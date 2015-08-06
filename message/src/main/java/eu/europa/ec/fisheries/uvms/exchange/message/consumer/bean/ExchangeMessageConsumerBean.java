@@ -14,11 +14,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import eu.europa.ec.fisheries.uvms.exchange.message.constants.MessageConstants;
-import eu.europa.ec.fisheries.uvms.exchange.message.consumer.MessageConsumer;
+import eu.europa.ec.fisheries.uvms.exchange.message.consumer.ExchangeMessageConsumer;
 import eu.europa.ec.fisheries.uvms.exchange.message.exception.ExchangeMessageException;
 
 @Stateless
-public class ExchangeMessageConsumerBean implements MessageConsumer {
+public class ExchangeMessageConsumerBean implements ExchangeMessageConsumer {
 
     final static Logger LOG = LoggerFactory.getLogger(ExchangeMessageConsumerBean.class);
     final static int ONE_MINUTE = 60000;

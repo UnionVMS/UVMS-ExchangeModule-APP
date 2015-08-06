@@ -40,7 +40,7 @@ public class MessageProducerBean implements MessageProducer {
     @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
     public String sendDataSourceMessage(String text, DataSourceQueue queue) throws ExchangeMessageException {
         try {
-            connectToQueue();
+            connectQueue();
             TextMessage message = session.createTextMessage();
             message.setJMSReplyTo(responseQueue);
             message.setText(text);
@@ -58,20 +58,23 @@ public class MessageProducerBean implements MessageProducer {
             LOG.error("[ Error when sending message. ] {0}", e.getMessage());
             throw new ExchangeMessageException("[ Error when sending message. ]", e);
         } finally {
-            try {
-                connection.stop();
-                connection.close();
-            } catch (JMSException e) {
-                LOG.error("[ Error when closing JMS connection ] {}", e.getMessage());
-                throw new ExchangeMessageException("[ Error when sending message. ]", e);
-            }
+            disconnectQueue();
         }
     }
 
-    private void connectToQueue() throws JMSException {
+    private void connectQueue() throws JMSException {
         connection = connectionFactory.createConnection();
         session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
         connection.start();
+    }
+
+    private void disconnectQueue() {
+        try {
+            connection.stop();
+            connection.close();
+        } catch (JMSException e) {
+            LOG.error("[ Error when stopping or closing JMS queue. ] {}", e.getMessage(), e.getStackTrace());
+        }
     }
 
 }

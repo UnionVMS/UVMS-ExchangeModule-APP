@@ -1,29 +1,65 @@
-<definitions name="ModuleObjectModule"
-             targetNamespace="module.wsdl.fisheries.ec.europa.eu"
-             xmlns:v="module.wsdl.fisheries.ec.europa.eu"
-             xmlns:tv="types.wsdl.fisheries.ec.europa.eu"
+<definitions name="ExchangeModuleService"
+             targetNamespace="urn:module.exchange.schema.fisheries.ec.europa.eu:v1"
+             xmlns:module="urn:module.exchange.schema.fisheries.ec.europa.eu:v1"
+             xmlns:search="urn:search.exchange.schema.fisheries.ec.europa.eu:v1"
+             xmlns:common="urn:common.exchange.schema.fisheries.ec.europa.eu:v1"
+             xmlns:exchange="urn:exchange.schema.fisheries.ec.europa.eu:v1"
              xmlns:xsd="http://www.w3.org/2001/XMLSchema"
              xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
-             xmlns="http://schemas.xmlsoap.org/wsdl/"
->
+             xmlns="http://schemas.xmlsoap.org/wsdl/">
 
     <types>
-        <xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema"
-                    targetNamespace="module.wsdl.fisheries.ec.europa.eu">
-            <xsd:import namespace="types.wsdl.fisheries.ec.europa.eu" schemaLocation="Element.xsd"/>
+        <xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema"  targetNamespace="urn:module.exchange.schema.fisheries.ec.europa.eu:v1">
             
-            <xsd:element name="GetModuleObjectRequest">
+            <xsd:import namespace="urn:common.exchange.schema.fisheries.ec.europa.eu:v1" schemaLocation="ExchangeCommon.xsd"/>
+            <xsd:import namespace="urn:exchange.schema.fisheries.ec.europa.eu:v1" schemaLocation="Service.xsd"/>
+            
+            <xsd:simpleType name="ExchangeDataSourceMethod">
+                <xsd:restriction base="xsd:string">
+                    <xsd:enumeration value="LIST_SERVICES"/>
+                    <xsd:enumeration value="REGISTER_SERVICE"/>
+                </xsd:restriction>
+            </xsd:simpleType>
+            
+            <xsd:complexType name="ExchangeBaseRequest" abstract="true">
+                <xsd:sequence>
+                    <xsd:element name="method" type="module:ExchangeDataSourceMethod"/>
+                </xsd:sequence>
+            </xsd:complexType>
+            
+            <xsd:element name="getServiceListByQueryRequest">
+                <xsd:complexType>
+                    <xsd:complexContent>
+                        <xsd:extension base="module:ExchangeBaseRequest">
+                        </xsd:extension>
+                    </xsd:complexContent>
+                </xsd:complexType>
+            </xsd:element>
+            
+            <xsd:element name="getServiceListByQueryResponse">
                 <xsd:complexType>
                     <xsd:sequence>
-                        <xsd:element name="object" type="tv:ModuleObject"/>
+                        <xsd:element name="service" type="exchange:ServiceType" minOccurs="0" maxOccurs="unbounded"/>
                     </xsd:sequence>
                 </xsd:complexType>
             </xsd:element>
             
-            <xsd:element name="GetModuleObjectResponse">
+            <xsd:element name="registerServiceRequest">
+                <xsd:complexType>
+                    <xsd:complexContent>
+                        <xsd:extension base="module:ExchangeBaseRequest">
+                            <xsd:sequence>
+                                <xsd:element name="service" type="exchange:ServiceType"/>
+                            </xsd:sequence>
+                        </xsd:extension>
+                    </xsd:complexContent>
+                </xsd:complexType>
+            </xsd:element>
+            
+            <xsd:element name="registerServiceResponse">
                 <xsd:complexType>
                     <xsd:sequence>
-                        <xsd:element name="object" type="tv:ModuleObject"/>
+                        <xsd:element name="service" type="exchange:ServiceType" minOccurs="1" maxOccurs="1"/>
                     </xsd:sequence>
                 </xsd:complexType>
             </xsd:element>
@@ -31,44 +67,71 @@
         </xsd:schema>
     </types>
     
-    <message name="GetModuleObjectFaultException">
-        <part name="body" element="tv:ModuleObjectException"/>
+    <message name="ExchangeException">
+        <part name="body" element="common:exceptionType"/>
     </message>
     
-    <message name="GetModuleObjectRequest">
-        <part name="body" element="v:GetModuleObjectRequest"/>
+    <message name="GetServiceListRequest">
+        <part name="body" element="module:getServiceListByQueryRequest"/>
     </message>
-
-    <message name="GetModuleObjectResponse">
-        <part name="body" element="v:GetModuleObjectResponse"/>
+    <message name="GetServiceListResponse">
+        <part name="body" element="module:getServiceListByQueryResponse"/>
     </message>
-
-    <portType name="ModuleObjectModulePortType">
-        <operation name="GetModuleObject">
-            <input message="v:GetModuleObjectRequest"/>
-            <output message="v:GetModuleObjectResponse"/>
-            <fault name="GetModuleObjectFaultException" message="v:GetModuleObjectFaultException"/>
+    
+    <message name="RegisterServiceRequest">
+        <part name="body" element="module:registerServiceRequest"/>
+    </message>
+    <message name="RegisterServiceResponse">
+        <part name="body" element="module:registerServiceResponse"/>
+    </message>
+    
+    <portType name="ExchangeModulePortType">
+        
+        <operation name="GetServiceList">
+            <input message="module:GetServiceListRequest"/>
+            <output message="module:GetServiceListResponse"/>
+            <fault name="ExchangeException" message="module:ExchangeException"/>
         </operation>
+        
+        <operation name="RegisterService">
+            <input message="module:RegisterServiceRequest"/>
+            <output message="module:RegisterServiceResponse"/>
+            <fault name="ExchangeException" message="module:ExchangeException"/>
+        </operation>
+        
     </portType>
 
-    <binding name="ModuleObjectModuleSoapBinding" type="v:ModuleObjectModulePortType">
+    <binding name="ExchangeModuleSoapBinding" type="module:ExchangeModulePortType">
         <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
-        <operation name="GetModuleObject">
-            <!-- <soap:operation soapAction="http://www.snowboard-info.com/EndorsementSearch"/> -->
+        
+        <operation name="GetServiceList">
             <input>
                 <soap:body use="literal"/>
             </input>
             <output>
                 <soap:body use="literal"/>
             </output>
-            <fault name="GetModuleObjectFaultException">
-                <soap:fault name="GetModuleObjectFaultException" use="literal"/>
+            <fault name="ExchangeException">
+                <soap:fault name="ExchangeException" use="literal"/>
             </fault>
         </operation>
+        
+        <operation name="RegisterService">
+            <input>
+                <soap:body use="literal"/>
+            </input>
+            <output>
+                <soap:body use="literal"/>
+            </output>
+            <fault name="ExchangeException">
+                <soap:fault name="ExchangeException" use="literal"/>
+            </fault>
+        </operation>
+        
     </binding>
 
-    <service name="ModuleObjectModuleService">
-        <port name="ModuleObjectModulePortType" binding="v:ModuleObjectModuleSoapBinding">
+    <service name="ExchangeModuleService">
+        <port name="ExchangeModulePortType" binding="module:ExchangeModuleSoapBinding">
             <soap:address location="http://REPLACE_ME"/>
         </port>
     </service>

@@ -17,9 +17,6 @@ import eu.europa.ec.fisheries.uvms.exchange.message.constants.MessageConstants;
 import eu.europa.ec.fisheries.uvms.exchange.message.event.ErrorEvent;
 import eu.europa.ec.fisheries.uvms.exchange.message.event.MessageRecievedEvent;
 import eu.europa.ec.fisheries.uvms.exchange.message.event.carrier.EventMessage;
-import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelMapperException;
-import eu.europa.ec.fisheries.uvms.exchange.model.mapper.JAXBMarshaller;
-import eu.europa.ec.fisheries.wsdl.source.GetDataRequest;
 
 //@formatter:off
 @MessageDriven(mappedName = MessageConstants.EXCHANGE_MESSAGE_IN_QUEUE, activationConfig = {
@@ -34,7 +31,7 @@ public class MessageConsumerBean implements MessageListener {
 
     @Inject
     @MessageRecievedEvent
-    Event<EventMessage> messageRecievedEvent;
+    Event<EventMessage> messageReceivedEvent;
 
     @Inject
     @ErrorEvent
@@ -43,12 +40,12 @@ public class MessageConsumerBean implements MessageListener {
     @Override
     @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
     public void onMessage(Message message) {
+        LOG.info("Message received in Exchange Message MDB");
+
         TextMessage textMessage = (TextMessage) message;
         try {
-            LOG.info("Message received in exchange");
-            GetDataRequest request = JAXBMarshaller.unmarshallTextMessage(textMessage, GetDataRequest.class);
-            messageRecievedEvent.fire(new EventMessage(textMessage, request.getId().toString()));
-        } catch (ExchangeModelMapperException | NullPointerException e) {
+            messageReceivedEvent.fire(new EventMessage(textMessage));
+        } catch (NullPointerException e) {
             LOG.error("[ Error when receiving message in exchange: ]", e);
             errorEvent.fire(new EventMessage(textMessage, "Error when receiving message in exchange: " + e.getMessage()));
         }

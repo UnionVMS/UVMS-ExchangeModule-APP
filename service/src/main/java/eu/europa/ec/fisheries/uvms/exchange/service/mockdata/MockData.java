@@ -1,8 +1,9 @@
 package eu.europa.ec.fisheries.uvms.exchange.service.mockdata;
 
-import eu.europa.ec.fisheries.wsdl.types.ModuleObject;
 import java.util.ArrayList;
 import java.util.List;
+
+import eu.europa.ec.fisheries.schema.exchange.v1.ServiceType;
 
 public class MockData {
 
@@ -12,8 +13,8 @@ public class MockData {
      * @param id
      * @return
      */
-    public static ModuleObject getDto(Long id) {
-        ModuleObject dto = new ModuleObject();
+    public static ServiceType getDto(Long id) {
+        ServiceType dto = new ServiceType();
         dto.setId(id.toString());
         return null;
     }
@@ -24,8 +25,8 @@ public class MockData {
      * @param amount
      * @return
      */
-    public static List<ModuleObject> getDtoList(Integer amount) {
-        List<ModuleObject> dtoList = new ArrayList<>();
+    public static List<ServiceType> getDtoList(Integer amount) {
+        List<ServiceType> dtoList = new ArrayList<>();
         for (int i = 0; i < amount; i++) {
             dtoList.add(getDto(Long.valueOf(i)));
         }

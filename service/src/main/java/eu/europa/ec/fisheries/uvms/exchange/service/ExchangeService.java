@@ -1,22 +1,24 @@
 package eu.europa.ec.fisheries.uvms.exchange.service;
 
+import java.util.List;
+
 import javax.ejb.Local;
 
+import eu.europa.ec.fisheries.schema.exchange.v1.ServiceType;
 import eu.europa.ec.fisheries.uvms.exchange.service.exception.ExchangeServiceException;
-import eu.europa.ec.fisheries.wsdl.types.ModuleObject;
-import java.util.List;
 
 @Local
 public interface ExchangeService {
 
     /**
-     * Create/Insert data into database
+     * Register a service
      *
      * @param data
      * @return
      * @throws ExchangeServiceException
      */
-    public ModuleObject create(ModuleObject data) throws ExchangeServiceException;
+    public ServiceType registerService(ServiceType data) throws
+    ExchangeServiceException;
 
     /**
      * Get a list with data
@@ -24,7 +26,7 @@ public interface ExchangeService {
      * @return
      * @throws ExchangeServiceException
      */
-    public List<ModuleObject> getList() throws ExchangeServiceException;
+    public List<ServiceType> getServiceList() throws ExchangeServiceException;
 
     /**
      * Get an object by id
@@ -33,7 +35,7 @@ public interface ExchangeService {
      * @return
      * @throws ExchangeServiceException
      */
-    public ModuleObject getById(Long id) throws ExchangeServiceException;
+    public ServiceType getById(Long id) throws ExchangeServiceException;
 
     /**
      * Update an object
@@ -41,6 +43,6 @@ public interface ExchangeService {
      * @param data
      * @throws ExchangeServiceException
      */
-    public ModuleObject update(ModuleObject data) throws ExchangeServiceException;
+    public ServiceType update(ServiceType data) throws ExchangeServiceException;
 
 }

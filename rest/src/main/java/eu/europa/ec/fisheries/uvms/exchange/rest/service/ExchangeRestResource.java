@@ -14,11 +14,11 @@ import javax.ws.rs.core.MediaType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import eu.europa.ec.fisheries.schema.exchange.v1.ServiceType;
 import eu.europa.ec.fisheries.uvms.exchange.rest.dto.ResponseCode;
 import eu.europa.ec.fisheries.uvms.exchange.rest.dto.ResponseDto;
 import eu.europa.ec.fisheries.uvms.exchange.service.ExchangeService;
 import eu.europa.ec.fisheries.uvms.exchange.service.exception.ExchangeServiceException;
-import eu.europa.ec.fisheries.wsdl.types.ModuleObject;
 
 @Path("/exchange")
 @Stateless
@@ -26,10 +26,6 @@ public class ExchangeRestResource {
 
     final static Logger LOG = LoggerFactory.getLogger(ExchangeRestResource.class);
 
-    /**
-     * TODO Rename this class so the name is YOUR_COMPNENT_NAME Resource instead
-     * of RestResource
-     */
     @EJB
     ExchangeService serviceLayer;
 
@@ -38,7 +34,7 @@ public class ExchangeRestResource {
      * @responseMessage 200 [Success]
      * @responseMessage 500 [Error]
      *
-     * @summary [Description]
+     * @summary Get a list of all registered and active services
      *
      */
     @GET
@@ -48,7 +44,7 @@ public class ExchangeRestResource {
     public ResponseDto getList() {
         LOG.info("Get list invoked in rest layer");
         try {
-            return new ResponseDto(serviceLayer.getList(), ResponseCode.OK);
+            return new ResponseDto(serviceLayer.getServiceList(), ResponseCode.OK);
         } catch (ExchangeServiceException | NullPointerException ex) {
             LOG.error("[ Error when geting list. ] {} ", ex.getStackTrace());
             return new ResponseDto(ex.getMessage(), ResponseCode.ERROR);
@@ -88,10 +84,10 @@ public class ExchangeRestResource {
     @POST
     @Consumes(value = { MediaType.APPLICATION_JSON })
     @Produces(value = { MediaType.APPLICATION_JSON })
-    public ResponseDto create(final ModuleObject data) {
+    public ResponseDto create(final ServiceType data) {
         LOG.info("Create invoked in rest layer");
         try {
-            return new ResponseDto(serviceLayer.create(data), ResponseCode.OK);
+            return new ResponseDto(serviceLayer.registerService(data), ResponseCode.OK);
         } catch (ExchangeServiceException | NullPointerException ex) {
             LOG.error("[ Error when creating. ] {} ", ex.getStackTrace());
             return new ResponseDto(ResponseCode.ERROR);
@@ -109,7 +105,7 @@ public class ExchangeRestResource {
     @PUT
     @Consumes(value = { MediaType.APPLICATION_JSON })
     @Produces(value = { MediaType.APPLICATION_JSON })
-    public ResponseDto update(final ModuleObject data) {
+    public ResponseDto update(final ServiceType data) {
         LOG.info("Update invoked in rest layer");
         try {
             return new ResponseDto(serviceLayer.update(data), ResponseCode.OK);
