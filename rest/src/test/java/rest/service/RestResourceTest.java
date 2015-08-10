@@ -75,7 +75,7 @@ public class RestResourceTest {
      * @throws ExchangeServiceException
      */
     @Test
-    public void testGetVesselList() throws ExchangeServiceException {
+    public void testGetServiceList() throws ExchangeServiceException {
         doReturn(DTO_LIST).when(serviceLayer).getServiceList();
         ResponseDto result = exchangeRestResource.getList();
         assertEquals(SUCCESS_RESULT_LIST.toString(), result.toString());
@@ -87,7 +87,7 @@ public class RestResourceTest {
      * @throws ExchangeServiceException
      */
     @Test
-    public void testGetVesselListNull() throws ExchangeServiceException {
+    public void testGetServiceListNull() throws ExchangeServiceException {
         ResponseDto result = SERVICE_NULL.getList();
         assertEquals(ERROR_RESULT.toString(), result.toString());
     }
@@ -98,7 +98,7 @@ public class RestResourceTest {
      * @throws ExchangeServiceException
      */
     @Test
-    public void testGetVesselById() throws ExchangeServiceException {
+    public void testGetServiceById() throws ExchangeServiceException {
         doReturn(DTO).when(serviceLayer).getById(ID);
         ResponseDto result = exchangeRestResource.getById(ID);
         Mockito.verify(serviceLayer).getById(ID);
@@ -112,7 +112,7 @@ public class RestResourceTest {
      * @throws ExchangeServiceException
      */
     @Test
-    public void testGetVesselByIdNull() throws ExchangeServiceException {
+    public void testGetServiceByIdNull() throws ExchangeServiceException {
         ResponseDto result = SERVICE_NULL.getById(ID);
         assertEquals(ERROR_RESULT.toString(), result.toString());
     }
@@ -123,7 +123,7 @@ public class RestResourceTest {
     // * @throws ExchangeServiceException
     // */
     // @Test
-    // public void testCreateVessel() throws ExchangeServiceException {
+    // public void testCreateService() throws ExchangeServiceException {
     // ResponseDto result = exchangeRestResource.create(DTO);
     // Mockito.verify(serviceLayer).registerService(DTO);
     // assertEquals(SUCCESS_RESULT.toString(), result.toString());
@@ -133,7 +133,7 @@ public class RestResourceTest {
     // * Test create when the injected EJB is null
     // */
     // @Test
-    // public void testCreateVesselNull() {
+    // public void testCreateServiceNull() {
     // ResponseDto result = SERVICE_NULL.create(DTO);
     // assertEquals(ERROR_RESULT.toString(), result.toString());
     // }
@@ -144,7 +144,7 @@ public class RestResourceTest {
      * @throws ExchangeServiceException
      */
     @Test
-    public void testUpdateVessel() throws ExchangeServiceException {
+    public void testUpdateService() throws ExchangeServiceException {
         ResponseDto result = exchangeRestResource.update(DTO);
         Mockito.verify(serviceLayer).update(DTO);
         assertEquals(SUCCESS_RESULT.toString(), result.toString());
@@ -154,7 +154,7 @@ public class RestResourceTest {
      * Test update when the injected EJB is null
      */
     @Test
-    public void testUpdateVesselNull() {
+    public void testUpdateServiceNull() {
         ResponseDto result = SERVICE_NULL.update(DTO);
         assertEquals(ERROR_RESULT.toString(), result.toString());
     }
