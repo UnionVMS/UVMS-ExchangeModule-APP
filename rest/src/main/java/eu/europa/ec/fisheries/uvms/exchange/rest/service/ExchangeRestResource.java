@@ -78,14 +78,14 @@ public class ExchangeRestResource {
      * @responseMessage 200 [Success]
      * @responseMessage 500 [Error]
      *
-     * @summary [Description]
+     * @summary registerService (will probably be removed)
      *
      */
     @POST
     @Consumes(value = { MediaType.APPLICATION_JSON })
     @Produces(value = { MediaType.APPLICATION_JSON })
     public ResponseDto create(final ServiceType data) {
-        LOG.info("Create invoked in rest layer");
+        LOG.info("Register service invoked in rest layer");
         try {
             return new ResponseDto(serviceLayer.registerService(data), ResponseCode.OK);
         } catch (ExchangeServiceException | NullPointerException ex) {

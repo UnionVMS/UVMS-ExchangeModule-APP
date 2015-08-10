@@ -43,9 +43,7 @@ public class ExchangeServiceBean implements ExchangeService {
      */
     @Override
     public ServiceType registerService(ServiceType data) throws ExchangeServiceException {
-        // It should probably not be possible
-        // to register a plugin from the UI...
-        LOG.info("Create invoked in service layer");
+        LOG.info("Register service invoked in service layer");
         try {
             String request = ExchangeDataSourceRequestMapper.mapRegisterServiceToString(data);
             String messageId = producer.sendDataSourceMessage(request, DataSourceQueue.INTERNAL);

@@ -29,6 +29,7 @@ import eu.europa.ec.fisheries.uvms.exchange.message.event.MessageRecievedEvent;
 import eu.europa.ec.fisheries.uvms.exchange.message.event.carrier.EventMessage;
 import eu.europa.ec.fisheries.uvms.exchange.message.producer.MessageProducer;
 import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelMapperException;
+import eu.europa.ec.fisheries.uvms.exchange.model.mapper.ExchangeDataSourceRequestMapper;
 import eu.europa.ec.fisheries.uvms.exchange.model.mapper.ExchangeDataSourceResponseMapper;
 import eu.europa.ec.fisheries.uvms.exchange.model.mapper.JAXBMarshaller;
 import eu.europa.ec.fisheries.uvms.exchange.service.EventService;
@@ -51,7 +52,7 @@ public class ExchangeEventServiceBean implements EventService {
     ExchangeMessageConsumer consumer;
 
     @EJB
-    ExchangeService service;
+    ExchangeService exchangeService;
 
     @Resource(lookup = MessageConstants.CONNECTION_FACTORY)
     private ConnectionFactory connectionFactory;
@@ -72,18 +73,29 @@ public class ExchangeEventServiceBean implements EventService {
             case LIST_SERVICES:
                 LOG.info("LIST_SERVICES");
 
-                List<ServiceType> serviceList = service.getServiceList();
+                List<ServiceType> serviceList = exchangeService.getServiceList();
 
                 connectQueue();
 
-                String response = ExchangeDataSourceResponseMapper.mapServiceTypeListToStringFromResponse(serviceList);
-                TextMessage responseMessage = session.createTextMessage(response);
-                responseMessage.setJMSCorrelationID(message.getJmsMessage().getJMSMessageID());
-                session.createProducer(message.getJmsMessage().getJMSReplyTo()).send(responseMessage);
+                String getServiceListResponse = ExchangeDataSourceResponseMapper.mapServiceTypeListToStringFromResponse(serviceList);
+                TextMessage getServiceListMessage = session.createTextMessage(getServiceListResponse);
+                getServiceListMessage.setJMSCorrelationID(message.getJmsMessage().getJMSMessageID());
+                session.createProducer(message.getJmsMessage().getJMSReplyTo()).send(getServiceListMessage);
 
                 break;
             case REGISTER_SERVICE:
-                LOG.info("REGISTER_SERVICE - not implemented");
+                LOG.info("REGISTER_SERVICE");
+                TextMessage textMessage = message.getJmsMessage();
+                ServiceType data = ExchangeDataSourceResponseMapper.mapToServiceTypeFromResponse(textMessage);
+                ServiceType service = exchangeService.registerService(data);
+
+                connectQueue();
+
+                String registerServiceResponse = ExchangeDataSourceRequestMapper.mapRegisterServiceToString(service);
+                TextMessage registerMessage = session.createTextMessage(registerServiceResponse);
+                registerMessage.setJMSCorrelationID(message.getJmsMessage().getJMSMessageID());
+                session.createProducer(message.getJmsMessage().getJMSReplyTo()).send(registerMessage);
+
                 break;
             default:
                 LOG.warn("No such method exists:{}", baseRequest.getMethod());
