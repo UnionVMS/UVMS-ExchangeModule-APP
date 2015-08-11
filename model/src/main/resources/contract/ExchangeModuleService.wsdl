@@ -3,6 +3,7 @@
              xmlns:module="urn:module.exchange.schema.fisheries.ec.europa.eu:v1"
              xmlns:search="urn:search.exchange.schema.fisheries.ec.europa.eu:v1"
              xmlns:common="urn:common.exchange.schema.fisheries.ec.europa.eu:v1"
+             xmlns:poll="urn:poll.exchange.schema.fisheries.ec.europa.eu:v1"
              xmlns:exchange="urn:exchange.schema.fisheries.ec.europa.eu:v1"
              xmlns:xsd="http://www.w3.org/2001/XMLSchema"
              xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
@@ -13,6 +14,7 @@
             
             <xsd:import namespace="urn:common.exchange.schema.fisheries.ec.europa.eu:v1" schemaLocation="ExchangeCommon.xsd"/>
             <xsd:import namespace="urn:exchange.schema.fisheries.ec.europa.eu:v1" schemaLocation="Service.xsd"/>
+            <xsd:import namespace="urn:poll.exchange.schema.fisheries.ec.europa.eu:v1" schemaLocation="Poll.xsd"/>
             
             <xsd:simpleType name="ExchangeDataSourceMethod">
                 <xsd:restriction base="xsd:string">
@@ -20,6 +22,7 @@
                     <xsd:enumeration value="REGISTER_SERVICE"/>
                     <xsd:enumeration value="GET_SETTINGS"/>
                     <xsd:enumeration value="GET_CAPABILITIES"/>
+                    <xsd:enumeration value="CREATE_POLL"/>
                 </xsd:restriction>
             </xsd:simpleType>
             
@@ -28,6 +31,26 @@
                     <xsd:element name="method" type="module:ExchangeDataSourceMethod"/>
                 </xsd:sequence>
             </xsd:complexType>
+            
+            <xsd:element name="CreatePollRequest">
+                <xsd:complexType>
+                    <xsd:complexContent>
+                        <xsd:extension base="module:ExchangeBaseRequest">
+                            <xsd:sequence>
+                                <xsd:element name="poll" type="poll:PollType"/>
+                            </xsd:sequence>
+                        </xsd:extension>
+                    </xsd:complexContent>
+                </xsd:complexType>
+            </xsd:element>
+            
+            <xsd:element name="CreatePollResponse">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element name="response" type="common:AcknowledgeType" minOccurs="1" maxOccurs="1"/>
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
             
             <xsd:element name="getServiceListByQueryRequest">
                 <xsd:complexType>
@@ -141,6 +164,13 @@
         <part name="body" element="module:getServiceCapabilitiesResponse"/>
     </message>
     
+    <message name="CreatePollRequest">
+        <part name="body" element="module:CreatePollResponse"/>
+    </message>
+    <message name="CreatePollResponse">
+        <part name="body" element="module:CreatePollResponse"/>
+    </message>
+    
     <portType name="ExchangeModulePortType">
         
         <operation name="GetServiceList">
@@ -164,6 +194,12 @@
         <operation name="GetServiceSettings">
             <input message="module:GetServiceSettingsRequest"/>
             <output message="module:GetServiceSettingsResponse"/>
+            <fault name="ExchangeException" message="module:ExchangeException"/>
+        </operation>
+        
+        <operation name="CreatePoll">
+            <input message="module:CreatePollRequest"/>
+            <output message="module:CreatePollResponse"/>
             <fault name="ExchangeException" message="module:ExchangeException"/>
         </operation>
         
@@ -209,6 +245,18 @@
         </operation>
         
         <operation name="GetServiceSettings">
+            <input>
+                <soap:body use="literal"/>
+            </input>
+            <output>
+                <soap:body use="literal"/>
+            </output>
+            <fault name="ExchangeException">
+                <soap:fault name="ExchangeException" use="literal"/>
+            </fault>
+        </operation>
+        
+        <operation name="CreatePoll">
             <input>
                 <soap:body use="literal"/>
             </input>

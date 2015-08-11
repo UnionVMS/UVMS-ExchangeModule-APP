@@ -20,6 +20,7 @@
                     <xsd:enumeration value="REGISTER_SERVICE"/>
                     <xsd:enumeration value="GET_SETTINGS"/>
                     <xsd:enumeration value="GET_CAPABILITIES"/>
+                    <xsd:enumeration value="GET_SERVICE"/>
                 </xsd:restriction>
             </xsd:simpleType>
             
@@ -44,6 +45,24 @@
                         <xsd:element name="service" type="exchange:ServiceType" minOccurs="0" maxOccurs="unbounded"/>
                         <xsd:element name="totalNumberOfPages" type="xsd:integer" minOccurs="1" maxOccurs="1"/>
                         <xsd:element name="currentPage" type="xsd:integer" minOccurs="1" maxOccurs="1"/>
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
+            
+            <xsd:element name="GetServiceRequest">
+                <xsd:complexType>
+                    <xsd:complexContent>
+                        <xsd:extension base="source:ExchangeBaseRequest">
+                            <xsd:element name="serviceId" type="xsd:string" minOccurs="1" maxOccurs="1"/>
+                        </xsd:extension>
+                    </xsd:complexContent>
+                </xsd:complexType>
+            </xsd:element>
+            
+            <xsd:element name="GetServiceResponse">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element name="service" type="exchange:ServiceType"/>
                     </xsd:sequence>
                 </xsd:complexType>
             </xsd:element>
@@ -128,6 +147,13 @@
         <part name="body" element="source:GetServiceListResponse"/>
     </message>
     
+    <message name="GetServiceRequest">
+        <part name="body" element="source:GetServiceRequest"/>
+    </message>
+    <message name="GetServiceResponse">
+        <part name="body" element="source:GetServiceResponse"/>
+    </message>
+    
     <message name="RegisterServiceRequest">
         <part name="body" element="source:RegisterServiceRequest"/>
     </message>
@@ -157,6 +183,12 @@
             <fault name="ExchangeFault" message="source:ExchangeFault"/>
         </operation>
         
+        <operation name="GetService">
+            <input message="source:GetServiceRequest"/>
+            <output message="source:GetServiceResponse"/>
+            <fault name="ExchangeFault" message="source:ExchangeFault"/>
+        </operation>
+        
         <operation name="RegisterService">
             <input message="source:RegisterServiceRequest"/>
             <output message="source:RegisterServiceResponse"/>
@@ -181,6 +213,18 @@
         <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
         
         <operation name="GetServiceList">
+            <input>
+                <soap:body use="literal"/>
+            </input>
+            <output>
+                <soap:body use="literal"/>
+            </output>
+            <fault name="ExchangeFault">
+                <soap:fault name="ExchangeFault" use="literal"/>
+            </fault>
+        </operation>
+        
+        <operation name="GetService">
             <input>
                 <soap:body use="literal"/>
             </input>

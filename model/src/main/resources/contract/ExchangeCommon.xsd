@@ -22,5 +22,19 @@
             </xsd:sequence>
         </xsd:complexType>
     </xsd:element>
-
+    
+    <xsd:complexType name="keyValueType">
+        <xsd:sequence>
+            <xsd:element name="name" type="xsd:string"/>
+            <xsd:element name="value" type="xsd:string"/>
+        </xsd:sequence>
+    </xsd:complexType>
+    
+    <xsd:simpleType name="AcknowledgeType">
+        <xsd:restriction base="xsd:string">
+            <xsd:enumeration value="OK"/>
+            <xsd:enumeration value="NOK"/>
+        </xsd:restriction>
+    </xsd:simpleType>
+    
 </xsd:schema>
