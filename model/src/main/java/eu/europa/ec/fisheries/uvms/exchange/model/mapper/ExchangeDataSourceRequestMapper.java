@@ -4,7 +4,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import eu.europa.ec.fisheries.schema.exchange.source.v1.ExchangeDataSourceMethod;
+import eu.europa.ec.fisheries.schema.exchange.source.v1.GetServiceCapabilitiesRequest;
 import eu.europa.ec.fisheries.schema.exchange.source.v1.GetServiceListRequest;
+import eu.europa.ec.fisheries.schema.exchange.source.v1.GetServiceSettingsRequest;
 import eu.europa.ec.fisheries.schema.exchange.source.v1.RegisterServiceRequest;
 import eu.europa.ec.fisheries.schema.exchange.v1.ServiceType;
 import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelMapperException;
@@ -24,18 +26,39 @@ public class ExchangeDataSourceRequestMapper {
         }
     }
 
-    public static String mapRegisterServiceToString(ServiceType service)
-            throws ExchangeModelMapperException {
+    public static String mapRegisterServiceToString(ServiceType service) throws ExchangeModelMapperException {
         try {
             RegisterServiceRequest request = new RegisterServiceRequest();
             request.setService(service);
             request.setMethod(ExchangeDataSourceMethod.REGISTER_SERVICE);
             return JAXBMarshaller.marshallJaxBObjectToString(request);
         } catch (Exception e) {
-            LOG.error("[ Error when mapping RegisterServiceRequest to String ] {}",
-                    e.getMessage());
-            throw new ExchangeModelMapperException("[ Error when mapping RegisterServiceRequest to String ]",
-                    e);
+            LOG.error("[ Error when mapping RegisterServiceRequest to String ] {}", e.getMessage());
+            throw new ExchangeModelMapperException("[ Error when mapping RegisterServiceRequest to String ]", e);
+        }
+    }
+
+    public static String mapGetServiceSettingsToString(String serviceClassName) throws ExchangeModelMapperException {
+        try {
+            GetServiceSettingsRequest request = new GetServiceSettingsRequest();
+            request.setServiceName(serviceClassName);
+            request.setMethod(ExchangeDataSourceMethod.GET_SETTINGS);
+            return JAXBMarshaller.marshallJaxBObjectToString(request);
+        } catch (Exception e) {
+            LOG.error("[ Error when mapping GetServiceSettingsRequest to String ] {}", e.getMessage());
+            throw new ExchangeModelMapperException("[ Error when mapping GetServiceSettingsRequest to String ]", e);
+        }
+    }
+
+    public static String mapGetServiceCapabilitiesToString(String serviceClassName) throws ExchangeModelMapperException {
+        try {
+            GetServiceCapabilitiesRequest request = new GetServiceCapabilitiesRequest();
+            request.setServiceName(serviceClassName);
+            request.setMethod(ExchangeDataSourceMethod.GET_CAPABILITIES);
+            return JAXBMarshaller.marshallJaxBObjectToString(request);
+        } catch (Exception e) {
+            LOG.error("[ Error when mapping GetServiceCapabilitiesRequest to String ] {}", e.getMessage());
+            throw new ExchangeModelMapperException("[ Error when mapping GetServiceCapabilitiesRequest to String ]", e);
         }
     }
 

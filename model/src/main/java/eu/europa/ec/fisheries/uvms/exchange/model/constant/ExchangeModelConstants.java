@@ -1,6 +1,6 @@
-package eu.europa.ec.fisheries.uvms.exchange.message.constants;
+package eu.europa.ec.fisheries.uvms.exchange.model.constant;
 
-public class MessageConstants {
+public class ExchangeModelConstants {
 
     public static final String CONNECTION_FACTORY = "java:/ConnectionFactory";
     public static final String CONNECTION_TYPE = "javax.jms.MessageListener";

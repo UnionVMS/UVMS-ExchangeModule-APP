@@ -22,7 +22,7 @@ import org.slf4j.LoggerFactory;
 import eu.europa.ec.fisheries.schema.exchange.common.v1.ExchangeFault;
 import eu.europa.ec.fisheries.schema.exchange.source.v1.ExchangeBaseRequest;
 import eu.europa.ec.fisheries.schema.exchange.v1.ServiceType;
-import eu.europa.ec.fisheries.uvms.exchange.message.constants.MessageConstants;
+import eu.europa.ec.fisheries.uvms.exchange.model.constant.ExchangeModelConstants;
 import eu.europa.ec.fisheries.uvms.exchange.message.consumer.ExchangeMessageConsumer;
 import eu.europa.ec.fisheries.uvms.exchange.message.event.ErrorEvent;
 import eu.europa.ec.fisheries.uvms.exchange.message.event.MessageRecievedEvent;
@@ -54,7 +54,7 @@ public class ExchangeEventServiceBean implements EventService {
     @EJB
     ExchangeService exchangeService;
 
-    @Resource(lookup = MessageConstants.CONNECTION_FACTORY)
+    @Resource(lookup = ExchangeModelConstants.CONNECTION_FACTORY)
     private ConnectionFactory connectionFactory;
 
     private Connection connection = null;

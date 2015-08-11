@@ -90,11 +90,11 @@
             </plugin>
         </plugins>
     </build>
-  <modules>
-    <module>rest</module>
-    <module>service</module>
-    <module>message</module>
-    <module>model</module>
-    <module>module</module>
-  </modules>
+    <modules>
+        <module>rest</module>
+        <module>service</module>
+        <module>message</module>
+        <module>model</module>
+        <module>module</module>
+    </modules>
 </project>

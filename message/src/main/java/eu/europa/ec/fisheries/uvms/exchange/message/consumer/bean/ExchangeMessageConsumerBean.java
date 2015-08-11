@@ -13,7 +13,7 @@ import javax.jms.Session;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import eu.europa.ec.fisheries.uvms.exchange.message.constants.MessageConstants;
+import eu.europa.ec.fisheries.uvms.exchange.model.constant.ExchangeModelConstants;
 import eu.europa.ec.fisheries.uvms.exchange.message.consumer.ExchangeMessageConsumer;
 import eu.europa.ec.fisheries.uvms.exchange.message.exception.ExchangeMessageException;
 
@@ -23,10 +23,10 @@ public class ExchangeMessageConsumerBean implements ExchangeMessageConsumer {
     final static Logger LOG = LoggerFactory.getLogger(ExchangeMessageConsumerBean.class);
     final static int ONE_MINUTE = 60000;
 
-    @Resource(mappedName = MessageConstants.EXCHANGE_RESPONSE_QUEUE)
+    @Resource(mappedName = ExchangeModelConstants.EXCHANGE_RESPONSE_QUEUE)
     private Queue responseQueue;
 
-    @Resource(lookup = MessageConstants.CONNECTION_FACTORY)
+    @Resource(lookup = ExchangeModelConstants.CONNECTION_FACTORY)
     private ConnectionFactory connectionFactory;
 
     private Connection connection = null;

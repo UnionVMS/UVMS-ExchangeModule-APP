@@ -15,7 +15,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import eu.europa.ec.fisheries.uvms.exchange.message.constants.DataSourceQueue;
-import eu.europa.ec.fisheries.uvms.exchange.message.constants.MessageConstants;
+import eu.europa.ec.fisheries.uvms.exchange.model.constant.ExchangeModelConstants;
 import eu.europa.ec.fisheries.uvms.exchange.message.exception.ExchangeMessageException;
 import eu.europa.ec.fisheries.uvms.exchange.message.producer.MessageProducer;
 
@@ -24,13 +24,13 @@ public class MessageProducerBean implements MessageProducer {
 
     final static Logger LOG = LoggerFactory.getLogger(MessageProducerBean.class);
 
-    @Resource(mappedName = MessageConstants.QUEUE_DATASOURCE_INTERNAL)
+    @Resource(mappedName = ExchangeModelConstants.QUEUE_DATASOURCE_INTERNAL)
     private Queue localDbQueue;
 
-    @Resource(mappedName = MessageConstants.EXCHANGE_RESPONSE_QUEUE)
+    @Resource(mappedName = ExchangeModelConstants.EXCHANGE_RESPONSE_QUEUE)
     private Queue responseQueue;
 
-    @Resource(lookup = MessageConstants.CONNECTION_FACTORY)
+    @Resource(lookup = ExchangeModelConstants.CONNECTION_FACTORY)
     private ConnectionFactory connectionFactory;
 
     private Connection connection = null;

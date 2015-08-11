@@ -18,6 +18,8 @@
                 <xsd:restriction base="xsd:string">
                     <xsd:enumeration value="LIST_SERVICES"/>
                     <xsd:enumeration value="REGISTER_SERVICE"/>
+                    <xsd:enumeration value="GET_SETTINGS"/>
+                    <xsd:enumeration value="GET_CAPABILITIES"/>
                 </xsd:restriction>
             </xsd:simpleType>
             
@@ -64,6 +66,46 @@
                 </xsd:complexType>
             </xsd:element>
             
+            <xsd:element name="getServiceSettingsRequest">
+                <xsd:complexType>
+                    <xsd:complexContent>
+                        <xsd:extension base="module:ExchangeBaseRequest">
+                            <xsd:sequence>
+                                <xsd:element name="serviceName" type="xsd:string"/>
+                            </xsd:sequence>
+                        </xsd:extension>
+                    </xsd:complexContent>
+                </xsd:complexType>
+            </xsd:element>
+            
+            <xsd:element name="getServiceSettingsResponse">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element name="settings" type="exchange:SettingListType"/>
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
+            
+            <xsd:element name="getServiceCapabilitiesRequest">
+                <xsd:complexType>
+                    <xsd:complexContent>
+                        <xsd:extension base="module:ExchangeBaseRequest">
+                            <xsd:sequence>
+                                <xsd:element name="serviceName" type="xsd:string"/>
+                            </xsd:sequence>
+                        </xsd:extension>
+                    </xsd:complexContent>
+                </xsd:complexType>
+            </xsd:element>
+            
+            <xsd:element name="getServiceCapabilitiesResponse">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element name="capabilities" type="exchange:CapabilityListType"/>
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
+            
         </xsd:schema>
     </types>
     
@@ -85,6 +127,20 @@
         <part name="body" element="module:registerServiceResponse"/>
     </message>
     
+    <message name="GetServiceSettingsRequest">
+        <part name="body" element="module:getServiceSettingsRequest"/>
+    </message>
+    <message name="GetServiceSettingsResponse">
+        <part name="body" element="module:getServiceSettingsResponse"/>
+    </message>
+    
+    <message name="GetServiceCapabilitiesRequest">
+        <part name="body" element="module:getServiceCapabilitiesRequest"/>
+    </message>
+    <message name="GetServiceCapabilitiesResponse">
+        <part name="body" element="module:getServiceCapabilitiesResponse"/>
+    </message>
+    
     <portType name="ExchangeModulePortType">
         
         <operation name="GetServiceList">
@@ -96,6 +152,18 @@
         <operation name="RegisterService">
             <input message="module:RegisterServiceRequest"/>
             <output message="module:RegisterServiceResponse"/>
+            <fault name="ExchangeException" message="module:ExchangeException"/>
+        </operation>
+        
+        <operation name="GetServiceCapabilities">
+            <input message="module:GetServiceCapabilitiesRequest"/>
+            <output message="module:GetServiceCapabilitiesResponse"/>
+            <fault name="ExchangeException" message="module:ExchangeException"/>
+        </operation>
+        
+        <operation name="GetServiceSettings">
+            <input message="module:GetServiceSettingsRequest"/>
+            <output message="module:GetServiceSettingsResponse"/>
             <fault name="ExchangeException" message="module:ExchangeException"/>
         </operation>
         
@@ -117,6 +185,30 @@
         </operation>
         
         <operation name="RegisterService">
+            <input>
+                <soap:body use="literal"/>
+            </input>
+            <output>
+                <soap:body use="literal"/>
+            </output>
+            <fault name="ExchangeException">
+                <soap:fault name="ExchangeException" use="literal"/>
+            </fault>
+        </operation>
+        
+        <operation name="GetServiceCapabilities">
+            <input>
+                <soap:body use="literal"/>
+            </input>
+            <output>
+                <soap:body use="literal"/>
+            </output>
+            <fault name="ExchangeException">
+                <soap:fault name="ExchangeException" use="literal"/>
+            </fault>
+        </operation>
+        
+        <operation name="GetServiceSettings">
             <input>
                 <soap:body use="literal"/>
             </input>
