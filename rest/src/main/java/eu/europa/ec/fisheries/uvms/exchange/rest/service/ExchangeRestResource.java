@@ -18,6 +18,7 @@ import org.slf4j.LoggerFactory;
 
 import eu.europa.ec.fisheries.uvms.exchange.rest.dto.ResponseCode;
 import eu.europa.ec.fisheries.uvms.exchange.rest.dto.ResponseDto;
+import eu.europa.ec.fisheries.uvms.exchange.rest.mock.ExchangeMock;
 import eu.europa.ec.fisheries.uvms.exchange.service.ExchangeService;
 import eu.europa.ec.fisheries.uvms.exchange.service.exception.ExchangeServiceException;
 
@@ -54,7 +55,8 @@ public class ExchangeRestResource {
 
     /**
      *
-     * @responseType java.util.List<eu.europa.ec.fisheries.uvms.exchange.rest.dto.exchange.response.ExchangeLog>
+     * @responseType
+     * java.util.List<eu.europa.ec.fisheries.uvms.exchange.rest.dto.exchange.ExchangeLog>
      *
      * @responseMessage 200 [Success]
      * @responseMessage 500 [Error]
@@ -69,9 +71,9 @@ public class ExchangeRestResource {
     public ResponseDto getLogListByCriteria(ExchangeListQuery query) {
         LOG.info("Get list invoked in rest layer");
         try {
-            return new ResponseDto(serviceLayer.getServiceList(), ResponseCode.OK);
-        } catch (ExchangeServiceException | NullPointerException ex) {
-            LOG.error("[ Error when geting list. ] {} ", ex.getStackTrace());
+            return new ResponseDto(ExchangeMock.getLogs(), ResponseCode.OK);
+        } catch (Exception ex) {
+            LOG.error("[ Error when geting log list. ] {} ", ex.getStackTrace());
             return new ResponseDto(ex.getMessage(), ResponseCode.ERROR);
         }
     }
