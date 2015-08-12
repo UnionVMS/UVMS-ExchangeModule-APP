@@ -64,7 +64,7 @@ public class ExchangeRestResource {
      * @summary Get a list of all exchangeLogs by search criterias
      *
      */
-    @GET
+    @POST
     @Consumes(value = {MediaType.APPLICATION_JSON})
     @Produces(value = {MediaType.APPLICATION_JSON})
     @Path("/log")
