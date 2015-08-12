@@ -1,5 +1,6 @@
 package eu.europa.ec.fisheries.uvms.exchange.service.bean;
 
+import eu.europa.ec.fisheries.schema.exchange.service.v1.ServiceType;
 import java.util.List;
 
 import javax.ejb.EJB;
@@ -9,7 +10,6 @@ import javax.jms.TextMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import eu.europa.ec.fisheries.schema.exchange.v1.ServiceType;
 import eu.europa.ec.fisheries.uvms.exchange.message.constants.DataSourceQueue;
 import eu.europa.ec.fisheries.uvms.exchange.message.consumer.ExchangeMessageConsumer;
 import eu.europa.ec.fisheries.uvms.exchange.message.exception.ExchangeMessageException;
@@ -96,6 +96,19 @@ public class ExchangeServiceBean implements ExchangeService {
     public ServiceType update(ServiceType data) throws ExchangeServiceException {
         LOG.info("Update invoked in service layer");
         throw new ExchangeServiceException("Update not implemented in service layer");
+    }
+
+    @Override
+    public ServiceType getService(String serviceId) throws ExchangeServiceException {
+        LOG.info("Get list invoked in service layer");
+        try {
+            String request = ExchangeDataSourceRequestMapper.mapGetServiceToString(serviceId);
+            String messageId = producer.sendDataSourceMessage(request, DataSourceQueue.INTERNAL);
+            TextMessage response = consumer.getMessage(messageId, TextMessage.class);
+            return ExchangeDataSourceResponseMapper.mapToServiceTypeFromGetServiceResponse(response);
+        } catch (ExchangeModelMapperException | ExchangeMessageException e) {
+            throw new ExchangeServiceException(e.getMessage());
+        }
     }
 
 }

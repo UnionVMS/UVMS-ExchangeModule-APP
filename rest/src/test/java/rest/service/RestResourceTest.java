@@ -1,5 +1,6 @@
 package rest.service;
 
+import eu.europa.ec.fisheries.schema.exchange.service.v1.ServiceType;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.doReturn;
 
@@ -15,7 +16,6 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
-import eu.europa.ec.fisheries.schema.exchange.v1.ServiceType;
 import eu.europa.ec.fisheries.uvms.exchange.rest.dto.ResponseCode;
 import eu.europa.ec.fisheries.uvms.exchange.rest.dto.ResponseDto;
 import eu.europa.ec.fisheries.uvms.exchange.rest.service.ExchangeRestResource;

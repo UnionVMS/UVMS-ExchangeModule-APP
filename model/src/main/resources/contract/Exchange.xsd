@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xsd:schema xmlns:exchange="urn:exchange.schema.fisheries.ec.europa.eu:v1"
+            targetNamespace="urn:exchange.schema.fisheries.ec.europa.eu:v1"          
+            xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+            xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+            xmlns="http://schemas.xmlsoap.org/wsdl/">
+    
+    
+    <xsd:complexType name="ExchangeLogType">
+        <xsd:sequence>
+            <xsd:element name="terminalId" type="xsd:string" />
+            <xsd:element name="terminalType" type="xsd:string" />
+            <xsd:element name="assetId" type="xsd:string" />
+            <xsd:element name="pollTrackId" type="xsd:string" />
+            <xsd:element name="dateRecieved" type="xsd:date" />
+            <xsd:element name="sentBy" type="xsd:string" />
+            <xsd:element name="message" type="xsd:string" />
+            <xsd:element name="fwdRule" type="xsd:string" />
+            <xsd:element name="recipient" type="xsd:string" />
+            <xsd:element name="dateFwd" type="xsd:date" />
+            <xsd:element name="status" type="xsd:string" />
+        </xsd:sequence>
+    </xsd:complexType>
+    
+    <xsd:simpleType name="SearchField">
+        <xsd:restriction base="xsd:string">
+            <xsd:enumeration value="FROM"/>
+            <xsd:enumeration value="TO"/>
+            <xsd:enumeration value="SENT_BY"/>
+            <xsd:enumeration value="MESSAGE_CONTAINS"/>      
+            <xsd:enumeration value="FORWARD_RULE"/>      
+            <xsd:enumeration value="RECIPIENT"/>      
+        </xsd:restriction>
+    </xsd:simpleType>
+    
+    <xsd:complexType name="ExchangeListQuery">
+        <xsd:sequence>
+            <xsd:element name="pagination" type="exchange:ExchangeListPagination" minOccurs="1" maxOccurs="1"/>
+            <xsd:element name="exchangeSearchCriteria" type="exchange:ExchangeListCriteria" minOccurs="1" maxOccurs="1"/>
+        </xsd:sequence>
+    </xsd:complexType>
+    
+    <xsd:complexType name="ExchangeListCriteria">
+        <xsd:sequence>
+            <xsd:element name="isDynamic" type="xsd:boolean" minOccurs="0" maxOccurs="1"/>
+            <xsd:element name="criterias" type="exchange:ExchangeListCriteriaPair" minOccurs="0" maxOccurs="unbounded" />
+        </xsd:sequence>
+    </xsd:complexType>
+    
+    <xsd:complexType name="ExchangeListPagination">
+        <xsd:sequence>
+            <xsd:element name="page" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+            <xsd:element name="listSize" type="xsd:int" minOccurs="0" maxOccurs="1"/>
+        </xsd:sequence>
+    </xsd:complexType>
+    
+    <xsd:complexType name="ExchangeListCriteriaPair">
+        <xsd:sequence>
+            <xsd:element name="key" type="exchange:SearchField" />
+            <xsd:element name="value" type="xsd:string" />
+        </xsd:sequence>
+    </xsd:complexType>
+    
+
+</xsd:schema>

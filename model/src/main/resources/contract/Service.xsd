@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<xsd:schema xmlns:service="urn:exchange.schema.fisheries.ec.europa.eu:v1" 
-            targetNamespace="urn:exchange.schema.fisheries.ec.europa.eu:v1"
-            xmlns:exchange="urn:exchange.schema.fisheries.ec.europa.eu:v1"
+<xsd:schema xmlns:service="urn:service.exchange.schema.fisheries.ec.europa.eu:v1" 
+            targetNamespace="urn:service.exchange.schema.fisheries.ec.europa.eu:v1"          
             xmlns:common="urn:common.exchange.schema.fisheries.ec.europa.eu:v1"
             xmlns:xsd="http://www.w3.org/2001/XMLSchema"
             xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
@@ -26,7 +25,7 @@
     
     <xsd:complexType name="SettingListType">
         <xsd:sequence>
-            <xsd:element name="setting" type="exchange:SettingType" minOccurs="0" maxOccurs="unbounded"/>
+            <xsd:element name="setting" type="service:SettingType" minOccurs="0" maxOccurs="unbounded"/>
         </xsd:sequence>
     </xsd:complexType>
     
@@ -38,7 +37,7 @@
     
     <xsd:complexType name="CapabilityListType">
         <xsd:sequence>
-            <xsd:element name="capability" type="exchange:CapabilityType" minOccurs="0" maxOccurs="unbounded"/>
+            <xsd:element name="capability" type="service:CapabilityType" minOccurs="0" maxOccurs="unbounded"/>
         </xsd:sequence>
     </xsd:complexType>
     

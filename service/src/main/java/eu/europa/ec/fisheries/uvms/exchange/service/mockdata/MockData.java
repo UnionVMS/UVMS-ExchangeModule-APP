@@ -1,9 +1,9 @@
 package eu.europa.ec.fisheries.uvms.exchange.service.mockdata;
 
+import eu.europa.ec.fisheries.schema.exchange.service.v1.ServiceType;
 import java.util.ArrayList;
 import java.util.List;
 
-import eu.europa.ec.fisheries.schema.exchange.v1.ServiceType;
 
 public class MockData {
 

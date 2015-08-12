@@ -1,10 +1,10 @@
 package eu.europa.ec.fisheries.uvms.exchange.service;
 
+import eu.europa.ec.fisheries.schema.exchange.service.v1.ServiceType;
 import java.util.List;
 
 import javax.ejb.Local;
 
-import eu.europa.ec.fisheries.schema.exchange.v1.ServiceType;
 import eu.europa.ec.fisheries.uvms.exchange.service.exception.ExchangeServiceException;
 
 @Local
@@ -17,8 +17,7 @@ public interface ExchangeService {
      * @return
      * @throws ExchangeServiceException
      */
-    public ServiceType registerService(ServiceType data) throws
-    ExchangeServiceException;
+    public ServiceType registerService(ServiceType data) throws ExchangeServiceException;
 
     /**
      * Get a list with data
@@ -41,8 +40,17 @@ public interface ExchangeService {
      * Update an object
      *
      * @param data
+     * @return
      * @throws ExchangeServiceException
      */
     public ServiceType update(ServiceType data) throws ExchangeServiceException;
+
+    /**
+     *
+     * @param serviceId
+     * @return
+     * @throws ExchangeServiceException
+     */
+    public ServiceType getService(String serviceId) throws ExchangeServiceException;
 
 }

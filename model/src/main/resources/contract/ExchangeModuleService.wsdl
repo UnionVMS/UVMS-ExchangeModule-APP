@@ -4,6 +4,7 @@
              xmlns:search="urn:search.exchange.schema.fisheries.ec.europa.eu:v1"
              xmlns:common="urn:common.exchange.schema.fisheries.ec.europa.eu:v1"
              xmlns:poll="urn:poll.exchange.schema.fisheries.ec.europa.eu:v1"
+             xmlns:service="urn:service.exchange.schema.fisheries.ec.europa.eu:v1"
              xmlns:exchange="urn:exchange.schema.fisheries.ec.europa.eu:v1"
              xmlns:xsd="http://www.w3.org/2001/XMLSchema"
              xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
@@ -13,10 +14,11 @@
         <xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema"  targetNamespace="urn:module.exchange.schema.fisheries.ec.europa.eu:v1">
             
             <xsd:import namespace="urn:common.exchange.schema.fisheries.ec.europa.eu:v1" schemaLocation="ExchangeCommon.xsd"/>
-            <xsd:import namespace="urn:exchange.schema.fisheries.ec.europa.eu:v1" schemaLocation="Service.xsd"/>
+            <xsd:import namespace="urn:exchange.schema.fisheries.ec.europa.eu:v1" schemaLocation="Exchange.xsd"/>
+            <xsd:import namespace="urn:service.exchange.schema.fisheries.ec.europa.eu:v1" schemaLocation="Service.xsd"/>
             <xsd:import namespace="urn:poll.exchange.schema.fisheries.ec.europa.eu:v1" schemaLocation="Poll.xsd"/>
             
-            <xsd:simpleType name="ExchangeDataSourceMethod">
+            <xsd:simpleType name="ExchangeModuleMethod">
                 <xsd:restriction base="xsd:string">
                     <xsd:enumeration value="LIST_SERVICES"/>
                     <xsd:enumeration value="REGISTER_SERVICE"/>
@@ -28,7 +30,7 @@
             
             <xsd:complexType name="ExchangeBaseRequest" abstract="true">
                 <xsd:sequence>
-                    <xsd:element name="method" type="module:ExchangeDataSourceMethod"/>
+                    <xsd:element name="method" type="module:ExchangeModuleMethod"/>
                 </xsd:sequence>
             </xsd:complexType>
             
@@ -64,7 +66,7 @@
             <xsd:element name="getServiceListByQueryResponse">
                 <xsd:complexType>
                     <xsd:sequence>
-                        <xsd:element name="service" type="exchange:ServiceType" minOccurs="0" maxOccurs="unbounded"/>
+                        <xsd:element name="service" type="service:ServiceType" minOccurs="0" maxOccurs="unbounded"/>
                     </xsd:sequence>
                 </xsd:complexType>
             </xsd:element>
@@ -74,7 +76,7 @@
                     <xsd:complexContent>
                         <xsd:extension base="module:ExchangeBaseRequest">
                             <xsd:sequence>
-                                <xsd:element name="service" type="exchange:ServiceType"/>
+                                <xsd:element name="service" type="service:ServiceType"/>
                             </xsd:sequence>
                         </xsd:extension>
                     </xsd:complexContent>
@@ -84,7 +86,7 @@
             <xsd:element name="registerServiceResponse">
                 <xsd:complexType>
                     <xsd:sequence>
-                        <xsd:element name="service" type="exchange:ServiceType" minOccurs="1" maxOccurs="1"/>
+                        <xsd:element name="service" type="service:ServiceType" minOccurs="1" maxOccurs="1"/>
                     </xsd:sequence>
                 </xsd:complexType>
             </xsd:element>
@@ -104,7 +106,7 @@
             <xsd:element name="getServiceSettingsResponse">
                 <xsd:complexType>
                     <xsd:sequence>
-                        <xsd:element name="settings" type="exchange:SettingListType"/>
+                        <xsd:element name="settings" type="service:SettingListType"/>
                     </xsd:sequence>
                 </xsd:complexType>
             </xsd:element>
@@ -124,7 +126,7 @@
             <xsd:element name="getServiceCapabilitiesResponse">
                 <xsd:complexType>
                     <xsd:sequence>
-                        <xsd:element name="capabilities" type="exchange:CapabilityListType"/>
+                        <xsd:element name="capabilities" type="service:CapabilityListType"/>
                     </xsd:sequence>
                 </xsd:complexType>
             </xsd:element>
