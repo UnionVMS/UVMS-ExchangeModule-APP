@@ -1,15 +1,16 @@
 package eu.europa.ec.fisheries.uvms.exchange.model.mapper;
 
-import eu.europa.ec.fisheries.schema.exchange.service.v1.ServiceType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import eu.europa.ec.fisheries.schema.exchange.service.v1.ServiceType;
 import eu.europa.ec.fisheries.schema.exchange.source.v1.ExchangeDataSourceMethod;
 import eu.europa.ec.fisheries.schema.exchange.source.v1.GetServiceCapabilitiesRequest;
 import eu.europa.ec.fisheries.schema.exchange.source.v1.GetServiceListRequest;
 import eu.europa.ec.fisheries.schema.exchange.source.v1.GetServiceRequest;
 import eu.europa.ec.fisheries.schema.exchange.source.v1.GetServiceSettingsRequest;
 import eu.europa.ec.fisheries.schema.exchange.source.v1.RegisterServiceRequest;
+import eu.europa.ec.fisheries.schema.exchange.source.v1.UnregisterServiceRequest;
 import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelMapperException;
 
 public class ExchangeDataSourceRequestMapper {
@@ -44,6 +45,18 @@ public class ExchangeDataSourceRequestMapper {
             RegisterServiceRequest request = new RegisterServiceRequest();
             request.setService(service);
             request.setMethod(ExchangeDataSourceMethod.REGISTER_SERVICE);
+            return JAXBMarshaller.marshallJaxBObjectToString(request);
+        } catch (Exception e) {
+            LOG.error("[ Error when mapping RegisterServiceRequest to String ] {}", e.getMessage());
+            throw new ExchangeModelMapperException("[ Error when mapping RegisterServiceRequest to String ]", e);
+        }
+    }
+
+    public static String mapUnregisterServiceToString(ServiceType service) throws ExchangeModelMapperException {
+        try {
+            UnregisterServiceRequest request = new UnregisterServiceRequest();
+            request.setService(service);
+            request.setMethod(ExchangeDataSourceMethod.UNREGISTER_SERVICE);
             return JAXBMarshaller.marshallJaxBObjectToString(request);
         } catch (Exception e) {
             LOG.error("[ Error when mapping RegisterServiceRequest to String ] {}", e.getMessage());

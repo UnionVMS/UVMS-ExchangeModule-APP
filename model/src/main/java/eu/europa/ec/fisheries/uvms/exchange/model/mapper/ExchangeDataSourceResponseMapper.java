@@ -1,12 +1,5 @@
 package eu.europa.ec.fisheries.uvms.exchange.model.mapper;
 
-import eu.europa.ec.fisheries.schema.exchange.module.v1.GetServiceCapabilitiesResponse;
-import eu.europa.ec.fisheries.schema.exchange.module.v1.GetServiceSettingsResponse;
-import eu.europa.ec.fisheries.schema.exchange.service.v1.CapabilityListType;
-import eu.europa.ec.fisheries.schema.exchange.service.v1.CapabilityType;
-import eu.europa.ec.fisheries.schema.exchange.service.v1.ServiceType;
-import eu.europa.ec.fisheries.schema.exchange.service.v1.SettingListType;
-import eu.europa.ec.fisheries.schema.exchange.service.v1.SettingType;
 import java.util.List;
 
 import javax.jms.JMSException;
@@ -15,9 +8,17 @@ import javax.jms.TextMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import eu.europa.ec.fisheries.schema.exchange.module.v1.GetServiceCapabilitiesResponse;
+import eu.europa.ec.fisheries.schema.exchange.module.v1.GetServiceSettingsResponse;
+import eu.europa.ec.fisheries.schema.exchange.service.v1.CapabilityListType;
+import eu.europa.ec.fisheries.schema.exchange.service.v1.CapabilityType;
+import eu.europa.ec.fisheries.schema.exchange.service.v1.ServiceType;
+import eu.europa.ec.fisheries.schema.exchange.service.v1.SettingListType;
+import eu.europa.ec.fisheries.schema.exchange.service.v1.SettingType;
 import eu.europa.ec.fisheries.schema.exchange.source.v1.GetServiceListResponse;
 import eu.europa.ec.fisheries.schema.exchange.source.v1.GetServiceResponse;
 import eu.europa.ec.fisheries.schema.exchange.source.v1.RegisterServiceResponse;
+import eu.europa.ec.fisheries.schema.exchange.source.v1.UnregisterServiceResponse;
 import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelMapperException;
 import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelMarshallException;
 
@@ -58,8 +59,13 @@ public class ExchangeDataSourceResponseMapper {
         return response.getService();
     }
 
-    public static ServiceType mapToServiceTypeFromResponse(TextMessage message) throws ExchangeModelMapperException {
+    public static ServiceType mapToRegisterServiceResponse(TextMessage message) throws ExchangeModelMapperException {
         RegisterServiceResponse response = JAXBMarshaller.unmarshallTextMessage(message, RegisterServiceResponse.class);
+        return response.getService();
+    }
+
+    public static ServiceType mapToUnregisterServiceResponse(TextMessage message) throws ExchangeModelMapperException {
+        UnregisterServiceResponse response = JAXBMarshaller.unmarshallTextMessage(message, UnregisterServiceResponse.class);
         return response.getService();
     }
 
@@ -99,8 +105,6 @@ public class ExchangeDataSourceResponseMapper {
     public static String createGetServiceListResponse(List<ServiceType> services) throws ExchangeModelMarshallException {
         GetServiceListResponse response = new GetServiceListResponse();
         response.getService().addAll(services);
-        response.setCurrentPage(null);
-        response.setTotalNumberOfPages(null);
         return JAXBMarshaller.marshallJaxBObjectToString(response);
     }
 

@@ -48,7 +48,26 @@ public class ExchangeServiceBean implements ExchangeService {
             String request = ExchangeDataSourceRequestMapper.mapRegisterServiceToString(data);
             String messageId = producer.sendDataSourceMessage(request, DataSourceQueue.INTERNAL);
             TextMessage response = consumer.getMessage(messageId, TextMessage.class);
-            return ExchangeDataSourceResponseMapper.mapToServiceTypeFromResponse(response);
+            return ExchangeDataSourceResponseMapper.mapToRegisterServiceResponse(response);
+        } catch (ExchangeModelMapperException | ExchangeMessageException ex) {
+            throw new ExchangeServiceException(ex.getMessage());
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @param data
+     * @throws ExchangeServiceException
+     */
+    @Override
+    public ServiceType unregisterService(ServiceType data) throws ExchangeServiceException {
+        LOG.info("Unregister service invoked in service layer");
+        try {
+            String request = ExchangeDataSourceRequestMapper.mapUnregisterServiceToString(data);
+            String messageId = producer.sendDataSourceMessage(request, DataSourceQueue.INTERNAL);
+            TextMessage response = consumer.getMessage(messageId, TextMessage.class);
+            return ExchangeDataSourceResponseMapper.mapToUnregisterServiceResponse(response);
         } catch (ExchangeModelMapperException | ExchangeMessageException ex) {
             throw new ExchangeServiceException(ex.getMessage());
         }

@@ -1,11 +1,15 @@
 package eu.europa.ec.fisheries.uvms.exchange.model.mapper;
 
-import eu.europa.ec.fisheries.schema.exchange.common.v1.AcknowledgeType;
-import eu.europa.ec.fisheries.schema.exchange.module.v1.CreatePollResponse;
-import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelMapperException;
-import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelMarshallException;
 import javax.jms.JMSException;
 import javax.jms.TextMessage;
+
+import eu.europa.ec.fisheries.schema.exchange.common.v1.AcknowledgeType;
+import eu.europa.ec.fisheries.schema.exchange.module.v1.CreatePollResponse;
+import eu.europa.ec.fisheries.schema.exchange.module.v1.RegisterServiceResponse;
+import eu.europa.ec.fisheries.schema.exchange.module.v1.UnregisterServiceResponse;
+import eu.europa.ec.fisheries.schema.exchange.service.v1.ServiceType;
+import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelMapperException;
+import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelMarshallException;
 
 public class ExchangeModuleResponseMapper {
 
@@ -20,7 +24,8 @@ public class ExchangeModuleResponseMapper {
         }
 
         if (!correlationId.equalsIgnoreCase(response.getJMSCorrelationID())) {
-            throw new ExchangeModelMapperException("Wrong corelationId in response. Expected was: " + correlationId + "But actual was: " + response.getJMSCorrelationID());
+            throw new ExchangeModelMapperException("Wrong corelationId in response. Expected was: " + correlationId + "But actual was: "
+                    + response.getJMSCorrelationID());
         }
 
     }
@@ -31,4 +36,15 @@ public class ExchangeModuleResponseMapper {
         return JAXBMarshaller.marshallJaxBObjectToString(response);
     }
 
+    public static String createRegisterServiceResponse(ServiceType service) throws ExchangeModelMarshallException {
+        RegisterServiceResponse response = new RegisterServiceResponse();
+        response.setService(service);
+        return JAXBMarshaller.marshallJaxBObjectToString(response);
+    }
+
+    public static String createUnregisterServiceResponse(ServiceType service) throws ExchangeModelMarshallException {
+        UnregisterServiceResponse response = new UnregisterServiceResponse();
+        response.setService(service);
+        return JAXBMarshaller.marshallJaxBObjectToString(response);
+    }
 }

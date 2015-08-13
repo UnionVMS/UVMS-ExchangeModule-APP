@@ -20,6 +20,15 @@ public interface ExchangeService {
     public ServiceType registerService(ServiceType data) throws ExchangeServiceException;
 
     /**
+     * Unregister a service
+     *
+     * @param data
+     * @return
+     * @throws ExchangeServiceException
+     */
+    public ServiceType unregisterService(ServiceType data) throws ExchangeServiceException;
+
+    /**
      * Get a list with data
      *
      * @return

@@ -20,6 +20,7 @@
                 <xsd:restriction base="xsd:string">
                     <xsd:enumeration value="LIST_SERVICES"/>
                     <xsd:enumeration value="REGISTER_SERVICE"/>
+                    <xsd:enumeration value="UNREGISTER_SERVICE"/>
                     <xsd:enumeration value="GET_SETTINGS"/>
                     <xsd:enumeration value="GET_CAPABILITIES"/>
                     <xsd:enumeration value="GET_SERVICE"/>
@@ -45,8 +46,6 @@
                 <xsd:complexType>
                     <xsd:sequence>
                         <xsd:element name="service" type="service:ServiceType" minOccurs="0" maxOccurs="unbounded"/>
-                        <xsd:element name="totalNumberOfPages" type="xsd:integer" minOccurs="1" maxOccurs="1"/>
-                        <xsd:element name="currentPage" type="xsd:integer" minOccurs="1" maxOccurs="1"/>
                     </xsd:sequence>
                 </xsd:complexType>
             </xsd:element>
@@ -89,8 +88,27 @@
                 </xsd:complexType>
             </xsd:element>
             
-         
-            <xsd:element name="getServiceSettingsRequest">
+            <xsd:element name="UnregisterServiceRequest">
+                <xsd:complexType>
+                    <xsd:complexContent>
+                        <xsd:extension base="source:ExchangeBaseRequest">
+                            <xsd:sequence>
+                                <xsd:element name="service" type="service:ServiceType"/>
+                            </xsd:sequence>
+                        </xsd:extension>
+                    </xsd:complexContent>
+                </xsd:complexType>
+            </xsd:element>
+
+            <xsd:element name="UnregisterServiceResponse">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element name="service" type="service:ServiceType" minOccurs="1" maxOccurs="1"/>
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
+            
+            <xsd:element name="GetServiceSettingsRequest">
                 <xsd:complexType>
                     <xsd:complexContent>
                         <xsd:extension base="source:ExchangeBaseRequest">
@@ -102,7 +120,7 @@
                 </xsd:complexType>
             </xsd:element>
             
-            <xsd:element name="getServiceSettingsResponse">
+            <xsd:element name="GetServiceSettingsResponse">
                 <xsd:complexType>
                     <xsd:sequence>
                         <xsd:element name="settings" type="service:SettingListType"/>
@@ -110,7 +128,7 @@
                 </xsd:complexType>
             </xsd:element>
             
-            <xsd:element name="getServiceCapabilitiesRequest">
+            <xsd:element name="GetServiceCapabilitiesRequest">
                 <xsd:complexType>
                     <xsd:complexContent>
                         <xsd:extension base="source:ExchangeBaseRequest">
@@ -122,16 +140,15 @@
                 </xsd:complexType>
             </xsd:element>
             
-            <xsd:element name="getServiceCapabilitiesResponse">
+            <xsd:element name="GetServiceCapabilitiesResponse">
                 <xsd:complexType>
                     <xsd:sequence>
                         <xsd:element name="capabilities" type="service:CapabilityListType"/>
                     </xsd:sequence>
                 </xsd:complexType>
             </xsd:element>
-         
-            
-        </xsd:schema>
+
+		</xsd:schema>
     </types>
     
     <message name="ExchangeFault">
@@ -163,23 +180,30 @@
         <part name="body" element="source:RegisterServiceResponse"/>
     </message>
     
+    <message name="UnregisterServiceRequest">
+        <part name="body" element="source:UnregisterServiceRequest"/>
+    </message>
+    <message name="UnregisterServiceResponse">
+        <part name="body" element="source:UnregisterServiceResponse"/>
+    </message>
+    
     <message name="GetServiceSettingsRequest">
-        <part name="body" element="source:getServiceSettingsRequest"/>
+        <part name="body" element="source:GetServiceSettingsRequest"/>
     </message>
     <message name="GetServiceSettingsResponse">
-        <part name="body" element="source:getServiceSettingsResponse"/>
+        <part name="body" element="source:GetServiceSettingsResponse"/>
     </message>
     
     <message name="GetServiceCapabilitiesRequest">
-        <part name="body" element="source:getServiceCapabilitiesRequest"/>
+        <part name="body" element="source:GetServiceCapabilitiesRequest"/>
     </message>
     <message name="GetServiceCapabilitiesResponse">
-        <part name="body" element="source:getServiceCapabilitiesResponse"/>
+        <part name="body" element="source:GetServiceCapabilitiesResponse"/>
     </message>
     
     <portType name="ExchangeDataSourcePortType">
-       
-        <operation name="GetServiceList">
+
+	<operation name="GetServiceList">
             <input message="source:GetServiceListRequest"/>
             <output message="source:GetServiceListResponse"/>
             <fault name="ExchangeFault" message="source:ExchangeFault"/>
@@ -194,6 +218,12 @@
         <operation name="RegisterService">
             <input message="source:RegisterServiceRequest"/>
             <output message="source:RegisterServiceResponse"/>
+            <fault name="ExchangeFault" message="source:ExchangeFault"/>
+        </operation>
+        
+        <operation name="UnregisterService">
+            <input message="source:UnregisterServiceRequest"/>
+            <output message="source:UnregisterServiceResponse"/>
             <fault name="ExchangeFault" message="source:ExchangeFault"/>
         </operation>
         
@@ -239,6 +269,18 @@
         </operation>
         
         <operation name="RegisterService">
+            <input>
+                <soap:body use="literal"/>
+            </input>
+            <output>
+                <soap:body use="literal"/>
+            </output>
+            <fault name="ExchangeFault">
+                <soap:fault name="ExchangeFault" use="literal"/>
+            </fault>
+        </operation>
+        
+        <operation name="UnregisterService">
             <input>
                 <soap:body use="literal"/>
             </input>
