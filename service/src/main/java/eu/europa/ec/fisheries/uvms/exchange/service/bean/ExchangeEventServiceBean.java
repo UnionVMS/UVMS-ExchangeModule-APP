@@ -110,7 +110,7 @@ public class ExchangeEventServiceBean implements EventService {
 
                 connectQueue();
 
-                String unregisterServiceResponse = ExchangeModuleResponseMapper.createRegisterServiceResponse(unregistratedService);
+                String unregisterServiceResponse = ExchangeModuleResponseMapper.createUnregisterServiceResponse(unregistratedService);
                 TextMessage unregisterMessage = session.createTextMessage(unregisterServiceResponse);
                 unregisterMessage.setJMSCorrelationID(message.getJmsMessage().getJMSMessageID());
                 session.createProducer(message.getJmsMessage().getJMSReplyTo()).send(unregisterMessage);
