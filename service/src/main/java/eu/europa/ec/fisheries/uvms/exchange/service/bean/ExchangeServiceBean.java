@@ -1,6 +1,9 @@
 package eu.europa.ec.fisheries.uvms.exchange.service.bean;
 
 import eu.europa.ec.fisheries.schema.exchange.service.v1.ServiceType;
+import eu.europa.ec.fisheries.schema.exchange.source.v1.GetLogListByQueryResponse;
+import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeListQuery;
+import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogType;
 import java.util.List;
 
 import javax.ejb.EJB;
@@ -125,6 +128,32 @@ public class ExchangeServiceBean implements ExchangeService {
             String messageId = producer.sendDataSourceMessage(request, DataSourceQueue.INTERNAL);
             TextMessage response = consumer.getMessage(messageId, TextMessage.class);
             return ExchangeDataSourceResponseMapper.mapToServiceTypeFromGetServiceResponse(response);
+        } catch (ExchangeModelMapperException | ExchangeMessageException e) {
+            throw new ExchangeServiceException(e.getMessage());
+        }
+    }
+
+    @Override
+    public ExchangeLogType createExchangeLog(ExchangeLogType exchangeLog) throws ExchangeServiceException {
+        LOG.info("Create Exchange log invoked in service layer");
+        try {
+            String request = ExchangeDataSourceRequestMapper.mapCreateExchangeLogToString(exchangeLog);
+            String messageId = producer.sendDataSourceMessage(request, DataSourceQueue.INTERNAL);
+            TextMessage response = consumer.getMessage(messageId, TextMessage.class);
+            return ExchangeDataSourceResponseMapper.mapToExchangeLogTypeFromCreateExchageLogResponse(response);
+        } catch (ExchangeModelMapperException | ExchangeMessageException e) {
+            throw new ExchangeServiceException(e.getMessage());
+        }
+    }
+
+    @Override
+    public GetLogListByQueryResponse getExchangeLogByQuery(ExchangeListQuery query) throws ExchangeServiceException {
+        LOG.info("Create Exchange log invoked in service layer");
+        try {
+            String request = ExchangeDataSourceRequestMapper.mapGetExchageLogListByQueryToString(query);
+            String messageId = producer.sendDataSourceMessage(request, DataSourceQueue.INTERNAL);
+            TextMessage response = consumer.getMessage(messageId, TextMessage.class);
+            return ExchangeDataSourceResponseMapper.mapToGetLogListByQueryResponse(response);
         } catch (ExchangeModelMapperException | ExchangeMessageException e) {
             throw new ExchangeServiceException(e.getMessage());
         }

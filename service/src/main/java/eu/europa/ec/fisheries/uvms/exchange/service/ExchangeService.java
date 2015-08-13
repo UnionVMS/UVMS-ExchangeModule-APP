@@ -1,6 +1,9 @@
 package eu.europa.ec.fisheries.uvms.exchange.service;
 
 import eu.europa.ec.fisheries.schema.exchange.service.v1.ServiceType;
+import eu.europa.ec.fisheries.schema.exchange.source.v1.GetLogListByQueryResponse;
+import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeListQuery;
+import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogType;
 import java.util.List;
 
 import javax.ejb.Local;
@@ -61,5 +64,25 @@ public interface ExchangeService {
      * @throws ExchangeServiceException
      */
     public ServiceType getService(String serviceId) throws ExchangeServiceException;
+
+    /**
+     *
+     * Creates an ExchangeLog
+     *
+     * @param exchangeLog
+     * @return
+     * @throws ExchangeServiceException
+     */
+    public ExchangeLogType createExchangeLog(ExchangeLogType exchangeLog) throws ExchangeServiceException;
+
+    /**
+     *
+     * Gets ExchangeLogs by a query
+     *
+     * @param query
+     * @return
+     * @throws ExchangeServiceException
+     */
+    public GetLogListByQueryResponse getExchangeLogByQuery(ExchangeListQuery query) throws ExchangeServiceException;
 
 }

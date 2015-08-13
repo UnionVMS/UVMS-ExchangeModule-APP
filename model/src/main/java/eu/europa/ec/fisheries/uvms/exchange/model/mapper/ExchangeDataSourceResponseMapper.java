@@ -1,5 +1,7 @@
 package eu.europa.ec.fisheries.uvms.exchange.model.mapper;
 
+import eu.europa.ec.fisheries.schema.exchange.source.v1.CreateLogResponse;
+import eu.europa.ec.fisheries.schema.exchange.source.v1.GetLogListByQueryResponse;
 import java.util.List;
 
 import javax.jms.JMSException;
@@ -18,9 +20,11 @@ import eu.europa.ec.fisheries.schema.exchange.service.v1.SettingType;
 import eu.europa.ec.fisheries.schema.exchange.source.v1.GetServiceListResponse;
 import eu.europa.ec.fisheries.schema.exchange.source.v1.GetServiceResponse;
 import eu.europa.ec.fisheries.schema.exchange.source.v1.RegisterServiceResponse;
+import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogType;
 import eu.europa.ec.fisheries.schema.exchange.source.v1.UnregisterServiceResponse;
 import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelMapperException;
 import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelMarshallException;
+import java.math.BigInteger;
 
 public class ExchangeDataSourceResponseMapper {
 
@@ -74,6 +78,16 @@ public class ExchangeDataSourceResponseMapper {
         return response.getService();
     }
 
+    public static ExchangeLogType mapToExchangeLogTypeFromCreateExchageLogResponse(TextMessage message) throws ExchangeModelMapperException {
+        CreateLogResponse response = JAXBMarshaller.unmarshallTextMessage(message, CreateLogResponse.class);
+        return response.getExchangeLog();
+    }
+
+    public static GetLogListByQueryResponse mapToGetLogListByQueryResponse(TextMessage message) throws ExchangeModelMapperException {
+        GetLogListByQueryResponse response = JAXBMarshaller.unmarshallTextMessage(message, GetLogListByQueryResponse.class);
+        return response;
+    }
+
     public static String mapServiceTypeListToStringFromResponse(List<ServiceType> services) throws ExchangeModelMapperException {
         GetServiceListResponse response = new GetServiceListResponse();
         response.getService().addAll(services);
@@ -105,6 +119,20 @@ public class ExchangeDataSourceResponseMapper {
     public static String createGetServiceListResponse(List<ServiceType> services) throws ExchangeModelMarshallException {
         GetServiceListResponse response = new GetServiceListResponse();
         response.getService().addAll(services);
+        return JAXBMarshaller.marshallJaxBObjectToString(response);
+    }
+
+    public static String createCreateExchangeLogResponse(ExchangeLogType log) throws ExchangeModelMarshallException {
+        CreateLogResponse response = new CreateLogResponse();
+        response.setExchangeLog(log);
+        return JAXBMarshaller.marshallJaxBObjectToString(response);
+    }
+
+    public static String createGetExchangeListByQueryResponse(List<ExchangeLogType> logs, Long currentPage, Long totalNumberOfPages) throws ExchangeModelMarshallException {
+        GetLogListByQueryResponse response = new GetLogListByQueryResponse();
+        response.getExchangeLogs().addAll(logs);
+        response.setCurrentPage(BigInteger.valueOf(currentPage));
+        response.setTotalNumberOfPages(BigInteger.valueOf(totalNumberOfPages));
         return JAXBMarshaller.marshallJaxBObjectToString(response);
     }
 

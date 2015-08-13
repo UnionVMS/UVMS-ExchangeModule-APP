@@ -1,21 +1,49 @@
 package eu.europa.ec.fisheries.uvms.exchange.model.mapper;
 
+import eu.europa.ec.fisheries.schema.exchange.source.v1.CreateLogRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import eu.europa.ec.fisheries.schema.exchange.service.v1.ServiceType;
 import eu.europa.ec.fisheries.schema.exchange.source.v1.ExchangeDataSourceMethod;
+import eu.europa.ec.fisheries.schema.exchange.source.v1.GetLogListByQueryRequest;
 import eu.europa.ec.fisheries.schema.exchange.source.v1.GetServiceCapabilitiesRequest;
 import eu.europa.ec.fisheries.schema.exchange.source.v1.GetServiceListRequest;
 import eu.europa.ec.fisheries.schema.exchange.source.v1.GetServiceRequest;
 import eu.europa.ec.fisheries.schema.exchange.source.v1.GetServiceSettingsRequest;
 import eu.europa.ec.fisheries.schema.exchange.source.v1.RegisterServiceRequest;
+import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeListQuery;
+import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogType;
 import eu.europa.ec.fisheries.schema.exchange.source.v1.UnregisterServiceRequest;
 import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelMapperException;
 
 public class ExchangeDataSourceRequestMapper {
 
     final static Logger LOG = LoggerFactory.getLogger(ExchangeDataSourceRequestMapper.class);
+
+    public static String mapCreateExchangeLogToString(ExchangeLogType log) throws ExchangeModelMapperException {
+        try {
+            CreateLogRequest request = new CreateLogRequest();
+            request.setMethod(ExchangeDataSourceMethod.CREATE_LOG);
+            request.setExchangeLog(log);
+            return JAXBMarshaller.marshallJaxBObjectToString(request);
+        } catch (Exception e) {
+            LOG.error("[ Error when mapping GetServiceListRequest to String ] {}", e.getMessage());
+            throw new ExchangeModelMapperException("[ Error when mapping GetServiceListRequest to String ]", e);
+        }
+    }
+
+    public static String mapGetExchageLogListByQueryToString(ExchangeListQuery query) throws ExchangeModelMapperException {
+        try {
+            GetLogListByQueryRequest request = new GetLogListByQueryRequest();
+            request.setMethod(ExchangeDataSourceMethod.GET_LOG_BY_QUERY);
+            request.setQuery(query);
+            return JAXBMarshaller.marshallJaxBObjectToString(request);
+        } catch (Exception e) {
+            LOG.error("[ Error when mapping GetServiceListRequest to String ] {}", e.getMessage());
+            throw new ExchangeModelMapperException("[ Error when mapping GetServiceListRequest to String ]", e);
+        }
+    }
 
     public static String mapGetServiceListToString() throws ExchangeModelMapperException {
         try {

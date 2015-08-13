@@ -24,6 +24,8 @@
                     <xsd:enumeration value="GET_SETTINGS"/>
                     <xsd:enumeration value="GET_CAPABILITIES"/>
                     <xsd:enumeration value="GET_SERVICE"/>
+                    <xsd:enumeration value="GET_LOG_BY_QUERY"/>
+                    <xsd:enumeration value="CREATE_LOG"/>
                 </xsd:restriction>
             </xsd:simpleType>
             
@@ -32,6 +34,44 @@
                     <xsd:element name="method" type="source:ExchangeDataSourceMethod"/>
                 </xsd:sequence>
             </xsd:complexType>
+            
+            <xsd:element name="GetLogListByQueryRequest">
+                <xsd:complexType>
+                    <xsd:complexContent>
+                        <xsd:extension base="source:ExchangeBaseRequest">
+                            <xsd:element name="query" type="exchange:ExchangeListQuery" minOccurs="1" maxOccurs="1"/>
+                        </xsd:extension>
+                    </xsd:complexContent>
+                </xsd:complexType>
+            </xsd:element>
+            
+            <xsd:element name="GetLogListByQueryResponse">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element name="totalNumberOfPages" type="xsd:integer" minOccurs="1" maxOccurs="1"/>
+                        <xsd:element name="currentPage" type="xsd:integer" minOccurs="1" maxOccurs="1"/>
+                        <xsd:element name="exchangeLogs" type="exchange:ExchangeLogType" minOccurs="0" maxOccurs="unbounded"/>
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
+            
+            <xsd:element name="CreateLogRequest">
+                <xsd:complexType>
+                    <xsd:complexContent>
+                        <xsd:extension base="source:ExchangeBaseRequest">
+                            <xsd:element name="exchangeLog" type="exchange:ExchangeLogType" minOccurs="1" maxOccurs="1"/>
+                        </xsd:extension>
+                    </xsd:complexContent>
+                </xsd:complexType>
+            </xsd:element>
+            
+            <xsd:element name="CreateLogResponse">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element name="exchangeLog" type="exchange:ExchangeLogType" minOccurs="1" maxOccurs="1"/>
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
             
             <xsd:element name="GetServiceListRequest">
                 <xsd:complexType>
@@ -148,7 +188,7 @@
                 </xsd:complexType>
             </xsd:element>
 
-		</xsd:schema>
+        </xsd:schema>
     </types>
     
     <message name="ExchangeFault">
@@ -157,6 +197,20 @@
 
     <message name="ExchangeException">
         <part name="body" element="common:exceptionType"/>
+    </message>
+    
+    <message name="GetLogListByQueryRequest">
+        <part name="body" element="source:GetLogListByQueryRequest"/>
+    </message>
+    <message name="GetLogListByQueryResponse">
+        <part name="body" element="source:GetLogListByQueryResponse"/>
+    </message>
+    
+    <message name="CreateLogRequest">
+        <part name="body" element="source:CreateLogRequest"/>
+    </message>
+    <message name="CreateLogResponse">
+        <part name="body" element="source:CreateLogResponse"/>
     </message>
     
     <message name="GetServiceListRequest">
@@ -203,7 +257,19 @@
     
     <portType name="ExchangeDataSourcePortType">
 
-	<operation name="GetServiceList">
+        <operation name="GetLogListByQuery">
+            <input message="source:GetLogListByQueryRequest"/>
+            <output message="source:GetLogListByQueryResponse"/>
+            <fault name="ExchangeFault" message="source:ExchangeFault"/>
+        </operation>
+        
+        <operation name="CreateLog">
+            <input message="source:CreateLogRequest"/>
+            <output message="source:CreateLogResponse"/>
+            <fault name="ExchangeFault" message="source:ExchangeFault"/>
+        </operation>
+       
+        <operation name="GetServiceList">
             <input message="source:GetServiceListRequest"/>
             <output message="source:GetServiceListResponse"/>
             <fault name="ExchangeFault" message="source:ExchangeFault"/>
@@ -243,6 +309,30 @@
 
     <binding name="ExchangeDataSourceSoapBinding" type="source:ExchangeDataSourcePortType">
         <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+        
+        <operation name="GetLogListByQuery">
+            <input>
+                <soap:body use="literal"/>
+            </input>
+            <output>
+                <soap:body use="literal"/>
+            </output>
+            <fault name="ExchangeFault">
+                <soap:fault name="ExchangeFault" use="literal"/>
+            </fault>
+        </operation>
+        
+        <operation name="CreateLog">
+            <input>
+                <soap:body use="literal"/>
+            </input>
+            <output>
+                <soap:body use="literal"/>
+            </output>
+            <fault name="ExchangeFault">
+                <soap:fault name="ExchangeFault" use="literal"/>
+            </fault>
+        </operation>
         
         <operation name="GetServiceList">
             <input>

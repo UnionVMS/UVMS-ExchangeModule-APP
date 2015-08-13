@@ -18,14 +18,22 @@
             <xsd:element name="fwdRule" type="xsd:string" />
             <xsd:element name="recipient" type="xsd:string" />
             <xsd:element name="dateFwd" type="xsd:date" />
-            <xsd:element name="status" type="xsd:string" />
+            <xsd:element name="status" type="exchange:ExchangeLogStatusType" />
         </xsd:sequence>
     </xsd:complexType>
+   
+    <xsd:simpleType name="ExchangeLogStatusType">
+        <xsd:restriction base="xsd:string">
+            <xsd:enumeration value="PENDING"/>
+            <xsd:enumeration value="FAILED"/>
+            <xsd:enumeration value="SUCCESSFUL"/>
+        </xsd:restriction>
+    </xsd:simpleType>
     
     <xsd:simpleType name="SearchField">
         <xsd:restriction base="xsd:string">
-            <xsd:enumeration value="FROM"/>
-            <xsd:enumeration value="TO"/>
+            <xsd:enumeration value="FROM_DATE"/>
+            <xsd:enumeration value="TO_DATE"/>
             <xsd:enumeration value="SENT_BY"/>
             <xsd:enumeration value="MESSAGE_CONTAINS"/>      
             <xsd:enumeration value="FORWARD_RULE"/>      
