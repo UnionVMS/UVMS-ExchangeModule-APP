@@ -4,10 +4,13 @@ import eu.europa.ec.fisheries.schema.exchange.service.v1.ServiceType;
 import eu.europa.ec.fisheries.schema.exchange.source.v1.GetLogListByQueryResponse;
 import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeListQuery;
 import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogType;
+
 import java.util.List;
 
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
+import javax.enterprise.event.Event;
+import javax.inject.Inject;
 import javax.jms.TextMessage;
 
 import org.slf4j.Logger;
@@ -22,6 +25,8 @@ import eu.europa.ec.fisheries.uvms.exchange.model.mapper.ExchangeDataSourceReque
 import eu.europa.ec.fisheries.uvms.exchange.model.mapper.ExchangeDataSourceResponseMapper;
 import eu.europa.ec.fisheries.uvms.exchange.service.ExchangeService;
 import eu.europa.ec.fisheries.uvms.exchange.service.ParameterService;
+import eu.europa.ec.fisheries.uvms.exchange.service.event.ServiceEvent;
+import eu.europa.ec.fisheries.uvms.exchange.service.event.WebsocketEvent;
 import eu.europa.ec.fisheries.uvms.exchange.service.exception.ExchangeServiceException;
 
 @Stateless
@@ -37,6 +42,10 @@ public class ExchangeServiceBean implements ExchangeService {
 
     @EJB
     MessageProducer producer;
+    
+    @Inject
+    @WebsocketEvent
+    Event<ServiceEvent> serviceEvent;
 
     /**
      * {@inheritDoc}
@@ -89,6 +98,7 @@ public class ExchangeServiceBean implements ExchangeService {
             String request = ExchangeDataSourceRequestMapper.mapGetServiceListToString();
             String messageId = producer.sendDataSourceMessage(request, DataSourceQueue.INTERNAL);
             TextMessage response = consumer.getMessage(messageId, TextMessage.class);
+            serviceEvent.fire(new ServiceEvent("tjohopp"));
             return ExchangeDataSourceResponseMapper.mapToServiceTypeListFromResponse(response);
         } catch (ExchangeModelMapperException | ExchangeMessageException e) {
             throw new ExchangeServiceException(e.getMessage());
@@ -140,6 +150,7 @@ public class ExchangeServiceBean implements ExchangeService {
             String request = ExchangeDataSourceRequestMapper.mapCreateExchangeLogToString(exchangeLog);
             String messageId = producer.sendDataSourceMessage(request, DataSourceQueue.INTERNAL);
             TextMessage response = consumer.getMessage(messageId, TextMessage.class);
+            serviceEvent.fire(new ServiceEvent("tjohopp"));
             return ExchangeDataSourceResponseMapper.mapToExchangeLogTypeFromCreateExchageLogResponse(response);
         } catch (ExchangeModelMapperException | ExchangeMessageException e) {
             throw new ExchangeServiceException(e.getMessage());
