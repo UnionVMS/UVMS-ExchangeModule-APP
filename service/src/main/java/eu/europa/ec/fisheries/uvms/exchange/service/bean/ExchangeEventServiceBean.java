@@ -19,7 +19,6 @@ import javax.jms.TextMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import eu.europa.ec.fisheries.schema.exchange.common.v1.AcknowledgeType;
 import eu.europa.ec.fisheries.schema.exchange.common.v1.ExchangeFault;
 import eu.europa.ec.fisheries.schema.exchange.module.v1.CreatePollRequest;
 import eu.europa.ec.fisheries.schema.exchange.module.v1.ExchangeBaseRequest;
@@ -77,75 +76,77 @@ public class ExchangeEventServiceBean implements EventService {
             TextMessage textMessage = message.getJmsMessage();
 
             switch (baseRequest.getMethod()) {
-                case LIST_SERVICES:
-                    LOG.info("LIST_SERVICES");
+            case LIST_SERVICES:
+                LOG.info("LIST_SERVICES");
 
-                    List<ServiceType> serviceList = exchangeService.getServiceList();
+                List<ServiceType> serviceList = exchangeService.getServiceList();
 
-                    connectQueue();
+                connectQueue();
 
-                    String getServiceListResponse = ExchangeDataSourceResponseMapper.mapServiceTypeListToStringFromResponse(serviceList);
-                    TextMessage getServiceListMessage = session.createTextMessage(getServiceListResponse);
-                    getServiceListMessage.setJMSCorrelationID(message.getJmsMessage().getJMSMessageID());
-                    session.createProducer(message.getJmsMessage().getJMSReplyTo()).send(getServiceListMessage);
+                String getServiceListResponse = ExchangeDataSourceResponseMapper.mapServiceTypeListToStringFromResponse(serviceList);
+                TextMessage getServiceListMessage = session.createTextMessage(getServiceListResponse);
+                getServiceListMessage.setJMSCorrelationID(message.getJmsMessage().getJMSMessageID());
+                session.createProducer(message.getJmsMessage().getJMSReplyTo()).send(getServiceListMessage);
 
-                    break;
-                case REGISTER_SERVICE:
-                    LOG.info("REGISTER_SERVICE");
-                    TextMessage registrationMessage = message.getJmsMessage();
-                    ServiceType registratingService = ExchangeModuleRequestMapper.mapToServiceTypeFromRequest(registrationMessage);
-                    ServiceType registratedService = exchangeService.registerService(registratingService);
+                break;
+            case REGISTER_SERVICE:
+                LOG.info("REGISTER_SERVICE");
+                TextMessage registrationMessage = message.getJmsMessage();
+                ServiceType registratingService = ExchangeModuleRequestMapper.mapToServiceTypeFromRequest(registrationMessage);
+                ServiceType registratedService = exchangeService.registerService(registratingService);
 
-                    connectQueue();
+                connectQueue();
 
-                    String registerServiceResponse = ExchangeModuleResponseMapper.createRegisterServiceResponse(registratedService);
-                    TextMessage registerMessage = session.createTextMessage(registerServiceResponse);
-                    registerMessage.setJMSCorrelationID(message.getJmsMessage().getJMSMessageID());
-                    session.createProducer(message.getJmsMessage().getJMSReplyTo()).send(registerMessage);
+                String registerServiceResponse = ExchangeModuleResponseMapper.createRegisterServiceResponse(registratedService);
+                TextMessage registerMessage = session.createTextMessage(registerServiceResponse);
+                registerMessage.setJMSCorrelationID(message.getJmsMessage().getJMSMessageID());
+                session.createProducer(message.getJmsMessage().getJMSReplyTo()).send(registerMessage);
 
-                    break;
-                case UNREGISTER_SERVICE:
-                    LOG.info("UNREGISTER_SERVICE");
-                    TextMessage unregistrationMessage = message.getJmsMessage();
-                    ServiceType unregistratingService = ExchangeModuleRequestMapper.mapToServiceTypeFromRequest(unregistrationMessage);
-                    ServiceType unregistratedService = exchangeService.unregisterService(unregistratingService);
+                break;
+            case UNREGISTER_SERVICE:
+                LOG.info("UNREGISTER_SERVICE");
+                TextMessage unregistrationMessage = message.getJmsMessage();
+                ServiceType unregistratingService = ExchangeModuleRequestMapper.mapToServiceTypeFromRequest(unregistrationMessage);
+                ServiceType unregistratedService = exchangeService.unregisterService(unregistratingService);
 
-                    connectQueue();
+                connectQueue();
 
-                    String unregisterServiceResponse = ExchangeModuleResponseMapper.createUnregisterServiceResponse(unregistratedService);
-                    TextMessage unregisterMessage = session.createTextMessage(unregisterServiceResponse);
-                    unregisterMessage.setJMSCorrelationID(message.getJmsMessage().getJMSMessageID());
-                    session.createProducer(message.getJmsMessage().getJMSReplyTo()).send(unregisterMessage);
+                String unregisterServiceResponse = ExchangeModuleResponseMapper.createUnregisterServiceResponse(unregistratedService);
+                TextMessage unregisterMessage = session.createTextMessage(unregisterServiceResponse);
+                unregisterMessage.setJMSCorrelationID(message.getJmsMessage().getJMSMessageID());
+                session.createProducer(message.getJmsMessage().getJMSReplyTo()).send(unregisterMessage);
 
-                    break;
+                break;
 
-                case CREATE_POLL:
-                    LOG.info("CREATE POLL");
+            case CREATE_POLL:
+                LOG.info("CREATE POLL");
 
-                    CreatePollRequest createpollRequest = JAXBMarshaller.unmarshallTextMessage(textMessage, CreatePollRequest.class);
-                    PollType type = createpollRequest.getPoll();
+                CreatePollRequest createpollRequest = JAXBMarshaller.unmarshallTextMessage(textMessage, CreatePollRequest.class);
+                PollType type = createpollRequest.getPoll();
 
-                    ServiceType retrievedService = exchangeService.getService(type.getServiceId());
+                ServiceType retrievedService = exchangeService.getService(type.getServiceId());
 
-                    ExchangeLogType log = exchangeService.createExchangeLog(CommonMapper.mapPollTypeToExchangeLogType(type));
+                ExchangeLogType log = exchangeService.createExchangeLog(CommonMapper.mapPollTypeToExchangeLogType(type));
 
                 // Do some logic to send the data to the plugin
-                    // if success send OK back
-                    String pollResponse = ExchangeModuleResponseMapper.mapCreatePollResponseToString(AcknowledgeType.OK);
+                // if success send OK back
+                // String pollResponse =
+                // ExchangeModuleResponseMapper.mapCreatePollResponseToString(AcknowledgeType.OK);
                 // If not success send NOK back
-                    // String pollOkResponse =
-                    // ExchangeModuleResponseMapper.mapCreatePollResponseToString(AcknowledgeType.NOK);
+                // String pollOkResponse =
+                // ExchangeModuleResponseMapper.mapCreatePollResponseToString(AcknowledgeType.NOK);
+                //
+                // connectQueue();
+                //
+                // TextMessage createPollMessage =
+                // session.createTextMessage(pollResponse);
+                // createPollMessage.setJMSCorrelationID(message.getJmsMessage().getJMSMessageID());
+                // session.createProducer(message.getJmsMessage().getJMSReplyTo()).send(createPollMessage);
+                break;
 
-                    connectQueue();
-
-                    TextMessage createPollMessage = session.createTextMessage(pollResponse);
-                    createPollMessage.setJMSCorrelationID(message.getJmsMessage().getJMSMessageID());
-                    session.createProducer(message.getJmsMessage().getJMSReplyTo()).send(createPollMessage);
-                    break;
-
-                default:
-                    LOG.warn("No such method exists:{}", baseRequest.getMethod());
-                    break;
+            default:
+                LOG.warn("No such method exists:{}", baseRequest.getMethod());
+                break;
             }
 
         } catch (ExchangeModelMapperException | ExchangeServiceException | JMSException e) {
