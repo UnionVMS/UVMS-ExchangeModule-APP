@@ -10,4 +10,6 @@ public interface MessageProducer {
 
     public String sendDataSourceMessage(String text, DataSourceQueue queue) throws ExchangeMessageException;
 
+    public String sendEventBusMessage(String text, String serviceName) throws ExchangeMessageException;
+
 }

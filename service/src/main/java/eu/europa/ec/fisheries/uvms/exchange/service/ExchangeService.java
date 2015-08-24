@@ -1,13 +1,14 @@
 package eu.europa.ec.fisheries.uvms.exchange.service;
 
-import eu.europa.ec.fisheries.schema.exchange.service.v1.ServiceType;
-import eu.europa.ec.fisheries.schema.exchange.source.v1.GetLogListByQueryResponse;
-import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeListQuery;
-import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogType;
 import java.util.List;
 
 import javax.ejb.Local;
 
+import eu.europa.ec.fisheries.schema.exchange.poll.v1.PollType;
+import eu.europa.ec.fisheries.schema.exchange.service.v1.ServiceType;
+import eu.europa.ec.fisheries.schema.exchange.source.v1.GetLogListByQueryResponse;
+import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeListQuery;
+import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogType;
 import eu.europa.ec.fisheries.uvms.exchange.service.exception.ExchangeServiceException;
 
 @Local
@@ -84,5 +85,15 @@ public interface ExchangeService {
      * @throws ExchangeServiceException
      */
     public GetLogListByQueryResponse getExchangeLogByQuery(ExchangeListQuery query) throws ExchangeServiceException;
+
+    /**
+     *
+     * Post poll request on EventBus
+     *
+     * @param data
+     * @return
+     * @throws ExchangeServiceException
+     */
+    public String sendPollToPlugin(PollType data) throws ExchangeServiceException;
 
 }

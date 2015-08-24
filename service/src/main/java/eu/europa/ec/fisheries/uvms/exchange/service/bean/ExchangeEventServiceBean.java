@@ -128,6 +128,9 @@ public class ExchangeEventServiceBean implements EventService {
 
                 ExchangeLogType log = exchangeService.createExchangeLog(CommonMapper.mapPollTypeToExchangeLogType(type));
 
+                // Post on topic with correct destination plugin
+                exchangeService.sendPollToPlugin(type);
+
                 // Do some logic to send the data to the plugin
                 // if success send OK back
                 // String pollResponse =
