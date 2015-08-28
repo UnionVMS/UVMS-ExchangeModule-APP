@@ -38,14 +38,6 @@ public class ObjectFactory {
     }
 
     /**
-     * Create an instance of {@link ExchangeLogType }
-     * 
-     */
-    public ExchangeLogType createExchangeLogType() {
-        return new ExchangeLogType();
-    }
-
-    /**
      * Create an instance of {@link ExchangeListCriteria }
      * 
      */
@@ -59,6 +51,14 @@ public class ObjectFactory {
      */
     public ExchangeListCriteriaPair createExchangeListCriteriaPair() {
         return new ExchangeListCriteriaPair();
+    }
+
+    /**
+     * Create an instance of {@link ExchangeLogType }
+     * 
+     */
+    public ExchangeLogType createExchangeLogType() {
+        return new ExchangeLogType();
     }
 
     /**

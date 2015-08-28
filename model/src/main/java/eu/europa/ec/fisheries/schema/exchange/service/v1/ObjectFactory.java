@@ -30,6 +30,22 @@ public class ObjectFactory {
     }
 
     /**
+     * Create an instance of {@link SettingType }
+     * 
+     */
+    public SettingType createSettingType() {
+        return new SettingType();
+    }
+
+    /**
+     * Create an instance of {@link SettingListType }
+     * 
+     */
+    public SettingListType createSettingListType() {
+        return new SettingListType();
+    }
+
+    /**
      * Create an instance of {@link ServiceType }
      * 
      */
@@ -43,22 +59,6 @@ public class ObjectFactory {
      */
     public CapabilityListType createCapabilityListType() {
         return new CapabilityListType();
-    }
-
-    /**
-     * Create an instance of {@link SettingListType }
-     * 
-     */
-    public SettingListType createSettingListType() {
-        return new SettingListType();
-    }
-
-    /**
-     * Create an instance of {@link SettingType }
-     * 
-     */
-    public SettingType createSettingType() {
-        return new SettingType();
     }
 
     /**
