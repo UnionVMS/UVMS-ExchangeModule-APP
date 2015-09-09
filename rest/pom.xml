@@ -11,7 +11,7 @@
         <artifactId>exchange</artifactId>
         <version>1.0.2-SNAPSHOT</version>
     </parent>
-    
+
     <dependencies>
         <!-- EJB DEPENDENCS -->
         <dependency>
@@ -50,7 +50,7 @@
             </plugin>
         </plugins>
     </build>
-    
+
     <!-- USE following command to run this profile: mvn clean install -P generate-rest-doc -Dhostname=127.0.0.1 -Dport=8080  -->
     <profiles>
         <profile>
@@ -84,9 +84,31 @@
                             </execution>
                         </executions>
                     </plugin>
+                    <plugin>
+                        <groupId>com.google.code.maven-replacer-plugin</groupId>
+                        <artifactId>replacer</artifactId>
+                        <version>1.5.3</version>
+                        <executions>
+                            <execution>
+                                <phase>prepare-package</phase>
+                                <goals>
+                                    <goal>replace</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                        <configuration>
+                            <file>rest/src/main/webapp/apidocs/index.html</file>
+                            <replacements>
+                                <replacement>
+                                    <token>new ApiKeyAuthorization\("api_key", key, "query"\)</token>
+                                    <value>new ApiKeyAuthorization("Authorization", key, "header")</value>
+                                </replacement>
+                            </replacements>
+                        </configuration>
+                    </plugin>
                 </plugins>
             </build>
-        </profile>        
+        </profile>
     </profiles> 
 
 </project>

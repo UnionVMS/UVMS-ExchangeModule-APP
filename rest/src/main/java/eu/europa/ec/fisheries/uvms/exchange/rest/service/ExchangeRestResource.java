@@ -18,9 +18,10 @@ import eu.europa.ec.fisheries.schema.exchange.service.v1.ServiceType;
 import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeListQuery;
 import eu.europa.ec.fisheries.uvms.exchange.rest.dto.ResponseCode;
 import eu.europa.ec.fisheries.uvms.exchange.rest.dto.ResponseDto;
-import eu.europa.ec.fisheries.uvms.exchange.rest.mock.ExchangeMock;
 import eu.europa.ec.fisheries.uvms.exchange.service.ExchangeService;
 import eu.europa.ec.fisheries.uvms.exchange.service.exception.ExchangeServiceException;
+import eu.europa.ec.fisheries.uvms.rest.security.RequiresFeature;
+import eu.europa.ec.fisheries.uvms.rest.security.UnionVMSFeature;
 
 @Path("/exchange")
 @Stateless
@@ -43,6 +44,7 @@ public class ExchangeRestResource {
     @Consumes(value = {MediaType.APPLICATION_JSON})
     @Produces(value = {MediaType.APPLICATION_JSON})
     @Path("/list")
+    @RequiresFeature(UnionVMSFeature.viewExchangeLog)
     public ResponseDto getList() {
         LOG.info("Get list invoked in rest layer");
         try {
@@ -68,6 +70,7 @@ public class ExchangeRestResource {
     @Consumes(value = {MediaType.APPLICATION_JSON})
     @Produces(value = {MediaType.APPLICATION_JSON})
     @Path("/log")
+    @RequiresFeature(UnionVMSFeature.viewExchangeLog)
     public ResponseDto getLogListByCriteria(ExchangeListQuery query) {
         LOG.info("Get list invoked in rest layer");
         try {
@@ -90,6 +93,7 @@ public class ExchangeRestResource {
     @Consumes(value = {MediaType.APPLICATION_JSON})
     @Produces(value = {MediaType.APPLICATION_JSON})
     @Path(value = "/{id}")
+    @RequiresFeature(UnionVMSFeature.viewExchangeLog)
     public ResponseDto getById(@PathParam(value = "id") final Long id) {
         LOG.info("Get by id invoked in rest layer");
         try {
@@ -111,6 +115,7 @@ public class ExchangeRestResource {
     @PUT
     @Consumes(value = {MediaType.APPLICATION_JSON})
     @Produces(value = {MediaType.APPLICATION_JSON})
+    @RequiresFeature(UnionVMSFeature.updateExchangeLog)
     public ResponseDto update(final ServiceType data) {
         LOG.info("Update invoked in rest layer");
         try {
