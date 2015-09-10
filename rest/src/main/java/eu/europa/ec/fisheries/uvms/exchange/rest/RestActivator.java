@@ -2,10 +2,14 @@ package eu.europa.ec.fisheries.uvms.exchange.rest;
 
 import eu.europa.ec.fisheries.uvms.exchange.rest.constants.RestConstants;
 import eu.europa.ec.fisheries.uvms.exchange.rest.service.ExchangeRestResource;
+import eu.europa.ec.fisheries.uvms.rest.security.UnionVMSFeatureFilter;
+
 import java.util.HashSet;
 import java.util.Set;
+
 import javax.ws.rs.ApplicationPath;
 import javax.ws.rs.core.Application;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -19,6 +23,7 @@ public class RestActivator extends Application {
 
     public RestActivator() {
         set.add(ExchangeRestResource.class);
+        set.add(UnionVMSFeatureFilter.class);
         LOG.info(RestConstants.MODULE_NAME + " module starting up");
     }
 
