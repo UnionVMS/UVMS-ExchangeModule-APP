@@ -26,9 +26,9 @@ import eu.europa.ec.fisheries.uvms.exchange.model.mapper.ExchangeDataSourceRespo
 import eu.europa.ec.fisheries.uvms.exchange.model.mapper.ExchangeServiceRequestMapper;
 import eu.europa.ec.fisheries.uvms.exchange.service.ExchangeService;
 import eu.europa.ec.fisheries.uvms.exchange.service.ParameterService;
-import eu.europa.ec.fisheries.uvms.exchange.service.event.ServiceEvent;
-import eu.europa.ec.fisheries.uvms.exchange.service.event.WebsocketEvent;
 import eu.europa.ec.fisheries.uvms.exchange.service.exception.ExchangeServiceException;
+import eu.europa.ec.fisheries.uvms.notifications.NotificationEvent;
+import eu.europa.ec.fisheries.uvms.notifications.NotificationMessage;
 
 @Stateless
 public class ExchangeServiceBean implements ExchangeService {
@@ -45,8 +45,8 @@ public class ExchangeServiceBean implements ExchangeService {
     MessageProducer producer;
 
     @Inject
-    @WebsocketEvent
-    Event<ServiceEvent> serviceEvent;
+    @NotificationEvent
+    Event<NotificationMessage> notification;
 
     /**
      * {@inheritDoc}
@@ -99,7 +99,6 @@ public class ExchangeServiceBean implements ExchangeService {
             String request = ExchangeDataSourceRequestMapper.mapGetServiceListToString();
             String messageId = producer.sendDataSourceMessage(request, DataSourceQueue.INTERNAL);
             TextMessage response = consumer.getMessage(messageId, TextMessage.class);
-            serviceEvent.fire(new ServiceEvent("tjohopp"));
             return ExchangeDataSourceResponseMapper.mapToServiceTypeListFromResponse(response);
         } catch (ExchangeModelMapperException | ExchangeMessageException e) {
             throw new ExchangeServiceException(e.getMessage());
@@ -151,7 +150,6 @@ public class ExchangeServiceBean implements ExchangeService {
             String request = ExchangeDataSourceRequestMapper.mapCreateExchangeLogToString(exchangeLog);
             String messageId = producer.sendDataSourceMessage(request, DataSourceQueue.INTERNAL);
             TextMessage response = consumer.getMessage(messageId, TextMessage.class);
-            serviceEvent.fire(new ServiceEvent("tjohopp"));
             return ExchangeDataSourceResponseMapper.mapToExchangeLogTypeFromCreateExchageLogResponse(response);
         } catch (ExchangeModelMapperException | ExchangeMessageException e) {
             throw new ExchangeServiceException(e.getMessage());
@@ -176,6 +174,7 @@ public class ExchangeServiceBean implements ExchangeService {
         LOG.info("Send poll to plugin method invoked in service layer");
         try {
             String request = ExchangeServiceRequestMapper.mapCreatePollRequest(data);
+            notification.fire(new NotificationMessage("pollTrackId", data.getPollTrackId()));
             producer.sendEventBusMessage(request, data.getServiceId());
             return "Message sent!";
         } catch (ExchangeMessageException | ExchangeModelMapperException e) {

@@ -18,6 +18,7 @@
         <joda-time.version>2.7</joda-time.version>
         <logback.core.version>1.1.2</logback.core.version>
         <usm4uvms.version>0.0.1-SNAPSHOT</usm4uvms.version>
+        <uvms.commons.version>1.1-SNAPSHOT</uvms.commons.version>
     </properties>
     
     <dependencies>
@@ -70,6 +71,11 @@
 			<artifactId>usm4uvms</artifactId>
 			<version>${usm4uvms.version}</version>
 		</dependency>
+        <dependency>
+            <groupId>eu.europa.ec.fisheries.uvms</groupId>
+            <artifactId>uvms-commons</artifactId>
+            <version>${uvms.commons.version}</version>
+        </dependency>
     </dependencies>
 	
     <distributionManagement>
