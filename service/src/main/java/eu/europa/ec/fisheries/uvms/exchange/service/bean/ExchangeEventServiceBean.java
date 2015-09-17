@@ -24,6 +24,7 @@ import eu.europa.ec.fisheries.schema.exchange.module.v1.CreatePollRequest;
 import eu.europa.ec.fisheries.schema.exchange.module.v1.ExchangeBaseRequest;
 import eu.europa.ec.fisheries.schema.exchange.poll.v1.PollType;
 import eu.europa.ec.fisheries.schema.exchange.service.v1.ServiceType;
+import eu.europa.ec.fisheries.schema.exchange.module.v1.PingResponse;
 import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogType;
 import eu.europa.ec.fisheries.uvms.exchange.message.consumer.ExchangeMessageConsumer;
 import eu.europa.ec.fisheries.uvms.exchange.message.event.ErrorEvent;
@@ -147,6 +148,19 @@ public class ExchangeEventServiceBean implements EventService {
                 // session.createProducer(message.getJmsMessage().getJMSReplyTo()).send(createPollMessage);
                 break;
 
+            case PING:
+                LOG.info("PING");
+				PingResponse pingResponse = new PingResponse();
+                pingResponse.setResponse("pong");
+                String pong = JAXBMarshaller.marshallJaxBObjectToString(pingResponse);
+
+                connectQueue();
+
+                TextMessage responseMessage = session.createTextMessage(pong);
+                responseMessage.setJMSCorrelationID(message.getJmsMessage().getJMSMessageID());
+                responseMessage.setJMSDestination(message.getJmsMessage().getJMSReplyTo());
+                session.createProducer(responseMessage.getJMSDestination()).send(responseMessage);
+                break;
             default:
                 LOG.warn("No such method exists:{}", baseRequest.getMethod());
                 break;

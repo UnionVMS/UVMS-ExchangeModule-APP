@@ -26,6 +26,7 @@
                     <xsd:enumeration value="GET_SETTINGS"/>
                     <xsd:enumeration value="GET_CAPABILITIES"/>
                     <xsd:enumeration value="CREATE_POLL"/>
+                    <xsd:enumeration value="PING"/>
                 </xsd:restriction>
             </xsd:simpleType>
             
@@ -152,6 +153,23 @@
                 </xsd:complexType>
             </xsd:element>
 
+            <!-- Ping request -->
+            <xsd:element name="pingRequest">
+                <xsd:complexType>
+                    <xsd:complexContent>
+                        <xsd:extension base="module:ExchangeBaseRequest"/>
+                    </xsd:complexContent>
+                </xsd:complexType>
+            </xsd:element>
+
+            <xsd:element name="pingResponse">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element name="response" type="xsd:string"/>
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
+
 		</xsd:schema>
     </types>
     
@@ -204,6 +222,13 @@
     <message name="CreatePollResponse">
         <part name="body" element="module:CreatePollResponse"/>
     </message>
+
+    <message name="PingRequest">
+        <part name="body" element="module:pingRequest"/>
+    </message>
+    <message name="PingResponse">
+        <part name="body" element="module:pingResponse"/>
+    </message>
     
     <portType name="ExchangeModulePortType">
 
@@ -243,6 +268,11 @@
             <fault name="ExchangeException" message="module:ExchangeException"/>
         </operation>
         
+        <operation name="Ping">
+            <input message="module:PingRequest"/>
+            <output message="module:PingResponse"/>
+        </operation>
+
     </portType>
 
     <binding name="ExchangeModuleSoapBinding" type="module:ExchangeModulePortType">
@@ -319,7 +349,16 @@
                 <soap:fault name="ExchangeException" use="literal"/>
             </fault>
         </operation>
-        
+
+        <operation name="Ping">
+            <input>
+                <soap:body use="literal"/>
+            </input>
+            <output>
+                <soap:body use="literal"/>
+            </output>
+        </operation>        
+
     </binding>
 
     <service name="ExchangeModuleService">

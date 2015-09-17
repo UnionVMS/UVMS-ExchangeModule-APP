@@ -26,6 +26,7 @@
                     <xsd:enumeration value="GET_SERVICE"/>
                     <xsd:enumeration value="GET_LOG_BY_QUERY"/>
                     <xsd:enumeration value="CREATE_LOG"/>
+                    <xsd:enumeration value="PING"/>
                 </xsd:restriction>
             </xsd:simpleType>
             
@@ -188,6 +189,24 @@
                 </xsd:complexType>
             </xsd:element>
 
+            <!-- Ping request -->
+            <xsd:element name="pingRequest">
+                <xsd:complexType>
+                    <xsd:complexContent>
+                        <xsd:extension base="source:ExchangeBaseRequest">
+                        </xsd:extension>
+                    </xsd:complexContent>
+                </xsd:complexType>
+            </xsd:element>
+
+            <xsd:element name="pingResponse">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element name="response" type="xsd:string"/>
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
+
         </xsd:schema>
     </types>
     
@@ -254,6 +273,13 @@
     <message name="GetServiceCapabilitiesResponse">
         <part name="body" element="source:GetServiceCapabilitiesResponse"/>
     </message>
+
+    <message name="PingRequest">
+        <part name="body" element="source:pingRequest"/>
+    </message>
+    <message name="PingResponse">
+        <part name="body" element="source:pingResponse"/>
+    </message>
     
     <portType name="ExchangeDataSourcePortType">
 
@@ -305,6 +331,11 @@
             <fault name="ExchangeFault" message="source:ExchangeFault"/>
         </operation>
         
+        <operation name="Ping">
+            <input message="source:PingRequest"/>
+            <output message="source:PingResponse"/>
+        </operation>
+
     </portType>
 
     <binding name="ExchangeDataSourceSoapBinding" type="source:ExchangeDataSourcePortType">
@@ -404,6 +435,15 @@
             <fault name="ExchangeFault">
                 <soap:fault name="ExchangeFault" use="literal"/>
             </fault>
+        </operation>
+
+        <operation name="Ping">
+            <input>
+                <soap:body use="literal"/>
+            </input>
+            <output>
+                <soap:body use="literal"/>
+            </output>
         </operation>
         
     </binding>
