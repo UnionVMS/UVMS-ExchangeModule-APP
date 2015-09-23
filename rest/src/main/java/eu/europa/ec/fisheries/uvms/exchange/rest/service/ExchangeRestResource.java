@@ -44,7 +44,7 @@ public class ExchangeRestResource {
     @Consumes(value = {MediaType.APPLICATION_JSON})
     @Produces(value = {MediaType.APPLICATION_JSON})
     @Path("/list")
-    @RequiresFeature(UnionVMSFeature.viewExchangeLog)
+    @RequiresFeature(UnionVMSFeature.viewExchange)
     public ResponseDto getList() {
         LOG.info("Get list invoked in rest layer");
         try {
@@ -70,7 +70,7 @@ public class ExchangeRestResource {
     @Consumes(value = {MediaType.APPLICATION_JSON})
     @Produces(value = {MediaType.APPLICATION_JSON})
     @Path("/log")
-    @RequiresFeature(UnionVMSFeature.viewExchangeLog)
+    @RequiresFeature(UnionVMSFeature.viewExchange)
     public ResponseDto getLogListByCriteria(ExchangeListQuery query) {
         LOG.info("Get list invoked in rest layer");
         try {
@@ -93,7 +93,7 @@ public class ExchangeRestResource {
     @Consumes(value = {MediaType.APPLICATION_JSON})
     @Produces(value = {MediaType.APPLICATION_JSON})
     @Path(value = "/{id}")
-    @RequiresFeature(UnionVMSFeature.viewExchangeLog)
+    @RequiresFeature(UnionVMSFeature.viewExchange)
     public ResponseDto getById(@PathParam(value = "id") final Long id) {
         LOG.info("Get by id invoked in rest layer");
         try {
@@ -103,27 +103,4 @@ public class ExchangeRestResource {
             return new ResponseDto(ex.getMessage(), ResponseCode.ERROR);
         }
     }
-
-    /**
-     *
-     * @responseMessage 200 [Success]
-     * @responseMessage 500 [Error]
-     *
-     * @summary [Description]
-     *
-     */
-    @PUT
-    @Consumes(value = {MediaType.APPLICATION_JSON})
-    @Produces(value = {MediaType.APPLICATION_JSON})
-    @RequiresFeature(UnionVMSFeature.updateExchangeLog)
-    public ResponseDto update(final ServiceType data) {
-        LOG.info("Update invoked in rest layer");
-        try {
-            return new ResponseDto(serviceLayer.update(data), ResponseCode.OK);
-        } catch (ExchangeServiceException | NullPointerException ex) {
-            LOG.error("[ Error when updating. ] {} ", ex.getMessage());
-            return new ResponseDto(ResponseCode.ERROR);
-        }
-    }
-
 }

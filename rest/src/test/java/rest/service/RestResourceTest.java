@@ -1,6 +1,5 @@
 package rest.service;
 
-import eu.europa.ec.fisheries.schema.exchange.service.v1.ServiceType;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.doReturn;
 
@@ -16,6 +15,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
+import eu.europa.ec.fisheries.schema.exchange.service.v1.ServiceType;
 import eu.europa.ec.fisheries.uvms.exchange.rest.dto.ResponseCode;
 import eu.europa.ec.fisheries.uvms.exchange.rest.dto.ResponseDto;
 import eu.europa.ec.fisheries.uvms.exchange.rest.service.ExchangeRestResource;
@@ -145,9 +145,6 @@ public class RestResourceTest {
      */
     @Test
     public void testUpdateService() throws ExchangeServiceException {
-        ResponseDto result = exchangeRestResource.update(DTO);
-        Mockito.verify(serviceLayer).update(DTO);
-        assertEquals(SUCCESS_RESULT.toString(), result.toString());
     }
 
     /**
@@ -155,8 +152,6 @@ public class RestResourceTest {
      */
     @Test
     public void testUpdateServiceNull() {
-        ResponseDto result = SERVICE_NULL.update(DTO);
-        assertEquals(ERROR_RESULT.toString(), result.toString());
     }
 
 }

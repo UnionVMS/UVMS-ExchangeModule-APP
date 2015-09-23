@@ -40,7 +40,9 @@
                 <xsd:complexType>
                     <xsd:complexContent>
                         <xsd:extension base="source:ExchangeBaseRequest">
-                            <xsd:element name="query" type="exchange:ExchangeListQuery" minOccurs="1" maxOccurs="1"/>
+                            <xsd:sequence>
+                                <xsd:element name="query" type="exchange:ExchangeListQuery" minOccurs="1" maxOccurs="1"/>
+                            </xsd:sequence>
                         </xsd:extension>
                     </xsd:complexContent>
                 </xsd:complexType>
@@ -60,7 +62,9 @@
                 <xsd:complexType>
                     <xsd:complexContent>
                         <xsd:extension base="source:ExchangeBaseRequest">
-                            <xsd:element name="exchangeLog" type="exchange:ExchangeLogType" minOccurs="1" maxOccurs="1"/>
+                            <xsd:sequence>
+                                <xsd:element name="exchangeLog" type="exchange:ExchangeLogType" minOccurs="1" maxOccurs="1"/>
+                            </xsd:sequence>
                         </xsd:extension>
                     </xsd:complexContent>
                 </xsd:complexType>
@@ -95,7 +99,9 @@
                 <xsd:complexType>
                     <xsd:complexContent>
                         <xsd:extension base="source:ExchangeBaseRequest">
-                            <xsd:element name="serviceId" type="xsd:string" minOccurs="1" maxOccurs="1"/>
+                            <xsd:sequence>
+                                <xsd:element name="serviceId" type="xsd:string" minOccurs="1" maxOccurs="1"/>
+                            </xsd:sequence>
                         </xsd:extension>
                     </xsd:complexContent>
                 </xsd:complexType>
