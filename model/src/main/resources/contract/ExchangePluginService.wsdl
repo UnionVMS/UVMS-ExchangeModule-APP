@@ -1,6 +1,7 @@
 <definitions name="ExchangeModuleService"
              targetNamespace="urn:plugin.exchange.schema.fisheries.ec.europa.eu:v1"
              xmlns:plugin="urn:plugin.exchange.schema.fisheries.ec.europa.eu:v1"
+             xmlns:types="urn:types.plugin.exchange.schema.fisheries.ec.europa.eu:v1"
              xmlns:common="urn:common.exchange.schema.fisheries.ec.europa.eu:v1"
              xmlns:xsd="http://www.w3.org/2001/XMLSchema"
              xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
@@ -13,6 +14,7 @@
             <xsd:import namespace="urn:exchange.schema.fisheries.ec.europa.eu:v1" schemaLocation="Exchange.xsd"/>
             <xsd:import namespace="urn:service.exchange.schema.fisheries.ec.europa.eu:v1" schemaLocation="Service.xsd"/>
             <xsd:import namespace="urn:poll.exchange.schema.fisheries.ec.europa.eu:v1" schemaLocation="Poll.xsd"/>
+            <xsd:import namespace="urn:types.plugin.exchange.schema.fisheries.ec.europa.eu:v1" schemaLocation="Plugin.xsd"/>
             
             <xsd:simpleType name="ExchangePluginMethod">
                 <xsd:restriction base="xsd:string">
@@ -31,13 +33,13 @@
                 </xsd:sequence>
             </xsd:complexType>
             
-            <xsd:element name="SetConfigRequesst">
+            <xsd:element name="SetConfigRequest">
                 <xsd:complexType>
                     <xsd:complexContent>
                         <xsd:extension base="plugin:PluginBaseRequest">
                             <xsd:sequence>
                                 <xsd:sequence>
-                                    <xsd:element name="test" type="common:keyValueType" minOccurs="1" maxOccurs="unbounded"/>
+                                    <xsd:element name="configurations" type="common:keyValueType" minOccurs="1" maxOccurs="unbounded"/>
                                 </xsd:sequence>
                             </xsd:sequence>
                         </xsd:extension>
@@ -58,7 +60,7 @@
                     <xsd:complexContent>
                         <xsd:extension base="plugin:PluginBaseRequest">
                             <xsd:sequence>
-                                <xsd:element name="test" type="common:CommandType"/>
+                                <xsd:element name="command" type="common:CommandType"/>
                             </xsd:sequence>
                         </xsd:extension>
                     </xsd:complexContent>
@@ -147,16 +149,16 @@
         </xsd:schema>
     </types>
     
-    <message name="ExchangeFault">
-        <part name="body" element="common:exchangeFault"/>
+    <message name="PluginFault">
+        <part name="body" element="types:PluginFault"/>
     </message>
 
     <message name="ExchangeException">
         <part name="body" element="common:exceptionType"/>
     </message>
     
-    <message name="SetConfigRequesst">
-        <part name="body" element="plugin:SetConfigRequesst"/>
+    <message name="SetConfigRequest">
+        <part name="body" element="plugin:SetConfigRequest"/>
     </message>
     <message name="SetConfigResponse">
         <part name="body" element="plugin:SetConfigResponse"/>
@@ -200,33 +202,33 @@
     <portType name="ExchangeModulePortType">
 
         <operation name="SetConfig">
-            <input message="plugin:SetConfigRequesst"/>
+            <input message="plugin:SetConfigRequest"/>
             <output message="plugin:SetConfigResponse"/>
-            <fault name="ExchangeFault" message="plugin:ExchangeFault"/>
+            <fault name="PluginFault" message="plugin:PluginFault"/>
         </operation>
         
         <operation name="SetCommand">
             <input message="plugin:SetCommandRequest"/>
             <output message="plugin:SetCommandResponse"/>
-            <fault name="ExchangeFault" message="plugin:ExchangeFault"/>
+            <fault name="PluginFault" message="plugin:PluginFault"/>
         </operation>
         
         <operation name="SetReport">
             <input message="plugin:SetReportRequest"/>
             <output message="plugin:SetReportRequest"/>
-            <fault name="ExchangeFault" message="plugin:ExchangeFault"/>
+            <fault name="PluginFault" message="plugin:PluginFault"/>
         </operation>
         
         <operation name="Start">
             <input message="plugin:StartRequest"/>
             <output message="plugin:StartResponse"/>
-            <fault name="ExchangeFault" message="plugin:ExchangeFault"/>
+            <fault name="PluginFault" message="plugin:PluginFault"/>
         </operation>
         
         <operation name="Stop">
             <input message="plugin:StopRequest"/>
             <output message="plugin:StopResponse"/>
-            <fault name="ExchangeFault" message="plugin:ExchangeFault"/>
+            <fault name="PluginFault" message="plugin:PluginFault"/>
         </operation>
         
         <operation name="Ping">
@@ -246,8 +248,8 @@
             <output>
                 <soap:body use="literal"/>
             </output>
-            <fault name="ExchangeFault">
-                <soap:fault name="ExchangeFault" use="literal"/>
+            <fault name="PluginFault">
+                <soap:fault name="PluginFault" use="literal"/>
             </fault>
         </operation>
         
@@ -258,8 +260,8 @@
             <output>
                 <soap:body use="literal"/>
             </output>
-            <fault name="ExchangeFault">
-                <soap:fault name="ExchangeFault" use="literal"/>
+            <fault name="PluginFault">
+                <soap:fault name="PluginFault" use="literal"/>
             </fault>
         </operation>
         
@@ -270,8 +272,8 @@
             <output>
                 <soap:body use="literal"/>
             </output>
-            <fault name="ExchangeFault">
-                <soap:fault name="ExchangeFault" use="literal"/>
+            <fault name="PluginFault">
+                <soap:fault name="PluginFault" use="literal"/>
             </fault>
         </operation>
         
@@ -282,8 +284,8 @@
             <output>
                 <soap:body use="literal"/>
             </output>
-            <fault name="ExchangeFault">
-                <soap:fault name="ExchangeFault" use="literal"/>
+            <fault name="PluginFault">
+                <soap:fault name="PluginFault" use="literal"/>
             </fault>
         </operation>
         
@@ -294,8 +296,8 @@
             <output>
                 <soap:body use="literal"/>
             </output>
-            <fault name="ExchangeFault">
-                <soap:fault name="ExchangeFault" use="literal"/>
+            <fault name="PluginFault">
+                <soap:fault name="PluginFault" use="literal"/>
             </fault>
         </operation>
 

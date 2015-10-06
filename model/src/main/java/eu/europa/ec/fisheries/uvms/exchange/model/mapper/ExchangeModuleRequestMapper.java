@@ -28,7 +28,6 @@ public class ExchangeModuleRequestMapper {
         RegisterServiceRequest request = new RegisterServiceRequest();
         request.setMethod(ExchangeModuleMethod.REGISTER_SERVICE);
         request.setService(serviceType);
-
         return JAXBMarshaller.marshallJaxBObjectToString(request);
     }
 
@@ -36,7 +35,6 @@ public class ExchangeModuleRequestMapper {
         UnregisterServiceRequest request = new UnregisterServiceRequest();
         request.setMethod(ExchangeModuleMethod.UNREGISTER_SERVICE);
         request.setService(serviceType);
-
         return JAXBMarshaller.marshallJaxBObjectToString(request);
     }
 
