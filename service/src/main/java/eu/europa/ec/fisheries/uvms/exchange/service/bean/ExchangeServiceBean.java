@@ -1,5 +1,6 @@
 package eu.europa.ec.fisheries.uvms.exchange.service.bean;
 
+import eu.europa.ec.fisheries.schema.exchange.common.v1.CommandType;
 import java.util.List;
 
 import javax.ejb.EJB;
@@ -11,7 +12,6 @@ import javax.jms.TextMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import eu.europa.ec.fisheries.schema.exchange.poll.v1.PollType;
 import eu.europa.ec.fisheries.schema.exchange.service.v1.ServiceType;
 import eu.europa.ec.fisheries.schema.exchange.source.v1.GetLogListByQueryResponse;
 import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeListQuery;
@@ -170,12 +170,12 @@ public class ExchangeServiceBean implements ExchangeService {
     }
 
     @Override
-    public String sendPollToPlugin(PollType data) throws ExchangeServiceException {
+    public String setPluginReport(CommandType data) throws ExchangeServiceException {
         LOG.info("Send poll to plugin method invoked in service layer");
         try {
             String request = ExchangeServiceRequestMapper.mapCreatePollRequest(data);
-            notification.fire(new NotificationMessage("pollTrackId", data.getPollTrackId()));
-            producer.sendEventBusMessage(request, data.getServiceId());
+            notification.fire(new NotificationMessage("pollTrackId", data));
+            producer.sendEventBusMessage(request, data.getTo());
             return "Message sent!";
         } catch (ExchangeMessageException | ExchangeModelMapperException e) {
             throw new ExchangeServiceException(e.getMessage());

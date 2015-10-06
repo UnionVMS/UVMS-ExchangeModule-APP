@@ -5,7 +5,7 @@
  */
 package eu.europa.ec.fisheries.uvms.exchange.model.mapper;
 
-import eu.europa.ec.fisheries.schema.exchange.poll.v1.PollType;
+import eu.europa.ec.fisheries.schema.exchange.common.v1.CommandType;
 import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogStatusType;
 import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogType;
 import java.util.Date;
@@ -20,19 +20,21 @@ import javax.xml.datatype.XMLGregorianCalendar;
  */
 public class CommonMapper {
 
-    public static ExchangeLogType mapPollTypeToExchangeLogType(PollType poll) {
+    public static ExchangeLogType mapCommandTypeToExchangeLogType(CommandType command) {
+
+        //TODO FIX EXCHANGE LOG
         ExchangeLogType type = new ExchangeLogType();
         type.setAssetId("FAKE ASSET");
         type.setDateFwd(parseTimestamp(new Date()));
         type.setDateRecieved(parseTimestamp(new Date()));
         type.setFwdRule("FAKE RULE");
-        type.setMessage(poll.getMessage());
-        type.setPollTrackId(poll.getPollTrackId());
+        //type.setMessage(poll.getMessage());
+        //type.setPollTrackId(poll.getPollTrackId());
         type.setRecipient("FAKE RECIPIENT");
         type.setSentBy("FAKE SENDER");
         type.setStatus(ExchangeLogStatusType.PENDING);
-        type.setTerminalId(poll.getTerminalId());
-        type.setTerminalType(poll.getServiceId());
+        //type.setTerminalId(poll.getTerminalId());
+        //type.setTerminalType(poll.getServiceId());
         return type;
     }
 

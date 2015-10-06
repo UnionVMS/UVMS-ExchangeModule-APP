@@ -1,10 +1,11 @@
 package eu.europa.ec.fisheries.uvms.exchange.service;
 
+import eu.europa.ec.fisheries.schema.exchange.common.v1.CommandType;
+import eu.europa.ec.fisheries.schema.exchange.common.v1.ReportType;
 import java.util.List;
 
 import javax.ejb.Local;
 
-import eu.europa.ec.fisheries.schema.exchange.poll.v1.PollType;
 import eu.europa.ec.fisheries.schema.exchange.service.v1.ServiceType;
 import eu.europa.ec.fisheries.schema.exchange.source.v1.GetLogListByQueryResponse;
 import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeListQuery;
@@ -94,6 +95,6 @@ public interface ExchangeService {
      * @return
      * @throws ExchangeServiceException
      */
-    public String sendPollToPlugin(PollType data) throws ExchangeServiceException;
+    public String setPluginReport(CommandType data) throws ExchangeServiceException;
 
 }
