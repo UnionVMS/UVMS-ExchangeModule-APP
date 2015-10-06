@@ -1,0 +1,319 @@
+<definitions name="ExchangeModuleService"
+             targetNamespace="urn:plugin.exchange.schema.fisheries.ec.europa.eu:v1"
+             xmlns:plugin="urn:plugin.exchange.schema.fisheries.ec.europa.eu:v1"
+             xmlns:common="urn:common.exchange.schema.fisheries.ec.europa.eu:v1"
+             xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+             xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+             xmlns="http://schemas.xmlsoap.org/wsdl/">
+
+    <types>
+        <xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema"  targetNamespace="urn:plugin.exchange.schema.fisheries.ec.europa.eu:v1">
+            
+            <xsd:import namespace="urn:common.exchange.schema.fisheries.ec.europa.eu:v1" schemaLocation="ExchangeCommon.xsd"/>
+            <xsd:import namespace="urn:exchange.schema.fisheries.ec.europa.eu:v1" schemaLocation="Exchange.xsd"/>
+            <xsd:import namespace="urn:service.exchange.schema.fisheries.ec.europa.eu:v1" schemaLocation="Service.xsd"/>
+            <xsd:import namespace="urn:poll.exchange.schema.fisheries.ec.europa.eu:v1" schemaLocation="Poll.xsd"/>
+            
+            <xsd:simpleType name="ExchangePluginMethod">
+                <xsd:restriction base="xsd:string">
+                    <xsd:enumeration value="SET_CONFIG"/>
+                    <xsd:enumeration value="SET_COMMAND"/>
+                    <xsd:enumeration value="SET_REPORT"/>
+                    <xsd:enumeration value="START"/>
+                    <xsd:enumeration value="STOP"/>
+                    <xsd:enumeration value="PING"/>
+                </xsd:restriction>
+            </xsd:simpleType>
+            
+            <xsd:complexType name="PluginBaseRequest" abstract="true">
+                <xsd:sequence>
+                    <xsd:element name="method" type="plugin:ExchangePluginMethod"/>
+                </xsd:sequence>
+            </xsd:complexType>
+            
+            <xsd:element name="SetConfigRequesst">
+                <xsd:complexType>
+                    <xsd:complexContent>
+                        <xsd:extension base="plugin:PluginBaseRequest">
+                            <xsd:sequence>
+                                <xsd:sequence>
+                                    <xsd:element name="test" type="common:keyValueType" minOccurs="1" maxOccurs="unbounded"/>
+                                </xsd:sequence>
+                            </xsd:sequence>
+                        </xsd:extension>
+                    </xsd:complexContent>
+                </xsd:complexType>
+            </xsd:element>
+            
+            <xsd:element name="SetConfigResponse">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element name="response" type="common:AcknowledgeType" minOccurs="1" maxOccurs="1"/>
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
+            
+            <xsd:element name="SetCommandRequest">
+                <xsd:complexType>
+                    <xsd:complexContent>
+                        <xsd:extension base="plugin:PluginBaseRequest">
+                            <xsd:sequence>
+                                <xsd:element name="test" type="common:CommandType"/>
+                            </xsd:sequence>
+                        </xsd:extension>
+                    </xsd:complexContent>
+                </xsd:complexType>
+            </xsd:element>
+            
+            <xsd:element name="SetCommandResponse">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element name="response" type="common:AcknowledgeType" minOccurs="1" maxOccurs="1"/>
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
+            
+            <xsd:element name="SetReportRequest">
+                <xsd:complexType>
+                    <xsd:complexContent>
+                        <xsd:extension base="plugin:PluginBaseRequest">
+                            <xsd:sequence>
+                                <xsd:element name="report" type="common:ReportType"/>
+                            </xsd:sequence>
+                        </xsd:extension>
+                    </xsd:complexContent>
+                </xsd:complexType>
+            </xsd:element>
+            
+            <xsd:element name="SetReportResponse">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element name="response" type="common:AcknowledgeType" minOccurs="1" maxOccurs="1"/>
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
+            
+            <xsd:element name="StartRequest">
+                <xsd:complexType>
+                    <xsd:complexContent>
+                        <xsd:extension base="plugin:PluginBaseRequest">  
+                        </xsd:extension>
+                    </xsd:complexContent>
+                </xsd:complexType>
+            </xsd:element>
+
+            <xsd:element name="StartResponse">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element name="response" type="common:AcknowledgeType" minOccurs="1" maxOccurs="1"/>
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
+            
+            <xsd:element name="StopRequest">
+                <xsd:complexType>
+                    <xsd:complexContent>
+                        <xsd:extension base="plugin:PluginBaseRequest">
+                        </xsd:extension>
+                    </xsd:complexContent>
+                </xsd:complexType>
+            </xsd:element>
+            
+            <xsd:element name="StopResponse">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element name="response" type="common:AcknowledgeType" minOccurs="1" maxOccurs="1"/>
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
+            
+            <!-- Ping request -->
+            <xsd:element name="PingRequest">
+                <xsd:complexType>
+                    <xsd:complexContent>
+                        <xsd:extension base="plugin:PluginBaseRequest"/>
+                    </xsd:complexContent>
+                </xsd:complexType>
+            </xsd:element>
+
+            <xsd:element name="PingResponse">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element name="response" type="xsd:string"/>
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
+
+        </xsd:schema>
+    </types>
+    
+    <message name="ExchangeFault">
+        <part name="body" element="common:exchangeFault"/>
+    </message>
+
+    <message name="ExchangeException">
+        <part name="body" element="common:exceptionType"/>
+    </message>
+    
+    <message name="SetConfigRequesst">
+        <part name="body" element="plugin:SetConfigRequesst"/>
+    </message>
+    <message name="SetConfigResponse">
+        <part name="body" element="plugin:SetConfigResponse"/>
+    </message>
+    
+    <message name="SetCommandRequest">
+        <part name="body" element="plugin:SetCommandRequest"/>
+    </message>
+    <message name="SetCommandResponse">
+        <part name="body" element="plugin:SetCommandResponse"/>
+    </message>
+    
+    <message name="SetReportRequest">
+        <part name="body" element="plugin:SetReportRequest"/>
+    </message>
+    <message name="SetReportResponse">
+        <part name="body" element="plugin:SetReportResponse"/>
+    </message>
+    
+    <message name="StartRequest">
+        <part name="body" element="plugin:StartRequest"/>
+    </message>
+    <message name="StartResponse">
+        <part name="body" element="plugin:StartResponse"/>
+    </message>
+    
+    <message name="StopRequest">
+        <part name="body" element="plugin:StopRequest"/>
+    </message>
+    <message name="StopResponse">
+        <part name="body" element="plugin:StopResponse"/>
+    </message>
+    
+    <message name="PingRequest">
+        <part name="body" element="plugin:PingRequest"/>
+    </message>
+    <message name="PingResponse">
+        <part name="body" element="plugin:PingResponse"/>
+    </message>
+    
+    <portType name="ExchangeModulePortType">
+
+        <operation name="SetConfig">
+            <input message="plugin:SetConfigRequesst"/>
+            <output message="plugin:SetConfigResponse"/>
+            <fault name="ExchangeFault" message="plugin:ExchangeFault"/>
+        </operation>
+        
+        <operation name="SetCommand">
+            <input message="plugin:SetCommandRequest"/>
+            <output message="plugin:SetCommandResponse"/>
+            <fault name="ExchangeFault" message="plugin:ExchangeFault"/>
+        </operation>
+        
+        <operation name="SetReport">
+            <input message="plugin:SetReportRequest"/>
+            <output message="plugin:SetReportRequest"/>
+            <fault name="ExchangeFault" message="plugin:ExchangeFault"/>
+        </operation>
+        
+        <operation name="Start">
+            <input message="plugin:StartRequest"/>
+            <output message="plugin:StartResponse"/>
+            <fault name="ExchangeFault" message="plugin:ExchangeFault"/>
+        </operation>
+        
+        <operation name="Stop">
+            <input message="plugin:StopRequest"/>
+            <output message="plugin:StopResponse"/>
+            <fault name="ExchangeFault" message="plugin:ExchangeFault"/>
+        </operation>
+        
+        <operation name="Ping">
+            <input message="plugin:PingRequest"/>
+            <output message="plugin:PingResponse"/>
+        </operation>
+
+    </portType>
+
+    <binding name="ExchangeModuleSoapBinding" type="plugin:ExchangeModulePortType">
+        <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+        
+        <operation name="SetConfig">
+            <input>
+                <soap:body use="literal"/>
+            </input>
+            <output>
+                <soap:body use="literal"/>
+            </output>
+            <fault name="ExchangeFault">
+                <soap:fault name="ExchangeFault" use="literal"/>
+            </fault>
+        </operation>
+        
+        <operation name="SetCommand">
+            <input>
+                <soap:body use="literal"/>
+            </input>
+            <output>
+                <soap:body use="literal"/>
+            </output>
+            <fault name="ExchangeFault">
+                <soap:fault name="ExchangeFault" use="literal"/>
+            </fault>
+        </operation>
+        
+        <operation name="SetReport">
+            <input>
+                <soap:body use="literal"/>
+            </input>
+            <output>
+                <soap:body use="literal"/>
+            </output>
+            <fault name="ExchangeFault">
+                <soap:fault name="ExchangeFault" use="literal"/>
+            </fault>
+        </operation>
+        
+        <operation name="Start">
+            <input>
+                <soap:body use="literal"/>
+            </input>
+            <output>
+                <soap:body use="literal"/>
+            </output>
+            <fault name="ExchangeFault">
+                <soap:fault name="ExchangeFault" use="literal"/>
+            </fault>
+        </operation>
+        
+        <operation name="Stop">
+            <input>
+                <soap:body use="literal"/>
+            </input>
+            <output>
+                <soap:body use="literal"/>
+            </output>
+            <fault name="ExchangeFault">
+                <soap:fault name="ExchangeFault" use="literal"/>
+            </fault>
+        </operation>
+
+        <operation name="Ping">
+            <input>
+                <soap:body use="literal"/>
+            </input>
+            <output>
+                <soap:body use="literal"/>
+            </output>
+        </operation>        
+
+    </binding>
+
+    <service name="ExchangeModuleService">
+        <port name="ExchangeModulePortType" binding="plugin:ExchangeModuleSoapBinding">
+            <soap:address location="http://REPLACE_ME"/>
+        </port>
+    </service>
+
+</definitions>

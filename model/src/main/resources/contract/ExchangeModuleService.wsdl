@@ -25,7 +25,8 @@
                     <xsd:enumeration value="UNREGISTER_SERVICE"/>
                     <xsd:enumeration value="GET_SETTINGS"/>
                     <xsd:enumeration value="GET_CAPABILITIES"/>
-                    <xsd:enumeration value="CREATE_POLL"/>
+                    <xsd:enumeration value="SET_REPORT"/>
+                    <xsd:enumeration value="SET_COMMAND"/>
                     <xsd:enumeration value="PING"/>
                 </xsd:restriction>
             </xsd:simpleType>
@@ -36,19 +37,19 @@
                 </xsd:sequence>
             </xsd:complexType>
             
-            <xsd:element name="CreatePollRequest">
+            <xsd:element name="SetCommandRequest">
                 <xsd:complexType>
                     <xsd:complexContent>
                         <xsd:extension base="module:ExchangeBaseRequest">
                             <xsd:sequence>
-                                <xsd:element name="poll" type="poll:PollType"/>
+                                <xsd:element name="command" type="common:CommandType"/>
                             </xsd:sequence>
                         </xsd:extension>
                     </xsd:complexContent>
                 </xsd:complexType>
             </xsd:element>
             
-            <xsd:element name="CreatePollResponse">
+            <xsd:element name="SetCommandResponse">
                 <xsd:complexType>
                     <xsd:sequence>
                         <xsd:element name="response" type="common:AcknowledgeType" minOccurs="1" maxOccurs="1"/>
@@ -170,7 +171,7 @@
                 </xsd:complexType>
             </xsd:element>
 
-		</xsd:schema>
+        </xsd:schema>
     </types>
     
     <message name="ExchangeFault">
@@ -216,11 +217,11 @@
         <part name="body" element="module:GetServiceCapabilitiesResponse"/>
     </message>
     
-    <message name="CreatePollRequest">
-        <part name="body" element="module:CreatePollResponse"/>
+    <message name="SetCommandRequest">
+        <part name="body" element="module:SetCommandResponse"/>
     </message>
-    <message name="CreatePollResponse">
-        <part name="body" element="module:CreatePollResponse"/>
+    <message name="SetCommandResponse">
+        <part name="body" element="module:SetCommandResponse"/>
     </message>
 
     <message name="PingRequest">
@@ -232,7 +233,7 @@
     
     <portType name="ExchangeModulePortType">
 
-	<operation name="GetServiceList">
+        <operation name="GetServiceList">
             <input message="module:GetServiceListRequest"/>
             <output message="module:GetServiceListResponse"/>
             <fault name="ExchangeFault" message="module:ExchangeFault"/>
@@ -263,8 +264,8 @@
         </operation>
         
         <operation name="CreatePoll">
-            <input message="module:CreatePollRequest"/>
-            <output message="module:CreatePollResponse"/>
+            <input message="module:SetCommandRequest"/>
+            <output message="module:SetCommandResponse"/>
             <fault name="ExchangeException" message="module:ExchangeException"/>
         </operation>
         

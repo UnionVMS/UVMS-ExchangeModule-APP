@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xsd:schema xmlns:plugin="urn:types.plugin.exchange.schema.fisheries.ec.europa.eu:v1"
+            targetNamespace="urn:types.plugin.exchange.schema.fisheries.ec.europa.eu:v1"          
+            xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+            xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+            xmlns="http://schemas.xmlsoap.org/wsdl/">
+    
+    
+    <xsd:complexType name="EmailType">
+        <xsd:sequence>
+            <xsd:element name="to" type="xsd:string" />
+            <xsd:element name="cc" type="xsd:string" minOccurs="1" maxOccurs="unbounded"/>
+            <xsd:element name="subject" type="xsd:string" />
+            <xsd:element name="body" type="xsd:string" />
+        </xsd:sequence>
+    </xsd:complexType>
+    
+    <xsd:simpleType name="PluginType">
+        <xsd:restriction base="xsd:string">
+            <xsd:enumeration value="EMAIL"/>
+            <xsd:enumeration value="SATELITE_RECEIVER"/>
+            <xsd:enumeration value="FLUX"/>
+            <xsd:enumeration value="OTHER"/>
+        </xsd:restriction>
+    </xsd:simpleType>
+    
+    
+
+</xsd:schema>

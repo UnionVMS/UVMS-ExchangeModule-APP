@@ -1,10 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <xsd:schema xmlns:service="urn:service.exchange.schema.fisheries.ec.europa.eu:v1" 
-            targetNamespace="urn:service.exchange.schema.fisheries.ec.europa.eu:v1"          
+            targetNamespace="urn:service.exchange.schema.fisheries.ec.europa.eu:v1"    
+            xmlns:plugin="urn:types.plugin.exchange.schema.fisheries.ec.europa.eu:v1"      
             xmlns:common="urn:common.exchange.schema.fisheries.ec.europa.eu:v1"
             xmlns:xsd="http://www.w3.org/2001/XMLSchema"
             xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
             xmlns="http://schemas.xmlsoap.org/wsdl/">
+    
+    <xsd:import namespace="urn:types.plugin.exchange.schema.fisheries.ec.europa.eu:v1" schemaLocation="Plugin.xsd"/>
     
     <xsd:complexType name="ServiceType">
         <xsd:sequence>
@@ -13,6 +16,7 @@
             <xsd:element name="name" type="xsd:string"/>
             <xsd:element name="description" type="xsd:string"/>
             <xsd:element name="updated" type="xsd:string"/>
+            <xsd:element name="pluginType" type="plugin:PluginType"/>
         </xsd:sequence>
     </xsd:complexType>
     

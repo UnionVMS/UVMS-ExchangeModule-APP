@@ -17,6 +17,7 @@
         <!-- the name of the wsdlfiles wothout fileending -->
         <wsdl.contract.name>ExchangeModuleService</wsdl.contract.name>
         <wsdl.source.name>ExchangeDataSourceService</wsdl.source.name>
+        <wsdl.plugin.name>ExchangePluginService</wsdl.plugin.name>
     </properties>
     
     <profiles>
@@ -24,6 +25,7 @@
             <id>generate-from-wsdl</id>
             <build>
                 <plugins>
+                    <!-- MODULE CONTRACT -->
                     <plugin>
                         <artifactId>maven-clean-plugin</artifactId>
                         <version>2.6.1</version>
@@ -50,7 +52,7 @@
                         <version>2.7.6</version>
                         <executions>
                             <execution>
-                                <id>generate-vessel-module</id>
+                                <id>generate-exchange-module</id>
                                 <phase>generate-sources</phase>
                                 <configuration>
                                     <sourceRoot>${basedir}/src/main/java/</sourceRoot>
@@ -69,7 +71,7 @@
                                 </goals>
                             </execution>
                             <execution>
-                                <id>generate-vessel-datasource</id>
+                                <id>generate-exchange-datasource</id>
                                 <phase>generate-sources</phase>
                                 <configuration>
                                     <sourceRoot>${basedir}/src/main/java/</sourceRoot>
@@ -87,8 +89,27 @@
                                     <goal>wsdl2java</goal>
                                 </goals>
                             </execution>
+                            <execution>
+                                <id>generate-exchange-plugin</id>
+                                <phase>generate-sources</phase>
+                                <configuration>
+                                    <sourceRoot>${basedir}/src/main/java/</sourceRoot>
+                                    <wsdlOptions>
+                                        <wsdlOption>
+                                         
+                                            <wsdl>${basedir}/src/main/resources/contract/${wsdl.plugin.name}.wsdl</wsdl>
+                                            <bindingFiles>
+                                                <bindingFile>${basedir}/src/main/resources/binding.xml</bindingFile>
+                                            </bindingFiles>
+                                        </wsdlOption>
+                                    </wsdlOptions>
+                                </configuration>
+                                <goals>
+                                    <goal>wsdl2java</goal>
+                                </goals>
+                            </execution>
                         </executions>
-                    </plugin>
+                    </plugin>                   
                 </plugins>
             </build>
         </profile>
