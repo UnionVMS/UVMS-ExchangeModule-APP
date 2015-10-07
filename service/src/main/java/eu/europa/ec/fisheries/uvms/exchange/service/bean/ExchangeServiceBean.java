@@ -37,10 +37,10 @@ import eu.europa.ec.fisheries.uvms.exchange.service.config.ParameterKey;
 import eu.europa.ec.fisheries.uvms.exchange.service.exception.ExchangeServiceException;
 import eu.europa.ec.fisheries.uvms.notifications.NotificationEvent;
 import eu.europa.ec.fisheries.uvms.notifications.NotificationMessage;
-import eu.europa.ec.fisheries.wsdl.module.v1.PullSettingsResponse;
-import eu.europa.ec.fisheries.wsdl.module.v1.PushSettingsResponse;
-import eu.europa.ec.fisheries.wsdl.types.v1.PullSettingsStatus;
-import eu.europa.ec.fisheries.wsdl.types.v1.SettingType;
+import eu.europa.ec.fisheries.schema.config.module.v1.PullSettingsResponse;
+import eu.europa.ec.fisheries.schema.config.module.v1.PushSettingsResponse;
+import eu.europa.ec.fisheries.schema.config.types.v1.PullSettingsStatus;
+import eu.europa.ec.fisheries.schema.config.types.v1.SettingType;
 
 @Stateless
 public class ExchangeServiceBean implements ExchangeService {

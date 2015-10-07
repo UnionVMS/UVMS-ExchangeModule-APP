@@ -34,9 +34,9 @@ import eu.europa.ec.fisheries.uvms.exchange.service.ExchangeService;
 import eu.europa.ec.fisheries.uvms.exchange.service.ParameterService;
 import eu.europa.ec.fisheries.uvms.exchange.service.config.ParameterKey;
 import eu.europa.ec.fisheries.uvms.exchange.service.exception.ExchangeServiceException;
-import eu.europa.ec.fisheries.wsdl.module.v1.ConfigTopicBaseRequest;
-import eu.europa.ec.fisheries.wsdl.module.v1.PushModuleSettingMessage;
-import eu.europa.ec.fisheries.wsdl.types.v1.SettingType;
+import eu.europa.ec.fisheries.schema.config.module.v1.ConfigTopicBaseRequest;
+import eu.europa.ec.fisheries.schema.config.module.v1.PushModuleSettingMessage;
+import eu.europa.ec.fisheries.schema.config.types.v1.SettingType;
 
 @Stateless
 public class ExchangeEventServiceBean implements EventService {
