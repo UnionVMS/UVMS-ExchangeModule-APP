@@ -206,7 +206,7 @@ public class ExchangeServiceBean implements ExchangeService {
             }
         } catch (ModelMarshallException | ExchangeMessageException | ExchangeModelMarshallException e) {
             LOG.error("[ Error when synchronizing settings with Config module. ] {}", e.getMessage());
-            throw new ExchangeServiceException("Error when synchronizing settings with Config module.", e);
+            throw new ExchangeServiceException("Error when synchronizing settings with Config module.");
         }
     }
 

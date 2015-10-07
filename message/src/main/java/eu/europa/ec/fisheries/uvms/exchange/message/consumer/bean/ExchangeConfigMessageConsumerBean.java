@@ -11,7 +11,7 @@ import javax.jms.MessageListener;
 import javax.jms.TextMessage;
 
 import eu.europa.ec.fisheries.uvms.exchange.message.event.ConfigMessageRecievedEvent;
-import eu.europa.ec.fisheries.uvms.exchange.message.event.carrier.EventMessage;
+import eu.europa.ec.fisheries.uvms.exchange.message.event.carrier.ExchangeMessageEvent;
 import eu.europa.ec.fisheries.uvms.exchange.model.constant.ExchangeModelConstants;
 
 //@formatter:off
@@ -25,13 +25,13 @@ public class ExchangeConfigMessageConsumerBean implements MessageListener {
 
     @Inject
     @ConfigMessageRecievedEvent
-    Event<EventMessage> configMessageReceivedEvent;
+    Event<ExchangeMessageEvent> configMessageReceivedEvent;
 
     @Override
     @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
     public void onMessage(Message message) {
         TextMessage textMessage = (TextMessage) message;
-        configMessageReceivedEvent.fire(new EventMessage(textMessage));
+        configMessageReceivedEvent.fire(new ExchangeMessageEvent(textMessage));
     }
 
 }

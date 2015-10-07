@@ -74,7 +74,7 @@ public class ParameterServiceBean implements ParameterService {
         }
         catch (Exception e) {
             LOG.error("[ Error when setting String value. ] {}", e.getMessage());
-            throw new ExchangeServiceException("[ Error when setting String value. ]", e);
+            throw new ExchangeServiceException("[ Error when setting String value. ]");
         }
     }
 
@@ -111,7 +111,7 @@ public class ParameterServiceBean implements ParameterService {
         }
         catch (Exception e) {
             LOG.error("[ Error when clearing all settings. ] {}", e.getMessage());
-            throw new ExchangeServiceException("[ Error when clearing all settings. ]", e);
+            throw new ExchangeServiceException("[ Error when clearing all settings. ]");
         }
     }
 
