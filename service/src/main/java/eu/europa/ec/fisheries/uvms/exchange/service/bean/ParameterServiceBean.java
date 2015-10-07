@@ -1,9 +1,13 @@
 package eu.europa.ec.fisheries.uvms.exchange.service.bean;
 
+import java.util.List;
+import java.util.UUID;
+
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
+import javax.persistence.TypedQuery;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,12 +35,46 @@ public class ParameterServiceBean implements ParameterService {
     public String getStringValue(ParameterKey key) throws ExchangeServiceException {
         try {
             Query query = em.createNamedQuery(ServiceConstants.FIND_BY_NAME);
-            query.setParameter("key", key.getKey());
+            query.setParameter("parameterDescription", key.getKey());
             Parameter entity = (Parameter) query.getSingleResult();
             return entity.getParamValue();
         } catch (Exception ex) {
             LOG.error("[ Error when getting String value ]", ex.getMessage());
             throw new ExchangeServiceException("[ Error when getting String value ]");
+        }
+    }
+
+    @Override
+    public void setStringValue(ParameterKey key, String value) throws ExchangeServiceException {
+        try {
+            TypedQuery<Parameter> query = em.createNamedQuery(ServiceConstants.FIND_BY_NAME, Parameter.class);
+            query.setParameter("parameterDescription", key.getKey());
+            List<Parameter> parameters = query.getResultList();
+
+            if (parameters.size() == 1) {
+                // Update existing parameter
+                parameters.get(0).setParamValue(value);
+                em.flush();
+            }
+            else {
+                if (!parameters.isEmpty()) {
+                    // Remove all parameters occurring more than once
+                    for (Parameter parameter : parameters) {
+                        em.remove(parameter);
+                    }
+                }
+
+                // Create new parameter
+                Parameter parameter = new Parameter();
+                parameter.setParamId(UUID.randomUUID().toString());
+                parameter.setParamDescription(key.getKey());
+                parameter.setParamValue(value);
+                em.persist(parameter);
+            }
+        }
+        catch (Exception e) {
+            LOG.error("[ Error when setting String value. ] {}", e.getMessage());
+            throw new ExchangeServiceException("[ Error when setting String value. ]", e);
         }
     }
 
@@ -50,6 +88,30 @@ public class ParameterServiceBean implements ParameterService {
         } catch (ExchangeServiceException ex) {
             LOG.error("[ Error when getting Boolean value ]", ex.getMessage());
             throw new ExchangeServiceException("[ Error when getting Boolean value ]");
+        }
+    }
+
+    @Override
+    public void reset(ParameterKey key) throws ExchangeServiceException {
+        TypedQuery<Parameter> query = em.createNamedQuery(ServiceConstants.FIND_BY_NAME, Parameter.class);
+        query.setParameter("parameterDescription", key.getKey());
+        for (Parameter parameter : query.getResultList()) {
+            em.remove(parameter);
+        }
+    }
+
+    @Override
+    public void clearAll() throws ExchangeServiceException {
+        try {
+            TypedQuery<Parameter> query = em.createNamedQuery(ServiceConstants.LIST_ALL, Parameter.class);
+            List<Parameter> parameters = query.getResultList();
+            for (Parameter parameter : parameters) {
+                em.remove(parameter);
+            }
+        }
+        catch (Exception e) {
+            LOG.error("[ Error when clearing all settings. ] {}", e.getMessage());
+            throw new ExchangeServiceException("[ Error when clearing all settings. ]", e);
         }
     }
 

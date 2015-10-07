@@ -9,21 +9,20 @@ import javax.persistence.*;
  *
  */
 @Entity
-@NamedQuery(name = ServiceConstants.FIND_BY_NAME, query = "SELECT p FROM Parameter p WHERE p.paramName = :key")
+@NamedQueries({
+    @NamedQuery(name = ServiceConstants.FIND_BY_NAME, query = "SELECT p FROM Parameter p WHERE p.paramDescription = :parameterDescription"),
+    @NamedQuery(name = ServiceConstants.LIST_ALL, query = "SELECT p FROM Parameter p")
+})
 public class Parameter implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "param_id")
-    private Integer paramId;
+    private String paramId;
 
     @Column(name = "param_description")
     private String paramDescription;
-
-    @Column(name = "param_name")
-    private String paramName;
 
     @Column(name = "param_value")
     private String paramValue;
@@ -31,11 +30,11 @@ public class Parameter implements Serializable {
     public Parameter() {
     }
 
-    public Integer getParamId() {
+    public String getParamId() {
         return this.paramId;
     }
 
-    public void setParamId(Integer paramId) {
+    public void setParamId(String paramId) {
         this.paramId = paramId;
     }
 
@@ -45,14 +44,6 @@ public class Parameter implements Serializable {
 
     public void setParamDescription(String paramDescription) {
         this.paramDescription = paramDescription;
-    }
-
-    public String getParamName() {
-        return this.paramName;
-    }
-
-    public void setParamName(String paramName) {
-        this.paramName = paramName;
     }
 
     public String getParamValue() {
