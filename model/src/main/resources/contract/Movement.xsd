@@ -10,6 +10,15 @@
     <xsd:import namespace="urn:asset.movement.schema.fisheries.ec.europa.eu:v1" schemaLocation="Asset.xsd"/>
     <xsd:import namespace="urn:mobileterminal.movement.schema.fisheries.ec.europa.eu:v1" schemaLocation="MobileTerminal.xsd"/>
     
+    <xsd:complexType name="ReportMovementType">
+        <xsd:sequence>
+            <xsd:element name="from" type="xsd:string" minOccurs="1" maxOccurs="1"/>
+            <!-- <xsd:element name="version" type="xsd:string" minOccurs="1" maxOccurs="1"/> -->
+            <xsd:element name="timestamp" type="xsd:dateTime" minOccurs="1" maxOccurs="1"/>
+            <xsd:element name="movement" type="movement:MovementType"/>
+        </xsd:sequence>
+    </xsd:complexType>
+    
     <xsd:simpleType name="SegmentCategoryType">
         <xsd:restriction base="xsd:string">
             <xsd:enumeration value="GAP"/>

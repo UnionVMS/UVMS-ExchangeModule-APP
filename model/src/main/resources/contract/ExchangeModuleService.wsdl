@@ -6,6 +6,7 @@
              xmlns:poll="urn:poll.exchange.schema.fisheries.ec.europa.eu:v1"
              xmlns:service="urn:service.exchange.schema.fisheries.ec.europa.eu:v1"
              xmlns:exchange="urn:exchange.schema.fisheries.ec.europa.eu:v1"
+             xmlns:movement="urn:movement.schema.fisheries.ec.europa.eu:v1"
              xmlns:xsd="http://www.w3.org/2001/XMLSchema"
              xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
              xmlns="http://schemas.xmlsoap.org/wsdl/">
@@ -17,16 +18,27 @@
             <xsd:import namespace="urn:exchange.schema.fisheries.ec.europa.eu:v1" schemaLocation="Exchange.xsd"/>
             <xsd:import namespace="urn:service.exchange.schema.fisheries.ec.europa.eu:v1" schemaLocation="Service.xsd"/>
             <xsd:import namespace="urn:poll.exchange.schema.fisheries.ec.europa.eu:v1" schemaLocation="Poll.xsd"/>
+            <xsd:import namespace="urn:movement.schema.fisheries.ec.europa.eu:v1" schemaLocation="Movement.xsd"/>
             
             <xsd:simpleType name="ExchangeModuleMethod">
                 <xsd:restriction base="xsd:string">
-                    <xsd:enumeration value="LIST_SERVICES"/>
+                    <!-- unionvms wants to -->
+                    <xsd:enumeration value="LIST_SERVICES"/> <!-- mobileterminal - get plugins -->
+                    <xsd:enumeration value="SET_COMMAND"/> <!-- mobileterminal - pollRequest OR rules - sendEmail -->
+                    <xsd:enumeration value="SET_REPORT"/> <!-- rules - sendPositionToFLUX -->
+                    
+                    <!-- plugin wants to -->
+                    <xsd:enumeration value="SET_MOVEMENT_REPORT"/>
+                    
+                    <!-- move to register wsdl -->
                     <xsd:enumeration value="REGISTER_SERVICE"/>
                     <xsd:enumeration value="UNREGISTER_SERVICE"/>
-                    <xsd:enumeration value="GET_SETTINGS"/>
-                    <xsd:enumeration value="GET_CAPABILITIES"/>
-                    <xsd:enumeration value="SET_REPORT"/>
-                    <xsd:enumeration value="SET_COMMAND"/>
+                    
+                    <!-- rest interface wants to -->
+                    <!-- <xsd:enumeration value="GET_SETTINGS"/>
+                    <xsd:enumeration value="GET_CAPABILITIES"/>-->
+                    
+                    <!-- admin/config wants to-->
                     <xsd:enumeration value="PING"/>
                 </xsd:restriction>
             </xsd:simpleType>
@@ -36,6 +48,26 @@
                     <xsd:element name="method" type="module:ExchangeModuleMethod"/>
                 </xsd:sequence>
             </xsd:complexType>
+            
+            <xsd:element name="SetMovementRequest">
+                <xsd:complexType>
+                    <xsd:complexContent>
+                        <xsd:extension base="module:ExchangeBaseRequest">
+                            <xsd:sequence>
+                                <xsd:element name="request" type="movement:ReportMovementType"/>
+                            </xsd:sequence>
+                        </xsd:extension>
+                    </xsd:complexContent>
+                </xsd:complexType>
+            </xsd:element>
+            
+            <xsd:element name="SetMovementResponse">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element name="response" type="common:AcknowledgeType" minOccurs="1" maxOccurs="1"/>
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
             
             <xsd:element name="SetCommandRequest">
                 <xsd:complexType>
