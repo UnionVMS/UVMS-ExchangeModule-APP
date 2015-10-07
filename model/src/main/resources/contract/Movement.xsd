@@ -108,8 +108,6 @@
         </xsd:sequence>
     </xsd:complexType>
  
-  
-    
     <xsd:complexType name="MovementActivityType">
         <xsd:sequence>
             <xsd:element name="messageType" type="movement:MovementActivityTypeType"/>
@@ -125,5 +123,14 @@
             <xsd:element name="altitude" type="xsd:double" nillable="true"/>
         </xsd:sequence>
     </xsd:complexType>
+    
+    <xsd:simpleType name="MovementComChannelType">
+        <xsd:restriction base="xsd:string">
+            <xsd:enumeration value="FLUX"/>
+            <xsd:enumeration value="MANUAL"/>
+            <xsd:enumeration value="NAF"/>
+            <xsd:enumeration value="MOBILE_TERMINAL"/>
+        </xsd:restriction>
+    </xsd:simpleType>
     
 </xsd:schema>

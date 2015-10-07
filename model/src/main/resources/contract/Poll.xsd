@@ -6,6 +6,8 @@
             xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
             xmlns="http://schemas.xmlsoap.org/wsdl/">
     
+    <xsd:import namespace="urn:common.exchange.schema.fisheries.ec.europa.eu:v1" schemaLocation="ExchangeCommon.xsd"/>
+    
     <xsd:complexType name="PollType">
         <xsd:sequence>
             <xsd:element name="serviceId" type="xsd:string"/>

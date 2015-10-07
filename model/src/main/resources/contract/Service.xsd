@@ -8,6 +8,7 @@
             xmlns="http://schemas.xmlsoap.org/wsdl/">
     
     <xsd:import namespace="urn:types.plugin.exchange.schema.fisheries.ec.europa.eu:v1" schemaLocation="Plugin.xsd"/>
+    <xsd:import namespace="urn:common.exchange.schema.fisheries.ec.europa.eu:v1" schemaLocation="ExchangeCommon.xsd"/>
     
     <xsd:complexType name="ServiceType">
         <xsd:sequence>
