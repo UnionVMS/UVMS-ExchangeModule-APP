@@ -33,6 +33,12 @@
             <version>${project.parent.version}</version>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>eu.europa.ec.fisheries.uvms.config</groupId>
+            <artifactId>config-model</artifactId>
+            <version>1.0-SNAPSHOT</version>
+            <scope>compile</scope>
+        </dependency>
     </dependencies>
 
     <build>

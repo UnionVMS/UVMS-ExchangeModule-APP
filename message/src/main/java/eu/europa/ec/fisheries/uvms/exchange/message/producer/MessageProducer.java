@@ -16,6 +16,8 @@ public interface MessageProducer {
 
     public String sendEventBusMessage(String text, String serviceName) throws ExchangeMessageException;
 
+    public String sendConfigMessage(String text) throws ExchangeMessageException;
+
     public void sendModuleResponseMessage(TextMessage message, String text);
     
     public void sendModuleErrorResponseMessage(@Observes @ErrorEvent ExchangeMessageEvent event);

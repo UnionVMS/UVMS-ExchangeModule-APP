@@ -42,6 +42,9 @@ public class MessageProducerBean implements MessageProducer {
     @Resource(lookup = ExchangeModelConstants.CONNECTION_FACTORY)
     private ConnectionFactory connectionFactory;
 
+    @Resource(mappedName = ExchangeModelConstants.CONFIG_MESSAGE_IN_QUEUE)
+    private Queue configQueue;
+
     private Connection connection = null;
     private Session session = null;
 
@@ -87,6 +90,26 @@ public class MessageProducerBean implements MessageProducer {
             LOG.error("[ Error when sending message. ] {0}", e.getMessage());
             throw new ExchangeMessageException("[ Error when sending message. ]", e);
         } finally {
+            disconnectJMS();
+        }
+    }
+
+    @Override
+    @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
+    public String sendConfigMessage(String text) throws ExchangeMessageException {
+        try {
+            connectJMS();
+            TextMessage message = session.createTextMessage();
+            message.setText(text);
+            message.setJMSReplyTo(responseQueue);
+            session.createProducer(configQueue).send(message);
+            return message.getJMSMessageID();
+        }
+        catch (Exception e) {
+            LOG.error("[ Error when sending config message. ] {}", e.getMessage());
+            throw new ExchangeMessageException("Error when sending config message.", e);
+        }
+        finally {
             disconnectJMS();
         }
     }
