@@ -6,7 +6,9 @@
 package eu.europa.ec.fisheries.uvms.exchange.model.mapper;
 
 import eu.europa.ec.fisheries.schema.exchange.common.v1.AcknowledgeType;
+import eu.europa.ec.fisheries.schema.exchange.common.v1.AcknowledgeTypeType;
 import eu.europa.ec.fisheries.schema.exchange.plugin.types.v1.PluginFault;
+import eu.europa.ec.fisheries.schema.exchange.plugin.v1.ExchangePluginMethod;
 import eu.europa.ec.fisheries.schema.exchange.plugin.v1.PingResponse;
 import eu.europa.ec.fisheries.schema.exchange.plugin.v1.SetCommandResponse;
 import eu.europa.ec.fisheries.schema.exchange.plugin.v1.SetConfigResponse;
@@ -41,9 +43,19 @@ public class ExchangePluginResponseMapper {
 
     }
 
-    public static String mapToPingResponse() throws ExchangeModelMarshallException {
+    public static AcknowledgeType mapToAcknowlageType(String id, AcknowledgeTypeType ackType) {
+        AcknowledgeType type = new AcknowledgeType();
+        type.setMessageId(id);
+        type.setType(ackType);
+        return type;
+    }
+
+    public static String mapToPingResponse(boolean registered, boolean enabled) throws ExchangeModelMarshallException {
         PingResponse response = new PingResponse();
+        response.setMethod(ExchangePluginMethod.PING);
         response.setResponse("pong");
+        response.setRegistered(registered);
+        response.setEnabled(enabled);
         return JAXBMarshaller.marshallJaxBObjectToString(response);
     }
 

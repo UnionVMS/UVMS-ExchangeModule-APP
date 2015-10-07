@@ -20,7 +20,6 @@
             <xsd:element name="pluginType" type="plugin:PluginType"/>
         </xsd:sequence>
     </xsd:complexType>
-    
       
     <xsd:complexType name="SettingType">
         <xsd:complexContent>

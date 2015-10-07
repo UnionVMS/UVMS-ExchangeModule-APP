@@ -21,12 +21,19 @@
         </xsd:sequence>
     </xsd:complexType>
     
-    <xsd:simpleType name="AcknowledgeType">
+    <xsd:simpleType name="AcknowledgeTypeType">
         <xsd:restriction base="xsd:string">
             <xsd:enumeration value="OK"/>
             <xsd:enumeration value="NOK"/>
         </xsd:restriction>
     </xsd:simpleType>
+    
+    <xsd:complexType name="AcknowledgeType">
+        <xsd:sequence>
+            <xsd:element name="messageId" type="xsd:string"/>
+            <xsd:element name="type" type="common:AcknowledgeTypeType"/>
+        </xsd:sequence>
+    </xsd:complexType>
     
     <xsd:complexType name="CommandType">
         <xsd:sequence>

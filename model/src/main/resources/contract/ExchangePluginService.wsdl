@@ -1,6 +1,7 @@
 <definitions name="ExchangeModuleService"
              targetNamespace="urn:plugin.exchange.schema.fisheries.ec.europa.eu:v1"
              xmlns:plugin="urn:plugin.exchange.schema.fisheries.ec.europa.eu:v1"
+             xmlns:service="urn:service.exchange.schema.fisheries.ec.europa.eu:v1"
              xmlns:types="urn:types.plugin.exchange.schema.fisheries.ec.europa.eu:v1"
              xmlns:common="urn:common.exchange.schema.fisheries.ec.europa.eu:v1"
              xmlns:xsd="http://www.w3.org/2001/XMLSchema"
@@ -39,7 +40,7 @@
                         <xsd:extension base="plugin:PluginBaseRequest">
                             <xsd:sequence>
                                 <xsd:sequence>
-                                    <xsd:element name="configurations" type="common:keyValueType" minOccurs="1" maxOccurs="unbounded"/>
+                                    <xsd:element name="configurations" type="service:SettingListType" minOccurs="1" maxOccurs="1"/>
                                 </xsd:sequence>
                             </xsd:sequence>
                         </xsd:extension>
@@ -140,9 +141,15 @@
 
             <xsd:element name="PingResponse">
                 <xsd:complexType>
-                    <xsd:sequence>
-                        <xsd:element name="response" type="xsd:string"/>
-                    </xsd:sequence>
+                    <xsd:complexContent>
+                        <xsd:extension base="plugin:PluginBaseRequest">
+                            <xsd:sequence>
+                                <xsd:element name="response" type="xsd:string"/>
+                                <xsd:element name="registered" type="xsd:boolean"/>
+                                <xsd:element name="enabled" type="xsd:boolean"/>
+                            </xsd:sequence>
+                        </xsd:extension>
+                    </xsd:complexContent>
                 </xsd:complexType>
             </xsd:element>
 

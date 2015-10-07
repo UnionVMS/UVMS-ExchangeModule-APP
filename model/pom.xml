@@ -18,6 +18,7 @@
         <wsdl.contract.name>ExchangeModuleService</wsdl.contract.name>
         <wsdl.source.name>ExchangeDataSourceService</wsdl.source.name>
         <wsdl.plugin.name>ExchangePluginService</wsdl.plugin.name>
+        <wsdl.registry.name>ExchangeRegistryService</wsdl.registry.name>
     </properties>
     
     <profiles>
@@ -79,6 +80,25 @@
                                         <wsdlOption>
                                             <!-- This is for incoming and outgoing messages to the proxy services and local database -->
                                             <wsdl>${basedir}/src/main/resources/contract/${wsdl.source.name}.wsdl</wsdl>
+                                            <bindingFiles>
+                                                <bindingFile>${basedir}/src/main/resources/binding.xml</bindingFile>
+                                            </bindingFiles>
+                                        </wsdlOption>
+                                    </wsdlOptions>
+                                </configuration>
+                                <goals>
+                                    <goal>wsdl2java</goal>
+                                </goals>
+                            </execution>
+                            <execution>
+                                <id>generate-exchange-registry</id>
+                                <phase>generate-sources</phase>
+                                <configuration>
+                                    <sourceRoot>${basedir}/src/main/java/</sourceRoot>
+                                    <wsdlOptions>
+                                        <wsdlOption>
+                                            <!-- This is for incoming and outgoing messages to the proxy services and local database -->
+                                            <wsdl>${basedir}/src/main/resources/contract/${wsdl.registry.name}.wsdl</wsdl>
                                             <bindingFiles>
                                                 <bindingFile>${basedir}/src/main/resources/binding.xml</bindingFile>
                                             </bindingFiles>

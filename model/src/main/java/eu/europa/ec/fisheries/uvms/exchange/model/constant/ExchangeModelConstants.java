@@ -12,5 +12,9 @@ public class ExchangeModelConstants {
 
     public static final String EVENTBUS = "java:/jms/topic/EventBus";
     public static final String SERVICE_NAME = "ServiceName";
+    
+    
+    public static final String REGISTRY_RESPONSE_NAME_ADDON = "REGISTRY_RESONSE";
+    public static final String RESPONSE_TOPIC_ADDON_NAME = "RESONSE";
 
 }

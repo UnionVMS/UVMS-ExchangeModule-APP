@@ -43,11 +43,11 @@ public class MessageConsumerBean implements MessageListener {
     @Inject
     @SetMovementEvent
     Event<ExchangeMessageEvent> processMovementEvent;
-    
+
     @Inject
     @PingEvent
     Event<ExchangeMessageEvent> pingEvent;
-    
+
     @Inject
     @ErrorEvent
     Event<ExchangeMessageEvent> errorEvent;
@@ -59,31 +59,31 @@ public class MessageConsumerBean implements MessageListener {
 
         TextMessage textMessage = (TextMessage) message;
         try {
-        	ExchangeBaseRequest request = JAXBMarshaller.unmarshallTextMessage(textMessage, ExchangeBaseRequest.class);
-        	
-        	switch(request.getMethod()) {
-        	case LIST_SERVICES:
-        		pluginConfigEvent.fire(new ExchangeMessageEvent(textMessage));
-        		break;
-        	case SET_COMMAND:
-        	case SET_REPORT:
-        		//TODO IMPLEMENT LIST SERVICES, SET COMMAND AND SET REPORT
-        		LOG.info("IMPLEMENT LIST SERVICES, SET COMMAND AND SET REPORT");
-        		break;
-        	case SET_MOVEMENT_REPORT:
-        		break;
-        	case PING:
-        		pingEvent.fire(new ExchangeMessageEvent(textMessage));
-        		break;
-        	default:
-        		LOG.error("[ Not implemented method consumed: {} ] ", request.getMethod());
-        		errorEvent.fire(new ExchangeMessageEvent(textMessage, ExchangeModuleResponseMapper.createFaultMessage(FaultCode.EXCHANGE_MESSAGE,  "Method not implemented")));
-        	}
-        	
+            ExchangeBaseRequest request = JAXBMarshaller.unmarshallTextMessage(textMessage, ExchangeBaseRequest.class);
+
+            switch (request.getMethod()) {
+                case LIST_SERVICES:
+                    pluginConfigEvent.fire(new ExchangeMessageEvent(textMessage));
+                    break;
+                case SET_COMMAND:
+                case SET_REPORT:
+                    //TODO IMPLEMENT LIST SERVICES, SET COMMAND AND SET REPORT
+                    LOG.info("IMPLEMENT LIST SERVICES, SET COMMAND AND SET REPORT");
+                    break;
+                case SET_MOVEMENT_REPORT:
+                    break;
+                case PING:
+                    pingEvent.fire(new ExchangeMessageEvent(textMessage));
+                    break;
+                default:
+                    LOG.error("[ Not implemented method consumed: {} ] ", request.getMethod());
+                    errorEvent.fire(new ExchangeMessageEvent(textMessage, ExchangeModuleResponseMapper.createFaultMessage(FaultCode.EXCHANGE_MESSAGE, "Method not implemented")));
+            }
+
         } catch (NullPointerException | ExchangeModelMarshallException e) {
-        	LOG.error("[ Error when receiving message in exchange: ]", e);
+            LOG.error("[ Error when receiving message in exchange: ]", e);
             errorEvent.fire(new ExchangeMessageEvent(textMessage, ExchangeModuleResponseMapper.createFaultMessage(FaultCode.EXCHANGE_MESSAGE, "Error when receiving message in exchange: " + e.getMessage())));
-		}
+        }
     }
 
 }

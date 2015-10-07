@@ -10,5 +10,5 @@ package eu.europa.ec.fisheries.uvms.exchange.model.mapper;
  * @author jojoha
  */
 public class ExchangePluginRequestMapper {
-    
+
 }
