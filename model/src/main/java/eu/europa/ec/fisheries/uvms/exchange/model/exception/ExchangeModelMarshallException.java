@@ -6,9 +6,4 @@ public class ExchangeModelMarshallException extends ExchangeModelMapperException
     public ExchangeModelMarshallException(String message) {
         super(message);
     }
-
-    public ExchangeModelMarshallException(String message, Throwable cause) {
-        super(message, cause);
-    }
-
 }

@@ -4,15 +4,6 @@
             xmlns:xsd="http://www.w3.org/2001/XMLSchema"
             xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
             xmlns="http://schemas.xmlsoap.org/wsdl/">
-
-    <xsd:element name="exceptionType">
-        <xsd:complexType>
-            <xsd:sequence>
-                <xsd:element name="code" type="xsd:integer"/>
-                <xsd:element name="fault" type="xsd:string"/>
-            </xsd:sequence>
-        </xsd:complexType>
-    </xsd:element>
   
     <xsd:element name="exchangeFault">
         <xsd:complexType>
@@ -22,9 +13,7 @@
             </xsd:sequence>
         </xsd:complexType>
     </xsd:element>
-    
    
-    
     <xsd:complexType name="keyValueType">
         <xsd:sequence>
             <xsd:element name="key" type="xsd:string"/>

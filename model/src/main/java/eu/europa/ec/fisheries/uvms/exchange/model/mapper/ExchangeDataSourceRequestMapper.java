@@ -29,7 +29,7 @@ public class ExchangeDataSourceRequestMapper {
             return JAXBMarshaller.marshallJaxBObjectToString(request);
         } catch (Exception e) {
             LOG.error("[ Error when mapping GetServiceListRequest to String ] {}", e.getMessage());
-            throw new ExchangeModelMapperException("[ Error when mapping GetServiceListRequest to String ]", e);
+            throw new ExchangeModelMapperException("[ Error when mapping GetServiceListRequest to String ]");
         }
     }
 
@@ -41,7 +41,7 @@ public class ExchangeDataSourceRequestMapper {
             return JAXBMarshaller.marshallJaxBObjectToString(request);
         } catch (Exception e) {
             LOG.error("[ Error when mapping GetServiceListRequest to String ] {}", e.getMessage());
-            throw new ExchangeModelMapperException("[ Error when mapping GetServiceListRequest to String ]", e);
+            throw new ExchangeModelMapperException("[ Error when mapping GetServiceListRequest to String ]");
         }
     }
 
@@ -52,7 +52,7 @@ public class ExchangeDataSourceRequestMapper {
             return JAXBMarshaller.marshallJaxBObjectToString(request);
         } catch (Exception e) {
             LOG.error("[ Error when mapping GetServiceListRequest to String ] {}", e.getMessage());
-            throw new ExchangeModelMapperException("[ Error when mapping GetServiceListRequest to String ]", e);
+            throw new ExchangeModelMapperException("[ Error when mapping GetServiceListRequest to String ]");
         }
     }
 
@@ -64,7 +64,7 @@ public class ExchangeDataSourceRequestMapper {
             return JAXBMarshaller.marshallJaxBObjectToString(request);
         } catch (Exception e) {
             LOG.error("[ Error when mapping GetServiceListRequest to String ] {}", e.getMessage());
-            throw new ExchangeModelMapperException("[ Error when mapping GetServiceListRequest to String ]", e);
+            throw new ExchangeModelMapperException("[ Error when mapping GetServiceListRequest to String ]");
         }
     }
 
@@ -76,7 +76,7 @@ public class ExchangeDataSourceRequestMapper {
             return JAXBMarshaller.marshallJaxBObjectToString(request);
         } catch (Exception e) {
             LOG.error("[ Error when mapping RegisterServiceRequest to String ] {}", e.getMessage());
-            throw new ExchangeModelMapperException("[ Error when mapping RegisterServiceRequest to String ]", e);
+            throw new ExchangeModelMapperException("[ Error when mapping RegisterServiceRequest to String ]");
         }
     }
 
@@ -88,7 +88,7 @@ public class ExchangeDataSourceRequestMapper {
             return JAXBMarshaller.marshallJaxBObjectToString(request);
         } catch (Exception e) {
             LOG.error("[ Error when mapping RegisterServiceRequest to String ] {}", e.getMessage());
-            throw new ExchangeModelMapperException("[ Error when mapping RegisterServiceRequest to String ]", e);
+            throw new ExchangeModelMapperException("[ Error when mapping RegisterServiceRequest to String ]");
         }
     }
 
@@ -100,7 +100,7 @@ public class ExchangeDataSourceRequestMapper {
             return JAXBMarshaller.marshallJaxBObjectToString(request);
         } catch (Exception e) {
             LOG.error("[ Error when mapping GetServiceSettingsRequest to String ] {}", e.getMessage());
-            throw new ExchangeModelMapperException("[ Error when mapping GetServiceSettingsRequest to String ]", e);
+            throw new ExchangeModelMapperException("[ Error when mapping GetServiceSettingsRequest to String ]");
         }
     }
 
@@ -112,7 +112,7 @@ public class ExchangeDataSourceRequestMapper {
             return JAXBMarshaller.marshallJaxBObjectToString(request);
         } catch (Exception e) {
             LOG.error("[ Error when mapping GetServiceCapabilitiesRequest to String ] {}", e.getMessage());
-            throw new ExchangeModelMapperException("[ Error when mapping GetServiceCapabilitiesRequest to String ]", e);
+            throw new ExchangeModelMapperException("[ Error when mapping GetServiceCapabilitiesRequest to String ]");
         }
     }
 

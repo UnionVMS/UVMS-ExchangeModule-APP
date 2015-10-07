@@ -36,7 +36,7 @@ public class ParameterServiceBean implements ParameterService {
             return entity.getParamValue();
         } catch (Exception ex) {
             LOG.error("[ Error when getting String value ]", ex.getMessage());
-            throw new ExchangeServiceException("[ Error when getting String value ]", ex);
+            throw new ExchangeServiceException("[ Error when getting String value ]");
         }
     }
 
@@ -49,7 +49,7 @@ public class ParameterServiceBean implements ParameterService {
             return parseBooleanValue(entity.getParamValue());
         } catch (ExchangeServiceException ex) {
             LOG.error("[ Error when getting Boolean value ]", ex.getMessage());
-            throw new ExchangeServiceException("[ Error when getting Boolean value ]", ex);
+            throw new ExchangeServiceException("[ Error when getting Boolean value ]");
         }
     }
 
@@ -65,7 +65,7 @@ public class ParameterServiceBean implements ParameterService {
             }
         } catch (Exception ex) {
             LOG.error("[ Error when parsing Boolean value from String ]", ex.getMessage());
-            throw new ExchangeServiceException("[ Error when parsing Boolean value from String ]", ex);
+            throw new ExchangeServiceException("[ Error when parsing Boolean value from String ]");
         }
     }
 

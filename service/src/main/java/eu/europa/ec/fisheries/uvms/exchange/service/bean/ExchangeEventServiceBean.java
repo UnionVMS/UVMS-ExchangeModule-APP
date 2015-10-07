@@ -1,46 +1,31 @@
 package eu.europa.ec.fisheries.uvms.exchange.service.bean;
 
-import eu.europa.ec.fisheries.schema.exchange.common.v1.CommandType;
 import java.util.List;
 
-import javax.annotation.Resource;
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
-import javax.ejb.TransactionAttribute;
-import javax.ejb.TransactionAttributeType;
 import javax.enterprise.event.Event;
 import javax.enterprise.event.Observes;
 import javax.inject.Inject;
-import javax.jms.Connection;
-import javax.jms.ConnectionFactory;
-import javax.jms.JMSException;
-import javax.jms.Session;
-import javax.jms.TextMessage;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import eu.europa.ec.fisheries.schema.exchange.common.v1.ExchangeFault;
-import eu.europa.ec.fisheries.schema.exchange.module.v1.ExchangeBaseRequest;
-import eu.europa.ec.fisheries.schema.exchange.service.v1.ServiceType;
 import eu.europa.ec.fisheries.schema.exchange.module.v1.PingResponse;
-import eu.europa.ec.fisheries.schema.exchange.module.v1.SetCommandRequest;
-import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogType;
-import eu.europa.ec.fisheries.uvms.exchange.message.consumer.ExchangeMessageConsumer;
+import eu.europa.ec.fisheries.schema.exchange.service.v1.ServiceType;
 import eu.europa.ec.fisheries.uvms.exchange.message.event.ErrorEvent;
-import eu.europa.ec.fisheries.uvms.exchange.message.event.MessageRecievedEvent;
-import eu.europa.ec.fisheries.uvms.exchange.message.event.carrier.EventMessage;
+import eu.europa.ec.fisheries.uvms.exchange.message.event.PingEvent;
+import eu.europa.ec.fisheries.uvms.exchange.message.event.PluginConfigEvent;
+import eu.europa.ec.fisheries.uvms.exchange.message.event.SetMovementEvent;
+import eu.europa.ec.fisheries.uvms.exchange.message.event.carrier.ExchangeMessageEvent;
 import eu.europa.ec.fisheries.uvms.exchange.message.producer.MessageProducer;
-import eu.europa.ec.fisheries.uvms.exchange.model.constant.ExchangeModelConstants;
-import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelMapperException;
-import eu.europa.ec.fisheries.uvms.exchange.model.mapper.CommonMapper;
-import eu.europa.ec.fisheries.uvms.exchange.model.mapper.ExchangeDataSourceResponseMapper;
-import eu.europa.ec.fisheries.uvms.exchange.model.mapper.ExchangeModuleRequestMapper;
+import eu.europa.ec.fisheries.uvms.exchange.model.constant.FaultCode;
+import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeException;
+import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelMarshallException;
 import eu.europa.ec.fisheries.uvms.exchange.model.mapper.ExchangeModuleResponseMapper;
 import eu.europa.ec.fisheries.uvms.exchange.model.mapper.JAXBMarshaller;
 import eu.europa.ec.fisheries.uvms.exchange.service.EventService;
 import eu.europa.ec.fisheries.uvms.exchange.service.ExchangeService;
-import eu.europa.ec.fisheries.uvms.exchange.service.exception.ExchangeServiceException;
 
 @Stateless
 public class ExchangeEventServiceBean implements EventService {
@@ -49,166 +34,44 @@ public class ExchangeEventServiceBean implements EventService {
 
     @Inject
     @ErrorEvent
-    Event<EventMessage> errorEvent;
+    Event<ExchangeMessageEvent> errorEvent;
 
     @EJB
     MessageProducer producer;
 
     @EJB
-    ExchangeMessageConsumer consumer;
-
-    @EJB
     ExchangeService exchangeService;
 
-    @Resource(lookup = ExchangeModelConstants.CONNECTION_FACTORY)
-    private ConnectionFactory connectionFactory;
-
-    private Connection connection = null;
-    private Session session = null;
-
     @Override
-    @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
-    public void getData(@Observes @MessageRecievedEvent EventMessage message) {
+    public void getPluginConfig(@Observes @PluginConfigEvent ExchangeMessageEvent message) {
         LOG.info("Received MessageRecievedEvent");
-
-        TextMessage requestMessage = message.getJmsMessage();
-        try {
-            ExchangeBaseRequest baseRequest = JAXBMarshaller.unmarshallTextMessage(requestMessage, ExchangeBaseRequest.class);
-            TextMessage textMessage = message.getJmsMessage();
-
-            switch (baseRequest.getMethod()) {
-                case LIST_SERVICES:
-                    LOG.info("LIST_SERVICES");
-
-                    List<ServiceType> serviceList = exchangeService.getServiceList();
-
-                    connectQueue();
-
-                    String getServiceListResponse = ExchangeDataSourceResponseMapper.mapServiceTypeListToStringFromResponse(serviceList);
-                    TextMessage getServiceListMessage = session.createTextMessage(getServiceListResponse);
-                    getServiceListMessage.setJMSCorrelationID(message.getJmsMessage().getJMSMessageID());
-                    session.createProducer(message.getJmsMessage().getJMSReplyTo()).send(getServiceListMessage);
-
-                    break;
-                case REGISTER_SERVICE:
-                    LOG.info("REGISTER_SERVICE");
-                    TextMessage registrationMessage = message.getJmsMessage();
-                    ServiceType registratingService = ExchangeModuleRequestMapper.mapToServiceTypeFromRequest(registrationMessage);
-                    ServiceType registratedService = exchangeService.registerService(registratingService);
-
-                    connectQueue();
-
-                    String registerServiceResponse = ExchangeModuleResponseMapper.createRegisterServiceResponse(registratedService);
-                    TextMessage registerMessage = session.createTextMessage(registerServiceResponse);
-                    registerMessage.setJMSCorrelationID(message.getJmsMessage().getJMSMessageID());
-                    session.createProducer(message.getJmsMessage().getJMSReplyTo()).send(registerMessage);
-
-                    break;
-                case UNREGISTER_SERVICE:
-                    LOG.info("UNREGISTER_SERVICE");
-                    TextMessage unregistrationMessage = message.getJmsMessage();
-                    ServiceType unregistratingService = ExchangeModuleRequestMapper.mapToServiceTypeFromRequest(unregistrationMessage);
-                    ServiceType unregistratedService = exchangeService.unregisterService(unregistratingService);
-
-                    connectQueue();
-
-                    String unregisterServiceResponse = ExchangeModuleResponseMapper.createUnregisterServiceResponse(unregistratedService);
-                    TextMessage unregisterMessage = session.createTextMessage(unregisterServiceResponse);
-                    unregisterMessage.setJMSCorrelationID(message.getJmsMessage().getJMSMessageID());
-                    session.createProducer(message.getJmsMessage().getJMSReplyTo()).send(unregisterMessage);
-
-                    break;
-
-                case SET_COMMAND:
-                    LOG.info("SET COMMAND");
-
-                    SetCommandRequest createpollRequest = JAXBMarshaller.unmarshallTextMessage(textMessage, SetCommandRequest.class);
-                    CommandType type = createpollRequest.getCommand();
-
-                    ServiceType retrievedService = exchangeService.getService(type.getTo());
-
-                    ExchangeLogType log = exchangeService.createExchangeLog(CommonMapper.mapCommandTypeToExchangeLogType(type));
-
-                    // Post on topic with correct destination plugin
-                    exchangeService.setPluginReport(type);
-
-                // Do some logic to send the data to the plugin
-                    // if success send OK back
-                    // String pollResponse =
-                    // ExchangeModuleResponseMapper.mapCreatePollResponseToString(AcknowledgeType.OK);
-                    // If not success send NOK back
-                    // String pollOkResponse =
-                    // ExchangeModuleResponseMapper.mapCreatePollResponseToString(AcknowledgeType.NOK);
-                    //
-                    // connectQueue();
-                    //
-                    // TextMessage createPollMessage =
-                    // session.createTextMessage(pollResponse);
-                    // createPollMessage.setJMSCorrelationID(message.getJmsMessage().getJMSMessageID());
-                    // session.createProducer(message.getJmsMessage().getJMSReplyTo()).send(createPollMessage);
-                    break;
-
-                case PING:
-                    LOG.info("PING");
-                    PingResponse pingResponse = new PingResponse();
-                    pingResponse.setResponse("pong");
-                    String pong = JAXBMarshaller.marshallJaxBObjectToString(pingResponse);
-
-                    connectQueue();
-
-                    TextMessage responseMessage = session.createTextMessage(pong);
-                    responseMessage.setJMSCorrelationID(message.getJmsMessage().getJMSMessageID());
-                    responseMessage.setJMSDestination(message.getJmsMessage().getJMSReplyTo());
-                    session.createProducer(responseMessage.getJMSDestination()).send(responseMessage);
-                    break;
-                default:
-                    LOG.warn("No such method exists:{}", baseRequest.getMethod());
-                    break;
-            }
-
-        } catch (ExchangeModelMapperException | ExchangeServiceException | JMSException e) {
-            errorEvent.fire(new EventMessage(message.getJmsMessage(), "Exception when sending response back to recipient : " + e.getMessage()));
-        }
+        List<ServiceType> serviceList;
+		try {
+			serviceList = exchangeService.getServiceList();
+			producer.sendModuleResponseMessage(message.getJmsMessage(), ExchangeModuleResponseMapper.mapServiceListResponse(serviceList));
+		} catch (ExchangeException e) {
+			LOG.error("[ Error when getting plugin list from source]");
+			errorEvent.fire(new ExchangeMessageEvent(message.getJmsMessage(), ExchangeModuleResponseMapper.createFaultMessage(FaultCode.EXCHANGE_MESSAGE, "Excpetion when getting service list")));
+		}
     }
 
-    @Override
-    @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
-    public void returnError(@Observes @ErrorEvent EventMessage message) {
-        try {
-            connectQueue();
-            LOG.debug("Sending error message back from Exchange module to recipient om JMS Queue with correlationID: {} ", message
-                    .getJmsMessage().getJMSMessageID());
+	@Override
+	public void processMovement(@Observes @SetMovementEvent ExchangeMessageEvent message) {
+		LOG.info("Process movement");
+		//TODO
+		//PROCESS MOVEMENT
+		//producer.sendModuleResponseMessage(message, text);
+	}
 
-            ExchangeFault request = new ExchangeFault();
-
-            request.setMessage(message.getErrorMessage());
-
-            String data = JAXBMarshaller.marshallJaxBObjectToString(request);
-
-            TextMessage response = session.createTextMessage(data);
-            response.setJMSCorrelationID(message.getJmsMessage().getJMSCorrelationID());
-            session.createProducer(message.getJmsMessage().getJMSReplyTo()).send(response);
-
-        } catch (ExchangeModelMapperException | JMSException e) {
-            LOG.error("Error when returning Error message to recipient", e.getMessage());
-        } finally {
-            disconnectQueue();
-        }
-    }
-
-    private void connectQueue() throws JMSException {
-        connection = connectionFactory.createConnection();
-        session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
-        connection.start();
-    }
-
-    private void disconnectQueue() {
-        try {
-            connection.stop();
-            connection.close();
-        } catch (JMSException e) {
-            LOG.warn("[ Error when stopping or closing JMS queue. ] {}", e.getMessage(), e.getStackTrace());
-        }
-    }
+	@Override
+	public void ping(@Observes @PingEvent ExchangeMessageEvent message) {
+		try {
+			PingResponse response = new PingResponse();
+			response.setResponse("pong");
+			producer.sendModuleResponseMessage(message.getJmsMessage(), JAXBMarshaller.marshallJaxBObjectToString(response));
+		} catch (ExchangeModelMarshallException e) {
+			LOG.error("[ Error when marshalling ping response ]");
+		}
+	}
 
 }

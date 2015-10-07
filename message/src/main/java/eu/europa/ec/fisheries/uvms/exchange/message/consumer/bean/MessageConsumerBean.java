@@ -13,10 +13,17 @@ import javax.jms.TextMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import eu.europa.ec.fisheries.uvms.exchange.model.constant.ExchangeModelConstants;
+import eu.europa.ec.fisheries.schema.exchange.module.v1.ExchangeBaseRequest;
 import eu.europa.ec.fisheries.uvms.exchange.message.event.ErrorEvent;
-import eu.europa.ec.fisheries.uvms.exchange.message.event.MessageRecievedEvent;
-import eu.europa.ec.fisheries.uvms.exchange.message.event.carrier.EventMessage;
+import eu.europa.ec.fisheries.uvms.exchange.message.event.PluginConfigEvent;
+import eu.europa.ec.fisheries.uvms.exchange.message.event.PingEvent;
+import eu.europa.ec.fisheries.uvms.exchange.message.event.SetMovementEvent;
+import eu.europa.ec.fisheries.uvms.exchange.message.event.carrier.ExchangeMessageEvent;
+import eu.europa.ec.fisheries.uvms.exchange.model.constant.ExchangeModelConstants;
+import eu.europa.ec.fisheries.uvms.exchange.model.constant.FaultCode;
+import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelMarshallException;
+import eu.europa.ec.fisheries.uvms.exchange.model.mapper.ExchangeModuleResponseMapper;
+import eu.europa.ec.fisheries.uvms.exchange.model.mapper.JAXBMarshaller;
 
 //@formatter:off
 @MessageDriven(mappedName = ExchangeModelConstants.EXCHANGE_MESSAGE_IN_QUEUE, activationConfig = {
@@ -30,12 +37,20 @@ public class MessageConsumerBean implements MessageListener {
     final static Logger LOG = LoggerFactory.getLogger(MessageConsumerBean.class);
 
     @Inject
-    @MessageRecievedEvent
-    Event<EventMessage> messageReceivedEvent;
+    @PluginConfigEvent
+    Event<ExchangeMessageEvent> pluginConfigEvent;
 
     @Inject
+    @SetMovementEvent
+    Event<ExchangeMessageEvent> processMovementEvent;
+    
+    @Inject
+    @PingEvent
+    Event<ExchangeMessageEvent> pingEvent;
+    
+    @Inject
     @ErrorEvent
-    Event<EventMessage> errorEvent;
+    Event<ExchangeMessageEvent> errorEvent;
 
     @Override
     @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
@@ -44,11 +59,31 @@ public class MessageConsumerBean implements MessageListener {
 
         TextMessage textMessage = (TextMessage) message;
         try {
-            messageReceivedEvent.fire(new EventMessage(textMessage));
-        } catch (NullPointerException e) {
-            LOG.error("[ Error when receiving message in exchange: ]", e);
-            errorEvent.fire(new EventMessage(textMessage, "Error when receiving message in exchange: " + e.getMessage()));
-        }
+        	ExchangeBaseRequest request = JAXBMarshaller.unmarshallTextMessage(textMessage, ExchangeBaseRequest.class);
+        	
+        	switch(request.getMethod()) {
+        	case LIST_SERVICES:
+        		pluginConfigEvent.fire(new ExchangeMessageEvent(textMessage));
+        		break;
+        	case SET_COMMAND:
+        	case SET_REPORT:
+        		//TODO IMPLEMENT LIST SERVICES, SET COMMAND AND SET REPORT
+        		LOG.info("IMPLEMENT LIST SERVICES, SET COMMAND AND SET REPORT");
+        		break;
+        	case SET_MOVEMENT_REPORT:
+        		break;
+        	case PING:
+        		pingEvent.fire(new ExchangeMessageEvent(textMessage));
+        		break;
+        	default:
+        		LOG.error("[ Not implemented method consumed: {} ] ", request.getMethod());
+        		errorEvent.fire(new ExchangeMessageEvent(textMessage, ExchangeModuleResponseMapper.createFaultMessage(FaultCode.EXCHANGE_MESSAGE,  "Method not implemented")));
+        	}
+        	
+        } catch (NullPointerException | ExchangeModelMarshallException e) {
+        	LOG.error("[ Error when receiving message in exchange: ]", e);
+            errorEvent.fire(new ExchangeMessageEvent(textMessage, ExchangeModuleResponseMapper.createFaultMessage(FaultCode.EXCHANGE_MESSAGE, "Error when receiving message in exchange: " + e.getMessage())));
+		}
     }
 
 }

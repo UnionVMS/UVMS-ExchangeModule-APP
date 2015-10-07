@@ -4,6 +4,7 @@ import javax.annotation.Resource;
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
+import javax.enterprise.event.Observes;
 import javax.jms.Connection;
 import javax.jms.ConnectionFactory;
 import javax.jms.JMSException;
@@ -16,9 +17,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import eu.europa.ec.fisheries.uvms.exchange.message.constants.DataSourceQueue;
+import eu.europa.ec.fisheries.uvms.exchange.message.event.ErrorEvent;
+import eu.europa.ec.fisheries.uvms.exchange.message.event.carrier.ExchangeMessageEvent;
 import eu.europa.ec.fisheries.uvms.exchange.message.exception.ExchangeMessageException;
 import eu.europa.ec.fisheries.uvms.exchange.message.producer.MessageProducer;
 import eu.europa.ec.fisheries.uvms.exchange.model.constant.ExchangeModelConstants;
+import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelMapperException;
+import eu.europa.ec.fisheries.uvms.exchange.model.mapper.JAXBMarshaller;
 
 @Stateless
 public class MessageProducerBean implements MessageProducer {
@@ -100,5 +105,41 @@ public class MessageProducerBean implements MessageProducer {
             LOG.error("[ Error when stopping or closing JMS queue. ] {}", e.getMessage(), e.getStackTrace());
         }
     }
+
+	@Override
+	public void sendModuleErrorResponseMessage(@Observes @ErrorEvent ExchangeMessageEvent message) {
+        try {
+            connectJMS();
+            LOG.debug("Sending error message back from Exchange module to recipient om JMS Queue with correlationID: {} ", message
+                    .getJmsMessage().getJMSMessageID());
+
+            String data = JAXBMarshaller.marshallJaxBObjectToString(message.getErrorFault());
+
+            TextMessage response = session.createTextMessage(data);
+            response.setJMSCorrelationID(message.getJmsMessage().getJMSMessageID());
+            session.createProducer(message.getJmsMessage().getJMSReplyTo()).send(response);
+
+        } catch (ExchangeModelMapperException | JMSException e) {
+            LOG.error("Error when returning Error message to recipient", e.getMessage());
+        } finally {
+            disconnectJMS();
+        }
+	}
+
+	@Override
+	public void sendModuleResponseMessage(TextMessage message, String text) {
+        try {
+            LOG.info("Sending message back to recipient from ExchangeModule with correlationId {} on queue: {}", message.getJMSMessageID(),
+                    message.getJMSReplyTo());
+            connectJMS();
+            TextMessage response = session.createTextMessage(text);
+            response.setJMSCorrelationID(message.getJMSMessageID());
+            session.createProducer(message.getJMSReplyTo()).send(response);
+        } catch (JMSException e) {
+            LOG.error("[ Error when returning module exchange request. ]");
+        } finally {
+            disconnectJMS();
+        }
+	}
 
 }

@@ -6,9 +6,4 @@ public class ExchangeSearchMapperException extends ExchangeModelMapperException 
     public ExchangeSearchMapperException(String message) {
         super(message);
     }
-
-    public ExchangeSearchMapperException(String message, Throwable cause) {
-        super(message, cause);
-    }
-
 }

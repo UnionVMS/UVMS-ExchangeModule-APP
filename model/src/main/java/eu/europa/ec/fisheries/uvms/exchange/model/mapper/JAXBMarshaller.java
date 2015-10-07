@@ -1,16 +1,19 @@
 package eu.europa.ec.fisheries.uvms.exchange.model.mapper;
 
-import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelMarshallException;
 import java.io.StringReader;
 import java.io.StringWriter;
+
 import javax.jms.JMSException;
 import javax.jms.TextMessage;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelMarshallException;
 
 public class JAXBMarshaller {
 
@@ -35,7 +38,7 @@ public class JAXBMarshaller {
             return sw.toString();
         } catch (JAXBException ex) {
             LOG.error("[ Error when marshalling object to string ] {} ", ex.getMessage());
-            throw new ExchangeModelMarshallException("[ Error when marshalling Object to String ]", ex);
+            throw new ExchangeModelMarshallException("[ Error when marshalling Object to String ]");
         }
     }
 
@@ -58,7 +61,7 @@ public class JAXBMarshaller {
             return (R) unmarshaller.unmarshal(sr);
         } catch (JMSException | JAXBException ex) {
             LOG.error("[ Error when Text message to object ] {} ", ex.getMessage());
-            throw new ExchangeModelMarshallException("[Error when unmarshalling response in ResponseMapper ]", ex);
+            throw new ExchangeModelMarshallException("[Error when unmarshalling response in ResponseMapper ]");
         }
     }
 
