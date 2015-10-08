@@ -15,8 +15,14 @@ import eu.europa.ec.fisheries.schema.exchange.plugin.v1.SetConfigResponse;
 import eu.europa.ec.fisheries.schema.exchange.plugin.v1.SetReportResponse;
 import eu.europa.ec.fisheries.schema.exchange.plugin.v1.StartResponse;
 import eu.europa.ec.fisheries.schema.exchange.plugin.v1.StopResponse;
+import eu.europa.ec.fisheries.schema.exchange.registry.v1.ExchangeRegistryMethod;
+import eu.europa.ec.fisheries.schema.exchange.registry.v1.RegisterServiceResponse;
+import eu.europa.ec.fisheries.schema.exchange.service.v1.ServiceType;
+import eu.europa.ec.fisheries.schema.exchange.service.v1.SettingListType;
+import eu.europa.ec.fisheries.schema.exchange.service.v1.SettingType;
 import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelMapperException;
 import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelMarshallException;
+import java.util.List;
 import javax.jms.JMSException;
 import javax.jms.TextMessage;
 
@@ -41,6 +47,19 @@ public class ExchangePluginResponseMapper {
                     + response.getJMSCorrelationID());
         }
 
+    }
+
+    public static String mapToRegisterServiceResponse(AcknowledgeTypeType ackType, ServiceType service, List<SettingType> settings) throws ExchangeModelMarshallException {
+        RegisterServiceResponse response = new RegisterServiceResponse();
+        response.setAck(ackType);
+        response.setService(service);
+        SettingListType settingsList = new SettingListType();
+        if (settings != null) {
+            settingsList.getSetting().addAll(settings);
+        }
+        response.setSettings(settingsList);
+        response.setMethod(ExchangeRegistryMethod.REGISTER_SERVICE);
+        return JAXBMarshaller.marshallJaxBObjectToString(response);
     }
 
     public static AcknowledgeType mapToAcknowlageType(String id, AcknowledgeTypeType ackType) {

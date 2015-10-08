@@ -58,11 +58,11 @@ public class MessageProducerBean implements MessageProducer {
             message.setText(text);
 
             switch (queue) {
-            case INTERNAL:
-                session.createProducer(localDbQueue).send(message);
-                break;
-            default:
-                break;
+                case INTERNAL:
+                    session.createProducer(localDbQueue).send(message);
+                    break;
+                default:
+                    break;
             }
 
             return message.getJMSMessageID();
@@ -129,8 +129,8 @@ public class MessageProducerBean implements MessageProducer {
         }
     }
 
-	@Override
-	public void sendModuleErrorResponseMessage(@Observes @ErrorEvent ExchangeMessageEvent message) {
+    @Override
+    public void sendModuleErrorResponseMessage(@Observes @ErrorEvent ExchangeMessageEvent message) {
         try {
             connectJMS();
             LOG.debug("Sending error message back from Exchange module to recipient om JMS Queue with correlationID: {} ", message
@@ -147,10 +147,10 @@ public class MessageProducerBean implements MessageProducer {
         } finally {
             disconnectJMS();
         }
-	}
+    }
 
-	@Override
-	public void sendModuleResponseMessage(TextMessage message, String text) {
+    @Override
+    public void sendModuleResponseMessage(TextMessage message, String text) {
         try {
             LOG.info("Sending message back to recipient from ExchangeModule with correlationId {} on queue: {}", message.getJMSMessageID(),
                     message.getJMSReplyTo());
@@ -163,6 +163,6 @@ public class MessageProducerBean implements MessageProducer {
         } finally {
             disconnectJMS();
         }
-	}
+    }
 
 }

@@ -1,15 +1,16 @@
 package eu.europa.ec.fisheries.uvms.exchange.model.mapper;
 
 import eu.europa.ec.fisheries.schema.exchange.common.v1.CommandType;
+import eu.europa.ec.fisheries.schema.exchange.module.v1.ExchangeModuleMethod;
+import eu.europa.ec.fisheries.schema.exchange.module.v1.SetCommandRequest;
+import eu.europa.ec.fisheries.schema.exchange.registry.v1.ExchangeRegistryMethod;
+import eu.europa.ec.fisheries.schema.exchange.registry.v1.RegisterServiceRequest;
+import eu.europa.ec.fisheries.schema.exchange.registry.v1.UnregisterServiceRequest;
 import javax.jms.TextMessage;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import eu.europa.ec.fisheries.schema.exchange.module.v1.ExchangeModuleMethod;
-import eu.europa.ec.fisheries.schema.exchange.module.v1.RegisterServiceRequest;
-import eu.europa.ec.fisheries.schema.exchange.module.v1.SetCommandRequest;
-import eu.europa.ec.fisheries.schema.exchange.module.v1.UnregisterServiceRequest;
 import eu.europa.ec.fisheries.schema.exchange.service.v1.ServiceType;
 import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelMarshallException;
 
@@ -24,16 +25,17 @@ public class ExchangeModuleRequestMapper {
         return JAXBMarshaller.marshallJaxBObjectToString(request);
     }
 
-    public static String createRegisterServiceRequest(ServiceType serviceType) throws ExchangeModelMarshallException {
+    public static String createRegisterServiceRequest(ServiceType serviceType, String messageSelector) throws ExchangeModelMarshallException {
         RegisterServiceRequest request = new RegisterServiceRequest();
-        request.setMethod(ExchangeModuleMethod.REGISTER_SERVICE);
+        request.setMethod(ExchangeRegistryMethod.REGISTER_SERVICE);
+        request.setResponseTopicMessageSelector(messageSelector);
         request.setService(serviceType);
         return JAXBMarshaller.marshallJaxBObjectToString(request);
     }
 
     public static String createUnregisterServiceRequest(ServiceType serviceType) throws ExchangeModelMarshallException {
         UnregisterServiceRequest request = new UnregisterServiceRequest();
-        request.setMethod(ExchangeModuleMethod.UNREGISTER_SERVICE);
+        request.setMethod(ExchangeRegistryMethod.UNREGISTER_SERVICE);
         request.setService(serviceType);
         return JAXBMarshaller.marshallJaxBObjectToString(request);
     }
