@@ -71,6 +71,7 @@ public class MessageConsumerBean implements MessageListener {
                     LOG.info("IMPLEMENT LIST SERVICES, SET COMMAND AND SET REPORT");
                     break;
                 case SET_MOVEMENT_REPORT:
+                	processMovementEvent.fire(new ExchangeMessageEvent(textMessage));
                     break;
                 case PING:
                     pingEvent.fire(new ExchangeMessageEvent(textMessage));

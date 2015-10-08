@@ -18,8 +18,10 @@
         <logback.version>1.1.2</logback.version>
         <joda-time.version>2.7</joda-time.version>
         <logback.core.version>1.1.2</logback.core.version>
+        <dozer.version>5.5.1</dozer.version>
         <usm4uvms.version>0.0.4-SNAPSHOT</usm4uvms.version>
         <uvms.commons.version>1.1-SNAPSHOT</uvms.commons.version>
+        <rules.version>1.0.1-SNAPSHOT</rules.version>
     </properties>
     
     <dependencies>

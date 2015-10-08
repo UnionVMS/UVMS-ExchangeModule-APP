@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<xsd:schema xmlns:asset="urn:asset.movement.schema.fisheries.ec.europa.eu:v1" 
-            targetNamespace="urn:asset.movement.schema.fisheries.ec.europa.eu:v1"
+<xsd:schema xmlns:asset="urn:asset.movement.exchange.schema.fisheries.ec.europa.eu:v1" 
+            targetNamespace="urn:asset.movement.exchange.schema.fisheries.ec.europa.eu:v1"
             xmlns:xsd="http://www.w3.org/2001/XMLSchema"
             xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
             xmlns="http://schemas.xmlsoap.org/wsdl/">
@@ -32,16 +32,6 @@
             <xsd:enumeration value="GUID"/>
         </xsd:restriction>
     </xsd:simpleType>
-    
-    <xsd:complexType name="VesselType">
-        <xsd:sequence>
-            <xsd:element name="flagState" type="xsd:string"/>
-            <xsd:element name="ircs" type="xsd:string"/>
-            <xsd:element name="cfr" type="xsd:string"/>
-            <xsd:element name="extMarking" type="xsd:string"/>
-            <xsd:element name="name" type="xsd:string"/>
-        </xsd:sequence>
-    </xsd:complexType>
     
     
 </xsd:schema>

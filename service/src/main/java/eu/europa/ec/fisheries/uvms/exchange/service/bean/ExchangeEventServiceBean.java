@@ -14,14 +14,19 @@ import javax.jms.TextMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import eu.europa.ec.fisheries.schema.exchange.common.v1.ReportType;
 import eu.europa.ec.fisheries.schema.exchange.module.v1.PingResponse;
+import eu.europa.ec.fisheries.schema.exchange.module.v1.SetMovementReportRequest;
+import eu.europa.ec.fisheries.schema.exchange.movement.v1.ReportMovementType;
 import eu.europa.ec.fisheries.schema.exchange.service.v1.ServiceType;
+import eu.europa.ec.fisheries.uvms.exchange.message.constants.DataSourceQueue;
 import eu.europa.ec.fisheries.uvms.exchange.message.event.ConfigMessageRecievedEvent;
 import eu.europa.ec.fisheries.uvms.exchange.message.event.ErrorEvent;
 import eu.europa.ec.fisheries.uvms.exchange.message.event.PingEvent;
 import eu.europa.ec.fisheries.uvms.exchange.message.event.PluginConfigEvent;
 import eu.europa.ec.fisheries.uvms.exchange.message.event.SetMovementEvent;
 import eu.europa.ec.fisheries.uvms.exchange.message.event.carrier.ExchangeMessageEvent;
+import eu.europa.ec.fisheries.uvms.exchange.message.exception.ExchangeMessageException;
 import eu.europa.ec.fisheries.uvms.exchange.message.producer.MessageProducer;
 import eu.europa.ec.fisheries.uvms.exchange.model.constant.ExchangeModelConstants;
 import eu.europa.ec.fisheries.uvms.exchange.model.constant.FaultCode;
@@ -34,9 +39,12 @@ import eu.europa.ec.fisheries.uvms.exchange.service.ExchangeService;
 import eu.europa.ec.fisheries.uvms.exchange.service.ParameterService;
 import eu.europa.ec.fisheries.uvms.exchange.service.config.ParameterKey;
 import eu.europa.ec.fisheries.uvms.exchange.service.exception.ExchangeServiceException;
-import eu.europa.ec.fisheries.schema.config.module.v1.ConfigTopicBaseRequest;
-import eu.europa.ec.fisheries.schema.config.module.v1.PushModuleSettingMessage;
-import eu.europa.ec.fisheries.schema.config.types.v1.SettingType;
+import eu.europa.ec.fisheries.uvms.exchange.service.mapper.MovementMapper;
+import eu.europa.ec.fisheries.uvms.rules.model.exception.RulesModelMapperException;
+import eu.europa.ec.fisheries.uvms.rules.model.mapper.RulesModuleRequestMapper;
+import eu.europa.ec.fisheries.wsdl.module.v1.ConfigTopicBaseRequest;
+import eu.europa.ec.fisheries.wsdl.module.v1.PushModuleSettingMessage;
+import eu.europa.ec.fisheries.wsdl.types.v1.SettingType;
 
 @Stateless
 public class ExchangeEventServiceBean implements EventService {
@@ -120,7 +128,24 @@ public class ExchangeEventServiceBean implements EventService {
 		LOG.info("Process movement");
 		//TODO
 		//PROCESS MOVEMENT
-		//producer.sendModuleResponseMessage(message, text);
+		try {
+			SetMovementReportRequest request = JAXBMarshaller.unmarshallTextMessage(message.getJmsMessage(), SetMovementReportRequest.class);
+			//TODO log to exchange log (received message)
+			//reportType.getFrom()
+			//reportType.getTimestamp()
+			
+			String movement = RulesModuleRequestMapper.createSetMovementReportRequest(MovementMapper.getMapper().map(request.getRequest().getMovement(), eu.europa.ec.fisheries.schema.rules.movement.v1.MovementBaseType.class));
+			producer.sendMessageOnQueue(movement, DataSourceQueue.INTEGRATION);
+		} catch (ExchangeModelMarshallException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (ExchangeMessageException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (RulesModelMapperException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 	@Override

@@ -71,7 +71,7 @@ public class ExchangeServiceBean implements ExchangeService {
         LOG.info("Register service invoked in service layer");
         try {
             String request = ExchangeDataSourceRequestMapper.mapRegisterServiceToString(data);
-            String messageId = producer.sendDataSourceMessage(request, DataSourceQueue.INTERNAL);
+            String messageId = producer.sendMessageOnQueue(request, DataSourceQueue.INTERNAL);
             TextMessage response = consumer.getMessage(messageId, TextMessage.class);
             return ExchangeDataSourceResponseMapper.mapToRegisterServiceResponse(response);
         } catch (ExchangeModelMapperException | ExchangeMessageException ex) {
@@ -90,7 +90,7 @@ public class ExchangeServiceBean implements ExchangeService {
         LOG.info("Unregister service invoked in service layer");
         try {
             String request = ExchangeDataSourceRequestMapper.mapUnregisterServiceToString(data);
-            String messageId = producer.sendDataSourceMessage(request, DataSourceQueue.INTERNAL);
+            String messageId = producer.sendMessageOnQueue(request, DataSourceQueue.INTERNAL);
             TextMessage response = consumer.getMessage(messageId, TextMessage.class);
             return ExchangeDataSourceResponseMapper.mapToUnregisterServiceResponse(response);
         } catch (ExchangeModelMapperException | ExchangeMessageException ex) {
@@ -109,7 +109,7 @@ public class ExchangeServiceBean implements ExchangeService {
         LOG.info("Get list invoked in service layer");
         try {
             String request = ExchangeDataSourceRequestMapper.mapGetServiceListToString();
-            String messageId = producer.sendDataSourceMessage(request, DataSourceQueue.INTERNAL);
+            String messageId = producer.sendMessageOnQueue(request, DataSourceQueue.INTERNAL);
             TextMessage response = consumer.getMessage(messageId, TextMessage.class);
             return ExchangeDataSourceResponseMapper.mapToServiceTypeListFromResponse(response);
         } catch (ExchangeModelMapperException | ExchangeMessageException e) {
@@ -147,7 +147,7 @@ public class ExchangeServiceBean implements ExchangeService {
         LOG.info("Get list invoked in service layer");
         try {
             String request = ExchangeDataSourceRequestMapper.mapGetServiceToString(serviceId);
-            String messageId = producer.sendDataSourceMessage(request, DataSourceQueue.INTERNAL);
+            String messageId = producer.sendMessageOnQueue(request, DataSourceQueue.INTERNAL);
             TextMessage response = consumer.getMessage(messageId, TextMessage.class);
             return ExchangeDataSourceResponseMapper.mapToServiceTypeFromGetServiceResponse(response);
         } catch (ExchangeModelMapperException | ExchangeMessageException e) {
@@ -160,7 +160,7 @@ public class ExchangeServiceBean implements ExchangeService {
         LOG.info("Create Exchange log invoked in service layer");
         try {
             String request = ExchangeDataSourceRequestMapper.mapCreateExchangeLogToString(exchangeLog);
-            String messageId = producer.sendDataSourceMessage(request, DataSourceQueue.INTERNAL);
+            String messageId = producer.sendMessageOnQueue(request, DataSourceQueue.INTERNAL);
             TextMessage response = consumer.getMessage(messageId, TextMessage.class);
             return ExchangeDataSourceResponseMapper.mapToExchangeLogTypeFromCreateExchageLogResponse(response);
         } catch (ExchangeModelMapperException | ExchangeMessageException e) {
@@ -173,7 +173,7 @@ public class ExchangeServiceBean implements ExchangeService {
         LOG.info("Create Exchange log invoked in service layer");
         try {
             String request = ExchangeDataSourceRequestMapper.mapGetExchageLogListByQueryToString(query);
-            String messageId = producer.sendDataSourceMessage(request, DataSourceQueue.INTERNAL);
+            String messageId = producer.sendMessageOnQueue(request, DataSourceQueue.INTERNAL);
             TextMessage response = consumer.getMessage(messageId, TextMessage.class);
             return ExchangeDataSourceResponseMapper.mapToGetLogListByQueryResponse(response);
         } catch (ExchangeModelMapperException | ExchangeMessageException e) {
@@ -205,7 +205,7 @@ public class ExchangeServiceBean implements ExchangeService {
                 }
             }
         } catch (ModelMarshallException | ExchangeMessageException | ExchangeModelMarshallException e) {
-            LOG.error("[ Error when synchronizing settings with Config module. ] {}", e.getMessage());
+            LOG.error("[ Error when synchronizing settings with Config module. ] ");
             throw new ExchangeServiceException("Error when synchronizing settings with Config module.");
         }
     }

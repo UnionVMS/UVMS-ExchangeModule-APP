@@ -6,7 +6,7 @@
              xmlns:poll="urn:poll.exchange.schema.fisheries.ec.europa.eu:v1"
              xmlns:service="urn:service.exchange.schema.fisheries.ec.europa.eu:v1"
              xmlns:exchange="urn:exchange.schema.fisheries.ec.europa.eu:v1"
-             xmlns:movement="urn:movement.schema.fisheries.ec.europa.eu:v1"
+             xmlns:movement="urn:movement.exchange.schema.fisheries.ec.europa.eu:v1"
              xmlns:xsd="http://www.w3.org/2001/XMLSchema"
              xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
              xmlns="http://schemas.xmlsoap.org/wsdl/">
@@ -18,7 +18,7 @@
             <xsd:import namespace="urn:exchange.schema.fisheries.ec.europa.eu:v1" schemaLocation="Exchange.xsd"/>
             <xsd:import namespace="urn:service.exchange.schema.fisheries.ec.europa.eu:v1" schemaLocation="Service.xsd"/>
             <xsd:import namespace="urn:poll.exchange.schema.fisheries.ec.europa.eu:v1" schemaLocation="Poll.xsd"/>
-            <xsd:import namespace="urn:movement.schema.fisheries.ec.europa.eu:v1" schemaLocation="Movement.xsd"/>
+            <xsd:import namespace="urn:movement.exchange.schema.fisheries.ec.europa.eu:v1" schemaLocation="Movement.xsd"/>
             
             <xsd:simpleType name="ExchangeModuleMethod">
                 <xsd:restriction base="xsd:string">
@@ -49,7 +49,7 @@
                 </xsd:sequence>
             </xsd:complexType>
             
-            <xsd:element name="SetMovementRequest">
+            <xsd:element name="SetMovementReportRequest">
                 <xsd:complexType>
                     <xsd:complexContent>
                         <xsd:extension base="module:ExchangeBaseRequest">
@@ -61,7 +61,7 @@
                 </xsd:complexType>
             </xsd:element>
             
-            <xsd:element name="SetMovementResponse">
+            <xsd:element name="SetMovementReportResponse">
                 <xsd:complexType>
                     <xsd:sequence>
                         <xsd:element name="response" type="common:AcknowledgeType" minOccurs="1" maxOccurs="1"/>
@@ -252,11 +252,11 @@
         <part name="body" element="module:SetCommandResponse"/>
     </message>
 
-    <message name="SetMovementRequest">
-        <part name="body" element="module:SetMovementRequest"/>
+    <message name="SetMovementReportRequest">
+        <part name="body" element="module:SetMovementReportRequest"/>
     </message>
-    <message name="SetMovementResponse">
-        <part name="body" element="module:SetMovementResponse"/>
+    <message name="SetMovementReportResponse">
+        <part name="body" element="module:SetMovementReportResponse"/>
     </message>
 
     <message name="PingRequest">
@@ -304,9 +304,9 @@
             <fault name="ExchangeFault" message="module:ExchangeFault"/>
         </operation>
         
-        <operation name="SetMovement">
-            <input message="module:SetMovementRequest"/>
-            <output message="module:SetMovementResponse"/>
+        <operation name="SetMovementReport">
+            <input message="module:SetMovementReportRequest"/>
+            <output message="module:SetMovementReportResponse"/>
             <fault name="ExchangeFault" message="module:ExchangeFault"/>
         </operation>
         
@@ -392,7 +392,7 @@
             </fault>
         </operation>
 
-        <operation name="SetMovement">
+        <operation name="SetMovementReport">
             <input>
                 <soap:body use="literal"/>
             </input>

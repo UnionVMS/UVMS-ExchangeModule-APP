@@ -1,21 +1,21 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<xsd:schema xmlns:movement="urn:movement.schema.fisheries.ec.europa.eu:v1" 
-            targetNamespace="urn:movement.schema.fisheries.ec.europa.eu:v1"
-            xmlns:asset="urn:asset.movement.schema.fisheries.ec.europa.eu:v1"
-            xmlns:mobterm="urn:mobileterminal.movement.schema.fisheries.ec.europa.eu:v1"
+<xsd:schema xmlns:movement="urn:movement.exchange.schema.fisheries.ec.europa.eu:v1" 
+            targetNamespace="urn:movement.exchange.schema.fisheries.ec.europa.eu:v1"
+            xmlns:asset="urn:asset.movement.exchange.schema.fisheries.ec.europa.eu:v1"
+            xmlns:mobterm="urn:mobileterminal.movement.exchange.schema.fisheries.ec.europa.eu:v1"
             xmlns:xsd="http://www.w3.org/2001/XMLSchema"
             xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
             xmlns="http://schemas.xmlsoap.org/wsdl/">
     
-    <xsd:import namespace="urn:asset.movement.schema.fisheries.ec.europa.eu:v1" schemaLocation="Asset.xsd"/>
-    <xsd:import namespace="urn:mobileterminal.movement.schema.fisheries.ec.europa.eu:v1" schemaLocation="MobileTerminal.xsd"/>
+    <xsd:import namespace="urn:asset.movement.exchange.schema.fisheries.ec.europa.eu:v1" schemaLocation="Asset.xsd"/>
+    <xsd:import namespace="urn:mobileterminal.movement.exchange.schema.fisheries.ec.europa.eu:v1" schemaLocation="MobileTerminal.xsd"/>
     
     <xsd:complexType name="ReportMovementType">
         <xsd:sequence>
             <xsd:element name="from" type="xsd:string" minOccurs="1" maxOccurs="1"/>
             <!-- <xsd:element name="version" type="xsd:string" minOccurs="1" maxOccurs="1"/> -->
             <xsd:element name="timestamp" type="xsd:dateTime" minOccurs="1" maxOccurs="1"/>
-            <xsd:element name="movement" type="movement:MovementType"/>
+            <xsd:element name="movement" type="movement:MovementBaseType"/>
         </xsd:sequence>
     </xsd:complexType>
     
@@ -67,6 +67,9 @@
         </xsd:restriction>
     </xsd:simpleType>
     
+    <!-- 
+    LES (eg. InmarsatC EIK), ev. free text field
+    -->
     <xsd:simpleType name="MovementSourceType">
         <xsd:restriction base="xsd:string">
             <xsd:enumeration value="INMARSAT_C"/>
@@ -74,11 +77,12 @@
         </xsd:restriction>
     </xsd:simpleType>
     
+    <!-- Type received in UNIONVMS -->
     <xsd:complexType name="MovementBaseType">
         <xsd:sequence>
-            <xsd:element name="guid" type="xsd:string"/>
-            <xsd:element name="connectId" type="xsd:string"/>
             <xsd:element name="assetId" type="asset:AssetId"/>
+            <xsd:element name="comChannelType" type="movement:MovementComChannelType"/>
+            <xsd:element name="mobileTerminalId" type="mobterm:MobileTerminal"/>
             <xsd:element name="position" type="movement:MovementPoint"/>
             <xsd:element name="positionTime" type="xsd:dateTime"/>
             <xsd:element name="status" type="xsd:string"/>
@@ -90,12 +94,15 @@
         </xsd:sequence>
     </xsd:complexType>
     
+    <!-- type sent to FLUX -->
     <xsd:complexType name="MovementType">
         <xsd:complexContent>
             <xsd:extension base="movement:MovementBaseType">
                 <xsd:sequence>
+                    <xsd:element name="guid" type="xsd:string"/> <!-- unionvms specific -->
+                    <xsd:element name="connectId" type="xsd:string"/> <!-- unionvms specific -->
                     <xsd:element name="calculatedCourse" type="xsd:double" nillable="true"/>
-                    <xsd:element name="comChannelType" type="movement:MovementComChannelType"/>
+                    <!-- <xsd:element name="comChannelType" type="movement:MovementComChannelType"/>-->
                     <xsd:element name="mobileTerminal" type="mobterm:MobileTerminalId"/>
                     <xsd:element name="measuredSpeed" type="xsd:double" nillable="true"/>
                     <xsd:element name="calculatedSpeed" type="xsd:double" nillable="true"/>
@@ -133,6 +140,7 @@
         </xsd:sequence>
     </xsd:complexType>
     
+    <!-- Plugin type -->
     <xsd:simpleType name="MovementComChannelType">
         <xsd:restriction base="xsd:string">
             <xsd:enumeration value="FLUX"/>

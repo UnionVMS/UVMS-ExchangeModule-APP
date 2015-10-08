@@ -27,4 +27,7 @@ public class ExchangeModelConstants {
     public static final String CONFIG_STATUS_TOPIC_NAME = "ConfigStatus";
 
     public static final String MODULE_NAME = "exchange";
+    
+    public static final String QUEUE_INTEGRATION = "java:/jms/queue/UVMSRulesEvent";
+    //public static final String QUEUE_INTEGRATION = "java:/jms/queue/TESTQUEUE";
 }

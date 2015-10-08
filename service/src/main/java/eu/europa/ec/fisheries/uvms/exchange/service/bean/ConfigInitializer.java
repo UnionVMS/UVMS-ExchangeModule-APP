@@ -28,7 +28,7 @@ public class ConfigInitializer {
             exchangeService.syncSettingsWithConfig();
         }
         catch (ExchangeServiceException e) {
-            LOG.error("[ Error when synchronizing settings with Config at startup. ]", e);
+            LOG.error("[ Error when synchronizing settings with Config at startup. ]");
         }
     }
 }

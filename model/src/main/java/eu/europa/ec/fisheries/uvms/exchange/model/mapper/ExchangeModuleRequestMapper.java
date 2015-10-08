@@ -3,9 +3,12 @@ package eu.europa.ec.fisheries.uvms.exchange.model.mapper;
 import eu.europa.ec.fisheries.schema.exchange.common.v1.CommandType;
 import eu.europa.ec.fisheries.schema.exchange.module.v1.ExchangeModuleMethod;
 import eu.europa.ec.fisheries.schema.exchange.module.v1.SetCommandRequest;
+import eu.europa.ec.fisheries.schema.exchange.module.v1.SetMovementReportRequest;
+import eu.europa.ec.fisheries.schema.exchange.movement.v1.ReportMovementType;
 import eu.europa.ec.fisheries.schema.exchange.registry.v1.ExchangeRegistryMethod;
 import eu.europa.ec.fisheries.schema.exchange.registry.v1.RegisterServiceRequest;
 import eu.europa.ec.fisheries.schema.exchange.registry.v1.UnregisterServiceRequest;
+
 import javax.jms.TextMessage;
 
 import org.slf4j.Logger;
@@ -45,4 +48,10 @@ public class ExchangeModuleRequestMapper {
         return request.getService();
     }
 
+    public static String createSetMovementReportRequest(ReportMovementType reportType) throws ExchangeModelMarshallException {
+    	SetMovementReportRequest request = new SetMovementReportRequest();
+    	request.setMethod(ExchangeModuleMethod.SET_MOVEMENT_REPORT);
+		request.setRequest(reportType);
+    	return JAXBMarshaller.marshallJaxBObjectToString(request);
+    }
 }
