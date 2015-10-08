@@ -43,7 +43,12 @@ public class ExchangeMessageConsumerBean implements ExchangeMessageConsumer {
             }
             connectToQueue();
 
-            return (T) session.createConsumer(responseQueue, "JMSCorrelationID='" + correlationId + "'").receive(ONE_MINUTE);
+            T response = (T) session.createConsumer(responseQueue, "JMSCorrelationID='" + correlationId + "'").receive(5000);
+            if (response == null) {
+                throw new ExchangeMessageException("[ No response from Config module. ]");
+            }
+
+            return response;
 
         } catch (Exception e) {
             LOG.error("[ Error when getting medssage ] {}", e.getMessage());
