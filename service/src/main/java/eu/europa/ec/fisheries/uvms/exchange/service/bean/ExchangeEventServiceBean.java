@@ -14,11 +14,13 @@ import javax.jms.TextMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import eu.europa.ec.fisheries.schema.exchange.common.v1.ReportType;
+import eu.europa.ec.fisheries.schema.config.module.v1.ConfigTopicBaseRequest;
+import eu.europa.ec.fisheries.schema.config.module.v1.PushModuleSettingMessage;
+import eu.europa.ec.fisheries.schema.config.types.v1.SettingType;
 import eu.europa.ec.fisheries.schema.exchange.module.v1.PingResponse;
 import eu.europa.ec.fisheries.schema.exchange.module.v1.SetMovementReportRequest;
-import eu.europa.ec.fisheries.schema.exchange.movement.v1.ReportMovementType;
 import eu.europa.ec.fisheries.schema.exchange.service.v1.ServiceType;
+import eu.europa.ec.fisheries.schema.rules.movement.v1.RawMovementType;
 import eu.europa.ec.fisheries.uvms.exchange.message.constants.DataSourceQueue;
 import eu.europa.ec.fisheries.uvms.exchange.message.event.ConfigMessageRecievedEvent;
 import eu.europa.ec.fisheries.uvms.exchange.message.event.ErrorEvent;
@@ -42,9 +44,6 @@ import eu.europa.ec.fisheries.uvms.exchange.service.exception.ExchangeServiceExc
 import eu.europa.ec.fisheries.uvms.exchange.service.mapper.MovementMapper;
 import eu.europa.ec.fisheries.uvms.rules.model.exception.RulesModelMapperException;
 import eu.europa.ec.fisheries.uvms.rules.model.mapper.RulesModuleRequestMapper;
-import eu.europa.ec.fisheries.wsdl.module.v1.ConfigTopicBaseRequest;
-import eu.europa.ec.fisheries.wsdl.module.v1.PushModuleSettingMessage;
-import eu.europa.ec.fisheries.wsdl.types.v1.SettingType;
 
 @Stateless
 public class ExchangeEventServiceBean implements EventService {
@@ -60,7 +59,7 @@ public class ExchangeEventServiceBean implements EventService {
 
     @EJB
     ExchangeService exchangeService;
-    
+
     @EJB
     ParameterService parameterService;
 
@@ -68,13 +67,14 @@ public class ExchangeEventServiceBean implements EventService {
     public void getPluginConfig(@Observes @PluginConfigEvent ExchangeMessageEvent message) {
         LOG.info("Received MessageRecievedEvent");
         List<ServiceType> serviceList;
-		try {
-			serviceList = exchangeService.getServiceList();
-			producer.sendModuleResponseMessage(message.getJmsMessage(), ExchangeModuleResponseMapper.mapServiceListResponse(serviceList));
-		} catch (ExchangeException e) {
-			LOG.error("[ Error when getting plugin list from source]");
-			errorEvent.fire(new ExchangeMessageEvent(message.getJmsMessage(), ExchangeModuleResponseMapper.createFaultMessage(FaultCode.EXCHANGE_MESSAGE, "Excpetion when getting service list")));
-		}
+        try {
+            serviceList = exchangeService.getServiceList();
+            producer.sendModuleResponseMessage(message.getJmsMessage(), ExchangeModuleResponseMapper.mapServiceListResponse(serviceList));
+        } catch (ExchangeException e) {
+            LOG.error("[ Error when getting plugin list from source]");
+            errorEvent.fire(new ExchangeMessageEvent(message.getJmsMessage(), ExchangeModuleResponseMapper.createFaultMessage(
+                    FaultCode.EXCHANGE_MESSAGE, "Excpetion when getting service list")));
+        }
     }
 
     @Override
@@ -104,8 +104,7 @@ public class ExchangeEventServiceBean implements EventService {
             ParameterKey key;
             try {
                 key = ParameterKey.valueOfKey(setting.getKey());
-            }
-            catch (IllegalArgumentException e) {
+            } catch (IllegalArgumentException e) {
                 LOG.error("[ Received setting with unknown key: " + setting.getKey() + " ]");
                 return;
             }
@@ -124,39 +123,40 @@ public class ExchangeEventServiceBean implements EventService {
     }
 
     @Override
-	public void processMovement(@Observes @SetMovementEvent ExchangeMessageEvent message) {
-		LOG.info("Process movement");
-		//TODO
-		//PROCESS MOVEMENT
-		try {
-			SetMovementReportRequest request = JAXBMarshaller.unmarshallTextMessage(message.getJmsMessage(), SetMovementReportRequest.class);
-			//TODO log to exchange log (received message)
-			//reportType.getFrom()
-			//reportType.getTimestamp()
-			
-			String movement = RulesModuleRequestMapper.createSetMovementReportRequest(MovementMapper.getMapper().map(request.getRequest().getMovement(), eu.europa.ec.fisheries.schema.rules.movement.v1.MovementBaseType.class));
-			producer.sendMessageOnQueue(movement, DataSourceQueue.INTEGRATION);
-		} catch (ExchangeModelMarshallException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (ExchangeMessageException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (RulesModelMapperException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-	}
+    public void processMovement(@Observes @SetMovementEvent ExchangeMessageEvent message) {
+        LOG.info("Process movement");
+        // TODO
+        // PROCESS MOVEMENT
+        try {
+            SetMovementReportRequest request = JAXBMarshaller.unmarshallTextMessage(message.getJmsMessage(), SetMovementReportRequest.class);
+            // TODO log to exchange log (received message)
+            // reportType.getFrom()
+            // reportType.getTimestamp()
 
-	@Override
-	public void ping(@Observes @PingEvent ExchangeMessageEvent message) {
-		try {
-			PingResponse response = new PingResponse();
-			response.setResponse("pong");
-			producer.sendModuleResponseMessage(message.getJmsMessage(), JAXBMarshaller.marshallJaxBObjectToString(response));
-		} catch (ExchangeModelMarshallException e) {
-			LOG.error("[ Error when marshalling ping response ]");
-		}
-	}
+            String movement = RulesModuleRequestMapper.createSetMovementReportRequest(MovementMapper.getMapper().map(
+                    request.getRequest().getMovement(), RawMovementType.class));
+            producer.sendMessageOnQueue(movement, DataSourceQueue.INTEGRATION);
+        } catch (ExchangeModelMarshallException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } catch (ExchangeMessageException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } catch (RulesModelMapperException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public void ping(@Observes @PingEvent ExchangeMessageEvent message) {
+        try {
+            PingResponse response = new PingResponse();
+            response.setResponse("pong");
+            producer.sendModuleResponseMessage(message.getJmsMessage(), JAXBMarshaller.marshallJaxBObjectToString(response));
+        } catch (ExchangeModelMarshallException e) {
+            LOG.error("[ Error when marshalling ping response ]");
+        }
+    }
 
 }
