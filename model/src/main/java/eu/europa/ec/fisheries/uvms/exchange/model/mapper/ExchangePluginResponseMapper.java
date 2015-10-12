@@ -5,16 +5,17 @@
  */
 package eu.europa.ec.fisheries.uvms.exchange.model.mapper;
 
+import java.util.List;
+
+import javax.jms.JMSException;
+import javax.jms.TextMessage;
+
 import eu.europa.ec.fisheries.schema.exchange.common.v1.AcknowledgeType;
 import eu.europa.ec.fisheries.schema.exchange.common.v1.AcknowledgeTypeType;
 import eu.europa.ec.fisheries.schema.exchange.plugin.types.v1.PluginFault;
+import eu.europa.ec.fisheries.schema.exchange.plugin.v1.AcknowledgeResponse;
 import eu.europa.ec.fisheries.schema.exchange.plugin.v1.ExchangePluginMethod;
 import eu.europa.ec.fisheries.schema.exchange.plugin.v1.PingResponse;
-import eu.europa.ec.fisheries.schema.exchange.plugin.v1.SetCommandResponse;
-import eu.europa.ec.fisheries.schema.exchange.plugin.v1.SetConfigResponse;
-import eu.europa.ec.fisheries.schema.exchange.plugin.v1.SetReportResponse;
-import eu.europa.ec.fisheries.schema.exchange.plugin.v1.StartResponse;
-import eu.europa.ec.fisheries.schema.exchange.plugin.v1.StopResponse;
 import eu.europa.ec.fisheries.schema.exchange.registry.v1.ExchangeRegistryMethod;
 import eu.europa.ec.fisheries.schema.exchange.registry.v1.RegisterServiceResponse;
 import eu.europa.ec.fisheries.schema.exchange.service.v1.ServiceType;
@@ -22,9 +23,6 @@ import eu.europa.ec.fisheries.schema.exchange.service.v1.SettingListType;
 import eu.europa.ec.fisheries.schema.exchange.service.v1.SettingType;
 import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelMapperException;
 import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelMarshallException;
-import java.util.List;
-import javax.jms.JMSException;
-import javax.jms.TextMessage;
 
 /**
  *
@@ -79,32 +77,37 @@ public class ExchangePluginResponseMapper {
     }
 
     public static String mapToStopResponse(AcknowledgeType ackType) throws ExchangeModelMarshallException {
-        StopResponse response = new StopResponse();
-        response.setResponse(ackType);
+    	AcknowledgeResponse response = new AcknowledgeResponse();
+    	response.setMethod(ExchangePluginMethod.STOP);
+    	response.setResponse(ackType);
         return JAXBMarshaller.marshallJaxBObjectToString(response);
     }
 
     public static String mapToStartResponse(AcknowledgeType ackType) throws ExchangeModelMarshallException {
-        StartResponse response = new StartResponse();
-        response.setResponse(ackType);
+    	AcknowledgeResponse response = new AcknowledgeResponse();
+    	response.setMethod(ExchangePluginMethod.START);
+    	response.setResponse(ackType);
         return JAXBMarshaller.marshallJaxBObjectToString(response);
     }
 
     public static String mapToSetCommandResponse(AcknowledgeType ackType) throws ExchangeModelMarshallException {
-        SetCommandResponse response = new SetCommandResponse();
-        response.setResponse(ackType);
+    	AcknowledgeResponse response = new AcknowledgeResponse();
+    	response.setMethod(ExchangePluginMethod.SET_COMMAND);
+    	response.setResponse(ackType);
         return JAXBMarshaller.marshallJaxBObjectToString(response);
     }
 
     public static String mapToSetConfigResponse(AcknowledgeType ackType) throws ExchangeModelMarshallException {
-        SetConfigResponse response = new SetConfigResponse();
-        response.setResponse(ackType);
+    	AcknowledgeResponse response = new AcknowledgeResponse();
+    	response.setMethod(ExchangePluginMethod.SET_CONFIG);
+    	response.setResponse(ackType);
         return JAXBMarshaller.marshallJaxBObjectToString(response);
     }
 
     public static String mapToSetReportResponse(AcknowledgeType ackType) throws ExchangeModelMarshallException {
-        SetReportResponse response = new SetReportResponse();
-        response.setResponse(ackType);
+    	AcknowledgeResponse response = new AcknowledgeResponse();
+    	response.setMethod(ExchangePluginMethod.SET_REPORT);
+    	response.setResponse(ackType);
         return JAXBMarshaller.marshallJaxBObjectToString(response);
     }
 

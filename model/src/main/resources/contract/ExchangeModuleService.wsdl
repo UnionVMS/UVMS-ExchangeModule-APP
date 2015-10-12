@@ -25,14 +25,14 @@
                     <!-- unionvms wants to -->
                     <xsd:enumeration value="LIST_SERVICES"/> <!-- mobileterminal - get plugins -->
                     <xsd:enumeration value="SET_COMMAND"/> <!-- mobileterminal - pollRequest OR rules - sendEmail -->
-                    <xsd:enumeration value="SET_REPORT"/> <!-- rules - sendPositionToFLUX -->
+                    <xsd:enumeration value="SEND_REPORT_TO_PLUGIN"/> <!-- rules - sendPositionToFLUX -->
                     
                     <!-- plugin wants to -->
                     <xsd:enumeration value="SET_MOVEMENT_REPORT"/>
                     
                     <!-- move to register wsdl -->
-                    <xsd:enumeration value="REGISTER_SERVICE"/>
-                    <xsd:enumeration value="UNREGISTER_SERVICE"/>
+                    <!-- <xsd:enumeration value="REGISTER_SERVICE"/>
+                    <xsd:enumeration value="UNREGISTER_SERVICE"/>-->
                     
                     <!-- rest interface wants to -->
                     <!-- <xsd:enumeration value="GET_SETTINGS"/>
@@ -54,7 +54,7 @@
                     <xsd:complexContent>
                         <xsd:extension base="module:ExchangeBaseRequest">
                             <xsd:sequence>
-                                <xsd:element name="request" type="movement:ReportMovementType"/>
+                                <xsd:element name="request" type="movement:SetReportMovementType"/>
                             </xsd:sequence>
                         </xsd:extension>
                     </xsd:complexContent>
@@ -89,6 +89,26 @@
                 </xsd:complexType>
             </xsd:element>
             
+            <xsd:element name="SendMovementToPluginRequest">
+                <xsd:complexType>
+                    <xsd:complexContent>
+                        <xsd:extension base="module:ExchangeBaseRequest">
+                            <xsd:sequence>
+                                <xsd:element name="report" type="movement:SendMovementToPluginType"/>
+                            </xsd:sequence>
+                        </xsd:extension>
+                    </xsd:complexContent>
+                </xsd:complexType>
+            </xsd:element>
+            
+            <xsd:element name="SendMovementToPluginResponse">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element name="response" type="common:AcknowledgeType" minOccurs="1" maxOccurs="1"/>
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
+            
             <xsd:element name="GetServiceListRequest">
                 <xsd:complexType>
                     <xsd:complexContent>
@@ -105,47 +125,7 @@
                     </xsd:sequence>
                 </xsd:complexType>
             </xsd:element>
-            
-            <xsd:element name="RegisterServiceRequest">
-                <xsd:complexType>
-                    <xsd:complexContent>
-                        <xsd:extension base="module:ExchangeBaseRequest">
-                            <xsd:sequence>
-                                <xsd:element name="service" type="service:ServiceType"/>
-                            </xsd:sequence>
-                        </xsd:extension>
-                    </xsd:complexContent>
-                </xsd:complexType>
-            </xsd:element>
-            
-            <xsd:element name="RegisterServiceResponse">
-                <xsd:complexType>
-                    <xsd:sequence>
-                        <xsd:element name="service" type="service:ServiceType" minOccurs="1" maxOccurs="1"/>
-                    </xsd:sequence>
-                </xsd:complexType>
-            </xsd:element>
-            
-            <xsd:element name="UnregisterServiceRequest">
-                <xsd:complexType>
-                    <xsd:complexContent>
-                        <xsd:extension base="module:ExchangeBaseRequest">
-                            <xsd:sequence>
-                                <xsd:element name="service" type="service:ServiceType"/>
-                            </xsd:sequence>
-                        </xsd:extension>
-                    </xsd:complexContent>
-                </xsd:complexType>
-            </xsd:element>
-
-            <xsd:element name="UnregisterServiceResponse">
-                <xsd:complexType>
-                    <xsd:sequence>
-                        <xsd:element name="service" type="service:ServiceType" minOccurs="1" maxOccurs="1"/>
-                    </xsd:sequence>
-                </xsd:complexType>
-            </xsd:element>
-            
+                        
             <xsd:element name="GetServiceSettingsRequest">
                 <xsd:complexType>
                     <xsd:complexContent>
@@ -217,20 +197,6 @@
         <part name="body" element="module:GetServiceListResponse"/>
     </message>
     
-    <message name="RegisterServiceRequest">
-        <part name="body" element="module:RegisterServiceRequest"/>
-    </message>
-    <message name="RegisterServiceResponse">
-        <part name="body" element="module:RegisterServiceResponse"/>
-    </message>
-    
-    <message name="UnregisterServiceRequest">
-        <part name="body" element="module:UnregisterServiceRequest"/>
-    </message>
-    <message name="UnregisterServiceResponse">
-        <part name="body" element="module:UnregisterServiceResponse"/>
-    </message>
-    
     <message name="GetServiceSettingsRequest">
         <part name="body" element="module:GetServiceSettingsRequest"/>
     </message>
@@ -259,6 +225,13 @@
         <part name="body" element="module:SetMovementReportResponse"/>
     </message>
 
+    <message name="SendMovementToPluginRequest">
+        <part name="body" element="module:SendMovementToPluginRequest"/>
+    </message>
+    <message name="SendMovementToPluginResponse">
+        <part name="body" element="module:SendMovementToPluginResponse"/>
+    </message>
+
     <message name="PingRequest">
         <part name="body" element="module:pingRequest"/>
     </message>
@@ -271,18 +244,6 @@
         <operation name="GetServiceList">
             <input message="module:GetServiceListRequest"/>
             <output message="module:GetServiceListResponse"/>
-            <fault name="ExchangeFault" message="module:ExchangeFault"/>
-        </operation>
-        
-        <operation name="RegisterService">
-            <input message="module:RegisterServiceRequest"/>
-            <output message="module:RegisterServiceResponse"/>
-            <fault name="ExchangeFault" message="module:ExchangeFault"/>
-        </operation>
-        
-        <operation name="UnregisterService">
-            <input message="module:UnregisterServiceRequest"/>
-            <output message="module:UnregisterServiceResponse"/>
             <fault name="ExchangeFault" message="module:ExchangeFault"/>
         </operation>
         
@@ -310,6 +271,12 @@
             <fault name="ExchangeFault" message="module:ExchangeFault"/>
         </operation>
         
+        <operation name="SendMovementToPlugin">
+            <input message="module:SendMovementToPluginRequest"/>
+            <output message="module:SendMovementToPluginResponse"/>
+            <fault name="ExchangeFault" message="module:ExchangeFault"/>
+        </operation>
+        
         <operation name="Ping">
             <input message="module:PingRequest"/>
             <output message="module:PingResponse"/>
@@ -321,30 +288,6 @@
         <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
         
         <operation name="GetServiceList">
-            <input>
-                <soap:body use="literal"/>
-            </input>
-            <output>
-                <soap:body use="literal"/>
-            </output>
-            <fault name="ExchangeFault">
-                <soap:fault name="ExchangeFault" use="literal"/>
-            </fault>
-        </operation>
-        
-        <operation name="RegisterService">
-            <input>
-                <soap:body use="literal"/>
-            </input>
-            <output>
-                <soap:body use="literal"/>
-            </output>
-            <fault name="ExchangeFault">
-                <soap:fault name="ExchangeFault" use="literal"/>
-            </fault>
-        </operation>
-        
-        <operation name="UnregisterService">
             <input>
                 <soap:body use="literal"/>
             </input>
@@ -402,7 +345,19 @@
             <fault name="ExchangeFault">
                 <soap:fault name="ExchangeFault" use="literal"/>
             </fault>
-        </operation>  
+        </operation>
+
+        <operation name="SendMovementToPlugin">
+            <input>
+                <soap:body use="literal"/>
+            </input>
+            <output>
+                <soap:body use="literal"/>
+            </output>
+            <fault name="ExchangeFault">
+                <soap:fault name="ExchangeFault" use="literal"/>
+            </fault>
+        </operation> 
 
         <operation name="Ping">
             <input>

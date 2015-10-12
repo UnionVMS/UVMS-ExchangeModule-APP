@@ -1,8 +1,6 @@
 package eu.europa.ec.fisheries.uvms.exchange.service.bean;
 
 import java.util.ArrayList;
-import eu.europa.ec.fisheries.schema.exchange.common.v1.CommandType;
-
 import java.util.List;
 
 import javax.ejb.EJB;
@@ -14,6 +12,7 @@ import javax.jms.TextMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import eu.europa.ec.fisheries.schema.exchange.common.v1.CommandType;
 import eu.europa.ec.fisheries.schema.exchange.service.v1.ServiceType;
 import eu.europa.ec.fisheries.schema.exchange.source.v1.GetLogListByQueryResponse;
 import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeListQuery;

@@ -5,10 +5,21 @@
  */
 package eu.europa.ec.fisheries.uvms.exchange.model.mapper;
 
+import eu.europa.ec.fisheries.schema.exchange.common.v1.ReportType;
+import eu.europa.ec.fisheries.schema.exchange.plugin.v1.ExchangePluginMethod;
+import eu.europa.ec.fisheries.schema.exchange.plugin.v1.SetReportRequest;
+import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelMarshallException;
+
 /**
  *
  * @author jojoha
  */
 public class ExchangePluginRequestMapper {
 
+	public static String createSetReportRequest(ReportType reportType) throws ExchangeModelMarshallException {
+		SetReportRequest request = new SetReportRequest();
+		request.setMethod(ExchangePluginMethod.SET_REPORT);
+		request.setReport(reportType);
+		return JAXBMarshaller.marshallJaxBObjectToString(request);
+	}
 }

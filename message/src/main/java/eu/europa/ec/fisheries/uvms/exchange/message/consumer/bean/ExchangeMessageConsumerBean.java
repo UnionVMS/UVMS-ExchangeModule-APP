@@ -52,14 +52,14 @@ public class ExchangeMessageConsumerBean implements ExchangeMessageConsumer {
 
         } catch (Exception e) {
             LOG.error("[ Error when getting medssage ] {}", e.getMessage());
-            throw new ExchangeMessageException("Error when retrieving message: ", e);
+            throw new ExchangeMessageException("Error when retrieving message: ");
         } finally {
             try {
                 connection.stop();
                 connection.close();
             } catch (JMSException e) {
                 LOG.error("[ Error when closing JMS connection ] {}", e.getMessage());
-                throw new ExchangeMessageException("Error closing JMS connection", e);
+                throw new ExchangeMessageException("Error closing JMS connection");
             }
         }
     }

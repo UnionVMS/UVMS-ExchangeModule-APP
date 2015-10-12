@@ -6,7 +6,7 @@
 
     <mapping map-null="true">
         <class-a>eu.europa.ec.fisheries.schema.exchange.movement.v1.MovementBaseType</class-a>
-        <class-b>eu.europa.ec.fisheries.schema.rules.movement.v1.MovementBaseType</class-b>
+        <class-b>eu.europa.ec.fisheries.schema.rules.movement.v1.RawMovementType</class-b>
         <!-- 
         <field>
             <a>extId</a>

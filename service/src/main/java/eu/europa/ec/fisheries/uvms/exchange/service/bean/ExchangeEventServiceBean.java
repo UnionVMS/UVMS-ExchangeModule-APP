@@ -17,15 +17,19 @@ import org.slf4j.LoggerFactory;
 import eu.europa.ec.fisheries.schema.config.module.v1.ConfigTopicBaseRequest;
 import eu.europa.ec.fisheries.schema.config.module.v1.PushModuleSettingMessage;
 import eu.europa.ec.fisheries.schema.config.types.v1.SettingType;
+import eu.europa.ec.fisheries.schema.exchange.common.v1.ReportType;
 import eu.europa.ec.fisheries.schema.exchange.module.v1.PingResponse;
+import eu.europa.ec.fisheries.schema.exchange.module.v1.SendMovementToPluginRequest;
 import eu.europa.ec.fisheries.schema.exchange.module.v1.SetMovementReportRequest;
 import eu.europa.ec.fisheries.schema.exchange.service.v1.ServiceType;
 import eu.europa.ec.fisheries.schema.rules.movement.v1.RawMovementType;
 import eu.europa.ec.fisheries.uvms.exchange.message.constants.DataSourceQueue;
 import eu.europa.ec.fisheries.uvms.exchange.message.event.ConfigMessageRecievedEvent;
 import eu.europa.ec.fisheries.uvms.exchange.message.event.ErrorEvent;
+import eu.europa.ec.fisheries.uvms.exchange.message.event.ExchangeLogEvent;
 import eu.europa.ec.fisheries.uvms.exchange.message.event.PingEvent;
 import eu.europa.ec.fisheries.uvms.exchange.message.event.PluginConfigEvent;
+import eu.europa.ec.fisheries.uvms.exchange.message.event.SendReportToPluginEvent;
 import eu.europa.ec.fisheries.uvms.exchange.message.event.SetMovementEvent;
 import eu.europa.ec.fisheries.uvms.exchange.message.event.carrier.ExchangeMessageEvent;
 import eu.europa.ec.fisheries.uvms.exchange.message.exception.ExchangeMessageException;
@@ -35,6 +39,7 @@ import eu.europa.ec.fisheries.uvms.exchange.model.constant.FaultCode;
 import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeException;
 import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelMarshallException;
 import eu.europa.ec.fisheries.uvms.exchange.model.mapper.ExchangeModuleResponseMapper;
+import eu.europa.ec.fisheries.uvms.exchange.model.mapper.ExchangePluginRequestMapper;
 import eu.europa.ec.fisheries.uvms.exchange.model.mapper.JAXBMarshaller;
 import eu.europa.ec.fisheries.uvms.exchange.service.EventService;
 import eu.europa.ec.fisheries.uvms.exchange.service.ExchangeService;
@@ -59,7 +64,7 @@ public class ExchangeEventServiceBean implements EventService {
 
     @EJB
     ExchangeService exchangeService;
-
+    
     @EJB
     ParameterService parameterService;
 
@@ -67,14 +72,14 @@ public class ExchangeEventServiceBean implements EventService {
     public void getPluginConfig(@Observes @PluginConfigEvent ExchangeMessageEvent message) {
         LOG.info("Received MessageRecievedEvent");
         List<ServiceType> serviceList;
-        try {
-            serviceList = exchangeService.getServiceList();
-            producer.sendModuleResponseMessage(message.getJmsMessage(), ExchangeModuleResponseMapper.mapServiceListResponse(serviceList));
-        } catch (ExchangeException e) {
-            LOG.error("[ Error when getting plugin list from source]");
+		try {
+			serviceList = exchangeService.getServiceList();
+			producer.sendModuleResponseMessage(message.getJmsMessage(), ExchangeModuleResponseMapper.mapServiceListResponse(serviceList));
+		} catch (ExchangeException e) {
+			LOG.error("[ Error when getting plugin list from source]");
             errorEvent.fire(new ExchangeMessageEvent(message.getJmsMessage(), ExchangeModuleResponseMapper.createFaultMessage(
                     FaultCode.EXCHANGE_MESSAGE, "Excpetion when getting service list")));
-        }
+		}
     }
 
     @Override
@@ -123,40 +128,69 @@ public class ExchangeEventServiceBean implements EventService {
     }
 
     @Override
-    public void processMovement(@Observes @SetMovementEvent ExchangeMessageEvent message) {
-        LOG.info("Process movement");
-        // TODO
-        // PROCESS MOVEMENT
-        try {
-            SetMovementReportRequest request = JAXBMarshaller.unmarshallTextMessage(message.getJmsMessage(), SetMovementReportRequest.class);
-            // TODO log to exchange log (received message)
-            // reportType.getFrom()
-            // reportType.getTimestamp()
+	public void processMovement(@Observes @SetMovementEvent ExchangeMessageEvent message) {
+		LOG.info("Process movement");
+		//TODO
+		//PROCESS MOVEMENT
+		try {
+			SetMovementReportRequest request = JAXBMarshaller.unmarshallTextMessage(message.getJmsMessage(), SetMovementReportRequest.class);
+			//TODO log to exchange log (received message)
+			//reportType.getFrom()
+			//reportType.getTimestamp()
+			
+			String movement = RulesModuleRequestMapper.createSetMovementReportRequest(MovementMapper.getMapper().map(request.getRequest().getMovement(), RawMovementType.class));
+			producer.sendMessageOnQueue(movement, DataSourceQueue.RULES);
+		} catch (ExchangeModelMarshallException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (ExchangeMessageException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (RulesModelMapperException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
 
-            String movement = RulesModuleRequestMapper.createSetMovementReportRequest(MovementMapper.getMapper().map(
-                    request.getRequest().getMovement(), RawMovementType.class));
-            producer.sendMessageOnQueue(movement, DataSourceQueue.INTEGRATION);
-        } catch (ExchangeModelMarshallException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } catch (ExchangeMessageException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } catch (RulesModelMapperException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-    }
+	@Override
+	public void ping(@Observes @PingEvent ExchangeMessageEvent message) {
+		try {
+			PingResponse response = new PingResponse();
+			response.setResponse("pong");
+			producer.sendModuleResponseMessage(message.getJmsMessage(), JAXBMarshaller.marshallJaxBObjectToString(response));
+		} catch (ExchangeModelMarshallException e) {
+			LOG.error("[ Error when marshalling ping response ]");
+		}
+	}
 
-    @Override
-    public void ping(@Observes @PingEvent ExchangeMessageEvent message) {
-        try {
-            PingResponse response = new PingResponse();
-            response.setResponse("pong");
-            producer.sendModuleResponseMessage(message.getJmsMessage(), JAXBMarshaller.marshallJaxBObjectToString(response));
-        } catch (ExchangeModelMarshallException e) {
-            LOG.error("[ Error when marshalling ping response ]");
-        }
-    }
+	@Override
+	public void sendReportToPlugin(@Observes @SendReportToPluginEvent ExchangeMessageEvent message) {
+		LOG.info("Send report to plugin");
+		
+		try {
+			SendMovementToPluginRequest request = JAXBMarshaller.unmarshallTextMessage(message.getJmsMessage(), SendMovementToPluginRequest.class);
+			String serviceName = request.getReport().getPluginName();
+		
+			//TODO do some validation logic
+			//check so request.getReport().getTo() exists
+			//check so the type of service has type request.getReport().getPlugin()
+			//check so the plugin is started
+			//otherwise answer to sender (rules) so rules can do something about it (tickets)
+			
+			ReportType report = new ReportType();
+			//TODO map from request
+			String text = ExchangePluginRequestMapper.createSetReportRequest(report);
+		
+			producer.sendEventBusMessage(text, serviceName);
+		} catch (ExchangeException e) {
+			LOG.error("[ Error when sending report to plugin ]");
+			errorEvent.fire(new ExchangeMessageEvent(message.getJmsMessage(), ExchangeModuleResponseMapper.createFaultMessage(FaultCode.EXCHANGE_EVENT_SERVICE, "Excpetion when sending message to plugin ")));
+		}
+	}
+
+	@Override
+	public void processAcknowledge(@Observes @ExchangeLogEvent ExchangeMessageEvent message) {
+		LOG.info("Process acknowledge");
+	}
 
 }

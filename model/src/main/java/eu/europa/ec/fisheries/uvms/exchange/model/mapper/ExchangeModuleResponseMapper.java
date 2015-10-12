@@ -8,9 +8,7 @@ import javax.jms.TextMessage;
 import eu.europa.ec.fisheries.schema.exchange.common.v1.AcknowledgeType;
 import eu.europa.ec.fisheries.schema.exchange.common.v1.ExchangeFault;
 import eu.europa.ec.fisheries.schema.exchange.module.v1.GetServiceListResponse;
-import eu.europa.ec.fisheries.schema.exchange.module.v1.RegisterServiceResponse;
 import eu.europa.ec.fisheries.schema.exchange.module.v1.SetCommandResponse;
-import eu.europa.ec.fisheries.schema.exchange.module.v1.UnregisterServiceResponse;
 import eu.europa.ec.fisheries.schema.exchange.service.v1.ServiceType;
 import eu.europa.ec.fisheries.uvms.exchange.model.constant.FaultCode;
 import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelMapperException;
@@ -38,18 +36,6 @@ public class ExchangeModuleResponseMapper {
     public static String mapCreatePollResponseToString(AcknowledgeType ackType) throws ExchangeModelMarshallException {
         SetCommandResponse response = new SetCommandResponse();
         response.setResponse(ackType);
-        return JAXBMarshaller.marshallJaxBObjectToString(response);
-    }
-
-    public static String createRegisterServiceResponse(ServiceType service) throws ExchangeModelMarshallException {
-        RegisterServiceResponse response = new RegisterServiceResponse();
-        response.setService(service);
-        return JAXBMarshaller.marshallJaxBObjectToString(response);
-    }
-
-    public static String createUnregisterServiceResponse(ServiceType service) throws ExchangeModelMarshallException {
-        UnregisterServiceResponse response = new UnregisterServiceResponse();
-        response.setService(service);
         return JAXBMarshaller.marshallJaxBObjectToString(response);
     }
     

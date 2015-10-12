@@ -1,17 +1,11 @@
 package eu.europa.ec.fisheries.uvms.exchange.message.exception;
 
-public class ExchangeMessageException extends Exception {
-    private static final long serialVersionUID = 1L;
+import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeException;
 
-    public ExchangeMessageException() {
-    }
+public class ExchangeMessageException extends ExchangeException {
+    private static final long serialVersionUID = 1L;
 
     public ExchangeMessageException(String message) {
         super(message);
     }
-
-    public ExchangeMessageException(String message, Throwable cause) {
-        super(message, cause);
-    }
-
 }

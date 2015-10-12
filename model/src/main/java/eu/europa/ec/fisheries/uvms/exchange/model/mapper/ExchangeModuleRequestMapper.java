@@ -1,25 +1,36 @@
 package eu.europa.ec.fisheries.uvms.exchange.model.mapper;
 
-import eu.europa.ec.fisheries.schema.exchange.common.v1.CommandType;
-import eu.europa.ec.fisheries.schema.exchange.module.v1.ExchangeModuleMethod;
-import eu.europa.ec.fisheries.schema.exchange.module.v1.SetCommandRequest;
-import eu.europa.ec.fisheries.schema.exchange.module.v1.SetMovementReportRequest;
-import eu.europa.ec.fisheries.schema.exchange.movement.v1.ReportMovementType;
-import eu.europa.ec.fisheries.schema.exchange.registry.v1.ExchangeRegistryMethod;
-import eu.europa.ec.fisheries.schema.exchange.registry.v1.RegisterServiceRequest;
-import eu.europa.ec.fisheries.schema.exchange.registry.v1.UnregisterServiceRequest;
-
 import javax.jms.TextMessage;
+import javax.websocket.SendResult;
+import javax.xml.datatype.DatatypeConfigurationException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import eu.europa.ec.fisheries.schema.exchange.common.v1.CommandType;
+import eu.europa.ec.fisheries.schema.exchange.common.v1.ObjectFactory;
+import eu.europa.ec.fisheries.schema.exchange.common.v1.Payload;
+import eu.europa.ec.fisheries.schema.exchange.module.v1.ExchangeModuleMethod;
+import eu.europa.ec.fisheries.schema.exchange.module.v1.SendMovementToPluginRequest;
+import eu.europa.ec.fisheries.schema.exchange.module.v1.SetCommandRequest;
+import eu.europa.ec.fisheries.schema.exchange.module.v1.SetMovementReportRequest;
+import eu.europa.ec.fisheries.schema.exchange.movement.asset.v1.AssetId;
+import eu.europa.ec.fisheries.schema.exchange.movement.v1.MovementType;
+import eu.europa.ec.fisheries.schema.exchange.movement.v1.ReportMovementType;
+import eu.europa.ec.fisheries.schema.exchange.movement.v1.SendMovementToPluginType;
+import eu.europa.ec.fisheries.schema.exchange.movement.v1.SetReportMovementType;
+import eu.europa.ec.fisheries.schema.exchange.plugin.types.v1.PluginType;
+import eu.europa.ec.fisheries.schema.exchange.registry.v1.ExchangeRegistryMethod;
+import eu.europa.ec.fisheries.schema.exchange.registry.v1.RegisterServiceRequest;
+import eu.europa.ec.fisheries.schema.exchange.registry.v1.UnregisterServiceRequest;
 import eu.europa.ec.fisheries.schema.exchange.service.v1.ServiceType;
+import eu.europa.ec.fisheries.uvms.common.DateUtils;
+import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelMapperException;
 import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelMarshallException;
 
 public class ExchangeModuleRequestMapper {
 
-    final static Logger LOG = LoggerFactory.getLogger(ExchangeDataSourceRequestMapper.class);
+    final static Logger LOG = LoggerFactory.getLogger(ExchangeModuleRequestMapper.class);
 
     public static String mapCreatePollRequest(CommandType command) throws ExchangeModelMarshallException {
         SetCommandRequest request = new SetCommandRequest();
@@ -48,10 +59,28 @@ public class ExchangeModuleRequestMapper {
         return request.getService();
     }
 
-    public static String createSetMovementReportRequest(ReportMovementType reportType) throws ExchangeModelMarshallException {
+    public static String createSetMovementReportRequest(SetReportMovementType reportType) throws ExchangeModelMarshallException {
     	SetMovementReportRequest request = new SetMovementReportRequest();
     	request.setMethod(ExchangeModuleMethod.SET_MOVEMENT_REPORT);
 		request.setRequest(reportType);
+    	return JAXBMarshaller.marshallJaxBObjectToString(request);
+    }
+    
+    public static String createSendReportToPlugin(String to, PluginType type, String version, MovementType payload) throws ExchangeModelMapperException {
+    	SendMovementToPluginRequest request = new SendMovementToPluginRequest();
+    	request.setMethod(ExchangeModuleMethod.SEND_REPORT_TO_PLUGIN);
+		SendMovementToPluginType report = new SendMovementToPluginType();
+    	try {
+			report.setTimestamp(DateUtils.getCurrentDate());
+		} catch (DatatypeConfigurationException e) {
+			throw new ExchangeModelMapperException("Couldn't set current timestamp for message");
+		}
+    	report.setPluginName(to);
+    	report.setMovement(payload);
+    	report.setPluginType(type);
+    	report.setVersion(version);
+		request.setReport(report);
+		
     	return JAXBMarshaller.marshallJaxBObjectToString(request);
     }
 }

@@ -36,11 +36,14 @@ public class MessageProducerBean implements MessageProducer {
     @Resource(mappedName = ExchangeModelConstants.EXCHANGE_RESPONSE_QUEUE)
     private Queue responseQueue;
 
+    @Resource(mappedName = ExchangeModelConstants.EXCHANGE_MESSAGE_IN_QUEUE)
+    private Queue eventQueue;
+    
     @Resource(mappedName = ExchangeModelConstants.EVENTBUS)
     private Topic eventBus;
 
-    @Resource(mappedName = ExchangeModelConstants.QUEUE_INTEGRATION)
-    private Queue integrationQueue;
+    @Resource(mappedName = ExchangeModelConstants.QUEUE_INTEGRATION_RULES)
+    private Queue rulesQueue;
     
     @Resource(lookup = ExchangeModelConstants.CONNECTION_FACTORY)
     private ConnectionFactory connectionFactory;
@@ -64,8 +67,8 @@ public class MessageProducerBean implements MessageProducer {
             case INTERNAL:
                 session.createProducer(localDbQueue).send(message);
                 break;
-            case INTEGRATION:
-            	session.createProducer(integrationQueue).send(message);
+            case RULES:
+            	session.createProducer(rulesQueue).send(message);
             	break;
             default:
                 break;
@@ -73,8 +76,8 @@ public class MessageProducerBean implements MessageProducer {
 
             return message.getJMSMessageID();
         } catch (Exception e) {
-            LOG.error("[ Error when sending message. ] {0}", e.getMessage());
-            throw new ExchangeMessageException("[ Error when sending message. ]", e);
+            LOG.error("[ Error when sending message. ]");
+            throw new ExchangeMessageException("[ Error when sending message. ]");
         } finally {
             disconnectJMS();
         }
@@ -84,17 +87,19 @@ public class MessageProducerBean implements MessageProducer {
     @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
     public String sendEventBusMessage(String text, String serviceName) throws ExchangeMessageException {
         try {
+        	LOG.debug("Sending event bus message from Exchange module to recipient om JMS Topic to: {} ", serviceName);
             connectJMS();
             TextMessage message = session.createTextMessage();
             message.setText(text);
             message.setStringProperty(ExchangeModelConstants.SERVICE_NAME, serviceName);
-
+            message.setJMSReplyTo(eventQueue);
+            
             session.createProducer(eventBus).send(message);
 
             return message.getJMSMessageID();
         } catch (Exception e) {
-            LOG.error("[ Error when sending message. ] {0}", e.getMessage());
-            throw new ExchangeMessageException("[ Error when sending message. ]", e);
+            LOG.error("[ Error when sending message. ] ", e);
+            throw new ExchangeMessageException("[ Error when sending message. ]");
         } finally {
             disconnectJMS();
         }
@@ -112,8 +117,8 @@ public class MessageProducerBean implements MessageProducer {
             return message.getJMSMessageID();
         }
         catch (Exception e) {
-            LOG.error("[ Error when sending config message. ] {}", e.getMessage());
-            throw new ExchangeMessageException("Error when sending config message.", e);
+            LOG.error("[ Error when sending config message. ] ");
+            throw new ExchangeMessageException("Error when sending config message.");
         }
         finally {
             disconnectJMS();
@@ -131,7 +136,7 @@ public class MessageProducerBean implements MessageProducer {
             connection.stop();
             connection.close();
         } catch (JMSException e) {
-            LOG.error("[ Error when stopping or closing JMS queue. ] {}", e.getMessage(), e.getStackTrace());
+            LOG.error("[ Error when stopping or closing JMS queue. ] {}", e);
         }
     }
 
@@ -149,7 +154,7 @@ public class MessageProducerBean implements MessageProducer {
             session.createProducer(message.getJmsMessage().getJMSReplyTo()).send(response);
 
         } catch (ExchangeModelMapperException | JMSException e) {
-            LOG.error("Error when returning Error message to recipient", e.getMessage());
+            LOG.error("Error when returning Error message to recipient");
         } finally {
             disconnectJMS();
         }

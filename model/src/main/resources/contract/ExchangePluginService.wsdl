@@ -34,6 +34,24 @@
                 </xsd:sequence>
             </xsd:complexType>
             
+            <xsd:complexType name="PluginBaseResponse" abstract="true">
+                <xsd:sequence>
+                    <xsd:element name="method" type="plugin:ExchangePluginMethod"/>
+                </xsd:sequence>
+            </xsd:complexType>
+            
+            <xsd:element name="AcknowledgeResponse">
+                <xsd:complexType>
+                    <xsd:complexContent>
+                        <xsd:extension base="plugin:PluginBaseResponse">
+                            <xsd:sequence>
+                                <xsd:element name="response" type="common:AcknowledgeType"/>
+                            </xsd:sequence>
+                        </xsd:extension>
+                    </xsd:complexContent>
+                </xsd:complexType>
+            </xsd:element>
+            
             <xsd:element name="SetConfigRequest">
                 <xsd:complexType>
                     <xsd:complexContent>
@@ -45,14 +63,6 @@
                             </xsd:sequence>
                         </xsd:extension>
                     </xsd:complexContent>
-                </xsd:complexType>
-            </xsd:element>
-            
-            <xsd:element name="SetConfigResponse">
-                <xsd:complexType>
-                    <xsd:sequence>
-                        <xsd:element name="response" type="common:AcknowledgeType" minOccurs="1" maxOccurs="1"/>
-                    </xsd:sequence>
                 </xsd:complexType>
             </xsd:element>
             
@@ -68,14 +78,6 @@
                 </xsd:complexType>
             </xsd:element>
             
-            <xsd:element name="SetCommandResponse">
-                <xsd:complexType>
-                    <xsd:sequence>
-                        <xsd:element name="response" type="common:AcknowledgeType" minOccurs="1" maxOccurs="1"/>
-                    </xsd:sequence>
-                </xsd:complexType>
-            </xsd:element>
-            
             <xsd:element name="SetReportRequest">
                 <xsd:complexType>
                     <xsd:complexContent>
@@ -88,28 +90,12 @@
                 </xsd:complexType>
             </xsd:element>
             
-            <xsd:element name="SetReportResponse">
-                <xsd:complexType>
-                    <xsd:sequence>
-                        <xsd:element name="response" type="common:AcknowledgeType" minOccurs="1" maxOccurs="1"/>
-                    </xsd:sequence>
-                </xsd:complexType>
-            </xsd:element>
-            
             <xsd:element name="StartRequest">
                 <xsd:complexType>
                     <xsd:complexContent>
                         <xsd:extension base="plugin:PluginBaseRequest">  
                         </xsd:extension>
                     </xsd:complexContent>
-                </xsd:complexType>
-            </xsd:element>
-
-            <xsd:element name="StartResponse">
-                <xsd:complexType>
-                    <xsd:sequence>
-                        <xsd:element name="response" type="common:AcknowledgeType" minOccurs="1" maxOccurs="1"/>
-                    </xsd:sequence>
                 </xsd:complexType>
             </xsd:element>
             
@@ -119,14 +105,6 @@
                         <xsd:extension base="plugin:PluginBaseRequest">
                         </xsd:extension>
                     </xsd:complexContent>
-                </xsd:complexType>
-            </xsd:element>
-            
-            <xsd:element name="StopResponse">
-                <xsd:complexType>
-                    <xsd:sequence>
-                        <xsd:element name="response" type="common:AcknowledgeType" minOccurs="1" maxOccurs="1"/>
-                    </xsd:sequence>
                 </xsd:complexType>
             </xsd:element>
             
@@ -159,44 +137,40 @@
     <message name="PluginFault">
         <part name="body" element="types:PluginFault"/>
     </message>
-
-    <message name="ExchangeException">
-        <part name="body" element="common:exceptionType"/>
-    </message>
     
     <message name="SetConfigRequest">
         <part name="body" element="plugin:SetConfigRequest"/>
     </message>
     <message name="SetConfigResponse">
-        <part name="body" element="plugin:SetConfigResponse"/>
+        <part name="body" element="plugin:AcknowledgeResponse"/>
     </message>
     
     <message name="SetCommandRequest">
         <part name="body" element="plugin:SetCommandRequest"/>
     </message>
     <message name="SetCommandResponse">
-        <part name="body" element="plugin:SetCommandResponse"/>
+        <part name="body" element="plugin:AcknowledgeResponse"/>
     </message>
     
     <message name="SetReportRequest">
         <part name="body" element="plugin:SetReportRequest"/>
     </message>
     <message name="SetReportResponse">
-        <part name="body" element="plugin:SetReportResponse"/>
+        <part name="body" element="plugin:AcknowledgeResponse"/>
     </message>
     
     <message name="StartRequest">
         <part name="body" element="plugin:StartRequest"/>
     </message>
     <message name="StartResponse">
-        <part name="body" element="plugin:StartResponse"/>
+        <part name="body" element="plugin:AcknowledgeResponse"/>
     </message>
     
     <message name="StopRequest">
         <part name="body" element="plugin:StopRequest"/>
     </message>
     <message name="StopResponse">
-        <part name="body" element="plugin:StopResponse"/>
+        <part name="body" element="plugin:AcknowledgeResponse"/>
     </message>
     
     <message name="PingRequest">
