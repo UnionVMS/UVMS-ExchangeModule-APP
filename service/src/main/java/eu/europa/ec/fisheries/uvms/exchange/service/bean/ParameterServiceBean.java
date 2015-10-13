@@ -14,7 +14,7 @@ import org.slf4j.LoggerFactory;
 
 import eu.europa.ec.fisheries.uvms.exchange.service.ParameterService;
 import eu.europa.ec.fisheries.uvms.exchange.service.config.ParameterKey;
-import eu.europa.ec.fisheries.uvms.exchange.service.constants.ServiceConstants;
+import eu.europa.ec.fisheries.uvms.exchange.service.constants.ExchangeServiceConstants;
 import eu.europa.ec.fisheries.uvms.exchange.service.entity.Parameter;
 import eu.europa.ec.fisheries.uvms.exchange.service.exception.ExchangeServiceException;
 import eu.europa.ec.fisheries.uvms.exchange.service.exception.InputArgumentException;
@@ -34,7 +34,7 @@ public class ParameterServiceBean implements ParameterService {
     @Override
     public String getStringValue(ParameterKey key) throws ExchangeServiceException {
         try {
-            Query query = em.createNamedQuery(ServiceConstants.FIND_BY_NAME);
+            Query query = em.createNamedQuery(ExchangeServiceConstants.FIND_BY_NAME);
             query.setParameter("parameterDescription", key.getKey());
             Parameter entity = (Parameter) query.getSingleResult();
             return entity.getParamValue();
@@ -47,7 +47,7 @@ public class ParameterServiceBean implements ParameterService {
     @Override
     public void setStringValue(ParameterKey key, String value) throws ExchangeServiceException {
         try {
-            TypedQuery<Parameter> query = em.createNamedQuery(ServiceConstants.FIND_BY_NAME, Parameter.class);
+            TypedQuery<Parameter> query = em.createNamedQuery(ExchangeServiceConstants.FIND_BY_NAME, Parameter.class);
             query.setParameter("parameterDescription", key.getKey());
             List<Parameter> parameters = query.getResultList();
 
@@ -81,7 +81,7 @@ public class ParameterServiceBean implements ParameterService {
     @Override
     public Boolean getBooleanValue(ParameterKey key) throws ExchangeServiceException {
         try {
-            Query query = em.createNamedQuery(ServiceConstants.FIND_BY_NAME);
+            Query query = em.createNamedQuery(ExchangeServiceConstants.FIND_BY_NAME);
             query.setParameter("key", key.getKey());
             Parameter entity = (Parameter) query.getSingleResult();
             return parseBooleanValue(entity.getParamValue());
@@ -93,7 +93,7 @@ public class ParameterServiceBean implements ParameterService {
 
     @Override
     public void reset(ParameterKey key) throws ExchangeServiceException {
-        TypedQuery<Parameter> query = em.createNamedQuery(ServiceConstants.FIND_BY_NAME, Parameter.class);
+        TypedQuery<Parameter> query = em.createNamedQuery(ExchangeServiceConstants.FIND_BY_NAME, Parameter.class);
         query.setParameter("parameterDescription", key.getKey());
         for (Parameter parameter : query.getResultList()) {
             em.remove(parameter);
@@ -103,7 +103,7 @@ public class ParameterServiceBean implements ParameterService {
     @Override
     public void clearAll() throws ExchangeServiceException {
         try {
-            TypedQuery<Parameter> query = em.createNamedQuery(ServiceConstants.LIST_ALL, Parameter.class);
+            TypedQuery<Parameter> query = em.createNamedQuery(ExchangeServiceConstants.LIST_ALL, Parameter.class);
             List<Parameter> parameters = query.getResultList();
             for (Parameter parameter : parameters) {
                 em.remove(parameter);

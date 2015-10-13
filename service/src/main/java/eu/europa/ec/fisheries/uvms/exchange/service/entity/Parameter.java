@@ -1,6 +1,6 @@
 package eu.europa.ec.fisheries.uvms.exchange.service.entity;
 
-import eu.europa.ec.fisheries.uvms.exchange.service.constants.ServiceConstants;
+import eu.europa.ec.fisheries.uvms.exchange.service.constants.ExchangeServiceConstants;
 import java.io.Serializable;
 import javax.persistence.*;
 
@@ -10,8 +10,8 @@ import javax.persistence.*;
  */
 @Entity
 @NamedQueries({
-    @NamedQuery(name = ServiceConstants.FIND_BY_NAME, query = "SELECT p FROM Parameter p WHERE p.paramDescription = :parameterDescription"),
-    @NamedQuery(name = ServiceConstants.LIST_ALL, query = "SELECT p FROM Parameter p")
+    @NamedQuery(name = ExchangeServiceConstants.FIND_BY_NAME, query = "SELECT p FROM Parameter p WHERE p.paramDescription = :parameterDescription"),
+    @NamedQuery(name = ExchangeServiceConstants.LIST_ALL, query = "SELECT p FROM Parameter p")
 })
 public class Parameter implements Serializable {
 

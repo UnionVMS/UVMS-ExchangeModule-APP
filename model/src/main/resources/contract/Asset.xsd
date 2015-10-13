@@ -8,8 +8,7 @@
     <xsd:complexType name="AssetId">
         <xsd:sequence>
             <xsd:element name="assetType" type="asset:AssetType"/>
-            <xsd:element name="idType" type="asset:AssetIdType" />
-            <xsd:element name="value" type="xsd:string" />
+            <xsd:element name="assetIdList" type="asset:AssetIdList" minOccurs="1" maxOccurs="unbounded"/>
         </xsd:sequence>
     </xsd:complexType>
     
@@ -21,6 +20,13 @@
             <xsd:enumeration value="OTHER"/>
         </xsd:restriction>
     </xsd:simpleType>
+    
+    <xsd:complexType name="AssetIdList">
+        <xsd:sequence>
+            <xsd:element name="idType" type="asset:AssetIdType" />
+            <xsd:element name="value" type="xsd:string" />
+        </xsd:sequence>
+    </xsd:complexType>
     
     <xsd:simpleType name="AssetIdType">
         <xsd:restriction base="xsd:string">

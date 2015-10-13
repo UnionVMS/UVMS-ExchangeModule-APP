@@ -15,7 +15,7 @@
     <xsd:complexType name="ReportMovementType" abstract="true">
         <xsd:sequence>
             <xsd:element name="pluginName" type="xsd:string" minOccurs="1" maxOccurs="1"/>
-            <xsd:element name="version" type="xsd:string" minOccurs="1" maxOccurs="1"/>
+            <!-- <xsd:element name="version" type="xsd:string" minOccurs="1" maxOccurs="1"/> -->
             <xsd:element name="timestamp" type="xsd:dateTime" minOccurs="1" maxOccurs="1"/>
         </xsd:sequence>
     </xsd:complexType>
@@ -41,17 +41,58 @@
         </xsd:complexContent>
     </xsd:complexType>
     
-    <xsd:simpleType name="SegmentCategoryType">
+    <!-- Type received in UNIONVMS -->
+    <xsd:complexType name="MovementBaseType">
+        <xsd:sequence>
+            <xsd:element name="assetId" type="asset:AssetId"/>
+            <xsd:element name="mobileTerminalId" type="mobterm:MobileTerminalId"/>
+            <xsd:element name="comChannelType" type="movement:MovementComChannelType"/>
+            <xsd:element name="source" type="movement:MovementSourceType"/>
+            
+            <xsd:element name="position" type="movement:MovementPoint"/>
+            <xsd:element name="positionTime" type="xsd:dateTime"/>
+            <xsd:element name="status" type="xsd:string"/>
+            <xsd:element name="reportedSpeed" type="xsd:double" nillable="true"/>
+            <xsd:element name="reportedCourse" type="xsd:double" nillable="true"/>
+            <xsd:element name="movementType" type="movement:MovementTypeType"/>
+            <xsd:element name="activity" type="movement:MovementActivityType"/>
+        </xsd:sequence>
+    </xsd:complexType>
+    
+    <xsd:complexType name="MovementPoint">
+        <xsd:sequence>
+            <xsd:element name="longitude" type="xsd:double" nillable="true"/>
+            <xsd:element name="latitude" type="xsd:double" nillable="true"/>
+            <xsd:element name="altitude" type="xsd:double" nillable="true"/>
+        </xsd:sequence>
+    </xsd:complexType>
+    
+    <!-- Plugin type -->
+    <xsd:simpleType name="MovementComChannelType">
         <xsd:restriction base="xsd:string">
-            <xsd:enumeration value="GAP"/>
-            <xsd:enumeration value="JUMP"/>
-            <xsd:enumeration value="IN_PORT"/>
-            <xsd:enumeration value="EXIT_PORT"/>
-            <xsd:enumeration value="ENTER_PORT"/>
-            <xsd:enumeration value="NULL_DUR"/>
-            <xsd:enumeration value="ANCHORED"/>
-            <xsd:enumeration value="LOW_SPEED"/>
-            <xsd:enumeration value="OTHER"/>
+            <xsd:enumeration value="FLUX"/>
+            <xsd:enumeration value="MANUAL"/>
+            <xsd:enumeration value="NAF"/>
+            <xsd:enumeration value="MOBILE_TERMINAL"/>
+        </xsd:restriction>
+    </xsd:simpleType>
+    
+    <xsd:simpleType name="MovementTypeType">
+        <xsd:restriction base="xsd:string">
+            <xsd:enumeration value="POS"/>
+            <xsd:enumeration value="ENT"/>
+            <xsd:enumeration value="EXI"/>
+            <xsd:enumeration value="MAN"/>
+        </xsd:restriction>
+    </xsd:simpleType>
+    
+    <!-- 
+    LES (eg. InmarsatC EIK), ev. free text field
+    -->
+    <xsd:simpleType name="MovementSourceType">
+        <xsd:restriction base="xsd:string">
+            <xsd:enumeration value="INMARSAT_C"/>
+            <xsd:enumeration value="AIS"/>
         </xsd:restriction>
     </xsd:simpleType>
     
@@ -80,42 +121,6 @@
         </xsd:restriction>
     </xsd:simpleType>
     
-    <xsd:simpleType name="MovementTypeType">
-        <xsd:restriction base="xsd:string">
-            <xsd:enumeration value="POS"/>
-            <xsd:enumeration value="ENT"/>
-            <xsd:enumeration value="EXI"/>
-            <xsd:enumeration value="MAN"/>
-        </xsd:restriction>
-    </xsd:simpleType>
-    
-    <!-- 
-    LES (eg. InmarsatC EIK), ev. free text field
-    -->
-    <xsd:simpleType name="MovementSourceType">
-        <xsd:restriction base="xsd:string">
-            <xsd:enumeration value="INMARSAT_C"/>
-            <xsd:enumeration value="AIS"/>
-        </xsd:restriction>
-    </xsd:simpleType>
-    
-    <!-- Type received in UNIONVMS -->
-    <xsd:complexType name="MovementBaseType">
-        <xsd:sequence>
-            <xsd:element name="assetId" type="asset:AssetId"/>
-            <xsd:element name="comChannelType" type="movement:MovementComChannelType"/>
-            <xsd:element name="mobileTerminalId" type="mobterm:MobileTerminal"/>
-            <xsd:element name="position" type="movement:MovementPoint"/>
-            <xsd:element name="positionTime" type="xsd:dateTime"/>
-            <xsd:element name="status" type="xsd:string"/>
-            <xsd:element name="reportedSpeed" type="xsd:double" nillable="true"/>
-            <xsd:element name="reportedCourse" type="xsd:double" nillable="true"/>
-            <xsd:element name="movementType" type="movement:MovementTypeType"/>
-            <xsd:element name="source" type="movement:MovementSourceType"/>
-            <xsd:element name="activity" type="movement:MovementActivityType"/>
-        </xsd:sequence>
-    </xsd:complexType>
-    
     <!-- type sent to FLUX -->
     <xsd:complexType name="MovementType">
         <xsd:complexContent>
@@ -124,8 +129,6 @@
                     <xsd:element name="guid" type="xsd:string"/> <!-- unionvms specific -->
                     <xsd:element name="connectId" type="xsd:string"/> <!-- unionvms specific -->
                     <xsd:element name="calculatedCourse" type="xsd:double" nillable="true"/>
-                    <!-- <xsd:element name="comChannelType" type="movement:MovementComChannelType"/>-->
-                    <xsd:element name="mobileTerminal" type="mobterm:MobileTerminalId"/>
                     <xsd:element name="measuredSpeed" type="xsd:double" nillable="true"/>
                     <xsd:element name="calculatedSpeed" type="xsd:double" nillable="true"/>
                     <xsd:element name="segmentIds" type="xsd:string"  minOccurs="1" maxOccurs="2"/>
@@ -153,23 +156,5 @@
             <xsd:element name="callback" type="xsd:string"/>
         </xsd:sequence>
     </xsd:complexType>
-    
-    <xsd:complexType name="MovementPoint">
-        <xsd:sequence>
-            <xsd:element name="longitude" type="xsd:double" nillable="true"/>
-            <xsd:element name="latitude" type="xsd:double" nillable="true"/>
-            <xsd:element name="altitude" type="xsd:double" nillable="true"/>
-        </xsd:sequence>
-    </xsd:complexType>
-    
-    <!-- Plugin type -->
-    <xsd:simpleType name="MovementComChannelType">
-        <xsd:restriction base="xsd:string">
-            <xsd:enumeration value="FLUX"/>
-            <xsd:enumeration value="MANUAL"/>
-            <xsd:enumeration value="NAF"/>
-            <xsd:enumeration value="MOBILE_TERMINAL"/>
-        </xsd:restriction>
-    </xsd:simpleType>
     
 </xsd:schema>

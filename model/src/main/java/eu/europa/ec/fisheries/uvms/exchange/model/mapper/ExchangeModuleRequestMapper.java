@@ -9,7 +9,6 @@ import org.slf4j.LoggerFactory;
 
 import eu.europa.ec.fisheries.schema.exchange.common.v1.CommandType;
 import eu.europa.ec.fisheries.schema.exchange.common.v1.ObjectFactory;
-import eu.europa.ec.fisheries.schema.exchange.common.v1.Payload;
 import eu.europa.ec.fisheries.schema.exchange.module.v1.ExchangeModuleMethod;
 import eu.europa.ec.fisheries.schema.exchange.module.v1.SendMovementToPluginRequest;
 import eu.europa.ec.fisheries.schema.exchange.module.v1.SetCommandRequest;
@@ -66,7 +65,7 @@ public class ExchangeModuleRequestMapper {
     	return JAXBMarshaller.marshallJaxBObjectToString(request);
     }
     
-    public static String createSendReportToPlugin(String to, PluginType type, String version, MovementType payload) throws ExchangeModelMapperException {
+    public static String createSendReportToPlugin(String to, PluginType type, MovementType payload) throws ExchangeModelMapperException {
     	SendMovementToPluginRequest request = new SendMovementToPluginRequest();
     	request.setMethod(ExchangeModuleMethod.SEND_REPORT_TO_PLUGIN);
 		SendMovementToPluginType report = new SendMovementToPluginType();
@@ -78,7 +77,6 @@ public class ExchangeModuleRequestMapper {
     	report.setPluginName(to);
     	report.setMovement(payload);
     	report.setPluginType(type);
-    	report.setVersion(version);
 		request.setReport(report);
 		
     	return JAXBMarshaller.marshallJaxBObjectToString(request);

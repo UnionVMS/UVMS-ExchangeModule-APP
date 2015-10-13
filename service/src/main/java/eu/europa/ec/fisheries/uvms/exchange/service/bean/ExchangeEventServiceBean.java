@@ -18,11 +18,16 @@ import eu.europa.ec.fisheries.schema.config.module.v1.ConfigTopicBaseRequest;
 import eu.europa.ec.fisheries.schema.config.module.v1.PushModuleSettingMessage;
 import eu.europa.ec.fisheries.schema.config.types.v1.SettingType;
 import eu.europa.ec.fisheries.schema.exchange.common.v1.ReportType;
+import eu.europa.ec.fisheries.schema.exchange.common.v1.ReportTypeType;
 import eu.europa.ec.fisheries.schema.exchange.module.v1.PingResponse;
 import eu.europa.ec.fisheries.schema.exchange.module.v1.SendMovementToPluginRequest;
 import eu.europa.ec.fisheries.schema.exchange.module.v1.SetMovementReportRequest;
+import eu.europa.ec.fisheries.schema.exchange.movement.v1.MovementType;
+import eu.europa.ec.fisheries.schema.exchange.movement.v1.ObjectFactory;
+import eu.europa.ec.fisheries.schema.exchange.movement.v1.SendMovementToPluginType;
 import eu.europa.ec.fisheries.schema.exchange.service.v1.ServiceType;
 import eu.europa.ec.fisheries.schema.rules.movement.v1.RawMovementType;
+import eu.europa.ec.fisheries.uvms.common.DateUtils;
 import eu.europa.ec.fisheries.uvms.exchange.message.constants.DataSourceQueue;
 import eu.europa.ec.fisheries.uvms.exchange.message.event.ConfigMessageRecievedEvent;
 import eu.europa.ec.fisheries.uvms.exchange.message.event.ErrorEvent;
@@ -45,6 +50,7 @@ import eu.europa.ec.fisheries.uvms.exchange.service.EventService;
 import eu.europa.ec.fisheries.uvms.exchange.service.ExchangeService;
 import eu.europa.ec.fisheries.uvms.exchange.service.ParameterService;
 import eu.europa.ec.fisheries.uvms.exchange.service.config.ParameterKey;
+import eu.europa.ec.fisheries.uvms.exchange.service.constants.ExchangeServiceConstants;
 import eu.europa.ec.fisheries.uvms.exchange.service.exception.ExchangeServiceException;
 import eu.europa.ec.fisheries.uvms.exchange.service.mapper.MovementMapper;
 import eu.europa.ec.fisheries.uvms.rules.model.exception.RulesModelMapperException;
@@ -169,7 +175,8 @@ public class ExchangeEventServiceBean implements EventService {
 		
 		try {
 			SendMovementToPluginRequest request = JAXBMarshaller.unmarshallTextMessage(message.getJmsMessage(), SendMovementToPluginRequest.class);
-			String serviceName = request.getReport().getPluginName();
+			SendMovementToPluginType sendReport = request.getReport();
+			String serviceName = sendReport.getPluginName();
 		
 			//TODO do some validation logic
 			//check so request.getReport().getTo() exists
@@ -178,9 +185,14 @@ public class ExchangeEventServiceBean implements EventService {
 			//otherwise answer to sender (rules) so rules can do something about it (tickets)
 			
 			ReportType report = new ReportType();
-			//TODO map from request
+			report.setTo(serviceName);
+			report.setTimestamp(sendReport.getTimestamp());
+			
+			//when elog is supported add logic
+			report.setMovement(sendReport.getMovement());
+			report.setType(ReportTypeType.MOVEMENT);
+			
 			String text = ExchangePluginRequestMapper.createSetReportRequest(report);
-		
 			producer.sendEventBusMessage(text, serviceName);
 		} catch (ExchangeException e) {
 			LOG.error("[ Error when sending report to plugin ]");
