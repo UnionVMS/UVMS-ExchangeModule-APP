@@ -16,6 +16,7 @@ import javax.jms.Topic;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import eu.europa.ec.fisheries.schema.exchange.plugin.types.v1.PluginType;
 import eu.europa.ec.fisheries.uvms.exchange.message.constants.DataSourceQueue;
 import eu.europa.ec.fisheries.uvms.exchange.message.event.ErrorEvent;
 import eu.europa.ec.fisheries.uvms.exchange.message.event.carrier.ExchangeMessageEvent;
@@ -105,6 +106,28 @@ public class MessageProducerBean implements MessageProducer {
         }
     }
 
+    @Override
+    @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
+	public String sendPluginTypeEventBusMessage(String text, PluginType pluginType) throws ExchangeMessageException {
+        try {
+        	LOG.debug("Sending plugin type event bus message from Exchange module to recipient om JMS Topic to: {} ", pluginType.name());
+            connectJMS();
+            TextMessage message = session.createTextMessage();
+            message.setText(text);
+            message.setStringProperty(ExchangeModelConstants.PLUGIN_TYPE_NAME, pluginType.name());
+            message.setJMSReplyTo(eventQueue);
+            
+            session.createProducer(eventBus).send(message);
+
+            return message.getJMSMessageID();
+        } catch (Exception e) {
+            LOG.error("[ Error when sending message. ] ", e);
+            throw new ExchangeMessageException("[ Error when sending message. ]");
+        } finally {
+            disconnectJMS();
+        }
+	}
+    
     @Override
     @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
     public String sendConfigMessage(String text) throws ExchangeMessageException {

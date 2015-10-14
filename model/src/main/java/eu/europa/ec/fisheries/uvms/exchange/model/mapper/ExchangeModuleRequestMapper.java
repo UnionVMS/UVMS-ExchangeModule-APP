@@ -8,6 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import eu.europa.ec.fisheries.schema.exchange.common.v1.CommandType;
+import eu.europa.ec.fisheries.schema.exchange.common.v1.CommandTypeType;
 import eu.europa.ec.fisheries.schema.exchange.common.v1.ObjectFactory;
 import eu.europa.ec.fisheries.schema.exchange.module.v1.ExchangeModuleMethod;
 import eu.europa.ec.fisheries.schema.exchange.module.v1.SendMovementToPluginRequest;
@@ -18,7 +19,9 @@ import eu.europa.ec.fisheries.schema.exchange.movement.v1.MovementType;
 import eu.europa.ec.fisheries.schema.exchange.movement.v1.ReportMovementType;
 import eu.europa.ec.fisheries.schema.exchange.movement.v1.SendMovementToPluginType;
 import eu.europa.ec.fisheries.schema.exchange.movement.v1.SetReportMovementType;
+import eu.europa.ec.fisheries.schema.exchange.plugin.types.v1.EmailType;
 import eu.europa.ec.fisheries.schema.exchange.plugin.types.v1.PluginType;
+import eu.europa.ec.fisheries.schema.exchange.plugin.types.v1.PollType;
 import eu.europa.ec.fisheries.schema.exchange.registry.v1.ExchangeRegistryMethod;
 import eu.europa.ec.fisheries.schema.exchange.registry.v1.RegisterServiceRequest;
 import eu.europa.ec.fisheries.schema.exchange.registry.v1.UnregisterServiceRequest;
@@ -65,7 +68,7 @@ public class ExchangeModuleRequestMapper {
     	return JAXBMarshaller.marshallJaxBObjectToString(request);
     }
     
-    public static String createSendReportToPlugin(String to, PluginType type, MovementType payload) throws ExchangeModelMapperException {
+    public static String createSendReportToPlugin(PluginType type, MovementType payload) throws ExchangeModelMapperException {
     	SendMovementToPluginRequest request = new SendMovementToPluginRequest();
     	request.setMethod(ExchangeModuleMethod.SEND_REPORT_TO_PLUGIN);
 		SendMovementToPluginType report = new SendMovementToPluginType();
@@ -74,11 +77,38 @@ public class ExchangeModuleRequestMapper {
 		} catch (DatatypeConfigurationException e) {
 			throw new ExchangeModelMapperException("Couldn't set current timestamp for message");
 		}
-    	report.setPluginName(to);
     	report.setMovement(payload);
     	report.setPluginType(type);
 		request.setReport(report);
 		
     	return JAXBMarshaller.marshallJaxBObjectToString(request);
+    }
+    
+    public static String createSetCommandSendPollRequest(String pluginName, PollType poll) throws ExchangeModelMapperException  {
+    	SetCommandRequest request = createSetCommandRequest(pluginName, CommandTypeType.POLL);
+    	request.getCommand().setPoll(poll);
+    	return JAXBMarshaller.marshallJaxBObjectToString(request);
+    }
+    
+    public static String createSetCommandSendEmailRequest(String pluginName, EmailType email) throws ExchangeModelMapperException {
+    	SetCommandRequest request = createSetCommandRequest(pluginName, CommandTypeType.EMAIL);
+    	request.getCommand().setEmail(email);
+    	return JAXBMarshaller.marshallJaxBObjectToString(request);
+    }
+    
+    private static SetCommandRequest createSetCommandRequest(String pluginName, CommandTypeType type) throws ExchangeModelMapperException {
+    	SetCommandRequest request = new SetCommandRequest();
+    	request.setMethod(ExchangeModuleMethod.SET_COMMAND);
+    	CommandType commandType = new CommandType();
+    	try {
+    		commandType.setTimestamp(DateUtils.getCurrentDate());
+    	} catch (DatatypeConfigurationException e) {
+    		throw new ExchangeModelMapperException("Couldn't set current timestamp for message");
+    	}
+    	commandType.setCommand(type);
+    	commandType.setPluginName(pluginName);
+    	
+		request.setCommand(commandType);
+    	return request;
     }
 }

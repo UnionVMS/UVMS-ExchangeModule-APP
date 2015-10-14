@@ -22,9 +22,18 @@ import eu.europa.ec.fisheries.schema.exchange.common.v1.ReportTypeType;
 import eu.europa.ec.fisheries.schema.exchange.module.v1.PingResponse;
 import eu.europa.ec.fisheries.schema.exchange.module.v1.SendMovementToPluginRequest;
 import eu.europa.ec.fisheries.schema.exchange.module.v1.SetMovementReportRequest;
+import eu.europa.ec.fisheries.schema.exchange.movement.asset.v1.AssetId;
+import eu.europa.ec.fisheries.schema.exchange.movement.asset.v1.AssetIdList;
+import eu.europa.ec.fisheries.schema.exchange.movement.asset.v1.AssetIdType;
+import eu.europa.ec.fisheries.schema.exchange.movement.asset.v1.AssetType;
+import eu.europa.ec.fisheries.schema.exchange.movement.mobileterminal.v1.IdList;
+import eu.europa.ec.fisheries.schema.exchange.movement.mobileterminal.v1.IdType;
+import eu.europa.ec.fisheries.schema.exchange.movement.mobileterminal.v1.MobileTerminalId;
+import eu.europa.ec.fisheries.schema.exchange.movement.v1.MovementBaseType;
 import eu.europa.ec.fisheries.schema.exchange.movement.v1.MovementType;
 import eu.europa.ec.fisheries.schema.exchange.movement.v1.ObjectFactory;
 import eu.europa.ec.fisheries.schema.exchange.movement.v1.SendMovementToPluginType;
+import eu.europa.ec.fisheries.schema.exchange.movement.v1.SetReportMovementType;
 import eu.europa.ec.fisheries.schema.exchange.service.v1.ServiceType;
 import eu.europa.ec.fisheries.schema.rules.movement.v1.RawMovementType;
 import eu.europa.ec.fisheries.uvms.common.DateUtils;
@@ -140,11 +149,19 @@ public class ExchangeEventServiceBean implements EventService {
 		//PROCESS MOVEMENT
 		try {
 			SetMovementReportRequest request = JAXBMarshaller.unmarshallTextMessage(message.getJmsMessage(), SetMovementReportRequest.class);
+			
 			//TODO log to exchange log (received message)
 			//reportType.getFrom()
 			//reportType.getTimestamp()
-			
-			String movement = RulesModuleRequestMapper.createSetMovementReportRequest(MovementMapper.getMapper().map(request.getRequest().getMovement(), RawMovementType.class));
+			MovementBaseType baseMovement = request.getRequest().getMovement();
+			RawMovementType rawMovement = MovementMapper.getMapper().map(baseMovement, RawMovementType.class);
+			if(rawMovement.getAssetId() != null && rawMovement.getAssetId().getAssetIdList() != null) {
+				rawMovement.getAssetId().getAssetIdList().addAll(MovementMapper.mapAssetIdList(baseMovement.getAssetId().getAssetIdList()));
+			}
+			if(rawMovement.getMobileTerminalId() != null && rawMovement.getMobileTerminalId().getMobileTerminalIdList() != null) {
+				rawMovement.getMobileTerminalId().getMobileTerminalIdList().addAll(MovementMapper.mapMobileTerminalIdList(baseMovement.getMobileTerminalId().getMobileTerminalIdList()));
+			}
+			String movement = RulesModuleRequestMapper.createSetMovementReportRequest(rawMovement);
 			producer.sendMessageOnQueue(movement, DataSourceQueue.RULES);
 		} catch (ExchangeModelMarshallException e) {
 			// TODO Auto-generated catch block
@@ -176,7 +193,6 @@ public class ExchangeEventServiceBean implements EventService {
 		try {
 			SendMovementToPluginRequest request = JAXBMarshaller.unmarshallTextMessage(message.getJmsMessage(), SendMovementToPluginRequest.class);
 			SendMovementToPluginType sendReport = request.getReport();
-			String serviceName = sendReport.getPluginName();
 		
 			//TODO do some validation logic
 			//check so request.getReport().getTo() exists
@@ -185,15 +201,13 @@ public class ExchangeEventServiceBean implements EventService {
 			//otherwise answer to sender (rules) so rules can do something about it (tickets)
 			
 			ReportType report = new ReportType();
-			report.setTo(serviceName);
 			report.setTimestamp(sendReport.getTimestamp());
-			
 			//when elog is supported add logic
 			report.setMovement(sendReport.getMovement());
 			report.setType(ReportTypeType.MOVEMENT);
 			
 			String text = ExchangePluginRequestMapper.createSetReportRequest(report);
-			producer.sendEventBusMessage(text, serviceName);
+			producer.sendPluginTypeEventBusMessage(text, sendReport.getPluginType());
 		} catch (ExchangeException e) {
 			LOG.error("[ Error when sending report to plugin ]");
 			errorEvent.fire(new ExchangeMessageEvent(message.getJmsMessage(), ExchangeModuleResponseMapper.createFaultMessage(FaultCode.EXCHANGE_EVENT_SERVICE, "Excpetion when sending message to plugin ")));

@@ -3,7 +3,6 @@
              xmlns:module="urn:module.exchange.schema.fisheries.ec.europa.eu:v1"
              xmlns:search="urn:search.exchange.schema.fisheries.ec.europa.eu:v1"
              xmlns:common="urn:common.exchange.schema.fisheries.ec.europa.eu:v1"
-             xmlns:poll="urn:poll.exchange.schema.fisheries.ec.europa.eu:v1"
              xmlns:service="urn:service.exchange.schema.fisheries.ec.europa.eu:v1"
              xmlns:exchange="urn:exchange.schema.fisheries.ec.europa.eu:v1"
              xmlns:movement="urn:movement.exchange.schema.fisheries.ec.europa.eu:v1"
@@ -17,7 +16,6 @@
             <xsd:import namespace="urn:common.exchange.schema.fisheries.ec.europa.eu:v1" schemaLocation="ExchangeCommon.xsd"/>
             <xsd:import namespace="urn:exchange.schema.fisheries.ec.europa.eu:v1" schemaLocation="Exchange.xsd"/>
             <xsd:import namespace="urn:service.exchange.schema.fisheries.ec.europa.eu:v1" schemaLocation="Service.xsd"/>
-            <xsd:import namespace="urn:poll.exchange.schema.fisheries.ec.europa.eu:v1" schemaLocation="Poll.xsd"/>
             <xsd:import namespace="urn:movement.exchange.schema.fisheries.ec.europa.eu:v1" schemaLocation="Movement.xsd"/>
             
             <xsd:simpleType name="ExchangeModuleMethod">

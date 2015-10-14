@@ -1,12 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <xsd:schema targetNamespace="urn:common.exchange.schema.fisheries.ec.europa.eu:v1"
             xmlns:common="urn:common.exchange.schema.fisheries.ec.europa.eu:v1"
-            xmlns:movement="urn:movement.exchange.schema.fisheries.ec.europa.eu:v1" 
+            xmlns:movement="urn:movement.exchange.schema.fisheries.ec.europa.eu:v1"
+            xmlns:plugin="urn:types.plugin.exchange.schema.fisheries.ec.europa.eu:v1" 
             xmlns:xsd="http://www.w3.org/2001/XMLSchema"
             xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
             xmlns="http://schemas.xmlsoap.org/wsdl/">
   
   <xsd:import namespace="urn:movement.exchange.schema.fisheries.ec.europa.eu:v1" schemaLocation="Movement.xsd"/>
+  <xsd:import namespace="urn:types.plugin.exchange.schema.fisheries.ec.europa.eu:v1" schemaLocation="Plugin.xsd"/>
   
     <xsd:element name="exchangeFault">
         <xsd:complexType>
@@ -40,15 +42,25 @@
     
     <xsd:complexType name="CommandType">
         <xsd:sequence>
-            <xsd:element name="to" type="xsd:string"/>
-            <xsd:element name="command" type="xsd:string"/>
-            <xsd:element name="params" type="common:keyValueType"/>
+            <xsd:element name="pluginName" type="xsd:string"/>
+            <xsd:element name="command" type="common:CommandTypeType"/>
+            <xsd:element name="timestamp" type="xsd:dateTime" minOccurs="1" maxOccurs="1"/>
+            <xsd:choice>
+                <xsd:element name="poll" type="plugin:PollType"/>
+                <xsd:element name="email" type="plugin:EmailType"/>
+            </xsd:choice>
         </xsd:sequence>
     </xsd:complexType>
     
+    <xsd:simpleType name="CommandTypeType">
+        <xsd:restriction base="xsd:string">
+            <xsd:enumeration value="POLL"/>
+            <xsd:enumeration value="EMAIL"/>
+        </xsd:restriction>
+    </xsd:simpleType>
+    
     <xsd:complexType name="ReportType">
         <xsd:sequence>
-            <xsd:element name="to" type="xsd:string"/> <!-- service-name-registered -->
             <xsd:element name="type" type="common:ReportTypeType"/>
             <!-- <xsd:element name="version" type="xsd:string"/> -->
             <xsd:element name="timestamp" type="xsd:dateTime" minOccurs="1" maxOccurs="1"/>

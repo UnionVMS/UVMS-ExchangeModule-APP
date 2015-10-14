@@ -4,6 +4,7 @@ import javax.ejb.Local;
 import javax.enterprise.event.Observes;
 import javax.jms.TextMessage;
 
+import eu.europa.ec.fisheries.schema.exchange.plugin.types.v1.PluginType;
 import eu.europa.ec.fisheries.uvms.exchange.message.constants.DataSourceQueue;
 import eu.europa.ec.fisheries.uvms.exchange.message.event.ErrorEvent;
 import eu.europa.ec.fisheries.uvms.exchange.message.event.carrier.ExchangeMessageEvent;
@@ -16,6 +17,8 @@ public interface MessageProducer {
 
     public String sendEventBusMessage(String text, String serviceName) throws ExchangeMessageException;
 
+    public String sendPluginTypeEventBusMessage(String text, PluginType pluginType) throws ExchangeMessageException;
+    
     public String sendConfigMessage(String text) throws ExchangeMessageException;
 
     public void sendModuleResponseMessage(TextMessage message, String text);
