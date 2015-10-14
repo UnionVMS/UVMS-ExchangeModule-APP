@@ -21,28 +21,19 @@ import eu.europa.ec.fisheries.schema.exchange.common.v1.ReportType;
 import eu.europa.ec.fisheries.schema.exchange.common.v1.ReportTypeType;
 import eu.europa.ec.fisheries.schema.exchange.module.v1.PingResponse;
 import eu.europa.ec.fisheries.schema.exchange.module.v1.SendMovementToPluginRequest;
+import eu.europa.ec.fisheries.schema.exchange.module.v1.SetCommandRequest;
 import eu.europa.ec.fisheries.schema.exchange.module.v1.SetMovementReportRequest;
-import eu.europa.ec.fisheries.schema.exchange.movement.asset.v1.AssetId;
-import eu.europa.ec.fisheries.schema.exchange.movement.asset.v1.AssetIdList;
-import eu.europa.ec.fisheries.schema.exchange.movement.asset.v1.AssetIdType;
-import eu.europa.ec.fisheries.schema.exchange.movement.asset.v1.AssetType;
-import eu.europa.ec.fisheries.schema.exchange.movement.mobileterminal.v1.IdList;
-import eu.europa.ec.fisheries.schema.exchange.movement.mobileterminal.v1.IdType;
-import eu.europa.ec.fisheries.schema.exchange.movement.mobileterminal.v1.MobileTerminalId;
 import eu.europa.ec.fisheries.schema.exchange.movement.v1.MovementBaseType;
-import eu.europa.ec.fisheries.schema.exchange.movement.v1.MovementType;
-import eu.europa.ec.fisheries.schema.exchange.movement.v1.ObjectFactory;
 import eu.europa.ec.fisheries.schema.exchange.movement.v1.SendMovementToPluginType;
-import eu.europa.ec.fisheries.schema.exchange.movement.v1.SetReportMovementType;
 import eu.europa.ec.fisheries.schema.exchange.service.v1.ServiceType;
 import eu.europa.ec.fisheries.schema.rules.movement.v1.RawMovementType;
-import eu.europa.ec.fisheries.uvms.common.DateUtils;
 import eu.europa.ec.fisheries.uvms.exchange.message.constants.DataSourceQueue;
 import eu.europa.ec.fisheries.uvms.exchange.message.event.ConfigMessageRecievedEvent;
 import eu.europa.ec.fisheries.uvms.exchange.message.event.ErrorEvent;
 import eu.europa.ec.fisheries.uvms.exchange.message.event.ExchangeLogEvent;
 import eu.europa.ec.fisheries.uvms.exchange.message.event.PingEvent;
 import eu.europa.ec.fisheries.uvms.exchange.message.event.PluginConfigEvent;
+import eu.europa.ec.fisheries.uvms.exchange.message.event.SendCommandToPluginEvent;
 import eu.europa.ec.fisheries.uvms.exchange.message.event.SendReportToPluginEvent;
 import eu.europa.ec.fisheries.uvms.exchange.message.event.SetMovementEvent;
 import eu.europa.ec.fisheries.uvms.exchange.message.event.carrier.ExchangeMessageEvent;
@@ -59,7 +50,6 @@ import eu.europa.ec.fisheries.uvms.exchange.service.EventService;
 import eu.europa.ec.fisheries.uvms.exchange.service.ExchangeService;
 import eu.europa.ec.fisheries.uvms.exchange.service.ParameterService;
 import eu.europa.ec.fisheries.uvms.exchange.service.config.ParameterKey;
-import eu.europa.ec.fisheries.uvms.exchange.service.constants.ExchangeServiceConstants;
 import eu.europa.ec.fisheries.uvms.exchange.service.exception.ExchangeServiceException;
 import eu.europa.ec.fisheries.uvms.exchange.service.mapper.MovementMapper;
 import eu.europa.ec.fisheries.uvms.rules.model.exception.RulesModelMapperException;
@@ -208,6 +198,9 @@ public class ExchangeEventServiceBean implements EventService {
 			
 			String text = ExchangePluginRequestMapper.createSetReportRequest(report);
 			producer.sendPluginTypeEventBusMessage(text, sendReport.getPluginType());
+			
+			//TODO
+			//log to exchangelogs
 		} catch (ExchangeException e) {
 			LOG.error("[ Error when sending report to plugin ]");
 			errorEvent.fire(new ExchangeMessageEvent(message.getJmsMessage(), ExchangeModuleResponseMapper.createFaultMessage(FaultCode.EXCHANGE_EVENT_SERVICE, "Excpetion when sending message to plugin ")));
@@ -217,6 +210,26 @@ public class ExchangeEventServiceBean implements EventService {
 	@Override
 	public void processAcknowledge(@Observes @ExchangeLogEvent ExchangeMessageEvent message) {
 		LOG.info("Process acknowledge");
+	}
+
+	@Override
+	public void sendCommandToPlugin(@Observes @SendCommandToPluginEvent ExchangeMessageEvent message) {
+		LOG.info("Send command to plugin");
+		
+		try {
+			SetCommandRequest request = JAXBMarshaller.unmarshallTextMessage(message.getJmsMessage(), SetCommandRequest.class);
+			String pluginName = request.getCommand().getPluginName();
+
+			String text = ExchangePluginRequestMapper.createSetCommandRequest(request.getCommand());
+			producer.sendEventBusMessage(text, pluginName);
+
+			//TODO
+			//log to exchangelogs
+			
+		} catch (NullPointerException | ExchangeException e) {
+			LOG.error("[ Error when sending command to plugin ]");
+			errorEvent.fire(new ExchangeMessageEvent(message.getJmsMessage(), ExchangeModuleResponseMapper.createFaultMessage(FaultCode.EXCHANGE_EVENT_SERVICE, "Excpetion when sending command to plugin ")));
+		}
 	}
 
 }

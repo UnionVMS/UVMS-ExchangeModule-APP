@@ -19,6 +19,7 @@ import eu.europa.ec.fisheries.uvms.exchange.message.event.ErrorEvent;
 import eu.europa.ec.fisheries.uvms.exchange.message.event.ExchangeLogEvent;
 import eu.europa.ec.fisheries.uvms.exchange.message.event.PingEvent;
 import eu.europa.ec.fisheries.uvms.exchange.message.event.PluginConfigEvent;
+import eu.europa.ec.fisheries.uvms.exchange.message.event.SendCommandToPluginEvent;
 import eu.europa.ec.fisheries.uvms.exchange.message.event.SendReportToPluginEvent;
 import eu.europa.ec.fisheries.uvms.exchange.message.event.SetMovementEvent;
 import eu.europa.ec.fisheries.uvms.exchange.message.event.carrier.ExchangeMessageEvent;
@@ -50,6 +51,10 @@ public class MessageConsumerBean implements MessageListener {
     @Inject
     @SendReportToPluginEvent
     Event<ExchangeMessageEvent> sendMessageToPluginEvent;
+    
+    @Inject
+    @SendCommandToPluginEvent
+    Event<ExchangeMessageEvent> sendCommandToPluginEvent;
     
     @Inject
     @ExchangeLogEvent
@@ -84,8 +89,7 @@ public class MessageConsumerBean implements MessageListener {
                 pluginConfigEvent.fire(new ExchangeMessageEvent(textMessage));
                 break;
             case SET_COMMAND:
-            	//TODO IMPLEMENT LIST SERVICES, SET COMMAND AND SET REPORT
-                LOG.info("IMPLEMENT LIST SERVICES, SET COMMAND AND SET REPORT");
+            	sendCommandToPluginEvent.fire(new ExchangeMessageEvent(textMessage));
             	break;
             case SEND_REPORT_TO_PLUGIN:
                 sendMessageToPluginEvent.fire(new ExchangeMessageEvent(textMessage));

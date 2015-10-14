@@ -55,10 +55,6 @@ public class ExchangeServiceBean implements ExchangeService {
     @EJB
     MessageProducer producer;
 
-    @Inject
-    @NotificationEvent
-    Event<NotificationMessage> notification;
-
     /**
      * {@inheritDoc}
      *
@@ -176,19 +172,6 @@ public class ExchangeServiceBean implements ExchangeService {
             TextMessage response = consumer.getMessage(messageId, TextMessage.class);
             return ExchangeDataSourceResponseMapper.mapToGetLogListByQueryResponse(response);
         } catch (ExchangeModelMapperException | ExchangeMessageException e) {
-            throw new ExchangeServiceException(e.getMessage());
-        }
-    }
-
-    @Override
-    public String setPluginReport(CommandType data) throws ExchangeServiceException {
-        LOG.info("Send poll to plugin method invoked in service layer");
-        try {
-            String request = ExchangeServiceRequestMapper.mapCreatePollRequest(data);
-            notification.fire(new NotificationMessage("pollTrackId", data));
-            //producer.sendEventBusMessage(request, data.getTo());
-            return "Message sent!";
-        } catch (ExchangeModelMapperException e) {
             throw new ExchangeServiceException(e.getMessage());
         }
     }

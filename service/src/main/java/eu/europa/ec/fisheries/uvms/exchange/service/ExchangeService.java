@@ -87,16 +87,6 @@ public interface ExchangeService {
     public GetLogListByQueryResponse getExchangeLogByQuery(ExchangeListQuery query) throws ExchangeServiceException;
 
     /**
-     *
-     * Post poll request on EventBus
-     *
-     * @param data
-     * @return
-     * @throws ExchangeServiceException
-     */
-    public String setPluginReport(CommandType data) throws ExchangeServiceException;
-
-    /**
      *  Requests parameters from Config module and stores in the database.
      *  If module is not registered, pushes current parameters to Config.
      *  
