@@ -1,7 +1,6 @@
 package eu.europa.ec.fisheries.uvms.exchange.model.mapper;
 
 import javax.jms.TextMessage;
-import javax.websocket.SendResult;
 import javax.xml.datatype.DatatypeConfigurationException;
 
 import org.slf4j.Logger;
@@ -9,14 +8,11 @@ import org.slf4j.LoggerFactory;
 
 import eu.europa.ec.fisheries.schema.exchange.common.v1.CommandType;
 import eu.europa.ec.fisheries.schema.exchange.common.v1.CommandTypeType;
-import eu.europa.ec.fisheries.schema.exchange.common.v1.ObjectFactory;
 import eu.europa.ec.fisheries.schema.exchange.module.v1.ExchangeModuleMethod;
 import eu.europa.ec.fisheries.schema.exchange.module.v1.SendMovementToPluginRequest;
 import eu.europa.ec.fisheries.schema.exchange.module.v1.SetCommandRequest;
 import eu.europa.ec.fisheries.schema.exchange.module.v1.SetMovementReportRequest;
-import eu.europa.ec.fisheries.schema.exchange.movement.asset.v1.AssetId;
 import eu.europa.ec.fisheries.schema.exchange.movement.v1.MovementType;
-import eu.europa.ec.fisheries.schema.exchange.movement.v1.ReportMovementType;
 import eu.europa.ec.fisheries.schema.exchange.movement.v1.SendMovementToPluginType;
 import eu.europa.ec.fisheries.schema.exchange.movement.v1.SetReportMovementType;
 import eu.europa.ec.fisheries.schema.exchange.plugin.types.v1.EmailType;
@@ -49,9 +45,10 @@ public class ExchangeModuleRequestMapper {
         return JAXBMarshaller.marshallJaxBObjectToString(request);
     }
 
-    public static String createUnregisterServiceRequest(ServiceType serviceType) throws ExchangeModelMarshallException {
+    public static String createUnregisterServiceRequest(ServiceType serviceType, String messageSelector) throws ExchangeModelMarshallException {
         UnregisterServiceRequest request = new UnregisterServiceRequest();
         request.setMethod(ExchangeRegistryMethod.UNREGISTER_SERVICE);
+        request.setResponseTopicMessageSelector(messageSelector);
         request.setService(serviceType);
         return JAXBMarshaller.marshallJaxBObjectToString(request);
     }

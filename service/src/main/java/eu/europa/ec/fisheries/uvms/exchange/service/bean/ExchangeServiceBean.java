@@ -5,14 +5,15 @@ import java.util.List;
 
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
-import javax.enterprise.event.Event;
-import javax.inject.Inject;
 import javax.jms.TextMessage;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import eu.europa.ec.fisheries.schema.exchange.common.v1.CommandType;
+import eu.europa.ec.fisheries.schema.config.module.v1.PullSettingsResponse;
+import eu.europa.ec.fisheries.schema.config.module.v1.PushSettingsResponse;
+import eu.europa.ec.fisheries.schema.config.types.v1.PullSettingsStatus;
+import eu.europa.ec.fisheries.schema.config.types.v1.SettingType;
 import eu.europa.ec.fisheries.schema.exchange.service.v1.ServiceType;
 import eu.europa.ec.fisheries.schema.exchange.source.v1.GetLogListByQueryResponse;
 import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeListQuery;
@@ -28,18 +29,11 @@ import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelMapperE
 import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelMarshallException;
 import eu.europa.ec.fisheries.uvms.exchange.model.mapper.ExchangeDataSourceRequestMapper;
 import eu.europa.ec.fisheries.uvms.exchange.model.mapper.ExchangeDataSourceResponseMapper;
-import eu.europa.ec.fisheries.uvms.exchange.model.mapper.ExchangeServiceRequestMapper;
 import eu.europa.ec.fisheries.uvms.exchange.model.mapper.JAXBMarshaller;
 import eu.europa.ec.fisheries.uvms.exchange.service.ExchangeService;
 import eu.europa.ec.fisheries.uvms.exchange.service.ParameterService;
 import eu.europa.ec.fisheries.uvms.exchange.service.config.ParameterKey;
 import eu.europa.ec.fisheries.uvms.exchange.service.exception.ExchangeServiceException;
-import eu.europa.ec.fisheries.uvms.notifications.NotificationEvent;
-import eu.europa.ec.fisheries.uvms.notifications.NotificationMessage;
-import eu.europa.ec.fisheries.schema.config.module.v1.PullSettingsResponse;
-import eu.europa.ec.fisheries.schema.config.module.v1.PushSettingsResponse;
-import eu.europa.ec.fisheries.schema.config.types.v1.PullSettingsStatus;
-import eu.europa.ec.fisheries.schema.config.types.v1.SettingType;
 
 @Stateless
 public class ExchangeServiceBean implements ExchangeService {

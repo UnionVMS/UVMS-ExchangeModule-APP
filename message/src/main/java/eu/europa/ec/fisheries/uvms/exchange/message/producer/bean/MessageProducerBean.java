@@ -20,6 +20,8 @@ import eu.europa.ec.fisheries.schema.exchange.plugin.types.v1.PluginType;
 import eu.europa.ec.fisheries.uvms.exchange.message.constants.DataSourceQueue;
 import eu.europa.ec.fisheries.uvms.exchange.message.event.ErrorEvent;
 import eu.europa.ec.fisheries.uvms.exchange.message.event.carrier.ExchangeMessageEvent;
+import eu.europa.ec.fisheries.uvms.exchange.message.event.carrier.PluginMessageEvent;
+import eu.europa.ec.fisheries.uvms.exchange.message.event.registry.PluginErrorEvent;
 import eu.europa.ec.fisheries.uvms.exchange.message.exception.ExchangeMessageException;
 import eu.europa.ec.fisheries.uvms.exchange.message.producer.MessageProducer;
 import eu.europa.ec.fisheries.uvms.exchange.model.constant.ExchangeModelConstants;
@@ -184,6 +186,27 @@ public class MessageProducerBean implements MessageProducer {
 	}
 
 	@Override
+	public void sendPluginErrorResponseMessage(@Observes @PluginErrorEvent PluginMessageEvent message) {
+        try {
+            connectJMS();
+            LOG.debug("Sending error message back from Exchange module to recipient om JMS Topic with correlationID: {} ", message
+                    .getJmsMessage().getJMSMessageID());
+
+            String data = JAXBMarshaller.marshallJaxBObjectToString(message.getErrorFault());
+            
+            TextMessage response = session.createTextMessage(data);
+            response.setStringProperty(ExchangeModelConstants.SERVICE_NAME, message.getResponseTopicMessageSelector());
+            response.setJMSCorrelationID(message.getJmsMessage().getJMSMessageID());
+            session.createProducer(eventBus).send(response);
+
+        } catch (ExchangeModelMapperException | JMSException e) {
+            LOG.error("Error when returning Error message to recipient");
+        } finally {
+            disconnectJMS();
+        }
+	}
+	
+	@Override
 	public void sendModuleResponseMessage(TextMessage message, String text) {
         try {
             LOG.info("Sending message back to recipient from ExchangeModule with correlationId {} on queue: {}", message.getJMSMessageID(),
@@ -197,5 +220,5 @@ public class MessageProducerBean implements MessageProducer {
         } finally {
             disconnectJMS();
         }
-	}
+	}	
 }

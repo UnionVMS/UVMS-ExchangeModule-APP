@@ -21,6 +21,7 @@ import eu.europa.ec.fisheries.schema.exchange.registry.v1.RegisterServiceRespons
 import eu.europa.ec.fisheries.schema.exchange.service.v1.ServiceType;
 import eu.europa.ec.fisheries.schema.exchange.service.v1.SettingListType;
 import eu.europa.ec.fisheries.schema.exchange.service.v1.SettingType;
+import eu.europa.ec.fisheries.uvms.exchange.model.constant.FaultCode;
 import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelMapperException;
 import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelMarshallException;
 
@@ -60,10 +61,16 @@ public class ExchangePluginResponseMapper {
         return JAXBMarshaller.marshallJaxBObjectToString(response);
     }
 
-    public static AcknowledgeType mapToAcknowlageType(String id, AcknowledgeTypeType ackType) {
+    public static AcknowledgeType mapToAcknowlegeType(String id, AcknowledgeTypeType ackType) {
         AcknowledgeType type = new AcknowledgeType();
         type.setMessageId(id);
         type.setType(ackType);
+        return type;
+    }
+    
+    public static AcknowledgeType mapToAcknowlegeType(String id, AcknowledgeTypeType ackType, String message) {
+        AcknowledgeType type = mapToAcknowlegeType(id, ackType);
+        type.setMessage(message);
         return type;
     }
 
@@ -111,11 +118,11 @@ public class ExchangePluginResponseMapper {
         return JAXBMarshaller.marshallJaxBObjectToString(response);
     }
 
-    public static String mapToPluginFaultResponse(int code, String message) throws ExchangeModelMarshallException {
-        PluginFault response = new PluginFault();
-        response.setCode(code);
-        response.setMessage(message);
-        return JAXBMarshaller.marshallJaxBObjectToString(response);
+    public static PluginFault mapToPluginFaultResponse(int code, String message) {
+        PluginFault fault = new PluginFault();
+        fault.setCode(code);
+        fault.setMessage(message);
+        return fault;
     }
 
 }

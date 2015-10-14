@@ -12,16 +12,20 @@ import eu.europa.ec.fisheries.schema.exchange.registry.v1.RegisterServiceRequest
 import eu.europa.ec.fisheries.schema.exchange.registry.v1.RegisterServiceResponse;
 import eu.europa.ec.fisheries.schema.exchange.registry.v1.UnregisterServiceRequest;
 import eu.europa.ec.fisheries.uvms.exchange.message.event.carrier.ExchangeMessageEvent;
+import eu.europa.ec.fisheries.uvms.exchange.message.event.carrier.PluginMessageEvent;
 import eu.europa.ec.fisheries.uvms.exchange.message.event.registry.PluginErrorEvent;
 import eu.europa.ec.fisheries.uvms.exchange.message.event.registry.RegisterServiceEvent;
 import eu.europa.ec.fisheries.uvms.exchange.message.event.registry.UnRegisterServiceEvent;
 import eu.europa.ec.fisheries.uvms.exchange.message.exception.ExchangeMessageException;
 import eu.europa.ec.fisheries.uvms.exchange.message.producer.MessageProducer;
 import eu.europa.ec.fisheries.uvms.exchange.model.constant.ExchangeModelConstants;
+import eu.europa.ec.fisheries.uvms.exchange.model.constant.FaultCode;
 import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelMarshallException;
 import eu.europa.ec.fisheries.uvms.exchange.model.mapper.ExchangePluginResponseMapper;
 import eu.europa.ec.fisheries.uvms.exchange.model.mapper.JAXBMarshaller;
+
 import java.util.logging.Level;
+
 import javax.ejb.ActivationConfigProperty;
 import javax.ejb.EJB;
 import javax.ejb.MessageDriven;
@@ -31,6 +35,7 @@ import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.MessageListener;
 import javax.jms.TextMessage;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -53,18 +58,15 @@ public class RegistryBusEventListener implements MessageListener {
 
     @Inject
     @RegisterServiceEvent
-    Event<ExchangeMessageEvent> pluginConfigEvent;
+    Event<PluginMessageEvent> registerServiceEvent;
 
     @Inject
     @UnRegisterServiceEvent
-    Event<ExchangeMessageEvent> processMovementEvent;
+    Event<PluginMessageEvent> unregisterServiceEvent;
 
     @Inject
     @PluginErrorEvent
-    Event<ExchangeMessageEvent> errorEvent;
-
-    @EJB
-    MessageProducer messageProducer;
+    Event<PluginMessageEvent> errorEvent;
 
     @Override
     public void onMessage(Message message) {
@@ -72,39 +74,27 @@ public class RegistryBusEventListener implements MessageListener {
         LOG.info("Eventbus listener for Exchange Registry (ExchangeModelConstants.EXCHANGE_REGISTER_SERVICE): {}", ExchangeModelConstants.EXCHANGE_REGISTER_SERVICE);
 
         TextMessage textMessage = (TextMessage) message;
-
+        String responseTopicMessageSelector = null;
         try {
 
             ExchangeRegistryBaseRequest request = JAXBMarshaller.unmarshallTextMessage(textMessage, ExchangeRegistryBaseRequest.class);
-
-            String responseMessage = null;
-            String serviceName = null;
-
+            responseTopicMessageSelector = request.getResponseTopicMessageSelector();
+            
             switch (request.getMethod()) {
                 case REGISTER_SERVICE:
-                    RegisterServiceRequest register = JAXBMarshaller.unmarshallTextMessage(textMessage, RegisterServiceRequest.class);
-                    serviceName = register.getResponseTopicMessageSelector();
-                    responseMessage = ExchangePluginResponseMapper.mapToRegisterServiceResponse(AcknowledgeTypeType.OK, register.getService(), null);
-                    LOG.info("GOT REGISTER CALL FROM " + register.getService().getName());
+                    registerServiceEvent.fire(new PluginMessageEvent(textMessage, responseTopicMessageSelector));
                     break;
                 case UNREGISTER_SERVICE:
                     UnregisterServiceRequest unregister = JAXBMarshaller.unmarshallTextMessage(textMessage, UnregisterServiceRequest.class);
                     LOG.info("GOT UNREGISTER CALL FROM " + unregister.getService().getName());
                     break;
                 default:
-                    String faultResponse = ExchangePluginResponseMapper.mapToPluginFaultResponse(1, "Method not recognized in plugin");
-                    ExchangeFault fault = new ExchangeFault();
-                    fault.setCode(1);
-                    fault.setMessage(faultResponse);
-                    errorEvent.fire(new ExchangeMessageEvent(textMessage, fault));
-                    break;
+                	LOG.error("[ Not implemented method consumed: {} ]", request.getMethod());
+                	throw new ExchangeMessageException("[ Not implemented method consumed: " + request.getMethod() +" ]");
             }
-
-            messageProducer.sendEventBusMessage(responseMessage, serviceName);
-
         } catch (ExchangeMessageException | ExchangeModelMarshallException | NullPointerException e) {
-            LOG.error("[ Error when receiving message in exchange: ]", e);
-            LOG.info("[ Trying to send Error Message backs to the requesting queue : ]", e);
+            LOG.error("[ Error when receiving message on topic in exchange: ]");
+            errorEvent.fire(new PluginMessageEvent(textMessage, responseTopicMessageSelector, ExchangePluginResponseMapper.mapToPluginFaultResponse(FaultCode.EXCHANGE_TOPIC_MESSAGE.getCode(), "Error when receiving message in exchange " + e.getMessage())));
         }
     }
 

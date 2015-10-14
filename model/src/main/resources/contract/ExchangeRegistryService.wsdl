@@ -23,6 +23,7 @@
             <xsd:complexType name="ExchangeRegistryBaseRequest" abstract="true">
                 <xsd:sequence>
                     <xsd:element name="method" type="registry:ExchangeRegistryMethod"/>
+                    <xsd:element name="responseTopicMessageSelector" type="xsd:string"/>
                 </xsd:sequence>
             </xsd:complexType>
             
@@ -32,7 +33,6 @@
                         <xsd:extension base="registry:ExchangeRegistryBaseRequest">
                             <xsd:sequence>
                                 <xsd:element name="service" type="service:ServiceType"/>
-                                <xsd:element name="responseTopicMessageSelector" type="xsd:string"/>
                             </xsd:sequence>
                         </xsd:extension>
                     </xsd:complexContent>
