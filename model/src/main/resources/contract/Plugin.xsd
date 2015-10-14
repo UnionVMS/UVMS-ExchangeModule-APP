@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <xsd:schema xmlns:plugin="urn:types.plugin.exchange.schema.fisheries.ec.europa.eu:v1"
             targetNamespace="urn:types.plugin.exchange.schema.fisheries.ec.europa.eu:v1"
-            xmlns:common="urn:common.exchange.schema.fisheries.ec.europa.eu:v1"          
+            xmlns:common="urn:common.exchange.schema.fisheries.ec.europa.eu:v1"
             xmlns:xsd="http://www.w3.org/2001/XMLSchema"
             xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
             xmlns="http://schemas.xmlsoap.org/wsdl/">
@@ -28,15 +28,11 @@
     
     <xsd:complexType name="PollType">
         <xsd:sequence>
-        <!-- dnid, membernumber, lesid, satellitenumber -->
-            <xsd:element name="mobileTerminalType" type="xsd:string"/>
-            <xsd:element name="connectId" type="xsd:string"/>
-            <xsd:element name="mobileTerminalId" type="xsd:string"/>
-            <xsd:element name="comchannelId" type="xsd:string"/>
-            <xsd:element name="pollTrackId" type="xsd:string"/>
+            <xsd:element name="pollId" type="xsd:string"/>
             <xsd:element name="pollType" type="xsd:string"/>
             <xsd:element name="message" type="xsd:string"/> <!-- comment from GUI sender -->
-            <xsd:element name="payload" type="common:keyValueType" minOccurs="0" maxOccurs="unbounded"/>
+            <xsd:element name="pollReceiver" type="common:keyValueType" minOccurs="1" maxOccurs="unbounded"/>
+            <xsd:element name="pollPayload" type="common:keyValueType" minOccurs="0" maxOccurs="unbounded"/>
         </xsd:sequence>
     </xsd:complexType>
 

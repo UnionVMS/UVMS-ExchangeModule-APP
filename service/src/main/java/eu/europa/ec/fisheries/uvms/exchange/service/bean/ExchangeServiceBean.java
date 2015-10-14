@@ -186,9 +186,9 @@ public class ExchangeServiceBean implements ExchangeService {
         try {
             String request = ExchangeServiceRequestMapper.mapCreatePollRequest(data);
             notification.fire(new NotificationMessage("pollTrackId", data));
-            producer.sendEventBusMessage(request, data.getTo());
+            //producer.sendEventBusMessage(request, data.getTo());
             return "Message sent!";
-        } catch (ExchangeMessageException | ExchangeModelMapperException e) {
+        } catch (ExchangeModelMapperException e) {
             throw new ExchangeServiceException(e.getMessage());
         }
     }

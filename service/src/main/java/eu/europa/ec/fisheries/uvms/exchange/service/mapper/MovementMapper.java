@@ -64,7 +64,7 @@ public class MovementMapper {
 				idType = IdType.LES;
 				break;
 			case MEMEBER_NUMBER:
-				idType = IdType.MEMEBER_NUMBER;
+				idType = IdType.MEMBER_NUMBER;
 				break;
 			case SATELLITE_NUMBER:
 				idType = IdType.SATELLITE_NUMBER;
