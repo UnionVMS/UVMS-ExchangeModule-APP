@@ -5,39 +5,28 @@
  */
 package eu.europa.ec.fisheries.uvms.exchange.message.consumer.bean;
 
-import eu.europa.ec.fisheries.schema.exchange.common.v1.AcknowledgeTypeType;
-import eu.europa.ec.fisheries.schema.exchange.common.v1.ExchangeFault;
-import eu.europa.ec.fisheries.schema.exchange.registry.v1.ExchangeRegistryBaseRequest;
-import eu.europa.ec.fisheries.schema.exchange.registry.v1.RegisterServiceRequest;
-import eu.europa.ec.fisheries.schema.exchange.registry.v1.RegisterServiceResponse;
-import eu.europa.ec.fisheries.schema.exchange.registry.v1.UnregisterServiceRequest;
-import eu.europa.ec.fisheries.uvms.exchange.message.event.carrier.ExchangeMessageEvent;
-import eu.europa.ec.fisheries.uvms.exchange.message.event.carrier.PluginMessageEvent;
-import eu.europa.ec.fisheries.uvms.exchange.message.event.registry.PluginErrorEvent;
-import eu.europa.ec.fisheries.uvms.exchange.message.event.registry.RegisterServiceEvent;
-import eu.europa.ec.fisheries.uvms.exchange.message.event.registry.UnRegisterServiceEvent;
-import eu.europa.ec.fisheries.uvms.exchange.message.exception.ExchangeMessageException;
-import eu.europa.ec.fisheries.uvms.exchange.message.producer.MessageProducer;
-import eu.europa.ec.fisheries.uvms.exchange.model.constant.ExchangeModelConstants;
-import eu.europa.ec.fisheries.uvms.exchange.model.constant.FaultCode;
-import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelMarshallException;
-import eu.europa.ec.fisheries.uvms.exchange.model.mapper.ExchangePluginResponseMapper;
-import eu.europa.ec.fisheries.uvms.exchange.model.mapper.JAXBMarshaller;
-
-import java.util.logging.Level;
-
 import javax.ejb.ActivationConfigProperty;
-import javax.ejb.EJB;
 import javax.ejb.MessageDriven;
 import javax.enterprise.event.Event;
 import javax.inject.Inject;
-import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.MessageListener;
 import javax.jms.TextMessage;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import eu.europa.ec.fisheries.schema.exchange.registry.v1.ExchangeRegistryBaseRequest;
+import eu.europa.ec.fisheries.uvms.exchange.message.event.carrier.PluginMessageEvent;
+import eu.europa.ec.fisheries.uvms.exchange.message.event.registry.PluginErrorEvent;
+import eu.europa.ec.fisheries.uvms.exchange.message.event.registry.RegisterServiceEvent;
+import eu.europa.ec.fisheries.uvms.exchange.message.event.registry.UnRegisterServiceEvent;
+import eu.europa.ec.fisheries.uvms.exchange.message.exception.ExchangeMessageException;
+import eu.europa.ec.fisheries.uvms.exchange.model.constant.ExchangeModelConstants;
+import eu.europa.ec.fisheries.uvms.exchange.model.constant.FaultCode;
+import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelMarshallException;
+import eu.europa.ec.fisheries.uvms.exchange.model.mapper.ExchangePluginResponseMapper;
+import eu.europa.ec.fisheries.uvms.exchange.model.mapper.JAXBMarshaller;
 
 /**
  *
@@ -85,8 +74,7 @@ public class RegistryBusEventListener implements MessageListener {
                     registerServiceEvent.fire(new PluginMessageEvent(textMessage, responseTopicMessageSelector));
                     break;
                 case UNREGISTER_SERVICE:
-                    UnregisterServiceRequest unregister = JAXBMarshaller.unmarshallTextMessage(textMessage, UnregisterServiceRequest.class);
-                    LOG.info("GOT UNREGISTER CALL FROM " + unregister.getService().getName());
+                	unregisterServiceEvent.fire(new PluginMessageEvent(textMessage, responseTopicMessageSelector));
                     break;
                 default:
                 	LOG.error("[ Not implemented method consumed: {} ]", request.getMethod());

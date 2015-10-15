@@ -16,7 +16,6 @@
             <xsd:element name="serviceClassName" type="xsd:string"/>
             <xsd:element name="name" type="xsd:string"/>
             <xsd:element name="description" type="xsd:string"/>
-            <xsd:element name="updated" type="xsd:string"/>
             <xsd:element name="pluginType" type="plugin:PluginType"/>
         </xsd:sequence>
     </xsd:complexType>

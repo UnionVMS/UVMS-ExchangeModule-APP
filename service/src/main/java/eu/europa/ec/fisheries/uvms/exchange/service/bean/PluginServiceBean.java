@@ -56,8 +56,6 @@ public class PluginServiceBean implements PluginService {
 	        
 			ServiceType service = exchangeService.registerService(register.getService());
 			
-	        
-	        //TODO push registered service to MobileTerminal plugin register
 	        //TODO log to exchange log
 	        
 	        //TODO receive settings
@@ -81,7 +79,6 @@ public class PluginServiceBean implements PluginService {
 			
 			ServiceType service = exchangeService.unregisterService(unregister.getService());
 			
-	        //TODO push unregistered service to MobileTerminal plugin register
 	        //TODO log to exchange log
 	        
 		} catch (ExchangeModelMarshallException | ExchangeServiceException e) {

@@ -76,9 +76,8 @@ public class ExchangeEventServiceBean implements EventService {
     @Override
     public void getPluginConfig(@Observes @PluginConfigEvent ExchangeMessageEvent message) {
         LOG.info("Received MessageRecievedEvent");
-        List<ServiceType> serviceList;
-		try {
-			serviceList = exchangeService.getServiceList();
+        try {
+        	List<ServiceType> serviceList = exchangeService.getServiceList();
 			producer.sendModuleResponseMessage(message.getJmsMessage(), ExchangeModuleResponseMapper.mapServiceListResponse(serviceList));
 		} catch (ExchangeException e) {
 			LOG.error("[ Error when getting plugin list from source]");
@@ -148,8 +147,8 @@ public class ExchangeEventServiceBean implements EventService {
 			if(rawMovement.getAssetId() != null && rawMovement.getAssetId().getAssetIdList() != null) {
 				rawMovement.getAssetId().getAssetIdList().addAll(MovementMapper.mapAssetIdList(baseMovement.getAssetId().getAssetIdList()));
 			}
-			if(rawMovement.getMobileTerminalId() != null && rawMovement.getMobileTerminalId().getMobileTerminalIdList() != null) {
-				rawMovement.getMobileTerminalId().getMobileTerminalIdList().addAll(MovementMapper.mapMobileTerminalIdList(baseMovement.getMobileTerminalId().getMobileTerminalIdList()));
+			if(rawMovement.getMobileTerminal() != null && rawMovement.getMobileTerminal().getMobileTerminalIdList() != null) {
+				rawMovement.getMobileTerminal().getMobileTerminalIdList().addAll(MovementMapper.mapMobileTerminalIdList(baseMovement.getMobileTerminalId().getMobileTerminalIdList()));
 			}
 			String movement = RulesModuleRequestMapper.createSetMovementReportRequest(rawMovement);
 			producer.sendMessageOnQueue(movement, DataSourceQueue.RULES);

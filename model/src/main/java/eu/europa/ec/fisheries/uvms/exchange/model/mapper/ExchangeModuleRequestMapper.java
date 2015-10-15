@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory;
 import eu.europa.ec.fisheries.schema.exchange.common.v1.CommandType;
 import eu.europa.ec.fisheries.schema.exchange.common.v1.CommandTypeType;
 import eu.europa.ec.fisheries.schema.exchange.module.v1.ExchangeModuleMethod;
+import eu.europa.ec.fisheries.schema.exchange.module.v1.GetServiceListRequest;
 import eu.europa.ec.fisheries.schema.exchange.module.v1.SendMovementToPluginRequest;
 import eu.europa.ec.fisheries.schema.exchange.module.v1.SetCommandRequest;
 import eu.europa.ec.fisheries.schema.exchange.module.v1.SetMovementReportRequest;
@@ -107,5 +108,11 @@ public class ExchangeModuleRequestMapper {
     	
 		request.setCommand(commandType);
     	return request;
+    }
+
+    public static String createGetServiceListRequest() throws ExchangeModelMapperException {
+    	GetServiceListRequest request = new GetServiceListRequest();
+    	request.setMethod(ExchangeModuleMethod.LIST_SERVICES);
+    	return JAXBMarshaller.marshallJaxBObjectToString(request);
     }
 }
