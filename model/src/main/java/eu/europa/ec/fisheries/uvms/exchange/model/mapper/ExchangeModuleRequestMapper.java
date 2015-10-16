@@ -22,7 +22,9 @@ import eu.europa.ec.fisheries.schema.exchange.plugin.types.v1.PollType;
 import eu.europa.ec.fisheries.schema.exchange.registry.v1.ExchangeRegistryMethod;
 import eu.europa.ec.fisheries.schema.exchange.registry.v1.RegisterServiceRequest;
 import eu.europa.ec.fisheries.schema.exchange.registry.v1.UnregisterServiceRequest;
+import eu.europa.ec.fisheries.schema.exchange.service.v1.CapabilityListType;
 import eu.europa.ec.fisheries.schema.exchange.service.v1.ServiceType;
+import eu.europa.ec.fisheries.schema.exchange.service.v1.SettingListType;
 import eu.europa.ec.fisheries.uvms.common.DateUtils;
 import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelMapperException;
 import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelMarshallException;
@@ -38,11 +40,13 @@ public class ExchangeModuleRequestMapper {
         return JAXBMarshaller.marshallJaxBObjectToString(request);
     }
 
-    public static String createRegisterServiceRequest(ServiceType serviceType, String messageSelector) throws ExchangeModelMarshallException {
+    public static String createRegisterServiceRequest(ServiceType serviceType, String messageSelector, CapabilityListType capabilityList, SettingListType settingList) throws ExchangeModelMarshallException {
         RegisterServiceRequest request = new RegisterServiceRequest();
         request.setMethod(ExchangeRegistryMethod.REGISTER_SERVICE);
         request.setResponseTopicMessageSelector(messageSelector);
         request.setService(serviceType);
+		request.setCapabilityList(capabilityList);
+		request.setSettingList(settingList);
         return JAXBMarshaller.marshallJaxBObjectToString(request);
     }
 

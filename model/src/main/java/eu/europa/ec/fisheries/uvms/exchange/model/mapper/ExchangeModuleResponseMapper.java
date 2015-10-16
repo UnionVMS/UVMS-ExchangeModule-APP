@@ -12,7 +12,7 @@ import eu.europa.ec.fisheries.schema.exchange.common.v1.AcknowledgeType;
 import eu.europa.ec.fisheries.schema.exchange.common.v1.ExchangeFault;
 import eu.europa.ec.fisheries.schema.exchange.module.v1.GetServiceListResponse;
 import eu.europa.ec.fisheries.schema.exchange.module.v1.SetCommandResponse;
-import eu.europa.ec.fisheries.schema.exchange.service.v1.ServiceType;
+import eu.europa.ec.fisheries.schema.exchange.service.v1.ServiceResponseType;
 import eu.europa.ec.fisheries.uvms.exchange.model.constant.FaultCode;
 import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelMapperException;
 import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelMarshallException;
@@ -58,13 +58,13 @@ public class ExchangeModuleResponseMapper {
     	return fault;
     }
 
-	public static String mapServiceListResponse(List<ServiceType> serviceList) throws ExchangeModelMarshallException {
+	public static String mapServiceListResponse(List<ServiceResponseType> serviceList) throws ExchangeModelMarshallException {
 		GetServiceListResponse response = new GetServiceListResponse();
 		response.getService().addAll(serviceList);
 		return JAXBMarshaller.marshallJaxBObjectToString(response);
 	}
 	
-	public static List<ServiceType> mapServiceListResponse(TextMessage response, String correlationId) throws ExchangeModelMapperException {
+	public static List<ServiceResponseType> mapServiceListResponse(TextMessage response, String correlationId) throws ExchangeModelMapperException {
 		try {
 			validateResponse(response, correlationId);
 			GetServiceListResponse unmarshalledResponse = JAXBMarshaller.unmarshallTextMessage(response, GetServiceListResponse.class);

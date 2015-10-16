@@ -5,8 +5,6 @@
  */
 package eu.europa.ec.fisheries.uvms.exchange.model.mapper;
 
-import java.util.List;
-
 import javax.jms.JMSException;
 import javax.jms.TextMessage;
 
@@ -18,10 +16,9 @@ import eu.europa.ec.fisheries.schema.exchange.plugin.v1.ExchangePluginMethod;
 import eu.europa.ec.fisheries.schema.exchange.plugin.v1.PingResponse;
 import eu.europa.ec.fisheries.schema.exchange.registry.v1.ExchangeRegistryMethod;
 import eu.europa.ec.fisheries.schema.exchange.registry.v1.RegisterServiceResponse;
+import eu.europa.ec.fisheries.schema.exchange.service.v1.ServiceResponseType;
 import eu.europa.ec.fisheries.schema.exchange.service.v1.ServiceType;
 import eu.europa.ec.fisheries.schema.exchange.service.v1.SettingListType;
-import eu.europa.ec.fisheries.schema.exchange.service.v1.SettingType;
-import eu.europa.ec.fisheries.uvms.exchange.model.constant.FaultCode;
 import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelMapperException;
 import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelMarshallException;
 
@@ -48,16 +45,11 @@ public class ExchangePluginResponseMapper {
 
     }
 
-    public static String mapToRegisterServiceResponse(AcknowledgeTypeType ackType, ServiceType service, List<SettingType> settings) throws ExchangeModelMarshallException {
+    public static String mapToRegisterServiceResponse(AcknowledgeTypeType ackType, ServiceResponseType service, SettingListType settings) throws ExchangeModelMarshallException {
         RegisterServiceResponse response = new RegisterServiceResponse();
+        response.setMethod(ExchangeRegistryMethod.REGISTER_SERVICE);
         response.setAck(ackType);
         response.setService(service);
-        SettingListType settingsList = new SettingListType();
-        if (settings != null) {
-            settingsList.getSetting().addAll(settings);
-        }
-        response.setSettings(settingsList);
-        response.setMethod(ExchangeRegistryMethod.REGISTER_SERVICE);
         return JAXBMarshaller.marshallJaxBObjectToString(response);
     }
 

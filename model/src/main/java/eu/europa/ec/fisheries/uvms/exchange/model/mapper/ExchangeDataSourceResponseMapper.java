@@ -2,6 +2,7 @@ package eu.europa.ec.fisheries.uvms.exchange.model.mapper;
 
 import eu.europa.ec.fisheries.schema.exchange.source.v1.CreateLogResponse;
 import eu.europa.ec.fisheries.schema.exchange.source.v1.GetLogListByQueryResponse;
+
 import java.util.List;
 
 import javax.jms.JMSException;
@@ -10,10 +11,11 @@ import javax.jms.TextMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import eu.europa.ec.fisheries.schema.exchange.module.v1.GetServiceCapabilitiesResponse;
-import eu.europa.ec.fisheries.schema.exchange.module.v1.GetServiceSettingsResponse;
+import eu.europa.ec.fisheries.schema.exchange.source.v1.GetServiceSettingsResponse;
+import eu.europa.ec.fisheries.schema.exchange.source.v1.GetServiceCapabilitiesResponse;
 import eu.europa.ec.fisheries.schema.exchange.service.v1.CapabilityListType;
 import eu.europa.ec.fisheries.schema.exchange.service.v1.CapabilityType;
+import eu.europa.ec.fisheries.schema.exchange.service.v1.ServiceResponseType;
 import eu.europa.ec.fisheries.schema.exchange.service.v1.ServiceType;
 import eu.europa.ec.fisheries.schema.exchange.service.v1.SettingListType;
 import eu.europa.ec.fisheries.schema.exchange.service.v1.SettingType;
@@ -24,6 +26,7 @@ import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogType;
 import eu.europa.ec.fisheries.schema.exchange.source.v1.UnregisterServiceResponse;
 import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelMapperException;
 import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelMarshallException;
+
 import java.math.BigInteger;
 
 public class ExchangeDataSourceResponseMapper {
@@ -58,12 +61,12 @@ public class ExchangeDataSourceResponseMapper {
 
     }
 
-    public static List<ServiceType> mapToServiceTypeListFromResponse(TextMessage message) throws ExchangeModelMapperException {
+    public static List<ServiceResponseType> mapToServiceTypeListFromResponse(TextMessage message) throws ExchangeModelMapperException {
         GetServiceListResponse response = JAXBMarshaller.unmarshallTextMessage(message, GetServiceListResponse.class);
         return response.getService();
     }
 
-    public static ServiceType mapToRegisterServiceResponse(TextMessage message) throws ExchangeModelMapperException {
+    public static ServiceResponseType mapToRegisterServiceResponse(TextMessage message) throws ExchangeModelMapperException {
         RegisterServiceResponse response = JAXBMarshaller.unmarshallTextMessage(message, RegisterServiceResponse.class);
         return response.getService();
     }
@@ -88,14 +91,14 @@ public class ExchangeDataSourceResponseMapper {
         return response;
     }
 
-    public static String mapServiceTypeListToStringFromResponse(List<ServiceType> services) throws ExchangeModelMapperException {
+    public static String mapServiceTypeListToStringFromResponse(List<ServiceResponseType> services) throws ExchangeModelMapperException {
         GetServiceListResponse response = new GetServiceListResponse();
         response.getService().addAll(services);
         return JAXBMarshaller.marshallJaxBObjectToString(response);
     }
 
     public static String createGetServiceSettingsResponse(List<SettingType> settings) throws ExchangeModelMarshallException {
-        GetServiceSettingsResponse response = new GetServiceSettingsResponse();
+    	GetServiceSettingsResponse response = new GetServiceSettingsResponse();
         SettingListType listType = new SettingListType();
         listType.getSetting().addAll(settings);
         response.setSettings(listType);
@@ -110,13 +113,13 @@ public class ExchangeDataSourceResponseMapper {
         return JAXBMarshaller.marshallJaxBObjectToString(response);
     }
 
-    public static String createGetServiceResponse(ServiceType service) throws ExchangeModelMarshallException {
+    public static String createGetServiceResponse(ServiceResponseType service) throws ExchangeModelMarshallException {
         GetServiceResponse response = new GetServiceResponse();
         response.setService(service);
         return JAXBMarshaller.marshallJaxBObjectToString(response);
     }
 
-    public static String createGetServiceListResponse(List<ServiceType> services) throws ExchangeModelMarshallException {
+    public static String createGetServiceListResponse(List<ServiceResponseType> services) throws ExchangeModelMarshallException {
         GetServiceListResponse response = new GetServiceListResponse();
         response.getService().addAll(services);
         return JAXBMarshaller.marshallJaxBObjectToString(response);
@@ -136,7 +139,7 @@ public class ExchangeDataSourceResponseMapper {
         return JAXBMarshaller.marshallJaxBObjectToString(response);
     }
 
-    public static String createRegisterServiceResponse(ServiceType service) throws ExchangeModelMarshallException {
+    public static String createRegisterServiceResponse(ServiceResponseType service) throws ExchangeModelMarshallException {
         RegisterServiceResponse response = new RegisterServiceResponse();
         response.setService(service);
         return JAXBMarshaller.marshallJaxBObjectToString(response);

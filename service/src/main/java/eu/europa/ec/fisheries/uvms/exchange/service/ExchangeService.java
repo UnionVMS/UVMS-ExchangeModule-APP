@@ -4,7 +4,10 @@ import java.util.List;
 
 import javax.ejb.Local;
 
+import eu.europa.ec.fisheries.schema.exchange.service.v1.CapabilityListType;
+import eu.europa.ec.fisheries.schema.exchange.service.v1.ServiceResponseType;
 import eu.europa.ec.fisheries.schema.exchange.service.v1.ServiceType;
+import eu.europa.ec.fisheries.schema.exchange.service.v1.SettingListType;
 import eu.europa.ec.fisheries.schema.exchange.source.v1.GetLogListByQueryResponse;
 import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeListQuery;
 import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogType;
@@ -20,7 +23,7 @@ public interface ExchangeService {
      * @return
      * @throws ExchangeServiceException
      */
-    public ServiceType registerService(ServiceType data) throws ExchangeServiceException;
+    public ServiceResponseType registerService(ServiceType data, CapabilityListType capabilityList, SettingListType settingList) throws ExchangeServiceException;
 
     /**
      * Unregister a service
@@ -37,7 +40,7 @@ public interface ExchangeService {
      * @return
      * @throws ExchangeServiceException
      */
-    public List<ServiceType> getServiceList() throws ExchangeServiceException;
+    public List<ServiceResponseType> getServiceList() throws ExchangeServiceException;
 
     /**
      * Get an object by id

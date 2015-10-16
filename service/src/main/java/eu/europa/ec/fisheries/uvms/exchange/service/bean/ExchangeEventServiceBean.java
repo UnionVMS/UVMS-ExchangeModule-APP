@@ -25,6 +25,7 @@ import eu.europa.ec.fisheries.schema.exchange.module.v1.SetCommandRequest;
 import eu.europa.ec.fisheries.schema.exchange.module.v1.SetMovementReportRequest;
 import eu.europa.ec.fisheries.schema.exchange.movement.v1.MovementBaseType;
 import eu.europa.ec.fisheries.schema.exchange.movement.v1.SendMovementToPluginType;
+import eu.europa.ec.fisheries.schema.exchange.service.v1.ServiceResponseType;
 import eu.europa.ec.fisheries.schema.exchange.service.v1.ServiceType;
 import eu.europa.ec.fisheries.schema.rules.movement.v1.RawMovementType;
 import eu.europa.ec.fisheries.uvms.exchange.message.constants.DataSourceQueue;
@@ -77,7 +78,7 @@ public class ExchangeEventServiceBean implements EventService {
     public void getPluginConfig(@Observes @PluginConfigEvent ExchangeMessageEvent message) {
         LOG.info("Received MessageRecievedEvent");
         try {
-        	List<ServiceType> serviceList = exchangeService.getServiceList();
+        	List<ServiceResponseType> serviceList = exchangeService.getServiceList();
 			producer.sendModuleResponseMessage(message.getJmsMessage(), ExchangeModuleResponseMapper.mapServiceListResponse(serviceList));
 		} catch (ExchangeException e) {
 			LOG.error("[ Error when getting plugin list from source]");
@@ -134,8 +135,7 @@ public class ExchangeEventServiceBean implements EventService {
     @Override
 	public void processMovement(@Observes @SetMovementEvent ExchangeMessageEvent message) {
 		LOG.info("Process movement");
-		//TODO
-		//PROCESS MOVEMENT
+		//TODO process movement
 		try {
 			SetMovementReportRequest request = JAXBMarshaller.unmarshallTextMessage(message.getJmsMessage(), SetMovementReportRequest.class);
 			
@@ -198,8 +198,7 @@ public class ExchangeEventServiceBean implements EventService {
 			String text = ExchangePluginRequestMapper.createSetReportRequest(report);
 			producer.sendPluginTypeEventBusMessage(text, sendReport.getPluginType());
 			
-			//TODO
-			//log to exchangelogs
+			//TODO log to exchange logs
 		} catch (ExchangeException e) {
 			LOG.error("[ Error when sending report to plugin ]");
 			errorEvent.fire(new ExchangeMessageEvent(message.getJmsMessage(), ExchangeModuleResponseMapper.createFaultMessage(FaultCode.EXCHANGE_EVENT_SERVICE, "Excpetion when sending message to plugin ")));
@@ -222,8 +221,7 @@ public class ExchangeEventServiceBean implements EventService {
 			String text = ExchangePluginRequestMapper.createSetCommandRequest(request.getCommand());
 			producer.sendEventBusMessage(text, pluginName);
 
-			//TODO
-			//log to exchangelogs
+			//TODO log to exchange logs
 			
 		} catch (NullPointerException | ExchangeException e) {
 			LOG.error("[ Error when sending command to plugin ]");

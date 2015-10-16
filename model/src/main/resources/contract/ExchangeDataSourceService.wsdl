@@ -22,7 +22,9 @@
                     <xsd:enumeration value="REGISTER_SERVICE"/>
                     <xsd:enumeration value="UNREGISTER_SERVICE"/>
                     <xsd:enumeration value="GET_SETTINGS"/>
+                    <!-- <xsd:enumeration value="SET_SETTINGS"/>--> <!-- change settings (config module) -->
                     <xsd:enumeration value="GET_CAPABILITIES"/>
+                    <!-- <xsd:enumeration value="SET_CAPABILITIES"/>--> <!-- change capabilities -->
                     <xsd:enumeration value="GET_SERVICE"/>
                     <xsd:enumeration value="GET_LOG_BY_QUERY"/>
                     <xsd:enumeration value="CREATE_LOG"/>
@@ -90,7 +92,7 @@
             <xsd:element name="GetServiceListResponse">
                 <xsd:complexType>
                     <xsd:sequence>
-                        <xsd:element name="service" type="service:ServiceType" minOccurs="0" maxOccurs="unbounded"/>
+                        <xsd:element name="service" type="service:ServiceResponseType" minOccurs="0" maxOccurs="unbounded"/>
                     </xsd:sequence>
                 </xsd:complexType>
             </xsd:element>
@@ -110,7 +112,7 @@
             <xsd:element name="GetServiceResponse">
                 <xsd:complexType>
                     <xsd:sequence>
-                        <xsd:element name="service" type="service:ServiceType"/>
+                        <xsd:element name="service" type="service:ServiceResponseType"/>
                     </xsd:sequence>
                 </xsd:complexType>
             </xsd:element>
@@ -121,6 +123,8 @@
                         <xsd:extension base="source:ExchangeBaseRequest">
                             <xsd:sequence>
                                 <xsd:element name="service" type="service:ServiceType"/>
+                                <xsd:element name="settingList" type="service:SettingListType" minOccurs="1" maxOccurs="1"/>
+                                <xsd:element name="capabilityList" type="service:CapabilityListType" minOccurs="1" maxOccurs="1"/>
                             </xsd:sequence>
                         </xsd:extension>
                     </xsd:complexContent>
@@ -130,7 +134,7 @@
             <xsd:element name="RegisterServiceResponse">
                 <xsd:complexType>
                     <xsd:sequence>
-                        <xsd:element name="service" type="service:ServiceType" minOccurs="1" maxOccurs="1"/>
+                        <xsd:element name="service" type="service:ServiceResponseType" minOccurs="1" maxOccurs="1"/>
                     </xsd:sequence>
                 </xsd:complexType>
             </xsd:element>
@@ -150,7 +154,7 @@
             <xsd:element name="UnregisterServiceResponse">
                 <xsd:complexType>
                     <xsd:sequence>
-                        <xsd:element name="service" type="service:ServiceType" minOccurs="1" maxOccurs="1"/>
+                        <xsd:element name="service" type="service:ServiceResponseType" minOccurs="1" maxOccurs="1"/>
                     </xsd:sequence>
                 </xsd:complexType>
             </xsd:element>
@@ -220,10 +224,6 @@
         <part name="body" element="common:exchangeFault"/>
     </message>
 
-    <message name="ExchangeException">
-        <part name="body" element="common:exceptionType"/>
-    </message>
-    
     <message name="GetLogListByQueryRequest">
         <part name="body" element="source:GetLogListByQueryRequest"/>
     </message>

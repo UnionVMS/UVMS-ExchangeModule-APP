@@ -14,7 +14,10 @@ import eu.europa.ec.fisheries.schema.config.module.v1.PullSettingsResponse;
 import eu.europa.ec.fisheries.schema.config.module.v1.PushSettingsResponse;
 import eu.europa.ec.fisheries.schema.config.types.v1.PullSettingsStatus;
 import eu.europa.ec.fisheries.schema.config.types.v1.SettingType;
+import eu.europa.ec.fisheries.schema.exchange.service.v1.CapabilityListType;
+import eu.europa.ec.fisheries.schema.exchange.service.v1.ServiceResponseType;
 import eu.europa.ec.fisheries.schema.exchange.service.v1.ServiceType;
+import eu.europa.ec.fisheries.schema.exchange.service.v1.SettingListType;
 import eu.europa.ec.fisheries.schema.exchange.source.v1.GetLogListByQueryResponse;
 import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeListQuery;
 import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogType;
@@ -56,10 +59,10 @@ public class ExchangeServiceBean implements ExchangeService {
      * @throws ExchangeServiceException
      */
     @Override
-    public ServiceType registerService(ServiceType data) throws ExchangeServiceException {
+    public ServiceResponseType registerService(ServiceType data, CapabilityListType capabilityList, SettingListType settingList) throws ExchangeServiceException {
         LOG.info("Register service invoked in service layer");
         try {
-            String request = ExchangeDataSourceRequestMapper.mapRegisterServiceToString(data);
+            String request = ExchangeDataSourceRequestMapper.mapRegisterServiceToString(data, capabilityList, settingList);
             String messageId = producer.sendMessageOnQueue(request, DataSourceQueue.INTERNAL);
             TextMessage response = consumer.getMessage(messageId, TextMessage.class);
             return ExchangeDataSourceResponseMapper.mapToRegisterServiceResponse(response);
@@ -94,7 +97,7 @@ public class ExchangeServiceBean implements ExchangeService {
      * @throws ExchangeServiceException
      */
     @Override
-    public List<ServiceType> getServiceList() throws ExchangeServiceException {
+    public List<ServiceResponseType> getServiceList() throws ExchangeServiceException {
         LOG.info("Get list invoked in service layer");
         try {
             String request = ExchangeDataSourceRequestMapper.mapGetServiceListToString();

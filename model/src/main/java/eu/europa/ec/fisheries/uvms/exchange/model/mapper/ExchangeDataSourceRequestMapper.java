@@ -1,10 +1,13 @@
 package eu.europa.ec.fisheries.uvms.exchange.model.mapper;
 
 import eu.europa.ec.fisheries.schema.exchange.source.v1.CreateLogRequest;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import eu.europa.ec.fisheries.schema.exchange.service.v1.CapabilityListType;
 import eu.europa.ec.fisheries.schema.exchange.service.v1.ServiceType;
+import eu.europa.ec.fisheries.schema.exchange.service.v1.SettingListType;
 import eu.europa.ec.fisheries.schema.exchange.source.v1.ExchangeDataSourceMethod;
 import eu.europa.ec.fisheries.schema.exchange.source.v1.GetLogListByQueryRequest;
 import eu.europa.ec.fisheries.schema.exchange.source.v1.GetServiceCapabilitiesRequest;
@@ -68,11 +71,13 @@ public class ExchangeDataSourceRequestMapper {
         }
     }
 
-    public static String mapRegisterServiceToString(ServiceType service) throws ExchangeModelMapperException {
+    public static String mapRegisterServiceToString(ServiceType service, CapabilityListType capabilityList, SettingListType settingList) throws ExchangeModelMapperException {
         try {
             RegisterServiceRequest request = new RegisterServiceRequest();
-            request.setService(service);
             request.setMethod(ExchangeDataSourceMethod.REGISTER_SERVICE);
+            request.setService(service);
+            request.setCapabilityList(capabilityList);
+            request.setSettingList(settingList);
             return JAXBMarshaller.marshallJaxBObjectToString(request);
         } catch (Exception e) {
             LOG.error("[ Error when mapping RegisterServiceRequest to String ] {}", e.getMessage());

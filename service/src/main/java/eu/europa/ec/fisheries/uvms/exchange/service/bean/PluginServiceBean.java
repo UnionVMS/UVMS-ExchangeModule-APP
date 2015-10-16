@@ -15,7 +15,9 @@ import org.slf4j.LoggerFactory;
 import eu.europa.ec.fisheries.schema.exchange.common.v1.AcknowledgeTypeType;
 import eu.europa.ec.fisheries.schema.exchange.registry.v1.RegisterServiceRequest;
 import eu.europa.ec.fisheries.schema.exchange.registry.v1.UnregisterServiceRequest;
+import eu.europa.ec.fisheries.schema.exchange.service.v1.ServiceResponseType;
 import eu.europa.ec.fisheries.schema.exchange.service.v1.ServiceType;
+import eu.europa.ec.fisheries.schema.exchange.service.v1.SettingListType;
 import eu.europa.ec.fisheries.schema.exchange.service.v1.SettingType;
 import eu.europa.ec.fisheries.uvms.exchange.message.event.carrier.PluginMessageEvent;
 import eu.europa.ec.fisheries.uvms.exchange.message.event.registry.PluginErrorEvent;
@@ -54,12 +56,15 @@ public class PluginServiceBean implements PluginService {
 			RegisterServiceRequest register = JAXBMarshaller.unmarshallTextMessage(textMessage, RegisterServiceRequest.class);
 	        serviceName = register.getResponseTopicMessageSelector();
 	        
-			ServiceType service = exchangeService.registerService(register.getService());
+			ServiceResponseType service = exchangeService.registerService(register.getService(), register.getCapabilityList(), register.getSettingList());
+			
+			//TODO set settings to parameter table, push to config module
 			
 	        //TODO log to exchange log
 	        
 	        //TODO receive settings
-	        List<SettingType> settings = null;
+			SettingListType settings = null;
+			
 			String response = ExchangePluginResponseMapper.mapToRegisterServiceResponse(AcknowledgeTypeType.OK, service, settings);
 	        producer.sendEventBusMessage(response, serviceName);
 		} catch (ExchangeModelMarshallException | ExchangeServiceException | ExchangeMessageException e) {

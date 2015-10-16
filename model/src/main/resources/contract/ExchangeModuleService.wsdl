@@ -28,13 +28,9 @@
                     <!-- plugin wants to -->
                     <xsd:enumeration value="SET_MOVEMENT_REPORT"/>
                     
-                    <!-- move to register wsdl -->
-                    <!-- <xsd:enumeration value="REGISTER_SERVICE"/>
-                    <xsd:enumeration value="UNREGISTER_SERVICE"/>-->
-                    
                     <!-- rest interface wants to -->
-                    <!-- <xsd:enumeration value="GET_SETTINGS"/>
-                    <xsd:enumeration value="GET_CAPABILITIES"/>-->
+                    <xsd:enumeration value="GET_SETTINGS"/>
+                    <xsd:enumeration value="GET_CAPABILITIES"/>
                     
                     <!-- admin/config wants to-->
                     <xsd:enumeration value="PING"/>
@@ -119,51 +115,11 @@
             <xsd:element name="GetServiceListResponse">
                 <xsd:complexType>
                     <xsd:sequence>
-                        <xsd:element name="service" type="service:ServiceType" minOccurs="0" maxOccurs="unbounded"/>
-                    </xsd:sequence>
-                </xsd:complexType>
-            </xsd:element>
-                        
-            <xsd:element name="GetServiceSettingsRequest">
-                <xsd:complexType>
-                    <xsd:complexContent>
-                        <xsd:extension base="module:ExchangeBaseRequest">
-                            <xsd:sequence>
-                                <xsd:element name="serviceName" type="xsd:string"/>
-                            </xsd:sequence>
-                        </xsd:extension>
-                    </xsd:complexContent>
-                </xsd:complexType>
-            </xsd:element>
-            
-            <xsd:element name="GetServiceSettingsResponse">
-                <xsd:complexType>
-                    <xsd:sequence>
-                        <xsd:element name="settings" type="service:SettingListType"/>
+                        <xsd:element name="service" type="service:ServiceResponseType" minOccurs="0" maxOccurs="unbounded"/>
                     </xsd:sequence>
                 </xsd:complexType>
             </xsd:element>
             
-            <xsd:element name="GetServiceCapabilitiesRequest">
-                <xsd:complexType>
-                    <xsd:complexContent>
-                        <xsd:extension base="module:ExchangeBaseRequest">
-                            <xsd:sequence>
-                                <xsd:element name="serviceName" type="xsd:string"/>
-                            </xsd:sequence>
-                        </xsd:extension>
-                    </xsd:complexContent>
-                </xsd:complexType>
-            </xsd:element>
-            
-            <xsd:element name="GetServiceCapabilitiesResponse">
-                <xsd:complexType>
-                    <xsd:sequence>
-                        <xsd:element name="capabilities" type="service:CapabilityListType"/>
-                    </xsd:sequence>
-                </xsd:complexType>
-            </xsd:element>
-
             <!-- Ping request -->
             <xsd:element name="pingRequest">
                 <xsd:complexType>
@@ -193,20 +149,6 @@
     </message>
     <message name="GetServiceListResponse">
         <part name="body" element="module:GetServiceListResponse"/>
-    </message>
-    
-    <message name="GetServiceSettingsRequest">
-        <part name="body" element="module:GetServiceSettingsRequest"/>
-    </message>
-    <message name="GetServiceSettingsResponse">
-        <part name="body" element="module:GetServiceSettingsResponse"/>
-    </message>
-    
-    <message name="GetServiceCapabilitiesRequest">
-        <part name="body" element="module:GetServiceCapabilitiesRequest"/>
-    </message>
-    <message name="GetServiceCapabilitiesResponse">
-        <part name="body" element="module:GetServiceCapabilitiesResponse"/>
     </message>
     
     <message name="SetCommandRequest">
@@ -245,18 +187,6 @@
             <fault name="ExchangeFault" message="module:ExchangeFault"/>
         </operation>
         
-        <operation name="GetServiceCapabilities">
-            <input message="module:GetServiceCapabilitiesRequest"/>
-            <output message="module:GetServiceCapabilitiesResponse"/>
-            <fault name="ExchangeFault" message="module:ExchangeFault"/>
-        </operation>
-        
-        <operation name="GetServiceSettings">
-            <input message="module:GetServiceSettingsRequest"/>
-            <output message="module:GetServiceSettingsResponse"/>
-            <fault name="ExchangeFault" message="module:ExchangeFault"/>
-        </operation>
-        
         <operation name="CreatePoll">
             <input message="module:SetCommandRequest"/>
             <output message="module:SetCommandResponse"/>
@@ -286,30 +216,6 @@
         <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
         
         <operation name="GetServiceList">
-            <input>
-                <soap:body use="literal"/>
-            </input>
-            <output>
-                <soap:body use="literal"/>
-            </output>
-            <fault name="ExchangeFault">
-                <soap:fault name="ExchangeFault" use="literal"/>
-            </fault>
-        </operation>
-        
-        <operation name="GetServiceCapabilities">
-            <input>
-                <soap:body use="literal"/>
-            </input>
-            <output>
-                <soap:body use="literal"/>
-            </output>
-            <fault name="ExchangeFault">
-                <soap:fault name="ExchangeFault" use="literal"/>
-            </fault>
-        </operation>
-        
-        <operation name="GetServiceSettings">
             <input>
                 <soap:body use="literal"/>
             </input>
