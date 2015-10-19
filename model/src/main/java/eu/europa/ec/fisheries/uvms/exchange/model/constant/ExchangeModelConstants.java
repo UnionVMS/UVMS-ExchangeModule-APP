@@ -16,7 +16,6 @@ public class ExchangeModelConstants {
 
     public static final String EVENTBUS = "java:/jms/topic/EventBus";
     public static final String SERVICE_NAME = "ServiceName";
-    public static final String PLUGIN_TYPE_NAME = "PluginType";
     
     public static final String EVENTBUS_NAME = "EventBus";
     public static final String EXCHANGE_REGISTER_SERVICE = "EXCHANGE_REGISTRY";

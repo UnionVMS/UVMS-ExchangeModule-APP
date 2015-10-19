@@ -116,28 +116,6 @@ public class MessageProducerBean implements MessageProducer, ConfigMessageProduc
 
     @Override
     @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
-	public String sendPluginTypeEventBusMessage(String text, PluginType pluginType) throws ExchangeMessageException {
-        try {
-        	LOG.debug("Sending plugin type event bus message from Exchange module to recipient om JMS Topic to: {} ", pluginType.name());
-            connectJMS();
-            TextMessage message = session.createTextMessage();
-            message.setText(text);
-            message.setStringProperty(ExchangeModelConstants.PLUGIN_TYPE_NAME, pluginType.name());
-            message.setJMSReplyTo(eventQueue);
-            
-            session.createProducer(eventBus).send(message);
-
-            return message.getJMSMessageID();
-        } catch (Exception e) {
-            LOG.error("[ Error when sending message. ] ", e);
-            throw new ExchangeMessageException("[ Error when sending message. ]");
-        } finally {
-            disconnectJMS();
-        }
-	}
-
-    @Override
-    @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
     public String sendConfigMessage(String text) throws ConfigMessageException {
         try {
         	return sendMessageOnQueue(text, DataSourceQueue.CONFIG);

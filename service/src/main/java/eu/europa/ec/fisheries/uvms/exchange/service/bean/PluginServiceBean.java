@@ -1,5 +1,6 @@
 package eu.europa.ec.fisheries.uvms.exchange.service.bean;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.ejb.EJB;
@@ -13,6 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import eu.europa.ec.fisheries.schema.exchange.common.v1.AcknowledgeTypeType;
+import eu.europa.ec.fisheries.schema.exchange.plugin.types.v1.PluginType;
 import eu.europa.ec.fisheries.schema.exchange.registry.v1.RegisterServiceRequest;
 import eu.europa.ec.fisheries.schema.exchange.registry.v1.UnregisterServiceRequest;
 import eu.europa.ec.fisheries.schema.exchange.service.v1.ServiceResponseType;
@@ -55,18 +57,40 @@ public class PluginServiceBean implements PluginService {
 		try {
 			RegisterServiceRequest register = JAXBMarshaller.unmarshallTextMessage(textMessage, RegisterServiceRequest.class);
 	        serviceName = register.getResponseTopicMessageSelector();
+	        boolean sendMessage = true;
 	        
-			ServiceResponseType service = exchangeService.registerService(register.getService(), register.getCapabilityList(), register.getSettingList());
-			
-			//TODO set settings to parameter table, push to config module
-			
-	        //TODO log to exchange log
-	        
-	        //TODO receive settings
-			SettingListType settings = null;
-			
-			String response = ExchangePluginResponseMapper.mapToRegisterServiceResponse(AcknowledgeTypeType.OK, service, settings);
-	        producer.sendEventBusMessage(response, serviceName);
+	        if(register.getService() != null) {
+	        	PluginType pluginType = register.getService().getPluginType();
+		        if(PluginType.EMAIL == pluginType || PluginType.FLUX == pluginType) {
+		        	//Check if type already exists
+		        	List<PluginType> type = new ArrayList<>();
+		        	type.add(pluginType);
+			        List<ServiceResponseType> services = exchangeService.getServiceList(type);
+			        if(!services.isEmpty()) {
+			        	
+			        	//TODO log to exchange log
+			        	//TODO better response message
+			        	String response = ExchangePluginResponseMapper.mapToRegisterServiceResponse(AcknowledgeTypeType.NOK, services.get(0), null);
+			        	producer.sendEventBusMessage(response, serviceName);
+			        	sendMessage = false;
+			        }
+		        }
+		        
+		        if(sendMessage) {
+		        	ServiceResponseType service = exchangeService.registerService(register.getService(), register.getCapabilityList(), register.getSettingList());
+				
+		        	//TODO set settings to parameter table, push to config module
+				
+		        	//TODO log to exchange log
+		        
+		        	//TODO receive settings
+		        	SettingListType settings = null;
+				
+		        	String response = ExchangePluginResponseMapper.mapToRegisterServiceResponse(AcknowledgeTypeType.OK, service, settings);
+		        	producer.sendEventBusMessage(response, serviceName);
+		        }
+	        }
+
 		} catch (ExchangeModelMarshallException | ExchangeServiceException | ExchangeMessageException e) {
 			LOG.error("Register service exception " + e.getMessage());
 			errorEvent.fire(new PluginMessageEvent(textMessage, serviceName, ExchangePluginResponseMapper.mapToPluginFaultResponse(FaultCode.EXCHANGE_PLUGIN_EVENT.getCode(), "Exception when register service")));

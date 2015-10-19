@@ -18,8 +18,6 @@ public interface MessageProducer {
     public String sendMessageOnQueue(String text, DataSourceQueue queue) throws ExchangeMessageException;
 
     public String sendEventBusMessage(String text, String serviceName) throws ExchangeMessageException;
-
-    public String sendPluginTypeEventBusMessage(String text, PluginType pluginType) throws ExchangeMessageException;
     
     public void sendModuleResponseMessage(TextMessage message, String text);
     

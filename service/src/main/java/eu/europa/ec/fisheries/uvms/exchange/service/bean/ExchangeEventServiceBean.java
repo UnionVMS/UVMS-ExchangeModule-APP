@@ -1,5 +1,6 @@
 package eu.europa.ec.fisheries.uvms.exchange.service.bean;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.ejb.EJB;
@@ -20,6 +21,7 @@ import eu.europa.ec.fisheries.schema.exchange.module.v1.SetCommandRequest;
 import eu.europa.ec.fisheries.schema.exchange.module.v1.SetMovementReportRequest;
 import eu.europa.ec.fisheries.schema.exchange.movement.v1.MovementBaseType;
 import eu.europa.ec.fisheries.schema.exchange.movement.v1.SendMovementToPluginType;
+import eu.europa.ec.fisheries.schema.exchange.plugin.types.v1.PluginType;
 import eu.europa.ec.fisheries.schema.exchange.service.v1.ServiceResponseType;
 import eu.europa.ec.fisheries.schema.exchange.service.v1.ServiceType;
 import eu.europa.ec.fisheries.schema.rules.movement.v1.RawMovementType;
@@ -131,22 +133,31 @@ public class ExchangeEventServiceBean implements EventService {
 			SendMovementToPluginRequest request = JAXBMarshaller.unmarshallTextMessage(message.getJmsMessage(), SendMovementToPluginRequest.class);
 			SendMovementToPluginType sendReport = request.getReport();
 		
-			//TODO do some validation logic
-			//check so request.getReport().getTo() exists
-			//check so the type of service has type request.getReport().getPlugin()
-			//check so the plugin is started
-			//otherwise answer to sender (rules) so rules can do something about it (tickets)
-			
-			ReportType report = new ReportType();
-			report.setTimestamp(sendReport.getTimestamp());
-			//when elog is supported add logic
-			report.setMovement(sendReport.getMovement());
-			report.setType(ReportTypeType.MOVEMENT);
-			
-			String text = ExchangePluginRequestMapper.createSetReportRequest(report);
-			producer.sendPluginTypeEventBusMessage(text, sendReport.getPluginType());
-			
-			//TODO log to exchange logs
+			List<PluginType> type = new ArrayList<>();
+			type.add(sendReport.getPluginType());
+			List<ServiceResponseType> services = exchangeService.getServiceList(type);
+			if(!services.isEmpty()) {
+				//TODO do some validation logic
+				//check so request.getReport().getTo() exists
+				//check so the type of service has type request.getReport().getPlugin()
+				//check so the plugin is started
+				//otherwise answer to sender (rules) so rules can do something about it (tickets)
+				
+				String serviceName = services.get(0).getServiceClassName(); //Use first and only
+				ReportType report = new ReportType();
+				report.setTimestamp(sendReport.getTimestamp());
+				//when elog is supported add logic
+				report.setMovement(sendReport.getMovement());
+				report.setType(ReportTypeType.MOVEMENT);
+				
+				String text = ExchangePluginRequestMapper.createSetReportRequest(report);
+				producer.sendEventBusMessage(text, serviceName);
+				
+				//TODO log to exchange logs
+				
+			} else {
+				errorEvent.fire(new ExchangeMessageEvent(message.getJmsMessage(), ExchangeModuleResponseMapper.createFaultMessage(FaultCode.EXCHANGE_EVENT_SERVICE, "Excpetion when sending message to plugin ")));
+			}
 		} catch (ExchangeException e) {
 			LOG.error("[ Error when sending report to plugin ]");
 			errorEvent.fire(new ExchangeMessageEvent(message.getJmsMessage(), ExchangeModuleResponseMapper.createFaultMessage(FaultCode.EXCHANGE_EVENT_SERVICE, "Excpetion when sending message to plugin ")));
