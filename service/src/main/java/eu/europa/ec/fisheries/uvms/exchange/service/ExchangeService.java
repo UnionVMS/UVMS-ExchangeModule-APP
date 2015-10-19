@@ -88,13 +88,5 @@ public interface ExchangeService {
      * @throws ExchangeServiceException
      */
     public GetLogListByQueryResponse getExchangeLogByQuery(ExchangeListQuery query) throws ExchangeServiceException;
-
-    /**
-     *  Requests parameters from Config module and stores in the database.
-     *  If module is not registered, pushes current parameters to Config.
-     *  
-     *  @throws ExchangeServiceException if unsuccessful
-     */
-    public void syncSettingsWithConfig() throws ExchangeServiceException;
     
 }

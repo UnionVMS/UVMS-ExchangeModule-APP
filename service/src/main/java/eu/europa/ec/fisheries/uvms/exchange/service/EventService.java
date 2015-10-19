@@ -21,8 +21,6 @@ public interface EventService {
     
     public void ping(@Observes @PingEvent ExchangeMessageEvent message);
 
-    public void receiveConfigMessageEvent(@Observes @ConfigMessageRecievedEvent ExchangeMessageEvent message);
-
     public void sendReportToPlugin(@Observes @SendReportToPluginEvent ExchangeMessageEvent message);
     
     public void sendCommandToPlugin(@Observes @SendCommandToPluginEvent ExchangeMessageEvent message);

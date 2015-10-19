@@ -21,8 +21,6 @@ public interface MessageProducer {
 
     public String sendPluginTypeEventBusMessage(String text, PluginType pluginType) throws ExchangeMessageException;
     
-    public String sendConfigMessage(String text) throws ExchangeMessageException;
-
     public void sendModuleResponseMessage(TextMessage message, String text);
     
     public void sendModuleErrorResponseMessage(@Observes @ErrorEvent ExchangeMessageEvent event);

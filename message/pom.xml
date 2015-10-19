@@ -19,6 +19,11 @@
             <version>1.0.2-SNAPSHOT</version>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>eu.europa.ec.fisheries</groupId>
+            <artifactId>uvms-config</artifactId>
+            <version>${uvms.config.version}</version>
+        </dependency>
     </dependencies>
 
     <build>

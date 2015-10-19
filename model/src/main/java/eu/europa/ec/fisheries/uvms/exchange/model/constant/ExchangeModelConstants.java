@@ -24,10 +24,6 @@ public class ExchangeModelConstants {
     public static final String REGISTRY_RESPONSE_NAME_ADDON = "REGISTRY_RESONSE";
     public static final String RESPONSE_TOPIC_ADDON_NAME = "RESONSE";
 
-    public static final String CONFIG_MESSAGE_IN_QUEUE = "java:/jms/queue/UVMSConfigEvent";
-    public static final String CONFIG_STATUS_TOPIC = "java:/jms/topic/ConfigStatus";
-    public static final String CONFIG_STATUS_TOPIC_NAME = "ConfigStatus";
-
     public static final String MODULE_NAME = "exchange";
     
     public static final String QUEUE_INTEGRATION_RULES = "java:/jms/queue/UVMSRulesEvent";

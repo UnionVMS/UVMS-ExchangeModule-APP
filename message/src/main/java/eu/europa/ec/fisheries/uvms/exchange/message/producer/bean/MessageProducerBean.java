@@ -17,6 +17,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import eu.europa.ec.fisheries.schema.exchange.plugin.types.v1.PluginType;
+import eu.europa.ec.fisheries.uvms.config.constants.ConfigConstants;
+import eu.europa.ec.fisheries.uvms.config.exception.ConfigMessageException;
+import eu.europa.ec.fisheries.uvms.config.message.ConfigMessageProducer;
 import eu.europa.ec.fisheries.uvms.exchange.message.constants.DataSourceQueue;
 import eu.europa.ec.fisheries.uvms.exchange.message.event.ErrorEvent;
 import eu.europa.ec.fisheries.uvms.exchange.message.event.carrier.ExchangeMessageEvent;
@@ -29,7 +32,7 @@ import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelMapperE
 import eu.europa.ec.fisheries.uvms.exchange.model.mapper.JAXBMarshaller;
 
 @Stateless
-public class MessageProducerBean implements MessageProducer {
+public class MessageProducerBean implements MessageProducer, ConfigMessageProducer {
 
     final static Logger LOG = LoggerFactory.getLogger(MessageProducerBean.class);
 
@@ -51,7 +54,7 @@ public class MessageProducerBean implements MessageProducer {
     @Resource(lookup = ExchangeModelConstants.CONNECTION_FACTORY)
     private ConnectionFactory connectionFactory;
 
-    @Resource(mappedName = ExchangeModelConstants.CONFIG_MESSAGE_IN_QUEUE)
+    @Resource(mappedName = ConfigConstants.CONFIG_MESSAGE_IN_QUEUE)
     private Queue configQueue;
 
     private Connection connection = null;
@@ -73,6 +76,9 @@ public class MessageProducerBean implements MessageProducer {
             case RULES:
             	session.createProducer(rulesQueue).send(message);
             	break;
+        	case CONFIG:
+        		session.createProducer(configQueue).send(message);
+        		break;
             default:
                 break;
             }
@@ -129,21 +135,16 @@ public class MessageProducerBean implements MessageProducer {
             disconnectJMS();
         }
 	}
-    
+
     @Override
     @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
-    public String sendConfigMessage(String text) throws ExchangeMessageException {
+    public String sendConfigMessage(String text) throws ConfigMessageException {
         try {
-            connectJMS();
-            TextMessage message = session.createTextMessage();
-            message.setText(text);
-            message.setJMSReplyTo(responseQueue);
-            session.createProducer(configQueue).send(message);
-            return message.getJMSMessageID();
+        	return sendMessageOnQueue(text, DataSourceQueue.CONFIG);
         }
-        catch (Exception e) {
-            LOG.error("[ Error when sending config message. ] ");
-            throw new ExchangeMessageException("Error when sending config message.");
+        catch (ExchangeMessageException e) {
+            LOG.error("[ Error when sending config message. ] {}", e.getMessage());
+            throw new ConfigMessageException("Error when sending config message.");
         }
         finally {
             disconnectJMS();
