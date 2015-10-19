@@ -4,6 +4,7 @@ import java.util.List;
 
 import javax.ejb.Local;
 
+import eu.europa.ec.fisheries.schema.exchange.plugin.types.v1.PluginType;
 import eu.europa.ec.fisheries.schema.exchange.service.v1.CapabilityListType;
 import eu.europa.ec.fisheries.schema.exchange.service.v1.ServiceResponseType;
 import eu.europa.ec.fisheries.schema.exchange.service.v1.ServiceType;
@@ -35,13 +36,13 @@ public interface ExchangeService {
     public ServiceType unregisterService(ServiceType data) throws ExchangeServiceException;
 
     /**
-     * Get a list with data
+     * Get a list with plugins depending on plugin types
      *
      * @return
      * @throws ExchangeServiceException
      */
-    public List<ServiceResponseType> getServiceList() throws ExchangeServiceException;
-
+    public List<ServiceResponseType> getServiceList(List<PluginType> pluginTypes) throws ExchangeServiceException;
+    
     /**
      * Get an object by id
      *

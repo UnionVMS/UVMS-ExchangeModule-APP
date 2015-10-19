@@ -76,7 +76,7 @@ public class RestResourceTest {
      */
     @Test
     public void testGetServiceList() throws ExchangeServiceException {
-        doReturn(DTO_LIST).when(serviceLayer).getServiceList();
+        doReturn(DTO_LIST).when(serviceLayer).getServiceList(null);
         ResponseDto result = exchangeRestResource.getList();
         assertEquals(SUCCESS_RESULT_LIST.toString(), result.toString());
     }

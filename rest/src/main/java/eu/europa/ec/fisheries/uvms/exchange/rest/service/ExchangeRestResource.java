@@ -46,7 +46,7 @@ public class ExchangeRestResource {
     public ResponseDto getList() {
         LOG.info("Get list invoked in rest layer");
         try {
-            return new ResponseDto(serviceLayer.getServiceList(), ResponseCode.OK);
+            return new ResponseDto(serviceLayer.getServiceList(null), ResponseCode.OK);
         } catch (ExchangeServiceException | NullPointerException ex) {
             LOG.error("[ Error when geting list. ] {} ", ex.getMessage());
             return new ResponseDto(ex.getMessage(), ResponseCode.ERROR);

@@ -14,6 +14,7 @@ import eu.europa.ec.fisheries.schema.config.module.v1.PullSettingsResponse;
 import eu.europa.ec.fisheries.schema.config.module.v1.PushSettingsResponse;
 import eu.europa.ec.fisheries.schema.config.types.v1.PullSettingsStatus;
 import eu.europa.ec.fisheries.schema.config.types.v1.SettingType;
+import eu.europa.ec.fisheries.schema.exchange.plugin.types.v1.PluginType;
 import eu.europa.ec.fisheries.schema.exchange.service.v1.CapabilityListType;
 import eu.europa.ec.fisheries.schema.exchange.service.v1.ServiceResponseType;
 import eu.europa.ec.fisheries.schema.exchange.service.v1.ServiceType;
@@ -97,10 +98,10 @@ public class ExchangeServiceBean implements ExchangeService {
      * @throws ExchangeServiceException
      */
     @Override
-    public List<ServiceResponseType> getServiceList() throws ExchangeServiceException {
+    public List<ServiceResponseType> getServiceList(List<PluginType> pluginTypes) throws ExchangeServiceException {
         LOG.info("Get list invoked in service layer");
         try {
-            String request = ExchangeDataSourceRequestMapper.mapGetServiceListToString();
+            String request = ExchangeDataSourceRequestMapper.mapGetServiceListToString(pluginTypes);
             String messageId = producer.sendMessageOnQueue(request, DataSourceQueue.INTERNAL);
             TextMessage response = consumer.getMessage(messageId, TextMessage.class);
             return ExchangeDataSourceResponseMapper.mapToServiceTypeListFromResponse(response);

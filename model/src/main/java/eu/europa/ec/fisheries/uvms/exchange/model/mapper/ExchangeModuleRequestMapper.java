@@ -1,5 +1,7 @@
 package eu.europa.ec.fisheries.uvms.exchange.model.mapper;
 
+import java.util.List;
+
 import javax.jms.TextMessage;
 import javax.xml.datatype.DatatypeConfigurationException;
 
@@ -114,9 +116,10 @@ public class ExchangeModuleRequestMapper {
     	return request;
     }
 
-    public static String createGetServiceListRequest() throws ExchangeModelMapperException {
+    public static String createGetServiceListRequest(List<PluginType> pluginTypes) throws ExchangeModelMapperException {
     	GetServiceListRequest request = new GetServiceListRequest();
     	request.setMethod(ExchangeModuleMethod.LIST_SERVICES);
+    	request.getType().addAll(pluginTypes);
     	return JAXBMarshaller.marshallJaxBObjectToString(request);
     }
 }

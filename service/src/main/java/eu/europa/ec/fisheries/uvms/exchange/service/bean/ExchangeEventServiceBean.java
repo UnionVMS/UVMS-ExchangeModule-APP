@@ -19,6 +19,7 @@ import eu.europa.ec.fisheries.schema.config.module.v1.PushModuleSettingMessage;
 import eu.europa.ec.fisheries.schema.config.types.v1.SettingType;
 import eu.europa.ec.fisheries.schema.exchange.common.v1.ReportType;
 import eu.europa.ec.fisheries.schema.exchange.common.v1.ReportTypeType;
+import eu.europa.ec.fisheries.schema.exchange.module.v1.GetServiceListRequest;
 import eu.europa.ec.fisheries.schema.exchange.module.v1.PingResponse;
 import eu.europa.ec.fisheries.schema.exchange.module.v1.SendMovementToPluginRequest;
 import eu.europa.ec.fisheries.schema.exchange.module.v1.SetCommandRequest;
@@ -78,7 +79,9 @@ public class ExchangeEventServiceBean implements EventService {
     public void getPluginConfig(@Observes @PluginConfigEvent ExchangeMessageEvent message) {
         LOG.info("Received MessageRecievedEvent");
         try {
-        	List<ServiceResponseType> serviceList = exchangeService.getServiceList();
+        	TextMessage jmsMessage = message.getJmsMessage();
+        	GetServiceListRequest request = JAXBMarshaller.unmarshallTextMessage(jmsMessage, GetServiceListRequest.class);
+        	List<ServiceResponseType> serviceList = exchangeService.getServiceList(request.getType());
 			producer.sendModuleResponseMessage(message.getJmsMessage(), ExchangeModuleResponseMapper.mapServiceListResponse(serviceList));
 		} catch (ExchangeException e) {
 			LOG.error("[ Error when getting plugin list from source]");

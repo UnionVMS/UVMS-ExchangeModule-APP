@@ -1,5 +1,8 @@
 package eu.europa.ec.fisheries.uvms.exchange.model.mapper;
 
+import java.util.List;
+
+import eu.europa.ec.fisheries.schema.exchange.plugin.types.v1.PluginType;
 import eu.europa.ec.fisheries.schema.exchange.source.v1.CreateLogRequest;
 
 import org.slf4j.Logger;
@@ -48,10 +51,11 @@ public class ExchangeDataSourceRequestMapper {
         }
     }
 
-    public static String mapGetServiceListToString() throws ExchangeModelMapperException {
+    public static String mapGetServiceListToString(List<PluginType> pluginTypes) throws ExchangeModelMapperException {
         try {
             GetServiceListRequest request = new GetServiceListRequest();
             request.setMethod(ExchangeDataSourceMethod.LIST_SERVICES);
+            request.getType().addAll(pluginTypes);
             return JAXBMarshaller.marshallJaxBObjectToString(request);
         } catch (Exception e) {
             LOG.error("[ Error when mapping GetServiceListRequest to String ] {}", e.getMessage());
