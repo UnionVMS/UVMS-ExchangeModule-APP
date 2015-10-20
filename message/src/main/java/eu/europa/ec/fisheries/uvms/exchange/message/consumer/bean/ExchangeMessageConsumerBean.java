@@ -23,7 +23,7 @@ import eu.europa.ec.fisheries.uvms.exchange.model.constant.ExchangeModelConstant
 public class ExchangeMessageConsumerBean implements ExchangeMessageConsumer, ConfigMessageConsumer {
 
     final static Logger LOG = LoggerFactory.getLogger(ExchangeMessageConsumerBean.class);
-    final static int ONE_MINUTE = 60000;
+    private final static long TEN_SECONDS = 10000;
 
     @Resource(mappedName = ExchangeModelConstants.EXCHANGE_RESPONSE_QUEUE)
     private Queue responseQueue;
@@ -45,13 +45,12 @@ public class ExchangeMessageConsumerBean implements ExchangeMessageConsumer, Con
             }
             connectToQueue();
 
-            T response = (T) session.createConsumer(responseQueue, "JMSCorrelationID='" + correlationId + "'").receive(5000);
+            T response = (T) session.createConsumer(responseQueue, "JMSCorrelationID='" + correlationId + "'").receive(TEN_SECONDS);
             if (response == null) {
-                throw new ExchangeMessageException("[ No response from module. ]");
+                throw new ExchangeMessageException("[ Timeout reached or message null in ExchangeMessageConsumerBean. ]");
             }
 
             return response;
-
         } catch (Exception e) {
             LOG.error("[ Error when getting message ] {}", e.getMessage());
             throw new ExchangeMessageException("Error when retrieving message: ");
