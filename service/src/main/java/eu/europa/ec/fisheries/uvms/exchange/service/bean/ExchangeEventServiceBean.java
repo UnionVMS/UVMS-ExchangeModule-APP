@@ -24,7 +24,6 @@ import eu.europa.ec.fisheries.schema.exchange.movement.v1.MovementBaseType;
 import eu.europa.ec.fisheries.schema.exchange.movement.v1.SendMovementToPluginType;
 import eu.europa.ec.fisheries.schema.exchange.plugin.types.v1.PluginType;
 import eu.europa.ec.fisheries.schema.exchange.service.v1.ServiceResponseType;
-import eu.europa.ec.fisheries.schema.exchange.service.v1.ServiceType;
 import eu.europa.ec.fisheries.schema.rules.movement.v1.RawMovementType;
 import eu.europa.ec.fisheries.uvms.config.service.ParameterService;
 import eu.europa.ec.fisheries.uvms.exchange.message.constants.DataSourceQueue;
@@ -64,7 +63,7 @@ public class ExchangeEventServiceBean implements EventService {
 
     @EJB
     ExchangeService exchangeService;
-    
+
     @EJB
     ParameterService parameterService;
 
@@ -72,121 +71,121 @@ public class ExchangeEventServiceBean implements EventService {
     public void getPluginConfig(@Observes @PluginConfigEvent ExchangeMessageEvent message) {
         LOG.info("Received MessageRecievedEvent");
         try {
-        	TextMessage jmsMessage = message.getJmsMessage();
-        	GetServiceListRequest request = JAXBMarshaller.unmarshallTextMessage(jmsMessage, GetServiceListRequest.class);
-        	List<ServiceResponseType> serviceList = exchangeService.getServiceList(request.getType());
-			producer.sendModuleResponseMessage(message.getJmsMessage(), ExchangeModuleResponseMapper.mapServiceListResponse(serviceList));
-		} catch (ExchangeException e) {
-			LOG.error("[ Error when getting plugin list from source]");
+            TextMessage jmsMessage = message.getJmsMessage();
+            GetServiceListRequest request = JAXBMarshaller.unmarshallTextMessage(jmsMessage, GetServiceListRequest.class);
+            List<ServiceResponseType> serviceList = exchangeService.getServiceList(request.getType());
+            producer.sendModuleResponseMessage(message.getJmsMessage(), ExchangeModuleResponseMapper.mapServiceListResponse(serviceList));
+        } catch (ExchangeException e) {
+            LOG.error("[ Error when getting plugin list from source]");
             errorEvent.fire(new ExchangeMessageEvent(message.getJmsMessage(), ExchangeModuleResponseMapper.createFaultMessage(
                     FaultCode.EXCHANGE_MESSAGE, "Excpetion when getting service list")));
-		}
+        }
     }
 
     @Override
-	public void processMovement(@Observes @SetMovementEvent ExchangeMessageEvent message) {
-		LOG.info("Process movement");
-		//TODO process movement
-		try {
-			SetMovementReportRequest request = JAXBMarshaller.unmarshallTextMessage(message.getJmsMessage(), SetMovementReportRequest.class);
-			
-			//TODO log to exchange log (received message)
-			//reportType.getFrom()
-			//reportType.getTimestamp()
-			MovementBaseType baseMovement = request.getRequest().getMovement();
-			RawMovementType rawMovement = MovementMapper.getMapper().map(baseMovement, RawMovementType.class);
-			if(rawMovement.getAssetId() != null && rawMovement.getAssetId().getAssetIdList() != null) {
-				rawMovement.getAssetId().getAssetIdList().addAll(MovementMapper.mapAssetIdList(baseMovement.getAssetId().getAssetIdList()));
-			}
-			if(rawMovement.getMobileTerminal() != null && rawMovement.getMobileTerminal().getMobileTerminalIdList() != null) {
-				rawMovement.getMobileTerminal().getMobileTerminalIdList().addAll(MovementMapper.mapMobileTerminalIdList(baseMovement.getMobileTerminalId().getMobileTerminalIdList()));
-			}
-			String movement = RulesModuleRequestMapper.createSetMovementReportRequest(rawMovement);
-			producer.sendMessageOnQueue(movement, DataSourceQueue.RULES);
-		} catch (ExchangeModelMarshallException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (ExchangeMessageException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (RulesModelMapperException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-	}
+    public void processMovement(@Observes @SetMovementEvent ExchangeMessageEvent message) {
+        LOG.info("Process movement");
+        //TODO process movement
+        try {
+            SetMovementReportRequest request = JAXBMarshaller.unmarshallTextMessage(message.getJmsMessage(), SetMovementReportRequest.class);
 
-	@Override
-	public void ping(@Observes @PingEvent ExchangeMessageEvent message) {
-		try {
-			PingResponse response = new PingResponse();
-			response.setResponse("pong");
-			producer.sendModuleResponseMessage(message.getJmsMessage(), JAXBMarshaller.marshallJaxBObjectToString(response));
-		} catch (ExchangeModelMarshallException e) {
-			LOG.error("[ Error when marshalling ping response ]");
-		}
-	}
+            //TODO log to exchange log (received message)
+            //reportType.getFrom()
+            //reportType.getTimestamp()
+            MovementBaseType baseMovement = request.getRequest().getMovement();
+            RawMovementType rawMovement = MovementMapper.getInstance().getMapper().map(baseMovement, RawMovementType.class);
+            if(rawMovement.getAssetId() != null && rawMovement.getAssetId().getAssetIdList() != null) {
+                rawMovement.getAssetId().getAssetIdList().addAll(MovementMapper.mapAssetIdList(baseMovement.getAssetId().getAssetIdList()));
+            }
+            if(baseMovement.getMobileTerminalId() != null && baseMovement.getMobileTerminalId().getMobileTerminalIdList() != null) {
+                rawMovement.getMobileTerminal().getMobileTerminalIdList().addAll(MovementMapper.mapMobileTerminalIdList(baseMovement.getMobileTerminalId().getMobileTerminalIdList()));
+            }
+            String movement = RulesModuleRequestMapper.createSetMovementReportRequest(rawMovement);
+            producer.sendMessageOnQueue(movement, DataSourceQueue.RULES);
+        } catch (ExchangeModelMarshallException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } catch (ExchangeMessageException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } catch (RulesModelMapperException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+    }
 
-	@Override
-	public void sendReportToPlugin(@Observes @SendReportToPluginEvent ExchangeMessageEvent message) {
-		LOG.info("Send report to plugin");
-		
-		try {
-			SendMovementToPluginRequest request = JAXBMarshaller.unmarshallTextMessage(message.getJmsMessage(), SendMovementToPluginRequest.class);
-			SendMovementToPluginType sendReport = request.getReport();
-		
-			List<PluginType> type = new ArrayList<>();
-			type.add(sendReport.getPluginType());
-			List<ServiceResponseType> services = exchangeService.getServiceList(type);
-			if(!services.isEmpty()) {
-				//TODO do some validation logic
-				//check so request.getReport().getTo() exists
-				//check so the type of service has type request.getReport().getPlugin()
-				//check so the plugin is started
-				//otherwise answer to sender (rules) so rules can do something about it (tickets)
-				
-				String serviceName = services.get(0).getServiceClassName(); //Use first and only
-				ReportType report = new ReportType();
-				report.setTimestamp(sendReport.getTimestamp());
-				//when elog is supported add logic
-				report.setMovement(sendReport.getMovement());
-				report.setType(ReportTypeType.MOVEMENT);
-				
-				String text = ExchangePluginRequestMapper.createSetReportRequest(report);
-				producer.sendEventBusMessage(text, serviceName);
-				
-				//TODO log to exchange logs
-				
-			} else {
-				errorEvent.fire(new ExchangeMessageEvent(message.getJmsMessage(), ExchangeModuleResponseMapper.createFaultMessage(FaultCode.EXCHANGE_EVENT_SERVICE, "Excpetion when sending message to plugin ")));
-			}
-		} catch (ExchangeException e) {
-			LOG.error("[ Error when sending report to plugin ]");
-			errorEvent.fire(new ExchangeMessageEvent(message.getJmsMessage(), ExchangeModuleResponseMapper.createFaultMessage(FaultCode.EXCHANGE_EVENT_SERVICE, "Excpetion when sending message to plugin ")));
-		}
-	}
+    @Override
+    public void ping(@Observes @PingEvent ExchangeMessageEvent message) {
+        try {
+            PingResponse response = new PingResponse();
+            response.setResponse("pong");
+            producer.sendModuleResponseMessage(message.getJmsMessage(), JAXBMarshaller.marshallJaxBObjectToString(response));
+        } catch (ExchangeModelMarshallException e) {
+            LOG.error("[ Error when marshalling ping response ]");
+        }
+    }
 
-	@Override
-	public void processAcknowledge(@Observes @ExchangeLogEvent ExchangeMessageEvent message) {
-		LOG.info("Process acknowledge");
-	}
+    @Override
+    public void sendReportToPlugin(@Observes @SendReportToPluginEvent ExchangeMessageEvent message) {
+        LOG.info("Send report to plugin");
 
-	@Override
-	public void sendCommandToPlugin(@Observes @SendCommandToPluginEvent ExchangeMessageEvent message) {
-		LOG.info("Send command to plugin");
-		
-		try {
-			SetCommandRequest request = JAXBMarshaller.unmarshallTextMessage(message.getJmsMessage(), SetCommandRequest.class);
-			String pluginName = request.getCommand().getPluginName();
+        try {
+            SendMovementToPluginRequest request = JAXBMarshaller.unmarshallTextMessage(message.getJmsMessage(), SendMovementToPluginRequest.class);
+            SendMovementToPluginType sendReport = request.getReport();
 
-			String text = ExchangePluginRequestMapper.createSetCommandRequest(request.getCommand());
-			producer.sendEventBusMessage(text, pluginName);
+            List<PluginType> type = new ArrayList<>();
+            type.add(sendReport.getPluginType());
+            List<ServiceResponseType> services = exchangeService.getServiceList(type);
+            if(!services.isEmpty()) {
+                //TODO do some validation logic
+                //check so request.getReport().getTo() exists
+                //check so the type of service has type request.getReport().getPlugin()
+                //check so the plugin is started
+                //otherwise answer to sender (rules) so rules can do something about it (tickets)
 
-			//TODO log to exchange logs
-			
-		} catch (NullPointerException | ExchangeException e) {
-			LOG.error("[ Error when sending command to plugin ]");
-			errorEvent.fire(new ExchangeMessageEvent(message.getJmsMessage(), ExchangeModuleResponseMapper.createFaultMessage(FaultCode.EXCHANGE_EVENT_SERVICE, "Excpetion when sending command to plugin ")));
-		}
-	}
+                String serviceName = services.get(0).getServiceClassName(); //Use first and only
+                ReportType report = new ReportType();
+                report.setTimestamp(sendReport.getTimestamp());
+                //when elog is supported add logic
+                report.setMovement(sendReport.getMovement());
+                report.setType(ReportTypeType.MOVEMENT);
+
+                String text = ExchangePluginRequestMapper.createSetReportRequest(report);
+                producer.sendEventBusMessage(text, serviceName);
+
+                //TODO log to exchange logs
+
+            } else {
+                errorEvent.fire(new ExchangeMessageEvent(message.getJmsMessage(), ExchangeModuleResponseMapper.createFaultMessage(FaultCode.EXCHANGE_EVENT_SERVICE, "Excpetion when sending message to plugin ")));
+            }
+        } catch (ExchangeException e) {
+            LOG.error("[ Error when sending report to plugin ]");
+            errorEvent.fire(new ExchangeMessageEvent(message.getJmsMessage(), ExchangeModuleResponseMapper.createFaultMessage(FaultCode.EXCHANGE_EVENT_SERVICE, "Excpetion when sending message to plugin ")));
+        }
+    }
+
+    @Override
+    public void processAcknowledge(@Observes @ExchangeLogEvent ExchangeMessageEvent message) {
+        LOG.info("Process acknowledge");
+    }
+
+    @Override
+    public void sendCommandToPlugin(@Observes @SendCommandToPluginEvent ExchangeMessageEvent message) {
+        LOG.info("Send command to plugin");
+
+        try {
+            SetCommandRequest request = JAXBMarshaller.unmarshallTextMessage(message.getJmsMessage(), SetCommandRequest.class);
+            String pluginName = request.getCommand().getPluginName();
+
+            String text = ExchangePluginRequestMapper.createSetCommandRequest(request.getCommand());
+            producer.sendEventBusMessage(text, pluginName);
+
+            //TODO log to exchange logs
+
+        } catch (NullPointerException | ExchangeException e) {
+            LOG.error("[ Error when sending command to plugin ]");
+            errorEvent.fire(new ExchangeMessageEvent(message.getJmsMessage(), ExchangeModuleResponseMapper.createFaultMessage(FaultCode.EXCHANGE_EVENT_SERVICE, "Excpetion when sending command to plugin ")));
+        }
+    }
 
 }

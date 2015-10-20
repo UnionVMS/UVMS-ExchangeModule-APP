@@ -18,7 +18,7 @@
             <xsd:enumeration value="SATELLITE_NUMBER"/>
             <xsd:enumeration value="LES"/>
             <xsd:enumeration value="DNID"/>
-            <xsd:enumeration value="MEMEBER_NUMBER"/>
+            <xsd:enumeration value="MEMBER_NUMBER"/>
         </xsd:restriction>
     </xsd:simpleType>
     
