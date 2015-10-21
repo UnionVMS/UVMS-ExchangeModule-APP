@@ -24,7 +24,7 @@
                     <xsd:enumeration value="REGISTER_SERVICE"/>
                     <xsd:enumeration value="UNREGISTER_SERVICE"/>
                     <xsd:enumeration value="GET_SETTINGS"/>
-                    <!-- <xsd:enumeration value="SET_SETTINGS"/>--> <!-- change settings (config module) -->
+                    <xsd:enumeration value="SET_SETTINGS"/> <!-- change settings (config module) -->
                     <xsd:enumeration value="GET_CAPABILITIES"/>
                     <!-- <xsd:enumeration value="SET_CAPABILITIES"/>--> <!-- change capabilities -->
                     <xsd:enumeration value="GET_SERVICE"/>
@@ -164,6 +164,27 @@
                 </xsd:complexType>
             </xsd:element>
             
+            <xsd:element name="SetServiceSettingsRequest">
+                <xsd:complexType>
+                    <xsd:complexContent>
+                        <xsd:extension base="source:ExchangeBaseRequest">
+                            <xsd:sequence>
+                                <xsd:element name="serviceName" type="xsd:string"/>
+                                <xsd:element name="settings" type="service:SettingListType"/>
+                            </xsd:sequence>
+                        </xsd:extension>
+                    </xsd:complexContent>
+                </xsd:complexType>
+            </xsd:element>
+            
+            <xsd:element name="SetServiceSettingsResponse">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element name="service" type="service:ServiceResponseType" minOccurs="1" maxOccurs="1"/>
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
+            
             <xsd:element name="GetServiceSettingsRequest">
                 <xsd:complexType>
                     <xsd:complexContent>
@@ -271,6 +292,13 @@
         <part name="body" element="source:UnregisterServiceResponse"/>
     </message>
     
+    <message name="SetServiceSettingsRequest">
+        <part name="body" element="source:SetServiceSettingsRequest"/>
+    </message>
+    <message name="SetServiceSettingsResponse">
+        <part name="body" element="source:SetServiceSettingsResponse"/>
+    </message>
+    
     <message name="GetServiceSettingsRequest">
         <part name="body" element="source:GetServiceSettingsRequest"/>
     </message>
@@ -333,6 +361,12 @@
         <operation name="GetServiceCapabilities">
             <input message="source:GetServiceCapabilitiesRequest"/>
             <output message="source:GetServiceCapabilitiesResponse"/>
+            <fault name="ExchangeFault" message="source:ExchangeFault"/>
+        </operation>
+        
+        <operation name="SetServiceSettings">
+            <input message="source:SetServiceSettingsRequest"/>
+            <output message="source:SetServiceSettingsResponse"/>
             <fault name="ExchangeFault" message="source:ExchangeFault"/>
         </operation>
         
@@ -425,6 +459,18 @@
         </operation>
         
         <operation name="GetServiceCapabilities">
+            <input>
+                <soap:body use="literal"/>
+            </input>
+            <output>
+                <soap:body use="literal"/>
+            </output>
+            <fault name="ExchangeFault">
+                <soap:fault name="ExchangeFault" use="literal"/>
+            </fault>
+        </operation>
+        
+        <operation name="SetServiceSettings">
             <input>
                 <soap:body use="literal"/>
             </input>

@@ -18,10 +18,12 @@ import eu.europa.ec.fisheries.schema.exchange.source.v1.GetServiceListRequest;
 import eu.europa.ec.fisheries.schema.exchange.source.v1.GetServiceRequest;
 import eu.europa.ec.fisheries.schema.exchange.source.v1.GetServiceSettingsRequest;
 import eu.europa.ec.fisheries.schema.exchange.source.v1.RegisterServiceRequest;
+import eu.europa.ec.fisheries.schema.exchange.source.v1.SetServiceSettingsRequest;
 import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeListQuery;
 import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogType;
 import eu.europa.ec.fisheries.schema.exchange.source.v1.UnregisterServiceRequest;
 import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelMapperException;
+import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelMarshallException;
 
 public class ExchangeDataSourceRequestMapper {
 
@@ -124,5 +126,18 @@ public class ExchangeDataSourceRequestMapper {
             throw new ExchangeModelMapperException("[ Error when mapping GetServiceCapabilitiesRequest to String ]");
         }
     }
+
+	public static String mapSetSettingsToString(String serviceClassName, SettingListType settingListType) throws ExchangeModelMapperException {
+		try {
+			SetServiceSettingsRequest request = new SetServiceSettingsRequest();
+			request.setMethod(ExchangeDataSourceMethod.SET_SETTINGS);
+			request.setServiceName(serviceClassName);
+			request.setSettings(settingListType);
+			return JAXBMarshaller.marshallJaxBObjectToString(request);
+		} catch (ExchangeModelMarshallException e) {
+			LOG.error("[ Error when mapping SetServiceSettingsRequest ] ");
+			throw new ExchangeModelMapperException("[ Error when mapping SetServiceSettingsRequest ]");
+		}
+	}
 
 }

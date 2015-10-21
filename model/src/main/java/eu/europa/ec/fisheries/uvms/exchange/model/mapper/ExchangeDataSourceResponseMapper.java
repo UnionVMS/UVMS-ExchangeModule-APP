@@ -9,6 +9,7 @@ import javax.jms.TextMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import eu.europa.ec.fisheries.schema.exchange.common.v1.ExchangeFault;
 import eu.europa.ec.fisheries.schema.exchange.service.v1.CapabilityListType;
 import eu.europa.ec.fisheries.schema.exchange.service.v1.CapabilityType;
 import eu.europa.ec.fisheries.schema.exchange.service.v1.ServiceResponseType;
@@ -21,10 +22,12 @@ import eu.europa.ec.fisheries.schema.exchange.source.v1.GetServiceListResponse;
 import eu.europa.ec.fisheries.schema.exchange.source.v1.GetServiceResponse;
 import eu.europa.ec.fisheries.schema.exchange.source.v1.GetServiceSettingsResponse;
 import eu.europa.ec.fisheries.schema.exchange.source.v1.RegisterServiceResponse;
+import eu.europa.ec.fisheries.schema.exchange.source.v1.SetServiceSettingsResponse;
 import eu.europa.ec.fisheries.schema.exchange.source.v1.UnregisterServiceResponse;
 import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogType;
 import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelMapperException;
 import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelMarshallException;
+import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeValidationException;
 
 public class ExchangeDataSourceResponseMapper {
 
@@ -38,54 +41,108 @@ public class ExchangeDataSourceResponseMapper {
      * @throws ExchangeModelMapperException
      * @throws JMSException
      */
-    private static void validateResponse(TextMessage response, String correlationId) throws ExchangeModelMapperException, JMSException {
+    private static void validateResponse(TextMessage response, String correlationId) throws ExchangeValidationException, JMSException {
 
         if (response == null) {
-            LOG.error("[ Error when validating response in ResponseMapper: Response is Null ]");
-            throw new ExchangeModelMapperException("[ Error when validating response in ResponseMapper: Response is Null ]");
+            throw new ExchangeValidationException("Error when validating response in ResponseMapper: Response is Null");
         }
 
         if (response.getJMSCorrelationID() == null) {
-            LOG.error("[ No corelationId in response.] Expected was: {} ", correlationId);
-            throw new ExchangeModelMapperException("[ No corelationId in response (Null) ] . Expected was: " + correlationId);
+            throw new ExchangeValidationException("No corelationId in response (Null) . Expected was: " + correlationId);
         }
 
         if (!correlationId.equalsIgnoreCase(response.getJMSCorrelationID())) {
-            LOG.error("[ Wrong corelationId in response. Expected was {0} But actual was: {1} ]", correlationId, response.getJMSCorrelationID());
-            throw new ExchangeModelMapperException("[ Wrong corelationId in response. ] Expected was: " + correlationId + "But actual was: "
+            throw new ExchangeValidationException("Wrong corelationId in response. Expected was: " + correlationId + "But actual was: "
                     + response.getJMSCorrelationID());
         }
 
+        try {
+			ExchangeFault fault = JAXBMarshaller.unmarshallTextMessage(response, ExchangeFault.class);
+	        //TODO use fault
+			throw new ExchangeValidationException("Fault found when validate response " + fault.getMessage());
+		} catch (ExchangeModelMarshallException e) {
+			//everything went well
+		}  
+
     }
 
-    public static List<ServiceResponseType> mapToServiceTypeListFromResponse(TextMessage message) throws ExchangeModelMapperException {
-        GetServiceListResponse response = JAXBMarshaller.unmarshallTextMessage(message, GetServiceListResponse.class);
-        return response.getService();
+    public static List<ServiceResponseType> mapToServiceTypeListFromResponse(TextMessage message, String correlationId) throws ExchangeModelMapperException {
+    	try {
+			validateResponse(message, correlationId);
+			GetServiceListResponse response = JAXBMarshaller.unmarshallTextMessage(message, GetServiceListResponse.class);
+	        return response.getService();
+		} catch (JMSException | ExchangeValidationException e) {
+			LOG.error("[ Error when mapping response to list of service ]");
+			throw new ExchangeModelMapperException("[ Error when mapping response to list of service ] " + e.getMessage());
+		}
     }
 
-    public static ServiceResponseType mapToRegisterServiceResponse(TextMessage message) throws ExchangeModelMapperException {
-        RegisterServiceResponse response = JAXBMarshaller.unmarshallTextMessage(message, RegisterServiceResponse.class);
-        return response.getService();
+    public static ServiceResponseType mapToRegisterServiceResponse(TextMessage message, String correlationId) throws ExchangeModelMapperException {
+    	try {
+    		validateResponse(message, correlationId);
+    		RegisterServiceResponse response = JAXBMarshaller.unmarshallTextMessage(message, RegisterServiceResponse.class);
+            return response.getService();
+    	} catch (JMSException | ExchangeValidationException e) {
+			LOG.error("[ Error when mapping response to list of service ]");
+			throw new ExchangeModelMapperException("[ Error when mapping response to list of service ] " + e.getMessage());
+		}
     }
 
-    public static ServiceResponseType mapToUnregisterServiceResponse(TextMessage message) throws ExchangeModelMapperException {
-        UnregisterServiceResponse response = JAXBMarshaller.unmarshallTextMessage(message, UnregisterServiceResponse.class);
-        return response.getService();
+    public static ServiceResponseType mapToUnregisterServiceResponse(TextMessage message, String correlationId) throws ExchangeModelMapperException {
+    	try {
+    		validateResponse(message, correlationId);
+    		UnregisterServiceResponse response = JAXBMarshaller.unmarshallTextMessage(message, UnregisterServiceResponse.class);
+            return response.getService();
+    	} catch (JMSException | ExchangeValidationException e) {
+			LOG.error("[ Error when mapping response to list of service ]");
+			throw new ExchangeModelMapperException("[ Error when mapping response to list of service ] " + e.getMessage());
+		}
+        
     }
 
-    public static ServiceResponseType mapToServiceTypeFromGetServiceResponse(TextMessage message) throws ExchangeModelMapperException {
-        GetServiceResponse response = JAXBMarshaller.unmarshallTextMessage(message, GetServiceResponse.class);
-        return response.getService();
+    public static ServiceResponseType mapToServiceTypeFromGetServiceResponse(TextMessage message, String correlationId) throws ExchangeModelMapperException {
+    	try {
+    		validateResponse(message, correlationId);
+    		GetServiceResponse response = JAXBMarshaller.unmarshallTextMessage(message, GetServiceResponse.class);
+            return response.getService();
+    	} catch (JMSException | ExchangeValidationException e) {
+			LOG.error("[ Error when mapping response to list of service ]");
+			throw new ExchangeModelMapperException("[ Error when mapping response to list of service ] " + e.getMessage());
+		}
+        
     }
 
-    public static ExchangeLogType mapToExchangeLogTypeFromCreateExchageLogResponse(TextMessage message) throws ExchangeModelMapperException {
-        CreateLogResponse response = JAXBMarshaller.unmarshallTextMessage(message, CreateLogResponse.class);
-        return response.getExchangeLog();
+    public static ServiceResponseType mapToServiceTypeFromSetSettingsResponse(TextMessage message, String correlationId) throws ExchangeModelMapperException {
+    	try {
+    		validateResponse(message, correlationId);
+    		SetServiceSettingsResponse response = JAXBMarshaller.unmarshallTextMessage(message, SetServiceSettingsResponse.class);
+            return response.getService();
+    	} catch (JMSException | ExchangeValidationException e) {
+			LOG.error("[ Error when mapping response to list of service ]");
+			throw new ExchangeModelMapperException("[ Error when mapping response to list of service ] " + e.getMessage());
+		}
+	}
+    
+    public static ExchangeLogType mapToExchangeLogTypeFromCreateExchageLogResponse(TextMessage message, String correlationId) throws ExchangeModelMapperException {
+    	try {
+    		validateResponse(message, correlationId);
+    		CreateLogResponse response = JAXBMarshaller.unmarshallTextMessage(message, CreateLogResponse.class);
+            return response.getExchangeLog();
+    	} catch (JMSException | ExchangeValidationException e) {
+			LOG.error("[ Error when mapping response to create exchange log ]");
+			throw new ExchangeModelMapperException("[ Error when mapping response to create exchange log] " + e.getMessage());
+		}
     }
 
-    public static GetLogListByQueryResponse mapToGetLogListByQueryResponse(TextMessage message) throws ExchangeModelMapperException {
-        GetLogListByQueryResponse response = JAXBMarshaller.unmarshallTextMessage(message, GetLogListByQueryResponse.class);
-        return response;
+    public static GetLogListByQueryResponse mapToGetLogListByQueryResponse(TextMessage message, String correlationId) throws ExchangeModelMapperException {
+    	try {
+    		validateResponse(message, correlationId);
+    		GetLogListByQueryResponse response = JAXBMarshaller.unmarshallTextMessage(message, GetLogListByQueryResponse.class);
+            return response;
+    	} catch (JMSException | ExchangeValidationException e) {
+    		LOG.error("[ Error when mapping response to exchange log ]");
+			throw new ExchangeModelMapperException("[ Error when mapping response to exchange log] " + e.getMessage());
+    	}
     }
 
     public static String mapServiceTypeListToStringFromResponse(List<ServiceResponseType> services) throws ExchangeModelMapperException {
@@ -147,4 +204,10 @@ public class ExchangeDataSourceResponseMapper {
     	response.setService(service);
     	return JAXBMarshaller.marshallJaxBObjectToString(response);
     }
+
+	public static String createSetServiceSettingsResponse(ServiceResponseType updatedService) throws ExchangeModelMarshallException {
+		SetServiceSettingsResponse response = new SetServiceSettingsResponse();
+		response.setService(updatedService);
+		return JAXBMarshaller.marshallJaxBObjectToString(response);
+	}
 }

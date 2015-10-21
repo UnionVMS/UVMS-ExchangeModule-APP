@@ -53,13 +53,13 @@ public interface ExchangeService {
     public ServiceType getById(Long id) throws ExchangeServiceException;
 
     /**
-     * Update an object
-     *
-     * @param data
-     * @return
+     * Upsert Service with settings
+     * @param serviceClassName - name of service to upsert
+     * @param settingList - list of settings to upsert
+     * @return updated service
      * @throws ExchangeServiceException
      */
-    public ServiceType update(ServiceType data) throws ExchangeServiceException;
+    public ServiceResponseType upsertSettings(String serviceClassName, SettingListType settingList) throws ExchangeServiceException;
 
     /**
      *
@@ -88,5 +88,5 @@ public interface ExchangeService {
      * @throws ExchangeServiceException
      */
     public GetLogListByQueryResponse getExchangeLogByQuery(ExchangeListQuery query) throws ExchangeServiceException;
-    
+
 }

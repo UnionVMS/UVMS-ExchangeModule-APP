@@ -1,6 +1,7 @@
 package eu.europa.ec.fisheries.uvms.exchange.service.bean;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import javax.ejb.EJB;
@@ -33,6 +34,7 @@ import eu.europa.ec.fisheries.uvms.exchange.message.exception.ExchangeMessageExc
 import eu.europa.ec.fisheries.uvms.exchange.message.producer.MessageProducer;
 import eu.europa.ec.fisheries.uvms.exchange.model.constant.FaultCode;
 import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelMarshallException;
+import eu.europa.ec.fisheries.uvms.exchange.model.mapper.ExchangePluginRequestMapper;
 import eu.europa.ec.fisheries.uvms.exchange.model.mapper.ExchangePluginResponseMapper;
 import eu.europa.ec.fisheries.uvms.exchange.model.mapper.JAXBMarshaller;
 import eu.europa.ec.fisheries.uvms.exchange.service.ExchangeService;
@@ -150,15 +152,40 @@ public class PluginServiceBean implements PluginService {
 
 	@Override
 	public void setConfig(@Observes @ConfigSettingUpdatedEvent ConfigSettingEvent settingEvent) {
-		switch(settingEvent.getEvent()) {
+		switch(settingEvent.getType()) {
 		case STORE:
 			//ConfigModule and/or Exchange module deployed
 			break;
 		case UPDATE:
-			//ConfigModule updated parameter table (settings of plugin, etc)
 			LOG.info("ConfigModule updated parameter table with settings of plugins");
-			//exchangeService.getServiceList(pluginTypes)
-			//parameterService.getSettings(keys)
+			try {
+				String key = settingEvent.getKey();
+				String value = parameterService.getStringValue(key);
+			
+				String[] splittedKey = key.split(PARAMETER_DELIMETER);
+				String serviceClassName = splittedKey[0];
+				String settingKey = splittedKey[1];
+				
+				SettingListType settingListType = new SettingListType();
+				SettingType settingType = new SettingType();
+				settingType.setKey(settingKey);
+				settingType.setValue(value);
+				settingListType.getSetting().add(settingType);
+				ServiceResponseType service = exchangeService.upsertSettings(serviceClassName, settingListType);
+				
+				String text = ExchangePluginRequestMapper.createSetConfigRequest(service.getSettingList());
+				producer.sendEventBusMessage(text, serviceClassName);
+				
+			} catch (ConfigServiceException e) {
+				LOG.error("Couldn't get updated parameter table value");
+			} catch (ExchangeServiceException e) {
+				LOG.error("Couldn't upsert settings in exchange");
+			} catch (ExchangeModelMarshallException e) {
+				LOG.error("Couldn't create plugin set config request");
+			} catch (ExchangeMessageException e) {
+				LOG.error("Couldn't send message to plugin");
+			}
+			break;
 		case DELETE:
 			LOG.info("ConfigModule removed parameter setting");
 			break;
