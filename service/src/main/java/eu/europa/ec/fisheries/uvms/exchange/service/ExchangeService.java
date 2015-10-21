@@ -33,7 +33,7 @@ public interface ExchangeService {
      * @return
      * @throws ExchangeServiceException
      */
-    public ServiceType unregisterService(ServiceType data) throws ExchangeServiceException;
+    public ServiceResponseType unregisterService(ServiceType data) throws ExchangeServiceException;
 
     /**
      * Get a list with plugins depending on plugin types
@@ -67,7 +67,7 @@ public interface ExchangeService {
      * @return
      * @throws ExchangeServiceException
      */
-    public ServiceType getService(String serviceId) throws ExchangeServiceException;
+    public ServiceResponseType getService(String serviceId) throws ExchangeServiceException;
 
     /**
      *

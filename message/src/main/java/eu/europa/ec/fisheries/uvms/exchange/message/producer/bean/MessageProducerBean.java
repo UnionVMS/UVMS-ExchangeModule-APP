@@ -124,9 +124,6 @@ public class MessageProducerBean implements MessageProducer, ConfigMessageProduc
             LOG.error("[ Error when sending config message. ] {}", e.getMessage());
             throw new ConfigMessageException("Error when sending config message.");
         }
-        finally {
-            disconnectJMS();
-        }
     }
 
     private void connectJMS() throws JMSException {

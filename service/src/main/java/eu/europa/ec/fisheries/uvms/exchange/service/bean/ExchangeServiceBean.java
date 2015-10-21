@@ -1,6 +1,5 @@
 package eu.europa.ec.fisheries.uvms.exchange.service.bean;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import javax.ejb.EJB;
@@ -10,10 +9,6 @@ import javax.jms.TextMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import eu.europa.ec.fisheries.schema.config.module.v1.PullSettingsResponse;
-import eu.europa.ec.fisheries.schema.config.module.v1.PushSettingsResponse;
-import eu.europa.ec.fisheries.schema.config.types.v1.PullSettingsStatus;
-import eu.europa.ec.fisheries.schema.config.types.v1.SettingType;
 import eu.europa.ec.fisheries.schema.exchange.plugin.types.v1.PluginType;
 import eu.europa.ec.fisheries.schema.exchange.service.v1.CapabilityListType;
 import eu.europa.ec.fisheries.schema.exchange.service.v1.ServiceResponseType;
@@ -22,21 +17,15 @@ import eu.europa.ec.fisheries.schema.exchange.service.v1.SettingListType;
 import eu.europa.ec.fisheries.schema.exchange.source.v1.GetLogListByQueryResponse;
 import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeListQuery;
 import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogType;
-import eu.europa.ec.fisheries.uvms.config.model.exception.ModelMarshallException;
-import eu.europa.ec.fisheries.uvms.config.model.mapper.ModuleRequestMapper;
 import eu.europa.ec.fisheries.uvms.config.service.ParameterService;
 import eu.europa.ec.fisheries.uvms.exchange.message.constants.DataSourceQueue;
 import eu.europa.ec.fisheries.uvms.exchange.message.consumer.ExchangeMessageConsumer;
 import eu.europa.ec.fisheries.uvms.exchange.message.exception.ExchangeMessageException;
 import eu.europa.ec.fisheries.uvms.exchange.message.producer.MessageProducer;
-import eu.europa.ec.fisheries.uvms.exchange.model.constant.ExchangeModelConstants;
 import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelMapperException;
-import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelMarshallException;
 import eu.europa.ec.fisheries.uvms.exchange.model.mapper.ExchangeDataSourceRequestMapper;
 import eu.europa.ec.fisheries.uvms.exchange.model.mapper.ExchangeDataSourceResponseMapper;
-import eu.europa.ec.fisheries.uvms.exchange.model.mapper.JAXBMarshaller;
 import eu.europa.ec.fisheries.uvms.exchange.service.ExchangeService;
-import eu.europa.ec.fisheries.uvms.exchange.service.config.ParameterKey;
 import eu.europa.ec.fisheries.uvms.exchange.service.exception.ExchangeServiceException;
 
 @Stateless
@@ -79,7 +68,7 @@ public class ExchangeServiceBean implements ExchangeService {
      * @throws ExchangeServiceException
      */
     @Override
-    public ServiceType unregisterService(ServiceType data) throws ExchangeServiceException {
+    public ServiceResponseType unregisterService(ServiceType data) throws ExchangeServiceException {
         LOG.info("Unregister service invoked in service layer");
         try {
             String request = ExchangeDataSourceRequestMapper.mapUnregisterServiceToString(data);
@@ -136,8 +125,7 @@ public class ExchangeServiceBean implements ExchangeService {
     }
 
     @Override
-    public ServiceType getService(String serviceId) throws ExchangeServiceException {
-        LOG.info("Get list invoked in service layer");
+    public ServiceResponseType getService(String serviceId) throws ExchangeServiceException {
         try {
             String request = ExchangeDataSourceRequestMapper.mapGetServiceToString(serviceId);
             String messageId = producer.sendMessageOnQueue(request, DataSourceQueue.INTERNAL);

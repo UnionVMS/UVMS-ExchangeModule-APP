@@ -3,7 +3,6 @@ package eu.europa.ec.fisheries.uvms.exchange.service;
 import javax.ejb.Local;
 import javax.enterprise.event.Observes;
 
-import eu.europa.ec.fisheries.uvms.exchange.message.event.ConfigMessageRecievedEvent;
 import eu.europa.ec.fisheries.uvms.exchange.message.event.ExchangeLogEvent;
 import eu.europa.ec.fisheries.uvms.exchange.message.event.PingEvent;
 import eu.europa.ec.fisheries.uvms.exchange.message.event.PluginConfigEvent;

@@ -1,8 +1,6 @@
 package eu.europa.ec.fisheries.uvms.exchange.model.mapper;
 
-import eu.europa.ec.fisheries.schema.exchange.source.v1.CreateLogResponse;
-import eu.europa.ec.fisheries.schema.exchange.source.v1.GetLogListByQueryResponse;
-
+import java.math.BigInteger;
 import java.util.List;
 
 import javax.jms.JMSException;
@@ -11,23 +9,22 @@ import javax.jms.TextMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import eu.europa.ec.fisheries.schema.exchange.source.v1.GetServiceSettingsResponse;
-import eu.europa.ec.fisheries.schema.exchange.source.v1.GetServiceCapabilitiesResponse;
 import eu.europa.ec.fisheries.schema.exchange.service.v1.CapabilityListType;
 import eu.europa.ec.fisheries.schema.exchange.service.v1.CapabilityType;
 import eu.europa.ec.fisheries.schema.exchange.service.v1.ServiceResponseType;
-import eu.europa.ec.fisheries.schema.exchange.service.v1.ServiceType;
 import eu.europa.ec.fisheries.schema.exchange.service.v1.SettingListType;
 import eu.europa.ec.fisheries.schema.exchange.service.v1.SettingType;
+import eu.europa.ec.fisheries.schema.exchange.source.v1.CreateLogResponse;
+import eu.europa.ec.fisheries.schema.exchange.source.v1.GetLogListByQueryResponse;
+import eu.europa.ec.fisheries.schema.exchange.source.v1.GetServiceCapabilitiesResponse;
 import eu.europa.ec.fisheries.schema.exchange.source.v1.GetServiceListResponse;
 import eu.europa.ec.fisheries.schema.exchange.source.v1.GetServiceResponse;
+import eu.europa.ec.fisheries.schema.exchange.source.v1.GetServiceSettingsResponse;
 import eu.europa.ec.fisheries.schema.exchange.source.v1.RegisterServiceResponse;
-import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogType;
 import eu.europa.ec.fisheries.schema.exchange.source.v1.UnregisterServiceResponse;
+import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogType;
 import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelMapperException;
 import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelMarshallException;
-
-import java.math.BigInteger;
 
 public class ExchangeDataSourceResponseMapper {
 
@@ -71,12 +68,12 @@ public class ExchangeDataSourceResponseMapper {
         return response.getService();
     }
 
-    public static ServiceType mapToUnregisterServiceResponse(TextMessage message) throws ExchangeModelMapperException {
+    public static ServiceResponseType mapToUnregisterServiceResponse(TextMessage message) throws ExchangeModelMapperException {
         UnregisterServiceResponse response = JAXBMarshaller.unmarshallTextMessage(message, UnregisterServiceResponse.class);
         return response.getService();
     }
 
-    public static ServiceType mapToServiceTypeFromGetServiceResponse(TextMessage message) throws ExchangeModelMapperException {
+    public static ServiceResponseType mapToServiceTypeFromGetServiceResponse(TextMessage message) throws ExchangeModelMapperException {
         GetServiceResponse response = JAXBMarshaller.unmarshallTextMessage(message, GetServiceResponse.class);
         return response.getService();
     }
@@ -145,4 +142,9 @@ public class ExchangeDataSourceResponseMapper {
         return JAXBMarshaller.marshallJaxBObjectToString(response);
     }
 
+    public static String createUnregisterServiceResponse(ServiceResponseType service) throws ExchangeModelMarshallException {
+    	UnregisterServiceResponse response = new UnregisterServiceResponse();
+    	response.setService(service);
+    	return JAXBMarshaller.marshallJaxBObjectToString(response);
+    }
 }

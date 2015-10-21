@@ -34,6 +34,7 @@
         <xsd:complexContent>
             <xsd:extension base="movement:ReportMovementType">
                 <xsd:sequence>
+                    <xsd:element name="pluginName" type="xsd:string" minOccurs="0" maxOccurs="1"/>
                     <xsd:element name="pluginType" type="plugin:PluginType"/>
                     <xsd:element name="movement" type="movement:MovementType"/>
                 </xsd:sequence>
