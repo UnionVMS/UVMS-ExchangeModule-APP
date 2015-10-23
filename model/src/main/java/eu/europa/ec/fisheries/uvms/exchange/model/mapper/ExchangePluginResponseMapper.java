@@ -17,8 +17,6 @@ import eu.europa.ec.fisheries.schema.exchange.plugin.v1.PingResponse;
 import eu.europa.ec.fisheries.schema.exchange.registry.v1.ExchangeRegistryMethod;
 import eu.europa.ec.fisheries.schema.exchange.registry.v1.RegisterServiceResponse;
 import eu.europa.ec.fisheries.schema.exchange.service.v1.ServiceResponseType;
-import eu.europa.ec.fisheries.schema.exchange.service.v1.ServiceType;
-import eu.europa.ec.fisheries.schema.exchange.service.v1.SettingListType;
 import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelMapperException;
 import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelMarshallException;
 
@@ -45,12 +43,23 @@ public class ExchangePluginResponseMapper {
 
     }
 
-    public static String mapToRegisterServiceResponse(AcknowledgeTypeType ackType, ServiceResponseType service, SettingListType settings) throws ExchangeModelMarshallException {
+    public static String mapToRegisterServiceResponseOK(String id, ServiceResponseType service) throws ExchangeModelMarshallException {
+    	RegisterServiceResponse response = mapToRegisterServiceResponse(id, AcknowledgeTypeType.OK);
+    	response.setService(service);
+    	return JAXBMarshaller.marshallJaxBObjectToString(response);
+    }
+    
+    public static String mapToRegisterServiceResponseNOK(String id, String message) throws ExchangeModelMarshallException {
+    	RegisterServiceResponse response = mapToRegisterServiceResponse(id, AcknowledgeTypeType.NOK);
+    	response.getAck().setMessage(message);
+    	return JAXBMarshaller.marshallJaxBObjectToString(response);
+    }
+    
+    private static RegisterServiceResponse mapToRegisterServiceResponse(String id, AcknowledgeTypeType ackType) throws ExchangeModelMarshallException {
         RegisterServiceResponse response = new RegisterServiceResponse();
         response.setMethod(ExchangeRegistryMethod.REGISTER_SERVICE);
-        response.setAck(ackType);
-        response.setService(service);
-        return JAXBMarshaller.marshallJaxBObjectToString(response);
+        response.setAck(mapToAcknowlegeType(id, ackType));
+        return response;
     }
 
     public static AcknowledgeType mapToAcknowlegeType(String id, AcknowledgeTypeType ackType) {

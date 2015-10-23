@@ -46,8 +46,8 @@
                     <xsd:complexContent>
                         <xsd:extension base="registry:ExchangeRegistryBaseRequest">
                             <xsd:sequence>
-                                <xsd:element name="ack" type="common:AcknowledgeTypeType" minOccurs="1" maxOccurs="1"/>
-                                <xsd:element name="service" type="service:ServiceResponseType" minOccurs="1" maxOccurs="1"/>
+                                <xsd:element name="ack" type="common:AcknowledgeType" minOccurs="1" maxOccurs="1"/>
+                                <xsd:element name="service" type="service:ServiceResponseType" minOccurs="0" maxOccurs="1"/>
                             </xsd:sequence>
                         </xsd:extension>
                     </xsd:complexContent>
@@ -71,6 +71,7 @@
                     <xsd:complexContent>
                         <xsd:extension base="registry:ExchangeRegistryBaseRequest">
                             <xsd:sequence>
+                                <xsd:element name="ack" type="common:AcknowledgeType" minOccurs="1" maxOccurs="1"/>
                                 <xsd:element name="service" type="service:ServiceType" minOccurs="1" maxOccurs="1"/>
                             </xsd:sequence>
                         </xsd:extension>

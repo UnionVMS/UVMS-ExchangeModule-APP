@@ -60,7 +60,7 @@ public class ExchangeEventServiceBean implements EventService {
 
     @EJB
     MessageProducer producer;
-
+    
     @EJB
     ExchangeService exchangeService;
 
@@ -69,7 +69,7 @@ public class ExchangeEventServiceBean implements EventService {
 
     @Override
     public void getPluginConfig(@Observes @PluginConfigEvent ExchangeMessageEvent message) {
-        LOG.info("Received MessageRecievedEvent");
+        LOG.info("Get plugin config LIST_SERVICE");
         try {
             TextMessage jmsMessage = message.getJmsMessage();
             GetServiceListRequest request = JAXBMarshaller.unmarshallTextMessage(jmsMessage, GetServiceListRequest.class);
@@ -167,6 +167,8 @@ public class ExchangeEventServiceBean implements EventService {
     @Override
     public void processAcknowledge(@Observes @ExchangeLogEvent ExchangeMessageEvent message) {
         LOG.info("Process acknowledge");
+        //TODO process acknowledge
+        // If register/unregister failed send to plugin - ExchangeMessageEvent carrier of Acknowledge (with source)?
     }
 
     @Override
