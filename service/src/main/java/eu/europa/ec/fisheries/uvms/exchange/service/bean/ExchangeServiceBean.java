@@ -14,6 +14,7 @@ import eu.europa.ec.fisheries.schema.exchange.service.v1.CapabilityListType;
 import eu.europa.ec.fisheries.schema.exchange.service.v1.ServiceResponseType;
 import eu.europa.ec.fisheries.schema.exchange.service.v1.ServiceType;
 import eu.europa.ec.fisheries.schema.exchange.service.v1.SettingListType;
+import eu.europa.ec.fisheries.schema.exchange.service.v1.StatusType;
 import eu.europa.ec.fisheries.schema.exchange.source.v1.GetLogListByQueryResponse;
 import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeListQuery;
 import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogType;
@@ -162,4 +163,17 @@ public class ExchangeServiceBean implements ExchangeService {
             throw new ExchangeServiceException(e.getMessage());
         }
     }
+
+	@Override
+	public ServiceResponseType updateServiceStatus(String serviceClassName, StatusType status) throws ExchangeServiceException {
+		LOG.info("Update service status invoked in service layer");
+		try {
+            String request = ExchangeDataSourceRequestMapper.mapSetServiceStatus(serviceClassName, status);
+            String messageId = producer.sendMessageOnQueue(request, DataSourceQueue.INTERNAL);
+            TextMessage response = consumer.getMessage(messageId, TextMessage.class);
+            return ExchangeDataSourceResponseMapper.mapSetServiceResponse(response, messageId);
+        } catch (ExchangeModelMapperException | ExchangeMessageException e) {
+            throw new ExchangeServiceException(e.getMessage());
+        }
+	}
 }

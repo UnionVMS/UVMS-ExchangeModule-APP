@@ -12,7 +12,7 @@
     
     <xsd:complexType name="ServiceType">
         <xsd:sequence>
-            <xsd:element name="id" type="xsd:string"/>
+            <!-- <xsd:element name="id" type="xsd:string"/>--> <!-- used for? -->
             <xsd:element name="serviceClassName" type="xsd:string" minOccurs="1" maxOccurs="1"/>
             <xsd:element name="name" type="xsd:string"/>
             <xsd:element name="description" type="xsd:string"/>
@@ -26,10 +26,19 @@
                 <xsd:sequence>
                     <xsd:element name="settingList" type="service:SettingListType" minOccurs="0" maxOccurs="1"/>
                     <xsd:element name="capabilityList" type="service:CapabilityListType" minOccurs="0" maxOccurs="1"/>
+                    <xsd:element name="status" type="service:StatusType" minOccurs="0" maxOccurs="1"/>
                 </xsd:sequence>
             </xsd:extension>
         </xsd:complexContent>
     </xsd:complexType>
+    
+    <xsd:simpleType name="StatusType">
+        <xsd:restriction base="xsd:string">
+            <xsd:enumeration value="UNKNOWN"/>
+            <xsd:enumeration value="STARTED"/>
+            <xsd:enumeration value="STOPPED"/>
+        </xsd:restriction>
+    </xsd:simpleType>
     
     <xsd:complexType name="SettingType">
         <xsd:complexContent>

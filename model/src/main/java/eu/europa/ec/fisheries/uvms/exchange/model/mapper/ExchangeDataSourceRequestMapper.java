@@ -2,15 +2,15 @@ package eu.europa.ec.fisheries.uvms.exchange.model.mapper;
 
 import java.util.List;
 
-import eu.europa.ec.fisheries.schema.exchange.plugin.types.v1.PluginType;
-import eu.europa.ec.fisheries.schema.exchange.source.v1.CreateLogRequest;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import eu.europa.ec.fisheries.schema.exchange.plugin.types.v1.PluginType;
 import eu.europa.ec.fisheries.schema.exchange.service.v1.CapabilityListType;
 import eu.europa.ec.fisheries.schema.exchange.service.v1.ServiceType;
 import eu.europa.ec.fisheries.schema.exchange.service.v1.SettingListType;
+import eu.europa.ec.fisheries.schema.exchange.service.v1.StatusType;
+import eu.europa.ec.fisheries.schema.exchange.source.v1.CreateLogRequest;
 import eu.europa.ec.fisheries.schema.exchange.source.v1.ExchangeDataSourceMethod;
 import eu.europa.ec.fisheries.schema.exchange.source.v1.GetLogListByQueryRequest;
 import eu.europa.ec.fisheries.schema.exchange.source.v1.GetServiceCapabilitiesRequest;
@@ -19,9 +19,10 @@ import eu.europa.ec.fisheries.schema.exchange.source.v1.GetServiceRequest;
 import eu.europa.ec.fisheries.schema.exchange.source.v1.GetServiceSettingsRequest;
 import eu.europa.ec.fisheries.schema.exchange.source.v1.RegisterServiceRequest;
 import eu.europa.ec.fisheries.schema.exchange.source.v1.SetServiceSettingsRequest;
+import eu.europa.ec.fisheries.schema.exchange.source.v1.SetServiceStatusRequest;
+import eu.europa.ec.fisheries.schema.exchange.source.v1.UnregisterServiceRequest;
 import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeListQuery;
 import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogType;
-import eu.europa.ec.fisheries.schema.exchange.source.v1.UnregisterServiceRequest;
 import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelMapperException;
 import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelMarshallException;
 
@@ -53,16 +54,13 @@ public class ExchangeDataSourceRequestMapper {
         }
     }
 
-    public static String mapGetServiceListToString(List<PluginType> pluginTypes) throws ExchangeModelMapperException {
-        try {
-            GetServiceListRequest request = new GetServiceListRequest();
-            request.setMethod(ExchangeDataSourceMethod.LIST_SERVICES);
-            request.getType().addAll(pluginTypes);
-            return JAXBMarshaller.marshallJaxBObjectToString(request);
-        } catch (Exception e) {
-            LOG.error("[ Error when mapping GetServiceListRequest to String ] {}", e.getMessage());
-            throw new ExchangeModelMapperException("[ Error when mapping GetServiceListRequest to String ]");
+    public static String mapGetServiceListToString(List<PluginType> pluginTypes) throws ExchangeModelMarshallException {
+    	GetServiceListRequest request = new GetServiceListRequest();
+        request.setMethod(ExchangeDataSourceMethod.LIST_SERVICES);
+        if(pluginTypes != null) {
+        	request.getType().addAll(pluginTypes);
         }
+        return JAXBMarshaller.marshallJaxBObjectToString(request);
     }
 
     public static String mapGetServiceToString(String serviceId) throws ExchangeModelMapperException {
@@ -137,6 +135,19 @@ public class ExchangeDataSourceRequestMapper {
 		} catch (ExchangeModelMarshallException e) {
 			LOG.error("[ Error when mapping SetServiceSettingsRequest ] ");
 			throw new ExchangeModelMapperException("[ Error when mapping SetServiceSettingsRequest ]");
+		}
+	}
+
+	public static String mapSetServiceStatus(String serviceClassName, StatusType status) throws ExchangeModelMapperException {
+		try {
+			SetServiceStatusRequest request = new SetServiceStatusRequest();
+			request.setMethod(ExchangeDataSourceMethod.SET_SERVICE_STATUS);
+			request.setServiceName(serviceClassName);
+			request.setStatus(status);
+			return JAXBMarshaller.marshallJaxBObjectToString(request);
+		} catch (ExchangeModelMarshallException e) {
+			LOG.error("[ Error when mapping SetServiceStatusRequest ]");
+			throw new ExchangeModelMapperException("[ Error when mapping SetServiceStatusRequest ]");
 		}
 	}
 

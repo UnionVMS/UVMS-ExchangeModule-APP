@@ -44,6 +44,7 @@
                     <xsd:complexContent>
                         <xsd:extension base="plugin:PluginBaseResponse">
                             <xsd:sequence>
+                                <xsd:element name="serviceClassName" type="xsd:string" minOccurs="1" maxOccurs="1"/>
                                 <xsd:element name="response" type="common:AcknowledgeType"/>
                             </xsd:sequence>
                         </xsd:extension>

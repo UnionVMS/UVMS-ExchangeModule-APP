@@ -39,6 +39,7 @@ import eu.europa.ec.fisheries.uvms.exchange.model.mapper.JAXBMarshaller;
 import eu.europa.ec.fisheries.uvms.exchange.service.ExchangeService;
 import eu.europa.ec.fisheries.uvms.exchange.service.PluginService;
 import eu.europa.ec.fisheries.uvms.exchange.service.exception.ExchangeServiceException;
+import eu.europa.ec.fisheries.uvms.exchange.service.exception.InputArgumentException;
 import eu.europa.ec.fisheries.uvms.exchange.service.mapper.SettingTypeMapper;
 
 @Stateless
@@ -64,6 +65,7 @@ public class PluginServiceBean implements PluginService {
     UVMSConfigService configService;
     
     private boolean checkPluginType(PluginType pluginType, String responseTopicMessageSelector, String messageId) throws ExchangeModelMarshallException, ExchangeMessageException {
+    	LOG.debug("checkPluginType " + pluginType.name());
         if(PluginType.EMAIL == pluginType || PluginType.FLUX == pluginType) {
         	//Check if type already exists
         	List<PluginType> type = new ArrayList<>();
@@ -90,21 +92,23 @@ public class PluginServiceBean implements PluginService {
     private void registerService(RegisterServiceRequest register, String responseTopicMessageSelector, String messageId) throws ExchangeModelMarshallException, ExchangeMessageException {
     	try {
     		ServiceResponseType service = exchangeService.registerService(register.getService(), register.getCapabilityList(), register.getSettingList());
-
+    		
     		//push to config module
-    		String serviceClassName = register.getService().getServiceClassName();
-    		SettingListType settings = register.getSettingList();
-    		for(SettingType setting : settings.getSetting()) {
-    			String description = "Plugin " + serviceClassName + " " + setting.getKey() + " setting";
-    			String key = serviceClassName+PARAMETER_DELIMETER+setting.getKey();
-    			configService.pushSettingToConfig(SettingTypeMapper.map(key, setting.getValue(), description), false);
+    		try {
+    			String serviceClassName = register.getService().getServiceClassName();
+    			SettingListType settings = register.getSettingList();
+    			for(SettingType setting : settings.getSetting()) {
+    				String description = "Plugin " + serviceClassName + " " + setting.getKey() + " setting";
+    				String key = serviceClassName+PARAMETER_DELIMETER+setting.getKey();
+    				configService.pushSettingToConfig(SettingTypeMapper.map(key, setting.getValue(), description), false);
+    			}
+    		} catch (ConfigServiceException e) {
+    			LOG.error("Couldn't register plugin settings in config parameter table");
     		}
+    		
         	//TODO log to exchange log
-        
         	String response = ExchangePluginResponseMapper.mapToRegisterServiceResponseOK(messageId, service);
         	producer.sendEventBusMessage(response, responseTopicMessageSelector);
-		} catch (ConfigServiceException e) {
-			LOG.error("Couldn't register plugin settings in config parameter table");
 		} catch (ExchangeServiceException e) {
 			String response = ExchangePluginResponseMapper.mapToRegisterServiceResponseNOK(messageId, "Exchange service exception when registering plugin [ " + e.getMessage() + " ]");
 			producer.sendEventBusMessage(response, responseTopicMessageSelector);
@@ -146,17 +150,19 @@ public class PluginServiceBean implements PluginService {
 			
 			ServiceResponseType service = exchangeService.unregisterService(unregister.getService());
 			String serviceClassName = service.getServiceClassName();
-				
-			SettingListType settingList = service.getSettingList();
-			for(SettingType setting : settingList.getSetting()) {
-				String key = serviceClassName+PARAMETER_DELIMETER+setting.getKey();
-				configService.pushSettingToConfig(SettingTypeMapper.map(key, setting.getValue()), true);
+			
+			try {
+				SettingListType settingList = service.getSettingList();
+				for(SettingType setting : settingList.getSetting()) {
+					String key = serviceClassName+PARAMETER_DELIMETER+setting.getKey();
+					configService.pushSettingToConfig(SettingTypeMapper.map(key, setting.getValue()), true);
+				}
+			} catch (ConfigServiceException e) {
+				LOG.error("Couldn't unregister plugin settings in config parameter table");
 			}
 			
 			//NO ack back to plugin
 	        //TODO log to exchange log
-		} catch (ConfigServiceException e) {
-			LOG.error("Couldn't unregister plugin settings in config parameter table");    
 		} catch (ExchangeModelMarshallException | ExchangeServiceException e) {
 			LOG.error("Unregister service exception " + e.getMessage());
 			errorEvent.fire(new PluginMessageEvent(textMessage, responseTopicMessageSelector, ExchangePluginResponseMapper.mapToPluginFaultResponse(FaultCode.EXCHANGE_PLUGIN_EVENT.getCode(), "Exception when unregister service")));
@@ -204,5 +210,54 @@ public class PluginServiceBean implements PluginService {
 			LOG.info("ConfigModule removed parameter setting");
 			break;
 		}
+	}
+
+	@Override
+	public boolean start(String serviceClassName) throws ExchangeServiceException {
+		if(serviceClassName == null) {
+			throw new InputArgumentException("No service to start");
+		}
+		try {
+			String text = ExchangePluginRequestMapper.createStartRequest();
+			producer.sendEventBusMessage(text, serviceClassName);
+			return true;
+		} catch (ExchangeModelMarshallException e) {
+			throw new ExchangeServiceException("[ Couldn't map start request for " + serviceClassName + " ]");
+		} catch (ExchangeMessageException e) {
+			throw new ExchangeServiceException("[ Couldn't send start request for " + serviceClassName + " ]");
+		}
+	}
+
+	@Override
+	public boolean stop(String serviceClassName) throws ExchangeServiceException {
+		if(serviceClassName == null) {
+			throw new InputArgumentException("No service to stop");
+		}
+		try {
+			String text = ExchangePluginRequestMapper.createStopRequest();
+			producer.sendEventBusMessage(text, serviceClassName);
+			return true;
+		} catch (ExchangeModelMarshallException e){
+			throw new ExchangeServiceException("[ Couldn't map stop request for " + serviceClassName + " ]");
+		} catch (ExchangeMessageException e) {
+			throw new ExchangeServiceException("[ Couldn't send stop request for " + serviceClassName + " ]");
+		}
+	}
+
+	@Override
+	public boolean ping(String serviceClassName) throws ExchangeServiceException {
+		if(serviceClassName == null) {
+			throw new InputArgumentException("No service to ping");
+		}
+		try {
+			String text = ExchangePluginRequestMapper.createPingRequest();
+			producer.sendEventBusMessage(text, serviceClassName);
+			return true;
+		} catch (ExchangeModelMarshallException e) {
+			throw new ExchangeServiceException("[ Couldn't map ping request for " + serviceClassName + " ]");
+		} catch (ExchangeMessageException e) {
+			throw new ExchangeServiceException("[ Couldn't send ping request for " + serviceClassName + " ]");
+		}
+		
 	}
 }

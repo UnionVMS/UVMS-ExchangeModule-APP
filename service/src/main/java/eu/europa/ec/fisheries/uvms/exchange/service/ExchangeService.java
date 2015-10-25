@@ -9,6 +9,7 @@ import eu.europa.ec.fisheries.schema.exchange.service.v1.CapabilityListType;
 import eu.europa.ec.fisheries.schema.exchange.service.v1.ServiceResponseType;
 import eu.europa.ec.fisheries.schema.exchange.service.v1.ServiceType;
 import eu.europa.ec.fisheries.schema.exchange.service.v1.SettingListType;
+import eu.europa.ec.fisheries.schema.exchange.service.v1.StatusType;
 import eu.europa.ec.fisheries.schema.exchange.source.v1.GetLogListByQueryResponse;
 import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeListQuery;
 import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogType;
@@ -61,6 +62,15 @@ public interface ExchangeService {
      */
     public ServiceResponseType upsertSettings(String serviceClassName, SettingListType settingList) throws ExchangeServiceException;
 
+    /**
+     * 
+     * @param serviceClassName
+     * @param status
+     * @return
+     * @throws ExchangeServiceException
+     */
+	public ServiceResponseType updateServiceStatus(String serviceClassName, StatusType status) throws ExchangeServiceException;
+    
     /**
      *
      * @param serviceId

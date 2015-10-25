@@ -13,6 +13,7 @@ import javax.jms.TextMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import eu.europa.ec.fisheries.schema.exchange.common.v1.AcknowledgeType;
 import eu.europa.ec.fisheries.schema.exchange.common.v1.ReportType;
 import eu.europa.ec.fisheries.schema.exchange.common.v1.ReportTypeType;
 import eu.europa.ec.fisheries.schema.exchange.module.v1.GetServiceListRequest;
@@ -23,7 +24,10 @@ import eu.europa.ec.fisheries.schema.exchange.module.v1.SetMovementReportRequest
 import eu.europa.ec.fisheries.schema.exchange.movement.v1.MovementBaseType;
 import eu.europa.ec.fisheries.schema.exchange.movement.v1.SendMovementToPluginType;
 import eu.europa.ec.fisheries.schema.exchange.plugin.types.v1.PluginType;
+import eu.europa.ec.fisheries.schema.exchange.plugin.v1.AcknowledgeResponse;
+import eu.europa.ec.fisheries.schema.exchange.plugin.v1.ExchangePluginMethod;
 import eu.europa.ec.fisheries.schema.exchange.service.v1.ServiceResponseType;
+import eu.europa.ec.fisheries.schema.exchange.service.v1.StatusType;
 import eu.europa.ec.fisheries.schema.rules.movement.v1.RawMovementType;
 import eu.europa.ec.fisheries.uvms.config.service.ParameterService;
 import eu.europa.ec.fisheries.uvms.exchange.message.constants.DataSourceQueue;
@@ -35,6 +39,8 @@ import eu.europa.ec.fisheries.uvms.exchange.message.event.SendCommandToPluginEve
 import eu.europa.ec.fisheries.uvms.exchange.message.event.SendReportToPluginEvent;
 import eu.europa.ec.fisheries.uvms.exchange.message.event.SetMovementEvent;
 import eu.europa.ec.fisheries.uvms.exchange.message.event.carrier.ExchangeMessageEvent;
+import eu.europa.ec.fisheries.uvms.exchange.message.event.carrier.PluginMessageEvent;
+import eu.europa.ec.fisheries.uvms.exchange.message.event.registry.PluginErrorEvent;
 import eu.europa.ec.fisheries.uvms.exchange.message.exception.ExchangeMessageException;
 import eu.europa.ec.fisheries.uvms.exchange.message.producer.MessageProducer;
 import eu.europa.ec.fisheries.uvms.exchange.model.constant.FaultCode;
@@ -43,21 +49,26 @@ import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelMarshal
 import eu.europa.ec.fisheries.uvms.exchange.model.mapper.ExchangeModuleResponseMapper;
 import eu.europa.ec.fisheries.uvms.exchange.model.mapper.ExchangePluginRequestMapper;
 import eu.europa.ec.fisheries.uvms.exchange.model.mapper.JAXBMarshaller;
-import eu.europa.ec.fisheries.uvms.exchange.service.EventService;
+import eu.europa.ec.fisheries.uvms.exchange.service.ExchangeEventService;
 import eu.europa.ec.fisheries.uvms.exchange.service.ExchangeService;
+import eu.europa.ec.fisheries.uvms.exchange.service.exception.ExchangeServiceException;
 import eu.europa.ec.fisheries.uvms.exchange.service.mapper.MovementMapper;
 import eu.europa.ec.fisheries.uvms.rules.model.exception.RulesModelMapperException;
 import eu.europa.ec.fisheries.uvms.rules.model.mapper.RulesModuleRequestMapper;
 
 @Stateless
-public class ExchangeEventServiceBean implements EventService {
+public class ExchangeEventServiceBean implements ExchangeEventService {
 
     final static Logger LOG = LoggerFactory.getLogger(ExchangeEventServiceBean.class);
 
     @Inject
     @ErrorEvent
-    Event<ExchangeMessageEvent> errorEvent;
+    Event<ExchangeMessageEvent> exchangeErrorEvent;
 
+    @Inject
+    @PluginErrorEvent
+    Event<PluginMessageEvent> pluginErrorEvent;
+    
     @EJB
     MessageProducer producer;
     
@@ -77,7 +88,7 @@ public class ExchangeEventServiceBean implements EventService {
             producer.sendModuleResponseMessage(message.getJmsMessage(), ExchangeModuleResponseMapper.mapServiceListResponse(serviceList));
         } catch (ExchangeException e) {
             LOG.error("[ Error when getting plugin list from source]");
-            errorEvent.fire(new ExchangeMessageEvent(message.getJmsMessage(), ExchangeModuleResponseMapper.createFaultMessage(
+            exchangeErrorEvent.fire(new ExchangeMessageEvent(message.getJmsMessage(), ExchangeModuleResponseMapper.createFaultMessage(
                     FaultCode.EXCHANGE_MESSAGE, "Excpetion when getting service list")));
         }
     }
@@ -85,13 +96,13 @@ public class ExchangeEventServiceBean implements EventService {
     @Override
     public void processMovement(@Observes @SetMovementEvent ExchangeMessageEvent message) {
         LOG.info("Process movement");
-        //TODO process movement
         try {
             SetMovementReportRequest request = JAXBMarshaller.unmarshallTextMessage(message.getJmsMessage(), SetMovementReportRequest.class);
 
             //TODO log to exchange log (received message)
-            //reportType.getFrom()
-            //reportType.getTimestamp()
+            String pluginName = request.getRequest().getPluginName();
+            PluginType pluginType = request.getRequest().getPluginType();
+            
             MovementBaseType baseMovement = request.getRequest().getMovement();
             RawMovementType rawMovement = MovementMapper.getInstance().getMapper().map(baseMovement, RawMovementType.class);
             if(rawMovement.getAssetId() != null && rawMovement.getAssetId().getAssetIdList() != null) {
@@ -100,17 +111,14 @@ public class ExchangeEventServiceBean implements EventService {
             if(baseMovement.getMobileTerminalId() != null && baseMovement.getMobileTerminalId().getMobileTerminalIdList() != null) {
                 rawMovement.getMobileTerminal().getMobileTerminalIdList().addAll(MovementMapper.mapMobileTerminalIdList(baseMovement.getMobileTerminalId().getMobileTerminalIdList()));
             }
-            String movement = RulesModuleRequestMapper.createSetMovementReportRequest(rawMovement);
-            producer.sendMessageOnQueue(movement, DataSourceQueue.RULES);
+            //String movement = RulesModuleRequestMapper.createSetMovementReportRequest(MovementMapper.mapPluginType(pluginType), rawMovement);
+            //producer.sendMessageOnQueue(movement, DataSourceQueue.RULES);
         } catch (ExchangeModelMarshallException e) {
+        	//pluginErrorEvent.fire(new PluginMessageEvent(message.getJmsMessage(), null, null));
+        //} catch (ExchangeMessageException e) {
             // TODO Auto-generated catch block
-            e.printStackTrace();
-        } catch (ExchangeMessageException e) {
+        //} catch (RulesModelMapperException e) {
             // TODO Auto-generated catch block
-            e.printStackTrace();
-        } catch (RulesModelMapperException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
         }
     }
 
@@ -156,11 +164,11 @@ public class ExchangeEventServiceBean implements EventService {
                 //TODO log to exchange logs
 
             } else {
-                errorEvent.fire(new ExchangeMessageEvent(message.getJmsMessage(), ExchangeModuleResponseMapper.createFaultMessage(FaultCode.EXCHANGE_EVENT_SERVICE, "Excpetion when sending message to plugin ")));
+                exchangeErrorEvent.fire(new ExchangeMessageEvent(message.getJmsMessage(), ExchangeModuleResponseMapper.createFaultMessage(FaultCode.EXCHANGE_EVENT_SERVICE, "Excpetion when sending message to plugin ")));
             }
         } catch (ExchangeException e) {
             LOG.error("[ Error when sending report to plugin ]");
-            errorEvent.fire(new ExchangeMessageEvent(message.getJmsMessage(), ExchangeModuleResponseMapper.createFaultMessage(FaultCode.EXCHANGE_EVENT_SERVICE, "Excpetion when sending message to plugin ")));
+            exchangeErrorEvent.fire(new ExchangeMessageEvent(message.getJmsMessage(), ExchangeModuleResponseMapper.createFaultMessage(FaultCode.EXCHANGE_EVENT_SERVICE, "Excpetion when sending message to plugin ")));
         }
     }
 
@@ -169,8 +177,52 @@ public class ExchangeEventServiceBean implements EventService {
         LOG.info("Process acknowledge");
         //TODO process acknowledge
         // If register/unregister failed send to plugin - ExchangeMessageEvent carrier of Acknowledge (with source)?
+        
+        try {
+			AcknowledgeResponse response = JAXBMarshaller.unmarshallTextMessage(message.getJmsMessage(), AcknowledgeResponse.class);
+			AcknowledgeType acknowledge = response.getResponse();
+			String serviceClassName = response.getServiceClassName();
+			ExchangePluginMethod method = response.getMethod();
+			switch(method) {
+			case SET_COMMAND:
+				break;
+			case SET_CONFIG:
+				break;
+			case SET_REPORT:
+				break;
+			case PING:
+				LOG.info(serviceClassName + " answered on ping: " + acknowledge.getType() + ": " + acknowledge.getMessage());
+				break;
+			case START:
+				handleStatusAcknowledge(serviceClassName, acknowledge, StatusType.STARTED);
+				break;
+			case STOP:
+				handleStatusAcknowledge(serviceClassName, acknowledge, StatusType.STOPPED);
+				break;
+			default:
+				LOG.error("Received unknown acknowledge: " + method);
+				break;
+			}
+		} catch (ExchangeModelMarshallException e) {
+			LOG.error("Process acknowledge couldn't be marshalled");
+		} catch (ExchangeServiceException e) {
+			//TODO couldn't save acknowledge in exchange service
+			LOG.error("Couldn't process acknowledge in exchange service: " + e.getMessage());
+		}
     }
 
+    private void handleStatusAcknowledge(String serviceClassName, AcknowledgeType ack, StatusType status) throws ExchangeServiceException {
+    	switch(ack.getType()) {
+    	case OK:
+    		exchangeService.updateServiceStatus(serviceClassName, status);
+    		break;
+    	case NOK:
+    		//TODO
+    		LOG.error("Couldn't start service");
+    		break;
+    	}
+    }
+    
     @Override
     public void sendCommandToPlugin(@Observes @SendCommandToPluginEvent ExchangeMessageEvent message) {
         LOG.info("Send command to plugin");
@@ -186,7 +238,7 @@ public class ExchangeEventServiceBean implements EventService {
 
         } catch (NullPointerException | ExchangeException e) {
             LOG.error("[ Error when sending command to plugin ]");
-            errorEvent.fire(new ExchangeMessageEvent(message.getJmsMessage(), ExchangeModuleResponseMapper.createFaultMessage(FaultCode.EXCHANGE_EVENT_SERVICE, "Excpetion when sending command to plugin ")));
+            exchangeErrorEvent.fire(new ExchangeMessageEvent(message.getJmsMessage(), ExchangeModuleResponseMapper.createFaultMessage(FaultCode.EXCHANGE_EVENT_SERVICE, "Excpetion when sending command to plugin ")));
         }
     }
 

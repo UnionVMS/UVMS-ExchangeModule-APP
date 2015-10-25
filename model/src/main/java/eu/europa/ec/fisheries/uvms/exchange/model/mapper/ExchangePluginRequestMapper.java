@@ -8,9 +8,12 @@ package eu.europa.ec.fisheries.uvms.exchange.model.mapper;
 import eu.europa.ec.fisheries.schema.exchange.common.v1.CommandType;
 import eu.europa.ec.fisheries.schema.exchange.common.v1.ReportType;
 import eu.europa.ec.fisheries.schema.exchange.plugin.v1.ExchangePluginMethod;
+import eu.europa.ec.fisheries.schema.exchange.plugin.v1.PingRequest;
 import eu.europa.ec.fisheries.schema.exchange.plugin.v1.SetCommandRequest;
 import eu.europa.ec.fisheries.schema.exchange.plugin.v1.SetConfigRequest;
 import eu.europa.ec.fisheries.schema.exchange.plugin.v1.SetReportRequest;
+import eu.europa.ec.fisheries.schema.exchange.plugin.v1.StartRequest;
+import eu.europa.ec.fisheries.schema.exchange.plugin.v1.StopRequest;
 import eu.europa.ec.fisheries.schema.exchange.service.v1.SettingListType;
 import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelMarshallException;
 
@@ -38,6 +41,24 @@ public class ExchangePluginRequestMapper {
 		SetConfigRequest request = new SetConfigRequest();
 		request.setMethod(ExchangePluginMethod.SET_CONFIG);
 		request.setConfigurations(settingList);
+		return JAXBMarshaller.marshallJaxBObjectToString(request);
+	}
+
+	public static String createPingRequest() throws ExchangeModelMarshallException {
+		PingRequest request = new PingRequest();
+		request.setMethod(ExchangePluginMethod.PING);
+		return JAXBMarshaller.marshallJaxBObjectToString(request);
+	}
+
+	public static String createStartRequest() throws ExchangeModelMarshallException {
+		StartRequest request = new StartRequest();
+		request.setMethod(ExchangePluginMethod.START);
+		return JAXBMarshaller.marshallJaxBObjectToString(request);
+	}
+	
+	public static String createStopRequest() throws ExchangeModelMarshallException {
+		StopRequest request = new StopRequest();
+		request.setMethod(ExchangePluginMethod.STOP);
 		return JAXBMarshaller.marshallJaxBObjectToString(request);
 	}
 }

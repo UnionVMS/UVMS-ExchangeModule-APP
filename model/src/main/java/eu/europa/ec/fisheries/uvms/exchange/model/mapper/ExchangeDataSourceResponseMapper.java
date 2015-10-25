@@ -23,6 +23,7 @@ import eu.europa.ec.fisheries.schema.exchange.source.v1.GetServiceResponse;
 import eu.europa.ec.fisheries.schema.exchange.source.v1.GetServiceSettingsResponse;
 import eu.europa.ec.fisheries.schema.exchange.source.v1.RegisterServiceResponse;
 import eu.europa.ec.fisheries.schema.exchange.source.v1.SetServiceSettingsResponse;
+import eu.europa.ec.fisheries.schema.exchange.source.v1.SetServiceStatusResponse;
 import eu.europa.ec.fisheries.schema.exchange.source.v1.UnregisterServiceResponse;
 import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogType;
 import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelMapperException;
@@ -145,6 +146,16 @@ public class ExchangeDataSourceResponseMapper {
     	}
     }
 
+    public static ServiceResponseType mapSetServiceResponse(TextMessage message, String correlationId) throws ExchangeModelMapperException {
+    	try {
+    		validateResponse(message, correlationId);
+    		SetServiceStatusResponse response = JAXBMarshaller.unmarshallTextMessage(message, SetServiceStatusResponse.class);
+    		return response.getService();
+    	} catch (JMSException | ExchangeValidationException e) {
+    		LOG.error("[ Error when mapping response to set service response ]");
+    		throw new ExchangeModelMapperException("[ Error when mapping response to set service response ] " + e.getMessage());
+    	}
+	}
     public static String mapServiceTypeListToStringFromResponse(List<ServiceResponseType> services) throws ExchangeModelMapperException {
         GetServiceListResponse response = new GetServiceListResponse();
         response.getService().addAll(services);
@@ -208,6 +219,12 @@ public class ExchangeDataSourceResponseMapper {
 	public static String createSetServiceSettingsResponse(ServiceResponseType updatedService) throws ExchangeModelMarshallException {
 		SetServiceSettingsResponse response = new SetServiceSettingsResponse();
 		response.setService(updatedService);
+		return JAXBMarshaller.marshallJaxBObjectToString(response);
+	}
+
+	public static String createSetServiceStatusResponse(ServiceResponseType statusService) throws ExchangeModelMarshallException {
+		SetServiceStatusResponse response = new SetServiceStatusResponse();
+		response.setService(statusService);
 		return JAXBMarshaller.marshallJaxBObjectToString(response);
 	}
 }

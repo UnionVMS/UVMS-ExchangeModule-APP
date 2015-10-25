@@ -43,34 +43,34 @@ public class ExchangePluginResponseMapper {
 
     }
 
-    public static String mapToRegisterServiceResponseOK(String id, ServiceResponseType service) throws ExchangeModelMarshallException {
-    	RegisterServiceResponse response = mapToRegisterServiceResponse(id, AcknowledgeTypeType.OK);
+    public static String mapToRegisterServiceResponseOK(String messageId, ServiceResponseType service) throws ExchangeModelMarshallException {
+    	RegisterServiceResponse response = mapToRegisterServiceResponse(messageId, AcknowledgeTypeType.OK);
     	response.setService(service);
     	return JAXBMarshaller.marshallJaxBObjectToString(response);
     }
     
-    public static String mapToRegisterServiceResponseNOK(String id, String message) throws ExchangeModelMarshallException {
-    	RegisterServiceResponse response = mapToRegisterServiceResponse(id, AcknowledgeTypeType.NOK);
+    public static String mapToRegisterServiceResponseNOK(String messageId, String message) throws ExchangeModelMarshallException {
+    	RegisterServiceResponse response = mapToRegisterServiceResponse(messageId, AcknowledgeTypeType.NOK);
     	response.getAck().setMessage(message);
     	return JAXBMarshaller.marshallJaxBObjectToString(response);
     }
     
-    private static RegisterServiceResponse mapToRegisterServiceResponse(String id, AcknowledgeTypeType ackType) throws ExchangeModelMarshallException {
+    private static RegisterServiceResponse mapToRegisterServiceResponse(String messageId, AcknowledgeTypeType ackType) throws ExchangeModelMarshallException {
         RegisterServiceResponse response = new RegisterServiceResponse();
         response.setMethod(ExchangeRegistryMethod.REGISTER_SERVICE);
-        response.setAck(mapToAcknowlegeType(id, ackType));
+        response.setAck(mapToAcknowlegeType(messageId, ackType));
         return response;
     }
 
-    public static AcknowledgeType mapToAcknowlegeType(String id, AcknowledgeTypeType ackType) {
+    public static AcknowledgeType mapToAcknowlegeType(String messageId, AcknowledgeTypeType ackType) {
         AcknowledgeType type = new AcknowledgeType();
-        type.setMessageId(id);
+        type.setMessageId(messageId);
         type.setType(ackType);
         return type;
     }
     
-    public static AcknowledgeType mapToAcknowlegeType(String id, AcknowledgeTypeType ackType, String message) {
-        AcknowledgeType type = mapToAcknowlegeType(id, ackType);
+    public static AcknowledgeType mapToAcknowlegeType(String messageId, AcknowledgeTypeType ackType, String message) {
+        AcknowledgeType type = mapToAcknowlegeType(messageId, ackType);
         type.setMessage(message);
         return type;
     }
@@ -84,39 +84,32 @@ public class ExchangePluginResponseMapper {
         return JAXBMarshaller.marshallJaxBObjectToString(response);
     }
 
-    public static String mapToStopResponse(AcknowledgeType ackType) throws ExchangeModelMarshallException {
+    private static String mapToAcknowledgeResponse(String serviceClassName, AcknowledgeType ackType, ExchangePluginMethod method) throws ExchangeModelMarshallException {
     	AcknowledgeResponse response = new AcknowledgeResponse();
-    	response.setMethod(ExchangePluginMethod.STOP);
+    	response.setMethod(method);
+    	response.setServiceClassName(serviceClassName);
     	response.setResponse(ackType);
-        return JAXBMarshaller.marshallJaxBObjectToString(response);
+    	return JAXBMarshaller.marshallJaxBObjectToString(response);
+    }
+    
+    public static String mapToStopResponse(String serviceClassName, AcknowledgeType ackType) throws ExchangeModelMarshallException {
+    	return mapToAcknowledgeResponse(serviceClassName, ackType, ExchangePluginMethod.STOP);
     }
 
-    public static String mapToStartResponse(AcknowledgeType ackType) throws ExchangeModelMarshallException {
-    	AcknowledgeResponse response = new AcknowledgeResponse();
-    	response.setMethod(ExchangePluginMethod.START);
-    	response.setResponse(ackType);
-        return JAXBMarshaller.marshallJaxBObjectToString(response);
+    public static String mapToStartResponse(String serviceClassName, AcknowledgeType ackType) throws ExchangeModelMarshallException {
+    	return mapToAcknowledgeResponse(serviceClassName, ackType, ExchangePluginMethod.START);
     }
 
-    public static String mapToSetCommandResponse(AcknowledgeType ackType) throws ExchangeModelMarshallException {
-    	AcknowledgeResponse response = new AcknowledgeResponse();
-    	response.setMethod(ExchangePluginMethod.SET_COMMAND);
-    	response.setResponse(ackType);
-        return JAXBMarshaller.marshallJaxBObjectToString(response);
+    public static String mapToSetCommandResponse(String serviceClassName, AcknowledgeType ackType) throws ExchangeModelMarshallException {
+    	return mapToAcknowledgeResponse(serviceClassName, ackType, ExchangePluginMethod.SET_COMMAND);
     }
 
-    public static String mapToSetConfigResponse(AcknowledgeType ackType) throws ExchangeModelMarshallException {
-    	AcknowledgeResponse response = new AcknowledgeResponse();
-    	response.setMethod(ExchangePluginMethod.SET_CONFIG);
-    	response.setResponse(ackType);
-        return JAXBMarshaller.marshallJaxBObjectToString(response);
+    public static String mapToSetConfigResponse(String serviceClassName, AcknowledgeType ackType) throws ExchangeModelMarshallException {
+    	return mapToAcknowledgeResponse(serviceClassName, ackType, ExchangePluginMethod.SET_CONFIG);
     }
 
-    public static String mapToSetReportResponse(AcknowledgeType ackType) throws ExchangeModelMarshallException {
-    	AcknowledgeResponse response = new AcknowledgeResponse();
-    	response.setMethod(ExchangePluginMethod.SET_REPORT);
-    	response.setResponse(ackType);
-        return JAXBMarshaller.marshallJaxBObjectToString(response);
+    public static String mapToSetReportResponse(String serviceClassName, AcknowledgeType ackType) throws ExchangeModelMarshallException {
+    	return mapToAcknowledgeResponse(serviceClassName, ackType, ExchangePluginMethod.SET_REPORT);
     }
 
     public static PluginFault mapToPluginFaultResponse(int code, String message) {

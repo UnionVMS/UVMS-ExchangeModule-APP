@@ -12,7 +12,7 @@ import eu.europa.ec.fisheries.uvms.exchange.message.event.SetMovementEvent;
 import eu.europa.ec.fisheries.uvms.exchange.message.event.carrier.ExchangeMessageEvent;
 
 @Local
-public interface EventService {
+public interface ExchangeEventService {
 
     public void getPluginConfig(@Observes @PluginConfigEvent ExchangeMessageEvent message);
 

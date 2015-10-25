@@ -14,6 +14,8 @@
     
     <xsd:complexType name="ReportMovementType" abstract="true">
         <xsd:sequence>
+            <xsd:element name="pluginName" type="xsd:string"/>
+            <xsd:element name="pluginType" type="plugin:PluginType"/>
             <!-- <xsd:element name="version" type="xsd:string" minOccurs="1" maxOccurs="1"/> -->
             <xsd:element name="timestamp" type="xsd:dateTime" minOccurs="1" maxOccurs="1"/>
         </xsd:sequence>
@@ -23,7 +25,6 @@
         <xsd:complexContent>
             <xsd:extension base="movement:ReportMovementType">
                 <xsd:sequence>
-                    <xsd:element name="pluginName" type="xsd:string" minOccurs="1" maxOccurs="1"/>
                     <xsd:element name="movement" type="movement:MovementBaseType"/>
                 </xsd:sequence>
             </xsd:extension>
@@ -34,8 +35,6 @@
         <xsd:complexContent>
             <xsd:extension base="movement:ReportMovementType">
                 <xsd:sequence>
-                    <xsd:element name="pluginName" type="xsd:string" minOccurs="0" maxOccurs="1"/>
-                    <xsd:element name="pluginType" type="plugin:PluginType"/>
                     <xsd:element name="movement" type="movement:MovementType"/>
                 </xsd:sequence>
             </xsd:extension>
