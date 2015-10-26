@@ -20,6 +20,8 @@ import eu.europa.ec.fisheries.uvms.exchange.rest.mapper.ServiceMapper;
 import eu.europa.ec.fisheries.uvms.exchange.service.ExchangeService;
 import eu.europa.ec.fisheries.uvms.exchange.service.PluginService;
 import eu.europa.ec.fisheries.uvms.exchange.service.exception.ExchangeServiceException;
+import eu.europa.ec.fisheries.uvms.rest.security.RequiresFeature;
+import eu.europa.ec.fisheries.uvms.rest.security.UnionVMSFeature;
 
 @Path("/plugin")
 @Stateless
@@ -69,7 +71,7 @@ public class ExchangeRegistryResource {
 	@Consumes(value = { MediaType.APPLICATION_JSON })
 	@Produces(value = { MediaType.APPLICATION_JSON })
 	@Path("/start/{serviceClassName}")
-	@RequiresFeature(UnionVMSFeature.viewExchange) //TODO
+	@RequiresFeature(UnionVMSFeature.manageExchangeTransmissionStatuses)
 	public ResponseDto startService(@PathParam(value="serviceClassName") String serviceClassName) {
 		LOG.info("Start service invoked in rest layer");
 		try {
@@ -92,7 +94,7 @@ public class ExchangeRegistryResource {
 	@Consumes(value = { MediaType.APPLICATION_JSON })
 	@Produces(value = { MediaType.APPLICATION_JSON })
 	@Path("/stop/{serviceClassName}")
-	@RequiresFeature(UnionVMSFeature.viewExchange)
+	@RequiresFeature(UnionVMSFeature.manageExchangeTransmissionStatuses)
 	public ResponseDto stopService(@PathParam(value="serviceClassName") String serviceClassName) {
 		LOG.info("Stop service invoked in rest layer");
 		try {

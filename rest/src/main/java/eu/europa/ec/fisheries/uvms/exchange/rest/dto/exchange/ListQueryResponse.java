@@ -6,8 +6,8 @@
 package eu.europa.ec.fisheries.uvms.exchange.rest.dto.exchange;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
+
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
@@ -19,15 +19,15 @@ import javax.xml.bind.annotation.XmlElement;
 @XmlAccessorType(XmlAccessType.FIELD)
 public class ListQueryResponse {
 
-    @XmlElement(required = true, type = Integer.class)
+    @XmlElement(required = true)
     private int currentPage;
-    @XmlElement(required = true, type = Integer.class)
+    @XmlElement(required = true)
     private int totalNumberOfPages;
-    @XmlElement(required = true, type = ExchangeLog.class)
-    private List<ExchangeLog> logs;
+    @XmlElement(required = true)
+    private List<ExchangeLog> logList;
 
     public ListQueryResponse() {
-        logs = new ArrayList<>();
+        logList = new ArrayList<>();
     }
 
     public int getCurrentPage() {
@@ -47,7 +47,7 @@ public class ListQueryResponse {
     }
 
     public List<ExchangeLog> getLogs() {
-        return logs;
+        return logList;
     }
 
 }

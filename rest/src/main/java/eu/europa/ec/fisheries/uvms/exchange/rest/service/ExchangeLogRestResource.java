@@ -1,5 +1,7 @@
 package eu.europa.ec.fisheries.uvms.exchange.rest.service;
 
+import java.util.List;
+
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
 import javax.ws.rs.Consumes;
@@ -16,9 +18,11 @@ import org.slf4j.LoggerFactory;
 import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeListQuery;
 import eu.europa.ec.fisheries.uvms.exchange.rest.dto.ResponseDto;
 import eu.europa.ec.fisheries.uvms.exchange.rest.dto.RestResponseCode;
+import eu.europa.ec.fisheries.uvms.exchange.rest.dto.exchange.ListQueryResponse;
+import eu.europa.ec.fisheries.uvms.exchange.rest.dto.exchange.SendingGroupLog;
 import eu.europa.ec.fisheries.uvms.exchange.rest.error.ErrorHandler;
-import eu.europa.ec.fisheries.uvms.exchange.service.ExchangeService;
-import eu.europa.ec.fisheries.uvms.exchange.service.exception.ExchangeServiceException;
+import eu.europa.ec.fisheries.uvms.exchange.rest.mock.ExchangeMock;
+import eu.europa.ec.fisheries.uvms.exchange.service.ExchangeLogService;
 import eu.europa.ec.fisheries.uvms.rest.security.RequiresFeature;
 import eu.europa.ec.fisheries.uvms.rest.security.UnionVMSFeature;
 
@@ -28,13 +32,10 @@ public class ExchangeLogRestResource {
 
     final static Logger LOG = LoggerFactory.getLogger(ExchangeLogRestResource.class);
 
-    @EJB
-    ExchangeService serviceLayer;
+    //@EJB
+    //ExchangeLogService serviceLayer;
 
     /**
-     *
-     * @responseType
-     * java.util.List<eu.europa.ec.fisheries.uvms.exchange.rest.dto.exchange.ListQueryResponse>
      *
      * @responseMessage 200 [Success]
      * @responseMessage 500 [Error]
@@ -45,18 +46,21 @@ public class ExchangeLogRestResource {
     @POST
     @Consumes(value = {MediaType.APPLICATION_JSON})
     @Produces(value = {MediaType.APPLICATION_JSON})
-    @Path("/log")
+    @Path("/list")
     @RequiresFeature(UnionVMSFeature.viewExchange)
-    public ResponseDto getLogListByCriteria(ExchangeListQuery query) {
+    public ResponseDto getLogListByCriteria(final ExchangeListQuery query) {
         LOG.info("Get list invoked in rest layer");
         try {
-            return new ResponseDto(serviceLayer.getExchangeLogByQuery(query), RestResponseCode.OK);
+        	//TODO query in swagger
+        	//GetLogListByQueryResponse exchangeLogList = serviceLayer.getExchangeLogByQuery(query);
+        	ListQueryResponse exchangeLogList = ExchangeMock.mockLogList(query);
+            return new ResponseDto(exchangeLogList, RestResponseCode.OK);
         } catch (Exception ex) {
             LOG.error("[ Error when geting log list. ] {} ", ex.getMessage());
             return ErrorHandler.getFault(ex);
         }
     }
-
+    
     /**
      *
      * @responseMessage 200 [Success]
@@ -70,13 +74,16 @@ public class ExchangeLogRestResource {
     @Produces(value = {MediaType.APPLICATION_JSON})
     @Path(value = "/{id}")
     @RequiresFeature(UnionVMSFeature.viewExchange)
-    public ResponseDto getById(@PathParam(value = "id") final Long id) {
+    public ResponseDto getByExchangeLogId(@PathParam(value = "id") final String id) {
         LOG.info("Get by id invoked in rest layer");
         try {
-            return new ResponseDto(serviceLayer.getById(id), RestResponseCode.OK);
-        } catch (ExchangeServiceException | NullPointerException ex) {
+        	String rawData = ExchangeMock.mockRawData(id);
+            return new ResponseDto(rawData, RestResponseCode.OK);
+        } catch (Exception ex) {
             LOG.error("[ Error when geting by id. ] {} ", ex.getMessage());
             return ErrorHandler.getFault(ex);
         }
     }
+    
+    
 }

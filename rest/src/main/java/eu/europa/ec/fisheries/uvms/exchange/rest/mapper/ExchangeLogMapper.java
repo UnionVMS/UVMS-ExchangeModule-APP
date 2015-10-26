@@ -6,12 +6,9 @@
 package eu.europa.ec.fisheries.uvms.exchange.rest.mapper;
 
 import eu.europa.ec.fisheries.schema.exchange.source.v1.GetLogListByQueryResponse;
-import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogStatusType;
 import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogType;
-import eu.europa.ec.fisheries.uvms.exchange.rest.constants.PollStatus;
 import eu.europa.ec.fisheries.uvms.exchange.rest.dto.exchange.ExchangeLog;
 import eu.europa.ec.fisheries.uvms.exchange.rest.dto.exchange.ListQueryResponse;
-import eu.europa.ec.fisheries.uvms.exchange.rest.util.DateUtil;
 
 /**
  *
@@ -26,7 +23,7 @@ public class ExchangeLogMapper {
         dto.setCurrentPage(response.getCurrentPage().intValue());
         dto.setTotalNumberOfPages(response.getTotalNumberOfPages().intValue());
 
-        for (ExchangeLogType log : response.getExchangeLogs()) {
+        for (ExchangeLogType log : response.getExchangeLog()) {
             dto.getLogs().add(mapToExchangeLogDto(log));
         }
 
@@ -36,29 +33,7 @@ public class ExchangeLogMapper {
 
     public static ExchangeLog mapToExchangeLogDto(ExchangeLogType log) {
         ExchangeLog dto = new ExchangeLog();
-
-        dto.setDateFwd(DateUtil.parseTimestamp(log.getDateFwd()));
-        dto.setDateRecieved(DateUtil.parseTimestamp(log.getDateRecieved()));
-        dto.setFwdRule(log.getFwdRule());
-        dto.setMessage(log.getMessage());
-        dto.setSentBy(log.getSentBy());
-        dto.setRecipient(log.getRecipient());
-        dto.setStatus(mapExchangeLogStatus(log.getStatus()));
-
+        //TODO map exchangelog
         return dto;
     }
-
-    public static PollStatus mapExchangeLogStatus(ExchangeLogStatusType status) {
-        switch (status) {
-            case SUCCESSFUL:
-                return PollStatus.SUCCESSFULL;
-            case PENDING:
-                return PollStatus.PENDING;
-            case FAILED:
-                return PollStatus.FAILED;
-            default:
-                return null;
-        }
-    }
-
 }

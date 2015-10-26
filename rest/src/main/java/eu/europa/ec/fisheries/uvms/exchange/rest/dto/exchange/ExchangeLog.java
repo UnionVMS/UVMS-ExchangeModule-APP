@@ -1,92 +1,83 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package eu.europa.ec.fisheries.uvms.exchange.rest.dto.exchange;
 
-import eu.europa.ec.fisheries.uvms.exchange.rest.constants.PollStatus;
-import java.util.Date;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 
-/**
- *
- * @author jojoha
- */
 @XmlAccessorType(XmlAccessType.FIELD)
 public class ExchangeLog {
 
-    @XmlElement(required = true, type = Date.class)
-    private Date dateRecieved;
-    @XmlElement(required = true, type = String.class)
-    private String sentBy;
-    @XmlElement(required = true, type = String.class)
-    private String message;
-    @XmlElement(required = true, type = String.class)
-    private String fwdRule;
-    @XmlElement(required = true, type = String.class)
-    private String recipient;
-    @XmlElement(required = true, type = Date.class)
-    private Date dateFwd;
-    @XmlElement(required = true, type = PollStatus.class)
-    private PollStatus status;
-
-    public Date getDateRecieved() {
-        return dateRecieved;
-    }
-
-    public void setDateRecieved(Date dateRecieved) {
-        this.dateRecieved = dateRecieved;
-    }
-
-    public String getSentBy() {
-        return sentBy;
-    }
-
-    public void setSentBy(String sentBy) {
-        this.sentBy = sentBy;
-    }
-
-    public String getMessage() {
-        return message;
-    }
-
-    public void setMessage(String message) {
-        this.message = message;
-    }
-
-    public String getFwdRule() {
-        return fwdRule;
-    }
-
-    public void setFwdRule(String fwdRule) {
-        this.fwdRule = fwdRule;
-    }
-
-    public String getRecipient() {
-        return recipient;
-    }
-
-    public void setRecipient(String recipient) {
-        this.recipient = recipient;
-    }
-
-    public Date getDateFwd() {
-        return dateFwd;
-    }
-
-    public void setDateFwd(Date dateFwd) {
-        this.dateFwd = dateFwd;
-    }
-
-    public PollStatus getStatus() {
-        return status;
-    }
-
-    public void setStatus(PollStatus status) {
-        this.status = status;
-    }
-
+	@XmlElement(required = true)
+	private String id;
+	@XmlElement(required = true)
+	private boolean incoming;
+	@XmlElement(required = true)
+	private String dateRecieved;
+	@XmlElement(required = true)
+	private String from;
+	@XmlElement(required = true)
+	private String source;
+	@XmlElement(required = true)
+	private String rule;
+	@XmlElement(required = true)
+	private String recipient;
+	@XmlElement(required = true)
+	private String dateFwd;
+	@XmlElement(required = true)
+	private String status;
+	
+	public String getId() {
+		return id;
+	}
+	public void setId(String id) {
+		this.id = id;
+	}
+	public boolean isIncoming() {
+		return incoming;
+	}
+	public void setIncoming(boolean incoming) {
+		this.incoming = incoming;
+	}
+	public String getDateRecieved() {
+		return dateRecieved;
+	}
+	public void setDateRecieved(String dateRecieved) {
+		this.dateRecieved = dateRecieved;
+	}
+	public String getFrom() {
+		return from;
+	}
+	public void setFrom(String from) {
+		this.from = from;
+	}
+	public String getSource() {
+		return source;
+	}
+	public void setSource(String source) {
+		this.source = source;
+	}
+	public String getRule() {
+		return rule;
+	}
+	public void setRule(String rule) {
+		this.rule = rule;
+	}
+	public String getRecipient() {
+		return recipient;
+	}
+	public void setRecipient(String recipient) {
+		this.recipient = recipient;
+	}
+	public String getDateFwd() {
+		return dateFwd;
+	}
+	public void setDateFwd(String dateFwd) {
+		this.dateFwd = dateFwd;
+	}
+	public String getStatus() {
+		return status;
+	}
+	public void setStatus(String status) {
+		this.status = status;
+	}
 }

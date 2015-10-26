@@ -32,12 +32,10 @@
     
     <xsd:simpleType name="SearchField">
         <xsd:restriction base="xsd:string">
-            <xsd:enumeration value="FROM_DATE"/>
-            <xsd:enumeration value="TO_DATE"/>
+            <xsd:enumeration value="DATE_RECEIVED_FROM"/>
+            <xsd:enumeration value="DATE_RECEIVED_TO"/>
             <xsd:enumeration value="SENT_BY"/>
-            <xsd:enumeration value="MESSAGE_CONTAINS"/>      
-            <xsd:enumeration value="FORWARD_RULE"/>      
-            <xsd:enumeration value="RECIPIENT"/>      
+            <xsd:enumeration value="RECIPIENT"/>
         </xsd:restriction>
     </xsd:simpleType>
     

@@ -198,7 +198,7 @@ public class ExchangeDataSourceResponseMapper {
 
     public static String createGetExchangeListByQueryResponse(List<ExchangeLogType> logs, Long currentPage, Long totalNumberOfPages) throws ExchangeModelMarshallException {
         GetLogListByQueryResponse response = new GetLogListByQueryResponse();
-        response.getExchangeLogs().addAll(logs);
+        response.getExchangeLog().addAll(logs);
         response.setCurrentPage(BigInteger.valueOf(currentPage));
         response.setTotalNumberOfPages(BigInteger.valueOf(totalNumberOfPages));
         return JAXBMarshaller.marshallJaxBObjectToString(response);
