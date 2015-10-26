@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.dozer.DozerBeanMapper;
 
+import eu.europa.ec.fisheries.schema.exchange.plugin.types.v1.PluginType;
 import eu.europa.ec.fisheries.schema.rules.asset.v1.AssetIdType;
 import eu.europa.ec.fisheries.schema.rules.mobileterminal.v1.IdType;
 
@@ -91,4 +92,18 @@ public class MovementMapper {
         }
         return outList;
     }
+
+	public static eu.europa.ec.fisheries.schema.rules.exchange.v1.PluginType mapPluginType(PluginType pluginType) {
+		switch(pluginType) {
+		case EMAIL:
+			return eu.europa.ec.fisheries.schema.rules.exchange.v1.PluginType.EMAIL;
+		case FLUX:
+			return eu.europa.ec.fisheries.schema.rules.exchange.v1.PluginType.FLUX;
+		case SATELLITE_RECEIVER:
+			return eu.europa.ec.fisheries.schema.rules.exchange.v1.PluginType.SATELLITE_RECEIVER;
+		case OTHER:
+		default:
+			return eu.europa.ec.fisheries.schema.rules.exchange.v1.PluginType.OTHER;
+		}
+	}
 }

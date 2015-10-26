@@ -32,7 +32,7 @@ import eu.europa.ec.fisheries.uvms.exchange.model.mapper.JAXBMarshaller;
  *
  * @author jojoha
  */
-@MessageDriven(mappedName = ExchangeModelConstants.EVENTBUS, activationConfig = {
+@MessageDriven(mappedName = ExchangeModelConstants.PLUGIN_EVENTBUS, activationConfig = {
     @ActivationConfigProperty(propertyName = "messageSelector", propertyValue = ExchangeModelConstants.SERVICE_NAME + " = '" + ExchangeModelConstants.EXCHANGE_REGISTER_SERVICE + "'"),
     @ActivationConfigProperty(propertyName = "messagingType", propertyValue = ExchangeModelConstants.CONNECTION_TYPE),
     @ActivationConfigProperty(propertyName = "subscriptionDurability", propertyValue = "Durable"),

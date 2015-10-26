@@ -44,7 +44,7 @@ public class MessageProducerBean implements MessageProducer, ConfigMessageProduc
     @Resource(mappedName = ExchangeModelConstants.EXCHANGE_MESSAGE_IN_QUEUE)
     private Queue eventQueue;
     
-    @Resource(mappedName = ExchangeModelConstants.EVENTBUS)
+    @Resource(mappedName = ExchangeModelConstants.PLUGIN_EVENTBUS)
     private Topic eventBus;
 
     @Resource(mappedName = ExchangeModelConstants.QUEUE_INTEGRATION_RULES)
