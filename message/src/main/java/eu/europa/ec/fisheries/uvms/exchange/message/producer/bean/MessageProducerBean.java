@@ -8,6 +8,7 @@ import javax.enterprise.event.Observes;
 import javax.jms.Connection;
 import javax.jms.ConnectionFactory;
 import javax.jms.JMSException;
+import javax.jms.Message;
 import javax.jms.Queue;
 import javax.jms.Session;
 import javax.jms.TextMessage;
@@ -59,6 +60,8 @@ public class MessageProducerBean implements MessageProducer, ConfigMessageProduc
     private Connection connection = null;
     private Session session = null;
 
+    private static final int CONFIG_TTL = 30000;
+
     @Override
     @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
     public String sendMessageOnQueue(String text, DataSourceQueue queue) throws ExchangeMessageException {
@@ -76,7 +79,7 @@ public class MessageProducerBean implements MessageProducer, ConfigMessageProduc
             	session.createProducer(rulesQueue).send(message);
             	break;
         	case CONFIG:
-        		session.createProducer(configQueue).send(message);
+        		session.createProducer(configQueue).send(message, Message.DEFAULT_DELIVERY_MODE, Message.DEFAULT_PRIORITY, CONFIG_TTL);
         		break;
             default:
                 break;
