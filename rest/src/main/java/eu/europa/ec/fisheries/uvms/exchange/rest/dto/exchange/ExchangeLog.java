@@ -14,7 +14,7 @@ public class ExchangeLog {
 	@XmlElement(required = true)
 	private String dateRecieved;
 	@XmlElement(required = true)
-	private String from;
+	private String senderRecipient;
 	@XmlElement(required = true)
 	private String source;
 	@XmlElement(required = true)
@@ -44,11 +44,11 @@ public class ExchangeLog {
 	public void setDateRecieved(String dateRecieved) {
 		this.dateRecieved = dateRecieved;
 	}
-	public String getFrom() {
-		return from;
+	public String getSenderRecipient() {
+		return senderRecipient;
 	}
-	public void setFrom(String from) {
-		this.from = from;
+	public void setSenderRecipient(String from) {
+		this.senderRecipient = from;
 	}
 	public String getSource() {
 		return source;

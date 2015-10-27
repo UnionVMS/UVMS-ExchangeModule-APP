@@ -43,7 +43,7 @@ public class ExchangeMock {
 		ExchangeLog log = new ExchangeLog();
 		log.setDateFwd("MOCK DateFwd");
 		log.setDateRecieved("MOCK dateReceived");
-		log.setFrom("MOCK from");
+		log.setSenderRecipient("MOCK senderRecipient");
 		log.setId("MOCK id");
 		log.setIncoming(false);
 		log.setRecipient("MOCK recipient");
