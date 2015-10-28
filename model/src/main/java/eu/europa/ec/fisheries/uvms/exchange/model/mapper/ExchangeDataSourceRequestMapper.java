@@ -55,10 +55,10 @@ public class ExchangeDataSourceRequestMapper {
     }
 
     public static String mapGetServiceListToString(List<PluginType> pluginTypes) throws ExchangeModelMarshallException {
-    	GetServiceListRequest request = new GetServiceListRequest();
+        GetServiceListRequest request = new GetServiceListRequest();
         request.setMethod(ExchangeDataSourceMethod.LIST_SERVICES);
-        if(pluginTypes != null) {
-        	request.getType().addAll(pluginTypes);
+        if (pluginTypes != null) {
+            request.getType().addAll(pluginTypes);
         }
         return JAXBMarshaller.marshallJaxBObjectToString(request);
     }
@@ -79,6 +79,21 @@ public class ExchangeDataSourceRequestMapper {
         try {
             RegisterServiceRequest request = new RegisterServiceRequest();
             request.setMethod(ExchangeDataSourceMethod.REGISTER_SERVICE);
+
+            if (service == null) {
+                throw new ExchangeModelMapperException("ServiceType cannot be null in RegisterServiceRequest!");
+            } else {
+
+                if (service.getServiceResponseMessageName() == null || service.getServiceResponseMessageName().isEmpty()) {
+                    throw new ExchangeModelMapperException("Service response message name in ServiceType cannot be null or empty!");
+                }
+
+                if (service.getServiceClassName() == null || service.getServiceResponseMessageName().isEmpty()) {
+                    throw new ExchangeModelMapperException("Service classname ServiceType cannot be null or empty!");
+                }
+
+            }
+
             request.setService(service);
             request.setCapabilityList(capabilityList);
             request.setSettingList(settingList);
@@ -125,30 +140,30 @@ public class ExchangeDataSourceRequestMapper {
         }
     }
 
-	public static String mapSetSettingsToString(String serviceClassName, SettingListType settingListType) throws ExchangeModelMapperException {
-		try {
-			SetServiceSettingsRequest request = new SetServiceSettingsRequest();
-			request.setMethod(ExchangeDataSourceMethod.SET_SETTINGS);
-			request.setServiceName(serviceClassName);
-			request.setSettings(settingListType);
-			return JAXBMarshaller.marshallJaxBObjectToString(request);
-		} catch (ExchangeModelMarshallException e) {
-			LOG.error("[ Error when mapping SetServiceSettingsRequest ] ");
-			throw new ExchangeModelMapperException("[ Error when mapping SetServiceSettingsRequest ]");
-		}
-	}
+    public static String mapSetSettingsToString(String serviceClassName, SettingListType settingListType) throws ExchangeModelMapperException {
+        try {
+            SetServiceSettingsRequest request = new SetServiceSettingsRequest();
+            request.setMethod(ExchangeDataSourceMethod.SET_SETTINGS);
+            request.setServiceName(serviceClassName);
+            request.setSettings(settingListType);
+            return JAXBMarshaller.marshallJaxBObjectToString(request);
+        } catch (ExchangeModelMarshallException e) {
+            LOG.error("[ Error when mapping SetServiceSettingsRequest ] ");
+            throw new ExchangeModelMapperException("[ Error when mapping SetServiceSettingsRequest ]");
+        }
+    }
 
-	public static String mapSetServiceStatus(String serviceClassName, StatusType status) throws ExchangeModelMapperException {
-		try {
-			SetServiceStatusRequest request = new SetServiceStatusRequest();
-			request.setMethod(ExchangeDataSourceMethod.SET_SERVICE_STATUS);
-			request.setServiceName(serviceClassName);
-			request.setStatus(status);
-			return JAXBMarshaller.marshallJaxBObjectToString(request);
-		} catch (ExchangeModelMarshallException e) {
-			LOG.error("[ Error when mapping SetServiceStatusRequest ]");
-			throw new ExchangeModelMapperException("[ Error when mapping SetServiceStatusRequest ]");
-		}
-	}
+    public static String mapSetServiceStatus(String serviceClassName, StatusType status) throws ExchangeModelMapperException {
+        try {
+            SetServiceStatusRequest request = new SetServiceStatusRequest();
+            request.setMethod(ExchangeDataSourceMethod.SET_SERVICE_STATUS);
+            request.setServiceName(serviceClassName);
+            request.setStatus(status);
+            return JAXBMarshaller.marshallJaxBObjectToString(request);
+        } catch (ExchangeModelMarshallException e) {
+            LOG.error("[ Error when mapping SetServiceStatusRequest ]");
+            throw new ExchangeModelMapperException("[ Error when mapping SetServiceStatusRequest ]");
+        }
+    }
 
 }

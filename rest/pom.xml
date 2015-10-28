@@ -16,7 +16,7 @@
         <!-- EJB DEPENDENCS -->
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>exchange-model</artifactId>
+            <artifactId>exchange-model</artifactId> 
             <version>${project.version}</version>
             <scope>provided</scope>
         </dependency>

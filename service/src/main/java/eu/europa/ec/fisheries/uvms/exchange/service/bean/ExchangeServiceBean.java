@@ -101,8 +101,8 @@ public class ExchangeServiceBean implements ExchangeService {
     }
 
     @Override
-	public ServiceResponseType upsertSettings(String serviceClassName, SettingListType settingListType) throws ExchangeServiceException {
-    	LOG.info("Upsert settings in service layer");
+    public ServiceResponseType upsertSettings(String serviceClassName, SettingListType settingListType) throws ExchangeServiceException {
+        LOG.info("Upsert settings in service layer");
         try {
             String request = ExchangeDataSourceRequestMapper.mapSetSettingsToString(serviceClassName, settingListType);
             String messageId = producer.sendMessageOnQueue(request, MessageQueue.INTERNAL);
@@ -111,8 +111,8 @@ public class ExchangeServiceBean implements ExchangeService {
         } catch (ExchangeModelMapperException | ExchangeMessageException e) {
             throw new ExchangeServiceException(e.getMessage());
         }
-	}
-    
+    }
+
     /**
      * {@inheritDoc}
      *
@@ -164,10 +164,10 @@ public class ExchangeServiceBean implements ExchangeService {
         }
     }
 
-	@Override
-	public ServiceResponseType updateServiceStatus(String serviceClassName, StatusType status) throws ExchangeServiceException {
-		LOG.info("Update service status invoked in service layer");
-		try {
+    @Override
+    public ServiceResponseType updateServiceStatus(String serviceClassName, StatusType status) throws ExchangeServiceException {
+        LOG.info("Update service status invoked in service layer");
+        try {
             String request = ExchangeDataSourceRequestMapper.mapSetServiceStatus(serviceClassName, status);
             String messageId = producer.sendMessageOnQueue(request, MessageQueue.INTERNAL);
             TextMessage response = consumer.getMessage(messageId, TextMessage.class);
@@ -175,5 +175,5 @@ public class ExchangeServiceBean implements ExchangeService {
         } catch (ExchangeModelMapperException | ExchangeMessageException e) {
             throw new ExchangeServiceException(e.getMessage());
         }
-	}
+    }
 }

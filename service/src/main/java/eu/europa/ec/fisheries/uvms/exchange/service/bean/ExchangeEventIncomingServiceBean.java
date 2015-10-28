@@ -54,6 +54,7 @@ import eu.europa.ec.fisheries.uvms.exchange.service.mapper.ExchangeLogMapper;
 import eu.europa.ec.fisheries.uvms.exchange.service.mapper.MovementMapper;
 import eu.europa.ec.fisheries.uvms.rules.model.exception.RulesModelMapperException;
 import eu.europa.ec.fisheries.uvms.rules.model.mapper.RulesModuleRequestMapper;
+import java.util.logging.Level;
 
 @Stateless
 public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingService {
@@ -67,10 +68,10 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
     @Inject
     @PluginErrorEvent
     Event<PluginMessageEvent> pluginErrorEvent;
-    
+
     @EJB
     MessageProducer producer;
-    
+
     @EJB
     ExchangeService exchangeService;
 
@@ -94,74 +95,78 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
         LOG.info("Process movement");
         try {
             SetMovementReportRequest request = JAXBMarshaller.unmarshallTextMessage(message.getJmsMessage(), SetMovementReportRequest.class);
-            
+
             String pluginName = request.getRequest().getPluginName();
             PluginType pluginType = request.getRequest().getPluginType();
-            String responseMessageTopicSelector = pluginName + ExchangeModelConstants.RESPONSE_TOPIC_ADDON_NAME;
+
+            ServiceResponseType service = exchangeService.getService(pluginName);
+
             LOG.debug("Process movement from " + pluginName + " of " + pluginType + " type");
-            
-            if(validate(request.getRequest(), responseMessageTopicSelector, message.getJmsMessage())) {
-            	//Send to exchange log
+
+            if (validate(request.getRequest(), service, message.getJmsMessage())) {
+                //Send to exchange log
                 try {
-                	ExchangeLogType log = ExchangeLogMapper.getReceiveMovementExchangeLog(request.getRequest());
-                	String text = ExchangeDataSourceRequestMapper.mapCreateExchangeLogToString(log);
-                	producer.sendMessageOnQueue(text, MessageQueue.INTERNAL);
+                    ExchangeLogType log = ExchangeLogMapper.getReceiveMovementExchangeLog(request.getRequest());
+                    String text = ExchangeDataSourceRequestMapper.mapCreateExchangeLogToString(log);
+                    producer.sendMessageOnQueue(text, MessageQueue.INTERNAL);
                 } catch (ExchangeModelMapperException | ExchangeMessageException | ExchangeLogException e) {
-                	LOG.error("Couldn't log movement to exchange log. " + e.getMessage());
-            	}
-            	
-            	MovementBaseType baseMovement = request.getRequest().getMovement();
-            	RawMovementType rawMovement = MovementMapper.getInstance().getMapper().map(baseMovement, RawMovementType.class);
-            	if(rawMovement.getAssetId() != null && rawMovement.getAssetId().getAssetIdList() != null) {
-                	rawMovement.getAssetId().getAssetIdList().addAll(MovementMapper.mapAssetIdList(baseMovement.getAssetId().getAssetIdList()));
-            	}
-            	if(baseMovement.getMobileTerminalId() != null && baseMovement.getMobileTerminalId().getMobileTerminalIdList() != null) {
-                	rawMovement.getMobileTerminal().getMobileTerminalIdList().addAll(MovementMapper.mapMobileTerminalIdList(baseMovement.getMobileTerminalId().getMobileTerminalIdList()));
-            	}
-            
-            	try {
-            		String movement = RulesModuleRequestMapper.createSetMovementReportRequest(MovementMapper.mapPluginType(pluginType), rawMovement);
-            		producer.sendMessageOnQueue(movement, MessageQueue.RULES);
-            		
-            		//TODO send back ack to plugin?
-            	} catch (RulesModelMapperException | ExchangeMessageException e) {
-            		PluginFault fault = ExchangePluginResponseMapper.mapToPluginFaultResponse(FaultCode.EXCHANGE_PLUGIN_EVENT.getCode(), "Movement sent cannot be sent to Rules module [ " + e.getMessage() +" ]");
-            		pluginErrorEvent.fire(new PluginMessageEvent(message.getJmsMessage(), responseMessageTopicSelector, fault));
-            	}
+                    LOG.error("Couldn't log movement to exchange log. " + e.getMessage());
+                }
+
+                MovementBaseType baseMovement = request.getRequest().getMovement();
+                RawMovementType rawMovement = MovementMapper.getInstance().getMapper().map(baseMovement, RawMovementType.class);
+                if (rawMovement.getAssetId() != null && rawMovement.getAssetId().getAssetIdList() != null) {
+                    rawMovement.getAssetId().getAssetIdList().addAll(MovementMapper.mapAssetIdList(baseMovement.getAssetId().getAssetIdList()));
+                }
+                if (baseMovement.getMobileTerminalId() != null && baseMovement.getMobileTerminalId().getMobileTerminalIdList() != null) {
+                    rawMovement.getMobileTerminal().getMobileTerminalIdList().addAll(MovementMapper.mapMobileTerminalIdList(baseMovement.getMobileTerminalId().getMobileTerminalIdList()));
+                }
+
+                try {
+                    String movement = RulesModuleRequestMapper.createSetMovementReportRequest(MovementMapper.mapPluginType(pluginType), rawMovement);
+                    producer.sendMessageOnQueue(movement, MessageQueue.RULES);
+
+                    //TODO send back ack to plugin?
+                } catch (RulesModelMapperException | ExchangeMessageException e) {
+                    PluginFault fault = ExchangePluginResponseMapper.mapToPluginFaultResponse(FaultCode.EXCHANGE_PLUGIN_EVENT.getCode(), "Movement sent cannot be sent to Rules module [ " + e.getMessage() + " ]");
+                    pluginErrorEvent.fire(new PluginMessageEvent(message.getJmsMessage(), service, fault));
+                }
             } else {
-            	LOG.debug("Validation error. Event sent to plugin");
+                LOG.debug("Validation error. Event sent to plugin");
             }
         } catch (ExchangeModelMarshallException e) {
-        	//Cannot send back fault to unknown sender
-        	LOG.error("Couldn't map to SetMovementReportRequest when processing movement from plugin");
+            //Cannot send back fault to unknown sender
+            LOG.error("Couldn't map to SetMovementReportRequest when processing movement from plugin");
+        } catch (ExchangeServiceException ex) {
+            java.util.logging.Logger.getLogger(ExchangeEventIncomingServiceBean.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 
-	private boolean validate(SetReportMovementType setReport, String responseMessageTopicSelector, TextMessage origin) {
-		if(setReport == null) {
-        	String faultMessage = "No setReport request";
-			pluginErrorEvent.fire(new PluginMessageEvent(origin, responseMessageTopicSelector, ExchangePluginResponseMapper.mapToPluginFaultResponse(FaultCode.PLUGIN_VALIDATION.getCode(), faultMessage)));
-			return false;
-        } else if(setReport.getMovement() == null) {
-        	String faultMessage = "No movement in setReport request";
-        	pluginErrorEvent.fire(new PluginMessageEvent(origin, responseMessageTopicSelector, ExchangePluginResponseMapper.mapToPluginFaultResponse(FaultCode.PLUGIN_VALIDATION.getCode(), faultMessage)));
-			return false;
-        } else if(setReport.getPluginType() == null) {
-        	String faultMessage = "No pluginType in setReport request";
-        	pluginErrorEvent.fire(new PluginMessageEvent(origin, responseMessageTopicSelector, ExchangePluginResponseMapper.mapToPluginFaultResponse(FaultCode.PLUGIN_VALIDATION.getCode(), faultMessage)));
-			return false;
-        } else if(setReport.getPluginName() == null || setReport.getPluginName().isEmpty()) {
-        	String faultMessage = "No pluginName in setReport request";
-        	pluginErrorEvent.fire(new PluginMessageEvent(origin, responseMessageTopicSelector, ExchangePluginResponseMapper.mapToPluginFaultResponse(FaultCode.PLUGIN_VALIDATION.getCode(), faultMessage)));
-			return false;
-        } else if(setReport.getTimestamp() == null) {
-        	String faultMessage = "No timestamp in setReport request";
-        	pluginErrorEvent.fire(new PluginMessageEvent(origin, responseMessageTopicSelector, ExchangePluginResponseMapper.mapToPluginFaultResponse(FaultCode.PLUGIN_VALIDATION.getCode(), faultMessage)));
-			return false;
+    private boolean validate(SetReportMovementType setReport, ServiceResponseType service, TextMessage origin) {
+        if (setReport == null) {
+            String faultMessage = "No setReport request";
+            pluginErrorEvent.fire(new PluginMessageEvent(origin, service, ExchangePluginResponseMapper.mapToPluginFaultResponse(FaultCode.PLUGIN_VALIDATION.getCode(), faultMessage)));
+            return false;
+        } else if (setReport.getMovement() == null) {
+            String faultMessage = "No movement in setReport request";
+            pluginErrorEvent.fire(new PluginMessageEvent(origin, service, ExchangePluginResponseMapper.mapToPluginFaultResponse(FaultCode.PLUGIN_VALIDATION.getCode(), faultMessage)));
+            return false;
+        } else if (setReport.getPluginType() == null) {
+            String faultMessage = "No pluginType in setReport request";
+            pluginErrorEvent.fire(new PluginMessageEvent(origin, service, ExchangePluginResponseMapper.mapToPluginFaultResponse(FaultCode.PLUGIN_VALIDATION.getCode(), faultMessage)));
+            return false;
+        } else if (setReport.getPluginName() == null || setReport.getPluginName().isEmpty()) {
+            String faultMessage = "No pluginName in setReport request";
+            pluginErrorEvent.fire(new PluginMessageEvent(origin, service, ExchangePluginResponseMapper.mapToPluginFaultResponse(FaultCode.PLUGIN_VALIDATION.getCode(), faultMessage)));
+            return false;
+        } else if (setReport.getTimestamp() == null) {
+            String faultMessage = "No timestamp in setReport request";
+            pluginErrorEvent.fire(new PluginMessageEvent(origin, service, ExchangePluginResponseMapper.mapToPluginFaultResponse(FaultCode.PLUGIN_VALIDATION.getCode(), faultMessage)));
+            return false;
         }
         return true;
     }
-    
+
     @Override
     public void ping(@Observes @PingEvent ExchangeMessageEvent message) {
         try {
@@ -176,49 +181,49 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
     @Override
     public void processAcknowledge(@Observes @ExchangeLogEvent ExchangeMessageEvent message) {
         LOG.info("Process acknowledge");
-        
+
         try {
-			AcknowledgeResponse response = JAXBMarshaller.unmarshallTextMessage(message.getJmsMessage(), AcknowledgeResponse.class);
-			AcknowledgeType acknowledge = response.getResponse();
-			String serviceClassName = response.getServiceClassName();
-			ExchangePluginMethod method = response.getMethod();
-			switch(method) {
-			case SET_COMMAND:
-				break;
-			case SET_CONFIG:
-				break;
-			case SET_REPORT:
-				break;
-			case PING:
-				LOG.info(serviceClassName + " answered on ping: " + acknowledge.getType() + ": " + acknowledge.getMessage());
-				break;
-			case START:
-				handleStatusAcknowledge(serviceClassName, acknowledge, StatusType.STARTED);
-				break;
-			case STOP:
-				handleStatusAcknowledge(serviceClassName, acknowledge, StatusType.STOPPED);
-				break;
-			default:
-				LOG.error("Received unknown acknowledge: " + method);
-				break;
-			}
-		} catch (ExchangeModelMarshallException e) {
-			LOG.error("Process acknowledge couldn't be marshalled");
-		} catch (ExchangeServiceException e) {
-			//TODO couldn't save acknowledge in exchange service
-			LOG.error("Couldn't process acknowledge in exchange service: " + e.getMessage());
-		}
+            AcknowledgeResponse response = JAXBMarshaller.unmarshallTextMessage(message.getJmsMessage(), AcknowledgeResponse.class);
+            AcknowledgeType acknowledge = response.getResponse();
+            String serviceClassName = response.getServiceClassName();
+            ExchangePluginMethod method = response.getMethod();
+            switch (method) {
+                case SET_COMMAND:
+                    break;
+                case SET_CONFIG:
+                    break;
+                case SET_REPORT:
+                    break;
+                case PING:
+                    LOG.info(serviceClassName + " answered on ping: " + acknowledge.getType() + ": " + acknowledge.getMessage());
+                    break;
+                case START:
+                    handleStatusAcknowledge(serviceClassName, acknowledge, StatusType.STARTED);
+                    break;
+                case STOP:
+                    handleStatusAcknowledge(serviceClassName, acknowledge, StatusType.STOPPED);
+                    break;
+                default:
+                    LOG.error("Received unknown acknowledge: " + method);
+                    break;
+            }
+        } catch (ExchangeModelMarshallException e) {
+            LOG.error("Process acknowledge couldn't be marshalled");
+        } catch (ExchangeServiceException e) {
+            //TODO couldn't save acknowledge in exchange service
+            LOG.error("Couldn't process acknowledge in exchange service: " + e.getMessage());
+        }
     }
 
     private void handleStatusAcknowledge(String serviceClassName, AcknowledgeType ack, StatusType status) throws ExchangeServiceException {
-    	switch(ack.getType()) {
-    	case OK:
-    		exchangeService.updateServiceStatus(serviceClassName, status);
-    		break;
-    	case NOK:
-    		//TODO
-    		LOG.error("Couldn't start service");
-    		break;
-    	}
+        switch (ack.getType()) {
+            case OK:
+                exchangeService.updateServiceStatus(serviceClassName, status);
+                break;
+            case NOK:
+                //TODO
+                LOG.error("Couldn't start service");
+                break;
+        }
     }
 }

@@ -39,24 +39,24 @@ public class MovementMapper {
             eu.europa.ec.fisheries.schema.rules.asset.v1.AssetIdList outAssetId = new eu.europa.ec.fisheries.schema.rules.asset.v1.AssetIdList();
             AssetIdType idType = null;
             switch (inAssetId.getIdType()) {
-            case CFR:
-                idType = AssetIdType.CFR;
-                break;
-            case ID:
-                idType = AssetIdType.ID;
-                break;
-            case IMO:
-                idType = AssetIdType.IMO;
-                break;
-            case IRCS:
-                idType = AssetIdType.IRCS;
-                break;
-            case MMSI:
-                idType = AssetIdType.MMSI;
-                break;
-            case GUID:
-                idType = AssetIdType.GUID;
-                break;
+                case CFR:
+                    idType = AssetIdType.CFR;
+                    break;
+                case ID:
+                    idType = AssetIdType.ID;
+                    break;
+                case IMO:
+                    idType = AssetIdType.IMO;
+                    break;
+                case IRCS:
+                    idType = AssetIdType.IRCS;
+                    break;
+                case MMSI:
+                    idType = AssetIdType.MMSI;
+                    break;
+                case GUID:
+                    idType = AssetIdType.GUID;
+                    break;
             }
             outAssetId.setIdType(idType);
             outAssetId.setValue(inAssetId.getValue());
@@ -73,18 +73,18 @@ public class MovementMapper {
             IdType idType = null;
 
             switch (inId.getType()) {
-            case DNID:
-                idType = IdType.DNID;
-                break;
-            case LES:
-                idType = IdType.LES;
-                break;
-            case MEMBER_NUMBER:
-                idType = IdType.MEMBER_NUMBER;
-                break;
-            case SATELLITE_NUMBER:
-                idType = IdType.SATELLITE_NUMBER;
-                break;
+                case DNID:
+                    idType = IdType.DNID;
+                    break;
+                case LES:
+                    idType = IdType.LES;
+                    break;
+                case MEMBER_NUMBER:
+                    idType = IdType.MEMBER_NUMBER;
+                    break;
+                case SATELLITE_NUMBER:
+                    idType = IdType.SATELLITE_NUMBER;
+                    break;
             }
             outId.setType(idType);
             outId.setValue(inId.getValue());
@@ -93,17 +93,17 @@ public class MovementMapper {
         return outList;
     }
 
-	public static eu.europa.ec.fisheries.schema.rules.exchange.v1.PluginType mapPluginType(PluginType pluginType) {
-		switch(pluginType) {
-		case EMAIL:
-			return eu.europa.ec.fisheries.schema.rules.exchange.v1.PluginType.EMAIL;
-		case FLUX:
-			return eu.europa.ec.fisheries.schema.rules.exchange.v1.PluginType.FLUX;
-		case SATELLITE_RECEIVER:
-			return eu.europa.ec.fisheries.schema.rules.exchange.v1.PluginType.SATELLITE_RECEIVER;
-		case OTHER:
-		default:
-			return eu.europa.ec.fisheries.schema.rules.exchange.v1.PluginType.OTHER;
-		}
-	}
+    public static eu.europa.ec.fisheries.schema.rules.exchange.v1.PluginType mapPluginType(PluginType pluginType) {
+        switch (pluginType) {
+            case EMAIL:
+                return eu.europa.ec.fisheries.schema.rules.exchange.v1.PluginType.EMAIL;
+            case FLUX:
+                return eu.europa.ec.fisheries.schema.rules.exchange.v1.PluginType.FLUX;
+            case SATELLITE_RECEIVER:
+                return eu.europa.ec.fisheries.schema.rules.exchange.v1.PluginType.SATELLITE_RECEIVER;
+            case OTHER:
+            default:
+                return eu.europa.ec.fisheries.schema.rules.exchange.v1.PluginType.OTHER;
+        }
+    }
 }

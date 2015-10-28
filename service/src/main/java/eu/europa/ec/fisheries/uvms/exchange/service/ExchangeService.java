@@ -22,6 +22,8 @@ public interface ExchangeService {
      * Register a service
      *
      * @param data
+     * @param capabilityList
+     * @param settingList
      * @return
      * @throws ExchangeServiceException
      */

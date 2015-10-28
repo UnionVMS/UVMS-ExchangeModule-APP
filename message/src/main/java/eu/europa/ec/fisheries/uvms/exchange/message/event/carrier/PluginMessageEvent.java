@@ -3,21 +3,21 @@ package eu.europa.ec.fisheries.uvms.exchange.message.event.carrier;
 import javax.jms.TextMessage;
 
 import eu.europa.ec.fisheries.schema.exchange.plugin.types.v1.PluginFault;
+import eu.europa.ec.fisheries.schema.exchange.service.v1.ServiceType;
 
 public class PluginMessageEvent {
 
     private TextMessage jmsMessage;
-    private String responseTopicMessageSelector;
+    private ServiceType serviceType;
     private PluginFault fault;
 
-    public PluginMessageEvent(TextMessage jmsMessage, String responseTopicMessageSelector) {
+    public PluginMessageEvent(TextMessage jmsMessage) {
         this.jmsMessage = jmsMessage;
-        this.responseTopicMessageSelector = responseTopicMessageSelector;
     }
 
-    public PluginMessageEvent(TextMessage jmsMessage, String responseTopicMessageSelector, PluginFault fault) {
+    public PluginMessageEvent(TextMessage jmsMessage, ServiceType type, PluginFault fault) {
         this.jmsMessage = jmsMessage;
-        this.responseTopicMessageSelector = responseTopicMessageSelector;
+        this.serviceType = type;
         this.fault = fault;
     }
 
@@ -37,12 +37,20 @@ public class PluginMessageEvent {
         this.jmsMessage = jmsMessage;
     }
 
-	public String getResponseTopicMessageSelector() {
-		return responseTopicMessageSelector;
-	}
+    public ServiceType getServiceType() {
+        return serviceType;
+    }
 
-	public void setResponseTopicMessageSelector(String responseTopicMessageSelector) {
-		this.responseTopicMessageSelector = responseTopicMessageSelector;
-	}
+    public void setServiceType(ServiceType serviceType) {
+        this.serviceType = serviceType;
+    }
+
+    public PluginFault getFault() {
+        return fault;
+    }
+
+    public void setFault(PluginFault fault) {
+        this.fault = fault;
+    }
 
 }

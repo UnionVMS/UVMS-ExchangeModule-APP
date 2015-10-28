@@ -23,42 +23,42 @@ import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelMarshal
  */
 public class ExchangePluginRequestMapper {
 
-	public static String createSetReportRequest(ReportType reportType) throws ExchangeModelMarshallException {
-		SetReportRequest request = new SetReportRequest();
-		request.setMethod(ExchangePluginMethod.SET_REPORT);
-		request.setReport(reportType);
-		return JAXBMarshaller.marshallJaxBObjectToString(request);
-	}
-	
-	public static String createSetCommandRequest(CommandType commandType) throws ExchangeModelMarshallException {
-		SetCommandRequest request = new SetCommandRequest();
-		request.setMethod(ExchangePluginMethod.SET_COMMAND);
-		request.setCommand(commandType);
-		return JAXBMarshaller.marshallJaxBObjectToString(request);
-	}
+    public static String createSetReportRequest(ReportType reportType) throws ExchangeModelMarshallException {
+        SetReportRequest request = new SetReportRequest();
+        request.setMethod(ExchangePluginMethod.SET_REPORT);
+        request.setReport(reportType);
+        return JAXBMarshaller.marshallJaxBObjectToString(request);
+    }
 
-	public static String createSetConfigRequest(SettingListType settingList) throws ExchangeModelMarshallException {
-		SetConfigRequest request = new SetConfigRequest();
-		request.setMethod(ExchangePluginMethod.SET_CONFIG);
-		request.setConfigurations(settingList);
-		return JAXBMarshaller.marshallJaxBObjectToString(request);
-	}
+    public static String createSetCommandRequest(CommandType commandType) throws ExchangeModelMarshallException {
+        SetCommandRequest request = new SetCommandRequest();
+        request.setMethod(ExchangePluginMethod.SET_COMMAND);
+        request.setCommand(commandType);
+        return JAXBMarshaller.marshallJaxBObjectToString(request);
+    }
 
-	public static String createPingRequest() throws ExchangeModelMarshallException {
-		PingRequest request = new PingRequest();
-		request.setMethod(ExchangePluginMethod.PING);
-		return JAXBMarshaller.marshallJaxBObjectToString(request);
-	}
+    public static String createSetConfigRequest(SettingListType settingList) throws ExchangeModelMarshallException {
+        SetConfigRequest request = new SetConfigRequest();
+        request.setMethod(ExchangePluginMethod.SET_CONFIG);
+        request.setConfigurations(settingList);
+        return JAXBMarshaller.marshallJaxBObjectToString(request);
+    }
 
-	public static String createStartRequest() throws ExchangeModelMarshallException {
-		StartRequest request = new StartRequest();
-		request.setMethod(ExchangePluginMethod.START);
-		return JAXBMarshaller.marshallJaxBObjectToString(request);
-	}
-	
-	public static String createStopRequest() throws ExchangeModelMarshallException {
-		StopRequest request = new StopRequest();
-		request.setMethod(ExchangePluginMethod.STOP);
-		return JAXBMarshaller.marshallJaxBObjectToString(request);
-	}
+    public static String createPingRequest() throws ExchangeModelMarshallException {
+        PingRequest request = new PingRequest();
+        request.setMethod(ExchangePluginMethod.PING);
+        return JAXBMarshaller.marshallJaxBObjectToString(request);
+    }
+
+    public static String createStartRequest() throws ExchangeModelMarshallException {
+        StartRequest request = new StartRequest();
+        request.setMethod(ExchangePluginMethod.START);
+        return JAXBMarshaller.marshallJaxBObjectToString(request);
+    }
+
+    public static String createStopRequest() throws ExchangeModelMarshallException {
+        StopRequest request = new StopRequest();
+        request.setMethod(ExchangePluginMethod.STOP);
+        return JAXBMarshaller.marshallJaxBObjectToString(request);
+    }
 }
