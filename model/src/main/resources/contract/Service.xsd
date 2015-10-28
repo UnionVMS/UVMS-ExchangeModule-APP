@@ -12,7 +12,7 @@
     
     <xsd:complexType name="ServiceType">
         <xsd:sequence>
-            <!-- <xsd:element name="id" type="xsd:string"/>--> <!-- used for? -->
+            <xsd:element name="serviceResponseMessageName" type="xsd:string"/>
             <xsd:element name="serviceClassName" type="xsd:string" minOccurs="1" maxOccurs="1"/>
             <xsd:element name="name" type="xsd:string"/>
             <xsd:element name="description" type="xsd:string"/>
