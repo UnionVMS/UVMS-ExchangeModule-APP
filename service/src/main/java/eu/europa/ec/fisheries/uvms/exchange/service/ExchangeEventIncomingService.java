@@ -6,23 +6,33 @@ import javax.enterprise.event.Observes;
 import eu.europa.ec.fisheries.uvms.exchange.message.event.ExchangeLogEvent;
 import eu.europa.ec.fisheries.uvms.exchange.message.event.PingEvent;
 import eu.europa.ec.fisheries.uvms.exchange.message.event.PluginConfigEvent;
-import eu.europa.ec.fisheries.uvms.exchange.message.event.SendCommandToPluginEvent;
-import eu.europa.ec.fisheries.uvms.exchange.message.event.SendReportToPluginEvent;
 import eu.europa.ec.fisheries.uvms.exchange.message.event.SetMovementEvent;
 import eu.europa.ec.fisheries.uvms.exchange.message.event.carrier.ExchangeMessageEvent;
 
 @Local
-public interface ExchangeEventService {
+public interface ExchangeEventIncomingService {
 
-    public void getPluginConfig(@Observes @PluginConfigEvent ExchangeMessageEvent message);
+	/**
+	 * Ping Exchange APP module
+	 * @param message
+	 */
+	public void ping(@Observes @PingEvent ExchangeMessageEvent message);
+	
+	/**
+	 * Get plugin list from APP module
+	 * @param message
+	 */
+    public void getPluginListByTypes(@Observes @PluginConfigEvent ExchangeMessageEvent message);
 
+    /**
+     * Process a received Movement
+     * @param message
+     */
     public void processMovement(@Observes @SetMovementEvent ExchangeMessageEvent message);
-    
-    public void ping(@Observes @PingEvent ExchangeMessageEvent message);
 
-    public void sendReportToPlugin(@Observes @SendReportToPluginEvent ExchangeMessageEvent message);
-    
-    public void sendCommandToPlugin(@Observes @SendCommandToPluginEvent ExchangeMessageEvent message);
-    
+    /**
+     * Process answer of commands sent to plugins
+     * @param message
+     */
     public void processAcknowledge(@Observes @ExchangeLogEvent ExchangeMessageEvent message);
 }

@@ -4,7 +4,7 @@ import javax.ejb.Local;
 import javax.enterprise.event.Observes;
 import javax.jms.TextMessage;
 
-import eu.europa.ec.fisheries.uvms.exchange.message.constants.DataSourceQueue;
+import eu.europa.ec.fisheries.uvms.exchange.message.constants.MessageQueue;
 import eu.europa.ec.fisheries.uvms.exchange.message.event.ErrorEvent;
 import eu.europa.ec.fisheries.uvms.exchange.message.event.carrier.ExchangeMessageEvent;
 import eu.europa.ec.fisheries.uvms.exchange.message.event.carrier.PluginMessageEvent;
@@ -14,7 +14,7 @@ import eu.europa.ec.fisheries.uvms.exchange.message.exception.ExchangeMessageExc
 @Local
 public interface MessageProducer {
 
-    public String sendMessageOnQueue(String text, DataSourceQueue queue) throws ExchangeMessageException;
+    public String sendMessageOnQueue(String text, MessageQueue queue) throws ExchangeMessageException;
 
     public String sendEventBusMessage(String text, String serviceName) throws ExchangeMessageException;
     

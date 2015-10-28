@@ -58,7 +58,7 @@ public class MessageConsumerBean implements MessageListener {
     
     @Inject
     @ExchangeLogEvent
-    Event<ExchangeMessageEvent> setStatusEvent;
+    Event<ExchangeMessageEvent> updateStateEvent;
     
     @Inject
     @PingEvent
@@ -81,7 +81,7 @@ public class MessageConsumerBean implements MessageListener {
         		LOG.error("[ Error when receiving message in exchange: ]");
                 errorEvent.fire(new ExchangeMessageEvent(textMessage, ExchangeModuleResponseMapper.createFaultMessage(FaultCode.EXCHANGE_MESSAGE, "Error when receiving message in exchange")));
             } else {
-            	setStatusEvent.fire(new ExchangeMessageEvent(textMessage));
+            	updateStateEvent.fire(new ExchangeMessageEvent(textMessage));
             }
         } else {
         	switch (request.getMethod()) {

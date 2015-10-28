@@ -35,6 +35,9 @@
         <xsd:complexContent>
             <xsd:extension base="movement:ReportMovementType">
                 <xsd:sequence>
+                    <xsd:element name="fwdRule" type="xsd:string"/>
+                    <xsd:element name="fwdDate" type="xsd:dateTime"/>
+                    <xsd:element name="recipient" type="xsd:string"/>
                     <xsd:element name="movement" type="movement:MovementType"/>
                 </xsd:sequence>
             </xsd:extension>

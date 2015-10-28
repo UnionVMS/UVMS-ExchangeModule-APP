@@ -6,36 +6,84 @@
             xmlns="http://schemas.xmlsoap.org/wsdl/">
     
     
-    <xsd:complexType name="ExchangeLogType">
+    <xsd:complexType name="ExchangeLogType" abstract="true">
         <xsd:sequence>
-            <xsd:element name="terminalId" type="xsd:string" />
-            <xsd:element name="terminalType" type="xsd:string" />
-            <xsd:element name="assetId" type="xsd:string" />
-            <xsd:element name="pollTrackId" type="xsd:string" />
+            <xsd:element name="guid" type="xsd:string"/>
+            <xsd:element name="senderReceiver" type="xsd:string"/>
             <xsd:element name="dateRecieved" type="xsd:date" />
-            <xsd:element name="sentBy" type="xsd:string" />
-            <xsd:element name="message" type="xsd:string" />
-            <xsd:element name="fwdRule" type="xsd:string" />
-            <xsd:element name="recipient" type="xsd:string" />
-            <xsd:element name="dateFwd" type="xsd:date" />
+            <xsd:element name="type" type="exchange:LogType"/>
+            <xsd:element name="incoming" type="xsd:boolean"/>
             <xsd:element name="status" type="exchange:ExchangeLogStatusType" />
         </xsd:sequence>
     </xsd:complexType>
    
+   <xsd:simpleType name="LogType">
+        <xsd:restriction base="xsd:string">
+            <xsd:enumeration value="RECEIVE_MOVEMENT"/>
+            <xsd:enumeration value="SEND_MOVEMENT"/>
+            <xsd:enumeration value="SEND_EMAIL"/>
+            <xsd:enumeration value="SEND_POLL"/>
+        </xsd:restriction>
+   </xsd:simpleType>
+   
+   <xsd:complexType name="ReceiveMovementType">
+        <xsd:complexContent>
+            <xsd:extension base="exchange:ExchangeLogType">
+                <xsd:sequence>
+                    <xsd:element name="source" type="xsd:string"/>
+                </xsd:sequence>
+            </xsd:extension>
+        </xsd:complexContent>
+   </xsd:complexType>
+   
+   <xsd:complexType name="SendMovementType">
+        <xsd:complexContent>
+            <xsd:extension base="exchange:ExchangeLogType">
+                <xsd:sequence>
+                    <xsd:element name="fwdRule" type="xsd:string"/>
+                    <xsd:element name="recipient" type="xsd:string"/>
+                    <xsd:element name="fwdDate" type="xsd:dateTime"/>
+                </xsd:sequence>
+            </xsd:extension>
+        </xsd:complexContent>
+   </xsd:complexType>
+   
+   <xsd:complexType name="SendEmailType">
+        <xsd:complexContent>
+            <xsd:extension base="exchange:ExchangeLogType"/>
+        </xsd:complexContent>
+   </xsd:complexType>
+   
+   <xsd:complexType name="SendPollType">
+        <xsd:complexContent>
+            <xsd:extension base="exchange:ExchangeLogType">
+                <xsd:sequence>
+                    <xsd:element name="pollTrackId" type="xsd:string"/>
+                </xsd:sequence>
+            </xsd:extension>
+        </xsd:complexContent>
+   </xsd:complexType>
+   
     <xsd:simpleType name="ExchangeLogStatusType">
         <xsd:restriction base="xsd:string">
+            <xsd:enumeration value="CREATED"/>
             <xsd:enumeration value="PENDING"/>
+            
             <xsd:enumeration value="FAILED"/>
             <xsd:enumeration value="SUCCESSFUL"/>
+            
+            <xsd:enumeration value="UNKNOWN"/>
         </xsd:restriction>
     </xsd:simpleType>
     
     <xsd:simpleType name="SearchField">
         <xsd:restriction base="xsd:string">
+            <xsd:enumeration value="TRANSFER_INCOMING"/>
             <xsd:enumeration value="DATE_RECEIVED_FROM"/>
             <xsd:enumeration value="DATE_RECEIVED_TO"/>
-            <xsd:enumeration value="SENT_BY"/>
+            <xsd:enumeration value="SENDER_RECEIVER"/>
             <xsd:enumeration value="RECIPIENT"/>
+            <!-- <xsd:enumeration value="STATUS"/> -->
         </xsd:restriction>
     </xsd:simpleType>
     
@@ -56,7 +104,7 @@
     <xsd:complexType name="ExchangeListPagination">
         <xsd:sequence>
             <xsd:element name="page" type="xsd:int" minOccurs="1" maxOccurs="1"/>
-            <xsd:element name="listSize" type="xsd:int" minOccurs="0" maxOccurs="1"/>
+            <xsd:element name="listSize" type="xsd:int" minOccurs="1" maxOccurs="1"/>
         </xsd:sequence>
     </xsd:complexType>
     

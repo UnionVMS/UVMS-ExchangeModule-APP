@@ -4,6 +4,7 @@ import java.util.List;
 
 import javax.jms.TextMessage;
 import javax.xml.datatype.DatatypeConfigurationException;
+import javax.xml.datatype.XMLGregorianCalendar;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -72,20 +73,40 @@ public class ExchangeModuleRequestMapper {
     	return JAXBMarshaller.marshallJaxBObjectToString(request);
     }
     
-    public static String createSendReportToPlugin(PluginType type, MovementType payload) throws ExchangeModelMapperException {
+    public static String createSendReportToPlugin(String pluginName, PluginType type, XMLGregorianCalendar fwdDate, String fwdRule, String recipient, MovementType payload) throws ExchangeModelMapperException {
+    	SendMovementToPluginRequest request = createSendReportToPluginRequest();
+		SendMovementToPluginType report = createSendMovementToPluginType(type, fwdDate, fwdRule, recipient, payload);
+		report.setPluginName(pluginName);
+		request.setReport(report);
+    	return JAXBMarshaller.marshallJaxBObjectToString(request);
+    }
+    
+    public static String createSendReportToPlugin(PluginType type, XMLGregorianCalendar fwdDate, String fwdRule, String recipient, MovementType payload) throws ExchangeModelMapperException {
+		SendMovementToPluginRequest request = createSendReportToPluginRequest();
+		SendMovementToPluginType report = createSendMovementToPluginType(type, fwdDate, fwdRule, recipient, payload);
+		request.setReport(report);
+    	return JAXBMarshaller.marshallJaxBObjectToString(request);
+    }
+    
+    private static SendMovementToPluginRequest createSendReportToPluginRequest() {
     	SendMovementToPluginRequest request = new SendMovementToPluginRequest();
     	request.setMethod(ExchangeModuleMethod.SEND_REPORT_TO_PLUGIN);
+		return request;
+    }
+
+    private static SendMovementToPluginType createSendMovementToPluginType(PluginType type, XMLGregorianCalendar fwdDate, String fwdRule, String recipient, MovementType payload) throws ExchangeModelMapperException {
 		SendMovementToPluginType report = new SendMovementToPluginType();
     	try {
 			report.setTimestamp(DateUtils.getCurrentDate());
 		} catch (DatatypeConfigurationException e) {
 			throw new ExchangeModelMapperException("Couldn't set current timestamp for message");
 		}
+    	report.setFwdDate(fwdDate);
+    	report.setFwdRule(fwdRule);
+    	report.setRecipient(recipient);
     	report.setMovement(payload);
     	report.setPluginType(type);
-		request.setReport(report);
-		
-    	return JAXBMarshaller.marshallJaxBObjectToString(request);
+    	return report;
     }
     
     public static String createSetCommandSendPollRequest(String pluginName, PollType poll) throws ExchangeModelMapperException  {

@@ -20,7 +20,7 @@ import org.slf4j.LoggerFactory;
 import eu.europa.ec.fisheries.uvms.config.constants.ConfigConstants;
 import eu.europa.ec.fisheries.uvms.config.exception.ConfigMessageException;
 import eu.europa.ec.fisheries.uvms.config.message.ConfigMessageProducer;
-import eu.europa.ec.fisheries.uvms.exchange.message.constants.DataSourceQueue;
+import eu.europa.ec.fisheries.uvms.exchange.message.constants.MessageQueue;
 import eu.europa.ec.fisheries.uvms.exchange.message.event.ErrorEvent;
 import eu.europa.ec.fisheries.uvms.exchange.message.event.carrier.ExchangeMessageEvent;
 import eu.europa.ec.fisheries.uvms.exchange.message.event.carrier.PluginMessageEvent;
@@ -64,7 +64,7 @@ public class MessageProducerBean implements MessageProducer, ConfigMessageProduc
 
     @Override
     @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
-    public String sendMessageOnQueue(String text, DataSourceQueue queue) throws ExchangeMessageException {
+    public String sendMessageOnQueue(String text, MessageQueue queue) throws ExchangeMessageException {
         try {
             connectJMS();
             TextMessage message = session.createTextMessage();
@@ -120,7 +120,7 @@ public class MessageProducerBean implements MessageProducer, ConfigMessageProduc
     @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
     public String sendConfigMessage(String text) throws ConfigMessageException {
         try {
-        	return sendMessageOnQueue(text, DataSourceQueue.CONFIG);
+        	return sendMessageOnQueue(text, MessageQueue.CONFIG);
         }
         catch (ExchangeMessageException e) {
             LOG.error("[ Error when sending config message. ] {}", e.getMessage());
@@ -136,8 +136,10 @@ public class MessageProducerBean implements MessageProducer, ConfigMessageProduc
 
     private void disconnectJMS() {
         try {
-            connection.stop();
-            connection.close();
+        	if(connection != null) {
+        		connection.stop();
+        		connection.close();
+        	}
         } catch (JMSException e) {
             LOG.error("[ Error when stopping or closing JMS queue. ] {}", e);
         }
