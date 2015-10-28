@@ -39,6 +39,7 @@
     <xsd:complexType name="EmailType">
         <xsd:sequence>
             <xsd:element name="to" type="xsd:string" />
+            <xsd:element name="from" type="xsd:string" />
             <xsd:element name="cc" type="xsd:string" minOccurs="1" maxOccurs="unbounded"/>
             <xsd:element name="subject" type="xsd:string" />
             <xsd:element name="body" type="xsd:string" />
