@@ -2,6 +2,7 @@ package eu.europa.ec.fisheries.uvms.exchange.service.bean;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
@@ -52,6 +53,9 @@ public class ExchangeEventOutgoingServiceBean implements ExchangeEventOutgoingSe
     Event<ExchangeMessageEvent> exchangeErrorEvent;
     
     @EJB
+    ExchangeEventLogCache logCache;
+    
+    @EJB
     MessageProducer producer;
     
     @EJB
@@ -83,17 +87,23 @@ public class ExchangeEventOutgoingServiceBean implements ExchangeEventOutgoingSe
                 if(sendMessage) {
                 	ReportType report = new ReportType();
                 	report.setTimestamp(sendReport.getTimestamp());
+                	
                 	//when elog is supported add logic
                 	report.setMovement(sendReport.getMovement());
                 	report.setType(ReportTypeType.MOVEMENT);
                 	
                 	String text = ExchangePluginRequestMapper.createSetReportRequest(report);
-                	producer.sendEventBusMessage(text, serviceName);
+                	String pluginMessageId = producer.sendEventBusMessage(text, serviceName);
                 	
                 	try {
+                		String logGuid = UUID.randomUUID().toString();
                     	ExchangeLogType log = ExchangeLogMapper.getSendMovementExchangeLog(sendReport);
+                    	log.setGuid(logGuid);
                     	String logText = ExchangeDataSourceRequestMapper.mapCreateExchangeLogToString(log);
                     	producer.sendMessageOnQueue(logText, MessageQueue.INTERNAL);
+                    	
+                    	logCache.put(pluginMessageId, logGuid);
+                    	
                     } catch (ExchangeModelMapperException | ExchangeMessageException | ExchangeLogException e) {
                     	LOG.error("Couldn't log movement to exchange log. " + e.getMessage());
                 	}
@@ -138,12 +148,17 @@ public class ExchangeEventOutgoingServiceBean implements ExchangeEventOutgoingSe
 
             if(validate(request.getCommand(), message.getJmsMessage())) {
             	String text = ExchangePluginRequestMapper.createSetCommandRequest(request.getCommand());
-            	producer.sendEventBusMessage(text, pluginName);
-
+            	String pluginMessageId = producer.sendEventBusMessage(text, pluginName);
+            	
             	try {
+            		String logGuid = UUID.randomUUID().toString();
             		ExchangeLogType log = ExchangeLogMapper.getSendCommandExchangeLog(request.getCommand());
+            		log.setGuid(logGuid);
             		String logText = ExchangeDataSourceRequestMapper.mapCreateExchangeLogToString(log);
             		producer.sendMessageOnQueue(logText, MessageQueue.INTERNAL);
+            	
+            		logCache.put(pluginMessageId, logGuid);
+            		
             	} catch (ExchangeModelMapperException | ExchangeMessageException | ExchangeLogException e) {
             		LOG.error("Couldn't log command to exchange log. " + e.getMessage());
             	}

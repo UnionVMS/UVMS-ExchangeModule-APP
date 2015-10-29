@@ -30,10 +30,6 @@
                     <!-- plugin wants to -->
                     <xsd:enumeration value="SET_MOVEMENT_REPORT"/>
                     
-                    <!-- rest interface wants to -->
-                    <xsd:enumeration value="GET_SETTINGS"/>
-                    <xsd:enumeration value="GET_CAPABILITIES"/>
-                    
                     <!-- admin/config wants to-->
                     <xsd:enumeration value="PING"/>
                 </xsd:restriction>

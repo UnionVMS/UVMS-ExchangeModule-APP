@@ -15,10 +15,12 @@ import org.slf4j.LoggerFactory;
 
 import eu.europa.ec.fisheries.schema.exchange.module.v1.ExchangeBaseRequest;
 import eu.europa.ec.fisheries.schema.exchange.plugin.v1.AcknowledgeResponse;
+import eu.europa.ec.fisheries.schema.exchange.plugin.v1.PingResponse;
 import eu.europa.ec.fisheries.uvms.exchange.message.event.ErrorEvent;
 import eu.europa.ec.fisheries.uvms.exchange.message.event.ExchangeLogEvent;
 import eu.europa.ec.fisheries.uvms.exchange.message.event.PingEvent;
 import eu.europa.ec.fisheries.uvms.exchange.message.event.PluginConfigEvent;
+import eu.europa.ec.fisheries.uvms.exchange.message.event.PluginPingEvent;
 import eu.europa.ec.fisheries.uvms.exchange.message.event.SendCommandToPluginEvent;
 import eu.europa.ec.fisheries.uvms.exchange.message.event.SendReportToPluginEvent;
 import eu.europa.ec.fisheries.uvms.exchange.message.event.SetMovementEvent;
@@ -61,6 +63,10 @@ public class MessageConsumerBean implements MessageListener {
     Event<ExchangeMessageEvent> updateStateEvent;
     
     @Inject
+    @PluginPingEvent
+    Event<ExchangeMessageEvent> updatePingStateEvent;
+    
+    @Inject
     @PingEvent
     Event<ExchangeMessageEvent> pingEvent;
 
@@ -76,13 +82,19 @@ public class MessageConsumerBean implements MessageListener {
         TextMessage textMessage = (TextMessage) message;
         ExchangeBaseRequest request = tryConsumeExchangeBaseRequest(textMessage);
         if(request == null) {
-        	AcknowledgeResponse type = tryConsumeAcknowledgeResponse(textMessage);
-        	if(type == null) {
-        		LOG.error("[ Error when receiving message in exchange: ]");
-                errorEvent.fire(new ExchangeMessageEvent(textMessage, ExchangeModuleResponseMapper.createFaultMessage(FaultCode.EXCHANGE_MESSAGE, "Error when receiving message in exchange")));
-            } else {
-            	updateStateEvent.fire(new ExchangeMessageEvent(textMessage));
-            }
+        	try {
+        		//Handle PingResponse from plugin
+				JAXBMarshaller.unmarshallTextMessage(textMessage, PingResponse.class);
+				updatePingStateEvent.fire(new ExchangeMessageEvent(textMessage));
+			} catch (ExchangeModelMarshallException e) {
+				AcknowledgeResponse type = tryConsumeAcknowledgeResponse(textMessage);
+	        	if(type == null) {
+	        		LOG.error("[ Error when receiving message in exchange: ]");
+	                errorEvent.fire(new ExchangeMessageEvent(textMessage, ExchangeModuleResponseMapper.createFaultMessage(FaultCode.EXCHANGE_MESSAGE, "Error when receiving message in exchange")));
+	            } else {
+	            	updateStateEvent.fire(new ExchangeMessageEvent(textMessage));
+	            }
+			}
         } else {
         	switch (request.getMethod()) {
             case LIST_SERVICES:
@@ -119,6 +131,7 @@ public class MessageConsumerBean implements MessageListener {
     	try {
     		return JAXBMarshaller.unmarshallTextMessage(textMessage, AcknowledgeResponse.class);
     	} catch (ExchangeModelMarshallException e) {
+    		LOG.error("Couldn't marshall ack response");
     		return null;
     	}
     }

@@ -1,6 +1,7 @@
 package eu.europa.ec.fisheries.uvms.exchange.service.bean;
 
 import java.util.List;
+import java.util.UUID;
 
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
@@ -24,6 +25,7 @@ import eu.europa.ec.fisheries.schema.exchange.plugin.v1.AcknowledgeResponse;
 import eu.europa.ec.fisheries.schema.exchange.plugin.v1.ExchangePluginMethod;
 import eu.europa.ec.fisheries.schema.exchange.service.v1.ServiceResponseType;
 import eu.europa.ec.fisheries.schema.exchange.service.v1.StatusType;
+import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogStatusTypeType;
 import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogType;
 import eu.europa.ec.fisheries.schema.rules.movement.v1.RawMovementType;
 import eu.europa.ec.fisheries.uvms.exchange.message.constants.MessageQueue;
@@ -31,6 +33,7 @@ import eu.europa.ec.fisheries.uvms.exchange.message.event.ErrorEvent;
 import eu.europa.ec.fisheries.uvms.exchange.message.event.ExchangeLogEvent;
 import eu.europa.ec.fisheries.uvms.exchange.message.event.PingEvent;
 import eu.europa.ec.fisheries.uvms.exchange.message.event.PluginConfigEvent;
+import eu.europa.ec.fisheries.uvms.exchange.message.event.PluginPingEvent;
 import eu.europa.ec.fisheries.uvms.exchange.message.event.SetMovementEvent;
 import eu.europa.ec.fisheries.uvms.exchange.message.event.carrier.ExchangeMessageEvent;
 import eu.europa.ec.fisheries.uvms.exchange.message.event.carrier.PluginMessageEvent;
@@ -54,6 +57,7 @@ import eu.europa.ec.fisheries.uvms.exchange.service.mapper.ExchangeLogMapper;
 import eu.europa.ec.fisheries.uvms.exchange.service.mapper.MovementMapper;
 import eu.europa.ec.fisheries.uvms.rules.model.exception.RulesModelMapperException;
 import eu.europa.ec.fisheries.uvms.rules.model.mapper.RulesModuleRequestMapper;
+
 import java.util.logging.Level;
 
 @Stateless
@@ -69,6 +73,9 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
     @PluginErrorEvent
     Event<PluginMessageEvent> pluginErrorEvent;
 
+    @EJB
+    ExchangeEventLogCache logCache;
+    
     @EJB
     MessageProducer producer;
 
@@ -104,11 +111,14 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
             LOG.debug("Process movement from " + pluginName + " of " + pluginType + " type");
 
             if (validate(request.getRequest(), service, message.getJmsMessage())) {
-                //Send to exchange log
                 try {
+                	String logGuid = UUID.randomUUID().toString();
                     ExchangeLogType log = ExchangeLogMapper.getReceiveMovementExchangeLog(request.getRequest());
+                    log.setGuid(logGuid);
                     String text = ExchangeDataSourceRequestMapper.mapCreateExchangeLogToString(log);
                     producer.sendMessageOnQueue(text, MessageQueue.INTERNAL);
+                    
+                    //TODO save as successful?
                 } catch (ExchangeModelMapperException | ExchangeMessageException | ExchangeLogException e) {
                     LOG.error("Couldn't log movement to exchange log. " + e.getMessage());
                 }
@@ -179,6 +189,17 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
     }
 
     @Override
+    public void processPluginPing(@Observes @PluginPingEvent ExchangeMessageEvent message) {
+    	try {
+			eu.europa.ec.fisheries.schema.exchange.plugin.v1.PingResponse response = JAXBMarshaller.unmarshallTextMessage(message.getJmsMessage(), eu.europa.ec.fisheries.schema.exchange.plugin.v1.PingResponse.class);
+			//TODO handle ping response from plugin, eg. no serviceClassName in response
+			LOG.info("FIX ME handle ping response from plugin");
+		} catch (ExchangeModelMarshallException e) {
+			LOG.error("Couldn't process ping response from plugin " + e.getMessage());
+		}
+    }
+    
+    @Override
     public void processAcknowledge(@Observes @ExchangeLogEvent ExchangeMessageEvent message) {
         LOG.info("Process acknowledge");
 
@@ -189,41 +210,75 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
             ExchangePluginMethod method = response.getMethod();
             switch (method) {
                 case SET_COMMAND:
-                    break;
-                case SET_CONFIG:
-                    break;
                 case SET_REPORT:
-                    break;
-                case PING:
-                    LOG.info(serviceClassName + " answered on ping: " + acknowledge.getType() + ": " + acknowledge.getMessage());
+                	handleUpdateExchangeLogAcknowledge(method, serviceClassName, acknowledge);
                     break;
                 case START:
-                    handleStatusAcknowledge(serviceClassName, acknowledge, StatusType.STARTED);
+                    handleUpdateServiceAcknowledge(serviceClassName, acknowledge, StatusType.STARTED);
                     break;
                 case STOP:
-                    handleStatusAcknowledge(serviceClassName, acknowledge, StatusType.STOPPED);
+                    handleUpdateServiceAcknowledge(serviceClassName, acknowledge, StatusType.STOPPED);
                     break;
+                case SET_CONFIG:
                 default:
-                    LOG.error("Received unknown acknowledge: " + method);
+                    handleAcknowledge(method, serviceClassName, acknowledge);
                     break;
             }
         } catch (ExchangeModelMarshallException e) {
             LOG.error("Process acknowledge couldn't be marshalled");
         } catch (ExchangeServiceException e) {
-            //TODO couldn't save acknowledge in exchange service
+            //TODO Audit.log() couldn't process acknowledge in exchange service
             LOG.error("Couldn't process acknowledge in exchange service: " + e.getMessage());
         }
     }
 
-    private void handleStatusAcknowledge(String serviceClassName, AcknowledgeType ack, StatusType status) throws ExchangeServiceException {
+	private void handleUpdateExchangeLogAcknowledge(ExchangePluginMethod method, String serviceClassName, AcknowledgeType ack) {
+    	LOG.debug(method + " was acknowledged in " + serviceClassName);
+    	
+    	ExchangeLogStatusTypeType logStatus = ExchangeLogStatusTypeType.FAILED;
+		switch (ack.getType()) {
+		case OK:
+			//if(poll probably transmitted)
+            logStatus = ExchangeLogStatusTypeType.SUCCESSFUL;
+			break;
+		case NOK:
+			LOG.debug(method + " was NOK: " + ack.getMessage());
+			break;
+		}
+		
+		try {
+        	String logGuid = logCache.acknowledged(ack.getMessageId());
+			LOG.debug("logGuid to update status for: " + logGuid);
+			
+			String text = ExchangeDataSourceRequestMapper.mapUpdateLogStatusRequest(logGuid, logStatus);
+			LOG.debug("Message to update: " + text);
+            producer.sendMessageOnQueue(text, MessageQueue.INTERNAL);
+        } catch (ExchangeModelMapperException | ExchangeMessageException e) {
+            LOG.error("Couldn't update status of exchange log" + e.getMessage());
+        }
+	}
+
+	private void handleUpdateServiceAcknowledge(String serviceClassName, AcknowledgeType ack, StatusType status) throws ExchangeServiceException {
         switch (ack.getType()) {
-            case OK:
-                exchangeService.updateServiceStatus(serviceClassName, status);
-                break;
-            case NOK:
-                //TODO
-                LOG.error("Couldn't start service");
-                break;
+        case OK:
+        	exchangeService.updateServiceStatus(serviceClassName, status);
+            break;
+        case NOK:
+        	//TODO Audit.log()
+            LOG.error("Couldn't start service " + serviceClassName);
+            break;
         }
     }
+	
+	private void handleAcknowledge(ExchangePluginMethod method, String serviceClassName, AcknowledgeType ack) {
+    	LOG.debug(method + " was acknowledged in " + serviceClassName);
+		switch(ack.getType()) {
+		case OK:
+			break;
+		case NOK:
+			//TODO Audit.log()
+			LOG.error(serviceClassName + " didn't like it. " + ack.getMessage());
+			break;
+		}
+	}
 }
