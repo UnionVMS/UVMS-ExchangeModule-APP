@@ -16,7 +16,6 @@ import eu.europa.ec.fisheries.schema.exchange.movement.v1.MovementSourceType;
 import eu.europa.ec.fisheries.schema.exchange.movement.v1.SendMovementToPluginType;
 import eu.europa.ec.fisheries.schema.exchange.movement.v1.SetReportMovementType;
 import eu.europa.ec.fisheries.schema.exchange.plugin.types.v1.PluginType;
-import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogStatusType;
 import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogType;
 import eu.europa.ec.fisheries.schema.exchange.v1.LogType;
 import eu.europa.ec.fisheries.schema.exchange.v1.ReceiveMovementType;
@@ -34,7 +33,6 @@ public class ExchangeLogMapper {
 		ReceiveMovementType log = new ReceiveMovementType();
 		log.setDateRecieved(request.getTimestamp());
 		log.setType(LogType.RECEIVE_MOVEMENT);
-		log.setStatus(ExchangeLogStatusType.CREATED);
 		log.setSenderReceiver(getSenderReceiver(request.getMovement(), request.getPluginType(), request.getPluginName()));
 		if(request.getMovement().getSource() != null) {
 			log.setSource(request.getMovement().getSource().name());
@@ -147,7 +145,6 @@ public class ExchangeLogMapper {
 		SendMovementType log = new SendMovementType();
 		log.setDateRecieved(sendReport.getTimestamp());
 		log.setType(LogType.SEND_MOVEMENT);
-		log.setStatus(ExchangeLogStatusType.CREATED);
 		
 		String senderReceiver = sendReport.getPluginType().name();
 		if(sendReport.getPluginName() != null && !sendReport.getPluginName().isEmpty()) {
@@ -160,7 +157,7 @@ public class ExchangeLogMapper {
 		}
 		log.setSenderReceiver(senderReceiver);
 		
-		//TODO
+		//TODO send fwdDate, fwdRule and recipient from Rules
 		log.setFwdDate(sendReport.getFwdDate());
 		log.setFwdRule(sendReport.getFwdRule());
 		log.setRecipient(sendReport.getRecipient());
@@ -186,7 +183,6 @@ public class ExchangeLogMapper {
 		log.setType(LogType.SEND_EMAIL);
 		log.setDateRecieved(command.getTimestamp());
 		log.setSenderReceiver(command.getEmail().getTo());
-		log.setStatus(ExchangeLogStatusType.CREATED);
 		return log;
 	}
 	
@@ -197,7 +193,6 @@ public class ExchangeLogMapper {
 		SendPollType log = new SendPollType();
 		log.setType(LogType.SEND_POLL);
 		log.setDateRecieved(command.getTimestamp());
-		log.setStatus(ExchangeLogStatusType.CREATED);
 		
 		String senderReceiver = command.getPluginName();
 		try {

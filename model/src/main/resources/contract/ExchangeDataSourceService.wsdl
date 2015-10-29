@@ -20,6 +20,7 @@
             
             <xsd:simpleType name="ExchangeDataSourceMethod">
                 <xsd:restriction base="xsd:string">
+                    <!-- SERVICE -->
                     <xsd:enumeration value="LIST_SERVICES"/>
                     <xsd:enumeration value="REGISTER_SERVICE"/>
                     <xsd:enumeration value="UNREGISTER_SERVICE"/>
@@ -29,8 +30,14 @@
                     <!-- <xsd:enumeration value="SET_CAPABILITIES"/>--> <!-- change capabilities -->
                     <xsd:enumeration value="SET_SERVICE_STATUS"/>
                     <xsd:enumeration value="GET_SERVICE"/>
+                    
+                    <!-- EXCHANGE LOG -->
                     <xsd:enumeration value="GET_LOG_BY_QUERY"/>
                     <xsd:enumeration value="CREATE_LOG"/>
+                    <xsd:enumeration value="UPDATE_LOG_STATUS"/>
+                    <xsd:enumeration value="GET_LOG_STATUS_HISTORY"/>
+                    
+                    <!-- MISC -->
                     <xsd:enumeration value="PING"/>
                 </xsd:restriction>
             </xsd:simpleType>
@@ -79,6 +86,46 @@
                 <xsd:complexType>
                     <xsd:sequence>
                         <xsd:element name="exchangeLog" type="exchange:ExchangeLogType" minOccurs="1" maxOccurs="1"/>
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
+            
+            <xsd:element name="UpdateLogStatusRequest">
+                <xsd:complexType>
+                    <xsd:complexContent>
+                        <xsd:extension base="source:ExchangeBaseRequest">
+                            <xsd:sequence>
+                                <xsd:element name="status" type="exchange:ExchangeLogStatusType" minOccurs="1" maxOccurs="1"/>
+                            </xsd:sequence>
+                        </xsd:extension>
+                    </xsd:complexContent>
+                </xsd:complexType>
+            </xsd:element>
+            
+            <xsd:element name="UpdateLogStatusResponse">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element name="exchangeLog" type="exchange:ExchangeLogType" minOccurs="1" maxOccurs="1"/>
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
+            
+            <xsd:element name="GetLogStatusHistoryRequest">
+                <xsd:complexType>
+                    <xsd:complexContent>
+                        <xsd:extension base="source:ExchangeBaseRequest">
+                            <xsd:sequence>
+                                <xsd:element name="logGuid" type="xsd:string" minOccurs="1" maxOccurs="1"/>
+                            </xsd:sequence>
+                        </xsd:extension>
+                    </xsd:complexContent>
+                </xsd:complexType>
+            </xsd:element>
+            
+            <xsd:element name="GetLogStatusHistoryResponse">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element name="status" type="exchange:ExchangeLogStatusType" minOccurs="1" maxOccurs="unbounded"/>
                     </xsd:sequence>
                 </xsd:complexType>
             </xsd:element>
@@ -286,6 +333,20 @@
         <part name="body" element="source:CreateLogResponse"/>
     </message>
     
+    <message name="UpdateLogStatusRequest">
+        <part name="body" element="source:UpdateLogStatusRequest"/>
+    </message>
+    <message name="UpdateLogStatusResponse">
+        <part name="body" element="source:UpdateLogStatusResponse"/>
+    </message>
+    
+    <message name="GetLogStatusHistoryRequest">
+        <part name="body" element="source:GetLogStatusHistoryRequest"/>
+    </message>
+    <message name="GetLogStatusHistoryResponse">
+        <part name="body" element="source:GetLogStatusHistoryResponse"/>
+    </message>
+    
     <message name="GetServiceListRequest">
         <part name="body" element="source:GetServiceListRequest"/>
     </message>
@@ -363,6 +424,18 @@
             <fault name="ExchangeFault" message="source:ExchangeFault"/>
         </operation>
        
+        <operation name="UpdateLogStatus">
+            <input message="source:UpdateLogStatusRequest"/>
+            <output message="source:UpdateLogStatusResponse"/>
+            <fault name="ExchangeFault" message="source:ExchangeFault"/>
+        </operation>
+       
+        <operation name="GetLogStatusHistory">
+            <input message="source:GetLogStatusHistoryRequest"/>
+            <output message="source:GetLogStatusHistoryResponse"/>
+            <fault name="ExchangeFault" message="source:ExchangeFault"/>
+        </operation>
+       
         <operation name="GetServiceList">
             <input message="source:GetServiceListRequest"/>
             <output message="source:GetServiceListResponse"/>
@@ -434,6 +507,30 @@
         </operation>
         
         <operation name="CreateLog">
+            <input>
+                <soap:body use="literal"/>
+            </input>
+            <output>
+                <soap:body use="literal"/>
+            </output>
+            <fault name="ExchangeFault">
+                <soap:fault name="ExchangeFault" use="literal"/>
+            </fault>
+        </operation>
+        
+        <operation name="UpdateLogStatus">
+            <input>
+                <soap:body use="literal"/>
+            </input>
+            <output>
+                <soap:body use="literal"/>
+            </output>
+            <fault name="ExchangeFault">
+                <soap:fault name="ExchangeFault" use="literal"/>
+            </fault>
+        </operation>
+        
+        <operation name="GetLogStatusHistory">
             <input>
                 <soap:body use="literal"/>
             </input>

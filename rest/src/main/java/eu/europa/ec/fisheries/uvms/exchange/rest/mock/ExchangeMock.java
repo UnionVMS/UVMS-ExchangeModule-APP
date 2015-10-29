@@ -12,8 +12,7 @@ import java.util.List;
 import java.util.Map;
 
 import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeListQuery;
-import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogStatusType;
-import eu.europa.ec.fisheries.schema.exchange.v1.SearchField;
+import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogStatusTypeType;
 import eu.europa.ec.fisheries.uvms.exchange.rest.dto.exchange.ExchangeLog;
 import eu.europa.ec.fisheries.uvms.exchange.rest.dto.exchange.ListQueryResponse;
 import eu.europa.ec.fisheries.uvms.exchange.rest.dto.exchange.SendingGroupLog;
@@ -92,8 +91,8 @@ public class ExchangeMock {
 
 	public static Map<String, List> mockConfiguration() {
 		Map<String, List> configuration = new HashMap<>();
-		List<ExchangeLogStatusType> statusList = new ArrayList<>();
-		statusList.addAll(Arrays.asList(ExchangeLogStatusType.values()));
+		List<ExchangeLogStatusTypeType> statusList = new ArrayList<>();
+		statusList.addAll(Arrays.asList(ExchangeLogStatusTypeType.values()));
 		configuration.put("STATUS", statusList);
 		List<String> recipientList = new ArrayList<>();
 		recipientList.add("DNK");

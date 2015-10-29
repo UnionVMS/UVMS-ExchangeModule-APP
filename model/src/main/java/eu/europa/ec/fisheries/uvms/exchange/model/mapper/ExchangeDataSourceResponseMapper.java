@@ -17,6 +17,7 @@ import eu.europa.ec.fisheries.schema.exchange.service.v1.SettingListType;
 import eu.europa.ec.fisheries.schema.exchange.service.v1.SettingType;
 import eu.europa.ec.fisheries.schema.exchange.source.v1.CreateLogResponse;
 import eu.europa.ec.fisheries.schema.exchange.source.v1.GetLogListByQueryResponse;
+import eu.europa.ec.fisheries.schema.exchange.source.v1.GetLogStatusHistoryResponse;
 import eu.europa.ec.fisheries.schema.exchange.source.v1.GetServiceCapabilitiesResponse;
 import eu.europa.ec.fisheries.schema.exchange.source.v1.GetServiceListResponse;
 import eu.europa.ec.fisheries.schema.exchange.source.v1.GetServiceResponse;
@@ -25,6 +26,8 @@ import eu.europa.ec.fisheries.schema.exchange.source.v1.RegisterServiceResponse;
 import eu.europa.ec.fisheries.schema.exchange.source.v1.SetServiceSettingsResponse;
 import eu.europa.ec.fisheries.schema.exchange.source.v1.SetServiceStatusResponse;
 import eu.europa.ec.fisheries.schema.exchange.source.v1.UnregisterServiceResponse;
+import eu.europa.ec.fisheries.schema.exchange.source.v1.UpdateLogStatusResponse;
+import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogStatusType;
 import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogType;
 import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelMapperException;
 import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelMarshallException;
@@ -225,6 +228,18 @@ public class ExchangeDataSourceResponseMapper {
 	public static String createSetServiceStatusResponse(ServiceResponseType statusService) throws ExchangeModelMarshallException {
 		SetServiceStatusResponse response = new SetServiceStatusResponse();
 		response.setService(statusService);
+		return JAXBMarshaller.marshallJaxBObjectToString(response);
+	}
+
+	public static String createUpdateLogStatusResponse(ExchangeLogType updatedExchangeLog) throws ExchangeModelMarshallException {
+		UpdateLogStatusResponse response = new UpdateLogStatusResponse();
+		response.setExchangeLog(updatedExchangeLog);
+		return JAXBMarshaller.marshallJaxBObjectToString(response);
+	}
+
+	public static String createGetLogStatusHistoryResponse(List<ExchangeLogStatusType> historyList) throws ExchangeModelMarshallException {
+		GetLogStatusHistoryResponse response = new GetLogStatusHistoryResponse();
+		response.getStatus().addAll(historyList);
 		return JAXBMarshaller.marshallJaxBObjectToString(response);
 	}
 }

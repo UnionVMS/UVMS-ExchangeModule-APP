@@ -13,6 +13,7 @@ import eu.europa.ec.fisheries.schema.exchange.service.v1.StatusType;
 import eu.europa.ec.fisheries.schema.exchange.source.v1.CreateLogRequest;
 import eu.europa.ec.fisheries.schema.exchange.source.v1.ExchangeDataSourceMethod;
 import eu.europa.ec.fisheries.schema.exchange.source.v1.GetLogListByQueryRequest;
+import eu.europa.ec.fisheries.schema.exchange.source.v1.GetLogStatusHistoryRequest;
 import eu.europa.ec.fisheries.schema.exchange.source.v1.GetServiceCapabilitiesRequest;
 import eu.europa.ec.fisheries.schema.exchange.source.v1.GetServiceListRequest;
 import eu.europa.ec.fisheries.schema.exchange.source.v1.GetServiceRequest;
@@ -21,7 +22,10 @@ import eu.europa.ec.fisheries.schema.exchange.source.v1.RegisterServiceRequest;
 import eu.europa.ec.fisheries.schema.exchange.source.v1.SetServiceSettingsRequest;
 import eu.europa.ec.fisheries.schema.exchange.source.v1.SetServiceStatusRequest;
 import eu.europa.ec.fisheries.schema.exchange.source.v1.UnregisterServiceRequest;
+import eu.europa.ec.fisheries.schema.exchange.source.v1.UpdateLogStatusRequest;
 import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeListQuery;
+import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogStatusType;
+import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogStatusTypeType;
 import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogType;
 import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelMapperException;
 import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelMarshallException;
@@ -165,5 +169,22 @@ public class ExchangeDataSourceRequestMapper {
             throw new ExchangeModelMapperException("[ Error when mapping SetServiceStatusRequest ]");
         }
     }
+
+	public static String mapGetLogStatusHistoryRequest(String guid) throws ExchangeModelMarshallException {
+		GetLogStatusHistoryRequest request = new GetLogStatusHistoryRequest();
+		request.setMethod(ExchangeDataSourceMethod.GET_LOG_STATUS_HISTORY);
+		request.setLogGuid(guid);
+		return JAXBMarshaller.marshallJaxBObjectToString(request);
+	}
+
+	public static String mapUpdateLogStatusRequest(String guid, ExchangeLogStatusTypeType type) throws ExchangeModelMarshallException {
+		UpdateLogStatusRequest request = new UpdateLogStatusRequest();
+		request.setMethod(ExchangeDataSourceMethod.UPDATE_LOG_STATUS);
+		ExchangeLogStatusType status = new ExchangeLogStatusType();
+		status.setLogGuid(guid);
+		status.setStatus(type);
+		request.setStatus(status);
+		return JAXBMarshaller.marshallJaxBObjectToString(request);
+	}
 
 }

@@ -10,10 +10,10 @@
         <xsd:sequence>
             <xsd:element name="guid" type="xsd:string"/>
             <xsd:element name="senderReceiver" type="xsd:string"/>
-            <xsd:element name="dateRecieved" type="xsd:date" />
+            <xsd:element name="dateRecieved" type="xsd:dateTime" />
             <xsd:element name="type" type="exchange:LogType"/>
             <xsd:element name="incoming" type="xsd:boolean"/>
-            <xsd:element name="status" type="exchange:ExchangeLogStatusType" />
+            <xsd:element name="status" type="exchange:ExchangeLogStatusTypeType" />
         </xsd:sequence>
     </xsd:complexType>
    
@@ -64,10 +64,21 @@
         </xsd:complexContent>
    </xsd:complexType>
    
-    <xsd:simpleType name="ExchangeLogStatusType">
+   <xsd:complexType name="ExchangeLogStatusType">
+        <xsd:sequence>
+            <xsd:element name="logGuid" type="xsd:string"/>
+            <xsd:element name="timestamp" type="xsd:dateTime"/>
+            <xsd:element name="status" type="exchange:ExchangeLogStatusTypeType"/>
+        </xsd:sequence>
+   </xsd:complexType>
+   
+    <xsd:simpleType name="ExchangeLogStatusTypeType">
         <xsd:restriction base="xsd:string">
-            <xsd:enumeration value="CREATED"/>
+            <xsd:enumeration value="ISSUED"/>
+            
+            <!-- For poll -->
             <xsd:enumeration value="PENDING"/>
+            <xsd:enumeration value="PROBABLY_TRANSMITTED"/>
             
             <xsd:enumeration value="FAILED"/>
             <xsd:enumeration value="SUCCESSFUL"/>
