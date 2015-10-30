@@ -1,8 +1,5 @@
 package eu.europa.ec.fisheries.uvms.exchange.rest.service;
 
-import java.util.List;
-
-import javax.ejb.EJB;
 import javax.ejb.Stateless;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
@@ -18,13 +15,10 @@ import org.slf4j.LoggerFactory;
 import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeListQuery;
 import eu.europa.ec.fisheries.uvms.exchange.rest.dto.ResponseDto;
 import eu.europa.ec.fisheries.uvms.exchange.rest.dto.RestResponseCode;
+import eu.europa.ec.fisheries.uvms.exchange.rest.dto.exchange.ExchangeLogData;
 import eu.europa.ec.fisheries.uvms.exchange.rest.dto.exchange.ListQueryResponse;
-import eu.europa.ec.fisheries.uvms.exchange.rest.dto.exchange.SendingGroupLog;
 import eu.europa.ec.fisheries.uvms.exchange.rest.error.ErrorHandler;
 import eu.europa.ec.fisheries.uvms.exchange.rest.mock.ExchangeMock;
-import eu.europa.ec.fisheries.uvms.exchange.service.ExchangeLogService;
-import eu.europa.ec.fisheries.uvms.rest.security.RequiresFeature;
-import eu.europa.ec.fisheries.uvms.rest.security.UnionVMSFeature;
 
 @Path("/exchange")
 @Stateless
@@ -77,8 +71,8 @@ public class ExchangeLogRestResource {
     public ResponseDto getByExchangeLogId(@PathParam(value = "id") final String id) {
         LOG.info("Get by id invoked in rest layer");
         try {
-        	String rawData = ExchangeMock.mockRawData(id);
-            return new ResponseDto(rawData, RestResponseCode.OK);
+        	ExchangeLogData logData = ExchangeMock.mockExchangeLogData(id);
+            return new ResponseDto(logData, RestResponseCode.OK);
         } catch (Exception ex) {
             LOG.error("[ Error when geting by id. ] {} ", ex.getMessage());
             return ErrorHandler.getFault(ex);

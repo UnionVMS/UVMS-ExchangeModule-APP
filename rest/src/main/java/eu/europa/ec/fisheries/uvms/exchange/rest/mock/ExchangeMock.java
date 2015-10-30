@@ -13,7 +13,9 @@ import java.util.Map;
 
 import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeListQuery;
 import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogStatusTypeType;
+import eu.europa.ec.fisheries.schema.exchange.v1.LogType;
 import eu.europa.ec.fisheries.uvms.exchange.rest.dto.exchange.ExchangeLog;
+import eu.europa.ec.fisheries.uvms.exchange.rest.dto.exchange.ExchangeLogData;
 import eu.europa.ec.fisheries.uvms.exchange.rest.dto.exchange.ListQueryResponse;
 import eu.europa.ec.fisheries.uvms.exchange.rest.dto.exchange.SendingGroupLog;
 import eu.europa.ec.fisheries.uvms.exchange.rest.dto.exchange.SendingLog;
@@ -52,8 +54,11 @@ public class ExchangeMock {
 		return log;
 	}
 
-	public static String mockRawData(String id) {
-		return "mock/rawData/" + id;
+	public static ExchangeLogData mockExchangeLogData(String logId) {
+		ExchangeLogData logData = new ExchangeLogData();
+		logData.setGuid("MOCK guid OF LogType");
+		logData.setType(LogType.SEND_MOVEMENT);
+		return logData;
 	}
 
 	public static List<SendingGroupLog> mockSendingList() {
@@ -80,8 +85,8 @@ public class ExchangeMock {
 	private static SendingLog mockSendingLog() {
 		SendingLog log = new SendingLog();
 		log.setDateRecieved("MOCK dateReceived");
-		log.setFrom("MOCK from");
-		log.setId("MOCK id");
+		log.setSenderRecipient("MOCK from");
+		log.setMessageId("MOCK id");
 		return log;
 	}
 

@@ -8,17 +8,17 @@ import javax.xml.bind.annotation.XmlElement;
 public class SendingLog {
 
 	@XmlElement(required = true)
-	private String id;
+	private String messageId;
 	@XmlElement(required = true)
 	private String dateRecieved;
 	@XmlElement(required = true)
-	private String from;
+	private String senderRecipient;
 	
-	public String getId() {
-		return id;
+	public String getMessageId() {
+		return messageId;
 	}
-	public void setId(String id) {
-		this.id = id;
+	public void setMessageId(String id) {
+		this.messageId = id;
 	}
 	public String getDateRecieved() {
 		return dateRecieved;
@@ -26,10 +26,10 @@ public class SendingLog {
 	public void setDateRecieved(String dateRecieved) {
 		this.dateRecieved = dateRecieved;
 	}
-	public String getFrom() {
-		return from;
+	public String getSenderRecipient() {
+		return senderRecipient;
 	}
-	public void setFrom(String from) {
-		this.from = from;
+	public void setSenderRecipient(String senderRecipient) {
+		this.senderRecipient = senderRecipient;
 	}
 }
