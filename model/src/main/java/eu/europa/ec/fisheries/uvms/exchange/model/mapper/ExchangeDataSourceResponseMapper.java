@@ -16,19 +16,23 @@ import eu.europa.ec.fisheries.schema.exchange.service.v1.ServiceResponseType;
 import eu.europa.ec.fisheries.schema.exchange.service.v1.SettingListType;
 import eu.europa.ec.fisheries.schema.exchange.service.v1.SettingType;
 import eu.europa.ec.fisheries.schema.exchange.source.v1.CreateLogResponse;
+import eu.europa.ec.fisheries.schema.exchange.source.v1.CreateUnsentMessageResponse;
 import eu.europa.ec.fisheries.schema.exchange.source.v1.GetLogListByQueryResponse;
 import eu.europa.ec.fisheries.schema.exchange.source.v1.GetLogStatusHistoryResponse;
 import eu.europa.ec.fisheries.schema.exchange.source.v1.GetServiceCapabilitiesResponse;
 import eu.europa.ec.fisheries.schema.exchange.source.v1.GetServiceListResponse;
 import eu.europa.ec.fisheries.schema.exchange.source.v1.GetServiceResponse;
 import eu.europa.ec.fisheries.schema.exchange.source.v1.GetServiceSettingsResponse;
+import eu.europa.ec.fisheries.schema.exchange.source.v1.GetUnsentMessageListResponse;
 import eu.europa.ec.fisheries.schema.exchange.source.v1.RegisterServiceResponse;
+import eu.europa.ec.fisheries.schema.exchange.source.v1.ResendMessageResponse;
 import eu.europa.ec.fisheries.schema.exchange.source.v1.SetServiceSettingsResponse;
 import eu.europa.ec.fisheries.schema.exchange.source.v1.SetServiceStatusResponse;
 import eu.europa.ec.fisheries.schema.exchange.source.v1.UnregisterServiceResponse;
 import eu.europa.ec.fisheries.schema.exchange.source.v1.UpdateLogStatusResponse;
 import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogStatusType;
 import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogType;
+import eu.europa.ec.fisheries.schema.exchange.v1.UnsentMessageType;
 import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelMapperException;
 import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelMarshallException;
 import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeValidationException;
@@ -240,6 +244,24 @@ public class ExchangeDataSourceResponseMapper {
 	public static String createGetLogStatusHistoryResponse(List<ExchangeLogStatusType> historyList) throws ExchangeModelMarshallException {
 		GetLogStatusHistoryResponse response = new GetLogStatusHistoryResponse();
 		response.getStatus().addAll(historyList);
+		return JAXBMarshaller.marshallJaxBObjectToString(response);
+	}
+
+	public static String createCreateUnsentMessageResponse(String messageId) throws ExchangeModelMarshallException {
+		CreateUnsentMessageResponse response = new CreateUnsentMessageResponse();
+		response.setUnsentMessageId(messageId);
+		return JAXBMarshaller.marshallJaxBObjectToString(response);
+	}
+
+	public static String createGetUnsentMessageListResponse(List<UnsentMessageType> unsentMessageList) throws ExchangeModelMarshallException {
+		GetUnsentMessageListResponse response = new GetUnsentMessageListResponse();
+		response.getUnsentMessage().addAll(unsentMessageList);
+		return JAXBMarshaller.marshallJaxBObjectToString(response);
+	}
+
+	public static String createResentMessageResponse(List<UnsentMessageType> messageList) throws ExchangeModelMarshallException {
+		ResendMessageResponse response = new ResendMessageResponse();
+		response.getResentMessage().addAll(messageList);
 		return JAXBMarshaller.marshallJaxBObjectToString(response);
 	}
 }

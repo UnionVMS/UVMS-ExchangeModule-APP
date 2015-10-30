@@ -2,6 +2,7 @@ package eu.europa.ec.fisheries.uvms.exchange.service.bean;
 
 import java.util.List;
 import java.util.UUID;
+import java.util.logging.Level;
 
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
@@ -40,7 +41,6 @@ import eu.europa.ec.fisheries.uvms.exchange.message.event.carrier.PluginMessageE
 import eu.europa.ec.fisheries.uvms.exchange.message.event.registry.PluginErrorEvent;
 import eu.europa.ec.fisheries.uvms.exchange.message.exception.ExchangeMessageException;
 import eu.europa.ec.fisheries.uvms.exchange.message.producer.MessageProducer;
-import eu.europa.ec.fisheries.uvms.exchange.model.constant.ExchangeModelConstants;
 import eu.europa.ec.fisheries.uvms.exchange.model.constant.FaultCode;
 import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeException;
 import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelMapperException;
@@ -57,8 +57,6 @@ import eu.europa.ec.fisheries.uvms.exchange.service.mapper.ExchangeLogMapper;
 import eu.europa.ec.fisheries.uvms.exchange.service.mapper.MovementMapper;
 import eu.europa.ec.fisheries.uvms.rules.model.exception.RulesModelMapperException;
 import eu.europa.ec.fisheries.uvms.rules.model.mapper.RulesModuleRequestMapper;
-
-import java.util.logging.Level;
 
 @Stateless
 public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingService {
@@ -238,7 +236,7 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
     	ExchangeLogStatusTypeType logStatus = ExchangeLogStatusTypeType.FAILED;
 		switch (ack.getType()) {
 		case OK:
-			//if(poll probably transmitted)
+			//TODO if(poll probably transmitted)
             logStatus = ExchangeLogStatusTypeType.SUCCESSFUL;
 			break;
 		case NOK:
@@ -248,10 +246,8 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
 		
 		try {
         	String logGuid = logCache.acknowledged(ack.getMessageId());
-			LOG.debug("logGuid to update status for: " + logGuid);
 			
 			String text = ExchangeDataSourceRequestMapper.mapUpdateLogStatusRequest(logGuid, logStatus);
-			LOG.debug("Message to update: " + text);
             producer.sendMessageOnQueue(text, MessageQueue.INTERNAL);
         } catch (ExchangeModelMapperException | ExchangeMessageException e) {
             LOG.error("Couldn't update status of exchange log" + e.getMessage());

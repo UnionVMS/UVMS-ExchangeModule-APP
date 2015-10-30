@@ -37,6 +37,11 @@
                     <xsd:enumeration value="UPDATE_LOG_STATUS"/>
                     <xsd:enumeration value="GET_LOG_STATUS_HISTORY"/>
                     
+                    <!-- UNSENT MESSAGES -->
+                    <xsd:enumeration value="GET_UNSENT_MESSAGE_LIST"/>
+                    <xsd:enumeration value="CREATE_UNSENT_MESSAGE"/>
+                    <xsd:enumeration value="RESEND_UNSENT_MESSAGE"/>
+                    
                     <!-- MISC -->
                     <xsd:enumeration value="PING"/>
                 </xsd:restriction>
@@ -48,6 +53,65 @@
                 </xsd:sequence>
             </xsd:complexType>
             
+            <!-- Unsent -->
+            <xsd:element name="GetUnsentMessageListRequest">
+                <xsd:complexType>
+                    <xsd:complexContent>
+                        <xsd:extension base="source:ExchangeBaseRequest">
+                        </xsd:extension>
+                    </xsd:complexContent>
+                </xsd:complexType>
+            </xsd:element>
+            
+            <xsd:element name="GetUnsentMessageListResponse">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element name="unsentMessage" type="exchange:UnsentMessageType" minOccurs="0" maxOccurs="unbounded"/>
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
+            
+            <xsd:element name="CreateUnsentMessageRequest">
+                <xsd:complexType>
+                    <xsd:complexContent>
+                        <xsd:extension base="source:ExchangeBaseRequest">
+                            <xsd:sequence>
+                                <xsd:element name="message" type="exchange:UnsentMessageType" minOccurs="1" maxOccurs="1"/>
+                            </xsd:sequence>
+                        </xsd:extension>
+                    </xsd:complexContent>
+                </xsd:complexType>
+            </xsd:element>
+            
+            <xsd:element name="CreateUnsentMessageResponse">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element name="unsentMessageId" type="xsd:string" minOccurs="0" maxOccurs="1"/>
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
+            
+            <xsd:element name="ResendMessageRequest">
+                <xsd:complexType>
+                    <xsd:complexContent>
+                        <xsd:extension base="source:ExchangeBaseRequest">
+                            <xsd:sequence>
+                                <xsd:element name="unsentMessageId" type="xsd:string" minOccurs="0" maxOccurs="unbounded"/>
+                            </xsd:sequence>
+                        </xsd:extension>
+                    </xsd:complexContent>
+                </xsd:complexType>
+            </xsd:element>
+            
+            <xsd:element name="ResendMessageResponse">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element name="resentMessage" type="exchange:UnsentMessageType" minOccurs="0" maxOccurs="unbounded"/>
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
+            
+            <!-- ExchangeLog -->
             <xsd:element name="GetLogListByQueryRequest">
                 <xsd:complexType>
                     <xsd:complexContent>
@@ -130,6 +194,7 @@
                 </xsd:complexType>
             </xsd:element>
             
+            <!-- Service -->
             <xsd:element name="GetServiceListRequest">
                 <xsd:complexType>
                     <xsd:complexContent>
@@ -319,6 +384,27 @@
         <part name="body" element="common:exchangeFault"/>
     </message>
 
+    <message name="GetUnsentMessageListRequest">  
+        <part name="body" element="source:GetUnsentMessageListRequest"/>
+    </message>
+    <message name="GetUnsentMessageListResponse">
+        <part name="body" element="source:GetUnsentMessageListResponse"/>
+    </message>
+
+    <message name="CreateUnsentMessageRequest">  
+        <part name="body" element="source:CreateUnsentMessageRequest"/>
+    </message>
+    <message name="CreateUnsentMessageResponse">
+        <part name="body" element="source:CreateUnsentMessageResponse"/>
+    </message>
+
+    <message name="ResendMessageRequest">  
+        <part name="body" element="source:ResendMessageRequest"/>
+    </message>
+    <message name="ResendMessageResponse">
+        <part name="body" element="source:ResendMessageResponse"/>
+    </message>
+
     <message name="GetLogListByQueryRequest">
         <part name="body" element="source:GetLogListByQueryRequest"/>
     </message>
@@ -412,6 +498,24 @@
     
     <portType name="ExchangeDataSourcePortType">
 
+        <operation name="GetUnsentMessageList">
+            <input message="source:GetUnsentMessageListRequest"/>
+            <output message="source:GetUnsentMessageListResponse"/>
+            <fault name="ExchangeFault" message="source:ExchangeFault"/>
+        </operation>
+
+        <operation name="CreateUnsentMessage">
+            <input message="source:CreateUnsentMessageRequest"/>
+            <output message="source:CreateUnsentMessageResponse"/>
+            <fault name="ExchangeFault" message="source:ExchangeFault"/>
+        </operation>
+        
+        <operation name="ResendMessage">
+            <input message="source:ResendMessageRequest"/>
+            <output message="source:ResendMessageResponse"/>
+            <fault name="ExchangeFault" message="source:ExchangeFault"/>
+        </operation>
+        
         <operation name="GetLogListByQuery">
             <input message="source:GetLogListByQueryRequest"/>
             <output message="source:GetLogListByQueryResponse"/>
@@ -493,6 +597,42 @@
 
     <binding name="ExchangeDataSourceSoapBinding" type="source:ExchangeDataSourcePortType">
         <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+
+        <operation name="GetUnsentMessageList">
+            <input>
+                <soap:body use="literal"/>
+            </input>
+            <output>
+                <soap:body use="literal"/>
+            </output>
+            <fault name="ExchangeFault">
+                <soap:fault name="ExchangeFault" use="literal"/>
+            </fault>
+        </operation>
+
+        <operation name="CreateUnsentMessage">
+            <input>
+                <soap:body use="literal"/>
+            </input>
+            <output>
+                <soap:body use="literal"/>
+            </output>
+            <fault name="ExchangeFault">
+                <soap:fault name="ExchangeFault" use="literal"/>
+            </fault>
+        </operation>
+        
+        <operation name="ResendMessage">
+            <input>
+                <soap:body use="literal"/>
+            </input>
+            <output>
+                <soap:body use="literal"/>
+            </output>
+            <fault name="ExchangeFault">
+                <soap:fault name="ExchangeFault" use="literal"/>
+            </fault>
+        </operation>
         
         <operation name="GetLogListByQuery">
             <input>

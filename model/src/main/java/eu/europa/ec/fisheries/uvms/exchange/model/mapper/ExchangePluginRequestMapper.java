@@ -5,8 +5,12 @@
  */
 package eu.europa.ec.fisheries.uvms.exchange.model.mapper;
 
+import javax.xml.datatype.XMLGregorianCalendar;
+
 import eu.europa.ec.fisheries.schema.exchange.common.v1.CommandType;
 import eu.europa.ec.fisheries.schema.exchange.common.v1.ReportType;
+import eu.europa.ec.fisheries.schema.exchange.common.v1.ReportTypeType;
+import eu.europa.ec.fisheries.schema.exchange.movement.v1.MovementType;
 import eu.europa.ec.fisheries.schema.exchange.plugin.v1.ExchangePluginMethod;
 import eu.europa.ec.fisheries.schema.exchange.plugin.v1.PingRequest;
 import eu.europa.ec.fisheries.schema.exchange.plugin.v1.SetCommandRequest;
@@ -23,10 +27,14 @@ import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelMarshal
  */
 public class ExchangePluginRequestMapper {
 
-    public static String createSetReportRequest(ReportType reportType) throws ExchangeModelMarshallException {
+    public static String createSetReportRequest(XMLGregorianCalendar dateReceived, MovementType movement) throws ExchangeModelMarshallException {
         SetReportRequest request = new SetReportRequest();
         request.setMethod(ExchangePluginMethod.SET_REPORT);
-        request.setReport(reportType);
+        ReportType reportType = new ReportType();
+		reportType.setMovement(movement);
+		reportType.setTimestamp(dateReceived);
+        reportType.setType(ReportTypeType.MOVEMENT);
+		request.setReport(reportType);
         return JAXBMarshaller.marshallJaxBObjectToString(request);
     }
 

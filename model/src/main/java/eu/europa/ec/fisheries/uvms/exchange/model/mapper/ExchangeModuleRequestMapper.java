@@ -71,27 +71,19 @@ public class ExchangeModuleRequestMapper {
     }
     
     public static String createSendReportToPlugin(String pluginName, PluginType type, XMLGregorianCalendar fwdDate, String fwdRule, String recipient, MovementType payload) throws ExchangeModelMapperException {
-    	SendMovementToPluginRequest request = createSendReportToPluginRequest();
-		SendMovementToPluginType report = createSendMovementToPluginType(type, fwdDate, fwdRule, recipient, payload);
-		report.setPluginName(pluginName);
-		request.setReport(report);
+    	SendMovementToPluginRequest request = createSendReportToPluginRequest(pluginName, type, fwdDate, fwdRule, recipient, payload);
     	return JAXBMarshaller.marshallJaxBObjectToString(request);
     }
     
-    public static String createSendReportToPlugin(PluginType type, XMLGregorianCalendar fwdDate, String fwdRule, String recipient, MovementType payload) throws ExchangeModelMapperException {
-		SendMovementToPluginRequest request = createSendReportToPluginRequest();
-		SendMovementToPluginType report = createSendMovementToPluginType(type, fwdDate, fwdRule, recipient, payload);
-		request.setReport(report);
-    	return JAXBMarshaller.marshallJaxBObjectToString(request);
-    }
-    
-    private static SendMovementToPluginRequest createSendReportToPluginRequest() {
+    private static SendMovementToPluginRequest createSendReportToPluginRequest(String pluginName, PluginType type, XMLGregorianCalendar fwdDate, String fwdRule, String recipient, MovementType payload) throws ExchangeModelMapperException {
     	SendMovementToPluginRequest request = new SendMovementToPluginRequest();
     	request.setMethod(ExchangeModuleMethod.SEND_REPORT_TO_PLUGIN);
+    	SendMovementToPluginType sendMovementToPluginType = createSendMovementToPluginType(pluginName, type, fwdDate, fwdRule, recipient, payload);
+    	request.setReport(sendMovementToPluginType);
 		return request;
     }
 
-    private static SendMovementToPluginType createSendMovementToPluginType(PluginType type, XMLGregorianCalendar fwdDate, String fwdRule, String recipient, MovementType payload) throws ExchangeModelMapperException {
+    public static SendMovementToPluginType createSendMovementToPluginType(String pluginName, PluginType type, XMLGregorianCalendar fwdDate, String fwdRule, String recipient, MovementType payload) throws ExchangeModelMapperException {
 		SendMovementToPluginType report = new SendMovementToPluginType();
 		report.setTimestamp(DateUtils.dateToXmlGregorian(DateUtils.nowUTC().toDate()));
     	report.setFwdDate(fwdDate);
@@ -99,6 +91,7 @@ public class ExchangeModuleRequestMapper {
     	report.setRecipient(recipient);
     	report.setMovement(payload);
     	report.setPluginType(type);
+    	report.setPluginName(pluginName);
     	return report;
     }
     

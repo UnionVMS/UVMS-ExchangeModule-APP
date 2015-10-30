@@ -13,19 +13,16 @@ public class ExchangeEventLogCache {
 	@PostConstruct
 	public void init() {
 		cache = new ConcurrentHashMap<String, String>();
+		//TODO set TTL on cached objects
 	}
 	
 	public void put(String messageId, String logGuid) {
-		//System.out.println("Wants to put. " + messageId + ", " + logGuid);
-		//System.out.println("Size before: " + cache.size());
 		cache.put(messageId, logGuid);
-		//System.out.println("Size after: " + cache.size());
 	}
 
 	public String acknowledged(String messageId) {
-		//System.out.println(messageId + " acknowledged. Size before: " + cache.size());
 		return cache.remove(messageId);
 	}
 	
-	//TODO set TTL on cached objects
+
 }

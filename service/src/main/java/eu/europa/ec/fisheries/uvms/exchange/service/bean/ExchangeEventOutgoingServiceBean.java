@@ -15,8 +15,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import eu.europa.ec.fisheries.schema.exchange.common.v1.CommandType;
-import eu.europa.ec.fisheries.schema.exchange.common.v1.ReportType;
-import eu.europa.ec.fisheries.schema.exchange.common.v1.ReportTypeType;
 import eu.europa.ec.fisheries.schema.exchange.module.v1.SendMovementToPluginRequest;
 import eu.europa.ec.fisheries.schema.exchange.module.v1.SetCommandRequest;
 import eu.europa.ec.fisheries.schema.exchange.movement.v1.SendMovementToPluginType;
@@ -34,6 +32,7 @@ import eu.europa.ec.fisheries.uvms.exchange.message.producer.MessageProducer;
 import eu.europa.ec.fisheries.uvms.exchange.model.constant.FaultCode;
 import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeException;
 import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelMapperException;
+import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelMarshallException;
 import eu.europa.ec.fisheries.uvms.exchange.model.mapper.ExchangeDataSourceRequestMapper;
 import eu.europa.ec.fisheries.uvms.exchange.model.mapper.ExchangeModuleResponseMapper;
 import eu.europa.ec.fisheries.uvms.exchange.model.mapper.ExchangePluginRequestMapper;
@@ -69,7 +68,6 @@ public class ExchangeEventOutgoingServiceBean implements ExchangeEventOutgoingSe
             SendMovementToPluginRequest request = JAXBMarshaller.unmarshallTextMessage(message.getJmsMessage(), SendMovementToPluginRequest.class);
             SendMovementToPluginType sendReport = request.getReport();
             
-            boolean sendMessage = true;
             List<PluginType> type = new ArrayList<>();
             type.add(sendReport.getPluginType());
             
@@ -78,21 +76,13 @@ public class ExchangeEventOutgoingServiceBean implements ExchangeEventOutgoingSe
                 String faultMessage = "No plugins of type " + sendReport.getPluginType() + " found";
                 LOG.debug(faultMessage);
 				exchangeErrorEvent.fire(new ExchangeMessageEvent(message.getJmsMessage(), ExchangeModuleResponseMapper.createFaultMessage(FaultCode.EXCHANGE_EVENT_SERVICE, faultMessage)));
-				sendMessage = false;
             } else {
             	ServiceResponseType service = services.get(0);
             	String serviceName = service.getServiceClassName();
-                sendMessage = validate(service, sendReport, message.getJmsMessage());
-                
-                if(sendMessage) {
-                	ReportType report = new ReportType();
-                	report.setTimestamp(sendReport.getTimestamp());
+            	String text = ExchangePluginRequestMapper.createSetReportRequest(sendReport.getTimestamp(), sendReport.getMovement());
+            	
+                if(validate(service, sendReport, text, message.getJmsMessage())) {
                 	
-                	//when elog is supported add logic
-                	report.setMovement(sendReport.getMovement());
-                	report.setType(ReportTypeType.MOVEMENT);
-                	
-                	String text = ExchangePluginRequestMapper.createSetReportRequest(report);
                 	String pluginMessageId = producer.sendEventBusMessage(text, serviceName);
                 	
                 	try {
@@ -117,7 +107,7 @@ public class ExchangeEventOutgoingServiceBean implements ExchangeEventOutgoingSe
         }
     }
 
-	private boolean validate(ServiceResponseType service, SendMovementToPluginType sendReport, TextMessage origin) {
+	private boolean validate(ServiceResponseType service, SendMovementToPluginType sendReport, String reportText, TextMessage origin) {
     	String serviceName = service.getServiceClassName(); //Use first and only
         if(serviceName == null || serviceName.isEmpty()) {
         	String faultMessage = "First plugin of type " + sendReport.getPluginType() + " is invalid. Missing serviceClassName";
@@ -132,8 +122,13 @@ public class ExchangeEventOutgoingServiceBean implements ExchangeEventOutgoingSe
 			exchangeErrorEvent.fire(new ExchangeMessageEvent(origin, ExchangeModuleResponseMapper.createFaultMessage(FaultCode.EXCHANGE_PLUGIN_INVALID, faultMessage)));
 			return false;
         } else if(!StatusType.STARTED.equals(service.getStatus())) {
-        	//TODO exchange log to sendingQueue
-        	LOG.error("Plugin to send report to is not started");
+        	LOG.info("Plugin to send report to is not started");
+        	try {
+				String text = ExchangeDataSourceRequestMapper.mapCreateUnsentMessage(sendReport.getTimestamp(), sendReport.getRecipient(), reportText);
+				producer.sendMessageOnQueue(text, MessageQueue.INTERNAL);
+			} catch (ExchangeModelMarshallException | ExchangeMessageException e) {
+				LOG.error("Couldn't add message to unsent list");
+			}
         }
         return true;
     }

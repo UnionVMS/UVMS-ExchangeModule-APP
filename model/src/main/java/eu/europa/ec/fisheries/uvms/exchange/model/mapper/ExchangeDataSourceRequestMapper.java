@@ -2,6 +2,8 @@ package eu.europa.ec.fisheries.uvms.exchange.model.mapper;
 
 import java.util.List;
 
+import javax.xml.datatype.XMLGregorianCalendar;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -11,6 +13,7 @@ import eu.europa.ec.fisheries.schema.exchange.service.v1.ServiceType;
 import eu.europa.ec.fisheries.schema.exchange.service.v1.SettingListType;
 import eu.europa.ec.fisheries.schema.exchange.service.v1.StatusType;
 import eu.europa.ec.fisheries.schema.exchange.source.v1.CreateLogRequest;
+import eu.europa.ec.fisheries.schema.exchange.source.v1.CreateUnsentMessageRequest;
 import eu.europa.ec.fisheries.schema.exchange.source.v1.ExchangeDataSourceMethod;
 import eu.europa.ec.fisheries.schema.exchange.source.v1.GetLogListByQueryRequest;
 import eu.europa.ec.fisheries.schema.exchange.source.v1.GetLogStatusHistoryRequest;
@@ -18,7 +21,9 @@ import eu.europa.ec.fisheries.schema.exchange.source.v1.GetServiceCapabilitiesRe
 import eu.europa.ec.fisheries.schema.exchange.source.v1.GetServiceListRequest;
 import eu.europa.ec.fisheries.schema.exchange.source.v1.GetServiceRequest;
 import eu.europa.ec.fisheries.schema.exchange.source.v1.GetServiceSettingsRequest;
+import eu.europa.ec.fisheries.schema.exchange.source.v1.GetUnsentMessageListRequest;
 import eu.europa.ec.fisheries.schema.exchange.source.v1.RegisterServiceRequest;
+import eu.europa.ec.fisheries.schema.exchange.source.v1.ResendMessageRequest;
 import eu.europa.ec.fisheries.schema.exchange.source.v1.SetServiceSettingsRequest;
 import eu.europa.ec.fisheries.schema.exchange.source.v1.SetServiceStatusRequest;
 import eu.europa.ec.fisheries.schema.exchange.source.v1.UnregisterServiceRequest;
@@ -27,6 +32,7 @@ import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeListQuery;
 import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogStatusType;
 import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogStatusTypeType;
 import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogType;
+import eu.europa.ec.fisheries.schema.exchange.v1.UnsentMessageType;
 import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelMapperException;
 import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelMarshallException;
 
@@ -184,6 +190,30 @@ public class ExchangeDataSourceRequestMapper {
 		status.setLogGuid(guid);
 		status.setStatus(type);
 		request.setStatus(status);
+		return JAXBMarshaller.marshallJaxBObjectToString(request);
+	}
+
+	public static String mapGetSendingQueue() throws ExchangeModelMarshallException {
+		GetUnsentMessageListRequest request = new GetUnsentMessageListRequest();
+		request.setMethod(ExchangeDataSourceMethod.GET_UNSENT_MESSAGE_LIST);
+		return JAXBMarshaller.marshallJaxBObjectToString(request);
+	}
+
+	public static String mapResendMessage(List<String> messageIdList) throws ExchangeModelMarshallException {
+		ResendMessageRequest request = new ResendMessageRequest();
+		request.setMethod(ExchangeDataSourceMethod.RESEND_UNSENT_MESSAGE);
+		request.getUnsentMessageId().addAll(messageIdList);
+		return JAXBMarshaller.marshallJaxBObjectToString(request);
+	}
+
+	public static String mapCreateUnsentMessage(XMLGregorianCalendar dateReceived, String recipient, String messageText) throws ExchangeModelMarshallException {
+		CreateUnsentMessageRequest request = new CreateUnsentMessageRequest();
+		request.setMethod(ExchangeDataSourceMethod.CREATE_UNSENT_MESSAGE);
+		UnsentMessageType unsentMessage = new UnsentMessageType();
+		unsentMessage.setDateReceived(dateReceived);
+		unsentMessage.setRecipient(recipient);
+		unsentMessage.setMessage(messageText);
+		request.setMessage(unsentMessage);
 		return JAXBMarshaller.marshallJaxBObjectToString(request);
 	}
 
