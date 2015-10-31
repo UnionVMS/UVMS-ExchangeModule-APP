@@ -16,6 +16,7 @@ import eu.europa.ec.fisheries.schema.exchange.movement.v1.MovementSourceType;
 import eu.europa.ec.fisheries.schema.exchange.movement.v1.SendMovementToPluginType;
 import eu.europa.ec.fisheries.schema.exchange.movement.v1.SetReportMovementType;
 import eu.europa.ec.fisheries.schema.exchange.plugin.types.v1.PluginType;
+import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogStatusTypeType;
 import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogType;
 import eu.europa.ec.fisheries.schema.exchange.v1.LogType;
 import eu.europa.ec.fisheries.schema.exchange.v1.ReceiveMovementType;
@@ -28,11 +29,14 @@ import eu.europa.ec.fisheries.uvms.exchange.service.exception.ExchangeLogExcepti
 public class ExchangeLogMapper {
 	final static Logger LOG = LoggerFactory.getLogger(ExchangeLogMapper.class);
 	
-	public static ExchangeLogType getReceiveMovementExchangeLog(SetReportMovementType request) throws ExchangeLogException {
+	public static ExchangeLogType getReceivedMovementExchangeLog(SetReportMovementType request, String typeRefGuid) throws ExchangeLogException {
 		if(request == null) throw new ExchangeLogException("No request");
 		ReceiveMovementType log = new ReceiveMovementType();
 		log.setDateRecieved(request.getTimestamp());
 		log.setType(LogType.RECEIVE_MOVEMENT);
+		log.setTypeRefGuid(typeRefGuid);
+		log.setStatus(ExchangeLogStatusTypeType.SUCCESSFUL);
+		
 		log.setSenderReceiver(getSenderReceiver(request.getMovement(), request.getPluginType(), request.getPluginName()));
 		if(request.getMovement().getSource() != null) {
 			log.setSource(request.getMovement().getSource().name());
@@ -145,7 +149,7 @@ public class ExchangeLogMapper {
 		SendMovementType log = new SendMovementType();
 		log.setDateRecieved(sendReport.getTimestamp());
 		log.setType(LogType.SEND_MOVEMENT);
-		
+		log.setTypeRefGuid(sendReport.getMovement().getGuid());
 		String senderReceiver = sendReport.getPluginType().name();
 		if(sendReport.getPluginName() != null && !sendReport.getPluginName().isEmpty()) {
 			senderReceiver = sendReport.getPluginName();
@@ -183,6 +187,8 @@ public class ExchangeLogMapper {
 		log.setType(LogType.SEND_EMAIL);
 		log.setDateRecieved(command.getTimestamp());
 		log.setSenderReceiver(command.getEmail().getTo());
+		//TODO where does master data of email live?
+		//log.setTypeRefGuid(value);
 		return log;
 	}
 	
@@ -201,7 +207,7 @@ public class ExchangeLogMapper {
 			LOG.error(e.getMessage());
 		}
 		log.setSenderReceiver(senderReceiver);
-		log.setPollTrackId(command.getPoll().getPollId());
+		log.setTypeRefGuid(command.getPoll().getPollId());
 		return log;
 	}
 }

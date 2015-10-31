@@ -1,8 +1,6 @@
 package eu.europa.ec.fisheries.uvms.exchange.service.bean;
 
 import java.util.List;
-import java.util.UUID;
-import java.util.logging.Level;
 
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
@@ -28,8 +26,8 @@ import eu.europa.ec.fisheries.schema.exchange.service.v1.ServiceResponseType;
 import eu.europa.ec.fisheries.schema.exchange.service.v1.StatusType;
 import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogStatusTypeType;
 import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogType;
+import eu.europa.ec.fisheries.schema.rules.movement.v1.MovementRefType;
 import eu.europa.ec.fisheries.schema.rules.movement.v1.RawMovementType;
-import eu.europa.ec.fisheries.uvms.exchange.message.constants.MessageQueue;
 import eu.europa.ec.fisheries.uvms.exchange.message.event.ErrorEvent;
 import eu.europa.ec.fisheries.uvms.exchange.message.event.ExchangeLogEvent;
 import eu.europa.ec.fisheries.uvms.exchange.message.event.PingEvent;
@@ -39,24 +37,21 @@ import eu.europa.ec.fisheries.uvms.exchange.message.event.SetMovementEvent;
 import eu.europa.ec.fisheries.uvms.exchange.message.event.carrier.ExchangeMessageEvent;
 import eu.europa.ec.fisheries.uvms.exchange.message.event.carrier.PluginMessageEvent;
 import eu.europa.ec.fisheries.uvms.exchange.message.event.registry.PluginErrorEvent;
-import eu.europa.ec.fisheries.uvms.exchange.message.exception.ExchangeMessageException;
 import eu.europa.ec.fisheries.uvms.exchange.message.producer.MessageProducer;
 import eu.europa.ec.fisheries.uvms.exchange.model.constant.FaultCode;
 import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeException;
-import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelMapperException;
 import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelMarshallException;
-import eu.europa.ec.fisheries.uvms.exchange.model.mapper.ExchangeDataSourceRequestMapper;
 import eu.europa.ec.fisheries.uvms.exchange.model.mapper.ExchangeModuleResponseMapper;
 import eu.europa.ec.fisheries.uvms.exchange.model.mapper.ExchangePluginResponseMapper;
 import eu.europa.ec.fisheries.uvms.exchange.model.mapper.JAXBMarshaller;
 import eu.europa.ec.fisheries.uvms.exchange.service.ExchangeEventIncomingService;
+import eu.europa.ec.fisheries.uvms.exchange.service.ExchangeLogService;
+import eu.europa.ec.fisheries.uvms.exchange.service.ExchangeRulesService;
 import eu.europa.ec.fisheries.uvms.exchange.service.ExchangeService;
 import eu.europa.ec.fisheries.uvms.exchange.service.exception.ExchangeLogException;
 import eu.europa.ec.fisheries.uvms.exchange.service.exception.ExchangeServiceException;
 import eu.europa.ec.fisheries.uvms.exchange.service.mapper.ExchangeLogMapper;
 import eu.europa.ec.fisheries.uvms.exchange.service.mapper.MovementMapper;
-import eu.europa.ec.fisheries.uvms.rules.model.exception.RulesModelMapperException;
-import eu.europa.ec.fisheries.uvms.rules.model.mapper.RulesModuleRequestMapper;
 
 @Stateless
 public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingService {
@@ -72,14 +67,17 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
     Event<PluginMessageEvent> pluginErrorEvent;
 
     @EJB
-    ExchangeEventLogCache logCache;
+    ExchangeLogService exchangeLog;
     
     @EJB
     MessageProducer producer;
-
+    
     @EJB
     ExchangeService exchangeService;
 
+    @EJB
+    ExchangeRulesService rulesService;
+    
     @Override
     public void getPluginListByTypes(@Observes @PluginConfigEvent ExchangeMessageEvent message) {
         LOG.info("Get plugin config LIST_SERVICE");
@@ -105,21 +103,9 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
             PluginType pluginType = request.getRequest().getPluginType();
 
             ServiceResponseType service = exchangeService.getService(pluginName);
-
             LOG.debug("Process movement from " + pluginName + " of " + pluginType + " type");
 
             if (validate(request.getRequest(), service, message.getJmsMessage())) {
-                try {
-                	String logGuid = UUID.randomUUID().toString();
-                    ExchangeLogType log = ExchangeLogMapper.getReceiveMovementExchangeLog(request.getRequest());
-                    log.setGuid(logGuid);
-                    String text = ExchangeDataSourceRequestMapper.mapCreateExchangeLogToString(log);
-                    producer.sendMessageOnQueue(text, MessageQueue.INTERNAL);
-                    
-                    //TODO save as successful?
-                } catch (ExchangeModelMapperException | ExchangeMessageException | ExchangeLogException e) {
-                    LOG.error("Couldn't log movement to exchange log. " + e.getMessage());
-                }
 
                 MovementBaseType baseMovement = request.getRequest().getMovement();
                 RawMovementType rawMovement = MovementMapper.getInstance().getMapper().map(baseMovement, RawMovementType.class);
@@ -131,22 +117,28 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
                 }
 
                 try {
-                    String movement = RulesModuleRequestMapper.createSetMovementReportRequest(MovementMapper.mapPluginType(pluginType), rawMovement);
-                    producer.sendMessageOnQueue(movement, MessageQueue.RULES);
-
+                    MovementRefType typeRef = rulesService.sendMovementToRules(MovementMapper.mapPluginType(pluginType), rawMovement);
+                    
+                    try {
+                        ExchangeLogType log = ExchangeLogMapper.getReceivedMovementExchangeLog(request.getRequest(), typeRef.getMovementRefGuid());
+                        exchangeLog.log(log);
+                    } catch (ExchangeLogException e) {
+                        LOG.error(e.getMessage());
+                    }
+                    
                     //TODO send back ack to plugin?
-                } catch (RulesModelMapperException | ExchangeMessageException e) {
+                } catch (ExchangeServiceException e) {
                     PluginFault fault = ExchangePluginResponseMapper.mapToPluginFaultResponse(FaultCode.EXCHANGE_PLUGIN_EVENT.getCode(), "Movement sent cannot be sent to Rules module [ " + e.getMessage() + " ]");
                     pluginErrorEvent.fire(new PluginMessageEvent(message.getJmsMessage(), service, fault));
                 }
             } else {
                 LOG.debug("Validation error. Event sent to plugin");
             }
+        } catch (ExchangeServiceException e) {
+        	//TODO send back to plugin
         } catch (ExchangeModelMarshallException e) {
             //Cannot send back fault to unknown sender
             LOG.error("Couldn't map to SetMovementReportRequest when processing movement from plugin");
-        } catch (ExchangeServiceException ex) {
-            java.util.logging.Logger.getLogger(ExchangeEventIncomingServiceBean.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 
@@ -245,12 +237,9 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
 		}
 		
 		try {
-        	String logGuid = logCache.acknowledged(ack.getMessageId());
-			
-			String text = ExchangeDataSourceRequestMapper.mapUpdateLogStatusRequest(logGuid, logStatus);
-            producer.sendMessageOnQueue(text, MessageQueue.INTERNAL);
-        } catch (ExchangeModelMapperException | ExchangeMessageException e) {
-            LOG.error("Couldn't update status of exchange log" + e.getMessage());
+			exchangeLog.updateStatus(ack.getMessageId(), logStatus);
+        } catch (ExchangeLogException e) {
+            LOG.error(e.getMessage());
         }
 	}
 

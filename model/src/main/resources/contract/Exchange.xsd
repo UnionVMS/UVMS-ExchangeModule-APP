@@ -13,6 +13,7 @@
             <xsd:element name="dateRecieved" type="xsd:dateTime" />
             <xsd:element name="type" type="exchange:LogType"/>
             <xsd:element name="incoming" type="xsd:boolean"/>
+            <xsd:element name="typeRefGuid" type="xsd:string"/>
             <xsd:element name="status" type="exchange:ExchangeLogStatusTypeType" />
         </xsd:sequence>
     </xsd:complexType>
@@ -57,9 +58,6 @@
    <xsd:complexType name="SendPollType">
         <xsd:complexContent>
             <xsd:extension base="exchange:ExchangeLogType">
-                <xsd:sequence>
-                    <xsd:element name="pollTrackId" type="xsd:string"/>
-                </xsd:sequence>
             </xsd:extension>
         </xsd:complexContent>
    </xsd:complexType>

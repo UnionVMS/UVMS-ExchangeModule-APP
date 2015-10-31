@@ -37,7 +37,6 @@ public class JAXBMarshaller {
             marshaller.marshal(data, sw);
             return sw.toString();
         } catch (JAXBException ex) {
-            LOG.error("[ Error when marshalling object to string ] {} ", ex.getMessage());
             throw new ExchangeModelMarshallException("[ Error when marshalling Object to String ]");
         }
     }
