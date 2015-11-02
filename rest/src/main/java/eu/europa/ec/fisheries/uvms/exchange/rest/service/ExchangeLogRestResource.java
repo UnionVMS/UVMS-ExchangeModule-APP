@@ -54,30 +54,4 @@ public class ExchangeLogRestResource {
             return ErrorHandler.getFault(ex);
         }
     }
-    
-    /**
-     *
-     * @responseMessage 200 [Success]
-     * @responseMessage 500 [Error]
-     *
-     * @summary [Description]
-     *
-     */
-    @GET
-    @Consumes(value = {MediaType.APPLICATION_JSON})
-    @Produces(value = {MediaType.APPLICATION_JSON})
-    @Path(value = "/{id}")
-    @RequiresFeature(UnionVMSFeature.viewExchange)
-    public ResponseDto getByExchangeLogId(@PathParam(value = "id") final String id) {
-        LOG.info("Get by id invoked in rest layer");
-        try {
-        	ExchangeLogData logData = ExchangeMock.mockExchangeLogData(id);
-            return new ResponseDto(logData, RestResponseCode.OK);
-        } catch (Exception ex) {
-            LOG.error("[ Error when geting by id. ] {} ", ex.getMessage());
-            return ErrorHandler.getFault(ex);
-        }
-    }
-    
-    
 }

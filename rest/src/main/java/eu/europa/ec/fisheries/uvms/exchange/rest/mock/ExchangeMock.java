@@ -50,11 +50,12 @@ public class ExchangeMock {
 		log.setRecipient("MOCK recipient");
 		log.setRule("MOCK rule");
 		log.setSource("MOCK source");
-		log.setStatus("MOCK status");
+		log.setStatus("MOCK ExchangeLogStatusTypeType");
+		log.setLogData(mockExchangeLogData());
 		return log;
 	}
 
-	public static ExchangeLogData mockExchangeLogData(String logId) {
+	public static ExchangeLogData mockExchangeLogData() {
 		ExchangeLogData logData = new ExchangeLogData();
 		logData.setGuid("MOCK guid OF LogType");
 		logData.setType(LogType.SEND_MOVEMENT);

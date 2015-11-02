@@ -25,6 +25,8 @@ public class ExchangeLog {
 	private String dateFwd;
 	@XmlElement(required = true)
 	private String status;
+	@XmlElement(required = true)
+	private ExchangeLogData logData;
 	
 	public String getId() {
 		return id;
@@ -79,5 +81,11 @@ public class ExchangeLog {
 	}
 	public void setStatus(String status) {
 		this.status = status;
+	}
+	public ExchangeLogData getLogData() {
+		return logData;
+	}
+	public void setLogData(ExchangeLogData logData) {
+		this.logData = logData;
 	}
 }
