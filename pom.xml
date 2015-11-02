@@ -70,11 +70,7 @@
             <version>${mockito.version}</version>
             <scope>test</scope>
         </dependency>
-        <dependency>
-            <groupId>eu.europa.ec.mare.usm</groupId>
-            <artifactId>usm4uvms</artifactId>
-            <version>${usm4uvms.version}</version>
-        </dependency>
+      
         <dependency>
             <groupId>eu.europa.ec.fisheries.uvms</groupId>
             <artifactId>uvms-commons</artifactId>
@@ -112,6 +108,7 @@
             </plugin>
         </plugins>
     </build>
+    
     <modules>
         <module>rest</module>
         <module>service</module>
