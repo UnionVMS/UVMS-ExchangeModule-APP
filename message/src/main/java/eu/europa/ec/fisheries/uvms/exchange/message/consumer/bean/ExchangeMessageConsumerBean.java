@@ -55,20 +55,8 @@ public class ExchangeMessageConsumerBean implements ExchangeMessageConsumer, Con
             LOG.error("[ Error when getting message ] {}", e.getMessage());
             throw new ExchangeMessageException("Error when retrieving message: ");
         } finally {
-            try {
-                connection.stop();
-                connection.close();
-            } catch (JMSException e) {
-                LOG.error("[ Error when closing JMS connection ] {}", e.getMessage());
-                throw new ExchangeMessageException("Error closing JMS connection");
-            }
+            disconnectQueue();
         }
-    }
-
-    private void connectToQueue() throws JMSException {
-        connection = connectionFactory.createConnection();
-        session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
-        connection.start();
     }
 
     @Override
@@ -80,6 +68,23 @@ public class ExchangeMessageConsumerBean implements ExchangeMessageConsumer, Con
         catch (ExchangeMessageException e) {
             LOG.error("[ Error when getting config message. ]", e.getMessage());
             throw new ConfigMessageException("[ Error when getting config message. ]");
+        }
+    }
+
+    private void connectToQueue() throws JMSException {
+        connection = connectionFactory.createConnection();
+        session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
+        connection.start();
+    }
+
+    private void disconnectQueue() {
+        try {
+            if (connection != null) {
+                connection.stop();
+                connection.close();
+            }
+        } catch (JMSException e) {
+            LOG.error("[ Error when closing JMS connection ] {}", e.getMessage());
         }
     }
 
