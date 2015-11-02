@@ -13,6 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeListQuery;
+import eu.europa.ec.fisheries.schema.exchange.v1.SearchField;
 import eu.europa.ec.fisheries.uvms.exchange.rest.dto.ResponseDto;
 import eu.europa.ec.fisheries.uvms.exchange.rest.dto.RestResponseCode;
 import eu.europa.ec.fisheries.uvms.exchange.rest.dto.exchange.ExchangeLogData;
@@ -52,6 +53,20 @@ public class ExchangeLogRestResource {
         } catch (Exception ex) {
             LOG.error("[ Error when geting log list. ] {} ", ex.getMessage());
             return ErrorHandler.getFault(ex);
+        }
+    }
+    
+    @GET
+    @Consumes(value = {MediaType.APPLICATION_JSON})
+    @Produces(value = {MediaType.APPLICATION_JSON})
+    @Path(value = "/pollstatus")
+	@RequiresFeature(UnionVMSFeature.viewExchange)
+    public ResponseDto getPollStatus(final ExchangeListQuery query) {
+        try {
+            return new ResponseDto(ExchangeMock.mockPollStatusList(query), RestResponseCode.OK);
+        } catch (Exception e) {
+            LOG.error("[ Error when getting config search fields. ]", e.getMessage());
+            return ErrorHandler.getFault(e);
         }
     }
 }
