@@ -20,6 +20,8 @@ import eu.europa.ec.fisheries.uvms.exchange.rest.dto.exchange.ExchangeLogData;
 import eu.europa.ec.fisheries.uvms.exchange.rest.dto.exchange.ListQueryResponse;
 import eu.europa.ec.fisheries.uvms.exchange.rest.error.ErrorHandler;
 import eu.europa.ec.fisheries.uvms.exchange.rest.mock.ExchangeMock;
+import eu.europa.ec.fisheries.uvms.rest.security.RequiresFeature;
+import eu.europa.ec.fisheries.uvms.rest.security.UnionVMSFeature;
 
 @Path("/exchange")
 @Stateless
