@@ -1,5 +1,6 @@
 package eu.europa.ec.fisheries.uvms.exchange.rest.service;
 
+import javax.ejb.EJB;
 import javax.ejb.Stateless;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
@@ -12,6 +13,7 @@ import javax.ws.rs.core.MediaType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import eu.europa.ec.fisheries.schema.exchange.source.v1.GetLogListByQueryResponse;
 import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeListQuery;
 import eu.europa.ec.fisheries.schema.exchange.v1.SearchField;
 import eu.europa.ec.fisheries.uvms.exchange.rest.dto.ResponseDto;
@@ -19,7 +21,9 @@ import eu.europa.ec.fisheries.uvms.exchange.rest.dto.RestResponseCode;
 import eu.europa.ec.fisheries.uvms.exchange.rest.dto.exchange.ExchangeLogData;
 import eu.europa.ec.fisheries.uvms.exchange.rest.dto.exchange.ListQueryResponse;
 import eu.europa.ec.fisheries.uvms.exchange.rest.error.ErrorHandler;
+import eu.europa.ec.fisheries.uvms.exchange.rest.mapper.ExchangeLogMapper;
 import eu.europa.ec.fisheries.uvms.exchange.rest.mock.ExchangeMock;
+import eu.europa.ec.fisheries.uvms.exchange.service.ExchangeLogService;
 import eu.europa.ec.fisheries.uvms.rest.security.RequiresFeature;
 import eu.europa.ec.fisheries.uvms.rest.security.UnionVMSFeature;
 
@@ -29,8 +33,8 @@ public class ExchangeLogRestResource {
 
     final static Logger LOG = LoggerFactory.getLogger(ExchangeLogRestResource.class);
 
-    //@EJB
-    //ExchangeLogService serviceLayer;
+    @EJB
+    ExchangeLogService serviceLayer;
 
     /**
      *
@@ -49,8 +53,9 @@ public class ExchangeLogRestResource {
         LOG.info("Get list invoked in rest layer");
         try {
         	//TODO query in swagger
-        	//GetLogListByQueryResponse exchangeLogList = serviceLayer.getExchangeLogByQuery(query);
-        	ListQueryResponse exchangeLogList = ExchangeMock.mockLogList(query);
+        	GetLogListByQueryResponse response = serviceLayer.getExchangeLogList(query);
+        	ListQueryResponse exchangeLogList = ExchangeLogMapper.mapToQueryResponse(response);
+        	//ExchangeMock.mockLogList(query);
             return new ResponseDto(exchangeLogList, RestResponseCode.OK);
         } catch (Exception ex) {
             LOG.error("[ Error when geting log list. ] {} ", ex.getMessage());

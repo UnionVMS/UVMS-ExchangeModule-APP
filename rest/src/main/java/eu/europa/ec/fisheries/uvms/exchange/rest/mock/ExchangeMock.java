@@ -13,7 +13,7 @@ import java.util.Map;
 
 import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeListQuery;
 import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogStatusTypeType;
-import eu.europa.ec.fisheries.schema.exchange.v1.LogType;
+import eu.europa.ec.fisheries.schema.exchange.v1.TypeRefType;
 import eu.europa.ec.fisheries.uvms.exchange.rest.dto.exchange.ExchangeLog;
 import eu.europa.ec.fisheries.uvms.exchange.rest.dto.exchange.ExchangeLogData;
 import eu.europa.ec.fisheries.uvms.exchange.rest.dto.exchange.ExchangeLogStatus;
@@ -60,7 +60,7 @@ public class ExchangeMock {
 	public static ExchangeLogData mockExchangeLogData() {
 		ExchangeLogData logData = new ExchangeLogData();
 		logData.setGuid("MOCK guid OF LogType");
-		logData.setType(LogType.SEND_MOVEMENT);
+		logData.setType(TypeRefType.POLL);
 		return logData;
 	}
 

@@ -18,23 +18,37 @@ import eu.europa.ec.fisheries.schema.exchange.movement.v1.SetReportMovementType;
 import eu.europa.ec.fisheries.schema.exchange.plugin.types.v1.PluginType;
 import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogStatusTypeType;
 import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogType;
+import eu.europa.ec.fisheries.schema.exchange.v1.LogRefType;
 import eu.europa.ec.fisheries.schema.exchange.v1.LogType;
 import eu.europa.ec.fisheries.schema.exchange.v1.ReceiveMovementType;
 import eu.europa.ec.fisheries.schema.exchange.v1.SendEmailType;
 import eu.europa.ec.fisheries.schema.exchange.v1.SendMovementType;
 import eu.europa.ec.fisheries.schema.exchange.v1.SendPollType;
+import eu.europa.ec.fisheries.schema.exchange.v1.TypeRefType;
 import eu.europa.ec.fisheries.schema.rules.mobileterminal.v1.IdType;
 import eu.europa.ec.fisheries.uvms.exchange.service.exception.ExchangeLogException;
 
 public class ExchangeLogMapper {
 	final static Logger LOG = LoggerFactory.getLogger(ExchangeLogMapper.class);
 	
-	public static ExchangeLogType getReceivedMovementExchangeLog(SetReportMovementType request, String typeRefGuid) throws ExchangeLogException {
+	public static ExchangeLogType getReceivedMovementExchangeLog(SetReportMovementType request, String typeRefGuid, String typeRefType) throws ExchangeLogException {
 		if(request == null) throw new ExchangeLogException("No request");
 		ReceiveMovementType log = new ReceiveMovementType();
 		log.setDateRecieved(request.getTimestamp());
 		log.setType(LogType.RECEIVE_MOVEMENT);
-		log.setTypeRefGuid(typeRefGuid);
+		
+		LogRefType logRefType = new LogRefType();
+		logRefType.setRefGuid(typeRefGuid);
+		TypeRefType refType = TypeRefType.UNKNOWN;
+		try {
+			refType = TypeRefType.fromValue(typeRefType);
+		} catch (IllegalArgumentException e) {
+			LOG.error("Non existing typeRefType: " + typeRefType);
+			
+		}
+		logRefType.setType(refType);
+		log.setTypeRef(logRefType);
+		
 		log.setStatus(ExchangeLogStatusTypeType.SUCCESSFUL);
 		
 		log.setSenderReceiver(getSenderReceiver(request.getMovement(), request.getPluginType(), request.getPluginName()));
@@ -91,7 +105,7 @@ public class ExchangeLogMapper {
 		
 		String dnid = null;
 		String memberNumber = null;
-		String satelliteNumber = null;
+		String serialNumber = null;
 		String les = null;
 		
 		List<IdList> idList = terminalId.getMobileTerminalIdList();
@@ -100,8 +114,8 @@ public class ExchangeLogMapper {
 				dnid = id.getValue();
 			} else if(IdType.MEMBER_NUMBER.equals(id.getType())) {
 				memberNumber = id.getValue();
-			} else if(IdType.SATELLITE_NUMBER.equals(id.getType())) {
-				satelliteNumber = id.getValue();
+			} else if(IdType.SERIAL_NUMBER.equals(id.getType())) {
+				serialNumber = id.getValue();
 			} else if(IdType.LES.equals(id.getType())) {
 				les = id.getValue();
 			}
@@ -110,8 +124,10 @@ public class ExchangeLogMapper {
 		switch(source) {
 		case INMARSAT_C:
 			return dnid+memberNumber;
+		case IRIDIUM:
+			return serialNumber;
 		case AIS:
-			return satelliteNumber;
+			return serialNumber;
 		}
 		throw new ExchangeLogException("No id of mobile terminal value");
 	}
@@ -128,7 +144,7 @@ public class ExchangeLogMapper {
 				dnid = pollReceiver.getValue();
 			} else if(IdType.MEMBER_NUMBER.name().equalsIgnoreCase(pollReceiver.getKey())) {
 				memberNumber = pollReceiver.getValue();
-			} else if(IdType.SATELLITE_NUMBER.name().equalsIgnoreCase(pollReceiver.getKey())) {
+			} else if(IdType.SERIAL_NUMBER.name().equalsIgnoreCase(pollReceiver.getKey())) {
 				satelliteNumber =  pollReceiver.getValue();
 			} else if(IdType.LES.name().equalsIgnoreCase(pollReceiver.getKey())) {
 				les = pollReceiver.getValue();
@@ -144,12 +160,7 @@ public class ExchangeLogMapper {
 		throw new ExchangeLogException("No receiver of poll");
 	}
 	
-	public static ExchangeLogType getSendMovementExchangeLog(SendMovementToPluginType sendReport) throws ExchangeLogException {
-		if(sendReport == null) throw new ExchangeLogException("No request");
-		SendMovementType log = new SendMovementType();
-		log.setDateRecieved(sendReport.getTimestamp());
-		log.setType(LogType.SEND_MOVEMENT);
-		log.setTypeRefGuid(sendReport.getMovement().getGuid());
+	public static String getSendMovementSenderReceiver(SendMovementToPluginType sendReport) {
 		String senderReceiver = sendReport.getPluginType().name();
 		if(sendReport.getPluginName() != null && !sendReport.getPluginName().isEmpty()) {
 			senderReceiver = sendReport.getPluginName();
@@ -159,6 +170,19 @@ public class ExchangeLogMapper {
 		} catch (ExchangeLogException e) {
 			LOG.debug("Report sent to plugin couldn't map to senderReceiver");
 		}
+		return senderReceiver;
+	}
+	
+	public static ExchangeLogType getSendMovementExchangeLog(SendMovementToPluginType sendReport) throws ExchangeLogException {
+		if(sendReport == null) throw new ExchangeLogException("No request");
+		SendMovementType log = new SendMovementType();
+		log.setDateRecieved(sendReport.getTimestamp());
+		log.setType(LogType.SEND_MOVEMENT);
+		LogRefType logRefType = new LogRefType();
+		logRefType.setRefGuid(sendReport.getMovement().getGuid());
+		logRefType.setType(TypeRefType.MOVEMENT);
+		log.setTypeRef(logRefType);
+		String senderReceiver = getSendMovementSenderReceiver(sendReport);
 		log.setSenderReceiver(senderReceiver);
 		
 		//TODO send fwdDate, fwdRule and recipient from Rules
@@ -187,8 +211,6 @@ public class ExchangeLogMapper {
 		log.setType(LogType.SEND_EMAIL);
 		log.setDateRecieved(command.getTimestamp());
 		log.setSenderReceiver(command.getEmail().getTo());
-		//TODO where does master data of email live?
-		//log.setTypeRefGuid(value);
 		return log;
 	}
 	
@@ -207,7 +229,10 @@ public class ExchangeLogMapper {
 			LOG.error(e.getMessage());
 		}
 		log.setSenderReceiver(senderReceiver);
-		log.setTypeRefGuid(command.getPoll().getPollId());
+		LogRefType logRefType = new LogRefType();
+		logRefType.setRefGuid(command.getPoll().getPollId());
+		logRefType.setType(TypeRefType.POLL);
+		log.setTypeRef(logRefType);
 		return log;
 	}
 }

@@ -82,8 +82,8 @@ public class MovementMapper {
                 case MEMBER_NUMBER:
                     idType = IdType.MEMBER_NUMBER;
                     break;
-                case SATELLITE_NUMBER:
-                    idType = IdType.SATELLITE_NUMBER;
+                case SERIAL_NUMBER:
+                    idType = IdType.SERIAL_NUMBER;
                     break;
             }
             outId.setType(idType);

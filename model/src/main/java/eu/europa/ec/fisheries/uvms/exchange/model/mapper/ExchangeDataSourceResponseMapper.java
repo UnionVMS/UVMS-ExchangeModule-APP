@@ -1,6 +1,5 @@
 package eu.europa.ec.fisheries.uvms.exchange.model.mapper;
 
-import java.math.BigInteger;
 import java.util.List;
 
 import javax.jms.JMSException;
@@ -186,6 +185,17 @@ public class ExchangeDataSourceResponseMapper {
     	}
 	}
     
+    public static List<UnsentMessageType> mapGetSendingQueueResponse(TextMessage message, String correlationId) throws ExchangeModelMapperException {
+    	try {
+    		validateResponse(message, correlationId);
+    		GetUnsentMessageListResponse response = JAXBMarshaller.unmarshallTextMessage(message, GetUnsentMessageListResponse.class);
+    		return response.getUnsentMessage();
+    	} catch (JMSException | ExchangeValidationException | ExchangeModelMarshallException e) {
+    		LOG.error("[ Error when mapping response to unsent message list response ]");
+    		throw new ExchangeModelMapperException("[ Error when mapping response to unsent message list response ]" + e.getMessage());
+    	}
+	}
+    
     public static String mapServiceTypeListToStringFromResponse(List<ServiceResponseType> services) throws ExchangeModelMapperException {
         GetServiceListResponse response = new GetServiceListResponse();
         response.getService().addAll(services);
@@ -226,11 +236,11 @@ public class ExchangeDataSourceResponseMapper {
         return JAXBMarshaller.marshallJaxBObjectToString(response);
     }
 
-    public static String createGetExchangeListByQueryResponse(List<ExchangeLogType> logs, Long currentPage, Long totalNumberOfPages) throws ExchangeModelMarshallException {
+    public static String createGetExchangeListByQueryResponse(List<ExchangeLogType> logs, int currentPage, int totalNumberOfPages) throws ExchangeModelMarshallException {
         GetLogListByQueryResponse response = new GetLogListByQueryResponse();
         response.getExchangeLog().addAll(logs);
-        response.setCurrentPage(BigInteger.valueOf(currentPage));
-        response.setTotalNumberOfPages(BigInteger.valueOf(totalNumberOfPages));
+        response.setCurrentPage(currentPage);
+        response.setTotalNumberOfPages(totalNumberOfPages);
         return JAXBMarshaller.marshallJaxBObjectToString(response);
     }
 

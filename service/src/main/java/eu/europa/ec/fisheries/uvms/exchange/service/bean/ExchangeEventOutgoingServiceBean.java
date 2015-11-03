@@ -118,7 +118,7 @@ public class ExchangeEventOutgoingServiceBean implements ExchangeEventOutgoingSe
         } else if(!StatusType.STARTED.equals(service.getStatus())) {
         	LOG.info("Plugin to send report to is not started");
         	try {
-				String text = ExchangeDataSourceRequestMapper.mapCreateUnsentMessage(sendReport.getTimestamp(), sendReport.getRecipient(), reportText);
+				String text = ExchangeDataSourceRequestMapper.mapCreateUnsentMessage(sendReport.getTimestamp(), ExchangeLogMapper.getSendMovementSenderReceiver(sendReport), sendReport.getRecipient(), reportText);
 				producer.sendMessageOnQueue(text, MessageQueue.INTERNAL);
 			} catch (ExchangeModelMarshallException | ExchangeMessageException e) {
 				LOG.error("Couldn't add message to unsent list");

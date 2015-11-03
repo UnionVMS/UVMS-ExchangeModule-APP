@@ -23,7 +23,7 @@ import eu.europa.ec.fisheries.uvms.exchange.model.constant.ExchangeModelConstant
 public class ExchangeMessageConsumerBean implements ExchangeMessageConsumer, ConfigMessageConsumer {
 
     final static Logger LOG = LoggerFactory.getLogger(ExchangeMessageConsumerBean.class);
-    private final static long TIMEOUT = 10*1000;
+    private final static long TIMEOUT = 10*1000; //TODO timeout
 
     @Resource(mappedName = ExchangeModelConstants.EXCHANGE_RESPONSE_QUEUE)
     private Queue responseQueue;

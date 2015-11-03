@@ -4,7 +4,7 @@ import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 
-import eu.europa.ec.fisheries.schema.exchange.v1.LogType;
+import eu.europa.ec.fisheries.schema.exchange.v1.TypeRefType;
 
 @XmlAccessorType(XmlAccessType.FIELD)
 public class ExchangeLogData {
@@ -13,7 +13,7 @@ public class ExchangeLogData {
 	private String guid;
 	
 	@XmlElement(required = true)
-	private LogType type;
+	private TypeRefType type;
 
 	public String getGuid() {
 		return guid;
@@ -23,11 +23,11 @@ public class ExchangeLogData {
 		this.guid = guid;
 	}
 
-	public LogType getType() {
+	public TypeRefType getType() {
 		return type;
 	}
 
-	public void setType(LogType type) {
+	public void setType(TypeRefType type) {
 		this.type = type;
 	}
 }

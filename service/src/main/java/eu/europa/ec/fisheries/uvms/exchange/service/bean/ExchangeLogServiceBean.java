@@ -1,5 +1,7 @@
 package eu.europa.ec.fisheries.uvms.exchange.service.bean;
 
+import java.util.List;
+
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
 import javax.jms.TextMessage;
@@ -7,8 +9,12 @@ import javax.jms.TextMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import eu.europa.ec.fisheries.schema.exchange.source.v1.GetLogListByQueryResponse;
+import eu.europa.ec.fisheries.schema.exchange.source.v1.GetUnsentMessageListResponse;
+import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeListQuery;
 import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogStatusTypeType;
 import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogType;
+import eu.europa.ec.fisheries.schema.exchange.v1.UnsentMessageType;
 import eu.europa.ec.fisheries.uvms.exchange.message.constants.MessageQueue;
 import eu.europa.ec.fisheries.uvms.exchange.message.consumer.ExchangeMessageConsumer;
 import eu.europa.ec.fisheries.uvms.exchange.message.exception.ExchangeMessageException;
@@ -65,6 +71,33 @@ public class ExchangeLogServiceBean implements ExchangeLogService {
 			return updatedLog;
 		} catch (ExchangeModelMapperException | ExchangeMessageException e) {
 			throw new ExchangeLogException("Couldn't update status of exchange log");
+		}
+	}
+
+	@Override
+	public GetLogListByQueryResponse getExchangeLogList(ExchangeListQuery query) throws ExchangeLogException {
+		try {
+			String text = ExchangeDataSourceRequestMapper.mapGetExchageLogListByQueryToString(query);
+			String messageId = producer.sendMessageOnQueue(text, MessageQueue.INTERNAL);
+			TextMessage response = consumer.getMessage(messageId, TextMessage.class);
+			GetLogListByQueryResponse logList = ExchangeDataSourceResponseMapper.mapToGetLogListByQueryResponse(response, messageId);
+			return logList;
+		}  catch (ExchangeModelMapperException | ExchangeMessageException e) {
+			throw new ExchangeLogException("Couldn't get exchange log list.");
+		}
+	}
+
+	@Override
+	public List<UnsentMessageType> getUnsentMessageList() throws ExchangeLogException {
+		LOG.info("Get unsent message list in service layer");
+		try {
+			String text = ExchangeDataSourceRequestMapper.mapGetSendingQueue();
+			String messageId = producer.sendMessageOnQueue(text, MessageQueue.INTERNAL);
+			TextMessage response = consumer.getMessage(messageId, TextMessage.class);
+			List<UnsentMessageType> unsentMessageList = ExchangeDataSourceResponseMapper.mapGetSendingQueueResponse(response, messageId);
+			return unsentMessageList;
+		}  catch (ExchangeModelMapperException | ExchangeMessageException e) {
+			throw new ExchangeLogException("Couldn't get unsent message list.");
 		}
 	}
 

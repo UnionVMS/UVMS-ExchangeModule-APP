@@ -120,7 +120,7 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
                     MovementRefType typeRef = rulesService.sendMovementToRules(MovementMapper.mapPluginType(pluginType), rawMovement);
                     
                     try {
-                        ExchangeLogType log = ExchangeLogMapper.getReceivedMovementExchangeLog(request.getRequest(), typeRef.getMovementRefGuid());
+                        ExchangeLogType log = ExchangeLogMapper.getReceivedMovementExchangeLog(request.getRequest(), typeRef.getMovementRefGuid(), typeRef.getType());
                         exchangeLog.log(log);
                     } catch (ExchangeLogException e) {
                         LOG.error(e.getMessage());

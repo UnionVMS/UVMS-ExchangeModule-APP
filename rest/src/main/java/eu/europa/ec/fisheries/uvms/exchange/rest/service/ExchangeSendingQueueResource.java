@@ -2,6 +2,7 @@ package eu.europa.ec.fisheries.uvms.exchange.rest.service;
 
 import java.util.List;
 
+import javax.ejb.EJB;
 import javax.ejb.Stateless;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
@@ -13,11 +14,14 @@ import javax.ws.rs.core.MediaType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import eu.europa.ec.fisheries.schema.exchange.v1.UnsentMessageType;
 import eu.europa.ec.fisheries.uvms.exchange.rest.dto.ResponseDto;
 import eu.europa.ec.fisheries.uvms.exchange.rest.dto.RestResponseCode;
 import eu.europa.ec.fisheries.uvms.exchange.rest.dto.exchange.SendingGroupLog;
 import eu.europa.ec.fisheries.uvms.exchange.rest.error.ErrorHandler;
+import eu.europa.ec.fisheries.uvms.exchange.rest.mapper.ExchangeLogMapper;
 import eu.europa.ec.fisheries.uvms.exchange.rest.mock.ExchangeMock;
+import eu.europa.ec.fisheries.uvms.exchange.service.ExchangeLogService;
 import eu.europa.ec.fisheries.uvms.rest.security.RequiresFeature;
 import eu.europa.ec.fisheries.uvms.rest.security.UnionVMSFeature;
 
@@ -27,8 +31,8 @@ public class ExchangeSendingQueueResource {
 
 	final static Logger LOG = LoggerFactory.getLogger(ExchangeSendingQueueResource.class);
 
-	// @EJB
-	// ExchangeLogService serviceLayer;
+	@EJB
+	ExchangeLogService serviceLayer;
 
 	/**
 	 * 
@@ -46,8 +50,10 @@ public class ExchangeSendingQueueResource {
 	public ResponseDto getSendingQueue() {
 		LOG.info("Get list invoked in rest layer");
 		try {
-			List<SendingGroupLog> exchangeLogList = ExchangeMock.mockSendingList();
-			return new ResponseDto(exchangeLogList, RestResponseCode.OK);
+			//List<SendingGroupLog> exchangeLogList = ExchangeMock.mockSendingList();
+			List<UnsentMessageType> unsentMessageList = serviceLayer.getUnsentMessageList();
+			List<SendingGroupLog> sendingQueue = ExchangeLogMapper.mapToSendingQueue(unsentMessageList);
+			return new ResponseDto(sendingQueue, RestResponseCode.OK);
 		} catch (Exception ex) {
 			LOG.error("[ Error when geting log list. ] {} ", ex.getMessage());
 			return ErrorHandler.getFault(ex);

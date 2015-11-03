@@ -13,7 +13,7 @@
             <xsd:element name="dateRecieved" type="xsd:dateTime" />
             <xsd:element name="type" type="exchange:LogType"/>
             <xsd:element name="incoming" type="xsd:boolean"/>
-            <xsd:element name="typeRefGuid" type="xsd:string"/>
+            <xsd:element name="typeRef" type="exchange:LogRefType"/>
             <xsd:element name="status" type="exchange:ExchangeLogStatusTypeType" />
         </xsd:sequence>
     </xsd:complexType>
@@ -24,6 +24,22 @@
             <xsd:enumeration value="SEND_MOVEMENT"/>
             <xsd:enumeration value="SEND_EMAIL"/>
             <xsd:enumeration value="SEND_POLL"/>
+        </xsd:restriction>
+   </xsd:simpleType>
+   
+   <xsd:complexType name="LogRefType">
+        <xsd:sequence>
+            <xsd:element name="refGuid" type="xsd:string"/>
+            <xsd:element name="type" type="exchange:TypeRefType"/>
+        </xsd:sequence>
+   </xsd:complexType>
+   
+   <xsd:simpleType name="TypeRefType">
+        <xsd:restriction base="xsd:string">
+            <xsd:enumeration value="MOVEMENT"/>
+            <xsd:enumeration value="POLL"/>
+            <xsd:enumeration value="ALARM"/>
+            <xsd:enumeration value="UNKNOWN"/>
         </xsd:restriction>
    </xsd:simpleType>
    
@@ -129,6 +145,7 @@
         <xsd:sequence>
             <xsd:element name="messageId" type="xsd:string"/>
             <xsd:element name="dateReceived" type="xsd:dateTime"/>
+            <xsd:element name="senderReceiver" type="xsd:string"/>
             <xsd:element name="recipient" type="xsd:string"/>
             <xsd:element name="message" type="xsd:string"/>
         </xsd:sequence>
