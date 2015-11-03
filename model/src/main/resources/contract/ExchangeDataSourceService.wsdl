@@ -36,6 +36,7 @@
                     <xsd:enumeration value="CREATE_LOG"/>
                     <xsd:enumeration value="UPDATE_LOG_STATUS"/>
                     <xsd:enumeration value="GET_LOG_STATUS_HISTORY"/>
+                    <xsd:enumeration value="GET_LOG_STATUS_HISTORY_BY_QUERY"/>
                     
                     <!-- UNSENT MESSAGES -->
                     <xsd:enumeration value="GET_UNSENT_MESSAGE_LIST"/>
@@ -179,7 +180,7 @@
                     <xsd:complexContent>
                         <xsd:extension base="source:ExchangeBaseRequest">
                             <xsd:sequence>
-                                <xsd:element name="logGuid" type="xsd:string" minOccurs="1" maxOccurs="1"/>
+                                <xsd:element name="guid" type="xsd:string" minOccurs="1" maxOccurs="1"/>
                             </xsd:sequence>
                         </xsd:extension>
                     </xsd:complexContent>
@@ -189,7 +190,27 @@
             <xsd:element name="GetLogStatusHistoryResponse">
                 <xsd:complexType>
                     <xsd:sequence>
-                        <xsd:element name="status" type="exchange:ExchangeLogStatusType" minOccurs="1" maxOccurs="unbounded"/>
+                        <xsd:element name="status" type="exchange:ExchangeLogStatusType" minOccurs="0" maxOccurs="1"/>
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
+            
+            <xsd:element name="GetLogStatusHistoryByQueryRequest">
+                <xsd:complexType>
+                    <xsd:complexContent>
+                        <xsd:extension base="source:ExchangeBaseRequest">
+                            <xsd:sequence>
+                                <xsd:element name="query" type="exchange:ExchangeHistoryListQuery" minOccurs="1" maxOccurs="1"/>
+                            </xsd:sequence>
+                        </xsd:extension>
+                    </xsd:complexContent>
+                </xsd:complexType>
+            </xsd:element>
+            
+            <xsd:element name="GetLogStatusHistoryByQueryResponse">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element name="statusLog" type="exchange:ExchangeLogStatusType" minOccurs="1" maxOccurs="unbounded"/>
                     </xsd:sequence>
                 </xsd:complexType>
             </xsd:element>
@@ -433,6 +454,13 @@
         <part name="body" element="source:GetLogStatusHistoryResponse"/>
     </message>
     
+    <message name="GetLogStatusHistoryByQueryRequest">
+        <part name="body" element="source:GetLogStatusHistoryByQueryRequest"/>
+    </message>
+    <message name="GetLogStatusHistoryByQueryResponse">
+        <part name="body" element="source:GetLogStatusHistoryByQueryResponse"/>
+    </message>
+    
     <message name="GetServiceListRequest">
         <part name="body" element="source:GetServiceListRequest"/>
     </message>
@@ -539,7 +567,13 @@
             <output message="source:GetLogStatusHistoryResponse"/>
             <fault name="ExchangeFault" message="source:ExchangeFault"/>
         </operation>
-       
+
+        <operation name="GetLogStatusHistoryByQuery">
+            <input message="source:GetLogStatusHistoryByQueryRequest"/>
+            <output message="source:GetLogStatusHistoryByQueryResponse"/>
+            <fault name="ExchangeFault" message="source:ExchangeFault"/>
+        </operation>
+               
         <operation name="GetServiceList">
             <input message="source:GetServiceListRequest"/>
             <output message="source:GetServiceListResponse"/>
@@ -671,6 +705,18 @@
         </operation>
         
         <operation name="GetLogStatusHistory">
+            <input>
+                <soap:body use="literal"/>
+            </input>
+            <output>
+                <soap:body use="literal"/>
+            </output>
+            <fault name="ExchangeFault">
+                <soap:fault name="ExchangeFault" use="literal"/>
+            </fault>
+        </operation>
+        
+        <operation name="GetLogStatusHistoryByQuery">
             <input>
                 <soap:body use="literal"/>
             </input>

@@ -17,6 +17,7 @@ import eu.europa.ec.fisheries.schema.exchange.service.v1.SettingType;
 import eu.europa.ec.fisheries.schema.exchange.source.v1.CreateLogResponse;
 import eu.europa.ec.fisheries.schema.exchange.source.v1.CreateUnsentMessageResponse;
 import eu.europa.ec.fisheries.schema.exchange.source.v1.GetLogListByQueryResponse;
+import eu.europa.ec.fisheries.schema.exchange.source.v1.GetLogStatusHistoryByQueryResponse;
 import eu.europa.ec.fisheries.schema.exchange.source.v1.GetLogStatusHistoryResponse;
 import eu.europa.ec.fisheries.schema.exchange.source.v1.GetServiceCapabilitiesResponse;
 import eu.europa.ec.fisheries.schema.exchange.source.v1.GetServiceListResponse;
@@ -195,13 +196,18 @@ public class ExchangeDataSourceResponseMapper {
     		throw new ExchangeModelMapperException("[ Error when mapping response to unsent message list response ]" + e.getMessage());
     	}
 	}
-    
-    public static String mapServiceTypeListToStringFromResponse(List<ServiceResponseType> services) throws ExchangeModelMapperException {
-        GetServiceListResponse response = new GetServiceListResponse();
-        response.getService().addAll(services);
-        return JAXBMarshaller.marshallJaxBObjectToString(response);
-    }
 
+    public static List<ExchangeLogStatusType> mapGetLogStatusHistoryByQueryResponse(TextMessage message, String correlationId) throws ExchangeModelMapperException {
+    	try {
+    		validateResponse(message, correlationId);
+    		GetLogStatusHistoryByQueryResponse response = JAXBMarshaller.unmarshallTextMessage(message, GetLogStatusHistoryByQueryResponse.class);
+    		return response.getStatusLog();
+    	} catch (JMSException | ExchangeValidationException | ExchangeModelMarshallException e) {
+    		LOG.error("[ Error when mapping response to log status history response ]");
+    		throw new ExchangeModelMapperException("[ Error when mapping response to log status history response ]" + e.getMessage());
+    	}
+	}
+    
     public static String createGetServiceSettingsResponse(List<SettingType> settings) throws ExchangeModelMarshallException {
     	GetServiceSettingsResponse response = new GetServiceSettingsResponse();
         SettingListType listType = new SettingListType();
@@ -274,9 +280,9 @@ public class ExchangeDataSourceResponseMapper {
 		return JAXBMarshaller.marshallJaxBObjectToString(response);
 	}
 
-	public static String createGetLogStatusHistoryResponse(List<ExchangeLogStatusType> historyList) throws ExchangeModelMarshallException {
+	public static String createGetLogStatusHistoryResponse(ExchangeLogStatusType statusType) throws ExchangeModelMarshallException {
 		GetLogStatusHistoryResponse response = new GetLogStatusHistoryResponse();
-		response.getStatus().addAll(historyList);
+		response.setStatus(statusType);
 		return JAXBMarshaller.marshallJaxBObjectToString(response);
 	}
 
@@ -295,6 +301,12 @@ public class ExchangeDataSourceResponseMapper {
 	public static String createResentMessageResponse(List<UnsentMessageType> messageList) throws ExchangeModelMarshallException {
 		ResendMessageResponse response = new ResendMessageResponse();
 		response.getResentMessage().addAll(messageList);
+		return JAXBMarshaller.marshallJaxBObjectToString(response);
+	}
+
+	public static String createGetLogStatusHistoryByQueryResponse(List<ExchangeLogStatusType> statusHistoryList) throws ExchangeModelMarshallException {
+		GetLogStatusHistoryByQueryResponse response = new GetLogStatusHistoryByQueryResponse();
+		response.getStatusLog().addAll(statusHistoryList);
 		return JAXBMarshaller.marshallJaxBObjectToString(response);
 	}
 }

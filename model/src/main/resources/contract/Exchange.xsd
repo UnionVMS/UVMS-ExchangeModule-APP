@@ -80,7 +80,14 @@
    
    <xsd:complexType name="ExchangeLogStatusType">
         <xsd:sequence>
-            <xsd:element name="logGuid" type="xsd:string"/>
+            <xsd:element name="guid" type="xsd:string"/>
+            <xsd:element name="typeRef" type="exchange:LogRefType"/>
+            <xsd:element name="history" type="exchange:ExchangeLogStatusHistoryType" minOccurs="1" maxOccurs="unbounded"/>
+        </xsd:sequence>
+   </xsd:complexType>
+   
+   <xsd:complexType name="ExchangeLogStatusHistoryType">
+        <xsd:sequence>
             <xsd:element name="timestamp" type="xsd:dateTime"/>
             <xsd:element name="status" type="exchange:ExchangeLogStatusTypeType"/>
         </xsd:sequence>
@@ -112,6 +119,15 @@
             <xsd:enumeration value="STATUS"/>
         </xsd:restriction>
     </xsd:simpleType>
+    
+    <xsd:complexType name="ExchangeHistoryListQuery">
+        <xsd:sequence>
+            <xsd:element name="type" type="exchange:TypeRefType" minOccurs="0" maxOccurs="unbounded"/>
+            <xsd:element name="status" type="exchange:ExchangeLogStatusTypeType" minOccurs="0" maxOccurs="unbounded"/>
+            <xsd:element name="typeRefDateFrom" type="xsd:dateTime" minOccurs="0" maxOccurs="1"/>
+            <xsd:element name="typeRefDateTo" type="xsd:dateTime" minOccurs="0" maxOccurs="1"/>
+        </xsd:sequence>
+    </xsd:complexType>
     
     <xsd:complexType name="ExchangeListQuery">
         <xsd:sequence>

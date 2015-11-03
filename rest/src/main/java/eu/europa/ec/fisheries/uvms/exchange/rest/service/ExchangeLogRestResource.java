@@ -1,12 +1,13 @@
 package eu.europa.ec.fisheries.uvms.exchange.rest.service;
 
+import java.util.Date;
+import java.util.List;
+
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
 import javax.ws.rs.Consumes;
-import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
@@ -15,14 +16,15 @@ import org.slf4j.LoggerFactory;
 
 import eu.europa.ec.fisheries.schema.exchange.source.v1.GetLogListByQueryResponse;
 import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeListQuery;
-import eu.europa.ec.fisheries.schema.exchange.v1.SearchField;
+import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogStatusType;
+import eu.europa.ec.fisheries.schema.exchange.v1.TypeRefType;
+import eu.europa.ec.fisheries.uvms.common.DateUtils;
+import eu.europa.ec.fisheries.uvms.exchange.rest.dto.PollQuery;
 import eu.europa.ec.fisheries.uvms.exchange.rest.dto.ResponseDto;
 import eu.europa.ec.fisheries.uvms.exchange.rest.dto.RestResponseCode;
-import eu.europa.ec.fisheries.uvms.exchange.rest.dto.exchange.ExchangeLogData;
 import eu.europa.ec.fisheries.uvms.exchange.rest.dto.exchange.ListQueryResponse;
 import eu.europa.ec.fisheries.uvms.exchange.rest.error.ErrorHandler;
 import eu.europa.ec.fisheries.uvms.exchange.rest.mapper.ExchangeLogMapper;
-import eu.europa.ec.fisheries.uvms.exchange.rest.mock.ExchangeMock;
 import eu.europa.ec.fisheries.uvms.exchange.service.ExchangeLogService;
 import eu.europa.ec.fisheries.uvms.rest.security.RequiresFeature;
 import eu.europa.ec.fisheries.uvms.rest.security.UnionVMSFeature;
@@ -63,14 +65,18 @@ public class ExchangeLogRestResource {
         }
     }
     
-    @GET
+    @POST
     @Consumes(value = {MediaType.APPLICATION_JSON})
     @Produces(value = {MediaType.APPLICATION_JSON})
-    @Path(value = "/pollstatus")
+    @Path(value = "/poll")
 	@RequiresFeature(UnionVMSFeature.viewExchange)
-    public ResponseDto getPollStatus(final ExchangeListQuery query) {
+    public ResponseDto getPollStatus(PollQuery query) {
         try {
-            return new ResponseDto(ExchangeMock.mockPollStatusList(query), RestResponseCode.OK);
+        	LOG.debug("Get ExchangeLog status for Poll in rest layer");
+        	Date from = DateUtils.stringToDate(query.getStatusFromDate());
+        	Date to = DateUtils.stringToDate(query.getStatusToDate());
+        	List<ExchangeLogStatusType> response = serviceLayer.getExchangeStatusHistoryList(query.getStatus(), TypeRefType.POLL, from, to);
+            return new ResponseDto(response, RestResponseCode.OK);
         } catch (Exception e) {
             LOG.error("[ Error when getting config search fields. ]", e.getMessage());
             return ErrorHandler.getFault(e);

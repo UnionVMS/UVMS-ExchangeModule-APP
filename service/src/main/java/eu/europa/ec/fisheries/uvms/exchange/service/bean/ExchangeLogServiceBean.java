@@ -1,19 +1,24 @@
 package eu.europa.ec.fisheries.uvms.exchange.service.bean;
 
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
 import javax.jms.TextMessage;
+import javax.xml.datatype.XMLGregorianCalendar;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import eu.europa.ec.fisheries.schema.exchange.source.v1.GetLogListByQueryResponse;
-import eu.europa.ec.fisheries.schema.exchange.source.v1.GetUnsentMessageListResponse;
+import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeHistoryListQuery;
 import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeListQuery;
+import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogStatusType;
 import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogStatusTypeType;
 import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogType;
+import eu.europa.ec.fisheries.schema.exchange.v1.TypeRefType;
 import eu.europa.ec.fisheries.schema.exchange.v1.UnsentMessageType;
 import eu.europa.ec.fisheries.uvms.exchange.message.constants.MessageQueue;
 import eu.europa.ec.fisheries.uvms.exchange.message.consumer.ExchangeMessageConsumer;
@@ -91,13 +96,31 @@ public class ExchangeLogServiceBean implements ExchangeLogService {
 	public List<UnsentMessageType> getUnsentMessageList() throws ExchangeLogException {
 		LOG.info("Get unsent message list in service layer");
 		try {
-			String text = ExchangeDataSourceRequestMapper.mapGetSendingQueue();
+			String text = ExchangeDataSourceRequestMapper.mapGetUnsentMessageList();
 			String messageId = producer.sendMessageOnQueue(text, MessageQueue.INTERNAL);
 			TextMessage response = consumer.getMessage(messageId, TextMessage.class);
 			List<UnsentMessageType> unsentMessageList = ExchangeDataSourceResponseMapper.mapGetSendingQueueResponse(response, messageId);
 			return unsentMessageList;
 		}  catch (ExchangeModelMapperException | ExchangeMessageException e) {
 			throw new ExchangeLogException("Couldn't get unsent message list.");
+		}
+	}
+
+	@Override
+	public List<ExchangeLogStatusType> getExchangeStatusHistoryList(ExchangeLogStatusTypeType status, TypeRefType type, Date from, Date to) throws ExchangeLogException {
+		LOG.info("Get pollstatus list in service layer");
+		try {
+			List<ExchangeLogStatusTypeType> statusList = new ArrayList<>();
+			statusList.add(status);
+			List<TypeRefType> typeList = new ArrayList<>();
+			typeList.add(type);
+			String text = ExchangeDataSourceRequestMapper.mapGetLogStatusHistoryByQueryRequest(from, to, statusList, typeList);
+			String messageId = producer.sendMessageOnQueue(text, MessageQueue.INTERNAL);
+			TextMessage response = consumer.getMessage(messageId, TextMessage.class);
+			List<ExchangeLogStatusType> pollStatusList = ExchangeDataSourceResponseMapper.mapGetLogStatusHistoryByQueryResponse(response, messageId);
+			return pollStatusList;
+		}  catch (ExchangeModelMapperException | ExchangeMessageException e) {
+			throw new ExchangeLogException("Couldn't get exchange status history list.");
 		}
 	}
 

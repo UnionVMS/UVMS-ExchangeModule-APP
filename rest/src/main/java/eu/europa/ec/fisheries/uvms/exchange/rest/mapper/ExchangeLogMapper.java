@@ -44,7 +44,7 @@ public class ExchangeLogMapper {
         return dto;
 
     }
-
+    
     public static ExchangeLog mapToExchangeLogDto(ExchangeLogType log) {
     	ExchangeLog dto = new ExchangeLog();
     	switch(log.getType()) {

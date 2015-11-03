@@ -16,11 +16,9 @@ import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogStatusTypeType;
 import eu.europa.ec.fisheries.schema.exchange.v1.TypeRefType;
 import eu.europa.ec.fisheries.uvms.exchange.rest.dto.exchange.ExchangeLog;
 import eu.europa.ec.fisheries.uvms.exchange.rest.dto.exchange.ExchangeLogData;
-import eu.europa.ec.fisheries.uvms.exchange.rest.dto.exchange.ExchangeLogStatus;
 import eu.europa.ec.fisheries.uvms.exchange.rest.dto.exchange.ListQueryResponse;
 import eu.europa.ec.fisheries.uvms.exchange.rest.dto.exchange.SendingGroupLog;
 import eu.europa.ec.fisheries.uvms.exchange.rest.dto.exchange.SendingLog;
-import eu.europa.ec.fisheries.uvms.exchange.rest.dto.exchange.StatusLog;
 
 /**
  *
@@ -108,27 +106,4 @@ public class ExchangeMock {
 		configuration.put("RECIPIENT", recipientList);
 		return configuration;
 	}
-
-	public static List<ExchangeLogStatus> mockPollStatusList(ExchangeListQuery query) {
-		List<ExchangeLogStatus> retList = new ArrayList<>();
-		retList.add(mockExchangeLogStatus());
-		return retList;
-	}
-	
-	private static ExchangeLogStatus mockExchangeLogStatus() {
-		ExchangeLogStatus logStatus = new ExchangeLogStatus();
-		logStatus.setTypeRefGuid("Mock Poll GUID");
-		List<StatusLog> statusLog = new ArrayList<>();
-		StatusLog issued = new StatusLog();
-		issued.setTimestamp("2015-02-02 15:00:00 +01:00");
-		issued.setStatus(ExchangeLogStatusTypeType.ISSUED);
-		statusLog.add(issued);
-		StatusLog transmitted = new StatusLog();
-		transmitted.setTimestamp("2015-02-02 15:30:00 +01:00");
-		transmitted.setStatus(ExchangeLogStatusTypeType.PROBABLY_TRANSMITTED);
-		statusLog.add(transmitted);
-		logStatus.setStatusList(statusLog);
-		return logStatus;
-	}
-
 }

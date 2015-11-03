@@ -1,5 +1,7 @@
 package eu.europa.ec.fisheries.uvms.exchange.model.mapper;
 
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import javax.xml.datatype.XMLGregorianCalendar;
@@ -16,6 +18,7 @@ import eu.europa.ec.fisheries.schema.exchange.source.v1.CreateLogRequest;
 import eu.europa.ec.fisheries.schema.exchange.source.v1.CreateUnsentMessageRequest;
 import eu.europa.ec.fisheries.schema.exchange.source.v1.ExchangeDataSourceMethod;
 import eu.europa.ec.fisheries.schema.exchange.source.v1.GetLogListByQueryRequest;
+import eu.europa.ec.fisheries.schema.exchange.source.v1.GetLogStatusHistoryByQueryRequest;
 import eu.europa.ec.fisheries.schema.exchange.source.v1.GetLogStatusHistoryRequest;
 import eu.europa.ec.fisheries.schema.exchange.source.v1.GetServiceCapabilitiesRequest;
 import eu.europa.ec.fisheries.schema.exchange.source.v1.GetServiceListRequest;
@@ -28,11 +31,15 @@ import eu.europa.ec.fisheries.schema.exchange.source.v1.SetServiceSettingsReques
 import eu.europa.ec.fisheries.schema.exchange.source.v1.SetServiceStatusRequest;
 import eu.europa.ec.fisheries.schema.exchange.source.v1.UnregisterServiceRequest;
 import eu.europa.ec.fisheries.schema.exchange.source.v1.UpdateLogStatusRequest;
+import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeHistoryListQuery;
 import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeListQuery;
+import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogStatusHistoryType;
 import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogStatusType;
 import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogStatusTypeType;
 import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogType;
+import eu.europa.ec.fisheries.schema.exchange.v1.TypeRefType;
 import eu.europa.ec.fisheries.schema.exchange.v1.UnsentMessageType;
+import eu.europa.ec.fisheries.uvms.common.DateUtils;
 import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelMapperException;
 import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelMarshallException;
 
@@ -179,7 +186,7 @@ public class ExchangeDataSourceRequestMapper {
 	public static String mapGetLogStatusHistoryRequest(String guid) throws ExchangeModelMarshallException {
 		GetLogStatusHistoryRequest request = new GetLogStatusHistoryRequest();
 		request.setMethod(ExchangeDataSourceMethod.GET_LOG_STATUS_HISTORY);
-		request.setLogGuid(guid);
+		request.setGuid(guid);
 		return JAXBMarshaller.marshallJaxBObjectToString(request);
 	}
 
@@ -187,13 +194,18 @@ public class ExchangeDataSourceRequestMapper {
 		UpdateLogStatusRequest request = new UpdateLogStatusRequest();
 		request.setMethod(ExchangeDataSourceMethod.UPDATE_LOG_STATUS);
 		ExchangeLogStatusType status = new ExchangeLogStatusType();
-		status.setLogGuid(guid);
-		status.setStatus(type);
+		status.setGuid(guid);
+		List<ExchangeLogStatusHistoryType> statusHistoryList = new ArrayList<>();
+		ExchangeLogStatusHistoryType statusHistory = new ExchangeLogStatusHistoryType();
+		statusHistory.setStatus(type);
+		//statusHistory.setTimestamp();
+		statusHistoryList.add(statusHistory);
+		status.getHistory().addAll(statusHistoryList);
 		request.setStatus(status);
 		return JAXBMarshaller.marshallJaxBObjectToString(request);
 	}
 
-	public static String mapGetSendingQueue() throws ExchangeModelMarshallException {
+	public static String mapGetUnsentMessageList() throws ExchangeModelMarshallException {
 		GetUnsentMessageListRequest request = new GetUnsentMessageListRequest();
 		request.setMethod(ExchangeDataSourceMethod.GET_UNSENT_MESSAGE_LIST);
 		return JAXBMarshaller.marshallJaxBObjectToString(request);
@@ -218,4 +230,21 @@ public class ExchangeDataSourceRequestMapper {
 		return JAXBMarshaller.marshallJaxBObjectToString(request);
 	}
 
+	public static String mapGetLogStatusHistoryByQueryRequest(Date fromDate, Date toDate, List<ExchangeLogStatusTypeType> statusList, List<TypeRefType> typeList) throws ExchangeModelMarshallException {
+		GetLogStatusHistoryByQueryRequest request = new GetLogStatusHistoryByQueryRequest();
+		request.setMethod(ExchangeDataSourceMethod.GET_LOG_STATUS_HISTORY_BY_QUERY);
+		ExchangeHistoryListQuery query = new ExchangeHistoryListQuery();
+		if(fromDate != null) {
+			XMLGregorianCalendar typeRefDateFrom = DateUtils.dateToXmlGregorian(fromDate);
+			query.setTypeRefDateFrom(typeRefDateFrom);
+		}
+		if(toDate != null) {
+			XMLGregorianCalendar typeRefDateTo = DateUtils.dateToXmlGregorian(toDate);
+			query.setTypeRefDateTo(typeRefDateTo);
+		}
+		query.getStatus().addAll(statusList);
+		query.getType().addAll(typeList);
+		request.setQuery(query);
+		return JAXBMarshaller.marshallJaxBObjectToString(request);
+	}
 }
