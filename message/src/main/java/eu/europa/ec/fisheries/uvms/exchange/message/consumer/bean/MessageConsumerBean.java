@@ -53,19 +53,19 @@ public class MessageConsumerBean implements MessageListener {
     @Inject
     @SendReportToPluginEvent
     Event<ExchangeMessageEvent> sendMessageToPluginEvent;
-    
+
     @Inject
     @SendCommandToPluginEvent
     Event<ExchangeMessageEvent> sendCommandToPluginEvent;
-    
+
     @Inject
     @ExchangeLogEvent
     Event<ExchangeMessageEvent> updateStateEvent;
-    
+
     @Inject
     @PluginPingEvent
     Event<ExchangeMessageEvent> updatePingStateEvent;
-    
+
     @Inject
     @PingEvent
     Event<ExchangeMessageEvent> pingEvent;
@@ -81,59 +81,59 @@ public class MessageConsumerBean implements MessageListener {
 
         TextMessage textMessage = (TextMessage) message;
         ExchangeBaseRequest request = tryConsumeExchangeBaseRequest(textMessage);
-        if(request == null) {
-        	try {
-        		//Handle PingResponse from plugin
-				JAXBMarshaller.unmarshallTextMessage(textMessage, PingResponse.class);
-				updatePingStateEvent.fire(new ExchangeMessageEvent(textMessage));
-			} catch (ExchangeModelMarshallException e) {
-				AcknowledgeResponse type = tryConsumeAcknowledgeResponse(textMessage);
-	        	if(type == null) {
-	        		LOG.error("[ Error when receiving message in exchange: ]");
-	                errorEvent.fire(new ExchangeMessageEvent(textMessage, ExchangeModuleResponseMapper.createFaultMessage(FaultCode.EXCHANGE_MESSAGE, "Error when receiving message in exchange")));
-	            } else {
-	            	updateStateEvent.fire(new ExchangeMessageEvent(textMessage));
-	            }
-			}
+        if (request == null) {
+            try {
+                //Handle PingResponse from plugin
+                JAXBMarshaller.unmarshallTextMessage(textMessage, PingResponse.class);
+                updatePingStateEvent.fire(new ExchangeMessageEvent(textMessage));
+            } catch (ExchangeModelMarshallException e) {
+                AcknowledgeResponse type = tryConsumeAcknowledgeResponse(textMessage);
+                if (type == null) {
+                    LOG.error("[ Error when receiving message in exchange: ]");
+                    errorEvent.fire(new ExchangeMessageEvent(textMessage, ExchangeModuleResponseMapper.createFaultMessage(FaultCode.EXCHANGE_MESSAGE, "Error when receiving message in exchange")));
+                } else {
+                    updateStateEvent.fire(new ExchangeMessageEvent(textMessage));
+                }
+            }
         } else {
-        	switch (request.getMethod()) {
-            case LIST_SERVICES:
-                pluginConfigEvent.fire(new ExchangeMessageEvent(textMessage));
-                break;
-            case SET_COMMAND:
-            	sendCommandToPluginEvent.fire(new ExchangeMessageEvent(textMessage));
-            	break;
-            case SEND_REPORT_TO_PLUGIN:
-                sendMessageToPluginEvent.fire(new ExchangeMessageEvent(textMessage));
-                break;
-            case SET_MOVEMENT_REPORT:
-            	processMovementEvent.fire(new ExchangeMessageEvent(textMessage));
-                break;
-            case PING:
-                pingEvent.fire(new ExchangeMessageEvent(textMessage));
-                break;
-            default:
-                LOG.error("[ Not implemented method consumed: {} ] ", request.getMethod());
-                errorEvent.fire(new ExchangeMessageEvent(textMessage, ExchangeModuleResponseMapper.createFaultMessage(FaultCode.EXCHANGE_MESSAGE, "Method not implemented")));
-        	}
+            switch (request.getMethod()) {
+                case LIST_SERVICES:
+                    pluginConfigEvent.fire(new ExchangeMessageEvent(textMessage));
+                    break;
+                case SET_COMMAND:
+                    sendCommandToPluginEvent.fire(new ExchangeMessageEvent(textMessage));
+                    break;
+                case SEND_REPORT_TO_PLUGIN:
+                    sendMessageToPluginEvent.fire(new ExchangeMessageEvent(textMessage));
+                    break;
+                case SET_MOVEMENT_REPORT:
+                    processMovementEvent.fire(new ExchangeMessageEvent(textMessage));
+                    break;
+                case PING:
+                    pingEvent.fire(new ExchangeMessageEvent(textMessage));
+                    break;
+                default:
+                    LOG.error("[ Not implemented method consumed: {} ] ", request.getMethod());
+                    errorEvent.fire(new ExchangeMessageEvent(textMessage, ExchangeModuleResponseMapper.createFaultMessage(FaultCode.EXCHANGE_MESSAGE, "Method not implemented")));
+            }
         }
     }
-    
+
     private ExchangeBaseRequest tryConsumeExchangeBaseRequest(TextMessage textMessage) {
-    	try {
-    		return JAXBMarshaller.unmarshallTextMessage(textMessage, ExchangeBaseRequest.class);
-    	} catch (ExchangeModelMarshallException e) {
-    		return null;
-    	}
+        try {
+            return JAXBMarshaller.unmarshallTextMessage(textMessage, ExchangeBaseRequest.class);
+        } catch (ExchangeModelMarshallException e) {
+            return null;
+        }
     }
-    
+
     private AcknowledgeResponse tryConsumeAcknowledgeResponse(TextMessage textMessage) {
-    	try {
-    		return JAXBMarshaller.unmarshallTextMessage(textMessage, AcknowledgeResponse.class);
-    	} catch (ExchangeModelMarshallException e) {
-    		LOG.error("Couldn't marshall ack response");
-    		return null;
-    	}
+        try {
+            return JAXBMarshaller.unmarshallTextMessage(textMessage, AcknowledgeResponse.class);
+        } catch (ExchangeModelMarshallException e) {
+            LOG.error("Couldn't marshall ack response");
+            return null;
+        }
     }
 
 }
