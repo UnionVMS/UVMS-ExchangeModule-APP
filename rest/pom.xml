@@ -102,7 +102,7 @@
                             </execution>
                         </executions>
                         <configuration>
-                            <file>rest/src/main/webapp/apidocs/index.html</file>
+                            <file>${basedir}/src/main/webapp/apidocs/index.html</file>
                             <replacements>
                                 <replacement>
                                     <token>new ApiKeyAuthorization\("api_key", key, "query"\)</token>

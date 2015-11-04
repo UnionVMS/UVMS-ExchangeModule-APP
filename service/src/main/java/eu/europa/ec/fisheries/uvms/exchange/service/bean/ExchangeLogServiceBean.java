@@ -30,7 +30,7 @@ import eu.europa.ec.fisheries.uvms.exchange.model.mapper.ExchangeDataSourceRespo
 import eu.europa.ec.fisheries.uvms.exchange.service.ExchangeLogService;
 import eu.europa.ec.fisheries.uvms.exchange.service.event.ExchangeLogEvent;
 import eu.europa.ec.fisheries.uvms.exchange.service.exception.ExchangeLogException;
-import eu.europa.ec.fisheries.uvms.notifications.NotificationMessage;
+import eu.europa.ec.fisheries.uvms.longpolling.notifications.NotificationMessage;
 
 @Stateless
 public class ExchangeLogServiceBean implements ExchangeLogService {

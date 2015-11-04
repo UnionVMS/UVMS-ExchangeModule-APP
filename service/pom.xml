@@ -49,11 +49,11 @@
             <artifactId>dozer</artifactId>
             <version>${dozer.version}</version>
         </dependency>
-		<dependency>
-			<groupId>eu.europa.ec.fisheries.uvms</groupId>
-			<artifactId>uvms-commons</artifactId>
-			<version>${uvms.commons.version}</version>
-		</dependency>
+        <dependency>
+            <groupId>eu.europa.ec.fisheries</groupId>
+            <artifactId>uvms-longpolling</artifactId>
+            <version>${longpolling.version}</version>
+        </dependency>
     </dependencies>
 
     <build>

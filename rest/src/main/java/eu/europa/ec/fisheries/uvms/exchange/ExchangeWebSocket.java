@@ -28,16 +28,16 @@ public class ExchangeWebSocket {
     private static Set<Session> peers = Collections.synchronizedSet(new HashSet<Session>());
 
     public void onServiceEvent(@Observes @NotificationEvent NotificationMessage notificationMessage) {
-    	for (Session peer : peers) {
-			try {
-				peer.getBasicRemote().sendText(NotificationUtils.getTextMessage(notificationMessage));
-			} catch (IOException e) {
-	            LOG.error("[ Error when sending message to websocket peer. ] {} ", e.getMessage());
-			}
-		}
+        for (Session peer : peers) {
+            try {
+                peer.getBasicRemote().sendText(NotificationUtils.getTextMessage(notificationMessage));
+            } catch (IOException e) {
+                LOG.error("[ Error when sending message to websocket peer. ] {} ", e.getMessage());
+            }
+        }
     }
 
-	@OnOpen
+    @OnOpen
     public void onOpen(Session peer) {
         peers.add(peer);
     }
