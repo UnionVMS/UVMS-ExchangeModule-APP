@@ -28,6 +28,7 @@ import eu.europa.ec.fisheries.schema.exchange.source.v1.RegisterServiceResponse;
 import eu.europa.ec.fisheries.schema.exchange.source.v1.ResendMessageResponse;
 import eu.europa.ec.fisheries.schema.exchange.source.v1.SetServiceSettingsResponse;
 import eu.europa.ec.fisheries.schema.exchange.source.v1.SetServiceStatusResponse;
+import eu.europa.ec.fisheries.schema.exchange.source.v1.SingleExchangeLogResponse;
 import eu.europa.ec.fisheries.schema.exchange.source.v1.UnregisterServiceResponse;
 import eu.europa.ec.fisheries.schema.exchange.source.v1.UpdateLogStatusResponse;
 import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogStatusType;
@@ -309,4 +310,21 @@ public class ExchangeDataSourceResponseMapper {
 		response.getStatusLog().addAll(statusHistoryList);
 		return JAXBMarshaller.marshallJaxBObjectToString(response);
 	}
+
+	public static String createSingleExchangeLogResponse(ExchangeLogType exchangeLog) throws ExchangeModelMarshallException {
+	    SingleExchangeLogResponse response = new SingleExchangeLogResponse();
+	    response.setExchangeLog(exchangeLog);
+	    return JAXBMarshaller.marshallJaxBObjectToString(response);
+	}
+
+    public static ExchangeLogType mapToExchangeLogTypeFromSingleExchageLogResponse(TextMessage message, String correlationId) throws ExchangeModelMapperException {
+        try {
+            validateResponse(message, correlationId);
+            SingleExchangeLogResponse singleExchangeLogResponse = JAXBMarshaller.unmarshallTextMessage(message, SingleExchangeLogResponse.class);
+            return singleExchangeLogResponse.getExchangeLog();
+        } catch (JMSException | ExchangeValidationException | ExchangeModelMarshallException e) {
+            LOG.error("[ Error when mapping response to single exchange log. ]");
+            throw new ExchangeModelMapperException("[ Error when mapping response to single exchange log. ] " + e.getMessage());
+        }
+    }
 }

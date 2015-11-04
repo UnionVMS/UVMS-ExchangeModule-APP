@@ -17,6 +17,7 @@ import eu.europa.ec.fisheries.schema.exchange.service.v1.StatusType;
 import eu.europa.ec.fisheries.schema.exchange.source.v1.CreateLogRequest;
 import eu.europa.ec.fisheries.schema.exchange.source.v1.CreateUnsentMessageRequest;
 import eu.europa.ec.fisheries.schema.exchange.source.v1.ExchangeDataSourceMethod;
+import eu.europa.ec.fisheries.schema.exchange.source.v1.GetExchangeLogRequest;
 import eu.europa.ec.fisheries.schema.exchange.source.v1.GetLogListByQueryRequest;
 import eu.europa.ec.fisheries.schema.exchange.source.v1.GetLogStatusHistoryByQueryRequest;
 import eu.europa.ec.fisheries.schema.exchange.source.v1.GetLogStatusHistoryRequest;
@@ -247,4 +248,12 @@ public class ExchangeDataSourceRequestMapper {
 		request.setQuery(query);
 		return JAXBMarshaller.marshallJaxBObjectToString(request);
 	}
+
+	public static String mapGetExchangeLogRequest(String guid) throws ExchangeModelMarshallException {
+	    GetExchangeLogRequest request = new GetExchangeLogRequest();
+	    request.setMethod(ExchangeDataSourceMethod.GET_LOG_BY_GUID);
+	    request.setGuid(guid);
+	    return JAXBMarshaller.marshallJaxBObjectToString(request);
+	}
+
 }

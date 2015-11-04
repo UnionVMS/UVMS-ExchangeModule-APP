@@ -6,14 +6,14 @@ import java.util.List;
 
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
+import javax.enterprise.event.Event;
+import javax.inject.Inject;
 import javax.jms.TextMessage;
-import javax.xml.datatype.XMLGregorianCalendar;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import eu.europa.ec.fisheries.schema.exchange.source.v1.GetLogListByQueryResponse;
-import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeHistoryListQuery;
 import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeListQuery;
 import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogStatusType;
 import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogStatusTypeType;
@@ -28,7 +28,9 @@ import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelMapperE
 import eu.europa.ec.fisheries.uvms.exchange.model.mapper.ExchangeDataSourceRequestMapper;
 import eu.europa.ec.fisheries.uvms.exchange.model.mapper.ExchangeDataSourceResponseMapper;
 import eu.europa.ec.fisheries.uvms.exchange.service.ExchangeLogService;
+import eu.europa.ec.fisheries.uvms.exchange.service.event.ExchangeLogEvent;
 import eu.europa.ec.fisheries.uvms.exchange.service.exception.ExchangeLogException;
+import eu.europa.ec.fisheries.uvms.notifications.NotificationMessage;
 
 @Stateless
 public class ExchangeLogServiceBean implements ExchangeLogService {
@@ -42,8 +44,12 @@ public class ExchangeLogServiceBean implements ExchangeLogService {
 	
 	@EJB
     ExchangeEventLogCache logCache;
-    
-	@Override
+
+    @Inject
+    @ExchangeLogEvent
+    Event<NotificationMessage> exchangeLogEvent;
+
+    @Override
 	public ExchangeLogType logAndCache(ExchangeLogType log, String pluginMessageId) throws ExchangeLogException {
         ExchangeLogType createdLog = log(log);
         logCache.put(pluginMessageId, createdLog.getGuid());
@@ -58,6 +64,7 @@ public class ExchangeLogServiceBean implements ExchangeLogService {
 			String messageId = producer.sendMessageOnQueue(logText, MessageQueue.INTERNAL);
 			TextMessage response = consumer.getMessage(messageId, TextMessage.class);
 			ExchangeLogType createdLog = ExchangeDataSourceResponseMapper.mapCreateExchangeLogResponse(response, messageId);
+			exchangeLogEvent.fire(new NotificationMessage("guid", createdLog.getGuid()));
 			return createdLog;
 		}  catch (ExchangeModelMapperException | ExchangeMessageException e) {
 			throw new ExchangeLogException("Couldn't create log exchange log.");
@@ -73,6 +80,7 @@ public class ExchangeLogServiceBean implements ExchangeLogService {
 			String messageId = producer.sendMessageOnQueue(text, MessageQueue.INTERNAL);
 			TextMessage response = consumer.getMessage(messageId, TextMessage.class);
 			ExchangeLogType updatedLog = ExchangeDataSourceResponseMapper.mapUpdateLogStatusResponse(response, messageId);
+			exchangeLogEvent.fire(new NotificationMessage("guid", updatedLog.getGuid()));
 			return updatedLog;
 		} catch (ExchangeModelMapperException | ExchangeMessageException e) {
 			throw new ExchangeLogException("Couldn't update status of exchange log");
@@ -123,5 +131,18 @@ public class ExchangeLogServiceBean implements ExchangeLogService {
 			throw new ExchangeLogException("Couldn't get exchange status history list.");
 		}
 	}
+
+    @Override
+    public ExchangeLogType getExchangeLogByGuid(String guid) throws ExchangeLogException {
+        try {
+            String request = ExchangeDataSourceRequestMapper.mapGetExchangeLogRequest(guid);
+            String messageId = producer.sendMessageOnQueue(request, MessageQueue.INTERNAL);
+            TextMessage response = consumer.getMessage(messageId, TextMessage.class);
+            return ExchangeDataSourceResponseMapper.mapToExchangeLogTypeFromSingleExchageLogResponse(response, messageId);
+        } catch (ExchangeMessageException | ExchangeModelMapperException e) {
+            LOG.error("[ Error when getting exchange log by GUID. ] {}", e.getMessage());
+            throw new ExchangeLogException("Error when getting exchange log by GUID.");
+        }
+    }
 
 }

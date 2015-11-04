@@ -20,8 +20,10 @@ import eu.europa.ec.fisheries.schema.exchange.movement.v1.SendMovementToPluginTy
 import eu.europa.ec.fisheries.schema.exchange.plugin.types.v1.PluginType;
 import eu.europa.ec.fisheries.schema.exchange.service.v1.ServiceResponseType;
 import eu.europa.ec.fisheries.schema.exchange.service.v1.StatusType;
+import eu.europa.ec.fisheries.schema.exchange.source.v1.CreateUnsentMessageResponse;
 import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogType;
 import eu.europa.ec.fisheries.uvms.exchange.message.constants.MessageQueue;
+import eu.europa.ec.fisheries.uvms.exchange.message.consumer.ExchangeMessageConsumer;
 import eu.europa.ec.fisheries.uvms.exchange.message.event.ErrorEvent;
 import eu.europa.ec.fisheries.uvms.exchange.message.event.SendCommandToPluginEvent;
 import eu.europa.ec.fisheries.uvms.exchange.message.event.SendReportToPluginEvent;
@@ -38,8 +40,10 @@ import eu.europa.ec.fisheries.uvms.exchange.model.mapper.JAXBMarshaller;
 import eu.europa.ec.fisheries.uvms.exchange.service.ExchangeEventOutgoingService;
 import eu.europa.ec.fisheries.uvms.exchange.service.ExchangeLogService;
 import eu.europa.ec.fisheries.uvms.exchange.service.ExchangeService;
+import eu.europa.ec.fisheries.uvms.exchange.service.event.ExchangeSendingQueueEvent;
 import eu.europa.ec.fisheries.uvms.exchange.service.exception.ExchangeLogException;
 import eu.europa.ec.fisheries.uvms.exchange.service.mapper.ExchangeLogMapper;
+import eu.europa.ec.fisheries.uvms.notifications.NotificationMessage;
 
 @Stateless
 public class ExchangeEventOutgoingServiceBean implements ExchangeEventOutgoingService {
@@ -52,13 +56,20 @@ public class ExchangeEventOutgoingServiceBean implements ExchangeEventOutgoingSe
     
     @EJB
     MessageProducer producer;
-    
+
+    @EJB
+    ExchangeMessageConsumer consumer;
+
     @EJB
     ExchangeLogService exchangeLog;
     
     @EJB
     ExchangeService exchangeService;
-    
+
+    @Inject
+    @ExchangeSendingQueueEvent
+    Event<NotificationMessage> sendingQueueEvent;
+
 	@Override
     public void sendReportToPlugin(@Observes @SendReportToPluginEvent ExchangeMessageEvent message) {
         LOG.info("Send report to plugin");
@@ -119,7 +130,10 @@ public class ExchangeEventOutgoingServiceBean implements ExchangeEventOutgoingSe
         	LOG.info("Plugin to send report to is not started");
         	try {
 				String text = ExchangeDataSourceRequestMapper.mapCreateUnsentMessage(sendReport.getTimestamp(), ExchangeLogMapper.getSendMovementSenderReceiver(sendReport), sendReport.getRecipient(), reportText);
-				producer.sendMessageOnQueue(text, MessageQueue.INTERNAL);
+				String messageId = producer.sendMessageOnQueue(text, MessageQueue.INTERNAL);
+				TextMessage response = consumer.getMessage(messageId, TextMessage.class);
+				CreateUnsentMessageResponse createUnsentMessageResponse = JAXBMarshaller.unmarshallTextMessage(response, CreateUnsentMessageResponse.class);
+				sendingQueueEvent.fire(new NotificationMessage("messageId", createUnsentMessageResponse.getUnsentMessageId()));
 			} catch (ExchangeModelMarshallException | ExchangeMessageException e) {
 				LOG.error("Couldn't add message to unsent list");
 			}

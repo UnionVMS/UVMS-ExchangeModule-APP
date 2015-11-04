@@ -48,10 +48,12 @@ import eu.europa.ec.fisheries.uvms.exchange.service.ExchangeEventIncomingService
 import eu.europa.ec.fisheries.uvms.exchange.service.ExchangeLogService;
 import eu.europa.ec.fisheries.uvms.exchange.service.ExchangeRulesService;
 import eu.europa.ec.fisheries.uvms.exchange.service.ExchangeService;
+import eu.europa.ec.fisheries.uvms.exchange.service.event.ExchangePluginStatusEvent;
 import eu.europa.ec.fisheries.uvms.exchange.service.exception.ExchangeLogException;
 import eu.europa.ec.fisheries.uvms.exchange.service.exception.ExchangeServiceException;
 import eu.europa.ec.fisheries.uvms.exchange.service.mapper.ExchangeLogMapper;
 import eu.europa.ec.fisheries.uvms.exchange.service.mapper.MovementMapper;
+import eu.europa.ec.fisheries.uvms.notifications.NotificationMessage;
 
 @Stateless
 public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingService {
@@ -77,7 +79,11 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
 
     @EJB
     ExchangeRulesService rulesService;
-    
+
+    @Inject
+    @ExchangePluginStatusEvent
+    Event<NotificationMessage> pluginStatusEvent;
+
     @Override
     public void getPluginListByTypes(@Observes @PluginConfigEvent ExchangeMessageEvent message) {
         LOG.info("Get plugin config LIST_SERVICE");
@@ -205,9 +211,11 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
                     break;
                 case START:
                     handleUpdateServiceAcknowledge(serviceClassName, acknowledge, StatusType.STARTED);
+                    pluginStatusEvent.fire(createNotificationMessage(serviceClassName, true));
                     break;
                 case STOP:
                     handleUpdateServiceAcknowledge(serviceClassName, acknowledge, StatusType.STOPPED);
+                    pluginStatusEvent.fire(createNotificationMessage(serviceClassName, false));
                     break;
                 case SET_CONFIG:
                 default:
@@ -266,4 +274,11 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
 			break;
 		}
 	}
+
+    private NotificationMessage createNotificationMessage(String serviceClassName, boolean started) {
+        NotificationMessage msg = new NotificationMessage("serviceClassName", serviceClassName);
+        msg.setProperty("started", started);
+        return msg;
+    }
+
 }

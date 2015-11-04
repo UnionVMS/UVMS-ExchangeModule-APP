@@ -28,5 +28,7 @@ public interface ExchangeLogService {
 	public List<UnsentMessageType> getUnsentMessageList() throws ExchangeLogException;
 
 	public List<ExchangeLogStatusType> getExchangeStatusHistoryList(ExchangeLogStatusTypeType status, TypeRefType type, Date from, Date to) throws ExchangeLogException;
-	
+
+	public ExchangeLogType getExchangeLogByGuid(String guid) throws ExchangeLogException;
+
 }

@@ -6,8 +6,10 @@ import java.util.List;
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
 import javax.ws.rs.Consumes;
+import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
@@ -82,4 +84,18 @@ public class ExchangeLogRestResource {
             return ErrorHandler.getFault(e);
         }
     }
+
+    @GET
+    @Produces(value = {MediaType.APPLICATION_JSON})
+    @Path("/{guid}")
+    @RequiresFeature(UnionVMSFeature.viewExchange)
+    public ResponseDto getExchangeLogByGuid(@PathParam("guid") String guid) {
+        try {
+            return new ResponseDto(serviceLayer.getExchangeLogByGuid(guid), RestResponseCode.OK);
+        } catch (Exception e) {
+            LOG.error("[ Error when getting exchange log by GUID. ] {}", e.getMessage());
+            return ErrorHandler.getFault(e);
+        }
+    }
+
 }

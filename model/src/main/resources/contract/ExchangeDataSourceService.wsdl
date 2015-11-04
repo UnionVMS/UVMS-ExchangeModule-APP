@@ -37,7 +37,8 @@
                     <xsd:enumeration value="UPDATE_LOG_STATUS"/>
                     <xsd:enumeration value="GET_LOG_STATUS_HISTORY"/>
                     <xsd:enumeration value="GET_LOG_STATUS_HISTORY_BY_QUERY"/>
-                    
+                    <xsd:enumeration value="GET_LOG_BY_GUID"/>
+
                     <!-- UNSENT MESSAGES -->
                     <xsd:enumeration value="GET_UNSENT_MESSAGE_LIST"/>
                     <xsd:enumeration value="CREATE_UNSENT_MESSAGE"/>
@@ -398,6 +399,26 @@
                 </xsd:complexType>
             </xsd:element>
 
+            <xsd:element name="GetExchangeLogRequest">
+                <xsd:complexType>
+                    <xsd:complexContent>
+                        <xsd:extension base="source:ExchangeBaseRequest">
+                            <xsd:sequence>
+                                <xsd:element name="guid" type="xsd:string"/>
+                            </xsd:sequence>
+                        </xsd:extension>
+                    </xsd:complexContent>
+                </xsd:complexType>
+            </xsd:element>
+
+            <xsd:element name="SingleExchangeLogResponse">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element name="exchangeLog" type="exchange:ExchangeLogType"/>
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
+
         </xsd:schema>
     </types>
     
@@ -523,6 +544,13 @@
     <message name="PingResponse">
         <part name="body" element="source:pingResponse"/>
     </message>
+
+    <message name="GetExchangeLogRequest">
+        <part name="body" element="source:GetExchangeLogRequest"/>
+    </message>
+    <message name="GetExchangeLogResponse">
+        <part name="body" element="source:SingleExchangeLogResponse"/>
+    </message>
     
     <portType name="ExchangeDataSourcePortType">
 
@@ -625,6 +653,12 @@
         <operation name="Ping">
             <input message="source:PingRequest"/>
             <output message="source:PingResponse"/>
+        </operation>
+
+        <operation name="GetExchangeLog">
+            <input message="source:GetExchangeLogRequest"/>
+            <output message="source:GetExchangeLogResponse"/>
+            <fault name="ExchangeFault" message="source:ExchangeFault"/>
         </operation>
 
     </portType>
@@ -825,6 +859,15 @@
         </operation>
 
         <operation name="Ping">
+            <input>
+                <soap:body use="literal"/>
+            </input>
+            <output>
+                <soap:body use="literal"/>
+            </output>
+        </operation>
+
+        <operation name="GetExchangeLog">
             <input>
                 <soap:body use="literal"/>
             </input>
