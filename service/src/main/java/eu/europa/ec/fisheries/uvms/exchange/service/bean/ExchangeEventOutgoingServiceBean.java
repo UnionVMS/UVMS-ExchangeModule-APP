@@ -13,6 +13,8 @@ import javax.jms.TextMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import eu.europa.ec.fisheries.schema.exchange.common.v1.AcknowledgeType;
+import eu.europa.ec.fisheries.schema.exchange.common.v1.AcknowledgeTypeType;
 import eu.europa.ec.fisheries.schema.exchange.common.v1.CommandType;
 import eu.europa.ec.fisheries.schema.exchange.module.v1.SendMovementToPluginRequest;
 import eu.europa.ec.fisheries.schema.exchange.module.v1.SetCommandRequest;
@@ -102,6 +104,9 @@ public class ExchangeEventOutgoingServiceBean implements ExchangeEventOutgoingSe
                 	} catch (ExchangeLogException e) {
                 		LOG.error(e.getMessage());
                 	}
+                	
+                	//TODO
+                	//producer.sendMessageOnQueue(arg0, arg1)
                 } else {
                 	LOG.debug("Validation error. Event sent to caller.");
                 }
@@ -159,6 +164,13 @@ public class ExchangeEventOutgoingServiceBean implements ExchangeEventOutgoingSe
             	} catch (ExchangeLogException e) {
             		LOG.error(e.getMessage());
             	}
+            	
+				//response back to Rules or MobileTerminal
+            	AcknowledgeType ackType = ExchangeModuleResponseMapper.mapAcknowledgeTypeOK();
+				String moduleResponse = ExchangeModuleResponseMapper.mapSetCommandResponse(ackType);
+            	producer.sendModuleResponseMessage(message.getJmsMessage(), moduleResponse);
+            } else {
+            	LOG.debug("Validation error. Event sent to caller.");
             }
             
         } catch (NullPointerException | ExchangeException e) {
@@ -184,7 +196,7 @@ public class ExchangeEventOutgoingServiceBean implements ExchangeEventOutgoingSe
         	String faultMessage = "No timestamp";
 			exchangeErrorEvent.fire(new ExchangeMessageEvent(origin, ExchangeModuleResponseMapper.createFaultMessage(FaultCode.EXCHANGE_COMMAND_INVALID, faultMessage)));
 			return false;
-        }
+        } //TODO if service is started, else sendingQueue
         return true;
 	}
 }

@@ -9,6 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import eu.europa.ec.fisheries.schema.exchange.common.v1.AcknowledgeType;
+import eu.europa.ec.fisheries.schema.exchange.common.v1.AcknowledgeTypeType;
 import eu.europa.ec.fisheries.schema.exchange.common.v1.ExchangeFault;
 import eu.europa.ec.fisheries.schema.exchange.module.v1.GetServiceListResponse;
 import eu.europa.ec.fisheries.schema.exchange.module.v1.SetCommandResponse;
@@ -45,7 +46,21 @@ public class ExchangeModuleResponseMapper {
 		}        
     }
 
-    public static String mapCreatePollResponseToString(AcknowledgeType ackType) throws ExchangeModelMarshallException {
+    public static AcknowledgeType mapAcknowledgeTypeOK() {
+    	AcknowledgeType ackType = new AcknowledgeType();
+    	ackType.setType(AcknowledgeTypeType.OK);
+    	return ackType;
+    }
+    
+    public static AcknowledgeType mapAcknowledgeTypeNOK(String messageId, String errorMessage) {
+    	AcknowledgeType ackType = new AcknowledgeType();
+    	ackType.setMessage(errorMessage);
+    	ackType.setMessageId(messageId);
+    	ackType.setType(AcknowledgeTypeType.NOK);
+    	return ackType;
+    }
+    
+    public static String mapSetCommandResponse(AcknowledgeType ackType) throws ExchangeModelMarshallException {
         SetCommandResponse response = new SetCommandResponse();
         response.setResponse(ackType);
         return JAXBMarshaller.marshallJaxBObjectToString(response);
@@ -70,6 +85,18 @@ public class ExchangeModuleResponseMapper {
 			GetServiceListResponse unmarshalledResponse = JAXBMarshaller.unmarshallTextMessage(response, GetServiceListResponse.class);
 			return unmarshalledResponse.getService();
 		} catch(JMSException | ExchangeValidationException e) {
+			LOG.error("[ Error when mapping response to service types ]");
+			throw new ExchangeModelMapperException("[ Error when mapping response to service types ] " + e.getMessage());
+		}
+	}
+
+	public static AcknowledgeType mapSetCommandSendPollResponse(TextMessage response, String correlationId) throws ExchangeModelMapperException {
+		try {
+			validateResponse(response, correlationId);
+			SetCommandResponse unmarshalledResponse = JAXBMarshaller.unmarshallTextMessage(response, SetCommandResponse.class);
+			return unmarshalledResponse.getResponse();
+			//TODO handle ExchangeValidationException - extract fault...
+		} catch(JMSException | ExchangeValidationException | ExchangeModelMarshallException e) {
 			LOG.error("[ Error when mapping response to service types ]");
 			throw new ExchangeModelMapperException("[ Error when mapping response to service types ] " + e.getMessage());
 		}
