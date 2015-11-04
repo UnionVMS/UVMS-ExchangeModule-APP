@@ -20,7 +20,6 @@ import eu.europa.ec.fisheries.uvms.exchange.rest.dto.RestResponseCode;
 import eu.europa.ec.fisheries.uvms.exchange.rest.dto.exchange.SendingGroupLog;
 import eu.europa.ec.fisheries.uvms.exchange.rest.error.ErrorHandler;
 import eu.europa.ec.fisheries.uvms.exchange.rest.mapper.ExchangeLogMapper;
-import eu.europa.ec.fisheries.uvms.exchange.rest.mock.ExchangeMock;
 import eu.europa.ec.fisheries.uvms.exchange.service.ExchangeLogService;
 import eu.europa.ec.fisheries.uvms.rest.security.RequiresFeature;
 import eu.europa.ec.fisheries.uvms.rest.security.UnionVMSFeature;
@@ -77,8 +76,9 @@ public class ExchangeSendingQueueResource {
 		LOG.info("Get list invoked in rest layer");
 		try {
 			//TODO swaggerize messageIdList
-			boolean send = ExchangeMock.send(messageIdList);
-			return new ResponseDto(send, RestResponseCode.OK);
+			//boolean send = ExchangeMock.send(messageIdList);
+			serviceLayer.resend(messageIdList);
+			return new ResponseDto(true, RestResponseCode.OK);
 		} catch (Exception ex) {
 			LOG.error("[ Error when geting log list. ] {} ", ex.getMessage());
 			return ErrorHandler.getFault(ex);
