@@ -9,6 +9,7 @@ import javax.ejb.Stateless;
 import javax.enterprise.event.Event;
 import javax.inject.Inject;
 import javax.jms.TextMessage;
+import javax.xml.datatype.XMLGregorianCalendar;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,6 +30,7 @@ import eu.europa.ec.fisheries.uvms.exchange.model.mapper.ExchangeDataSourceReque
 import eu.europa.ec.fisheries.uvms.exchange.model.mapper.ExchangeDataSourceResponseMapper;
 import eu.europa.ec.fisheries.uvms.exchange.service.ExchangeLogService;
 import eu.europa.ec.fisheries.uvms.exchange.service.event.ExchangeLogEvent;
+import eu.europa.ec.fisheries.uvms.exchange.service.event.ExchangeSendingQueueEvent;
 import eu.europa.ec.fisheries.uvms.exchange.service.exception.ExchangeLogException;
 import eu.europa.ec.fisheries.uvms.longpolling.notifications.NotificationMessage;
 
@@ -49,6 +51,10 @@ public class ExchangeLogServiceBean implements ExchangeLogService {
     @ExchangeLogEvent
     Event<NotificationMessage> exchangeLogEvent;
 
+    @Inject
+    @ExchangeSendingQueueEvent
+    Event<NotificationMessage> sendingQueueEvent;
+    
     @Override
 	public ExchangeLogType logAndCache(ExchangeLogType log, String pluginMessageId) throws ExchangeLogException {
         ExchangeLogType createdLog = log(log);
@@ -144,5 +150,22 @@ public class ExchangeLogServiceBean implements ExchangeLogService {
             throw new ExchangeLogException("Error when getting exchange log by GUID.");
         }
     }
+
+	@Override
+	public String createUnsentMessage(String senderReceiver, XMLGregorianCalendar timestamp, String recipient, String message) throws ExchangeLogException {
+		LOG.debug("createUnsentMessage in service layer");
+		try {
+			String text = ExchangeDataSourceRequestMapper.mapCreateUnsentMessage(timestamp, senderReceiver, recipient, message);
+			LOG.debug(text);
+			String messageId = producer.sendMessageOnQueue(text, MessageQueue.INTERNAL);
+			TextMessage response = consumer.getMessage(messageId, TextMessage.class);
+			String unsentMessageId = ExchangeDataSourceResponseMapper.mapCreateUnsentMessageResponse(response, messageId);
+			sendingQueueEvent.fire(new NotificationMessage("messageId", unsentMessageId));
+			return unsentMessageId;
+		} catch (ExchangeMessageException | ExchangeModelMapperException e) {
+			LOG.error("Couldn't add message to unsent list");
+			throw new ExchangeLogException("Couldn't add message to unsent list");
+		}
+	}
 
 }

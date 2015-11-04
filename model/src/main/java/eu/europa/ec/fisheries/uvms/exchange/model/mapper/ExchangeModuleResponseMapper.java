@@ -12,6 +12,7 @@ import eu.europa.ec.fisheries.schema.exchange.common.v1.AcknowledgeType;
 import eu.europa.ec.fisheries.schema.exchange.common.v1.AcknowledgeTypeType;
 import eu.europa.ec.fisheries.schema.exchange.common.v1.ExchangeFault;
 import eu.europa.ec.fisheries.schema.exchange.module.v1.GetServiceListResponse;
+import eu.europa.ec.fisheries.schema.exchange.module.v1.SendMovementToPluginResponse;
 import eu.europa.ec.fisheries.schema.exchange.module.v1.SetCommandResponse;
 import eu.europa.ec.fisheries.schema.exchange.service.v1.ServiceResponseType;
 import eu.europa.ec.fisheries.uvms.exchange.model.constant.FaultCode;
@@ -65,6 +66,12 @@ public class ExchangeModuleResponseMapper {
         response.setResponse(ackType);
         return JAXBMarshaller.marshallJaxBObjectToString(response);
     }
+    
+    public static String mapSendMovementToPluginResponse(AcknowledgeType ackType) throws ExchangeModelMarshallException {
+    	SendMovementToPluginResponse response = new SendMovementToPluginResponse();
+    	response.setResponse(ackType);
+    	return JAXBMarshaller.marshallJaxBObjectToString(response);
+	}
     
     public static ExchangeFault createFaultMessage(FaultCode code, String message) {
     	ExchangeFault fault = new ExchangeFault();

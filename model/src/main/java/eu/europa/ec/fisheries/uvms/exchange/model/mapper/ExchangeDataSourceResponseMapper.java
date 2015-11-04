@@ -327,4 +327,15 @@ public class ExchangeDataSourceResponseMapper {
             throw new ExchangeModelMapperException("[ Error when mapping response to single exchange log. ] " + e.getMessage());
         }
     }
+
+	public static String mapCreateUnsentMessageResponse(TextMessage message, String correlationId) throws ExchangeModelMapperException {
+		try {
+            validateResponse(message, correlationId);
+            CreateUnsentMessageResponse unmarshalledResponse = JAXBMarshaller.unmarshallTextMessage(message, CreateUnsentMessageResponse.class);
+            return unmarshalledResponse.getUnsentMessageId();
+        } catch (JMSException | ExchangeValidationException | ExchangeModelMarshallException e) {
+            LOG.error("[ Error when mapping response to single exchange log. ]");
+            throw new ExchangeModelMapperException("[ Error when mapping response to single exchange log. ] " + e.getMessage());
+        }
+	}
 }

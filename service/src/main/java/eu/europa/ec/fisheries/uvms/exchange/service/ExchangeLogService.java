@@ -4,6 +4,7 @@ import java.util.Date;
 import java.util.List;
 
 import javax.ejb.Local;
+import javax.xml.datatype.XMLGregorianCalendar;
 
 import eu.europa.ec.fisheries.schema.exchange.source.v1.GetLogListByQueryResponse;
 import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeListQuery;
@@ -31,4 +32,5 @@ public interface ExchangeLogService {
 
 	public ExchangeLogType getExchangeLogByGuid(String guid) throws ExchangeLogException;
 
+	public String createUnsentMessage(String senderReceiver, XMLGregorianCalendar timestamp, String recipient, String message) throws ExchangeLogException;
 }
