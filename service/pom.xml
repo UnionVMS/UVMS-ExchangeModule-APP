@@ -33,11 +33,18 @@
             <version>${project.parent.version}</version>
             <scope>provided</scope>
         </dependency>
+        <!-- needed ??? -->
         <dependency>
             <groupId>eu.europa.ec.fisheries.uvms.config</groupId>
             <artifactId>config-model</artifactId>
             <version>1.0-SNAPSHOT</version>
             <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>eu.europa.ec.fisheries.uvms.audit</groupId>
+            <artifactId>audit-model</artifactId>
+            <version>${audit.model.version}</version>
+            <type>jar</type>
         </dependency>
         <dependency>
             <groupId>eu.europa.ec.fisheries.uvms.rules</groupId>
