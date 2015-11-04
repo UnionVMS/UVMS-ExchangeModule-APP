@@ -49,11 +49,6 @@
             <artifactId>dozer</artifactId>
             <version>${dozer.version}</version>
         </dependency>
-        <dependency>
-            <groupId>eu.europa.ec.fisheries.uvms</groupId>
-            <artifactId>uvms-commons</artifactId>
-            <version>${uvms.common.version}</version>
-        </dependency>
     </dependencies>
 
     <build>

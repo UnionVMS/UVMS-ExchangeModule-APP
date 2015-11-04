@@ -30,4 +30,10 @@ public class DateUtils {
         return new DateTime(DateTimeZone.UTC);
     }
 
+    public static Date parseTimestamp(XMLGregorianCalendar timestamp) {
+        if (timestamp != null) {
+            return timestamp.toGregorianCalendar().getTime();
+        }
+        return null;
+    }
 }

@@ -39,9 +39,9 @@ import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogStatusTypeType;
 import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogType;
 import eu.europa.ec.fisheries.schema.exchange.v1.TypeRefType;
 import eu.europa.ec.fisheries.schema.exchange.v1.UnsentMessageType;
-import eu.europa.ec.fisheries.uvms.common.DateUtils;
 import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelMapperException;
 import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelMarshallException;
+import eu.europa.ec.fisheries.uvms.exchange.model.util.DateUtils;
 
 public class ExchangeDataSourceRequestMapper {
 
