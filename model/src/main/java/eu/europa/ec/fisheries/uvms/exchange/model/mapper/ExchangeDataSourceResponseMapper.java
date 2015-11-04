@@ -334,8 +334,19 @@ public class ExchangeDataSourceResponseMapper {
             CreateUnsentMessageResponse unmarshalledResponse = JAXBMarshaller.unmarshallTextMessage(message, CreateUnsentMessageResponse.class);
             return unmarshalledResponse.getUnsentMessageId();
         } catch (JMSException | ExchangeValidationException | ExchangeModelMarshallException e) {
-            LOG.error("[ Error when mapping response to single exchange log. ]");
-            throw new ExchangeModelMapperException("[ Error when mapping response to single exchange log. ] " + e.getMessage());
+            LOG.error("[ Error when mapping response unsent message response. ]");
+            throw new ExchangeModelMapperException("[ Error when mapping response unsent message response. ] " + e.getMessage());
+        }
+	}
+
+	public static List<UnsentMessageType> mapResendMessageResponse(TextMessage message, String correlationId) throws ExchangeModelMapperException {
+		try {
+            validateResponse(message, correlationId);
+            ResendMessageResponse unmarshalledResponse = JAXBMarshaller.unmarshallTextMessage(message, ResendMessageResponse.class);
+            return unmarshalledResponse.getResentMessage();
+        } catch (JMSException | ExchangeValidationException | ExchangeModelMarshallException e) {
+            LOG.error("[ Error when mapping to resend response. ]");
+            throw new ExchangeModelMapperException("[ Error when mapping to resend response. ] " + e.getMessage());
         }
 	}
 }

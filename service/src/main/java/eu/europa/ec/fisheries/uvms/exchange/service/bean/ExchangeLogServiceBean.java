@@ -8,6 +8,7 @@ import javax.ejb.EJB;
 import javax.ejb.Stateless;
 import javax.enterprise.event.Event;
 import javax.inject.Inject;
+import javax.jms.JMSException;
 import javax.jms.TextMessage;
 import javax.xml.datatype.XMLGregorianCalendar;
 
@@ -26,8 +27,10 @@ import eu.europa.ec.fisheries.uvms.exchange.message.consumer.ExchangeMessageCons
 import eu.europa.ec.fisheries.uvms.exchange.message.exception.ExchangeMessageException;
 import eu.europa.ec.fisheries.uvms.exchange.message.producer.MessageProducer;
 import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelMapperException;
+import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeValidationException;
 import eu.europa.ec.fisheries.uvms.exchange.model.mapper.ExchangeDataSourceRequestMapper;
 import eu.europa.ec.fisheries.uvms.exchange.model.mapper.ExchangeDataSourceResponseMapper;
+import eu.europa.ec.fisheries.uvms.exchange.model.mapper.ExchangeModuleResponseMapper;
 import eu.europa.ec.fisheries.uvms.exchange.service.ExchangeLogService;
 import eu.europa.ec.fisheries.uvms.exchange.service.event.ExchangeLogEvent;
 import eu.europa.ec.fisheries.uvms.exchange.service.event.ExchangeSendingQueueEvent;
@@ -156,12 +159,40 @@ public class ExchangeLogServiceBean implements ExchangeLogService {
 		LOG.debug("createUnsentMessage in service layer");
 		try {
 			String text = ExchangeDataSourceRequestMapper.mapCreateUnsentMessage(timestamp, senderReceiver, recipient, message);
-			LOG.debug(text);
 			String messageId = producer.sendMessageOnQueue(text, MessageQueue.INTERNAL);
 			TextMessage response = consumer.getMessage(messageId, TextMessage.class);
 			String unsentMessageId = ExchangeDataSourceResponseMapper.mapCreateUnsentMessageResponse(response, messageId);
 			sendingQueueEvent.fire(new NotificationMessage("messageId", unsentMessageId));
 			return unsentMessageId;
+		} catch (ExchangeMessageException | ExchangeModelMapperException e) {
+			LOG.error("Couldn't add message to unsent list");
+			throw new ExchangeLogException("Couldn't add message to unsent list");
+		}
+	}
+
+	@Override
+	public void resend(List<String> messageIdList) throws ExchangeLogException {
+		LOG.debug("createUnsentMessage in service layer");
+		try {
+			String text = ExchangeDataSourceRequestMapper.mapResendMessage(messageIdList);
+			String messageId = producer.sendMessageOnQueue(text, MessageQueue.INTERNAL);
+			TextMessage response = consumer.getMessage(messageId, TextMessage.class);
+			List<UnsentMessageType> unsentMessageList = ExchangeDataSourceResponseMapper.mapResendMessageResponse(response, messageId);
+			LOG.debug("Received unsentMessageList from db: " + unsentMessageList.size());
+			if(unsentMessageList != null) {
+				for(UnsentMessageType unsentMessage : unsentMessageList) {
+					LOG.debug("MessageToSend: " + unsentMessage.getMessage());
+					String unsentMessageId = producer.sendMessageOnQueue(unsentMessage.getMessage(), MessageQueue.EVENT);
+					TextMessage unsentResponse = consumer.getMessage(unsentMessageId, TextMessage.class);
+					LOG.debug("Message resent, validating response...");
+					try {
+						ExchangeModuleResponseMapper.validateResponse(unsentResponse, unsentMessageId);
+					} catch (JMSException | ExchangeValidationException e) {
+						//TODO handle unsent message
+						LOG.error("Couldn't resend message " + unsentMessage.getMessageId() + " : " + e.getMessage());
+					}
+				}
+			}
 		} catch (ExchangeMessageException | ExchangeModelMapperException e) {
 			LOG.error("Couldn't add message to unsent list");
 			throw new ExchangeLogException("Couldn't add message to unsent list");

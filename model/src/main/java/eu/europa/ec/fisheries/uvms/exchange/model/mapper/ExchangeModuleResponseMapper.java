@@ -23,7 +23,7 @@ import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeValidationEx
 public class ExchangeModuleResponseMapper {
 	private static Logger LOG = LoggerFactory.getLogger(ExchangeModuleResponseMapper.class);
 	
-    private static void validateResponse(TextMessage response, String correlationId) throws JMSException, ExchangeValidationException {
+    public static void validateResponse(TextMessage response, String correlationId) throws JMSException, ExchangeValidationException {
 
         if (response == null) {
             throw new ExchangeValidationException("Error when validating response in ResponseMapper: Response is Null");

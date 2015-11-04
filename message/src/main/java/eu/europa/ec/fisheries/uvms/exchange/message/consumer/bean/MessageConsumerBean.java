@@ -96,6 +96,7 @@ public class MessageConsumerBean implements MessageListener {
                 }
             }
         } else {
+        	LOG.debug("BaseRequest method " + request.getMethod());
             switch (request.getMethod()) {
                 case LIST_SERVICES:
                     pluginConfigEvent.fire(new ExchangeMessageEvent(textMessage));
@@ -131,7 +132,6 @@ public class MessageConsumerBean implements MessageListener {
         try {
             return JAXBMarshaller.unmarshallTextMessage(textMessage, AcknowledgeResponse.class);
         } catch (ExchangeModelMarshallException e) {
-            LOG.error("Couldn't marshall ack response");
             return null;
         }
     }

@@ -75,6 +75,9 @@ public class MessageProducerBean implements MessageProducer, ConfigMessageProduc
                 case INTERNAL:
                     session.createProducer(localDbQueue).send(message);
                     break;
+                case EVENT:
+                	session.createProducer(eventQueue).send(message);
+                	break;
                 case RULES:
                     session.createProducer(rulesQueue).send(message);
                     break;

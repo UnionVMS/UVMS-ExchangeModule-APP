@@ -40,7 +40,6 @@ import eu.europa.ec.fisheries.uvms.exchange.service.ExchangeLogService;
 import eu.europa.ec.fisheries.uvms.exchange.service.ExchangeService;
 import eu.europa.ec.fisheries.uvms.exchange.service.exception.ExchangeLogException;
 import eu.europa.ec.fisheries.uvms.exchange.service.mapper.ExchangeLogMapper;
-import eu.europa.ec.fisheries.uvms.longpolling.notifications.NotificationMessage;
 
 @Stateless
 public class ExchangeEventOutgoingServiceBean implements ExchangeEventOutgoingService {
@@ -82,9 +81,9 @@ public class ExchangeEventOutgoingServiceBean implements ExchangeEventOutgoingSe
             } else {
             	ServiceResponseType service = services.get(0);
             	String serviceName = service.getServiceClassName();
-            	String text = ExchangePluginRequestMapper.createSetReportRequest(sendReport.getTimestamp(), sendReport.getMovement());
             	
-                if(validate(service, sendReport, text, message.getJmsMessage())) {
+                if(validate(service, sendReport, message.getJmsMessage())) {
+                	String text = ExchangePluginRequestMapper.createSetReportRequest(sendReport.getTimestamp(), sendReport.getMovement());
                 	String pluginMessageId = producer.sendEventBusMessage(text, serviceName);
                 	
                 	//System.out.println("SendReport: PluginMessageId: " + pluginMessageId);
@@ -102,7 +101,7 @@ public class ExchangeEventOutgoingServiceBean implements ExchangeEventOutgoingSe
                 	producer.sendModuleResponseMessage(message.getJmsMessage(), moduleResponse);
                 	
                 } else {
-                	LOG.debug("Validation error. Event sent to caller.");
+                	LOG.debug("Cannot send to plugin. Response sent to caller.");
                 }
             }
         } catch (ExchangeException e) {
@@ -111,7 +110,7 @@ public class ExchangeEventOutgoingServiceBean implements ExchangeEventOutgoingSe
         }
     }
 
-	private boolean validate(ServiceResponseType service, SendMovementToPluginType sendReport, String reportText, TextMessage origin) {
+	private boolean validate(ServiceResponseType service, SendMovementToPluginType sendReport, TextMessage origin) {
     	String serviceName = service.getServiceClassName(); //Use first and only
         if(serviceName == null || serviceName.isEmpty()) {
         	String faultMessage = "First plugin of type " + sendReport.getPluginType() + " is invalid. Missing serviceClassName";
@@ -130,7 +129,7 @@ public class ExchangeEventOutgoingServiceBean implements ExchangeEventOutgoingSe
         	AcknowledgeType ackType = ExchangeModuleResponseMapper.mapAcknowledgeTypeOK();
         	try {
         		try {
-        			exchangeLog.createUnsentMessage(ExchangeLogMapper.getSendMovementSenderReceiver(sendReport), sendReport.getTimestamp(), sendReport.getRecipient(), reportText);
+        			exchangeLog.createUnsentMessage(ExchangeLogMapper.getSendMovementSenderReceiver(sendReport), sendReport.getTimestamp(), sendReport.getRecipient(), origin.getText());
         		} catch (ExchangeLogException e) {
         			LOG.error(e.getMessage());
         			ackType = ExchangeModuleResponseMapper.mapAcknowledgeTypeNOK(origin.getJMSMessageID(), e.getMessage());
@@ -155,11 +154,9 @@ public class ExchangeEventOutgoingServiceBean implements ExchangeEventOutgoingSe
             String pluginName = request.getCommand().getPluginName();
 
             ServiceResponseType service = exchangeService.getService(pluginName);
-            LOG.debug("Service from db: " + service.getServiceClassName() + ", status: " + service.getStatus());
             
-            String text = ExchangePluginRequestMapper.createSetCommandRequest(request.getCommand());
-            
-            if(validate(request.getCommand(), message.getJmsMessage(), service, text)) {
+            if(validate(request.getCommand(), message.getJmsMessage(), service)) {
+            	String text = ExchangePluginRequestMapper.createSetCommandRequest(request.getCommand());
             	String pluginMessageId = producer.sendEventBusMessage(text, pluginName);
             	
             	try {
@@ -174,7 +171,7 @@ public class ExchangeEventOutgoingServiceBean implements ExchangeEventOutgoingSe
 				String moduleResponse = ExchangeModuleResponseMapper.mapSetCommandResponse(ackType);
             	producer.sendModuleResponseMessage(message.getJmsMessage(), moduleResponse);
             } else {
-            	LOG.debug("Validation error. Event sent to caller.");
+            	LOG.debug("Can not send to plugin. Response sent to caller.");
             }
             
         } catch (NullPointerException | ExchangeException e) {
@@ -183,7 +180,7 @@ public class ExchangeEventOutgoingServiceBean implements ExchangeEventOutgoingSe
         }
     }
 	
-	private boolean validate(CommandType command, TextMessage origin, ServiceResponseType service, String messageText) {
+	private boolean validate(CommandType command, TextMessage origin, ServiceResponseType service) {
         if(command == null) {
         	String faultMessage = "No command";
 			exchangeErrorEvent.fire(new ExchangeMessageEvent(origin, ExchangeModuleResponseMapper.createFaultMessage(FaultCode.EXCHANGE_COMMAND_INVALID, faultMessage)));
@@ -209,7 +206,7 @@ public class ExchangeEventOutgoingServiceBean implements ExchangeEventOutgoingSe
         	AcknowledgeType ackType = ExchangeModuleResponseMapper.mapAcknowledgeTypeOK();
         	try {
         		try {
-        			exchangeLog.createUnsentMessage(command.getPluginName(), command.getTimestamp(), null, messageText);
+        			exchangeLog.createUnsentMessage(command.getPluginName(), command.getTimestamp(), null, origin.getText());
         		} catch (ExchangeLogException e) {
         			LOG.error(e.getMessage());
         			ackType = ExchangeModuleResponseMapper.mapAcknowledgeTypeNOK(origin.getJMSMessageID(), e.getMessage());
