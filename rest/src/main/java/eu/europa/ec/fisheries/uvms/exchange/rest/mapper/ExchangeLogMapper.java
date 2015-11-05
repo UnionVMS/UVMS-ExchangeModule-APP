@@ -18,6 +18,7 @@ import eu.europa.ec.fisheries.schema.exchange.v1.ReceiveMovementType;
 import eu.europa.ec.fisheries.schema.exchange.v1.SendMovementType;
 import eu.europa.ec.fisheries.schema.exchange.v1.UnsentMessageType;
 import eu.europa.ec.fisheries.uvms.common.DateUtils;
+import eu.europa.ec.fisheries.uvms.exchange.rest.dto.LogTypeLabel;
 import eu.europa.ec.fisheries.uvms.exchange.rest.dto.exchange.ExchangeLog;
 import eu.europa.ec.fisheries.uvms.exchange.rest.dto.exchange.ExchangeLogData;
 import eu.europa.ec.fisheries.uvms.exchange.rest.dto.exchange.ListQueryResponse;
@@ -49,9 +50,11 @@ public class ExchangeLogMapper {
     	ExchangeLog dto = new ExchangeLog();
     	switch(log.getType()) {
     	case RECEIVE_MOVEMENT:
+    		dto.setType(LogTypeLabel.RECEIVED_MOVEMENT);
     		dto.setSource(((ReceiveMovementType)log).getSource());
     		break;
     	case SEND_MOVEMENT:
+    		dto.setType(LogTypeLabel.SENT_MOVEMENT);
     		SendMovementType sendLog = (SendMovementType)log;
     		Date dateFwd = sendLog.getFwdDate().toGregorianCalendar().getTime();
     		dto.setDateFwd(DateUtils.dateToString(dateFwd));
@@ -59,7 +62,11 @@ public class ExchangeLogMapper {
     		dto.setRecipient(sendLog.getRecipient());
     		break;
     	case SEND_EMAIL:
+    		dto.setType(LogTypeLabel.SENT_EMAIL);
+    		break;
     	case SEND_POLL:
+    		dto.setType(LogTypeLabel.SENT_POLL);
+    		break;
     	default:
     		break;
     	}

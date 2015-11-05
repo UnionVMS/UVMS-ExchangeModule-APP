@@ -97,6 +97,7 @@
             <xsd:enumeration value="INMARSAT_C"/>
             <xsd:enumeration value="IRIDIUM"/>
             <xsd:enumeration value="AIS"/>
+            <xsd:enumeration value="MANUAL"/>
         </xsd:restriction>
     </xsd:simpleType>
     
