@@ -20,9 +20,15 @@ import eu.europa.ec.fisheries.uvms.exchange.longpolling.constants.LongPollingCon
 import eu.europa.ec.fisheries.uvms.exchange.service.event.ExchangeLogEvent;
 import eu.europa.ec.fisheries.uvms.exchange.service.event.ExchangePluginStatusEvent;
 import eu.europa.ec.fisheries.uvms.exchange.service.event.ExchangeSendingQueueEvent;
-import eu.europa.ec.fisheries.uvms.notifications.NotificationMessage;
+import eu.europa.ec.fisheries.uvms.exchange.service.event.PollEvent;
+import eu.europa.ec.fisheries.uvms.longpolling.notifications.NotificationMessage;
 
-@WebServlet(asyncSupported = true, urlPatterns = { LongPollingConstants.EXCHANGE_LOG_PATH, LongPollingConstants.PLUGIN_STATUS_PATH, LongPollingConstants.SENDING_QUEUE_PATH })
+@WebServlet(asyncSupported = true, urlPatterns = {
+        LongPollingConstants.EXCHANGE_LOG_PATH,
+        LongPollingConstants.PLUGIN_STATUS_PATH,
+        LongPollingConstants.SENDING_QUEUE_PATH,
+        LongPollingConstants.POLL_PATH
+})
 public class LongPollingHttpServlet extends HttpServlet {
 
     private static final long serialVersionUID = 1L;
@@ -62,6 +68,11 @@ public class LongPollingHttpServlet extends HttpServlet {
     public void observeSendinqQueueEvent(@Observes @ExchangeSendingQueueEvent NotificationMessage message) throws IOException {
         List<String> messageIdList = (List<String>) message.getProperties().get("messageIds");
         completePoll(LongPollingConstants.SENDING_QUEUE_PATH, createJsonMessageFromList(messageIdList));
+    }
+
+    public void observePollEvent(@Observes @PollEvent NotificationMessage message) throws IOException {
+        String guid = (String) message.getProperties().get("guid");
+        completePoll(LongPollingConstants.POLL_PATH, createJsonMessage(guid));
     }
 
     private String createJsonMessageFromList(List<String> guidList) {

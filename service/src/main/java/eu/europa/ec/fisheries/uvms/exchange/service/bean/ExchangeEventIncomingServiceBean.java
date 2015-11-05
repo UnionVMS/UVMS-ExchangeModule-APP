@@ -26,6 +26,8 @@ import eu.europa.ec.fisheries.schema.exchange.service.v1.ServiceResponseType;
 import eu.europa.ec.fisheries.schema.exchange.service.v1.StatusType;
 import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogStatusTypeType;
 import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogType;
+import eu.europa.ec.fisheries.schema.exchange.v1.LogRefType;
+import eu.europa.ec.fisheries.schema.exchange.v1.TypeRefType;
 import eu.europa.ec.fisheries.schema.rules.movement.v1.MovementRefType;
 import eu.europa.ec.fisheries.schema.rules.movement.v1.RawMovementType;
 import eu.europa.ec.fisheries.uvms.exchange.message.event.ErrorEvent;
@@ -49,6 +51,7 @@ import eu.europa.ec.fisheries.uvms.exchange.service.ExchangeLogService;
 import eu.europa.ec.fisheries.uvms.exchange.service.ExchangeRulesService;
 import eu.europa.ec.fisheries.uvms.exchange.service.ExchangeService;
 import eu.europa.ec.fisheries.uvms.exchange.service.event.ExchangePluginStatusEvent;
+import eu.europa.ec.fisheries.uvms.exchange.service.event.PollEvent;
 import eu.europa.ec.fisheries.uvms.exchange.service.exception.ExchangeLogException;
 import eu.europa.ec.fisheries.uvms.exchange.service.exception.ExchangeServiceException;
 import eu.europa.ec.fisheries.uvms.exchange.service.mapper.ExchangeLogMapper;
@@ -83,6 +86,10 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
     @Inject
     @ExchangePluginStatusEvent
     Event<NotificationMessage> pluginStatusEvent;
+
+    @Inject
+    @PollEvent
+    Event<NotificationMessage> pollEvent;
 
     @Override
     public void getPluginListByTypes(@Observes @PluginConfigEvent ExchangeMessageEvent message) {
@@ -127,7 +134,13 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
                     
                     try {
                         ExchangeLogType log = ExchangeLogMapper.getReceivedMovementExchangeLog(request.getRequest(), typeRef.getMovementRefGuid(), typeRef.getType());
-                        exchangeLog.log(log);
+                        ExchangeLogType createdLog = exchangeLog.log(log);
+
+                        LogRefType logTypeRef = createdLog.getTypeRef();
+                        if (typeRef != null && logTypeRef.getType() == TypeRefType.POLL) {
+                            String pollGuid = logTypeRef.getRefGuid();
+                            pollEvent.fire(new NotificationMessage("guid", pollGuid));
+                        }
                     } catch (ExchangeLogException e) {
                         LOG.error(e.getMessage());
                     }
@@ -245,7 +258,13 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
 		}
 		
 		try {
-			exchangeLog.updateStatus(ack.getMessageId(), logStatus);
+			ExchangeLogType updatedLog = exchangeLog.updateStatus(ack.getMessageId(), logStatus);
+
+            LogRefType typeRef = updatedLog.getTypeRef();
+            if (typeRef != null && typeRef.getType() == TypeRefType.POLL) {
+                String pollGuid = typeRef.getRefGuid();
+                pollEvent.fire(new NotificationMessage("guid", pollGuid));
+            }
         } catch (ExchangeLogException e) {
             LOG.error(e.getMessage());
         }
