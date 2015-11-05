@@ -1,6 +1,7 @@
 package eu.europa.ec.fisheries.uvms.exchange.longpolling.service;
 
 import java.io.IOException;
+import java.util.List;
 
 import javax.enterprise.event.Observes;
 import javax.inject.Inject;
@@ -59,10 +60,20 @@ public class LongPollingHttpServlet extends HttpServlet {
     }
 
     public void observeSendinqQueueEvent(@Observes @ExchangeSendingQueueEvent NotificationMessage message) throws IOException {
-        String messageId = (String) message.getProperties().get("messageId");
-        completePoll(LongPollingConstants.SENDING_QUEUE_PATH, createJsonMessage(messageId));
+        List<String> messageIdList = (List<String>) message.getProperties().get("messageIds");
+        completePoll(LongPollingConstants.SENDING_QUEUE_PATH, createJsonMessageFromList(messageIdList));
     }
 
+    private String createJsonMessageFromList(List<String> guidList) {
+    	JsonArrayBuilder array = Json.createArrayBuilder();
+        if (guidList != null) {
+        	for (String guid : guidList) {
+        		array.add(guid);
+			}
+        }
+        return Json.createObjectBuilder().add("ids", array).build().toString();
+    }
+    
     private String createJsonMessage(String guid) {
         JsonArrayBuilder array = Json.createArrayBuilder();
         if (guid != null) {

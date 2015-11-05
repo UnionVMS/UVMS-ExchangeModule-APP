@@ -1,6 +1,7 @@
 package eu.europa.ec.fisheries.uvms.exchange.service.bean;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -183,7 +184,8 @@ public class ExchangeLogServiceBean implements ExchangeLogService {
 			String messageId = producer.sendMessageOnQueue(text, MessageQueue.INTERNAL);
 			TextMessage response = consumer.getMessage(messageId, TextMessage.class);
 			String unsentMessageId = ExchangeDataSourceResponseMapper.mapCreateUnsentMessageResponse(response, messageId);
-			sendingQueueEvent.fire(new NotificationMessage("messageId", unsentMessageId));
+			List<String> unsentMessageIds = Arrays.asList(unsentMessageId);
+			sendingQueueEvent.fire(new NotificationMessage("messageIds", unsentMessageIds));
 			return unsentMessageId;
 		} catch (ExchangeMessageException | ExchangeModelMapperException e) {
 			LOG.error("Couldn't add message to unsent list");
@@ -199,13 +201,15 @@ public class ExchangeLogServiceBean implements ExchangeLogService {
 			String messageId = producer.sendMessageOnQueue(text, MessageQueue.INTERNAL);
 			TextMessage response = consumer.getMessage(messageId, TextMessage.class);
 			List<UnsentMessageType> unsentMessageList = ExchangeDataSourceResponseMapper.mapResendMessageResponse(response, messageId);
-			LOG.debug("Received unsentMessageList from db: " + unsentMessageList.size());
-			if(unsentMessageList != null) {
+			
+			if(unsentMessageList != null && !unsentMessageList.isEmpty()) {
+				sendingQueueEvent.fire(new NotificationMessage("messageIds", messageIdList));
+				
 				for(UnsentMessageType unsentMessage : unsentMessageList) {
-					LOG.debug("MessageToSend: " + unsentMessage.getMessage());
+					
 					String unsentMessageId = producer.sendMessageOnQueue(unsentMessage.getMessage(), MessageQueue.EVENT);
 					TextMessage unsentResponse = consumer.getMessage(unsentMessageId, TextMessage.class);
-					LOG.debug("Message resent, validating response...");
+					
 					try {
 						ExchangeModuleResponseMapper.validateResponse(unsentResponse, unsentMessageId);
 					} catch (JMSException | ExchangeValidationException e) {

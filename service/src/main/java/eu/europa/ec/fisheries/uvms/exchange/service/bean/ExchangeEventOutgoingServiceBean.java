@@ -203,7 +203,7 @@ public class ExchangeEventOutgoingServiceBean implements ExchangeEventOutgoingSe
         } else if(!StatusType.STARTED.equals(service.getStatus())) {
         	LOG.info("Plugin to send report to is not started");
         	try {
-        		exchangeLog.createUnsentMessage(command.getPluginName(), command.getTimestamp(), null, origin.getText());
+        		exchangeLog.createUnsentMessage(command.getPluginName(), command.getTimestamp(), command.getCommand().name(), origin.getText());
         	} catch (ExchangeLogException | JMSException e) {
         		LOG.error("Couldn't create unsentMessage " + e.getMessage());
         	}
