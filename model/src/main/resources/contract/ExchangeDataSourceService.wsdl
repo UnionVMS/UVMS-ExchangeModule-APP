@@ -182,6 +182,7 @@
                         <xsd:extension base="source:ExchangeBaseRequest">
                             <xsd:sequence>
                                 <xsd:element name="guid" type="xsd:string" minOccurs="1" maxOccurs="1"/>
+                                <xsd:element name="typeRefType" type="exchange:TypeRefType"/> 
                             </xsd:sequence>
                         </xsd:extension>
                     </xsd:complexContent>

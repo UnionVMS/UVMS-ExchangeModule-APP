@@ -145,6 +145,23 @@ public class ExchangeLogServiceBean implements ExchangeLogService {
 		}
 	}
 
+	@Override
+	public ExchangeLogStatusType getExchangeStatusHistory(TypeRefType type, String typeRefGuid) throws ExchangeLogException {
+		LOG.info("Get poll status history in service layer");
+		if(typeRefGuid == null || typeRefGuid.isEmpty()) {
+			throw new ExchangeLogException("Invalid id");
+		}
+		try {
+			String text = ExchangeDataSourceRequestMapper.mapGetLogStatusHistoryRequest(typeRefGuid, type);
+			String messageId = producer.sendMessageOnQueue(text, MessageQueue.INTERNAL);
+			TextMessage response = consumer.getMessage(messageId, TextMessage.class);
+			ExchangeLogStatusType pollStatus = ExchangeDataSourceResponseMapper.mapGetLogStatusHistoryResponse(response, messageId);
+			return pollStatus;
+		}  catch (ExchangeModelMapperException | ExchangeMessageException e) {
+			throw new ExchangeLogException("Couldn't get exchange status history list.");
+		}
+	}
+	
     @Override
     public ExchangeLogType getExchangeLogByGuid(String guid) throws ExchangeLogException {
         try {
@@ -202,5 +219,4 @@ public class ExchangeLogServiceBean implements ExchangeLogService {
 			throw new ExchangeLogException("Couldn't add message to unsent list");
 		}
 	}
-
 }

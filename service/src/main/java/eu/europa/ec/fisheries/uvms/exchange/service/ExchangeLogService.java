@@ -35,4 +35,6 @@ public interface ExchangeLogService {
 	public String createUnsentMessage(String senderReceiver, XMLGregorianCalendar timestamp, String recipient, String message) throws ExchangeLogException;
 
 	public void resend(List<String> messageIdList) throws ExchangeLogException;
+
+	public ExchangeLogStatusType getExchangeStatusHistory(TypeRefType type, String typeRefGuid) throws ExchangeLogException;
 }

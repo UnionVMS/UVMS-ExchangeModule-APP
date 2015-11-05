@@ -349,4 +349,15 @@ public class ExchangeDataSourceResponseMapper {
             throw new ExchangeModelMapperException("[ Error when mapping to resend response. ] " + e.getMessage());
         }
 	}
+
+	public static ExchangeLogStatusType mapGetLogStatusHistoryResponse(TextMessage message, String correlationId) throws ExchangeModelMapperException {
+		try {
+            validateResponse(message, correlationId);
+            GetLogStatusHistoryResponse unmarshalledResponse = JAXBMarshaller.unmarshallTextMessage(message, GetLogStatusHistoryResponse.class);
+            return unmarshalledResponse.getStatus();
+        } catch (JMSException | ExchangeValidationException | ExchangeModelMarshallException e) {
+            LOG.error("[ Error when mapping to log status history response. ]");
+            throw new ExchangeModelMapperException("[ Error when mapping to log status history response. ] " + e.getMessage());
+        }
+	}
 }

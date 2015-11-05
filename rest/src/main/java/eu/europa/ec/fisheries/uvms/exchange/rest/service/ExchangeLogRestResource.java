@@ -28,8 +28,6 @@ import eu.europa.ec.fisheries.uvms.exchange.rest.dto.exchange.ListQueryResponse;
 import eu.europa.ec.fisheries.uvms.exchange.rest.error.ErrorHandler;
 import eu.europa.ec.fisheries.uvms.exchange.rest.mapper.ExchangeLogMapper;
 import eu.europa.ec.fisheries.uvms.exchange.service.ExchangeLogService;
-import eu.europa.ec.fisheries.uvms.rest.security.RequiresFeature;
-import eu.europa.ec.fisheries.uvms.rest.security.UnionVMSFeature;
 
 @Path("/exchange")
 @Stateless
@@ -85,6 +83,22 @@ public class ExchangeLogRestResource {
         }
     }
 
+    @GET
+    @Consumes(value = {MediaType.APPLICATION_JSON})
+    @Produces(value = {MediaType.APPLICATION_JSON})
+    @Path(value = "/poll/{typeRefGuid}")
+	@RequiresFeature(UnionVMSFeature.viewExchange)
+    public ResponseDto getPollStatus(@PathParam("typeRefGuid") String typeRefGuid) {
+        try {
+        	LOG.debug("Get ExchangeLog status for Poll by typeRefGuid");
+        	ExchangeLogStatusType response = serviceLayer.getExchangeStatusHistory(TypeRefType.POLL, typeRefGuid);
+            return new ResponseDto(response, RestResponseCode.OK);
+        } catch (Exception e) {
+            LOG.error("[ Error when getting config search fields. ]", e.getMessage());
+            return ErrorHandler.getFault(e);
+        }
+    }
+    
     @GET
     @Produces(value = {MediaType.APPLICATION_JSON})
     @Path("/{guid}")

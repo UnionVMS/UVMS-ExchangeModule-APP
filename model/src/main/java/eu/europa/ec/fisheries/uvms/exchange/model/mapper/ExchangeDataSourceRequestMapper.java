@@ -184,13 +184,14 @@ public class ExchangeDataSourceRequestMapper {
         }
     }
 
-	public static String mapGetLogStatusHistoryRequest(String guid) throws ExchangeModelMarshallException {
+	public static String mapGetLogStatusHistoryRequest(String guid, TypeRefType typeRefType) throws ExchangeModelMarshallException {
 		GetLogStatusHistoryRequest request = new GetLogStatusHistoryRequest();
 		request.setMethod(ExchangeDataSourceMethod.GET_LOG_STATUS_HISTORY);
 		request.setGuid(guid);
+		request.setTypeRefType(typeRefType);
 		return JAXBMarshaller.marshallJaxBObjectToString(request);
 	}
-
+	
 	public static String mapUpdateLogStatusRequest(String guid, ExchangeLogStatusTypeType type) throws ExchangeModelMarshallException {
 		UpdateLogStatusRequest request = new UpdateLogStatusRequest();
 		request.setMethod(ExchangeDataSourceMethod.UPDATE_LOG_STATUS);
@@ -255,5 +256,4 @@ public class ExchangeDataSourceRequestMapper {
 	    request.setGuid(guid);
 	    return JAXBMarshaller.marshallJaxBObjectToString(request);
 	}
-
 }
