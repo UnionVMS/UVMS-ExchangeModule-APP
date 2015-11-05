@@ -126,15 +126,14 @@ public class ExchangeEventOutgoingServiceBean implements ExchangeEventOutgoingSe
 			return false;
         } else if(!StatusType.STARTED.equals(service.getStatus())) {
         	LOG.info("Plugin to send report to is not started");
-        	AcknowledgeType ackType = ExchangeModuleResponseMapper.mapAcknowledgeTypeOK();
         	try {
-        		try {
-        			exchangeLog.createUnsentMessage(ExchangeLogMapper.getSendMovementSenderReceiver(sendReport), sendReport.getTimestamp(), sendReport.getRecipient(), origin.getText());
-        		} catch (ExchangeLogException e) {
-        			LOG.error(e.getMessage());
-        			ackType = ExchangeModuleResponseMapper.mapAcknowledgeTypeNOK(origin.getJMSMessageID(), e.getMessage());
-        		}
+        		exchangeLog.createUnsentMessage(ExchangeLogMapper.getSendMovementSenderReceiver(sendReport), sendReport.getTimestamp(), sendReport.getRecipient(), origin.getText());
+        	} catch (ExchangeLogException | JMSException e) {
+        		LOG.error("Couldn't create unsent message " + e.getMessage());
+        	}
         	
+        	try {
+        		AcknowledgeType ackType = ExchangeModuleResponseMapper.mapAcknowledgeTypeNOK(origin.getJMSMessageID(), "Plugin to send movement is not started");
         		String moduleResponse = ExchangeModuleResponseMapper.mapSendMovementToPluginResponse(ackType);
         		producer.sendModuleResponseMessage(origin, moduleResponse);
         	} catch (JMSException | ExchangeModelMarshallException e) {
@@ -203,19 +202,20 @@ public class ExchangeEventOutgoingServiceBean implements ExchangeEventOutgoingSe
 			return false;
         } else if(!StatusType.STARTED.equals(service.getStatus())) {
         	LOG.info("Plugin to send report to is not started");
-        	AcknowledgeType ackType = ExchangeModuleResponseMapper.mapAcknowledgeTypeOK();
         	try {
-        		try {
-        			exchangeLog.createUnsentMessage(command.getPluginName(), command.getTimestamp(), null, origin.getText());
-        		} catch (ExchangeLogException e) {
-        			LOG.error(e.getMessage());
-        			ackType = ExchangeModuleResponseMapper.mapAcknowledgeTypeNOK(origin.getJMSMessageID(), e.getMessage());
-        		}
-        		String moduleResponse = ExchangeModuleResponseMapper.mapSendMovementToPluginResponse(ackType);
+        		exchangeLog.createUnsentMessage(command.getPluginName(), command.getTimestamp(), null, origin.getText());
+        	} catch (ExchangeLogException | JMSException e) {
+        		LOG.error("Couldn't create unsentMessage " + e.getMessage());
+        	}
+        	
+        	try {
+        		AcknowledgeType ackType = ExchangeModuleResponseMapper.mapAcknowledgeTypeNOK(origin.getJMSMessageID(), "Plugin to send command to is not started");
+        		String moduleResponse = ExchangeModuleResponseMapper.mapSetCommandResponse(ackType);
         		producer.sendModuleResponseMessage(origin, moduleResponse);
         	} catch (JMSException | ExchangeModelMarshallException e) {
         		LOG.error("Plugin not started, couldn't send module response: " + e.getMessage());
         	}
+        	
         	return false;
         }
         return true;

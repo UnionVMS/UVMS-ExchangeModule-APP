@@ -41,7 +41,7 @@ public class ExchangeModuleResponseMapper {
         try {
 			ExchangeFault fault = JAXBMarshaller.unmarshallTextMessage(response, ExchangeFault.class);
 	        //TODO use fault
-			throw new ExchangeValidationException("Fault found when validate response " + fault.getMessage());
+			throw new ExchangeValidationException(fault.getCode() + " - " + fault.getMessage());
 		} catch (ExchangeModelMarshallException e) {
 			//everything went well
 		}        
@@ -97,13 +97,13 @@ public class ExchangeModuleResponseMapper {
 		}
 	}
 
-	public static AcknowledgeType mapSetCommandSendPollResponse(TextMessage response, String correlationId) throws ExchangeModelMapperException {
+	public static AcknowledgeType mapSetCommandResponse(TextMessage response, String correlationId) throws ExchangeModelMapperException {
 		try {
 			validateResponse(response, correlationId);
 			SetCommandResponse unmarshalledResponse = JAXBMarshaller.unmarshallTextMessage(response, SetCommandResponse.class);
 			return unmarshalledResponse.getResponse();
 			//TODO handle ExchangeValidationException - extract fault...
-		} catch(JMSException | ExchangeValidationException | ExchangeModelMarshallException e) {
+		} catch(JMSException | ExchangeModelMarshallException e) {
 			LOG.error("[ Error when mapping response to service types ]");
 			throw new ExchangeModelMapperException("[ Error when mapping response to service types ] " + e.getMessage());
 		}
