@@ -128,9 +128,13 @@ public class ExchangeLogServiceBean implements ExchangeLogService {
 		LOG.info("Get pollstatus list in service layer");
 		try {
 			List<ExchangeLogStatusTypeType> statusList = new ArrayList<>();
-			statusList.add(status);
+			if(status != null) {
+				statusList.add(status);
+			}
 			List<TypeRefType> typeList = new ArrayList<>();
-			typeList.add(type);
+			if(type != null) {
+				typeList.add(type);
+			}
 			String text = ExchangeDataSourceRequestMapper.mapGetLogStatusHistoryByQueryRequest(from, to, statusList, typeList);
 			String messageId = producer.sendMessageOnQueue(text, MessageQueue.INTERNAL);
 			TextMessage response = consumer.getMessage(messageId, TextMessage.class);
