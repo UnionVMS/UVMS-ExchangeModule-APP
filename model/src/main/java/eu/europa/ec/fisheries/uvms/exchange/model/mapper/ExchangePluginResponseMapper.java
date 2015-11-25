@@ -10,6 +10,7 @@ import javax.jms.TextMessage;
 
 import eu.europa.ec.fisheries.schema.exchange.common.v1.AcknowledgeType;
 import eu.europa.ec.fisheries.schema.exchange.common.v1.AcknowledgeTypeType;
+import eu.europa.ec.fisheries.schema.exchange.common.v1.PollStatusAcknowledgeType;
 import eu.europa.ec.fisheries.schema.exchange.plugin.types.v1.PluginFault;
 import eu.europa.ec.fisheries.schema.exchange.plugin.v1.AcknowledgeResponse;
 import eu.europa.ec.fisheries.schema.exchange.plugin.v1.ExchangePluginMethod;
@@ -17,6 +18,7 @@ import eu.europa.ec.fisheries.schema.exchange.plugin.v1.PingResponse;
 import eu.europa.ec.fisheries.schema.exchange.registry.v1.ExchangeRegistryMethod;
 import eu.europa.ec.fisheries.schema.exchange.registry.v1.RegisterServiceResponse;
 import eu.europa.ec.fisheries.schema.exchange.service.v1.ServiceResponseType;
+import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogStatusTypeType;
 import eu.europa.ec.fisheries.uvms.exchange.model.constant.FaultCode;
 import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelMapperException;
 import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelMarshallException;
@@ -92,6 +94,17 @@ public class ExchangePluginResponseMapper {
         response.setResponse(ackType);
         return JAXBMarshaller.marshallJaxBObjectToString(response);
     }
+    private static String mapToSetPollStatusAcknowledgeResponse(String serviceClassName, AcknowledgeType ackType, String pollGuid, ExchangeLogStatusTypeType status, ExchangePluginMethod method) throws ExchangeModelMarshallException {
+        AcknowledgeResponse response = new AcknowledgeResponse();
+        PollStatusAcknowledgeType pollStatusAcknowledgeType = new PollStatusAcknowledgeType();
+        response.setMethod(method);
+        response.setServiceClassName(serviceClassName);
+        response.setResponse(ackType);
+        ackType.setPollStatus(pollStatusAcknowledgeType);
+        pollStatusAcknowledgeType.setStatus(status);
+        pollStatusAcknowledgeType.setPollId(pollGuid);
+        return JAXBMarshaller.marshallJaxBObjectToString(response);
+    }
 
     public static String mapToStopResponse(String serviceClassName, AcknowledgeType ackType) throws ExchangeModelMarshallException {
         return mapToAcknowledgeResponse(serviceClassName, ackType, ExchangePluginMethod.STOP);
@@ -118,5 +131,23 @@ public class ExchangePluginResponseMapper {
         fault.setCode(code);
         fault.setMessage(message);
         return fault;
+    }
+    public static String mapToSetPollStatusToUnknownResponse(String serviceClassName, AcknowledgeType ackType, String pollGuid) throws ExchangeModelMarshallException {
+        return mapToSetPollStatusAcknowledgeResponse(serviceClassName, ackType, pollGuid, ExchangeLogStatusTypeType.UNKNOWN, ExchangePluginMethod.SET_COMMAND);
+    }
+    public static String mapToSetPollStatusToPendingResponse(String serviceClassName, AcknowledgeType ackType, String pollGuid) throws ExchangeModelMarshallException {
+        return mapToSetPollStatusAcknowledgeResponse(serviceClassName, ackType, pollGuid, ExchangeLogStatusTypeType.PENDING, ExchangePluginMethod.SET_COMMAND);
+    }
+
+    public static String mapToSetPollStatusToTransmittedResponse(String serviceClassName, AcknowledgeType ackType, String pollGuid) throws ExchangeModelMarshallException {
+        return mapToSetPollStatusAcknowledgeResponse(serviceClassName, ackType, pollGuid, ExchangeLogStatusTypeType.PROBABLY_TRANSMITTED, ExchangePluginMethod.SET_COMMAND);
+    }
+
+    public static String mapToSetPollStatusToSuccessfulResponse(String serviceClassName, AcknowledgeType ackType, String pollGuid) throws ExchangeModelMarshallException {
+        return mapToSetPollStatusAcknowledgeResponse(serviceClassName, ackType, pollGuid, ExchangeLogStatusTypeType.SUCCESSFUL, ExchangePluginMethod.SET_COMMAND);
+    }
+
+    public static String mapToSetPollStatusToFailedResponse(String serviceClassName, AcknowledgeType ackType, String pollGuid) throws ExchangeModelMarshallException {
+        return mapToSetPollStatusAcknowledgeResponse(serviceClassName, ackType, pollGuid, ExchangeLogStatusTypeType.FAILED, ExchangePluginMethod.SET_COMMAND);
     }
 }
