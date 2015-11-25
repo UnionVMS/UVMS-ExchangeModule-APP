@@ -5,6 +5,8 @@ import java.util.List;
 import javax.jms.JMSException;
 import javax.jms.TextMessage;
 
+import eu.europa.ec.fisheries.schema.exchange.source.v1.*;
+import eu.europa.ec.fisheries.schema.exchange.v1.PollStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -14,23 +16,6 @@ import eu.europa.ec.fisheries.schema.exchange.service.v1.CapabilityType;
 import eu.europa.ec.fisheries.schema.exchange.service.v1.ServiceResponseType;
 import eu.europa.ec.fisheries.schema.exchange.service.v1.SettingListType;
 import eu.europa.ec.fisheries.schema.exchange.service.v1.SettingType;
-import eu.europa.ec.fisheries.schema.exchange.source.v1.CreateLogResponse;
-import eu.europa.ec.fisheries.schema.exchange.source.v1.CreateUnsentMessageResponse;
-import eu.europa.ec.fisheries.schema.exchange.source.v1.GetLogListByQueryResponse;
-import eu.europa.ec.fisheries.schema.exchange.source.v1.GetLogStatusHistoryByQueryResponse;
-import eu.europa.ec.fisheries.schema.exchange.source.v1.GetLogStatusHistoryResponse;
-import eu.europa.ec.fisheries.schema.exchange.source.v1.GetServiceCapabilitiesResponse;
-import eu.europa.ec.fisheries.schema.exchange.source.v1.GetServiceListResponse;
-import eu.europa.ec.fisheries.schema.exchange.source.v1.GetServiceResponse;
-import eu.europa.ec.fisheries.schema.exchange.source.v1.GetServiceSettingsResponse;
-import eu.europa.ec.fisheries.schema.exchange.source.v1.GetUnsentMessageListResponse;
-import eu.europa.ec.fisheries.schema.exchange.source.v1.RegisterServiceResponse;
-import eu.europa.ec.fisheries.schema.exchange.source.v1.ResendMessageResponse;
-import eu.europa.ec.fisheries.schema.exchange.source.v1.SetServiceSettingsResponse;
-import eu.europa.ec.fisheries.schema.exchange.source.v1.SetServiceStatusResponse;
-import eu.europa.ec.fisheries.schema.exchange.source.v1.SingleExchangeLogResponse;
-import eu.europa.ec.fisheries.schema.exchange.source.v1.UnregisterServiceResponse;
-import eu.europa.ec.fisheries.schema.exchange.source.v1.UpdateLogStatusResponse;
 import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogStatusType;
 import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogType;
 import eu.europa.ec.fisheries.schema.exchange.v1.UnsentMessageType;
@@ -360,4 +345,26 @@ public class ExchangeDataSourceResponseMapper {
             throw new ExchangeModelMapperException("[ Error when mapping to log status history response. ] " + e.getMessage());
         }
 	}
+
+
+    public static PollStatus mapSetPollStatusResponse(TextMessage message, String correlationId) throws ExchangeModelMapperException {
+        try {
+            validateResponse(message, correlationId);
+            SetPollStatusResponse response = JAXBMarshaller.unmarshallTextMessage(message, SetPollStatusResponse.class);
+            return response.getExchangeLog();
+        } catch (JMSException | ExchangeValidationException | ExchangeModelMarshallException e) {
+            LOG.error("[ Error when mapping response to update log status response ]");
+            throw new ExchangeModelMapperException("[ Error when mapping response to update log status response ]" + e.getMessage());
+        }
+    }
+
+    public static String createSetPollStatusResponse(ExchangeLogType log) throws ExchangeModelMarshallException {
+        SetPollStatusResponse response = new SetPollStatusResponse();
+        PollStatus pollStatus = new PollStatus();
+        pollStatus.setStatus(log.getStatus());
+        pollStatus.setExchangeLogGuid(log.getGuid());
+        pollStatus.setPollGuid(log.getTypeRef().getRefGuid());
+        response.setExchangeLog(pollStatus);
+        return JAXBMarshaller.marshallJaxBObjectToString(response);
+    }
 }

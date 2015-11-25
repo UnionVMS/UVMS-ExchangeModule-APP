@@ -9,6 +9,8 @@ import javax.enterprise.event.Observes;
 import javax.inject.Inject;
 import javax.jms.TextMessage;
 
+import eu.europa.ec.fisheries.schema.exchange.common.v1.AcknowledgeTypeType;
+import eu.europa.ec.fisheries.schema.exchange.v1.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,10 +26,6 @@ import eu.europa.ec.fisheries.schema.exchange.plugin.v1.AcknowledgeResponse;
 import eu.europa.ec.fisheries.schema.exchange.plugin.v1.ExchangePluginMethod;
 import eu.europa.ec.fisheries.schema.exchange.service.v1.ServiceResponseType;
 import eu.europa.ec.fisheries.schema.exchange.service.v1.StatusType;
-import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogStatusTypeType;
-import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogType;
-import eu.europa.ec.fisheries.schema.exchange.v1.LogRefType;
-import eu.europa.ec.fisheries.schema.exchange.v1.TypeRefType;
 import eu.europa.ec.fisheries.schema.rules.movement.v1.MovementRefType;
 import eu.europa.ec.fisheries.schema.rules.movement.v1.RawMovementType;
 import eu.europa.ec.fisheries.uvms.exchange.message.event.ErrorEvent;
@@ -219,6 +217,13 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
             ExchangePluginMethod method = response.getMethod();
             switch (method) {
                 case SET_COMMAND:
+                    // Only Acknowledge for poll should have a poll status set
+                    if(acknowledge.getPollStatus()!=null && acknowledge.getPollStatus().getPollId()!=null){
+                        handleSetPollStatusAcknowledge(method, serviceClassName, acknowledge);
+                    }else{
+                        handleUpdateExchangeLogAcknowledge(method, serviceClassName, acknowledge);
+                    }
+                    break;
                 case SET_REPORT:
                 	handleUpdateExchangeLogAcknowledge(method, serviceClassName, acknowledge);
                     break;
@@ -245,21 +250,21 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
 
 	private void handleUpdateExchangeLogAcknowledge(ExchangePluginMethod method, String serviceClassName, AcknowledgeType ack) {
     	LOG.debug(method + " was acknowledged in " + serviceClassName);
-    	
-    	ExchangeLogStatusTypeType logStatus = ExchangeLogStatusTypeType.FAILED;
-		switch (ack.getType()) {
-		case OK:
-			//TODO if(poll probably transmitted)
-            logStatus = ExchangeLogStatusTypeType.SUCCESSFUL;
-			break;
-		case NOK:
-			LOG.debug(method + " was NOK: " + ack.getMessage());
-			break;
-		}
-		
+        ExchangeLogStatusTypeType logStatus = ExchangeLogStatusTypeType.FAILED;
+        switch (ack.getType()) {
+            case OK:
+                //TODO if(poll probably transmitted)
+                logStatus = ExchangeLogStatusTypeType.SUCCESSFUL;
+                break;
+            case NOK:
+                LOG.debug(method + " was NOK: " + ack.getMessage());
+                break;
+        }
+
 		try {
 			ExchangeLogType updatedLog = exchangeLog.updateStatus(ack.getMessageId(), logStatus);
 
+            // Long polling
             LogRefType typeRef = updatedLog.getTypeRef();
             if (typeRef != null && typeRef.getType() == TypeRefType.POLL) {
                 String pollGuid = typeRef.getRefGuid();
@@ -270,18 +275,30 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
         }
 	}
 
-	private void handleUpdateServiceAcknowledge(String serviceClassName, AcknowledgeType ack, StatusType status) throws ExchangeServiceException {
-        switch (ack.getType()) {
-        case OK:
-        	exchangeService.updateServiceStatus(serviceClassName, status);
-            break;
-        case NOK:
-        	//TODO Audit.log()
-            LOG.error("Couldn't start service " + serviceClassName);
-            break;
+    private void handleSetPollStatusAcknowledge(ExchangePluginMethod method, String serviceClassName, AcknowledgeType ack) {
+        LOG.debug(method + " was acknowledged in " + serviceClassName);
+        try {
+            PollStatus updatedLog = exchangeLog.setPollStatus(ack.getMessageId(), ack.getPollStatus().getPollId(), ack.getPollStatus().getStatus());
+
+            // Long polling
+            pollEvent.fire(new NotificationMessage("guid", updatedLog.getPollGuid()));
+        } catch (ExchangeLogException e) {
+            LOG.error(e.getMessage());
         }
     }
-	
+
+    private void handleUpdateServiceAcknowledge(String serviceClassName, AcknowledgeType ack, StatusType status) throws ExchangeServiceException {
+        switch (ack.getType()) {
+            case OK:
+                exchangeService.updateServiceStatus(serviceClassName, status);
+                break;
+            case NOK:
+                //TODO Audit.log()
+                LOG.error("Couldn't start service " + serviceClassName);
+                break;
+        }
+    }
+    
 	private void handleAcknowledge(ExchangePluginMethod method, String serviceClassName, AcknowledgeType ack) {
     	LOG.debug(method + " was acknowledged in " + serviceClassName);
 		switch(ack.getType()) {
@@ -299,5 +316,4 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
         msg.setProperty("started", started);
         return msg;
     }
-
 }

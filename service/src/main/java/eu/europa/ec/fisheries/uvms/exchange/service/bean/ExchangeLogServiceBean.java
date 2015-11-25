@@ -13,16 +13,11 @@ import javax.jms.JMSException;
 import javax.jms.TextMessage;
 import javax.xml.datatype.XMLGregorianCalendar;
 
+import eu.europa.ec.fisheries.schema.exchange.v1.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import eu.europa.ec.fisheries.schema.exchange.source.v1.GetLogListByQueryResponse;
-import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeListQuery;
-import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogStatusType;
-import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogStatusTypeType;
-import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogType;
-import eu.europa.ec.fisheries.schema.exchange.v1.TypeRefType;
-import eu.europa.ec.fisheries.schema.exchange.v1.UnsentMessageType;
 import eu.europa.ec.fisheries.uvms.exchange.message.constants.MessageQueue;
 import eu.europa.ec.fisheries.uvms.exchange.message.consumer.ExchangeMessageConsumer;
 import eu.europa.ec.fisheries.uvms.exchange.message.exception.ExchangeMessageException;
@@ -90,7 +85,9 @@ public class ExchangeLogServiceBean implements ExchangeLogService {
 			String messageId = producer.sendMessageOnQueue(text, MessageQueue.INTERNAL);
 			TextMessage response = consumer.getMessage(messageId, TextMessage.class);
 			ExchangeLogType updatedLog = ExchangeDataSourceResponseMapper.mapUpdateLogStatusResponse(response, messageId);
-			exchangeLogEvent.fire(new NotificationMessage("guid", updatedLog.getGuid()));
+
+			// For long polling
+            exchangeLogEvent.fire(new NotificationMessage("guid", updatedLog.getGuid()));
 			return updatedLog;
 		} catch (ExchangeModelMapperException | ExchangeMessageException e) {
 			throw new ExchangeLogException("Couldn't update status of exchange log");
@@ -223,4 +220,23 @@ public class ExchangeLogServiceBean implements ExchangeLogService {
 			throw new ExchangeLogException("Couldn't add message to unsent list");
 		}
 	}
+
+    @Override
+    public PollStatus setPollStatus(String jmsCorrelationId, String pollId, ExchangeLogStatusTypeType logStatus) throws ExchangeLogException {
+        try {
+            // Remove the message from cache, because legancy implementation
+            logCache.acknowledged(jmsCorrelationId);
+
+            String text = ExchangeDataSourceRequestMapper.mapSetPollStatusRequest(pollId, logStatus);
+            String messageId = producer.sendMessageOnQueue(text, MessageQueue.INTERNAL);
+            TextMessage response = consumer.getMessage(messageId, TextMessage.class);
+            PollStatus pollStatusResponse = ExchangeDataSourceResponseMapper.mapSetPollStatusResponse(response, messageId);
+
+            // For long polling
+            exchangeLogEvent.fire(new NotificationMessage("guid", pollStatusResponse.getExchangeLogGuid()));
+            return pollStatusResponse;
+        } catch (ExchangeModelMapperException | ExchangeMessageException e) {
+            throw new ExchangeLogException("Couldn't update status of exchange log");
+        }
+    }
 }

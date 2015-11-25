@@ -38,6 +38,7 @@
                     <xsd:enumeration value="GET_LOG_STATUS_HISTORY"/>
                     <xsd:enumeration value="GET_LOG_STATUS_HISTORY_BY_QUERY"/>
                     <xsd:enumeration value="GET_LOG_BY_GUID"/>
+                    <xsd:enumeration value="SET_POLL_STATUS"/>
 
                     <!-- UNSENT MESSAGES -->
                     <xsd:enumeration value="GET_UNSENT_MESSAGE_LIST"/>
@@ -420,6 +421,26 @@
                 </xsd:complexType>
             </xsd:element>
 
+            <xsd:element name="SetPollStatusRequest">
+                <xsd:complexType>
+                    <xsd:complexContent>
+                        <xsd:extension base="source:ExchangeBaseRequest">
+                            <xsd:sequence>
+                                <xsd:element name="status" type="exchange:PollStatus" minOccurs="1" maxOccurs="1"/>
+                            </xsd:sequence>
+                        </xsd:extension>
+                    </xsd:complexContent>
+                </xsd:complexType>
+            </xsd:element>
+
+            <xsd:element name="SetPollStatusResponse">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element name="exchangeLog" type="exchange:PollStatus" minOccurs="1" maxOccurs="1"/>
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
+
         </xsd:schema>
     </types>
     
@@ -552,6 +573,13 @@
     <message name="GetExchangeLogResponse">
         <part name="body" element="source:SingleExchangeLogResponse"/>
     </message>
+
+    <message name="SetPollStatusRequest">
+        <part name="body" element="source:SetPollStatusRequest"/>
+    </message>
+    <message name="SetPollStatusResponse">
+        <part name="body" element="source:SetPollStatusResponse"/>
+    </message>
     
     <portType name="ExchangeDataSourcePortType">
 
@@ -588,6 +616,12 @@
         <operation name="UpdateLogStatus">
             <input message="source:UpdateLogStatusRequest"/>
             <output message="source:UpdateLogStatusResponse"/>
+            <fault name="ExchangeFault" message="source:ExchangeFault"/>
+        </operation>
+
+        <operation name="SetPollStatus">
+            <input message="source:SetPollStatusRequest"/>
+            <output message="source:SetPollStatusResponse"/>
             <fault name="ExchangeFault" message="source:ExchangeFault"/>
         </operation>
        
@@ -875,6 +909,18 @@
             <output>
                 <soap:body use="literal"/>
             </output>
+        </operation>
+
+        <operation name="SetPollStatus">
+            <input>
+                <soap:body use="literal"/>
+            </input>
+            <output>
+                <soap:body use="literal"/>
+            </output>
+            <fault name="ExchangeFault">
+                <soap:fault name="ExchangeFault" use="literal"/>
+            </fault>
         </operation>
         
     </binding>

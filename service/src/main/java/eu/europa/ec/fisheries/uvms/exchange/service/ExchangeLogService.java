@@ -7,12 +7,7 @@ import javax.ejb.Local;
 import javax.xml.datatype.XMLGregorianCalendar;
 
 import eu.europa.ec.fisheries.schema.exchange.source.v1.GetLogListByQueryResponse;
-import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeListQuery;
-import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogStatusType;
-import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogStatusTypeType;
-import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogType;
-import eu.europa.ec.fisheries.schema.exchange.v1.TypeRefType;
-import eu.europa.ec.fisheries.schema.exchange.v1.UnsentMessageType;
+import eu.europa.ec.fisheries.schema.exchange.v1.*;
 import eu.europa.ec.fisheries.uvms.exchange.service.exception.ExchangeLogException;
 
 @Local
@@ -37,4 +32,6 @@ public interface ExchangeLogService {
 	public void resend(List<String> messageIdList) throws ExchangeLogException;
 
 	public ExchangeLogStatusType getExchangeStatusHistory(TypeRefType type, String typeRefGuid) throws ExchangeLogException;
+
+    public PollStatus setPollStatus(String messageId, String pluginMessageId, ExchangeLogStatusTypeType logStatus) throws ExchangeLogException;
 }

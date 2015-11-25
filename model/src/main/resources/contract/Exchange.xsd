@@ -167,4 +167,12 @@
         </xsd:sequence>
     </xsd:complexType>
 
+    <xsd:complexType name="PollStatus">
+        <xsd:sequence>
+            <xsd:element name="pollGuid" type="xsd:string"/>
+            <xsd:element name="exchangeLogGuid" type="xsd:string"/>
+            <xsd:element name="status" type="exchange:ExchangeLogStatusTypeType" />
+        </xsd:sequence>
+    </xsd:complexType>
+
 </xsd:schema>
