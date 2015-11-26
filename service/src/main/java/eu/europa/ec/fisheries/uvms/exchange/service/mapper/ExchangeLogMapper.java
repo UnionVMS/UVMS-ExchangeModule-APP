@@ -77,6 +77,7 @@ public class ExchangeLogMapper {
             case SATELLITE_RECEIVER:
                 senderReceiver = getSenderReceiverOfMovement(movement.getSource(), movement.getMobileTerminalId());
                 break;
+            case MANUAL:
             case FLUX:
                 senderReceiver = getSenderReceiver(movement.getAssetId());
                 break;
