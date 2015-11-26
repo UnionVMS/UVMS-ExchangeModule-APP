@@ -96,7 +96,7 @@ public class MessageConsumerBean implements MessageListener {
                 }
             }
         } else {
-        	LOG.debug("BaseRequest method " + request.getMethod());
+            LOG.debug("BaseRequest method " + request.getMethod());
             switch (request.getMethod()) {
                 case LIST_SERVICES:
                     pluginConfigEvent.fire(new ExchangeMessageEvent(textMessage));

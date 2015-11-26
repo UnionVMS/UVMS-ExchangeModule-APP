@@ -71,10 +71,10 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
 
     @EJB
     ExchangeLogService exchangeLog;
-    
+
     @EJB
     MessageProducer producer;
-    
+
     @EJB
     ExchangeService exchangeService;
 
@@ -129,7 +129,7 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
 
                 try {
                     MovementRefType typeRef = rulesService.sendMovementToRules(MovementMapper.mapPluginType(pluginType), rawMovement);
-                    
+
                     try {
                         ExchangeLogType log = ExchangeLogMapper.getReceivedMovementExchangeLog(request.getRequest(), typeRef.getMovementRefGuid(), typeRef.getType());
                         ExchangeLogType createdLog = exchangeLog.log(log);
@@ -142,8 +142,9 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
                     } catch (ExchangeLogException e) {
                         LOG.error(e.getMessage());
                     }
-                    
-                    //TODO send back ack to plugin?
+
+                    ExchangeModuleResponseMapper.mapSetMovementReportResponse(AcknowledgeTypeType.OK, rawMovement.getGuid(), "Movement successfully processed");
+                    producer.sendModuleResponseMessage(message.getJmsMessage(), pluginName);
                 } catch (ExchangeServiceException e) {
                     PluginFault fault = ExchangePluginResponseMapper.mapToPluginFaultResponse(FaultCode.EXCHANGE_PLUGIN_EVENT.getCode(), "Movement sent cannot be sent to Rules module [ " + e.getMessage() + " ]");
                     pluginErrorEvent.fire(new PluginMessageEvent(message.getJmsMessage(), service, fault));
@@ -152,7 +153,7 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
                 LOG.debug("Validation error. Event sent to plugin");
             }
         } catch (ExchangeServiceException e) {
-        	//TODO send back to plugin
+            //TODO send back to plugin
         } catch (ExchangeModelMarshallException e) {
             //Cannot send back fault to unknown sender
             LOG.error("Couldn't map to SetMovementReportRequest when processing movement from plugin");
@@ -248,8 +249,9 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
         }
     }
 
-	private void handleUpdateExchangeLogAcknowledge(ExchangePluginMethod method, String serviceClassName, AcknowledgeType ack) {
-    	LOG.debug(method + " was acknowledged in " + serviceClassName);
+    private void handleUpdateExchangeLogAcknowledge(ExchangePluginMethod method, String serviceClassName, AcknowledgeType ack) {
+        LOG.debug(method + " was acknowledged in " + serviceClassName);
+
         ExchangeLogStatusTypeType logStatus = ExchangeLogStatusTypeType.FAILED;
         switch (ack.getType()) {
             case OK:
@@ -298,22 +300,23 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
                 break;
         }
     }
-    
-	private void handleAcknowledge(ExchangePluginMethod method, String serviceClassName, AcknowledgeType ack) {
-    	LOG.debug(method + " was acknowledged in " + serviceClassName);
-		switch(ack.getType()) {
-		case OK:
-			break;
-		case NOK:
-			//TODO Audit.log()
-			LOG.error(serviceClassName + " didn't like it. " + ack.getMessage());
-			break;
-		}
-	}
+
+    private void handleAcknowledge(ExchangePluginMethod method, String serviceClassName, AcknowledgeType ack) {
+        LOG.debug(method + " was acknowledged in " + serviceClassName);
+        switch (ack.getType()) {
+            case OK:
+                break;
+            case NOK:
+                //TODO Audit.log()
+                LOG.error(serviceClassName + " didn't like it. " + ack.getMessage());
+                break;
+        }
+    }
 
     private NotificationMessage createNotificationMessage(String serviceClassName, boolean started) {
         NotificationMessage msg = new NotificationMessage("serviceClassName", serviceClassName);
         msg.setProperty("started", started);
         return msg;
     }
+
 }
