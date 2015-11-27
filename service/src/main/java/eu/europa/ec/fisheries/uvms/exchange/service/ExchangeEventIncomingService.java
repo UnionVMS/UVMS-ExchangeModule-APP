@@ -30,7 +30,7 @@ public interface ExchangeEventIncomingService {
      * @param message
      */
     public void processMovement(@Observes @SetMovementEvent ExchangeMessageEvent message);
-
+    
     /**
      * Process answer of commands sent to plugins
      * @param message

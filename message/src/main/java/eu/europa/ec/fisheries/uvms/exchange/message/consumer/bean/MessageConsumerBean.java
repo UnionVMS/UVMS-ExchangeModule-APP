@@ -24,6 +24,7 @@ import eu.europa.ec.fisheries.uvms.exchange.message.event.PluginPingEvent;
 import eu.europa.ec.fisheries.uvms.exchange.message.event.SendCommandToPluginEvent;
 import eu.europa.ec.fisheries.uvms.exchange.message.event.SendReportToPluginEvent;
 import eu.europa.ec.fisheries.uvms.exchange.message.event.SetMovementEvent;
+import eu.europa.ec.fisheries.uvms.exchange.message.event.UpdatePluginSettingEvent;
 import eu.europa.ec.fisheries.uvms.exchange.message.event.carrier.ExchangeMessageEvent;
 import eu.europa.ec.fisheries.uvms.exchange.model.constant.ExchangeModelConstants;
 import eu.europa.ec.fisheries.uvms.exchange.model.constant.FaultCode;
@@ -62,6 +63,10 @@ public class MessageConsumerBean implements MessageListener {
     @ExchangeLogEvent
     Event<ExchangeMessageEvent> updateStateEvent;
 
+    @Inject
+    @UpdatePluginSettingEvent
+    Event<ExchangeMessageEvent> updatePluginSettingEvent;
+    
     @Inject
     @PluginPingEvent
     Event<ExchangeMessageEvent> updatePingStateEvent;
@@ -110,6 +115,9 @@ public class MessageConsumerBean implements MessageListener {
                 case SET_MOVEMENT_REPORT:
                     processMovementEvent.fire(new ExchangeMessageEvent(textMessage));
                     break;
+                case UPDATE_PLUGIN_SETTING:
+                	updatePluginSettingEvent.fire(new ExchangeMessageEvent(textMessage));
+                	break;
                 case PING:
                     pingEvent.fire(new ExchangeMessageEvent(textMessage));
                     break;

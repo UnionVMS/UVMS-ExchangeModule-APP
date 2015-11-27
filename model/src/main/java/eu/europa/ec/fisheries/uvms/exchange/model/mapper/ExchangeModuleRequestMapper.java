@@ -15,6 +15,7 @@ import eu.europa.ec.fisheries.schema.exchange.module.v1.GetServiceListRequest;
 import eu.europa.ec.fisheries.schema.exchange.module.v1.SendMovementToPluginRequest;
 import eu.europa.ec.fisheries.schema.exchange.module.v1.SetCommandRequest;
 import eu.europa.ec.fisheries.schema.exchange.module.v1.SetMovementReportRequest;
+import eu.europa.ec.fisheries.schema.exchange.module.v1.UpdatePluginSettingRequest;
 import eu.europa.ec.fisheries.schema.exchange.movement.v1.MovementType;
 import eu.europa.ec.fisheries.schema.exchange.movement.v1.SendMovementToPluginType;
 import eu.europa.ec.fisheries.schema.exchange.movement.v1.SetReportMovementType;
@@ -27,6 +28,7 @@ import eu.europa.ec.fisheries.schema.exchange.registry.v1.UnregisterServiceReque
 import eu.europa.ec.fisheries.schema.exchange.service.v1.CapabilityListType;
 import eu.europa.ec.fisheries.schema.exchange.service.v1.ServiceType;
 import eu.europa.ec.fisheries.schema.exchange.service.v1.SettingListType;
+import eu.europa.ec.fisheries.schema.exchange.service.v1.SettingType;
 import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelMapperException;
 import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelMarshallException;
 import eu.europa.ec.fisheries.uvms.exchange.model.util.DateUtils;
@@ -124,5 +126,16 @@ public class ExchangeModuleRequestMapper {
         request.setMethod(ExchangeModuleMethod.LIST_SERVICES);
         request.getType().addAll(pluginTypes);
         return JAXBMarshaller.marshallJaxBObjectToString(request);
+    }
+    
+    public static String createUpdatePluginSettingRequest(String serviceClassName, String settingKey, String settingValue) throws ExchangeModelMarshallException {
+    	UpdatePluginSettingRequest request = new UpdatePluginSettingRequest();
+    	request.setMethod(ExchangeModuleMethod.UPDATE_PLUGIN_SETTING);
+    	request.setServiceClassName(serviceClassName);
+    	SettingType setting = new SettingType();
+    	setting.setKey(settingKey);
+    	setting.setValue(settingValue);
+		request.setSetting(setting);
+    	return JAXBMarshaller.marshallJaxBObjectToString(request);
     }
 }

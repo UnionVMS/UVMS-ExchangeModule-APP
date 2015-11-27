@@ -14,6 +14,7 @@ import javax.jms.TextMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import eu.europa.ec.fisheries.schema.exchange.module.v1.UpdatePluginSettingRequest;
 import eu.europa.ec.fisheries.schema.exchange.plugin.types.v1.PluginType;
 import eu.europa.ec.fisheries.schema.exchange.registry.v1.RegisterServiceRequest;
 import eu.europa.ec.fisheries.schema.exchange.registry.v1.UnregisterServiceRequest;
@@ -25,6 +26,8 @@ import eu.europa.ec.fisheries.uvms.config.event.ConfigSettingUpdatedEvent;
 import eu.europa.ec.fisheries.uvms.config.exception.ConfigServiceException;
 import eu.europa.ec.fisheries.uvms.config.service.ParameterService;
 import eu.europa.ec.fisheries.uvms.config.service.UVMSConfigService;
+import eu.europa.ec.fisheries.uvms.exchange.message.event.UpdatePluginSettingEvent;
+import eu.europa.ec.fisheries.uvms.exchange.message.event.carrier.ExchangeMessageEvent;
 import eu.europa.ec.fisheries.uvms.exchange.message.event.carrier.PluginMessageEvent;
 import eu.europa.ec.fisheries.uvms.exchange.message.event.registry.PluginErrorEvent;
 import eu.europa.ec.fisheries.uvms.exchange.message.event.registry.RegisterServiceEvent;
@@ -33,6 +36,7 @@ import eu.europa.ec.fisheries.uvms.exchange.message.exception.ExchangeMessageExc
 import eu.europa.ec.fisheries.uvms.exchange.message.producer.MessageProducer;
 import eu.europa.ec.fisheries.uvms.exchange.model.constant.FaultCode;
 import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelMarshallException;
+import eu.europa.ec.fisheries.uvms.exchange.model.mapper.ExchangeModuleResponseMapper;
 import eu.europa.ec.fisheries.uvms.exchange.model.mapper.ExchangePluginRequestMapper;
 import eu.europa.ec.fisheries.uvms.exchange.model.mapper.ExchangePluginResponseMapper;
 import eu.europa.ec.fisheries.uvms.exchange.model.mapper.JAXBMarshaller;
@@ -169,7 +173,17 @@ public class PluginServiceBean implements PluginService {
             errorEvent.fire(new PluginMessageEvent(textMessage, service, ExchangePluginResponseMapper.mapToPluginFaultResponse(FaultCode.EXCHANGE_PLUGIN_EVENT.getCode(), "Exception when unregister service")));
         }
     }
+    
+    private void updatePluginSetting(String serviceClassName, SettingType updatedSetting) throws ExchangeServiceException, ExchangeModelMarshallException, ExchangeMessageException {
+    	SettingListType settingListType = new SettingListType();
+    	settingListType.getSetting().add(updatedSetting);
 
+    	ServiceResponseType service = exchangeService.upsertSettings(serviceClassName, settingListType);
+
+    	String text = ExchangePluginRequestMapper.createSetConfigRequest(service.getSettingList());
+    	producer.sendEventBusMessage(text, serviceClassName);
+    }
+    
     @Override
     public void setConfig(@Observes @ConfigSettingUpdatedEvent ConfigSettingEvent settingEvent) {
         switch (settingEvent.getType()) {
@@ -185,18 +199,13 @@ public class PluginServiceBean implements PluginService {
                     String[] splittedKey = key.split(PARAMETER_DELIMETER);
                     String serviceClassName = splittedKey[0];
                     String settingKey = splittedKey[1];
-
-                    SettingListType settingListType = new SettingListType();
+                    
                     SettingType settingType = new SettingType();
                     settingType.setKey(settingKey);
                     settingType.setValue(value);
-                    settingListType.getSetting().add(settingType);
-
-                    ServiceResponseType service = exchangeService.upsertSettings(serviceClassName, settingListType);
-
-                    String text = ExchangePluginRequestMapper.createSetConfigRequest(service.getSettingList());
-                    producer.sendEventBusMessage(text, serviceClassName);
-
+                    
+                    updatePluginSetting(serviceClassName, settingType);
+                    
                 } catch (ConfigServiceException e) {
                     LOG.error("Couldn't get updated parameter table value");
                 } catch (ExchangeServiceException e) {
@@ -213,6 +222,25 @@ public class PluginServiceBean implements PluginService {
         }
     }
 
+    @Override
+	public void updatePluginSetting(@Observes @UpdatePluginSettingEvent ExchangeMessageEvent settingEvent) {
+		LOG.info("update plugin setting from module queue");
+		try {
+			TextMessage jmsMessage = settingEvent.getJmsMessage();
+			UpdatePluginSettingRequest request = JAXBMarshaller.unmarshallTextMessage(jmsMessage, UpdatePluginSettingRequest.class);
+			updatePluginSetting(request.getServiceClassName(), request.getSetting());
+			
+			String text = ExchangeModuleResponseMapper.mapUpdateSettingResponse(ExchangeModuleResponseMapper.mapAcknowledgeTypeOK());
+			producer.sendModuleResponseMessage(settingEvent.getJmsMessage(), text);
+		} catch (ExchangeModelMarshallException | ExchangeServiceException | ExchangeMessageException e) {
+			LOG.error("Couldn't unmarshall update setting request");
+			settingEvent.setErrorFault(ExchangeModuleResponseMapper.createFaultMessage(FaultCode.EXCHANGE_EVENT_SERVICE, "Couldn't update plugin setting"));
+			producer.sendModuleErrorResponseMessage(settingEvent);
+		}
+		
+		
+	}
+    
     @Override
     public boolean start(String serviceClassName) throws ExchangeServiceException {
         if (serviceClassName == null) {

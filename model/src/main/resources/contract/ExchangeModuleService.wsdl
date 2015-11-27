@@ -24,6 +24,7 @@
                 <xsd:restriction base="xsd:string">
                     <!-- unionvms wants to -->
                     <xsd:enumeration value="LIST_SERVICES"/> <!-- mobileterminal - get plugins -->
+                    <xsd:enumeration value="UPDATE_PLUGIN_SETTING"/> <!-- mobileterminal - send dnidList -->
                     <xsd:enumeration value="SET_COMMAND"/> <!-- mobileterminal - pollRequest OR rules - sendEmail -->
                     <xsd:enumeration value="SEND_REPORT_TO_PLUGIN"/> <!-- rules - sendPositionToFLUX -->
                     
@@ -121,6 +122,27 @@
                 </xsd:complexType>
             </xsd:element>
             
+            <xsd:element name="UpdatePluginSettingRequest">
+                <xsd:complexType>
+                    <xsd:complexContent>
+                        <xsd:extension base="module:ExchangeBaseRequest">
+                            <xsd:sequence>
+                                <xsd:element name="serviceClassName" type="xsd:string" minOccurs="1" maxOccurs="1"/>
+                                <xsd:element name="setting" type="service:SettingType" minOccurs="1" maxOccurs="1"/>
+                            </xsd:sequence>
+                        </xsd:extension>
+                    </xsd:complexContent>
+                </xsd:complexType>
+            </xsd:element>
+            
+            <xsd:element name="UpdatePluginSettingResponse">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element name="response" type="common:AcknowledgeType" minOccurs="1" maxOccurs="1"/>
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
+            
             <!-- Ping request -->
             <xsd:element name="pingRequest">
                 <xsd:complexType>
@@ -173,6 +195,13 @@
         <part name="body" element="module:SendMovementToPluginResponse"/>
     </message>
 
+    <message name="UpdatePluginSettingRequest">
+        <part name="body" element="module:UpdatePluginSettingRequest"/>
+    </message>
+    <message name="UpdatePluginSettingResponse">
+        <part name="body" element="module:UpdatePluginSettingResponse"/>
+    </message>
+
     <message name="PingRequest">
         <part name="body" element="module:pingRequest"/>
     </message>
@@ -203,6 +232,12 @@
         <operation name="SendMovementToPlugin">
             <input message="module:SendMovementToPluginRequest"/>
             <output message="module:SendMovementToPluginResponse"/>
+            <fault name="ExchangeFault" message="module:ExchangeFault"/>
+        </operation>
+        
+        <operation name="UpdatePluginSetting">
+            <input message="module:UpdatePluginSettingRequest"/>
+            <output message="module:UpdatePluginSettingResponse"/>
             <fault name="ExchangeFault" message="module:ExchangeFault"/>
         </operation>
         
@@ -263,6 +298,18 @@
                 <soap:fault name="ExchangeFault" use="literal"/>
             </fault>
         </operation> 
+
+        <operation name="UpdatePluginSetting">
+            <input>
+                <soap:body use="literal"/>
+            </input>
+            <output>
+                <soap:body use="literal"/>
+            </output>
+            <fault name="ExchangeFault">
+                <soap:fault name="ExchangeFault" use="literal"/>
+            </fault>
+        </operation>
 
         <operation name="Ping">
             <input>
