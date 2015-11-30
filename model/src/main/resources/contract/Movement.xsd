@@ -38,12 +38,20 @@
                     <xsd:element name="fwdRule" type="xsd:string"/>
                     <xsd:element name="fwdDate" type="xsd:dateTime"/>
                     <xsd:element name="recipient" type="xsd:string"/>
+                    <xsd:element name="recipientInfo" type="movement:RecipientInfoType" minOccurs="1" maxOccurs="unbounded"/>
                     <xsd:element name="movement" type="movement:MovementType"/>
                 </xsd:sequence>
             </xsd:extension>
         </xsd:complexContent>
     </xsd:complexType>
-    
+
+    <xsd:complexType name="RecipientInfoType">
+        <xsd:sequence>
+            <xsd:element name="key" type="xsd:string" minOccurs="1" maxOccurs="1"/>
+            <xsd:element name="value" type="xsd:string" minOccurs="1" maxOccurs="1"/>
+        </xsd:sequence>
+    </xsd:complexType>
+
     <!-- Type received in UNIONVMS -->
     <xsd:complexType name="MovementBaseType">
         <xsd:sequence>
@@ -161,5 +169,5 @@
             <xsd:element name="callback" type="xsd:string"/>
         </xsd:sequence>
     </xsd:complexType>
-    
+
 </xsd:schema>
