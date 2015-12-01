@@ -1,7 +1,9 @@
 package eu.europa.ec.fisheries.uvms.exchange.service.bean;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
@@ -11,6 +13,7 @@ import javax.inject.Inject;
 import javax.jms.JMSException;
 import javax.jms.TextMessage;
 
+import eu.europa.ec.fisheries.schema.exchange.service.v1.ServiceType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -78,11 +81,14 @@ public class PluginServiceBean implements PluginService {
             try {
                 List<ServiceResponseType> services = exchangeService.getServiceList(type);
                 if (!services.isEmpty()) {
-
-                    //TODO log to audit log
-                    String response = ExchangePluginResponseMapper.mapToRegisterServiceResponseNOK(messageId, "Plugin of " + pluginType + " already registered. Only one is allowed.");
-                    producer.sendEventBusMessage(response, responseTopicMessageSelector);
-                    return false;
+                    for(ServiceResponseType service : services){
+                        if(service.isActive()){
+                            //TODO log to audit log
+                            String response = ExchangePluginResponseMapper.mapToRegisterServiceResponseNOK(messageId, "Plugin of " + pluginType + " already registered. Only one is allowed.");
+                            producer.sendEventBusMessage(response, responseTopicMessageSelector);
+                            return false;
+                        }
+                    }
                 }
             } catch (ExchangeServiceException e) {
                 String response = ExchangePluginResponseMapper.mapToRegisterServiceResponseNOK(messageId, "Exchange service exception when registering plugin [ " + e.getMessage() + " ]");
@@ -95,8 +101,8 @@ public class PluginServiceBean implements PluginService {
 
     private void registerService(RegisterServiceRequest register, String messageId) throws ExchangeModelMarshallException, ExchangeMessageException {
         try {
+            overrideSettingsFromConfig(register);
             ServiceResponseType service = exchangeService.registerService(register.getService(), register.getCapabilityList(), register.getSettingList());
-
             //push to config module
             try {
                 String serviceClassName = register.getService().getServiceClassName();
@@ -144,27 +150,50 @@ public class PluginServiceBean implements PluginService {
         }
     }
 
+    private void overrideSettingsFromConfig(RegisterServiceRequest registerServiceRequest) {
+        List<SettingType> currentRequestSettings = registerServiceRequest.getSettingList().getSetting();
+        try {
+            List<eu.europa.ec.fisheries.schema.config.types.v1.SettingType> configServiceSettings = configService.getSettings(registerServiceRequest.getService().getServiceClassName());
+            Map<String, SettingType>configServiceSettingsMap = putConfigSettingsInAMap(configServiceSettings);
+            if(!configServiceSettingsMap.isEmpty()){
+                String serviceClassName = registerServiceRequest.getService().getServiceClassName();
+                for(SettingType type : currentRequestSettings){
+                    String key = serviceClassName + PARAMETER_DELIMETER + type.getKey();
+                    SettingType configSettingType = configServiceSettingsMap.get(key);
+                    if(configSettingType!=null && !configSettingType.getValue().equalsIgnoreCase(type.getValue())){
+                        type.setValue(configSettingType.getValue());
+                    }
+                }
+            }
+
+        } catch (ConfigServiceException e) {
+            LOG.error("Register service exception, cannot read Exchange settings from Config " + e.getMessage());
+            // Ignore when we can't get the settings from Config. It is possible there is no Config module setup.
+        }
+    }
+
+    private Map<String, SettingType> putConfigSettingsInAMap(List<eu.europa.ec.fisheries.schema.config.types.v1.SettingType> settings){
+        Map<String, SettingType> settingTypeMap = new HashMap<>();
+        if(settings!=null && !settings.isEmpty()) {
+            for (eu.europa.ec.fisheries.schema.config.types.v1.SettingType configSettingType : settings) {
+                SettingType type = new SettingType();
+                type.setKey(configSettingType.getKey());
+                type.setValue(configSettingType.getValue());
+                settingTypeMap.put(configSettingType.getKey(), type);
+            }
+        }
+        return  settingTypeMap;
+    }
+
     @Override
     public void unregisterService(@Observes @UnRegisterServiceEvent PluginMessageEvent event) {
         LOG.info("unregister service");
         TextMessage textMessage = event.getJmsMessage();
-
         ServiceResponseType service = null;
-
         try {
             UnregisterServiceRequest unregister = JAXBMarshaller.unmarshallTextMessage(textMessage, UnregisterServiceRequest.class);
             service = exchangeService.unregisterService(unregister.getService());
             String serviceClassName = service.getServiceClassName();
-
-            try {
-                SettingListType settingList = service.getSettingList();
-                for (SettingType setting : settingList.getSetting()) {
-                    String key = serviceClassName + PARAMETER_DELIMETER + setting.getKey();
-                    configService.pushSettingToConfig(SettingTypeMapper.map(key, setting.getValue()), true);
-                }
-            } catch (ConfigServiceException e) {
-                LOG.error("Couldn't unregister plugin settings in config parameter table");
-            }
 
             //NO ack back to plugin
             //TODO log to exchange log
