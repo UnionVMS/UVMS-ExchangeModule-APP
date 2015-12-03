@@ -209,6 +209,7 @@ public class PluginServiceBean implements PluginService {
 
     	ServiceResponseType service = exchangeService.upsertSettings(serviceClassName, settingListType);
 
+        // Send the plugin settings to the topic where all plugins should listen to
     	String text = ExchangePluginRequestMapper.createSetConfigRequest(service.getSettingList());
     	producer.sendEventBusMessage(text, serviceClassName);
     }
