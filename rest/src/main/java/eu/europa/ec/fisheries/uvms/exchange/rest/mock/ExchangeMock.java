@@ -14,11 +14,7 @@ import java.util.Map;
 import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeListQuery;
 import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogStatusTypeType;
 import eu.europa.ec.fisheries.schema.exchange.v1.TypeRefType;
-import eu.europa.ec.fisheries.uvms.exchange.rest.dto.exchange.ExchangeLog;
-import eu.europa.ec.fisheries.uvms.exchange.rest.dto.exchange.ExchangeLogData;
-import eu.europa.ec.fisheries.uvms.exchange.rest.dto.exchange.ListQueryResponse;
-import eu.europa.ec.fisheries.uvms.exchange.rest.dto.exchange.SendingGroupLog;
-import eu.europa.ec.fisheries.uvms.exchange.rest.dto.exchange.SendingLog;
+import eu.europa.ec.fisheries.uvms.exchange.rest.dto.exchange.*;
 
 /**
  *
@@ -71,8 +67,13 @@ public class ExchangeMock {
 
 	private static SendingGroupLog mockGroupLog(String recipient) {
 		SendingGroupLog groupLog = new SendingGroupLog();
+        List<PluginType> pluginTypeList = new ArrayList<>();
 		groupLog.setRecipient(recipient);
-		groupLog.setSendingLogList(mockSendingLogList(recipient));
+        PluginType pluginType = new PluginType();
+        pluginType.setName("PluginMock");
+        pluginType.setSendingLogList(mockSendingLogList(recipient));
+        pluginTypeList.add(pluginType);
+        groupLog.setPluginList(pluginTypeList);
 		return groupLog;
 	}
 

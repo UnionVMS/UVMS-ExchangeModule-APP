@@ -49,7 +49,6 @@ public class ExchangeSendingQueueResource {
 	public ResponseDto getSendingQueue() {
 		LOG.info("Get list invoked in rest layer");
 		try {
-			//List<SendingGroupLog> exchangeLogList = ExchangeMock.mockSendingList();
 			List<UnsentMessageType> unsentMessageList = serviceLayer.getUnsentMessageList();
 			List<SendingGroupLog> sendingQueue = ExchangeLogMapper.mapToSendingQueue(unsentMessageList);
 			return new ResponseDto(sendingQueue, RestResponseCode.OK);

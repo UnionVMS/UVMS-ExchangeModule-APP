@@ -5,25 +5,21 @@
  */
 package eu.europa.ec.fisheries.uvms.exchange.rest.mapper;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-
 import eu.europa.ec.fisheries.schema.exchange.source.v1.GetLogListByQueryResponse;
 import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogType;
 import eu.europa.ec.fisheries.schema.exchange.v1.ReceiveMovementType;
 import eu.europa.ec.fisheries.schema.exchange.v1.SendMovementType;
 import eu.europa.ec.fisheries.schema.exchange.v1.UnsentMessageType;
 import eu.europa.ec.fisheries.uvms.common.DateUtils;
+import eu.europa.ec.fisheries.uvms.exchange.model.mapper.ExchangeModuleRequestMapper;
+import eu.europa.ec.fisheries.uvms.exchange.model.mapper.ExchangeModuleResponseMapper;
+import eu.europa.ec.fisheries.uvms.exchange.model.mapper.JAXBMarshaller;
 import eu.europa.ec.fisheries.uvms.exchange.rest.dto.LogTypeLabel;
-import eu.europa.ec.fisheries.uvms.exchange.rest.dto.exchange.ExchangeLog;
-import eu.europa.ec.fisheries.uvms.exchange.rest.dto.exchange.ExchangeLogData;
-import eu.europa.ec.fisheries.uvms.exchange.rest.dto.exchange.ListQueryResponse;
-import eu.europa.ec.fisheries.uvms.exchange.rest.dto.exchange.SendingGroupLog;
-import eu.europa.ec.fisheries.uvms.exchange.rest.dto.exchange.SendingLog;
+import eu.europa.ec.fisheries.uvms.exchange.rest.dto.exchange.*;
+
+import javax.jms.Message;
+import javax.jms.TextMessage;
+import java.util.*;
 
 /**
  *
@@ -100,11 +96,11 @@ public class ExchangeLogMapper {
 		Iterator<String> itr = groupMap.keySet().iterator();
 		while(itr.hasNext()) {
 			SendingGroupLog groupLog = new SendingGroupLog();
-			String recipient = itr.next();
+            String recipient = itr.next();
 			groupLog.setRecipient(recipient);
-			groupLog.setSendingLogList(mapSendingLog(groupMap.get(recipient)));
-			sendingGroupList.add(groupLog);
-		}
+            groupLog.setPluginList(mapPluginTypeList(groupMap.get(recipient)));
+            sendingGroupList.add(groupLog);
+        }
 		return sendingGroupList;
 	}
 	
@@ -120,4 +116,32 @@ public class ExchangeLogMapper {
 		}
 		return sendingLog;
 	}
+
+    private static List<PluginType> mapPluginTypeList(List<UnsentMessageType> unsentMessageList){
+        Map<String, List<UnsentMessageType>> groupMap = new HashMap<>();
+        List<PluginType> pluginTypeList = new ArrayList<>();
+        for(UnsentMessageType message : unsentMessageList) {
+            List<UnsentMessageType> logList = groupMap.get(message.getSenderReceiver());
+            if(logList == null) {
+                logList = new ArrayList<>();
+            }
+            logList.add(message);
+            groupMap.put(message.getSenderReceiver(), logList);
+        }
+
+        Iterator<String> iterator = groupMap.keySet().iterator();
+        while (iterator.hasNext()){
+            PluginType pluginType = new PluginType();
+            String senderReceiver = iterator.next();
+            pluginType.setName(senderReceiver);
+            pluginType.setSendingLogList(mapSendingLog(groupMap.get(senderReceiver)));
+            pluginTypeList.add(pluginType);
+        }
+        return pluginTypeList;
+    }
+
+    private void test(String msg){
+
+    }
+
 }

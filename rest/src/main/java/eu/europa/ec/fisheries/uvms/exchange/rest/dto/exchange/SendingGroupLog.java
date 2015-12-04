@@ -11,19 +11,23 @@ public class SendingGroupLog {
 
 	@XmlElement(required = true)
 	private String recipient;
-	@XmlElement(required = true)
-	private List<SendingLog> sendingLogList;
+    @XmlElement(required = true)
+    private List<PluginType> pluginList;
+
 	public String getRecipient() {
 		return recipient;
 	}
-	public void setRecipient(String recipient) {
+
+    public void setRecipient(String recipient) {
 		this.recipient = recipient;
 	}
-	public List<SendingLog> getSendingLogList() {
-		return sendingLogList;
-	}
-	public void setSendingLogList(List<SendingLog> sendingLogList) {
-		this.sendingLogList = sendingLogList;
-	}
+    public List<PluginType> getPluginList() {
+        return pluginList;
+    }
+
+    public void setPluginList(List<PluginType> pluginList) {
+        this.pluginList = pluginList;
+    }
+
 	
 }

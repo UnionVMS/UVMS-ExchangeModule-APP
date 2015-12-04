@@ -127,12 +127,12 @@ public class ExchangeEventOutgoingServiceBean implements ExchangeEventOutgoingSe
         } else if(!StatusType.STARTED.equals(service.getStatus())) {
         	LOG.info("Plugin to send report to is not started");
         	try {
-        		exchangeLog.createUnsentMessage(ExchangeLogMapper.getSendMovementSenderReceiver(sendReport), sendReport.getTimestamp(), sendReport.getRecipient(), origin.getText());
+                exchangeLog.createUnsentMessage(ExchangeLogMapper.getSendMovementSenderReceiver(sendReport), sendReport.getTimestamp(), sendReport.getRecipient(), origin.getText());
         	} catch (ExchangeLogException | JMSException e) {
         		LOG.error("Couldn't create unsent message " + e.getMessage());
         	}
-        	
-        	try {
+
+            try {
         		AcknowledgeType ackType = ExchangeModuleResponseMapper.mapAcknowledgeTypeNOK(origin.getJMSMessageID(), "Plugin to send movement is not started");
         		String moduleResponse = ExchangeModuleResponseMapper.mapSendMovementToPluginResponse(ackType);
         		producer.sendModuleResponseMessage(origin, moduleResponse);
