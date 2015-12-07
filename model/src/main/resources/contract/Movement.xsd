@@ -40,6 +40,8 @@
                     <xsd:element name="recipient" type="xsd:string"/>
                     <xsd:element name="recipientInfo" type="movement:RecipientInfoType" minOccurs="1" maxOccurs="unbounded"/>
                     <xsd:element name="movement" type="movement:MovementType"/>
+                    <xsd:element name="assetName" type="xsd:string"/>
+                    <xsd:element name="ircs" type="xsd:string"/>
                 </xsd:sequence>
             </xsd:extension>
         </xsd:complexContent>
