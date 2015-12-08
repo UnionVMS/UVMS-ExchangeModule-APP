@@ -21,6 +21,7 @@
     <xsd:simpleType name="PollTypeType">
         <xsd:restriction base="xsd:string">
             <xsd:enumeration value="CONFIG"/>
+            <xsd:enumeration value="SAMPLING"/>
             <xsd:enumeration value="POLL"/>
         </xsd:restriction>
     </xsd:simpleType>

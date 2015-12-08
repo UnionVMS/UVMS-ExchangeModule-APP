@@ -6,7 +6,6 @@ import java.util.List;
 import eu.europa.ec.fisheries.schema.exchange.plugin.types.v1.EmailType;
 import eu.europa.ec.fisheries.schema.exchange.plugin.types.v1.PollType;
 import eu.europa.ec.fisheries.schema.exchange.v1.*;
-import eu.europa.ec.fisheries.wsdl.vessel.types.Vessel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -288,15 +287,14 @@ public class ExchangeLogMapper {
         return unsentMessageTypeProperties;
     }
 
-
-    public static List<UnsentMessageTypeProperty> getPropertiesForPoll(PollType poll, String assetName ) throws ExchangeLogException {
+    public static List<UnsentMessageTypeProperty> getPropertiesForPoll(PollType poll, String assetName) throws ExchangeLogException {
         List<UnsentMessageTypeProperty> unsentMessageTypeProperties = new ArrayList<>();
         UnsentMessageTypeProperty propertyAssetName = new UnsentMessageTypeProperty();
         propertyAssetName.setKey(UnsentMessageTypePropertyKey.ASSET_NAME);
         propertyAssetName.setValue(assetName);
         UnsentMessageTypeProperty pollType = new UnsentMessageTypeProperty();
         pollType.setKey(UnsentMessageTypePropertyKey.POLL_TYPE);
-        pollType.setValue(poll.getPollType());
+        pollType.setValue(poll.getPollTypeType().name());
         unsentMessageTypeProperties.add(propertyAssetName);
         unsentMessageTypeProperties.add(pollType);
         return unsentMessageTypeProperties;
@@ -313,8 +311,8 @@ public class ExchangeLogMapper {
 
     public static String getConnectId(PollType poll) {
         List<KeyValueType> pollReceiver = poll.getPollReceiver();
-        for(KeyValueType keyValueType : pollReceiver){
-            if("CONNECT_ID".equalsIgnoreCase(keyValueType.getKey())){
+        for (KeyValueType keyValueType : pollReceiver) {
+            if ("CONNECT_ID".equalsIgnoreCase(keyValueType.getKey())) {
                 return keyValueType.getValue();
             }
         }
