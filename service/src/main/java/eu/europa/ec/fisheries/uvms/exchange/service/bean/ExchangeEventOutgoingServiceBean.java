@@ -216,7 +216,7 @@ public class ExchangeEventOutgoingServiceBean implements ExchangeEventOutgoingSe
         	LOG.info("Plugin to send report to is not started");
         	try {
                 List<UnsentMessageTypeProperty> setUnsentMessageTypePropertiesForPoll = getSetUnsentMessageTypePropertiesForPoll(commandType);
-                exchangeLog.createUnsentMessage(service.getName(), command.getTimestamp(), command.getCommand().name(), origin.getText(), setUnsentMessageTypePropertiesForPoll);
+                exchangeLog.createUnsentMessage(command.getCommand().name(), command.getTimestamp(), service.getName(),  origin.getText(), setUnsentMessageTypePropertiesForPoll);
         	} catch (ExchangeLogException | JMSException e) {
         		LOG.error("Couldn't create unsentMessage " + e.getMessage());
         	}
