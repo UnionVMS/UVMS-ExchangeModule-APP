@@ -18,6 +18,13 @@
         </xsd:restriction>
     </xsd:simpleType>
     
+    <xsd:simpleType name="PollTypeType">
+        <xsd:restriction base="xsd:string">
+            <xsd:enumeration value="CONFIG"/>
+            <xsd:enumeration value="POLL"/>
+        </xsd:restriction>
+    </xsd:simpleType>
+    
     <xsd:element name="PluginFault">
         <xsd:complexType>
             <xsd:sequence>
@@ -30,13 +37,13 @@
     <xsd:complexType name="PollType">
         <xsd:sequence>
             <xsd:element name="pollId" type="xsd:string"/>
-            <xsd:element name="pollType" type="xsd:string"/>
+            <xsd:element name="pollTypeType" type="plugin:PollTypeType"/> 
             <xsd:element name="message" type="xsd:string"/> <!-- comment from GUI sender -->
             <xsd:element name="pollReceiver" type="common:keyValueType" minOccurs="1" maxOccurs="unbounded"/>
             <xsd:element name="pollPayload" type="common:keyValueType" minOccurs="0" maxOccurs="unbounded"/>
         </xsd:sequence>
     </xsd:complexType>
-
+    
     <xsd:complexType name="EmailType">
         <xsd:sequence>
             <xsd:element name="to" type="xsd:string" />
