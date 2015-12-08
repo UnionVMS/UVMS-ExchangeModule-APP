@@ -119,6 +119,18 @@
             <xsd:enumeration value="STATUS"/>
         </xsd:restriction>
     </xsd:simpleType>
+
+    <xsd:simpleType name="UnsentMessageTypePropertyKey">
+        <xsd:restriction base="xsd:string">
+            <xsd:enumeration value="EMAIL"/>
+            <xsd:enumeration value="ASSET_NAME"/>
+            <xsd:enumeration value="IRCS"/>
+            <xsd:enumeration value="LONGITUDE"/>
+            <xsd:enumeration value="LATITUDE"/>
+            <xsd:enumeration value="POLL_TYPE"/>
+            <xsd:enumeration value="POSITION_TIME"/>
+        </xsd:restriction>
+    </xsd:simpleType>
     
     <xsd:complexType name="ExchangeHistoryListQuery">
         <xsd:sequence>
@@ -164,6 +176,13 @@
             <xsd:element name="senderReceiver" type="xsd:string"/>
             <xsd:element name="recipient" type="xsd:string"/>
             <xsd:element name="message" type="xsd:string"/>
+            <xsd:element name="properties" type="exchange:UnsentMessageTypeProperty" minOccurs="0" maxOccurs="unbounded" />
+        </xsd:sequence>
+    </xsd:complexType>
+    <xsd:complexType name="UnsentMessageTypeProperty">
+        <xsd:sequence>
+            <xsd:element name="key" type="exchange:UnsentMessageTypePropertyKey" />
+            <xsd:element name="value" type="xsd:string" />
         </xsd:sequence>
     </xsd:complexType>
 

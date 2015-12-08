@@ -22,6 +22,7 @@
         <audit.model.version>1.0.4-SNAPSHOT</audit.model.version>
         <usm4uvms.version>0.0.12-SNAPSHOT</usm4uvms.version>
         <rules.version>1.0.1-SNAPSHOT</rules.version>
+        <vessel.version>1.0.10-SNAPSHOT</vessel.version>
         <longpolling.version>1.0-SNAPSHOT</longpolling.version>
         <uvms.config.version>0.1-SNAPSHOT</uvms.config.version>
     </properties>

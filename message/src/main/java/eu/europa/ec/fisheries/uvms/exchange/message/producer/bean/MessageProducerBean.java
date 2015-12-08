@@ -57,6 +57,9 @@ public class MessageProducerBean implements MessageProducer, ConfigMessageProduc
     @Resource(mappedName = ConfigConstants.CONFIG_MESSAGE_IN_QUEUE)
     private Queue configQueue;
 
+    @Resource(mappedName = ExchangeModelConstants.QUEUE_INTEGRATION_VESSEL)
+    private Queue vesselQueue;
+
     private Connection connection = null;
     private Session session = null;
 
@@ -83,6 +86,9 @@ public class MessageProducerBean implements MessageProducer, ConfigMessageProduc
                     break;
                 case CONFIG:
                     session.createProducer(configQueue).send(message, Message.DEFAULT_DELIVERY_MODE, Message.DEFAULT_PRIORITY, CONFIG_TTL);
+                    break;
+                case VESSEL:
+                    session.createProducer(vesselQueue).send(message);
                     break;
                 default:
                     break;

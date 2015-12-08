@@ -1,19 +1,5 @@
 package eu.europa.ec.fisheries.uvms.exchange.service.bean;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.ejb.EJB;
-import javax.ejb.Stateless;
-import javax.enterprise.event.Event;
-import javax.enterprise.event.Observes;
-import javax.inject.Inject;
-import javax.jms.JMSException;
-import javax.jms.TextMessage;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import eu.europa.ec.fisheries.schema.exchange.common.v1.AcknowledgeType;
 import eu.europa.ec.fisheries.schema.exchange.common.v1.CommandType;
 import eu.europa.ec.fisheries.schema.exchange.module.v1.SendMovementToPluginRequest;
@@ -23,6 +9,7 @@ import eu.europa.ec.fisheries.schema.exchange.plugin.types.v1.PluginType;
 import eu.europa.ec.fisheries.schema.exchange.service.v1.ServiceResponseType;
 import eu.europa.ec.fisheries.schema.exchange.service.v1.StatusType;
 import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogType;
+import eu.europa.ec.fisheries.schema.exchange.v1.UnsentMessageTypeProperty;
 import eu.europa.ec.fisheries.uvms.exchange.message.consumer.ExchangeMessageConsumer;
 import eu.europa.ec.fisheries.uvms.exchange.message.event.ErrorEvent;
 import eu.europa.ec.fisheries.uvms.exchange.message.event.SendCommandToPluginEvent;
@@ -35,11 +22,26 @@ import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelMarshal
 import eu.europa.ec.fisheries.uvms.exchange.model.mapper.ExchangeModuleResponseMapper;
 import eu.europa.ec.fisheries.uvms.exchange.model.mapper.ExchangePluginRequestMapper;
 import eu.europa.ec.fisheries.uvms.exchange.model.mapper.JAXBMarshaller;
+import eu.europa.ec.fisheries.uvms.exchange.service.ExchangeAssetService;
 import eu.europa.ec.fisheries.uvms.exchange.service.ExchangeEventOutgoingService;
 import eu.europa.ec.fisheries.uvms.exchange.service.ExchangeLogService;
 import eu.europa.ec.fisheries.uvms.exchange.service.ExchangeService;
 import eu.europa.ec.fisheries.uvms.exchange.service.exception.ExchangeLogException;
+import eu.europa.ec.fisheries.uvms.exchange.service.exception.ExchangeServiceException;
 import eu.europa.ec.fisheries.uvms.exchange.service.mapper.ExchangeLogMapper;
+import eu.europa.ec.fisheries.wsdl.vessel.types.Vessel;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.ejb.EJB;
+import javax.ejb.Stateless;
+import javax.enterprise.event.Event;
+import javax.enterprise.event.Observes;
+import javax.inject.Inject;
+import javax.jms.JMSException;
+import javax.jms.TextMessage;
+import java.util.ArrayList;
+import java.util.List;
 
 @Stateless
 public class ExchangeEventOutgoingServiceBean implements ExchangeEventOutgoingService {
@@ -62,6 +64,11 @@ public class ExchangeEventOutgoingServiceBean implements ExchangeEventOutgoingSe
     @EJB
     ExchangeService exchangeService;
 
+    @EJB
+    ExchangeAssetService exchangeAssetService;
+
+
+
 	@Override
     public void sendReportToPlugin(@Observes @SendReportToPluginEvent ExchangeMessageEvent message) {
         LOG.info("Send report to plugin");
@@ -69,7 +76,7 @@ public class ExchangeEventOutgoingServiceBean implements ExchangeEventOutgoingSe
         try {
             SendMovementToPluginRequest request = JAXBMarshaller.unmarshallTextMessage(message.getJmsMessage(), SendMovementToPluginRequest.class);
             SendMovementToPluginType sendReport = request.getReport();
-            
+
             List<PluginType> type = new ArrayList<>();
             type.add(sendReport.getPluginType());
             
@@ -127,7 +134,8 @@ public class ExchangeEventOutgoingServiceBean implements ExchangeEventOutgoingSe
         } else if(!StatusType.STARTED.equals(service.getStatus())) {
         	LOG.info("Plugin to send report to is not started");
         	try {
-                exchangeLog.createUnsentMessage(ExchangeLogMapper.getSendMovementSenderReceiver(sendReport), sendReport.getTimestamp(), sendReport.getRecipient(), origin.getText());
+                List<UnsentMessageTypeProperty> unsentMessageProperties = ExchangeLogMapper.getUnsentMessageProperties(sendReport);
+                exchangeLog.createUnsentMessage(ExchangeLogMapper.getSendMovementSenderReceiver(sendReport), sendReport.getTimestamp(), sendReport.getRecipient(), origin.getText(), unsentMessageProperties);
         	} catch (ExchangeLogException | JMSException e) {
         		LOG.error("Couldn't create unsent message " + e.getMessage());
         	}
@@ -143,18 +151,22 @@ public class ExchangeEventOutgoingServiceBean implements ExchangeEventOutgoingSe
         }
         return true;
     }
-	
-	@Override
+
+
+
+    @Override
     public void sendCommandToPlugin(@Observes @SendCommandToPluginEvent ExchangeMessageEvent message) {
         LOG.info("Send command to plugin");
 
         try {
             SetCommandRequest request = JAXBMarshaller.unmarshallTextMessage(message.getJmsMessage(), SetCommandRequest.class);
             String pluginName = request.getCommand().getPluginName();
-
+            CommandType commandType = request.getCommand();
             ServiceResponseType service = exchangeService.getService(pluginName);
+
+
             
-            if(validate(request.getCommand(), message.getJmsMessage(), service)) {
+            if(validate(request.getCommand(), message.getJmsMessage(), service, commandType)) {
             	String text = ExchangePluginRequestMapper.createSetCommandRequest(request.getCommand());
             	String pluginMessageId = producer.sendEventBusMessage(text, pluginName);
             	
@@ -179,7 +191,7 @@ public class ExchangeEventOutgoingServiceBean implements ExchangeEventOutgoingSe
         }
     }
 	
-	private boolean validate(CommandType command, TextMessage origin, ServiceResponseType service) {
+	private boolean validate(CommandType command, TextMessage origin, ServiceResponseType service, CommandType commandType) {
         if(command == null) {
         	String faultMessage = "No command";
 			exchangeErrorEvent.fire(new ExchangeMessageEvent(origin, ExchangeModuleResponseMapper.createFaultMessage(FaultCode.EXCHANGE_COMMAND_INVALID, faultMessage)));
@@ -203,7 +215,8 @@ public class ExchangeEventOutgoingServiceBean implements ExchangeEventOutgoingSe
         } else if(!StatusType.STARTED.equals(service.getStatus())) {
         	LOG.info("Plugin to send report to is not started");
         	try {
-        		exchangeLog.createUnsentMessage(service.getName(), command.getTimestamp(), command.getCommand().name(), origin.getText());
+                List<UnsentMessageTypeProperty> setUnsentMessageTypePropertiesForPoll = getSetUnsentMessageTypePropertiesForPoll(commandType);
+                exchangeLog.createUnsentMessage(service.getName(), command.getTimestamp(), command.getCommand().name(), origin.getText(), setUnsentMessageTypePropertiesForPoll);
         	} catch (ExchangeLogException | JMSException e) {
         		LOG.error("Couldn't create unsentMessage " + e.getMessage());
         	}
@@ -220,4 +233,32 @@ public class ExchangeEventOutgoingServiceBean implements ExchangeEventOutgoingSe
         }
         return true;
 	}
+
+    private Vessel getAsset(String connectId) throws ExchangeLogException {
+        Vessel asset = null;
+        try {
+            asset = exchangeAssetService.getAsset(connectId);
+        } catch (ExchangeServiceException e) {
+            LOG.error("Couldn't create unsentMessage " + e.getMessage());
+            throw new ExchangeLogException(e.getMessage());
+        }
+        return asset;
+    }
+
+    private List<UnsentMessageTypeProperty> getSetUnsentMessageTypePropertiesForPoll(CommandType commandType) throws ExchangeLogException {
+        List<UnsentMessageTypeProperty> properties = new ArrayList<>();
+        if(commandType.getPoll()!=null){
+            String connectId = ExchangeLogMapper.getConnectId(commandType.getPoll());
+            Vessel asset = getAsset(connectId);
+            properties = ExchangeLogMapper.getPropertiesForPoll(commandType.getPoll(), asset.getName());
+
+        }else if(commandType.getEmail()!=null){
+            properties = ExchangeLogMapper.getPropertiesForEmail(commandType.getEmail());
+
+        }
+        return properties;
+
+    }
+
+
 }

@@ -196,7 +196,7 @@ public class ExchangeDataSourceRequestMapper {
 		return JAXBMarshaller.marshallJaxBObjectToString(request);
 	}
 
-	public static String mapCreateUnsentMessage(XMLGregorianCalendar dateReceived, String senderReceiver, String recipient, String messageText) throws ExchangeModelMarshallException {
+	public static String mapCreateUnsentMessage(XMLGregorianCalendar dateReceived, String senderReceiver, String recipient, String messageText, List<UnsentMessageTypeProperty> properties) throws ExchangeModelMarshallException {
 		CreateUnsentMessageRequest request = new CreateUnsentMessageRequest();
 		request.setMethod(ExchangeDataSourceMethod.CREATE_UNSENT_MESSAGE);
 		UnsentMessageType unsentMessage = new UnsentMessageType();
@@ -204,6 +204,7 @@ public class ExchangeDataSourceRequestMapper {
 		unsentMessage.setSenderReceiver(senderReceiver);
 		unsentMessage.setRecipient(recipient);
 		unsentMessage.setMessage(messageText);
+        unsentMessage.getProperties().addAll(properties);
 		request.setMessage(unsentMessage);
 		return JAXBMarshaller.marshallJaxBObjectToString(request);
 	}

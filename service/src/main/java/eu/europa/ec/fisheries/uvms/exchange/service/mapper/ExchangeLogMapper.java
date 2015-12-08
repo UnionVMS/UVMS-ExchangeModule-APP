@@ -1,7 +1,12 @@
 package eu.europa.ec.fisheries.uvms.exchange.service.mapper;
 
+import java.util.ArrayList;
 import java.util.List;
 
+import eu.europa.ec.fisheries.schema.exchange.plugin.types.v1.EmailType;
+import eu.europa.ec.fisheries.schema.exchange.plugin.types.v1.PollType;
+import eu.europa.ec.fisheries.schema.exchange.v1.*;
+import eu.europa.ec.fisheries.wsdl.vessel.types.Vessel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -16,15 +21,6 @@ import eu.europa.ec.fisheries.schema.exchange.movement.v1.MovementSourceType;
 import eu.europa.ec.fisheries.schema.exchange.movement.v1.SendMovementToPluginType;
 import eu.europa.ec.fisheries.schema.exchange.movement.v1.SetReportMovementType;
 import eu.europa.ec.fisheries.schema.exchange.plugin.types.v1.PluginType;
-import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogStatusTypeType;
-import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogType;
-import eu.europa.ec.fisheries.schema.exchange.v1.LogRefType;
-import eu.europa.ec.fisheries.schema.exchange.v1.LogType;
-import eu.europa.ec.fisheries.schema.exchange.v1.ReceiveMovementType;
-import eu.europa.ec.fisheries.schema.exchange.v1.SendEmailType;
-import eu.europa.ec.fisheries.schema.exchange.v1.SendMovementType;
-import eu.europa.ec.fisheries.schema.exchange.v1.SendPollType;
-import eu.europa.ec.fisheries.schema.exchange.v1.TypeRefType;
 import eu.europa.ec.fisheries.schema.rules.mobileterminal.v1.IdType;
 import eu.europa.ec.fisheries.uvms.exchange.service.exception.ExchangeLogException;
 
@@ -262,5 +258,66 @@ public class ExchangeLogMapper {
         logRefType.setType(TypeRefType.POLL);
         log.setTypeRef(logRefType);
         return log;
+    }
+
+    public static List<UnsentMessageTypeProperty> getUnsentMessageProperties(SendMovementToPluginType sendReport) {
+
+        List<UnsentMessageTypeProperty> unsentMessageTypeProperties = new ArrayList<>();
+        UnsentMessageTypeProperty propertyAssetName = new UnsentMessageTypeProperty();
+        UnsentMessageTypeProperty propertyIrcs = new UnsentMessageTypeProperty();
+        UnsentMessageTypeProperty propertyLong = new UnsentMessageTypeProperty();
+        UnsentMessageTypeProperty propertyLat = new UnsentMessageTypeProperty();
+        UnsentMessageTypeProperty propertyPositionTime = new UnsentMessageTypeProperty();
+
+        propertyAssetName.setKey(UnsentMessageTypePropertyKey.ASSET_NAME);
+        propertyAssetName.setValue(sendReport.getAssetName());
+        propertyIrcs.setKey(UnsentMessageTypePropertyKey.IRCS);
+        propertyIrcs.setValue(sendReport.getIrcs());
+        propertyLong.setKey(UnsentMessageTypePropertyKey.LONGITUDE);
+        propertyLong.setValue(sendReport.getMovement().getPosition().getLongitude().toString());
+        propertyLat.setKey(UnsentMessageTypePropertyKey.LATITUDE);
+        propertyLat.setValue(sendReport.getMovement().getPosition().getLatitude().toString());
+        propertyPositionTime.setKey(UnsentMessageTypePropertyKey.POSITION_TIME);
+        propertyPositionTime.setValue(sendReport.getMovement().getPositionTime().toString());
+
+        unsentMessageTypeProperties.add(propertyAssetName);
+        unsentMessageTypeProperties.add(propertyIrcs);
+        unsentMessageTypeProperties.add(propertyLong);
+        unsentMessageTypeProperties.add(propertyLat);
+        unsentMessageTypeProperties.add(propertyPositionTime);
+        return unsentMessageTypeProperties;
+    }
+
+
+    public static List<UnsentMessageTypeProperty> getPropertiesForPoll(PollType poll, String assetName ) throws ExchangeLogException {
+        List<UnsentMessageTypeProperty> unsentMessageTypeProperties = new ArrayList<>();
+        UnsentMessageTypeProperty propertyAssetName = new UnsentMessageTypeProperty();
+        propertyAssetName.setKey(UnsentMessageTypePropertyKey.ASSET_NAME);
+        propertyAssetName.setValue(assetName);
+        UnsentMessageTypeProperty pollType = new UnsentMessageTypeProperty();
+        pollType.setKey(UnsentMessageTypePropertyKey.POLL_TYPE);
+        pollType.setValue(poll.getPollType());
+        unsentMessageTypeProperties.add(propertyAssetName);
+        unsentMessageTypeProperties.add(pollType);
+        return unsentMessageTypeProperties;
+    }
+
+    public static List<UnsentMessageTypeProperty> getPropertiesForEmail(EmailType email) throws ExchangeLogException {
+        List<UnsentMessageTypeProperty> unsentMessageTypeProperties = new ArrayList<>();
+        UnsentMessageTypeProperty propertyEmail = new UnsentMessageTypeProperty();
+        propertyEmail.setKey(UnsentMessageTypePropertyKey.EMAIL);
+        propertyEmail.setValue(email.getTo());
+        unsentMessageTypeProperties.add(propertyEmail);
+        return unsentMessageTypeProperties;
+    }
+
+    public static String getConnectId(PollType poll) {
+        List<KeyValueType> pollReceiver = poll.getPollReceiver();
+        for(KeyValueType keyValueType : pollReceiver){
+            if("CONNECT_ID".equalsIgnoreCase(keyValueType.getKey())){
+                return keyValueType.getValue();
+            }
+        }
+        return null;
     }
 }

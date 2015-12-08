@@ -6,10 +6,7 @@
 package eu.europa.ec.fisheries.uvms.exchange.rest.mapper;
 
 import eu.europa.ec.fisheries.schema.exchange.source.v1.GetLogListByQueryResponse;
-import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogType;
-import eu.europa.ec.fisheries.schema.exchange.v1.ReceiveMovementType;
-import eu.europa.ec.fisheries.schema.exchange.v1.SendMovementType;
-import eu.europa.ec.fisheries.schema.exchange.v1.UnsentMessageType;
+import eu.europa.ec.fisheries.schema.exchange.v1.*;
 import eu.europa.ec.fisheries.uvms.common.DateUtils;
 import eu.europa.ec.fisheries.uvms.exchange.model.mapper.ExchangeModuleRequestMapper;
 import eu.europa.ec.fisheries.uvms.exchange.model.mapper.ExchangeModuleResponseMapper;
@@ -112,10 +109,19 @@ public class ExchangeLogMapper {
 			log.setDateRecieved(DateUtils.dateToString(dateRecieved));
 			log.setMessageId(message.getMessageId());
 			log.setSenderRecipient(message.getSenderReceiver());
+            log.setProperties(mapProperties(message.getProperties()));
 			sendingLog.add(log);
 		}
 		return sendingLog;
 	}
+
+    private static Map<String, String> mapProperties(List<UnsentMessageTypeProperty> properties) {
+        Map<String, String> map = new HashMap<>();
+        for (UnsentMessageTypeProperty property : properties){
+            map.put(property.getKey().name(), property.getValue());
+        }
+        return map;
+    }
 
     private static List<PluginType> mapPluginTypeList(List<UnsentMessageType> unsentMessageList){
         Map<String, List<UnsentMessageType>> groupMap = new HashMap<>();
@@ -140,8 +146,6 @@ public class ExchangeLogMapper {
         return pluginTypeList;
     }
 
-    private void test(String msg){
 
-    }
 
 }

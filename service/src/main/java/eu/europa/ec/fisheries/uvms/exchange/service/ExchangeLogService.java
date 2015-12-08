@@ -27,7 +27,7 @@ public interface ExchangeLogService {
 
 	public ExchangeLogType getExchangeLogByGuid(String guid) throws ExchangeLogException;
 
-	public String createUnsentMessage(String senderReceiver, XMLGregorianCalendar timestamp, String recipient, String message) throws ExchangeLogException;
+	public String createUnsentMessage(String senderReceiver, XMLGregorianCalendar timestamp, String recipient, String message, List<UnsentMessageTypeProperty> properties) throws ExchangeLogException;
 
 	public void resend(List<String> messageIdList) throws ExchangeLogException;
 

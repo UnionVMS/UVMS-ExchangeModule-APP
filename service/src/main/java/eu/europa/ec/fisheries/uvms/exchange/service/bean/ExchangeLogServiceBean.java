@@ -1,23 +1,7 @@
 package eu.europa.ec.fisheries.uvms.exchange.service.bean;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
-
-import javax.ejb.EJB;
-import javax.ejb.Stateless;
-import javax.enterprise.event.Event;
-import javax.inject.Inject;
-import javax.jms.JMSException;
-import javax.jms.TextMessage;
-import javax.xml.datatype.XMLGregorianCalendar;
-
-import eu.europa.ec.fisheries.schema.exchange.v1.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import eu.europa.ec.fisheries.schema.exchange.source.v1.GetLogListByQueryResponse;
+import eu.europa.ec.fisheries.schema.exchange.v1.*;
 import eu.europa.ec.fisheries.uvms.exchange.message.constants.MessageQueue;
 import eu.europa.ec.fisheries.uvms.exchange.message.consumer.ExchangeMessageConsumer;
 import eu.europa.ec.fisheries.uvms.exchange.message.exception.ExchangeMessageException;
@@ -32,6 +16,20 @@ import eu.europa.ec.fisheries.uvms.exchange.service.event.ExchangeLogEvent;
 import eu.europa.ec.fisheries.uvms.exchange.service.event.ExchangeSendingQueueEvent;
 import eu.europa.ec.fisheries.uvms.exchange.service.exception.ExchangeLogException;
 import eu.europa.ec.fisheries.uvms.longpolling.notifications.NotificationMessage;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.ejb.EJB;
+import javax.ejb.Stateless;
+import javax.enterprise.event.Event;
+import javax.inject.Inject;
+import javax.jms.JMSException;
+import javax.jms.TextMessage;
+import javax.xml.datatype.XMLGregorianCalendar;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.List;
 
 @Stateless
 public class ExchangeLogServiceBean implements ExchangeLogService {
@@ -174,10 +172,10 @@ public class ExchangeLogServiceBean implements ExchangeLogService {
     }
 
 	@Override
-	public String createUnsentMessage(String senderReceiver, XMLGregorianCalendar timestamp, String recipient, String message) throws ExchangeLogException {
+	public String createUnsentMessage(String senderReceiver, XMLGregorianCalendar timestamp, String recipient, String message, List<UnsentMessageTypeProperty> properties) throws ExchangeLogException {
 		LOG.debug("createUnsentMessage in service layer");
 		try {
-			String text = ExchangeDataSourceRequestMapper.mapCreateUnsentMessage(timestamp, senderReceiver, recipient, message);
+			String text = ExchangeDataSourceRequestMapper.mapCreateUnsentMessage(timestamp, senderReceiver, recipient, message, properties);
 			String messageId = producer.sendMessageOnQueue(text, MessageQueue.INTERNAL);
 			TextMessage response = consumer.getMessage(messageId, TextMessage.class);
 			String unsentMessageId = ExchangeDataSourceResponseMapper.mapCreateUnsentMessageResponse(response, messageId);
@@ -189,6 +187,7 @@ public class ExchangeLogServiceBean implements ExchangeLogService {
 			throw new ExchangeLogException("Couldn't add message to unsent list");
 		}
 	}
+
 
 	@Override
 	public void resend(List<String> messageIdList) throws ExchangeLogException {

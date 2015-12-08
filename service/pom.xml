@@ -45,6 +45,11 @@
             <version>${rules.version}</version>
         </dependency>
         <dependency>
+            <groupId>eu.europa.ec.fisheries.uvms.vessel</groupId>
+            <artifactId>vessel-model</artifactId>
+            <version>${vessel.version}</version>
+        </dependency>
+        <dependency>
             <groupId>net.sf.dozer</groupId>
             <artifactId>dozer</artifactId>
             <version>${dozer.version}</version>
