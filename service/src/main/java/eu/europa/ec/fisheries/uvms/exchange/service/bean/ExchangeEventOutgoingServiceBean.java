@@ -135,7 +135,7 @@ public class ExchangeEventOutgoingServiceBean implements ExchangeEventOutgoingSe
         	LOG.info("Plugin to send report to is not started");
         	try {
                 List<UnsentMessageTypeProperty> unsentMessageProperties = ExchangeLogMapper.getUnsentMessageProperties(sendReport);
-                exchangeLog.createUnsentMessage(ExchangeLogMapper.getSendMovementSenderReceiver(sendReport), sendReport.getTimestamp(), sendReport.getRecipient(), origin.getText(), unsentMessageProperties);
+                exchangeLog.createUnsentMessage(sendReport.getRecipient(), sendReport.getTimestamp(), ExchangeLogMapper.getSendMovementSenderReceiver(sendReport) , origin.getText(), unsentMessageProperties);
         	} catch (ExchangeLogException | JMSException e) {
         		LOG.error("Couldn't create unsent message " + e.getMessage());
         	}
@@ -216,7 +216,7 @@ public class ExchangeEventOutgoingServiceBean implements ExchangeEventOutgoingSe
         	LOG.info("Plugin to send report to is not started");
         	try {
                 List<UnsentMessageTypeProperty> setUnsentMessageTypePropertiesForPoll = getSetUnsentMessageTypePropertiesForPoll(commandType);
-                exchangeLog.createUnsentMessage(command.getCommand().name(), command.getTimestamp(), service.getName(),  origin.getText(), setUnsentMessageTypePropertiesForPoll);
+                exchangeLog.createUnsentMessage(service.getName(), command.getTimestamp(), command.getCommand().name(), origin.getText(), setUnsentMessageTypePropertiesForPoll);
         	} catch (ExchangeLogException | JMSException e) {
         		LOG.error("Couldn't create unsentMessage " + e.getMessage());
         	}
