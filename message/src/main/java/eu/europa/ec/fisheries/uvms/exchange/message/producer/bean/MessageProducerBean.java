@@ -60,6 +60,9 @@ public class MessageProducerBean implements MessageProducer, ConfigMessageProduc
     @Resource(mappedName = ExchangeModelConstants.QUEUE_INTEGRATION_VESSEL)
     private Queue vesselQueue;
 
+    @Resource(mappedName = ExchangeModelConstants.QUEUE_INTEGRATION_AUDIT)
+    private Queue auditQueue;
+
     private Connection connection = null;
     private Session session = null;
 
@@ -90,6 +93,8 @@ public class MessageProducerBean implements MessageProducer, ConfigMessageProduc
                 case VESSEL:
                     session.createProducer(vesselQueue).send(message);
                     break;
+                case AUDIT:
+                    session.createProducer(auditQueue).send(message);
                 default:
                     break;
             }

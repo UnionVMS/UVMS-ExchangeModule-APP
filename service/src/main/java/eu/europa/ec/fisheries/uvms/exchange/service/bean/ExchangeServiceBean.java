@@ -1,33 +1,29 @@
 package eu.europa.ec.fisheries.uvms.exchange.service.bean;
 
-import java.util.List;
-
-import javax.ejb.EJB;
-import javax.ejb.Stateless;
-import javax.jms.TextMessage;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import eu.europa.ec.fisheries.schema.exchange.plugin.types.v1.PluginType;
-import eu.europa.ec.fisheries.schema.exchange.service.v1.CapabilityListType;
-import eu.europa.ec.fisheries.schema.exchange.service.v1.ServiceResponseType;
-import eu.europa.ec.fisheries.schema.exchange.service.v1.ServiceType;
-import eu.europa.ec.fisheries.schema.exchange.service.v1.SettingListType;
-import eu.europa.ec.fisheries.schema.exchange.service.v1.StatusType;
+import eu.europa.ec.fisheries.schema.exchange.service.v1.*;
 import eu.europa.ec.fisheries.schema.exchange.source.v1.GetLogListByQueryResponse;
 import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeListQuery;
 import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogType;
+import eu.europa.ec.fisheries.uvms.audit.model.exception.AuditModelMarshallException;
 import eu.europa.ec.fisheries.uvms.config.service.ParameterService;
 import eu.europa.ec.fisheries.uvms.exchange.message.constants.MessageQueue;
 import eu.europa.ec.fisheries.uvms.exchange.message.consumer.ExchangeMessageConsumer;
 import eu.europa.ec.fisheries.uvms.exchange.message.exception.ExchangeMessageException;
 import eu.europa.ec.fisheries.uvms.exchange.message.producer.MessageProducer;
 import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelMapperException;
+import eu.europa.ec.fisheries.uvms.exchange.model.mapper.ExchangeAuditRequestMapper;
 import eu.europa.ec.fisheries.uvms.exchange.model.mapper.ExchangeDataSourceRequestMapper;
 import eu.europa.ec.fisheries.uvms.exchange.model.mapper.ExchangeDataSourceResponseMapper;
 import eu.europa.ec.fisheries.uvms.exchange.service.ExchangeService;
 import eu.europa.ec.fisheries.uvms.exchange.service.exception.ExchangeServiceException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.ejb.EJB;
+import javax.ejb.Stateless;
+import javax.jms.TextMessage;
+import java.util.List;
 
 @Stateless
 public class ExchangeServiceBean implements ExchangeService {
@@ -56,7 +52,9 @@ public class ExchangeServiceBean implements ExchangeService {
             String request = ExchangeDataSourceRequestMapper.mapRegisterServiceToString(data, capabilityList, settingList);
             String messageId = producer.sendMessageOnQueue(request, MessageQueue.INTERNAL);
             TextMessage response = consumer.getMessage(messageId, TextMessage.class);
-            return ExchangeDataSourceResponseMapper.mapToRegisterServiceResponse(response, messageId);
+            ServiceResponseType serviceResponseType = ExchangeDataSourceResponseMapper.mapToRegisterServiceResponse(response, messageId);
+            sendAuditLogMessageForRegisterService(serviceResponseType.getServiceClassName());
+            return serviceResponseType;
         } catch (ExchangeModelMapperException | ExchangeMessageException ex) {
             throw new ExchangeServiceException(ex.getMessage());
         }
@@ -75,7 +73,9 @@ public class ExchangeServiceBean implements ExchangeService {
             String request = ExchangeDataSourceRequestMapper.mapUnregisterServiceToString(data);
             String messageId = producer.sendMessageOnQueue(request, MessageQueue.INTERNAL);
             TextMessage response = consumer.getMessage(messageId, TextMessage.class);
-            return ExchangeDataSourceResponseMapper.mapToUnregisterServiceResponse(response, messageId);
+            ServiceResponseType serviceResponseType = ExchangeDataSourceResponseMapper.mapToUnregisterServiceResponse(response, messageId);
+            sendAuditLogMessageForUnregisterService(serviceResponseType.getServiceClassName());
+            return serviceResponseType;
         } catch (ExchangeModelMapperException | ExchangeMessageException ex) {
             throw new ExchangeServiceException(ex.getMessage());
         }
@@ -107,6 +107,7 @@ public class ExchangeServiceBean implements ExchangeService {
             String request = ExchangeDataSourceRequestMapper.mapSetSettingsToString(serviceClassName, settingListType);
             String messageId = producer.sendMessageOnQueue(request, MessageQueue.INTERNAL);
             TextMessage response = consumer.getMessage(messageId, TextMessage.class);
+            sendAuditLogMessageForUpdateService(serviceClassName);
             return ExchangeDataSourceResponseMapper.mapToServiceTypeFromSetSettingsResponse(response, messageId);
         } catch (ExchangeModelMapperException | ExchangeMessageException e) {
             throw new ExchangeServiceException(e.getMessage());
@@ -145,7 +146,9 @@ public class ExchangeServiceBean implements ExchangeService {
             String request = ExchangeDataSourceRequestMapper.mapCreateExchangeLogToString(exchangeLog);
             String messageId = producer.sendMessageOnQueue(request, MessageQueue.INTERNAL);
             TextMessage response = consumer.getMessage(messageId, TextMessage.class);
-            return ExchangeDataSourceResponseMapper.mapToExchangeLogTypeFromCreateExchageLogResponse(response, messageId);
+            ExchangeLogType exchangeLogType = ExchangeDataSourceResponseMapper.mapToExchangeLogTypeFromCreateExchageLogResponse(response, messageId);
+            sendAuditLogMessageForCreateExchangeLog(exchangeLog.getGuid());
+            return exchangeLog;
         } catch (ExchangeModelMapperException | ExchangeMessageException e) {
             throw new ExchangeServiceException(e.getMessage());
         }
@@ -171,9 +174,84 @@ public class ExchangeServiceBean implements ExchangeService {
             String request = ExchangeDataSourceRequestMapper.mapSetServiceStatus(serviceClassName, status);
             String messageId = producer.sendMessageOnQueue(request, MessageQueue.INTERNAL);
             TextMessage response = consumer.getMessage(messageId, TextMessage.class);
+            sendAuditLogMessageForUpdateServiceStatus(serviceClassName, status);
             return ExchangeDataSourceResponseMapper.mapSetServiceResponse(response, messageId);
         } catch (ExchangeModelMapperException | ExchangeMessageException e) {
             throw new ExchangeServiceException(e.getMessage());
+        }
+    }
+
+    private void sendAuditLogMessageForRegisterService(String serviceName){
+        try {
+            String request = ExchangeAuditRequestMapper.mapRegisterService(serviceName);
+            producer.sendMessageOnQueue(request, MessageQueue.AUDIT);
+        } catch (AuditModelMarshallException | ExchangeMessageException e) {
+            LOG.error("Could not send audit log message. Exchange registered service: " + serviceName );
+        }
+    }
+
+    private void sendAuditLogMessageForUnregisterService(String serviceName){
+        try {
+            String request = ExchangeAuditRequestMapper.mapUnregisterService(serviceName);
+            producer.sendMessageOnQueue(request, MessageQueue.AUDIT);
+        } catch (AuditModelMarshallException | ExchangeMessageException e) {
+            LOG.error("Could not send audit log message. Exchange unregistered service: " + serviceName );
+        }
+    }
+
+    private void sendAuditLogMessageForServiceStatusStopped(String serviceName){
+        try {
+            String request = ExchangeAuditRequestMapper.mapServiceStatusStopped(serviceName);
+            producer.sendMessageOnQueue(request, MessageQueue.AUDIT);
+        } catch (AuditModelMarshallException | ExchangeMessageException e) {
+            LOG.error("Could not send audit log message. Exchange stopped service: " + serviceName );
+        }
+    }
+
+    private void sendAuditLogMessageForServiceStatusUnknown(String serviceName){
+        try {
+            String request = ExchangeAuditRequestMapper.mapServiceStatusUnknown(serviceName);
+            producer.sendMessageOnQueue(request, MessageQueue.AUDIT);
+        } catch (AuditModelMarshallException | ExchangeMessageException e) {
+            LOG.error("Could not send audit log message. Exchange set service: " + serviceName +"status to unknown" );
+        }
+    }
+
+    private void sendAuditLogMessageForServiceStatusStarted(String serviceName){
+        try {
+            String request = ExchangeAuditRequestMapper.mapServiceStatusStarted(serviceName);
+            producer.sendMessageOnQueue(request, MessageQueue.AUDIT);
+        } catch (AuditModelMarshallException | ExchangeMessageException e) {
+            LOG.error("Could not send audit log message. Exchange started service: " + serviceName );
+        }
+    }
+
+    private void sendAuditLogMessageForUpdateService(String serviceName){
+        try {
+            String request = ExchangeAuditRequestMapper.mapUpdateService(serviceName);
+            producer.sendMessageOnQueue(request, MessageQueue.AUDIT);
+        } catch (AuditModelMarshallException | ExchangeMessageException e) {
+            LOG.error("Could not send audit log message. Exchange started service: " + serviceName );
+        }
+    }
+
+    private void sendAuditLogMessageForUpdateServiceStatus(String serviceName, StatusType status){
+        switch (status){
+            case STARTED:
+                sendAuditLogMessageForServiceStatusStarted(serviceName);
+            case STOPPED:
+                sendAuditLogMessageForServiceStatusStopped(serviceName);
+            default:
+                sendAuditLogMessageForServiceStatusUnknown(serviceName);
+        }
+    }
+
+    private void sendAuditLogMessageForCreateExchangeLog(String guid){
+        try {
+            String request = ExchangeAuditRequestMapper.mapCreateExchangeLog(guid);
+            producer.sendMessageOnQueue(request, MessageQueue.AUDIT);
+        } catch (AuditModelMarshallException | ExchangeMessageException e) {
+            LOG.error("Could not send audit log message. Exchange log was created with guid: " + guid);
         }
     }
 }
