@@ -277,14 +277,28 @@ public class PluginServiceBean implements PluginService {
             throw new InputArgumentException("No service to start");
         }
         try {
-            String text = ExchangePluginRequestMapper.createStartRequest();
-            producer.sendEventBusMessage(text, serviceClassName);
-            return true;
+            if (isServiceRegistered(serviceClassName)){
+                String text = ExchangePluginRequestMapper.createStartRequest();
+                producer.sendEventBusMessage(text, serviceClassName);
+                return true;
+            }else{
+                throw new ExchangeServiceException("Service with service class name: "+ serviceClassName + " does not exist");
+            }
         } catch (ExchangeModelMarshallException e) {
             throw new ExchangeServiceException("[ Couldn't map start request for " + serviceClassName + " ]");
         } catch (ExchangeMessageException e) {
             throw new ExchangeServiceException("[ Couldn't send start request for " + serviceClassName + " ]");
         }
+    }
+
+    private boolean isServiceRegistered(String serviceClassName) throws ExchangeServiceException {
+        List<ServiceResponseType> serviceList = exchangeService.getServiceList(null);
+        for (ServiceResponseType serviceResponseType : serviceList){
+            if(serviceResponseType.getServiceClassName().equalsIgnoreCase(serviceClassName)){
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override
@@ -293,9 +307,13 @@ public class PluginServiceBean implements PluginService {
             throw new InputArgumentException("No service to stop");
         }
         try {
-            String text = ExchangePluginRequestMapper.createStopRequest();
-            producer.sendEventBusMessage(text, serviceClassName);
-            return true;
+            if(isServiceRegistered(serviceClassName)) {
+                String text = ExchangePluginRequestMapper.createStopRequest();
+                producer.sendEventBusMessage(text, serviceClassName);
+                return true;
+            }else{
+                throw new ExchangeServiceException("Service with service class name: "+ serviceClassName + " does not exist");
+            }
         } catch (ExchangeModelMarshallException e) {
             throw new ExchangeServiceException("[ Couldn't map stop request for " + serviceClassName + " ]");
         } catch (ExchangeMessageException e) {
