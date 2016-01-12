@@ -57,7 +57,7 @@ public class MessageProducerBean implements MessageProducer, ConfigMessageProduc
     @Resource(mappedName = ConfigConstants.CONFIG_MESSAGE_IN_QUEUE)
     private Queue configQueue;
 
-    @Resource(mappedName = ExchangeModelConstants.QUEUE_INTEGRATION_VESSEL)
+    @Resource(mappedName = ExchangeModelConstants.QUEUE_INTEGRATION_ASSET)
     private Queue vesselQueue;
 
     @Resource(mappedName = ExchangeModelConstants.QUEUE_INTEGRATION_AUDIT)

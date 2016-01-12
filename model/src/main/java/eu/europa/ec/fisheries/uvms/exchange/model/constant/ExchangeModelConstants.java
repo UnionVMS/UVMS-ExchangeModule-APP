@@ -21,7 +21,7 @@ public class ExchangeModelConstants {
     public static final String MODULE_NAME = "exchange";
 
     public static final String QUEUE_INTEGRATION_RULES = "java:/jms/queue/UVMSRulesEvent";
-    public static final String QUEUE_INTEGRATION_VESSEL = "java:/jms/queue/UVMSVesselEvent";
+    public static final String QUEUE_INTEGRATION_ASSET = "java:/jms/queue/UVMSAssetEvent";
     public static final String QUEUE_INTEGRATION_AUDIT = "java:/jms/queue/UVMSAuditEvent";
 
 }
