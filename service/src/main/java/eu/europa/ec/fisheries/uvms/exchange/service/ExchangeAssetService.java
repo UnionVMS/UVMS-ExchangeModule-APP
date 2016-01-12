@@ -1,9 +1,9 @@
 package eu.europa.ec.fisheries.uvms.exchange.service;
 
 import eu.europa.ec.fisheries.uvms.exchange.service.exception.ExchangeServiceException;
-import eu.europa.ec.fisheries.wsdl.vessel.types.Vessel;
+import eu.europa.ec.fisheries.wsdl.asset.types.Asset;
 
 public interface ExchangeAssetService {
 
-    Vessel getAsset(String assetGuid) throws ExchangeServiceException;
+    Asset getAsset(String assetGuid) throws ExchangeServiceException;
 }

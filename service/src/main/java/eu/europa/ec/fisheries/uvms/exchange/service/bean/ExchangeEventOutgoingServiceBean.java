@@ -29,7 +29,7 @@ import eu.europa.ec.fisheries.uvms.exchange.service.ExchangeService;
 import eu.europa.ec.fisheries.uvms.exchange.service.exception.ExchangeLogException;
 import eu.europa.ec.fisheries.uvms.exchange.service.exception.ExchangeServiceException;
 import eu.europa.ec.fisheries.uvms.exchange.service.mapper.ExchangeLogMapper;
-import eu.europa.ec.fisheries.wsdl.vessel.types.Vessel;
+import eu.europa.ec.fisheries.wsdl.asset.types.Asset;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -234,8 +234,8 @@ public class ExchangeEventOutgoingServiceBean implements ExchangeEventOutgoingSe
         return true;
 	}
 
-    private Vessel getAsset(String connectId) throws ExchangeLogException {
-        Vessel asset = null;
+    private Asset getAsset(String connectId) throws ExchangeLogException {
+        Asset asset = null;
         try {
             asset = exchangeAssetService.getAsset(connectId);
         } catch (ExchangeServiceException e) {
@@ -249,7 +249,7 @@ public class ExchangeEventOutgoingServiceBean implements ExchangeEventOutgoingSe
         List<UnsentMessageTypeProperty> properties = new ArrayList<>();
         if(commandType.getPoll()!=null){
             String connectId = ExchangeLogMapper.getConnectId(commandType.getPoll());
-            Vessel asset = getAsset(connectId);
+            Asset asset = getAsset(connectId);
             properties = ExchangeLogMapper.getPropertiesForPoll(commandType.getPoll(), asset.getName());
 
         }else if(commandType.getEmail()!=null){
