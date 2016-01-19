@@ -111,6 +111,7 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
     @Override
     public void processMovement(@Observes @SetMovementEvent ExchangeMessageEvent message) {
         LOG.info("Process movement");
+        long start = System.currentTimeMillis();
         try {
             SetMovementReportRequest request = JAXBMarshaller.unmarshallTextMessage(message.getJmsMessage(), SetMovementReportRequest.class);
 
@@ -133,7 +134,8 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
 
                 try {
                     MovementRefType typeRef = rulesService.sendMovementToRules(MovementMapper.mapPluginType(pluginType), rawMovement);
-
+                    long diff = System.currentTimeMillis() - start;
+                    LOG.debug("Exchange send movement to Rules: " + " ---- TIME ---- " + diff +"ms");
                     try {
                         ExchangeLogType log = ExchangeLogMapper.getReceivedMovementExchangeLog(request.getRequest(), typeRef.getMovementRefGuid(), typeRef.getType());
                         ExchangeLogType createdLog = exchangeLog.log(log);
@@ -156,6 +158,7 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
             } else {
                 LOG.debug("Validation error. Event sent to plugin");
             }
+
         } catch (ExchangeServiceException e) {
             //TODO send back to plugin
         } catch (ExchangeModelMarshallException e) {
