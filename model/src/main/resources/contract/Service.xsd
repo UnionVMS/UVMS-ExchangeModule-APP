@@ -17,6 +17,7 @@
             <xsd:element name="name" type="xsd:string"/>
             <xsd:element name="description" type="xsd:string"/>
             <xsd:element name="pluginType" type="plugin:PluginType" minOccurs="1" maxOccurs="1"/>
+            <xsd:element name="satelliteType" type="xsd:string" minOccurs="0" maxOccurs="1"/>
         </xsd:sequence>
     </xsd:complexType>
     
