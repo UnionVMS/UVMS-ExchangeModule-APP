@@ -2,6 +2,7 @@ package eu.europa.ec.fisheries.uvms.exchange.service.bean;
 
 import eu.europa.ec.fisheries.schema.exchange.common.v1.AcknowledgeType;
 import eu.europa.ec.fisheries.schema.exchange.common.v1.CommandType;
+import eu.europa.ec.fisheries.schema.exchange.common.v1.CommandTypeType;
 import eu.europa.ec.fisheries.schema.exchange.module.v1.SendMovementToPluginRequest;
 import eu.europa.ec.fisheries.schema.exchange.module.v1.SetCommandRequest;
 import eu.europa.ec.fisheries.schema.exchange.movement.v1.SendMovementToPluginType;
@@ -157,15 +158,13 @@ public class ExchangeEventOutgoingServiceBean implements ExchangeEventOutgoingSe
     @Override
     public void sendCommandToPlugin(@Observes @SendCommandToPluginEvent ExchangeMessageEvent message) {
         LOG.info("Send command to plugin");
-
+        SetCommandRequest request = new SetCommandRequest();
         try {
-            SetCommandRequest request = JAXBMarshaller.unmarshallTextMessage(message.getJmsMessage(), SetCommandRequest.class);
+            request = JAXBMarshaller.unmarshallTextMessage(message.getJmsMessage(), SetCommandRequest.class);
             String pluginName = request.getCommand().getPluginName();
             CommandType commandType = request.getCommand();
             ServiceResponseType service = exchangeService.getService(pluginName);
 
-
-            
             if(validate(request.getCommand(), message.getJmsMessage(), service, commandType)) {
             	String text = ExchangePluginRequestMapper.createSetCommandRequest(request.getCommand());
             	String pluginMessageId = producer.sendEventBusMessage(text, pluginName);
@@ -176,21 +175,26 @@ public class ExchangeEventOutgoingServiceBean implements ExchangeEventOutgoingSe
             	} catch (ExchangeLogException e) {
             		LOG.error(e.getMessage());
             	}
+                CommandTypeType x = request.getCommand().getCommand();
             	
-				//response back to Rules or MobileTerminal
-            	AcknowledgeType ackType = ExchangeModuleResponseMapper.mapAcknowledgeTypeOK();
-				String moduleResponse = ExchangeModuleResponseMapper.mapSetCommandResponse(ackType);
-            	producer.sendModuleResponseMessage(message.getJmsMessage(), moduleResponse);
+				//response back to MobileTerminal (not to rules when email)
+                if (request.getCommand().getCommand() != CommandTypeType.EMAIL) {
+                    AcknowledgeType ackType = ExchangeModuleResponseMapper.mapAcknowledgeTypeOK();
+                    String moduleResponse = ExchangeModuleResponseMapper.mapSetCommandResponse(ackType);
+                    producer.sendModuleResponseMessage(message.getJmsMessage(), moduleResponse);
+                }
             } else {
             	LOG.debug("Can not send to plugin. Response sent to caller.");
             }
             
         } catch (NullPointerException | ExchangeException e) {
-            LOG.error("[ Error when sending command to plugin ]");
-            exchangeErrorEvent.fire(new ExchangeMessageEvent(message.getJmsMessage(), ExchangeModuleResponseMapper.createFaultMessage(FaultCode.EXCHANGE_EVENT_SERVICE, "Excpetion when sending command to plugin ")));
+            if (request.getCommand().getCommand() != CommandTypeType.EMAIL) {
+                LOG.error("[ Error when sending command to plugin {} ]", e.getMessage());
+                exchangeErrorEvent.fire(new ExchangeMessageEvent(message.getJmsMessage(), ExchangeModuleResponseMapper.createFaultMessage(FaultCode.EXCHANGE_EVENT_SERVICE, "Exception when sending command to plugin")));
+            }
         }
     }
-	
+
 	private boolean validate(CommandType command, TextMessage origin, ServiceResponseType service, CommandType commandType) {
         if(command == null) {
         	String faultMessage = "No command";
