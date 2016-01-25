@@ -5,6 +5,7 @@ import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
 import javax.enterprise.event.Observes;
+import javax.inject.Inject;
 import javax.jms.Connection;
 import javax.jms.ConnectionFactory;
 import javax.jms.JMSException;
@@ -51,9 +52,6 @@ public class MessageProducerBean implements MessageProducer, ConfigMessageProduc
     @Resource(mappedName = ExchangeModelConstants.QUEUE_INTEGRATION_RULES)
     private Queue rulesQueue;
 
-    @Resource(lookup = ExchangeModelConstants.CONNECTION_FACTORY)
-    private ConnectionFactory connectionFactory;
-
     @Resource(mappedName = ConfigConstants.CONFIG_MESSAGE_IN_QUEUE)
     private Queue configQueue;
 
@@ -63,16 +61,16 @@ public class MessageProducerBean implements MessageProducer, ConfigMessageProduc
     @Resource(mappedName = ExchangeModelConstants.QUEUE_INTEGRATION_AUDIT)
     private Queue auditQueue;
 
-    private Connection connection = null;
-    private Session session = null;
-
     private static final int CONFIG_TTL = 30000;
+
+    @Inject
+    JMSConnectorBean connector;
 
     @Override
     @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
     public String sendMessageOnQueue(String text, MessageQueue queue) throws ExchangeMessageException {
         try {
-            connectJMS();
+            Session session = connector.getNewSession();
             TextMessage message = session.createTextMessage();
             message.setJMSReplyTo(responseQueue);
             message.setText(text);
@@ -103,8 +101,6 @@ public class MessageProducerBean implements MessageProducer, ConfigMessageProduc
         } catch (Exception e) {
             LOG.error("[ Error when sending message. ]");
             throw new ExchangeMessageException("[ Error when sending message. ]");
-        } finally {
-            disconnectJMS();
         }
     }
 
@@ -113,7 +109,8 @@ public class MessageProducerBean implements MessageProducer, ConfigMessageProduc
     public String sendEventBusMessage(String text, String serviceName) throws ExchangeMessageException {
         try {
             LOG.debug("Sending event bus message from Exchange module to recipient om JMS Topic to: {} ", serviceName);
-            connectJMS();
+            Session session = connector.getNewSession();
+
             TextMessage message = session.createTextMessage();
             message.setText(text);
             message.setStringProperty(ExchangeModelConstants.SERVICE_NAME, serviceName);
@@ -125,8 +122,6 @@ public class MessageProducerBean implements MessageProducer, ConfigMessageProduc
         } catch (Exception e) {
             LOG.error("[ Error when sending message. ] ", e);
             throw new ExchangeMessageException("[ Error when sending message. ]");
-        } finally {
-            disconnectJMS();
         }
     }
 
@@ -141,27 +136,11 @@ public class MessageProducerBean implements MessageProducer, ConfigMessageProduc
         }
     }
 
-    private void connectJMS() throws JMSException {
-        connection = connectionFactory.createConnection();
-        session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
-        connection.start();
-    }
-
-    private void disconnectJMS() {
-        try {
-            if (connection != null) {
-                connection.stop();
-                connection.close();
-            }
-        } catch (JMSException e) {
-            LOG.error("[ Error when stopping or closing JMS queue. ] {}", e);
-        }
-    }
-
     @Override
     public void sendModuleErrorResponseMessage(@Observes @ErrorEvent ExchangeMessageEvent message) {
         try {
-            connectJMS();
+            Session session = connector.getNewSession();
+
             LOG.debug("Sending error message back from Exchange module to recipient om JMS Queue with correlationID: {} ", message.getJmsMessage().getJMSMessageID());
 
             String data = JAXBMarshaller.marshallJaxBObjectToString(message.getErrorFault());
@@ -172,15 +151,13 @@ public class MessageProducerBean implements MessageProducer, ConfigMessageProduc
 
         } catch (ExchangeModelMapperException | JMSException e) {
             LOG.error("Error when returning Error message to recipient");
-        } finally {
-            disconnectJMS();
         }
     }
 
     @Override
     public void sendPluginErrorResponseMessage(@Observes @PluginErrorEvent PluginMessageEvent message) {
         try {
-            connectJMS();
+            Session session = connector.getNewSession();
             LOG.debug("Sending error message back from Exchange module to recipient om JMS Topic with correlationID: {} ", message.getJmsMessage().getJMSMessageID());
             String data = JAXBMarshaller.marshallJaxBObjectToString(message.getErrorFault());
             TextMessage response = session.createTextMessage(data);
@@ -190,8 +167,6 @@ public class MessageProducerBean implements MessageProducer, ConfigMessageProduc
 
         } catch (ExchangeModelMapperException | JMSException e) {
             LOG.error("Error when returning Error message to recipient");
-        } finally {
-            disconnectJMS();
         }
     }
 
@@ -199,14 +174,12 @@ public class MessageProducerBean implements MessageProducer, ConfigMessageProduc
     public void sendModuleResponseMessage(TextMessage message, String text) {
         try {
             LOG.info("Sending message back to recipient from ExchangeModule with correlationId {} on queue: {}", message.getJMSMessageID(), message.getJMSReplyTo());
-            connectJMS();
+            Session session = connector.getNewSession();
             TextMessage response = session.createTextMessage(text);
             response.setJMSCorrelationID(message.getJMSMessageID());
             session.createProducer(message.getJMSReplyTo()).send(response);
         } catch (JMSException e) {
             LOG.error("[ Error when returning module exchange request. ]");
-        } finally {
-            disconnectJMS();
         }
     }
 }

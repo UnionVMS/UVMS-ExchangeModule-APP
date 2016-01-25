@@ -24,6 +24,12 @@
             <artifactId>uvms-config</artifactId>
             <version>${uvms.config.version}</version>
         </dependency>
+
+        <dependency>
+            <groupId>org.apache.activemq</groupId>
+            <artifactId>activemq-pool</artifactId>
+            <version>5.13.0</version>
+        </dependency>
     </dependencies>
 
     <build>
