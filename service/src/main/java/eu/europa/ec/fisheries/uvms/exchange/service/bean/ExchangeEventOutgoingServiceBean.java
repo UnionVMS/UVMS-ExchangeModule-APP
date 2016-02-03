@@ -85,7 +85,7 @@ public class ExchangeEventOutgoingServiceBean implements ExchangeEventOutgoingSe
             if(services.isEmpty()) {
                 String faultMessage = "No plugins of type " + sendReport.getPluginType() + " found";
                 LOG.debug(faultMessage);
-				exchangeErrorEvent.fire(new ExchangeMessageEvent(message.getJmsMessage(), ExchangeModuleResponseMapper.createFaultMessage(FaultCode.EXCHANGE_EVENT_SERVICE, faultMessage)));
+				
             } else {
             	ServiceResponseType service = services.get(0);
             	String serviceName = service.getServiceClassName();
@@ -103,10 +103,6 @@ public class ExchangeEventOutgoingServiceBean implements ExchangeEventOutgoingSe
                 		LOG.error(e.getMessage());
                 	}
 
-                    //response back to Rules
-                	AcknowledgeType ackType = ExchangeModuleResponseMapper.mapAcknowledgeTypeOK();
-    				String moduleResponse = ExchangeModuleResponseMapper.mapSendMovementToPluginResponse(ackType);
-                	producer.sendModuleResponseMessage(message.getJmsMessage(), moduleResponse);
                 	
                 } else {
                 	LOG.debug("Cannot send to plugin. Response sent to caller.");
@@ -114,7 +110,7 @@ public class ExchangeEventOutgoingServiceBean implements ExchangeEventOutgoingSe
             }
         } catch (ExchangeException e) {
             LOG.error("[ Error when sending report to plugin ]");
-            exchangeErrorEvent.fire(new ExchangeMessageEvent(message.getJmsMessage(), ExchangeModuleResponseMapper.createFaultMessage(FaultCode.EXCHANGE_EVENT_SERVICE, "Excpetion when sending message to plugin ")));
+            
         }
     }
 
