@@ -5,6 +5,7 @@ import java.util.List;
 import javax.jms.TextMessage;
 import javax.xml.datatype.XMLGregorianCalendar;
 
+import eu.europa.ec.fisheries.schema.exchange.movement.asset.v1.AssetId;
 import eu.europa.ec.fisheries.schema.exchange.movement.v1.RecipientInfoType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -73,32 +74,39 @@ public class ExchangeModuleRequestMapper {
         return JAXBMarshaller.marshallJaxBObjectToString(request);
     }
 
-    public static String createSendReportToPlugin(String pluginName, PluginType type, XMLGregorianCalendar fwdDate, String fwdRule, String recipient, MovementType payload, List<RecipientInfoType> recipientInfoList, String assetName, String ircs) throws ExchangeModelMapperException {
-        SendMovementToPluginRequest request = createSendReportToPluginRequest(pluginName, type, fwdDate, fwdRule, recipient, payload, recipientInfoList, assetName, ircs);
+    public static String createSendReportToPlugin(String pluginName, PluginType type, XMLGregorianCalendar fwdDate, String fwdRule, String recipient, MovementType payload, List<RecipientInfoType> recipientInfoList, String assetName, String ircs, String mmsi, String externalMarking, String flagState) throws ExchangeModelMapperException {
+        SendMovementToPluginRequest request = createSendReportToPluginRequest(pluginName, type, fwdDate, fwdRule, recipient, payload, recipientInfoList, assetName, ircs, mmsi, externalMarking, flagState);
         return JAXBMarshaller.marshallJaxBObjectToString(request);
     }
 
-    private static SendMovementToPluginRequest createSendReportToPluginRequest(String pluginName, PluginType type, XMLGregorianCalendar fwdDate, String fwdRule, String recipient, MovementType payload, List<RecipientInfoType> recipientInfoList, String assetName, String ircs) throws ExchangeModelMapperException {
+    private static SendMovementToPluginRequest createSendReportToPluginRequest(String pluginName, PluginType type, XMLGregorianCalendar fwdDate, String fwdRule, String recipient, MovementType payload, List<RecipientInfoType> recipientInfoList, String assetName, String ircs, String mmsi, String externalMarking, String flagState) throws ExchangeModelMapperException {
         SendMovementToPluginRequest request = new SendMovementToPluginRequest();
         request.setMethod(ExchangeModuleMethod.SEND_REPORT_TO_PLUGIN);
-        SendMovementToPluginType sendMovementToPluginType = createSendMovementToPluginType(pluginName, type, fwdDate, fwdRule, recipient, payload, recipientInfoList, assetName, ircs);
+        SendMovementToPluginType sendMovementToPluginType = createSendMovementToPluginType(pluginName, type, fwdDate, fwdRule, recipient, payload, recipientInfoList, assetName, ircs, mmsi, externalMarking, flagState);
         request.setReport(sendMovementToPluginType);
         return request;
     }
 
-    public static SendMovementToPluginType createSendMovementToPluginType(String pluginName, PluginType type, XMLGregorianCalendar fwdDate, String fwdRule, String recipient, MovementType payload, List<RecipientInfoType> recipientInfoList, String assetName, String ircs) throws ExchangeModelMapperException {
+    public static SendMovementToPluginType createSendMovementToPluginType(String pluginName, PluginType type, XMLGregorianCalendar fwdDate, String fwdRule, String recipient, MovementType payload, List<RecipientInfoType> recipientInfoList, String assetName, String ircs, String mmsi, String externalMarking, String flagState) throws ExchangeModelMapperException {
         SendMovementToPluginType report = new SendMovementToPluginType();
+        mapToMovementType(payload, ircs, mmsi, externalMarking, flagState);
         report.setTimestamp(DateUtils.dateToXmlGregorian(DateUtils.nowUTC().toDate()));
         report.setFwdDate(fwdDate);
         report.setFwdRule(fwdRule);
         report.setRecipient(recipient);
         report.getRecipientInfo().addAll(recipientInfoList);
         report.setAssetName(assetName);
-        report.setIrcs(ircs);
         report.setMovement(payload);
         report.setPluginType(type);
         report.setPluginName(pluginName);
         return report;
+    }
+
+    private static void mapToMovementType(MovementType movementType, String ircs, String mmsi, String externalMarking, String flagState){
+        movementType.setMmsi(mmsi);
+        movementType.setExternalMarking(externalMarking);
+        movementType.setIrcs(ircs);
+        movementType.setFlagState(flagState);
     }
 
     public static String createSetCommandSendPollRequest(String pluginName, PollType poll) throws ExchangeModelMapperException {

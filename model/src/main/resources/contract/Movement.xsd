@@ -69,10 +69,11 @@
             <xsd:element name="reportedCourse" type="xsd:double" nillable="true"/>
             <xsd:element name="movementType" type="movement:MovementTypeType"/>
             <xsd:element name="activity" type="movement:MovementActivityType"/>
-
             <xsd:element name="assetName" type="xsd:string"/>
             <xsd:element name="flagState" type="xsd:string"/>
             <xsd:element name="externalMarking" type="xsd:string"/>
+            <xsd:element name="ircs" type="xsd:string"/>
+            <xsd:element name="mmsi" type="xsd:string"/>
         </xsd:sequence>
     </xsd:complexType>
     
