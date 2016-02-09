@@ -4,7 +4,7 @@
 
     <groupId>eu.europa.ec.fisheries.uvms.exchange</groupId>
     <artifactId>exchange</artifactId>
-    <version>1.0.2-SNAPSHOT</version>
+    <version>1.0.1-SNAPSHOT</version>
     <packaging>pom</packaging>
     <description>Maven projekt-archetype for UnionVms modules</description>
     
@@ -20,13 +20,12 @@
         <joda-time.version>2.7</joda-time.version>
         <logback.core.version>1.1.2</logback.core.version>
         <dozer.version>5.5.1</dozer.version>
-        <audit.model.version>1.0.4-SNAPSHOT</audit.model.version>
-        <usm4uvms.version>0.0.12-SNAPSHOT</usm4uvms.version>
+        <audit.model.version>1.0.1-SNAPSHOT</audit.model.version>
+        <usm4uvms.version>1.0.0</usm4uvms.version>
         <rules.version>1.0.1-SNAPSHOT</rules.version>
-        <asset.version>1.0.10-SNAPSHOT</asset.version>
+        <asset.version>1.0.0</asset.version>
         <longpolling.version>1.0.0</longpolling.version>
-        <uvms.config.version>1.0.0</uvms.config.version>
-        <uvms.config.version>1.0.0</uvms.config.version>
+        <uvms.config.version>1.0.1-SNAPSHOT</uvms.config.version>
     </properties>
     
     <dependencies>
