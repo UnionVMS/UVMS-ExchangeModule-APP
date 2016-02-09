@@ -2,7 +2,7 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     
     <modelVersion>4.0.0</modelVersion>
-    <artifactId>module</artifactId>
+    <artifactId>exchange-module</artifactId>
     <name>${project.parent.artifactId}-module</name>
     <packaging>ear</packaging>
     
@@ -24,11 +24,11 @@
                     <modules>
                         <ejbModule>
                             <groupId>${project.groupId}</groupId>   
-                            <artifactId>message</artifactId>
+                            <artifactId>exchange-message</artifactId>
                         </ejbModule>
                         <ejbModule>
                             <groupId>${project.groupId}</groupId>  
-                            <artifactId>service</artifactId>
+                            <artifactId>exchange-service</artifactId>
                         </ejbModule>
                         <ejbModule>
                             <groupId>${project.groupId}</groupId>  
@@ -37,7 +37,7 @@
                         <webModule>
                             <groupId>${project.groupId}</groupId>
                             <context-root>${project.parent.artifactId}</context-root>  
-                            <artifactId>rest</artifactId>							
+                            <artifactId>exchange-rest</artifactId>
                         </webModule>
                     </modules>
                     <skinnyWars>true</skinnyWars>
@@ -49,13 +49,13 @@
     <dependencies>
         <dependency>
             <groupId>${project.groupId}</groupId>     
-            <artifactId>message</artifactId>
+            <artifactId>exchange-message</artifactId>
             <version>${project.version}</version>
             <type>ejb</type>
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>  
-            <artifactId>service</artifactId>
+            <artifactId>exchange-service</artifactId>
             <version>${project.version}</version>
             <type>ejb</type>
         </dependency>
@@ -67,7 +67,7 @@
         </dependency> 
         <dependency>
             <groupId>${project.groupId}</groupId>  
-            <artifactId>rest</artifactId>
+            <artifactId>exchange-rest</artifactId>
             <version>${project.version}</version>
             <type>war</type>
         </dependency> 

@@ -9,7 +9,8 @@
     <description>Maven projekt-archetype for UnionVms modules</description>
     
     <properties>
-        <release.branch.name>lasarus</release.branch.name>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <release.branch.name>uvms-1.0.0</release.branch.name>
         <mockito.version>1.9.5</mockito.version>
         <junit.version>4.10</junit.version>
         <javaee.version>7.0</javaee.version>
