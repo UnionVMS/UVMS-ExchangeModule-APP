@@ -21,6 +21,12 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>exchange-model</artifactId>
+            <version>${project.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
             <groupId>eu.europa.ec.mare.usm</groupId>
             <artifactId>usm4uvms</artifactId>
             <version>${usm4uvms.version}</version>

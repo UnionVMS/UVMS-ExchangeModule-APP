@@ -24,8 +24,9 @@
         <usm4uvms.version>0.0.12-SNAPSHOT</usm4uvms.version>
         <rules.version>1.0.1-SNAPSHOT</rules.version>
         <asset.version>1.0.10-SNAPSHOT</asset.version>
-        <longpolling.version>1.0-SNAPSHOT</longpolling.version>
-        <uvms.config.version>0.1-SNAPSHOT</uvms.config.version>
+        <longpolling.version>1.0.0</longpolling.version>
+        <uvms.config.version>1.0.0</uvms.config.version>
+        <uvms.config.version>1.0.0</uvms.config.version>
     </properties>
     
     <dependencies>
