@@ -77,8 +77,8 @@ public class ExchangeDataSourceResponseMapper {
     		RegisterServiceResponse response = JAXBMarshaller.unmarshallTextMessage(message, RegisterServiceResponse.class);
             return response.getService();
     	} catch (JMSException | ExchangeValidationException | ExchangeModelMarshallException e) {
-			LOG.error("[ Error when mapping response to list of service ]");
-			throw new ExchangeModelMapperException("[ Error when mapping response to list of service ] " + e.getMessage());
+			LOG.error("[ Error when mapping response to register service ]");
+			throw new ExchangeModelMapperException("[ Error when mapping response to register service ] " + e.getMessage());
 		}
     }
 
@@ -88,8 +88,8 @@ public class ExchangeDataSourceResponseMapper {
     		UnregisterServiceResponse response = JAXBMarshaller.unmarshallTextMessage(message, UnregisterServiceResponse.class);
             return response.getService();
     	} catch (JMSException | ExchangeValidationException | ExchangeModelMarshallException e) {
-			LOG.error("[ Error when mapping response to list of service ]");
-			throw new ExchangeModelMapperException("[ Error when mapping response to list of service ] " + e.getMessage());
+			LOG.error("[ Error when mapping response to unregister service ]");
+			throw new ExchangeModelMapperException("[ Error when mapping response to unregister service ] " + e.getMessage());
 		}
         
     }
@@ -100,8 +100,8 @@ public class ExchangeDataSourceResponseMapper {
     		GetServiceResponse response = JAXBMarshaller.unmarshallTextMessage(message, GetServiceResponse.class);
             return response.getService();
     	} catch (JMSException | ExchangeValidationException | ExchangeModelMarshallException e) {
-			LOG.error("[ Error when mapping response to list of service ]");
-			throw new ExchangeModelMapperException("[ Error when mapping response to list of service ] " + e.getMessage());
+			LOG.error("[ Error when mapping response to ServiceResponseType from GetServiceResponse ]");
+			throw new ExchangeModelMapperException("[ Error when mapping response to ServiceResponseType from GetServiceResponse ] " + e.getMessage());
 		}
         
     }
@@ -112,8 +112,8 @@ public class ExchangeDataSourceResponseMapper {
     		SetServiceSettingsResponse response = JAXBMarshaller.unmarshallTextMessage(message, SetServiceSettingsResponse.class);
             return response.getService();
     	} catch (JMSException | ExchangeValidationException | ExchangeModelMarshallException e) {
-			LOG.error("[ Error when mapping response to list of service ]");
-			throw new ExchangeModelMapperException("[ Error when mapping response to list of service ] " + e.getMessage());
+			LOG.error("[ Error when mapping to ServiceResponseType from SetSettingsResponse ]");
+			throw new ExchangeModelMapperException("[ Error when mapping response to ServiceResponseType from SetSettingsResponse ] " + e.getMessage());
 		}
 	}
     
