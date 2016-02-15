@@ -30,7 +30,21 @@
             </xsd:extension>
         </xsd:complexContent>
     </xsd:complexType>
-    
+
+    <xsd:complexType name="MovementRefType">
+        <xsd:sequence>
+            <xsd:element name="movementRefGuid" type="xsd:string" minOccurs="1" maxOccurs="1"/>
+            <xsd:element name="type" type="movement:MovementRefTypeType" minOccurs="1" maxOccurs="1"/>
+        </xsd:sequence>
+    </xsd:complexType>
+
+    <xsd:simpleType name="MovementRefTypeType">
+        <xsd:restriction base="xsd:string">
+            <xsd:enumeration value="MOVEMENT"/>
+            <xsd:enumeration value="ALARM"/> <!-- (holding table) -->
+        </xsd:restriction>
+    </xsd:simpleType>
+
     <xsd:complexType name="SendMovementToPluginType">
         <xsd:complexContent>
             <xsd:extension base="movement:ReportMovementType">

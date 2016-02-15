@@ -1,21 +1,14 @@
 package eu.europa.ec.fisheries.uvms.exchange.service.bean;
 
-import eu.europa.ec.fisheries.schema.rules.exchange.v1.PluginType;
-import eu.europa.ec.fisheries.schema.rules.movement.v1.MovementRefType;
-import eu.europa.ec.fisheries.schema.rules.movement.v1.RawMovementType;
+import eu.europa.ec.fisheries.uvms.asset.model.exception.AssetModelMapperException;
+import eu.europa.ec.fisheries.uvms.asset.model.mapper.AssetModuleRequestMapper;
+import eu.europa.ec.fisheries.uvms.asset.model.mapper.AssetModuleResponseMapper;
 import eu.europa.ec.fisheries.uvms.exchange.message.constants.MessageQueue;
 import eu.europa.ec.fisheries.uvms.exchange.message.consumer.ExchangeMessageConsumer;
 import eu.europa.ec.fisheries.uvms.exchange.message.exception.ExchangeMessageException;
 import eu.europa.ec.fisheries.uvms.exchange.message.producer.MessageProducer;
 import eu.europa.ec.fisheries.uvms.exchange.service.ExchangeAssetService;
-import eu.europa.ec.fisheries.uvms.exchange.service.ExchangeRulesService;
 import eu.europa.ec.fisheries.uvms.exchange.service.exception.ExchangeServiceException;
-import eu.europa.ec.fisheries.uvms.rules.model.exception.RulesModelMapperException;
-import eu.europa.ec.fisheries.uvms.rules.model.mapper.ModuleResponseMapper;
-import eu.europa.ec.fisheries.uvms.rules.model.mapper.RulesModuleRequestMapper;
-import eu.europa.ec.fisheries.uvms.asset.model.exception.AssetModelMapperException;
-import eu.europa.ec.fisheries.uvms.asset.model.mapper.AssetModuleRequestMapper;
-import eu.europa.ec.fisheries.uvms.asset.model.mapper.AssetModuleResponseMapper;
 import eu.europa.ec.fisheries.wsdl.asset.types.Asset;
 import eu.europa.ec.fisheries.wsdl.asset.types.AssetIdType;
 import org.slf4j.Logger;
@@ -44,10 +37,10 @@ public class ExchangeAssetServiceBean implements ExchangeAssetService {
             return AssetModuleResponseMapper.mapToAssetFromResponse(response, messageId);
 
 		} catch (ExchangeMessageException e) {
-			LOG.error("Couldn't send message to vessel module ");
+			LOG.error("Couldn't send message to vessel module");
 			throw new ExchangeServiceException("Couldn't send message to vessel module");
 		} catch (AssetModelMapperException e) {
-            LOG.error("Couldn't map asset object by guid:  " + assetGuid);
+            LOG.error("Couldn't map asset object by guid:  {}", assetGuid);
             throw new ExchangeServiceException("Couldn't map asset object by guid:  " + assetGuid);
         }
     }

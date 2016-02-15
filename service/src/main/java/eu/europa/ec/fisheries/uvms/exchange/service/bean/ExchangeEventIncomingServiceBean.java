@@ -7,8 +7,12 @@ import javax.ejb.Stateless;
 import javax.enterprise.event.Event;
 import javax.enterprise.event.Observes;
 import javax.inject.Inject;
+import javax.jms.JMSException;
 import javax.jms.TextMessage;
 
+import eu.europa.ec.fisheries.schema.exchange.module.v1.ProcessedMovementResponse;
+import eu.europa.ec.fisheries.schema.exchange.movement.v1.MovementRefType;
+import eu.europa.ec.fisheries.uvms.exchange.message.event.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,14 +34,7 @@ import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogType;
 import eu.europa.ec.fisheries.schema.exchange.v1.LogRefType;
 import eu.europa.ec.fisheries.schema.exchange.v1.PollStatus;
 import eu.europa.ec.fisheries.schema.exchange.v1.TypeRefType;
-import eu.europa.ec.fisheries.schema.rules.movement.v1.MovementRefType;
 import eu.europa.ec.fisheries.schema.rules.movement.v1.RawMovementType;
-import eu.europa.ec.fisheries.uvms.exchange.message.event.ErrorEvent;
-import eu.europa.ec.fisheries.uvms.exchange.message.event.ExchangeLogEvent;
-import eu.europa.ec.fisheries.uvms.exchange.message.event.PingEvent;
-import eu.europa.ec.fisheries.uvms.exchange.message.event.PluginConfigEvent;
-import eu.europa.ec.fisheries.uvms.exchange.message.event.PluginPingEvent;
-import eu.europa.ec.fisheries.uvms.exchange.message.event.SetMovementEvent;
 import eu.europa.ec.fisheries.uvms.exchange.message.event.carrier.ExchangeMessageEvent;
 import eu.europa.ec.fisheries.uvms.exchange.message.event.carrier.PluginMessageEvent;
 import eu.europa.ec.fisheries.uvms.exchange.message.event.registry.PluginErrorEvent;
@@ -119,10 +116,9 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
             PluginType pluginType = request.getRequest().getPluginType();
 
             ServiceResponseType service = exchangeService.getService(pluginName);
-            LOG.debug("Process movement from " + pluginName + " of " + pluginType + " type");
+            LOG.debug("Process movement from {} of {} type", pluginName, pluginType);
 
             if (validate(request.getRequest(), service, message.getJmsMessage())) {
-
                 MovementBaseType baseMovement = request.getRequest().getMovement();
                 RawMovementType rawMovement = MovementMapper.getInstance().getMapper().map(baseMovement, RawMovementType.class);
                 if (rawMovement.getAssetId() != null && rawMovement.getAssetId().getAssetIdList() != null) {
@@ -132,25 +128,12 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
                     rawMovement.getMobileTerminal().getMobileTerminalIdList().addAll(MovementMapper.mapMobileTerminalIdList(baseMovement.getMobileTerminalId().getMobileTerminalIdList()));
                 }
 
+                rawMovement.setPluginType(pluginType.value());
+                rawMovement.setPluginName(pluginName);
+                rawMovement.setDateRecieved(request.getRequest().getTimestamp());
+
                 try {
-                    MovementRefType typeRef = rulesService.sendMovementToRules(MovementMapper.mapPluginType(pluginType), rawMovement);
-                    long diff = System.currentTimeMillis() - start;
-                    LOG.debug("Exchange send movement to Rules: " + " ---- TIME ---- " + diff +"ms");
-                    try {
-                        ExchangeLogType log = ExchangeLogMapper.getReceivedMovementExchangeLog(request.getRequest(), typeRef.getMovementRefGuid(), typeRef.getType());
-                        ExchangeLogType createdLog = exchangeLog.log(log);
-
-                        LogRefType logTypeRef = createdLog.getTypeRef();
-                        if (typeRef != null && logTypeRef.getType() == TypeRefType.POLL) {
-                            String pollGuid = logTypeRef.getRefGuid();
-                            pollEvent.fire(new NotificationMessage("guid", pollGuid));
-                        }
-                    } catch (ExchangeLogException e) {
-                        LOG.error(e.getMessage());
-                    }
-
-                    ExchangeModuleResponseMapper.mapSetMovementReportResponse(AcknowledgeTypeType.OK, rawMovement.getGuid(), "Movement successfully processed");
-                    producer.sendModuleResponseMessage(message.getJmsMessage(), pluginName);
+                    rulesService.sendMovementToRules(MovementMapper.mapPluginType(pluginType), rawMovement);
                 } catch (ExchangeServiceException e) {
                     PluginFault fault = ExchangePluginResponseMapper.mapToPluginFaultResponse(FaultCode.EXCHANGE_PLUGIN_EVENT.getCode(), "Movement sent cannot be sent to Rules module [ " + e.getMessage() + " ]");
                     pluginErrorEvent.fire(new PluginMessageEvent(message.getJmsMessage(), service, fault));
@@ -165,6 +148,33 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
             //Cannot send back fault to unknown sender
             LOG.error("Couldn't map to SetMovementReportRequest when processing movement from plugin");
         }
+    }
+
+    // Asynch response handler for processed movements
+    @Override
+    public void handleProcessedMovement(@Observes @HandleProcessedMovementEvent ExchangeMessageEvent message) {
+        LOG.debug("Received processed movement from Rules");
+            try {
+                ProcessedMovementResponse request = JAXBMarshaller.unmarshallTextMessage(message.getJmsMessage(), ProcessedMovementResponse.class);
+                MovementRefType movementRefType = request.getMovementRefType();
+                SetReportMovementType orgRequest = request.getOrgRequest();
+
+                ExchangeLogType log = ExchangeLogMapper.getReceivedMovementExchangeLog(orgRequest, movementRefType.getMovementRefGuid(), movementRefType.getType().value());
+                ExchangeLogType createdLog = exchangeLog.log(log);
+
+                LogRefType logTypeRef = createdLog.getTypeRef();
+                if (logTypeRef != null && logTypeRef.getType() == TypeRefType.POLL) {
+                    String pollGuid = logTypeRef.getRefGuid();
+                    pollEvent.fire(new NotificationMessage("guid", pollGuid));
+                }
+
+                // TODO: What is this needed for???
+                ExchangeModuleResponseMapper.mapSetMovementReportResponse(AcknowledgeTypeType.OK, movementRefType.getMovementRefGuid(), "Movement successfully processed");
+
+                producer.sendModuleResponseMessage(message.getJmsMessage(), orgRequest.getPluginName());
+            } catch (ExchangeLogException | ExchangeModelMarshallException e) {
+                LOG.error(e.getMessage());
+            }
     }
 
     private boolean validate(SetReportMovementType setReport, ServiceResponseType service, TextMessage origin) {

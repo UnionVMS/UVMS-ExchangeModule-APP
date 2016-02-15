@@ -30,9 +30,12 @@
                     
                     <!-- plugin wants to -->
                     <xsd:enumeration value="SET_MOVEMENT_REPORT"/>
-                    
+
                     <!-- admin/config wants to-->
                     <xsd:enumeration value="PING"/>
+
+                    <!-- asynch processed movement response-->
+                    <xsd:enumeration value="PROCESSED_MOVEMENT"/>
                 </xsd:restriction>
             </xsd:simpleType>
             
@@ -160,6 +163,20 @@
                 </xsd:complexType>
             </xsd:element>
 
+            <!-- Asynch processed movement response -->
+            <xsd:element name="ProcessedMovementResponse">
+                <xsd:complexType>
+                    <xsd:complexContent>
+                        <xsd:extension base="module:ExchangeBaseRequest">
+                            <xsd:sequence>
+                                <xsd:element name="orgRequest" type="movement:SetReportMovementType" minOccurs="1" maxOccurs="1"/>
+                                <xsd:element name="movementRefType" type="movement:MovementRefType" minOccurs="1" maxOccurs="1"/>
+                            </xsd:sequence>
+                        </xsd:extension>
+                    </xsd:complexContent>
+                </xsd:complexType>
+            </xsd:element>
+
         </xsd:schema>
     </types>
     
@@ -208,7 +225,11 @@
     <message name="PingResponse">
         <part name="body" element="module:pingResponse"/>
     </message>
-    
+
+    <message name="ProcessedMovementResponse">
+        <part name="body" element="module:ProcessedMovementResponse"/>
+    </message>
+
     <portType name="ExchangeModulePortType">
 
         <operation name="GetServiceList">
@@ -240,10 +261,14 @@
             <output message="module:UpdatePluginSettingResponse"/>
             <fault name="ExchangeFault" message="module:ExchangeFault"/>
         </operation>
-        
+
         <operation name="Ping">
             <input message="module:PingRequest"/>
             <output message="module:PingResponse"/>
+        </operation>
+
+        <operation name="ProcessedMovement">
+            <input message="module:ProcessedMovementResponse"/>
         </operation>
 
     </portType>
@@ -318,7 +343,13 @@
             <output>
                 <soap:body use="literal"/>
             </output>
-        </operation>        
+        </operation>
+
+        <operation name="ProcessedMovement">
+            <input>
+                <soap:body use="literal"/>
+            </input>
+        </operation>
 
     </binding>
 

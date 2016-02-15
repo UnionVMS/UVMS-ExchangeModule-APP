@@ -70,6 +70,10 @@ public class MessageConsumerBean implements MessageListener {
     @ErrorEvent
     Event<ExchangeMessageEvent> errorEvent;
 
+    @Inject
+    @HandleProcessedMovementEvent
+    Event<ExchangeMessageEvent> processedMovementEvent;
+
     @Override
     @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
     public void onMessage(Message message) {
@@ -92,7 +96,7 @@ public class MessageConsumerBean implements MessageListener {
                 }
             }
         } else {
-            LOG.debug("BaseRequest method " + request.getMethod());
+            LOG.debug("BaseRequest method {}", request.getMethod());
             switch (request.getMethod()) {
                 case LIST_SERVICES:
                     pluginConfigEvent.fire(new ExchangeMessageEvent(textMessage));
@@ -107,10 +111,13 @@ public class MessageConsumerBean implements MessageListener {
                     processMovementEvent.fire(new ExchangeMessageEvent(textMessage));
                     break;
                 case UPDATE_PLUGIN_SETTING:
-                	updatePluginSettingEvent.fire(new ExchangeMessageEvent(textMessage));
-                	break;
+                    updatePluginSettingEvent.fire(new ExchangeMessageEvent(textMessage));
+                    break;
                 case PING:
                     pingEvent.fire(new ExchangeMessageEvent(textMessage));
+                    break;
+                case PROCESSED_MOVEMENT:
+                    processedMovementEvent.fire(new ExchangeMessageEvent(textMessage));
                     break;
                 default:
                     LOG.error("[ Not implemented method consumed: {} ] ", request.getMethod());
