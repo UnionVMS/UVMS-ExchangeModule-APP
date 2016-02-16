@@ -40,6 +40,12 @@
             <type>jar</type>
         </dependency>
         <dependency>
+            <groupId>eu.europa.ec.fisheries.uvms.movement</groupId>
+            <artifactId>movement-model</artifactId>
+            <version>${movement.model.version}</version>
+            <type>jar</type>
+        </dependency>
+        <dependency>
             <groupId>eu.europa.ec.fisheries.uvms.rules</groupId>
             <artifactId>rules-model</artifactId>
             <version>${rules.version}</version>

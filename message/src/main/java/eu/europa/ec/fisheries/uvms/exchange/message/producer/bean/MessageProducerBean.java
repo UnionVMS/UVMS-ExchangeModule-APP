@@ -6,14 +6,7 @@ import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
 import javax.enterprise.event.Observes;
 import javax.inject.Inject;
-import javax.jms.Connection;
-import javax.jms.ConnectionFactory;
-import javax.jms.JMSException;
-import javax.jms.Message;
-import javax.jms.Queue;
-import javax.jms.Session;
-import javax.jms.TextMessage;
-import javax.jms.Topic;
+import javax.jms.*;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -60,6 +53,9 @@ public class MessageProducerBean implements MessageProducer, ConfigMessageProduc
 
     @Resource(mappedName = ExchangeModelConstants.QUEUE_INTEGRATION_AUDIT)
     private Queue auditQueue;
+
+    @Resource(mappedName = ExchangeModelConstants.MOVEMENT_RESPONSE_QUEUE)
+    private Queue movementResponseQueue;
 
     private static final int CONFIG_TTL = 30000;
 
@@ -182,4 +178,26 @@ public class MessageProducerBean implements MessageProducer, ConfigMessageProduc
             LOG.error("[ Error when returning module exchange request. ]");
         }
     }
+
+    @Override
+    public void sendModuleAckMessage(String messageId, MessageQueue queue, String text) {
+        try {
+            LOG.info("Sending message asynchronous back to recipient from ExchangeModule with correlationId {} on queue: {}", messageId, queue);
+            Session session = connector.getNewSession();
+            TextMessage response = session.createTextMessage(text);
+            response.setJMSCorrelationID(messageId);
+
+            switch (queue) {
+                case MOVEMENT_RESPONSE:
+                    session.createProducer(movementResponseQueue).send(response);
+                    break;
+                default:
+                    break;
+            }
+
+        } catch (JMSException e) {
+            LOG.error("[ Error when returning asynchronous module exchange response. ]");
+        }
+    }
+
 }

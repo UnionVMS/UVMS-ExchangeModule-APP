@@ -22,4 +22,6 @@ public interface MessageProducer {
     
     public void sendModuleErrorResponseMessage(@Observes @ErrorEvent ExchangeMessageEvent event);
     public void sendPluginErrorResponseMessage(@Observes @PluginErrorEvent PluginMessageEvent event);
+
+    void sendModuleAckMessage(String messageId, MessageQueue queue, String text);
 }

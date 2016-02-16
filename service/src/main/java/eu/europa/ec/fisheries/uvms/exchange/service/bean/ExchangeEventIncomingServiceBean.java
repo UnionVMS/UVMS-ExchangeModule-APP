@@ -10,17 +10,17 @@ import javax.inject.Inject;
 import javax.jms.JMSException;
 import javax.jms.TextMessage;
 
-import eu.europa.ec.fisheries.schema.exchange.module.v1.ProcessedMovementResponse;
+import eu.europa.ec.fisheries.schema.exchange.module.v1.*;
 import eu.europa.ec.fisheries.schema.exchange.movement.v1.MovementRefType;
+import eu.europa.ec.fisheries.schema.exchange.movement.v1.MovementSourceType;
+import eu.europa.ec.fisheries.schema.movement.module.v1.ProcessedMovementAck;
+import eu.europa.ec.fisheries.uvms.exchange.message.constants.MessageQueue;
 import eu.europa.ec.fisheries.uvms.exchange.message.event.*;
+import eu.europa.ec.fisheries.uvms.movement.model.mapper.MovementModuleResponseMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import eu.europa.ec.fisheries.schema.exchange.common.v1.AcknowledgeType;
-import eu.europa.ec.fisheries.schema.exchange.common.v1.AcknowledgeTypeType;
-import eu.europa.ec.fisheries.schema.exchange.module.v1.GetServiceListRequest;
-import eu.europa.ec.fisheries.schema.exchange.module.v1.PingResponse;
-import eu.europa.ec.fisheries.schema.exchange.module.v1.SetMovementReportRequest;
 import eu.europa.ec.fisheries.schema.exchange.movement.v1.MovementBaseType;
 import eu.europa.ec.fisheries.schema.exchange.movement.v1.SetReportMovementType;
 import eu.europa.ec.fisheries.schema.exchange.plugin.types.v1.PluginFault;
@@ -108,7 +108,6 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
     @Override
     public void processMovement(@Observes @SetMovementEvent ExchangeMessageEvent message) {
         LOG.info("Process movement");
-        long start = System.currentTimeMillis();
         try {
             SetMovementReportRequest request = JAXBMarshaller.unmarshallTextMessage(message.getJmsMessage(), SetMovementReportRequest.class);
 
@@ -131,6 +130,8 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
                 rawMovement.setPluginType(pluginType.value());
                 rawMovement.setPluginName(pluginName);
                 rawMovement.setDateRecieved(request.getRequest().getTimestamp());
+                // TODO: Temporary - probably better to change corr id to have the same though the entire flow; then we can use this to send response to original caller from anywhere needed
+                rawMovement.setAckResponseMessageID(message.getJmsMessage().getJMSMessageID());
 
                 try {
                     rulesService.sendMovementToRules(MovementMapper.mapPluginType(pluginType), rawMovement);
@@ -147,6 +148,8 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
         } catch (ExchangeModelMarshallException e) {
             //Cannot send back fault to unknown sender
             LOG.error("Couldn't map to SetMovementReportRequest when processing movement from plugin");
+        } catch (JMSException e) {
+            LOG.error("Failed to get response queue");
         }
     }
 
@@ -168,10 +171,11 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
                     pollEvent.fire(new NotificationMessage("guid", pollGuid));
                 }
 
-                // TODO: What is this needed for???
-                ExchangeModuleResponseMapper.mapSetMovementReportResponse(AcknowledgeTypeType.OK, movementRefType.getMovementRefGuid(), "Movement successfully processed");
-
-                producer.sendModuleResponseMessage(message.getJmsMessage(), orgRequest.getPluginName());
+                // Send some response to Movement, if it originated from there (manual movement)
+                if (orgRequest.getMovement().getSource() == MovementSourceType.MANUAL) {
+                    ProcessedMovementAck response = MovementModuleResponseMapper.mapProcessedMovementAck(eu.europa.ec.fisheries.schema.movement.common.v1.AcknowledgeTypeType.OK, movementRefType.getMovementRefGuid(), "Movement successfully processed");
+                    producer.sendModuleAckMessage(movementRefType.getAckResponseMessageID(), MessageQueue.MOVEMENT_RESPONSE, JAXBMarshaller.marshallJaxBObjectToString(response));
+                }
             } catch (ExchangeLogException | ExchangeModelMarshallException e) {
                 LOG.error(e.getMessage());
             }

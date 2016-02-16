@@ -44,15 +44,6 @@ public class ExchangeModuleResponseMapper {
 		}        
     }
 
-    public static SetMovementReportResponse mapSetMovementReportResponse(AcknowledgeTypeType ack, String messageId, String message) {
-        SetMovementReportResponse resp = new SetMovementReportResponse();
-        AcknowledgeType ackType = new AcknowledgeType();
-        ackType.setMessage(message);
-        ackType.setMessageId(messageId);
-        resp.setResponse(ackType);
-        return resp;
-    }
-
     public static AcknowledgeType mapAcknowledgeTypeOK() {
     	AcknowledgeType ackType = new AcknowledgeType();
     	ackType.setType(AcknowledgeTypeType.OK);

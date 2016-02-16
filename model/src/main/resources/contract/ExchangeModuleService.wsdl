@@ -34,7 +34,7 @@
                     <!-- admin/config wants to-->
                     <xsd:enumeration value="PING"/>
 
-                    <!-- asynch processed movement response-->
+                    <!-- asynch processed movement response -->
                     <xsd:enumeration value="PROCESSED_MOVEMENT"/>
                 </xsd:restriction>
             </xsd:simpleType>
@@ -56,15 +56,7 @@
                     </xsd:complexContent>
                 </xsd:complexType>
             </xsd:element>
-            
-            <xsd:element name="SetMovementReportResponse">
-                <xsd:complexType>
-                    <xsd:sequence>
-                        <xsd:element name="response" type="common:AcknowledgeType" minOccurs="1" maxOccurs="1"/>
-                    </xsd:sequence>
-                </xsd:complexType>
-            </xsd:element>
-            
+
             <xsd:element name="SetCommandRequest">
                 <xsd:complexType>
                     <xsd:complexContent>
@@ -201,9 +193,6 @@
     <message name="SetMovementReportRequest">
         <part name="body" element="module:SetMovementReportRequest"/>
     </message>
-    <message name="SetMovementReportResponse">
-        <part name="body" element="module:SetMovementReportResponse"/>
-    </message>
 
     <message name="SendMovementToPluginRequest">
         <part name="body" element="module:SendMovementToPluginRequest"/>
@@ -243,13 +232,12 @@
             <output message="module:SetCommandResponse"/>
             <fault name="ExchangeFault" message="module:ExchangeFault"/>
         </operation>
-        
+
         <operation name="SetMovementReport">
             <input message="module:SetMovementReportRequest"/>
-            <output message="module:SetMovementReportResponse"/>
             <fault name="ExchangeFault" message="module:ExchangeFault"/>
         </operation>
-        
+
         <operation name="SendMovementToPlugin">
             <input message="module:SendMovementToPluginRequest"/>
             <output message="module:SendMovementToPluginResponse"/>
@@ -304,9 +292,6 @@
             <input>
                 <soap:body use="literal"/>
             </input>
-            <output>
-                <soap:body use="literal"/>
-            </output>
             <fault name="ExchangeFault">
                 <soap:fault name="ExchangeFault" use="literal"/>
             </fault>

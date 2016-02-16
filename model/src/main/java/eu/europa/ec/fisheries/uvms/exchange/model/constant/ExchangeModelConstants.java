@@ -24,4 +24,7 @@ public class ExchangeModelConstants {
     public static final String QUEUE_INTEGRATION_ASSET = "java:/jms/queue/UVMSAssetEvent";
     public static final String QUEUE_INTEGRATION_AUDIT = "java:/jms/queue/UVMSAuditEvent";
 
+    // For ack
+    public static final String MOVEMENT_RESPONSE_QUEUE = "java:/jms/queue/UVMSMovement";
+
 }

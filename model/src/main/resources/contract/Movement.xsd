@@ -35,6 +35,7 @@
         <xsd:sequence>
             <xsd:element name="movementRefGuid" type="xsd:string" minOccurs="1" maxOccurs="1"/>
             <xsd:element name="type" type="movement:MovementRefTypeType" minOccurs="1" maxOccurs="1"/>
+            <xsd:element name="ackResponseMessageID" type="xsd:string" minOccurs="1" maxOccurs="1"/>
         </xsd:sequence>
     </xsd:complexType>
 
