@@ -71,6 +71,17 @@ public class ExchangeDataSourceResponseMapper {
 		}
     }
 
+    public static List<ServiceResponseType> mapToServiceTypeListFromModuleResponse(TextMessage message, String correlationId) throws ExchangeModelMapperException {
+        try {
+            validateResponse(message, correlationId);
+            eu.europa.ec.fisheries.schema.exchange.module.v1.GetServiceListResponse response = JAXBMarshaller.unmarshallTextMessage(message, eu.europa.ec.fisheries.schema.exchange.module.v1.GetServiceListResponse.class);
+            return response.getService();
+        } catch (JMSException | ExchangeValidationException | ExchangeModelMarshallException e) {
+            LOG.error("[ Error when mapping response to list of service ]");
+            throw new ExchangeModelMapperException("[ Error when mapping response to list of service ] " + e.getMessage());
+        }
+    }
+
     public static ServiceResponseType mapToRegisterServiceResponse(TextMessage message, String correlationId) throws ExchangeModelMapperException {
     	try {
     		validateResponse(message, correlationId);

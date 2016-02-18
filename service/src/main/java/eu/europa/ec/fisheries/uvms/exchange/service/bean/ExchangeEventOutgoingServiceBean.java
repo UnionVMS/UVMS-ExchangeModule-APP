@@ -82,7 +82,7 @@ public class ExchangeEventOutgoingServiceBean implements ExchangeEventOutgoingSe
             type.add(sendReport.getPluginType());
             
             List<ServiceResponseType> services = exchangeService.getServiceList(type);
-            if(services.isEmpty()) {
+            if(services == null || services.isEmpty()) {
                 String faultMessage = "No plugins of type " + sendReport.getPluginType() + " found";
                 LOG.debug(faultMessage);
 				
@@ -91,17 +91,17 @@ public class ExchangeEventOutgoingServiceBean implements ExchangeEventOutgoingSe
             	String serviceName = service.getServiceClassName();
             	
                 if(validate(service, sendReport, message.getJmsMessage())) {
-                	String text = ExchangePluginRequestMapper.createSetReportRequest(sendReport.getTimestamp(), sendReport.getMovement());
+                    String text = ExchangePluginRequestMapper.createSetReportRequest(sendReport.getTimestamp(), sendReport);
                 	String pluginMessageId = producer.sendEventBusMessage(text, serviceName);
-                	
-                	//System.out.println("SendReport: PluginMessageId: " + pluginMessageId);
-                	
-                	try {
-                		ExchangeLogType log = ExchangeLogMapper.getSendMovementExchangeLog(sendReport);
-                		exchangeLog.logAndCache(log, pluginMessageId);
-                	} catch (ExchangeLogException e) {
-                		LOG.error(e.getMessage());
-                	}
+                    
+                    //System.out.println("SendReport: PluginMessageId: " + pluginMessageId);
+                    
+                    try {
+                        ExchangeLogType log = ExchangeLogMapper.getSendMovementExchangeLog(sendReport);
+                        exchangeLog.logAndCache(log, pluginMessageId);
+                    } catch (ExchangeLogException e) {
+                        LOG.error(e.getMessage());
+                    }
 
                 	
                 } else {

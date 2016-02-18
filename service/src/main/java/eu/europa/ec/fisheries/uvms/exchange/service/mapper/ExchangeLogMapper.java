@@ -74,6 +74,7 @@ public class ExchangeLogMapper {
                 break;
             case MANUAL:
             case FLUX:
+            case NAF:
                 senderReceiver = getSenderReceiver(movement.getAssetId());
                 break;
             case EMAIL:

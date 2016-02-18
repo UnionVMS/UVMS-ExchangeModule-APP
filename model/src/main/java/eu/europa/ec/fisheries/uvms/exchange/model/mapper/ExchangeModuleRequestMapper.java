@@ -81,7 +81,7 @@ public class ExchangeModuleRequestMapper {
 
     public static SendMovementToPluginType createSendMovementToPluginType(String pluginName, PluginType type, XMLGregorianCalendar fwdDate, String fwdRule, String recipient, MovementType payload, List<RecipientInfoType> recipientInfoList, String assetName, String ircs, String mmsi, String externalMarking, String flagState) throws ExchangeModelMapperException {
         SendMovementToPluginType report = new SendMovementToPluginType();
-        mapToMovementType(payload, ircs, mmsi, externalMarking, flagState);
+        mapToMovementType(payload, ircs, mmsi, externalMarking, flagState, assetName);
         report.setTimestamp(DateUtils.dateToXmlGregorian(DateUtils.nowUTC().toDate()));
         report.setFwdDate(fwdDate);
         report.setFwdRule(fwdRule);
@@ -94,11 +94,12 @@ public class ExchangeModuleRequestMapper {
         return report;
     }
 
-    private static void mapToMovementType(MovementType movementType, String ircs, String mmsi, String externalMarking, String flagState){
+    private static void mapToMovementType(MovementType movementType, String ircs, String mmsi, String externalMarking, String flagState, String assetName){
         movementType.setMmsi(mmsi);
         movementType.setExternalMarking(externalMarking);
         movementType.setIrcs(ircs);
         movementType.setFlagState(flagState);
+        movementType.setAssetName(assetName);
     }
 
     public static String createSetCommandSendPollRequest(String pluginName, PollType poll) throws ExchangeModelMapperException {

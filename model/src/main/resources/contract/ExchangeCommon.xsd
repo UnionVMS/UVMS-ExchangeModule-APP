@@ -74,6 +74,8 @@
         <xsd:sequence>
             <xsd:element name="type" type="common:ReportTypeType"/>
             <!-- <xsd:element name="version" type="xsd:string"/> -->
+            <xsd:element name="recipient" type="xsd:string"/>
+            <xsd:element name="recipientInfo" type="movement:RecipientInfoType" minOccurs="1" maxOccurs="unbounded"/>
             <xsd:element name="timestamp" type="xsd:dateTime" minOccurs="1" maxOccurs="1"/>
             <xsd:choice>
                 <xsd:element name="movement" type="movement:MovementType"/>

@@ -101,6 +101,8 @@ public class MovementMapper {
                 return eu.europa.ec.fisheries.schema.rules.exchange.v1.PluginType.FLUX;
             case SATELLITE_RECEIVER:
                 return eu.europa.ec.fisheries.schema.rules.exchange.v1.PluginType.SATELLITE_RECEIVER;
+            case NAF:
+                return eu.europa.ec.fisheries.schema.rules.exchange.v1.PluginType.NAF;
             case OTHER:
             default:
                 return eu.europa.ec.fisheries.schema.rules.exchange.v1.PluginType.OTHER;

@@ -11,6 +11,7 @@ import eu.europa.ec.fisheries.schema.exchange.common.v1.CommandType;
 import eu.europa.ec.fisheries.schema.exchange.common.v1.ReportType;
 import eu.europa.ec.fisheries.schema.exchange.common.v1.ReportTypeType;
 import eu.europa.ec.fisheries.schema.exchange.movement.v1.MovementType;
+import eu.europa.ec.fisheries.schema.exchange.movement.v1.SendMovementToPluginType;
 import eu.europa.ec.fisheries.schema.exchange.plugin.v1.ExchangePluginMethod;
 import eu.europa.ec.fisheries.schema.exchange.plugin.v1.PingRequest;
 import eu.europa.ec.fisheries.schema.exchange.plugin.v1.SetCommandRequest;
@@ -27,14 +28,16 @@ import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelMarshal
  */
 public class ExchangePluginRequestMapper {
 
-    public static String createSetReportRequest(XMLGregorianCalendar dateReceived, MovementType movement) throws ExchangeModelMarshallException {
+    public static String createSetReportRequest(XMLGregorianCalendar dateReceived, SendMovementToPluginType movement) throws ExchangeModelMarshallException {
         SetReportRequest request = new SetReportRequest();
         request.setMethod(ExchangePluginMethod.SET_REPORT);
         ReportType reportType = new ReportType();
-		reportType.setMovement(movement);
-		reportType.setTimestamp(dateReceived);
+        reportType.setRecipient(movement.getRecipient());
+        reportType.getRecipientInfo().addAll(movement.getRecipientInfo());
+        reportType.setMovement(movement.getMovement());
+        reportType.setTimestamp(dateReceived);
         reportType.setType(ReportTypeType.MOVEMENT);
-		request.setReport(reportType);
+        request.setReport(reportType);
         return JAXBMarshaller.marshallJaxBObjectToString(request);
     }
 
