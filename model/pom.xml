@@ -10,7 +10,7 @@
     <parent>
         <groupId>eu.europa.ec.fisheries.uvms.exchange</groupId>
         <artifactId>exchange</artifactId>
-        <version>1.0.1-SNAPSHOT</version>
+        <version>1.0.2-SNAPSHOT</version>
     </parent>
     
     <properties>
@@ -162,7 +162,7 @@
         <dependency>
             <groupId>eu.europa.ec.fisheries.uvms.audit</groupId>
             <artifactId>audit-model</artifactId>
-            <version>${audit.model.version}</version>
+            <version>1.0.1</version>
         </dependency>
     </dependencies>
     
