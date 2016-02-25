@@ -17,6 +17,7 @@ import eu.europa.ec.fisheries.uvms.exchange.model.mapper.ExchangeDataSourceReque
 import eu.europa.ec.fisheries.uvms.exchange.model.mapper.ExchangeDataSourceResponseMapper;
 import eu.europa.ec.fisheries.uvms.exchange.service.ExchangeService;
 import eu.europa.ec.fisheries.uvms.exchange.service.exception.ExchangeServiceException;
+import static eu.europa.ec.fisheries.uvms.exchange.service.util.StringUtil.compressServiceClassName;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -53,7 +54,7 @@ public class ExchangeServiceBean implements ExchangeService {
             String messageId = producer.sendMessageOnQueue(request, MessageQueue.INTERNAL);
             TextMessage response = consumer.getMessage(messageId, TextMessage.class);
             ServiceResponseType serviceResponseType = ExchangeDataSourceResponseMapper.mapToRegisterServiceResponse(response, messageId);
-            sendAuditLogMessageForRegisterService(serviceResponseType.getServiceClassName());
+            sendAuditLogMessageForRegisterService(compressServiceClassName(serviceResponseType.getServiceClassName()));
             return serviceResponseType;
         } catch (ExchangeModelMapperException | ExchangeMessageException ex) {
             throw new ExchangeServiceException(ex.getMessage());
@@ -74,7 +75,7 @@ public class ExchangeServiceBean implements ExchangeService {
             String messageId = producer.sendMessageOnQueue(request, MessageQueue.INTERNAL);
             TextMessage response = consumer.getMessage(messageId, TextMessage.class);
             ServiceResponseType serviceResponseType = ExchangeDataSourceResponseMapper.mapToUnregisterServiceResponse(response, messageId);
-            sendAuditLogMessageForUnregisterService(serviceResponseType.getServiceClassName());
+            sendAuditLogMessageForUnregisterService(compressServiceClassName(serviceResponseType.getServiceClassName()));
             return serviceResponseType;
         } catch (ExchangeModelMapperException | ExchangeMessageException ex) {
             throw new ExchangeServiceException(ex.getMessage());
@@ -107,7 +108,7 @@ public class ExchangeServiceBean implements ExchangeService {
             String request = ExchangeDataSourceRequestMapper.mapSetSettingsToString(serviceClassName, settingListType);
             String messageId = producer.sendMessageOnQueue(request, MessageQueue.INTERNAL);
             TextMessage response = consumer.getMessage(messageId, TextMessage.class);
-            sendAuditLogMessageForUpdateService(serviceClassName);
+            sendAuditLogMessageForUpdateService(compressServiceClassName(serviceClassName));
             return ExchangeDataSourceResponseMapper.mapToServiceTypeFromSetSettingsResponse(response, messageId);
         } catch (ExchangeModelMapperException | ExchangeMessageException e) {
             throw new ExchangeServiceException(e.getMessage());
@@ -238,11 +239,11 @@ public class ExchangeServiceBean implements ExchangeService {
     private void sendAuditLogMessageForUpdateServiceStatus(String serviceName, StatusType status){
         switch (status){
             case STARTED:
-                sendAuditLogMessageForServiceStatusStarted(serviceName);
+                sendAuditLogMessageForServiceStatusStarted(compressServiceClassName(serviceName));
             case STOPPED:
-                sendAuditLogMessageForServiceStatusStopped(serviceName);
+                sendAuditLogMessageForServiceStatusStopped(compressServiceClassName(serviceName));
             default:
-                sendAuditLogMessageForServiceStatusUnknown(serviceName);
+                sendAuditLogMessageForServiceStatusUnknown(compressServiceClassName(serviceName));
         }
     }
 
