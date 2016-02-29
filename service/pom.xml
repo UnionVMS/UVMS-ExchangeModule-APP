@@ -36,19 +36,19 @@
         <dependency>
             <groupId>eu.europa.ec.fisheries.uvms.audit</groupId>
             <artifactId>audit-model</artifactId>
-            <version>1.0.1</version>
+            <version>${audit.version}</version>
             <type>jar</type>
         </dependency>
         <dependency>
             <groupId>eu.europa.ec.fisheries.uvms.movement</groupId>
             <artifactId>movement-model</artifactId>
-            <version>1.0.1</version>
+            <version>${movement.model.version}</version>
             <type>jar</type>
         </dependency>
         <dependency>
             <groupId>eu.europa.ec.fisheries.uvms.rules</groupId>
             <artifactId>rules-model</artifactId>
-            <version>1.0.1</version>
+            <version>${rules.version}</version>
         </dependency>
         <dependency>
             <groupId>eu.europa.ec.fisheries.uvms.asset</groupId>
