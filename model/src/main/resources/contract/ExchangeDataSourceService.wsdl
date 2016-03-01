@@ -44,6 +44,7 @@
                     <xsd:enumeration value="GET_UNSENT_MESSAGE_LIST"/>
                     <xsd:enumeration value="CREATE_UNSENT_MESSAGE"/>
                     <xsd:enumeration value="RESEND_UNSENT_MESSAGE"/>
+                    <xsd:enumeration value="REMOVE_UNSENT_MESSAGE"/>
                     
                     <!-- MISC -->
                     <xsd:enumeration value="PING"/>
@@ -87,6 +88,26 @@
             </xsd:element>
             
             <xsd:element name="CreateUnsentMessageResponse">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element name="unsentMessageId" type="xsd:string" minOccurs="0" maxOccurs="1"/>
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
+            
+            <xsd:element name="RemoveUnsentMessageRequest">
+                <xsd:complexType>
+                    <xsd:complexContent>
+                        <xsd:extension base="source:ExchangeBaseRequest">
+                            <xsd:sequence>
+                                <xsd:element name="unsentMessageId" type="xsd:string" minOccurs="1" maxOccurs="1"/>
+                            </xsd:sequence>
+                        </xsd:extension>
+                    </xsd:complexContent>
+                </xsd:complexType>
+            </xsd:element>
+            
+            <xsd:element name="RemoveUnsentMessageResponse">
                 <xsd:complexType>
                     <xsd:sequence>
                         <xsd:element name="unsentMessageId" type="xsd:string" minOccurs="0" maxOccurs="1"/>

@@ -28,7 +28,7 @@ import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelMarshal
  */
 public class ExchangePluginRequestMapper {
 
-    public static String createSetReportRequest(XMLGregorianCalendar dateReceived, SendMovementToPluginType movement) throws ExchangeModelMarshallException {
+    public static String createSetReportRequest(XMLGregorianCalendar dateReceived, SendMovementToPluginType movement, String unsentMessageGuid) throws ExchangeModelMarshallException {
         SetReportRequest request = new SetReportRequest();
         request.setMethod(ExchangePluginMethod.SET_REPORT);
         ReportType reportType = new ReportType();
@@ -37,6 +37,7 @@ public class ExchangePluginRequestMapper {
         reportType.setMovement(movement.getMovement());
         reportType.setTimestamp(dateReceived);
         reportType.setType(ReportTypeType.MOVEMENT);
+        reportType.setUnsentMessageGuid(unsentMessageGuid);
         request.setReport(reportType);
         return JAXBMarshaller.marshallJaxBObjectToString(request);
     }

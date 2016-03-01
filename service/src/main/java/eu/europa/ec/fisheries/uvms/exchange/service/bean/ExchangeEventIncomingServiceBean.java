@@ -157,28 +157,28 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
     @Override
     public void handleProcessedMovement(@Observes @HandleProcessedMovementEvent ExchangeMessageEvent message) {
         LOG.debug("Received processed movement from Rules");
-            try {
-                ProcessedMovementResponse request = JAXBMarshaller.unmarshallTextMessage(message.getJmsMessage(), ProcessedMovementResponse.class);
-                MovementRefType movementRefType = request.getMovementRefType();
-                SetReportMovementType orgRequest = request.getOrgRequest();
+        try {
+            ProcessedMovementResponse request = JAXBMarshaller.unmarshallTextMessage(message.getJmsMessage(), ProcessedMovementResponse.class);
+            MovementRefType movementRefType = request.getMovementRefType();
+            SetReportMovementType orgRequest = request.getOrgRequest();
 
-                ExchangeLogType log = ExchangeLogMapper.getReceivedMovementExchangeLog(orgRequest, movementRefType.getMovementRefGuid(), movementRefType.getType().value());
-                ExchangeLogType createdLog = exchangeLog.log(log);
+            ExchangeLogType log = ExchangeLogMapper.getReceivedMovementExchangeLog(orgRequest, movementRefType.getMovementRefGuid(), movementRefType.getType().value());
+            ExchangeLogType createdLog = exchangeLog.log(log);
 
-                LogRefType logTypeRef = createdLog.getTypeRef();
-                if (logTypeRef != null && logTypeRef.getType() == TypeRefType.POLL) {
-                    String pollGuid = logTypeRef.getRefGuid();
-                    pollEvent.fire(new NotificationMessage("guid", pollGuid));
-                }
-
-                // Send some response to Movement, if it originated from there (manual movement)
-                if (orgRequest.getMovement().getSource() == MovementSourceType.MANUAL) {
-                    ProcessedMovementAck response = MovementModuleResponseMapper.mapProcessedMovementAck(eu.europa.ec.fisheries.schema.movement.common.v1.AcknowledgeTypeType.OK, movementRefType.getMovementRefGuid(), "Movement successfully processed");
-                    producer.sendModuleAckMessage(movementRefType.getAckResponseMessageID(), MessageQueue.MOVEMENT_RESPONSE, JAXBMarshaller.marshallJaxBObjectToString(response));
-                }
-            } catch (ExchangeLogException | ExchangeModelMarshallException e) {
-                LOG.error(e.getMessage());
+            LogRefType logTypeRef = createdLog.getTypeRef();
+            if (logTypeRef != null && logTypeRef.getType() == TypeRefType.POLL) {
+                String pollGuid = logTypeRef.getRefGuid();
+                pollEvent.fire(new NotificationMessage("guid", pollGuid));
             }
+
+            // Send some response to Movement, if it originated from there (manual movement)
+            if (orgRequest.getMovement().getSource() == MovementSourceType.MANUAL) {
+                ProcessedMovementAck response = MovementModuleResponseMapper.mapProcessedMovementAck(eu.europa.ec.fisheries.schema.movement.common.v1.AcknowledgeTypeType.OK, movementRefType.getMovementRefGuid(), "Movement successfully processed");
+                producer.sendModuleAckMessage(movementRefType.getAckResponseMessageID(), MessageQueue.MOVEMENT_RESPONSE, JAXBMarshaller.marshallJaxBObjectToString(response));
+            }
+        } catch (ExchangeLogException | ExchangeModelMarshallException e) {
+            LOG.error(e.getMessage());
+        }
     }
 
     private boolean validate(SetReportMovementType setReport, ServiceResponseType service, TextMessage origin) {
@@ -219,15 +219,15 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
 
     @Override
     public void processPluginPing(@Observes @PluginPingEvent ExchangeMessageEvent message) {
-    	try {
-			eu.europa.ec.fisheries.schema.exchange.plugin.v1.PingResponse response = JAXBMarshaller.unmarshallTextMessage(message.getJmsMessage(), eu.europa.ec.fisheries.schema.exchange.plugin.v1.PingResponse.class);
-			//TODO handle ping response from plugin, eg. no serviceClassName in response
-			LOG.info("FIX ME handle ping response from plugin");
-		} catch (ExchangeModelMarshallException e) {
-			LOG.error("Couldn't process ping response from plugin " + e.getMessage());
-		}
+        try {
+            eu.europa.ec.fisheries.schema.exchange.plugin.v1.PingResponse response = JAXBMarshaller.unmarshallTextMessage(message.getJmsMessage(), eu.europa.ec.fisheries.schema.exchange.plugin.v1.PingResponse.class);
+            //TODO handle ping response from plugin, eg. no serviceClassName in response
+            LOG.info("FIX ME handle ping response from plugin");
+        } catch (ExchangeModelMarshallException e) {
+            LOG.error("Couldn't process ping response from plugin " + e.getMessage());
+        }
     }
-    
+
     @Override
     public void processAcknowledge(@Observes @ExchangeLogEvent ExchangeMessageEvent message) {
         LOG.info("Process acknowledge");
@@ -240,14 +240,14 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
             switch (method) {
                 case SET_COMMAND:
                     // Only Acknowledge for poll should have a poll status set
-                    if(acknowledge.getPollStatus()!=null && acknowledge.getPollStatus().getPollId()!=null){
+                    if (acknowledge.getPollStatus() != null && acknowledge.getPollStatus().getPollId() != null) {
                         handleSetPollStatusAcknowledge(method, serviceClassName, acknowledge);
-                    }else{
+                    } else {
                         handleUpdateExchangeLogAcknowledge(method, serviceClassName, acknowledge);
                     }
                     break;
                 case SET_REPORT:
-                	handleUpdateExchangeLogAcknowledge(method, serviceClassName, acknowledge);
+                    handleUpdateExchangeLogAcknowledge(method, serviceClassName, acknowledge);
                     break;
                 case START:
                     handleUpdateServiceAcknowledge(serviceClassName, acknowledge, StatusType.STARTED);
@@ -278,14 +278,19 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
             case OK:
                 //TODO if(poll probably transmitted)
                 logStatus = ExchangeLogStatusTypeType.SUCCESSFUL;
+                try {
+                    exchangeLog.removeUnsentMessage(ack.getUnsentMessageGuid());
+                } catch (ExchangeLogException ex) {
+                    LOG.error(ex.getMessage());
+                }
                 break;
             case NOK:
                 LOG.debug(method + " was NOK: " + ack.getMessage());
                 break;
         }
 
-		try {
-			ExchangeLogType updatedLog = exchangeLog.updateStatus(ack.getMessageId(), logStatus);
+        try {
+            ExchangeLogType updatedLog = exchangeLog.updateStatus(ack.getMessageId(), logStatus);
 
             // Long polling
             LogRefType typeRef = updatedLog.getTypeRef();
@@ -296,7 +301,7 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
         } catch (ExchangeLogException e) {
             LOG.error(e.getMessage());
         }
-	}
+    }
 
     private void handleSetPollStatusAcknowledge(ExchangePluginMethod method, String serviceClassName, AcknowledgeType ack) {
         LOG.debug(method + " was acknowledged in " + serviceClassName);

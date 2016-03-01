@@ -72,6 +72,14 @@ public class ExchangePluginResponseMapper {
         return type;
     }
 
+    public static AcknowledgeType mapToAcknowlegeType(String messageId, String unsentMessageGuid, AcknowledgeTypeType ackType) {
+        AcknowledgeType type = new AcknowledgeType();
+        type.setMessageId(messageId);
+        type.setUnsentMessageGuid(unsentMessageGuid);
+        type.setType(ackType);
+        return type;
+    }
+
     public static AcknowledgeType mapToAcknowlegeType(String messageId, AcknowledgeTypeType ackType, String message) {
         AcknowledgeType type = mapToAcknowlegeType(messageId, ackType);
         type.setMessage(message);

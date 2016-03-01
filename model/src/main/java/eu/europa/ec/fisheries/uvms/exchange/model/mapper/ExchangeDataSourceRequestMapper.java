@@ -160,79 +160,86 @@ public class ExchangeDataSourceRequestMapper {
         }
     }
 
-	public static String mapGetLogStatusHistoryRequest(String guid, TypeRefType typeRefType) throws ExchangeModelMarshallException {
-		GetLogStatusHistoryRequest request = new GetLogStatusHistoryRequest();
-		request.setMethod(ExchangeDataSourceMethod.GET_LOG_STATUS_HISTORY);
-		request.setGuid(guid);
-		request.setTypeRefType(typeRefType);
-		return JAXBMarshaller.marshallJaxBObjectToString(request);
-	}
-	
-	public static String mapUpdateLogStatusRequest(String guid, ExchangeLogStatusTypeType type) throws ExchangeModelMarshallException {
-		UpdateLogStatusRequest request = new UpdateLogStatusRequest();
-		request.setMethod(ExchangeDataSourceMethod.UPDATE_LOG_STATUS);
-		ExchangeLogStatusType status = new ExchangeLogStatusType();
-		status.setGuid(guid);
-		List<ExchangeLogStatusHistoryType> statusHistoryList = new ArrayList<>();
-		ExchangeLogStatusHistoryType statusHistory = new ExchangeLogStatusHistoryType();
-		statusHistory.setStatus(type);
-		//statusHistory.setTimestamp();
-		statusHistoryList.add(statusHistory);
-		status.getHistory().addAll(statusHistoryList);
-		request.setStatus(status);
-		return JAXBMarshaller.marshallJaxBObjectToString(request);
-	}
+    public static String mapGetLogStatusHistoryRequest(String guid, TypeRefType typeRefType) throws ExchangeModelMarshallException {
+        GetLogStatusHistoryRequest request = new GetLogStatusHistoryRequest();
+        request.setMethod(ExchangeDataSourceMethod.GET_LOG_STATUS_HISTORY);
+        request.setGuid(guid);
+        request.setTypeRefType(typeRefType);
+        return JAXBMarshaller.marshallJaxBObjectToString(request);
+    }
 
-	public static String mapGetUnsentMessageList() throws ExchangeModelMarshallException {
-		GetUnsentMessageListRequest request = new GetUnsentMessageListRequest();
-		request.setMethod(ExchangeDataSourceMethod.GET_UNSENT_MESSAGE_LIST);
-		return JAXBMarshaller.marshallJaxBObjectToString(request);
-	}
+    public static String mapUpdateLogStatusRequest(String guid, ExchangeLogStatusTypeType type) throws ExchangeModelMarshallException {
+        UpdateLogStatusRequest request = new UpdateLogStatusRequest();
+        request.setMethod(ExchangeDataSourceMethod.UPDATE_LOG_STATUS);
+        ExchangeLogStatusType status = new ExchangeLogStatusType();
+        status.setGuid(guid);
+        List<ExchangeLogStatusHistoryType> statusHistoryList = new ArrayList<>();
+        ExchangeLogStatusHistoryType statusHistory = new ExchangeLogStatusHistoryType();
+        statusHistory.setStatus(type);
+        //statusHistory.setTimestamp();
+        statusHistoryList.add(statusHistory);
+        status.getHistory().addAll(statusHistoryList);
+        request.setStatus(status);
+        return JAXBMarshaller.marshallJaxBObjectToString(request);
+    }
 
-	public static String mapResendMessage(List<String> messageIdList) throws ExchangeModelMarshallException {
-		ResendMessageRequest request = new ResendMessageRequest();
-		request.setMethod(ExchangeDataSourceMethod.RESEND_UNSENT_MESSAGE);
-		request.getUnsentMessageId().addAll(messageIdList);
-		return JAXBMarshaller.marshallJaxBObjectToString(request);
-	}
+    public static String mapGetUnsentMessageList() throws ExchangeModelMarshallException {
+        GetUnsentMessageListRequest request = new GetUnsentMessageListRequest();
+        request.setMethod(ExchangeDataSourceMethod.GET_UNSENT_MESSAGE_LIST);
+        return JAXBMarshaller.marshallJaxBObjectToString(request);
+    }
 
-	public static String mapCreateUnsentMessage(XMLGregorianCalendar dateReceived, String senderReceiver, String recipient, String messageText, List<UnsentMessageTypeProperty> properties) throws ExchangeModelMarshallException {
-		CreateUnsentMessageRequest request = new CreateUnsentMessageRequest();
-		request.setMethod(ExchangeDataSourceMethod.CREATE_UNSENT_MESSAGE);
-		UnsentMessageType unsentMessage = new UnsentMessageType();
-		unsentMessage.setDateReceived(dateReceived);
-		unsentMessage.setSenderReceiver(senderReceiver);
-		unsentMessage.setRecipient(recipient);
-		unsentMessage.setMessage(messageText);
+    public static String mapResendMessage(List<String> messageIdList) throws ExchangeModelMarshallException {
+        ResendMessageRequest request = new ResendMessageRequest();
+        request.setMethod(ExchangeDataSourceMethod.RESEND_UNSENT_MESSAGE);
+        request.getUnsentMessageId().addAll(messageIdList);
+        return JAXBMarshaller.marshallJaxBObjectToString(request);
+    }
+
+    public static String mapCreateUnsentMessage(XMLGregorianCalendar dateReceived, String senderReceiver, String recipient, String messageText, List<UnsentMessageTypeProperty> properties) throws ExchangeModelMarshallException {
+        CreateUnsentMessageRequest request = new CreateUnsentMessageRequest();
+        request.setMethod(ExchangeDataSourceMethod.CREATE_UNSENT_MESSAGE);
+        UnsentMessageType unsentMessage = new UnsentMessageType();
+        unsentMessage.setDateReceived(dateReceived);
+        unsentMessage.setSenderReceiver(senderReceiver);
+        unsentMessage.setRecipient(recipient);
+        unsentMessage.setMessage(messageText);
         unsentMessage.getProperties().addAll(properties);
-		request.setMessage(unsentMessage);
-		return JAXBMarshaller.marshallJaxBObjectToString(request);
-	}
+        request.setMessage(unsentMessage);
+        return JAXBMarshaller.marshallJaxBObjectToString(request);
+    }
 
-	public static String mapGetLogStatusHistoryByQueryRequest(Date fromDate, Date toDate, List<ExchangeLogStatusTypeType> statusList, List<TypeRefType> typeList) throws ExchangeModelMarshallException {
-		GetLogStatusHistoryByQueryRequest request = new GetLogStatusHistoryByQueryRequest();
-		request.setMethod(ExchangeDataSourceMethod.GET_LOG_STATUS_HISTORY_BY_QUERY);
-		ExchangeHistoryListQuery query = new ExchangeHistoryListQuery();
-		if(fromDate != null) {
-			XMLGregorianCalendar typeRefDateFrom = DateUtils.dateToXmlGregorian(fromDate);
-			query.setTypeRefDateFrom(typeRefDateFrom);
-		}
-		if(toDate != null) {
-			XMLGregorianCalendar typeRefDateTo = DateUtils.dateToXmlGregorian(toDate);
-			query.setTypeRefDateTo(typeRefDateTo);
-		}
-		query.getStatus().addAll(statusList);
-		query.getType().addAll(typeList);
-		request.setQuery(query);
-		return JAXBMarshaller.marshallJaxBObjectToString(request);
-	}
+    public static String mapRemoveUnsentMessage(String unsentMessageId) throws ExchangeModelMarshallException {
+        RemoveUnsentMessageRequest request = new RemoveUnsentMessageRequest();
+        request.setMethod(ExchangeDataSourceMethod.REMOVE_UNSENT_MESSAGE);
+        request.setUnsentMessageId(unsentMessageId);
+        return JAXBMarshaller.marshallJaxBObjectToString(request);
+    }
 
-	public static String mapGetExchangeLogRequest(String guid) throws ExchangeModelMarshallException {
-	    GetExchangeLogRequest request = new GetExchangeLogRequest();
-	    request.setMethod(ExchangeDataSourceMethod.GET_LOG_BY_GUID);
-	    request.setGuid(guid);
-	    return JAXBMarshaller.marshallJaxBObjectToString(request);
-	}
+    public static String mapGetLogStatusHistoryByQueryRequest(Date fromDate, Date toDate, List<ExchangeLogStatusTypeType> statusList, List<TypeRefType> typeList) throws ExchangeModelMarshallException {
+        GetLogStatusHistoryByQueryRequest request = new GetLogStatusHistoryByQueryRequest();
+        request.setMethod(ExchangeDataSourceMethod.GET_LOG_STATUS_HISTORY_BY_QUERY);
+        ExchangeHistoryListQuery query = new ExchangeHistoryListQuery();
+        if (fromDate != null) {
+            XMLGregorianCalendar typeRefDateFrom = DateUtils.dateToXmlGregorian(fromDate);
+            query.setTypeRefDateFrom(typeRefDateFrom);
+        }
+        if (toDate != null) {
+            XMLGregorianCalendar typeRefDateTo = DateUtils.dateToXmlGregorian(toDate);
+            query.setTypeRefDateTo(typeRefDateTo);
+        }
+        query.getStatus().addAll(statusList);
+        query.getType().addAll(typeList);
+        request.setQuery(query);
+        return JAXBMarshaller.marshallJaxBObjectToString(request);
+    }
+
+    public static String mapGetExchangeLogRequest(String guid) throws ExchangeModelMarshallException {
+        GetExchangeLogRequest request = new GetExchangeLogRequest();
+        request.setMethod(ExchangeDataSourceMethod.GET_LOG_BY_GUID);
+        request.setGuid(guid);
+        return JAXBMarshaller.marshallJaxBObjectToString(request);
+    }
 
     public static String mapSetPollStatusRequest(String guid, ExchangeLogStatusTypeType type) throws ExchangeModelMarshallException {
         PollStatus pollStatus = new PollStatus();

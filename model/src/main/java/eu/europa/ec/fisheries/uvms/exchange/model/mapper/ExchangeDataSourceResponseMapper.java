@@ -51,24 +51,24 @@ public class ExchangeDataSourceResponseMapper {
         }
 
         try {
-			ExchangeFault fault = JAXBMarshaller.unmarshallTextMessage(response, ExchangeFault.class);
-	        //TODO use fault
-			throw new ExchangeValidationException("Fault found when validate response " + fault.getMessage());
-		} catch (ExchangeModelMarshallException e) {
-			//everything went well
-		}  
+            ExchangeFault fault = JAXBMarshaller.unmarshallTextMessage(response, ExchangeFault.class);
+            //TODO use fault
+            throw new ExchangeValidationException("Fault found when validate response " + fault.getMessage());
+        } catch (ExchangeModelMarshallException e) {
+            //everything went well
+        }
 
     }
 
     public static List<ServiceResponseType> mapToServiceTypeListFromResponse(TextMessage message, String correlationId) throws ExchangeModelMapperException {
-    	try {
-			validateResponse(message, correlationId);
-			GetServiceListResponse response = JAXBMarshaller.unmarshallTextMessage(message, GetServiceListResponse.class);
-	        return response.getService();
-		} catch (JMSException | ExchangeValidationException | ExchangeModelMarshallException e) {
-			LOG.error("[ Error when mapping response to list of service ]");
-			throw new ExchangeModelMapperException("[ Error when mapping response to list of service ] " + e.getMessage());
-		}
+        try {
+            validateResponse(message, correlationId);
+            GetServiceListResponse response = JAXBMarshaller.unmarshallTextMessage(message, GetServiceListResponse.class);
+            return response.getService();
+        } catch (JMSException | ExchangeValidationException | ExchangeModelMarshallException e) {
+            LOG.error("[ Error when mapping response to list of service ]");
+            throw new ExchangeModelMapperException("[ Error when mapping response to list of service ] " + e.getMessage());
+        }
     }
 
     public static List<ServiceResponseType> mapToServiceTypeListFromModuleResponse(TextMessage message, String correlationId) throws ExchangeModelMapperException {
@@ -83,130 +83,130 @@ public class ExchangeDataSourceResponseMapper {
     }
 
     public static ServiceResponseType mapToRegisterServiceResponse(TextMessage message, String correlationId) throws ExchangeModelMapperException {
-    	try {
-    		validateResponse(message, correlationId);
-    		RegisterServiceResponse response = JAXBMarshaller.unmarshallTextMessage(message, RegisterServiceResponse.class);
+        try {
+            validateResponse(message, correlationId);
+            RegisterServiceResponse response = JAXBMarshaller.unmarshallTextMessage(message, RegisterServiceResponse.class);
             return response.getService();
-    	} catch (JMSException | ExchangeValidationException | ExchangeModelMarshallException e) {
-			LOG.error("[ Error when mapping response to register service ]");
-			throw new ExchangeModelMapperException("[ Error when mapping response to register service ] " + e.getMessage());
-		}
+        } catch (JMSException | ExchangeValidationException | ExchangeModelMarshallException e) {
+            LOG.error("[ Error when mapping response to register service ]");
+            throw new ExchangeModelMapperException("[ Error when mapping response to register service ] " + e.getMessage());
+        }
     }
 
     public static ServiceResponseType mapToUnregisterServiceResponse(TextMessage message, String correlationId) throws ExchangeModelMapperException {
-    	try {
-    		validateResponse(message, correlationId);
-    		UnregisterServiceResponse response = JAXBMarshaller.unmarshallTextMessage(message, UnregisterServiceResponse.class);
+        try {
+            validateResponse(message, correlationId);
+            UnregisterServiceResponse response = JAXBMarshaller.unmarshallTextMessage(message, UnregisterServiceResponse.class);
             return response.getService();
-    	} catch (JMSException | ExchangeValidationException | ExchangeModelMarshallException e) {
-			LOG.error("[ Error when mapping response to unregister service ]");
-			throw new ExchangeModelMapperException("[ Error when mapping response to unregister service ] " + e.getMessage());
-		}
-        
+        } catch (JMSException | ExchangeValidationException | ExchangeModelMarshallException e) {
+            LOG.error("[ Error when mapping response to unregister service ]");
+            throw new ExchangeModelMapperException("[ Error when mapping response to unregister service ] " + e.getMessage());
+        }
+
     }
 
     public static ServiceResponseType mapToServiceTypeFromGetServiceResponse(TextMessage message, String correlationId) throws ExchangeModelMapperException {
-    	try {
-    		validateResponse(message, correlationId);
-    		GetServiceResponse response = JAXBMarshaller.unmarshallTextMessage(message, GetServiceResponse.class);
+        try {
+            validateResponse(message, correlationId);
+            GetServiceResponse response = JAXBMarshaller.unmarshallTextMessage(message, GetServiceResponse.class);
             return response.getService();
-    	} catch (JMSException | ExchangeValidationException | ExchangeModelMarshallException e) {
-			LOG.error("[ Error when mapping response to ServiceResponseType from GetServiceResponse ]");
-			throw new ExchangeModelMapperException("[ Error when mapping response to ServiceResponseType from GetServiceResponse ] " + e.getMessage());
-		}
-        
+        } catch (JMSException | ExchangeValidationException | ExchangeModelMarshallException e) {
+            LOG.error("[ Error when mapping response to ServiceResponseType from GetServiceResponse ]");
+            throw new ExchangeModelMapperException("[ Error when mapping response to ServiceResponseType from GetServiceResponse ] " + e.getMessage());
+        }
+
     }
 
     public static ServiceResponseType mapToServiceTypeFromSetSettingsResponse(TextMessage message, String correlationId) throws ExchangeModelMapperException {
-    	try {
-    		validateResponse(message, correlationId);
-    		SetServiceSettingsResponse response = JAXBMarshaller.unmarshallTextMessage(message, SetServiceSettingsResponse.class);
+        try {
+            validateResponse(message, correlationId);
+            SetServiceSettingsResponse response = JAXBMarshaller.unmarshallTextMessage(message, SetServiceSettingsResponse.class);
             return response.getService();
-    	} catch (JMSException | ExchangeValidationException | ExchangeModelMarshallException e) {
-			LOG.error("[ Error when mapping to ServiceResponseType from SetSettingsResponse ]");
-			throw new ExchangeModelMapperException("[ Error when mapping response to ServiceResponseType from SetSettingsResponse ] " + e.getMessage());
-		}
-	}
-    
+        } catch (JMSException | ExchangeValidationException | ExchangeModelMarshallException e) {
+            LOG.error("[ Error when mapping to ServiceResponseType from SetSettingsResponse ]");
+            throw new ExchangeModelMapperException("[ Error when mapping response to ServiceResponseType from SetSettingsResponse ] " + e.getMessage());
+        }
+    }
+
     public static ExchangeLogType mapToExchangeLogTypeFromCreateExchageLogResponse(TextMessage message, String correlationId) throws ExchangeModelMapperException {
-    	try {
-    		validateResponse(message, correlationId);
-    		CreateLogResponse response = JAXBMarshaller.unmarshallTextMessage(message, CreateLogResponse.class);
+        try {
+            validateResponse(message, correlationId);
+            CreateLogResponse response = JAXBMarshaller.unmarshallTextMessage(message, CreateLogResponse.class);
             return response.getExchangeLog();
-    	} catch (JMSException | ExchangeValidationException | ExchangeModelMarshallException e) {
-			LOG.error("[ Error when mapping response to create exchange log ]");
-			throw new ExchangeModelMapperException("[ Error when mapping response to create exchange log] " + e.getMessage());
-		}
+        } catch (JMSException | ExchangeValidationException | ExchangeModelMarshallException e) {
+            LOG.error("[ Error when mapping response to create exchange log ]");
+            throw new ExchangeModelMapperException("[ Error when mapping response to create exchange log] " + e.getMessage());
+        }
     }
 
     public static GetLogListByQueryResponse mapToGetLogListByQueryResponse(TextMessage message, String correlationId) throws ExchangeModelMapperException {
-    	try {
-    		validateResponse(message, correlationId);
-    		GetLogListByQueryResponse response = JAXBMarshaller.unmarshallTextMessage(message, GetLogListByQueryResponse.class);
+        try {
+            validateResponse(message, correlationId);
+            GetLogListByQueryResponse response = JAXBMarshaller.unmarshallTextMessage(message, GetLogListByQueryResponse.class);
             return response;
-    	} catch (JMSException | ExchangeValidationException | ExchangeModelMarshallException e) {
-    		LOG.error("[ Error when mapping response to exchange log ]");
-			throw new ExchangeModelMapperException("[ Error when mapping response to exchange log] " + e.getMessage());
-    	}
+        } catch (JMSException | ExchangeValidationException | ExchangeModelMarshallException e) {
+            LOG.error("[ Error when mapping response to exchange log ]");
+            throw new ExchangeModelMapperException("[ Error when mapping response to exchange log] " + e.getMessage());
+        }
     }
 
     public static ServiceResponseType mapSetServiceResponse(TextMessage message, String correlationId) throws ExchangeModelMapperException {
-    	try {
-    		validateResponse(message, correlationId);
-    		SetServiceStatusResponse response = JAXBMarshaller.unmarshallTextMessage(message, SetServiceStatusResponse.class);
-    		return response.getService();
-    	} catch (JMSException | ExchangeValidationException | ExchangeModelMarshallException e) {
-    		LOG.error("[ Error when mapping response to set service response ]");
-    		throw new ExchangeModelMapperException("[ Error when mapping response to set service response ] " + e.getMessage());
-    	}
-	}
-    
+        try {
+            validateResponse(message, correlationId);
+            SetServiceStatusResponse response = JAXBMarshaller.unmarshallTextMessage(message, SetServiceStatusResponse.class);
+            return response.getService();
+        } catch (JMSException | ExchangeValidationException | ExchangeModelMarshallException e) {
+            LOG.error("[ Error when mapping response to set service response ]");
+            throw new ExchangeModelMapperException("[ Error when mapping response to set service response ] " + e.getMessage());
+        }
+    }
+
     public static ExchangeLogType mapCreateExchangeLogResponse(TextMessage message, String correlationId) throws ExchangeModelMapperException {
-		try {
-			validateResponse(message, correlationId);
-			CreateLogResponse response = JAXBMarshaller.unmarshallTextMessage(message, CreateLogResponse.class);
-			return response.getExchangeLog();
-		} catch (JMSException | ExchangeValidationException | ExchangeModelMarshallException e) {
-			LOG.error("[ Error when mapping response to create log response ]");
-			throw new ExchangeModelMapperException("[ Error when mapping response to create log response ] " + e.getMessage());
-		}
-	}
-    
+        try {
+            validateResponse(message, correlationId);
+            CreateLogResponse response = JAXBMarshaller.unmarshallTextMessage(message, CreateLogResponse.class);
+            return response.getExchangeLog();
+        } catch (JMSException | ExchangeValidationException | ExchangeModelMarshallException e) {
+            LOG.error("[ Error when mapping response to create log response ]");
+            throw new ExchangeModelMapperException("[ Error when mapping response to create log response ] " + e.getMessage());
+        }
+    }
+
     public static ExchangeLogType mapUpdateLogStatusResponse(TextMessage message, String correlationId) throws ExchangeModelMapperException {
-    	try {
-    		validateResponse(message, correlationId);
-    		UpdateLogStatusResponse response = JAXBMarshaller.unmarshallTextMessage(message, UpdateLogStatusResponse.class);
-    		return response.getExchangeLog();
-    	} catch (JMSException | ExchangeValidationException | ExchangeModelMarshallException e) {
-    		LOG.error("[ Error when mapping response to update log status response ]");
-    		throw new ExchangeModelMapperException("[ Error when mapping response to update log status response ]" + e.getMessage());
-    	}
-	}
-    
+        try {
+            validateResponse(message, correlationId);
+            UpdateLogStatusResponse response = JAXBMarshaller.unmarshallTextMessage(message, UpdateLogStatusResponse.class);
+            return response.getExchangeLog();
+        } catch (JMSException | ExchangeValidationException | ExchangeModelMarshallException e) {
+            LOG.error("[ Error when mapping response to update log status response ]");
+            throw new ExchangeModelMapperException("[ Error when mapping response to update log status response ]" + e.getMessage());
+        }
+    }
+
     public static List<UnsentMessageType> mapGetSendingQueueResponse(TextMessage message, String correlationId) throws ExchangeModelMapperException {
-    	try {
-    		validateResponse(message, correlationId);
-    		GetUnsentMessageListResponse response = JAXBMarshaller.unmarshallTextMessage(message, GetUnsentMessageListResponse.class);
-    		return response.getUnsentMessage();
-    	} catch (JMSException | ExchangeValidationException | ExchangeModelMarshallException e) {
-    		LOG.error("[ Error when mapping response to unsent message list response ]");
-    		throw new ExchangeModelMapperException("[ Error when mapping response to unsent message list response ]" + e.getMessage());
-    	}
-	}
+        try {
+            validateResponse(message, correlationId);
+            GetUnsentMessageListResponse response = JAXBMarshaller.unmarshallTextMessage(message, GetUnsentMessageListResponse.class);
+            return response.getUnsentMessage();
+        } catch (JMSException | ExchangeValidationException | ExchangeModelMarshallException e) {
+            LOG.error("[ Error when mapping response to unsent message list response ]");
+            throw new ExchangeModelMapperException("[ Error when mapping response to unsent message list response ]" + e.getMessage());
+        }
+    }
 
     public static List<ExchangeLogStatusType> mapGetLogStatusHistoryByQueryResponse(TextMessage message, String correlationId) throws ExchangeModelMapperException {
-    	try {
-    		validateResponse(message, correlationId);
-    		GetLogStatusHistoryByQueryResponse response = JAXBMarshaller.unmarshallTextMessage(message, GetLogStatusHistoryByQueryResponse.class);
-    		return response.getStatusLog();
-    	} catch (JMSException | ExchangeValidationException | ExchangeModelMarshallException e) {
-    		LOG.error("[ Error when mapping response to log status history response ]");
-    		throw new ExchangeModelMapperException("[ Error when mapping response to log status history response ]" + e.getMessage());
-    	}
-	}
-    
+        try {
+            validateResponse(message, correlationId);
+            GetLogStatusHistoryByQueryResponse response = JAXBMarshaller.unmarshallTextMessage(message, GetLogStatusHistoryByQueryResponse.class);
+            return response.getStatusLog();
+        } catch (JMSException | ExchangeValidationException | ExchangeModelMarshallException e) {
+            LOG.error("[ Error when mapping response to log status history response ]");
+            throw new ExchangeModelMapperException("[ Error when mapping response to log status history response ]" + e.getMessage());
+        }
+    }
+
     public static String createGetServiceSettingsResponse(List<SettingType> settings) throws ExchangeModelMarshallException {
-    	GetServiceSettingsResponse response = new GetServiceSettingsResponse();
+        GetServiceSettingsResponse response = new GetServiceSettingsResponse();
         SettingListType listType = new SettingListType();
         listType.getSetting().addAll(settings);
         response.setSettings(listType);
@@ -254,64 +254,70 @@ public class ExchangeDataSourceResponseMapper {
     }
 
     public static String createUnregisterServiceResponse(ServiceResponseType service) throws ExchangeModelMarshallException {
-    	UnregisterServiceResponse response = new UnregisterServiceResponse();
-    	response.setService(service);
-    	return JAXBMarshaller.marshallJaxBObjectToString(response);
+        UnregisterServiceResponse response = new UnregisterServiceResponse();
+        response.setService(service);
+        return JAXBMarshaller.marshallJaxBObjectToString(response);
     }
 
-	public static String createSetServiceSettingsResponse(ServiceResponseType updatedService) throws ExchangeModelMarshallException {
-		SetServiceSettingsResponse response = new SetServiceSettingsResponse();
-		response.setService(updatedService);
-		return JAXBMarshaller.marshallJaxBObjectToString(response);
-	}
+    public static String createSetServiceSettingsResponse(ServiceResponseType updatedService) throws ExchangeModelMarshallException {
+        SetServiceSettingsResponse response = new SetServiceSettingsResponse();
+        response.setService(updatedService);
+        return JAXBMarshaller.marshallJaxBObjectToString(response);
+    }
 
-	public static String createSetServiceStatusResponse(ServiceResponseType statusService) throws ExchangeModelMarshallException {
-		SetServiceStatusResponse response = new SetServiceStatusResponse();
-		response.setService(statusService);
-		return JAXBMarshaller.marshallJaxBObjectToString(response);
-	}
+    public static String createSetServiceStatusResponse(ServiceResponseType statusService) throws ExchangeModelMarshallException {
+        SetServiceStatusResponse response = new SetServiceStatusResponse();
+        response.setService(statusService);
+        return JAXBMarshaller.marshallJaxBObjectToString(response);
+    }
 
-	public static String createUpdateLogStatusResponse(ExchangeLogType exchangeLog) throws ExchangeModelMarshallException {
-		UpdateLogStatusResponse response = new UpdateLogStatusResponse();
-		response.setExchangeLog(exchangeLog);
-		return JAXBMarshaller.marshallJaxBObjectToString(response);
-	}
+    public static String createUpdateLogStatusResponse(ExchangeLogType exchangeLog) throws ExchangeModelMarshallException {
+        UpdateLogStatusResponse response = new UpdateLogStatusResponse();
+        response.setExchangeLog(exchangeLog);
+        return JAXBMarshaller.marshallJaxBObjectToString(response);
+    }
 
-	public static String createGetLogStatusHistoryResponse(ExchangeLogStatusType statusType) throws ExchangeModelMarshallException {
-		GetLogStatusHistoryResponse response = new GetLogStatusHistoryResponse();
-		response.setStatus(statusType);
-		return JAXBMarshaller.marshallJaxBObjectToString(response);
-	}
+    public static String createGetLogStatusHistoryResponse(ExchangeLogStatusType statusType) throws ExchangeModelMarshallException {
+        GetLogStatusHistoryResponse response = new GetLogStatusHistoryResponse();
+        response.setStatus(statusType);
+        return JAXBMarshaller.marshallJaxBObjectToString(response);
+    }
 
-	public static String createCreateUnsentMessageResponse(String messageId) throws ExchangeModelMarshallException {
-		CreateUnsentMessageResponse response = new CreateUnsentMessageResponse();
-		response.setUnsentMessageId(messageId);
-		return JAXBMarshaller.marshallJaxBObjectToString(response);
-	}
+    public static String createCreateUnsentMessageResponse(String messageId) throws ExchangeModelMarshallException {
+        CreateUnsentMessageResponse response = new CreateUnsentMessageResponse();
+        response.setUnsentMessageId(messageId);
+        return JAXBMarshaller.marshallJaxBObjectToString(response);
+    }
 
-	public static String createGetUnsentMessageListResponse(List<UnsentMessageType> unsentMessageList) throws ExchangeModelMarshallException {
-		GetUnsentMessageListResponse response = new GetUnsentMessageListResponse();
-		response.getUnsentMessage().addAll(unsentMessageList);
-		return JAXBMarshaller.marshallJaxBObjectToString(response);
-	}
+    public static String createRemoveUnsentMessageResponse(String messageId) throws ExchangeModelMarshallException {
+        RemoveUnsentMessageResponse response = new RemoveUnsentMessageResponse();
+        response.setUnsentMessageId(messageId);
+        return JAXBMarshaller.marshallJaxBObjectToString(response);
+    }
 
-	public static String createResentMessageResponse(List<UnsentMessageType> messageList) throws ExchangeModelMarshallException {
-		ResendMessageResponse response = new ResendMessageResponse();
-		response.getResentMessage().addAll(messageList);
-		return JAXBMarshaller.marshallJaxBObjectToString(response);
-	}
+    public static String createGetUnsentMessageListResponse(List<UnsentMessageType> unsentMessageList) throws ExchangeModelMarshallException {
+        GetUnsentMessageListResponse response = new GetUnsentMessageListResponse();
+        response.getUnsentMessage().addAll(unsentMessageList);
+        return JAXBMarshaller.marshallJaxBObjectToString(response);
+    }
 
-	public static String createGetLogStatusHistoryByQueryResponse(List<ExchangeLogStatusType> statusHistoryList) throws ExchangeModelMarshallException {
-		GetLogStatusHistoryByQueryResponse response = new GetLogStatusHistoryByQueryResponse();
-		response.getStatusLog().addAll(statusHistoryList);
-		return JAXBMarshaller.marshallJaxBObjectToString(response);
-	}
+    public static String createResentMessageResponse(List<UnsentMessageType> messageList) throws ExchangeModelMarshallException {
+        ResendMessageResponse response = new ResendMessageResponse();
+        response.getResentMessage().addAll(messageList);
+        return JAXBMarshaller.marshallJaxBObjectToString(response);
+    }
 
-	public static String createSingleExchangeLogResponse(ExchangeLogType exchangeLog) throws ExchangeModelMarshallException {
-	    SingleExchangeLogResponse response = new SingleExchangeLogResponse();
-	    response.setExchangeLog(exchangeLog);
-	    return JAXBMarshaller.marshallJaxBObjectToString(response);
-	}
+    public static String createGetLogStatusHistoryByQueryResponse(List<ExchangeLogStatusType> statusHistoryList) throws ExchangeModelMarshallException {
+        GetLogStatusHistoryByQueryResponse response = new GetLogStatusHistoryByQueryResponse();
+        response.getStatusLog().addAll(statusHistoryList);
+        return JAXBMarshaller.marshallJaxBObjectToString(response);
+    }
+
+    public static String createSingleExchangeLogResponse(ExchangeLogType exchangeLog) throws ExchangeModelMarshallException {
+        SingleExchangeLogResponse response = new SingleExchangeLogResponse();
+        response.setExchangeLog(exchangeLog);
+        return JAXBMarshaller.marshallJaxBObjectToString(response);
+    }
 
     public static ExchangeLogType mapToExchangeLogTypeFromSingleExchageLogResponse(TextMessage message, String correlationId) throws ExchangeModelMapperException {
         try {
@@ -324,8 +330,8 @@ public class ExchangeDataSourceResponseMapper {
         }
     }
 
-	public static String mapCreateUnsentMessageResponse(TextMessage message, String correlationId) throws ExchangeModelMapperException {
-		try {
+    public static String mapCreateUnsentMessageResponse(TextMessage message, String correlationId) throws ExchangeModelMapperException {
+        try {
             validateResponse(message, correlationId);
             CreateUnsentMessageResponse unmarshalledResponse = JAXBMarshaller.unmarshallTextMessage(message, CreateUnsentMessageResponse.class);
             return unmarshalledResponse.getUnsentMessageId();
@@ -333,10 +339,21 @@ public class ExchangeDataSourceResponseMapper {
             LOG.error("[ Error when mapping response unsent message response. ]");
             throw new ExchangeModelMapperException("[ Error when mapping response unsent message response. ] " + e.getMessage());
         }
-	}
+    }
 
-	public static List<UnsentMessageType> mapResendMessageResponse(TextMessage message, String correlationId) throws ExchangeModelMapperException {
-		try {
+    public static String mapRemoveUnsentMessageResponse(TextMessage message, String correlationId) throws ExchangeModelMapperException {
+        try {
+            validateResponse(message, correlationId);
+            RemoveUnsentMessageResponse unmarshalledResponse = JAXBMarshaller.unmarshallTextMessage(message, RemoveUnsentMessageResponse.class);
+            return unmarshalledResponse.getUnsentMessageId();
+        } catch (JMSException | ExchangeValidationException | ExchangeModelMarshallException e) {
+            LOG.error("[ Error when mapping response unsent message response. ]");
+            throw new ExchangeModelMapperException("[ Error when mapping response unsent message response. ] " + e.getMessage());
+        }
+    }
+
+    public static List<UnsentMessageType> mapResendMessageResponse(TextMessage message, String correlationId) throws ExchangeModelMapperException {
+        try {
             validateResponse(message, correlationId);
             ResendMessageResponse unmarshalledResponse = JAXBMarshaller.unmarshallTextMessage(message, ResendMessageResponse.class);
             return unmarshalledResponse.getResentMessage();
@@ -344,10 +361,10 @@ public class ExchangeDataSourceResponseMapper {
             LOG.error("[ Error when mapping to resend response. ]");
             throw new ExchangeModelMapperException("[ Error when mapping to resend response. ] " + e.getMessage());
         }
-	}
+    }
 
-	public static ExchangeLogStatusType mapGetLogStatusHistoryResponse(TextMessage message, String correlationId) throws ExchangeModelMapperException {
-		try {
+    public static ExchangeLogStatusType mapGetLogStatusHistoryResponse(TextMessage message, String correlationId) throws ExchangeModelMapperException {
+        try {
             validateResponse(message, correlationId);
             GetLogStatusHistoryResponse unmarshalledResponse = JAXBMarshaller.unmarshallTextMessage(message, GetLogStatusHistoryResponse.class);
             return unmarshalledResponse.getStatus();
@@ -355,8 +372,7 @@ public class ExchangeDataSourceResponseMapper {
             LOG.error("[ Error when mapping to log status history response. ]");
             throw new ExchangeModelMapperException("[ Error when mapping to log status history response. ] " + e.getMessage());
         }
-	}
-
+    }
 
     public static PollStatus mapSetPollStatusResponse(TextMessage message, String correlationId) throws ExchangeModelMapperException {
         try {

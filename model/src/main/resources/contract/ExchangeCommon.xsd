@@ -41,6 +41,7 @@
             <xsd:element name="message" type="xsd:string" minOccurs="0"/>
             <xsd:element name="type" type="common:AcknowledgeTypeType"/>
             <xsd:element name="pollStatus" type="common:PollStatusAcknowledgeType" minOccurs="0" maxOccurs="1"/>
+            <xsd:element name="unsentMessageGuid" type="xsd:string"/>
         </xsd:sequence>
     </xsd:complexType>
 
@@ -60,6 +61,7 @@
                 <xsd:element name="poll" type="plugin:PollType"/>
                 <xsd:element name="email" type="plugin:EmailType"/>
             </xsd:choice>
+            <xsd:element name="unsentMessageGuid" type="xsd:string" minOccurs="1" maxOccurs="1"/>
         </xsd:sequence>
     </xsd:complexType>
     
@@ -81,6 +83,7 @@
                 <xsd:element name="movement" type="movement:MovementType"/>
                 <!-- <xsd:element name="elog" type="xsd:string"/> -->
             </xsd:choice>
+            <xsd:element name="unsentMessageGuid" type="xsd:string" minOccurs="1" maxOccurs="1"/>
         </xsd:sequence>
     </xsd:complexType>
     

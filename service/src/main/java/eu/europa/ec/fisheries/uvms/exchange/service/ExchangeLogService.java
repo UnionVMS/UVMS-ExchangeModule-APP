@@ -13,25 +13,27 @@ import eu.europa.ec.fisheries.uvms.exchange.service.exception.ExchangeLogExcepti
 @Local
 public interface ExchangeLogService {
 
-	public ExchangeLogType logAndCache(ExchangeLogType log, String pluginMessageId) throws ExchangeLogException;
+    public ExchangeLogType logAndCache(ExchangeLogType log, String pluginMessageId) throws ExchangeLogException;
 
-	public ExchangeLogType log(ExchangeLogType log) throws ExchangeLogException;
+    public ExchangeLogType log(ExchangeLogType log) throws ExchangeLogException;
 
-	public ExchangeLogType updateStatus(String messageId, ExchangeLogStatusTypeType logStatus) throws ExchangeLogException;
+    public ExchangeLogType updateStatus(String messageId, ExchangeLogStatusTypeType logStatus) throws ExchangeLogException;
 
-	public GetLogListByQueryResponse getExchangeLogList(ExchangeListQuery query) throws ExchangeLogException;
-	
-	public List<UnsentMessageType> getUnsentMessageList() throws ExchangeLogException;
+    public GetLogListByQueryResponse getExchangeLogList(ExchangeListQuery query) throws ExchangeLogException;
 
-	public List<ExchangeLogStatusType> getExchangeStatusHistoryList(ExchangeLogStatusTypeType status, TypeRefType type, Date from, Date to) throws ExchangeLogException;
+    public List<UnsentMessageType> getUnsentMessageList() throws ExchangeLogException;
 
-	public ExchangeLogType getExchangeLogByGuid(String guid) throws ExchangeLogException;
+    public List<ExchangeLogStatusType> getExchangeStatusHistoryList(ExchangeLogStatusTypeType status, TypeRefType type, Date from, Date to) throws ExchangeLogException;
 
-	public String createUnsentMessage(String senderReceiver, XMLGregorianCalendar timestamp, String recipient, String message, List<UnsentMessageTypeProperty> properties) throws ExchangeLogException;
+    public ExchangeLogType getExchangeLogByGuid(String guid) throws ExchangeLogException;
 
-	public void resend(List<String> messageIdList) throws ExchangeLogException;
+    public String createUnsentMessage(String senderReceiver, XMLGregorianCalendar timestamp, String recipient, String message, List<UnsentMessageTypeProperty> properties) throws ExchangeLogException;
 
-	public ExchangeLogStatusType getExchangeStatusHistory(TypeRefType type, String typeRefGuid) throws ExchangeLogException;
+    public void resend(List<String> messageIdList) throws ExchangeLogException;
+
+    public ExchangeLogStatusType getExchangeStatusHistory(TypeRefType type, String typeRefGuid) throws ExchangeLogException;
 
     public PollStatus setPollStatus(String messageId, String pluginMessageId, ExchangeLogStatusTypeType logStatus) throws ExchangeLogException;
+
+    public void removeUnsentMessage(String messageId) throws ExchangeLogException;
 }

@@ -56,4 +56,8 @@ public class ExchangeAuditRequestMapper {
         return AuditLogMapper.mapToAuditLog(objectType, operation, affectedObject);
     }
 
+    public static String mapRemoveUnsentMessage(String guid) throws AuditModelMarshallException {
+        return mapToAuditLog(AuditTypeEnum.EXCHANGE_UNSENT_MESSAGE.getValue(), AuditOperationEnum.REMOVE.getValue(), guid);
+    }
+
 }
