@@ -201,8 +201,9 @@ public class ExchangeLogServiceBean implements ExchangeLogService {
             String messageId = producer.sendMessageOnQueue(text, MessageQueue.INTERNAL);
             TextMessage response = consumer.getMessage(messageId, TextMessage.class);
             String removedUnsentMessageId = ExchangeDataSourceResponseMapper.mapRemoveUnsentMessageResponse(response, messageId);
+            List<String> removedMessageIds = Arrays.asList(removedUnsentMessageId);
             sendAuditLogMessageForRemoveUnsentMessage(removedUnsentMessageId);
-            sendingQueueEvent.fire(new NotificationMessage("messageIds", removedUnsentMessageId));
+            sendingQueueEvent.fire(new NotificationMessage("messageIds", removedMessageIds));
         } catch (ExchangeMessageException | ExchangeModelMapperException e) {
             LOG.error("Couldn't add message to unsent list");
             throw new ExchangeLogException("Couldn't add message to unsent list");
