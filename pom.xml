@@ -4,13 +4,13 @@
 
     <groupId>eu.europa.ec.fisheries.uvms.exchange</groupId>
     <artifactId>exchange</artifactId>
-    <version>1.0.2-SNAPSHOT</version>
+    <version>1.0.3-SNAPSHOT</version>
     <packaging>pom</packaging>
     <description>Maven projekt-archetype for UnionVms modules</description>
     
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <release.branch.name>aragorn</release.branch.name>
+        <release.branch.name><!-- INSERT BRANCH NAME --></release.branch.name>
         <mockito.version>1.9.5</mockito.version>
         <junit.version>4.10</junit.version>
         <javaee.version>7.0</javaee.version>
@@ -20,14 +20,14 @@
         <joda-time.version>2.7</joda-time.version>
         <logback.core.version>1.1.2</logback.core.version>
         <dozer.version>5.5.1</dozer.version>
-        <audit.model.version>1.0.2-SNAPSHOT</audit.model.version>
-        <movement.model.version>1.0.2-SNAPSHOT</movement.model.version>
+        <audit.model.version>1.0.2</audit.model.version>
+        <movement.model.version>1.0.2</movement.model.version>
         <usm4uvms.version>1.0.0</usm4uvms.version>
-        <rules.version>1.0.2-SNAPSHOT</rules.version>
-        <asset.version>1.0.2-SNAPSHOT</asset.version>
-        <audit.version>1.0.2-SNAPSHOT</audit.version>
+        <rules.version>1.0.2</rules.version>
+        <asset.version>1.0.2</asset.version>
+        <audit.version>1.0.2</audit.version>
         <longpolling.version>1.0.0</longpolling.version>
-        <uvms.config.version>1.0.1-SNAPSHOT</uvms.config.version>
+        <uvms.config.version>1.0.2</uvms.config.version>
     </properties>
     
     <dependencies>
