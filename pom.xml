@@ -27,7 +27,7 @@
         <asset.version>1.0.2</asset.version>
         <audit.version>1.0.2</audit.version>
         <longpolling.version>1.0.0</longpolling.version>
-        <uvms.config.version>1.0.2</uvms.config.version>
+        <uvms.config.version>1.0.3-SNAPSHOT</uvms.config.version>
     </properties>
     
     <dependencies>
