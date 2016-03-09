@@ -25,7 +25,7 @@ import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeValidationEx
 
 public class ExchangeDataSourceResponseMapper {
 
-    final static Logger LOG = LoggerFactory.getLogger(ExchangeDataSourceRequestMapper.class);
+    final static Logger LOG = LoggerFactory.getLogger(ExchangeDataSourceResponseMapper.class);
 
     /**
      * Validates a response
