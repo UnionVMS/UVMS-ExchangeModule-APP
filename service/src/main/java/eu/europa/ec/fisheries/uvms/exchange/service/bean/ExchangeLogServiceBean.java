@@ -56,17 +56,17 @@ public class ExchangeLogServiceBean implements ExchangeLogService {
     Event<NotificationMessage> sendingQueueEvent;
 
     @Override
-    public ExchangeLogType logAndCache(ExchangeLogType log, String pluginMessageId) throws ExchangeLogException {
-        ExchangeLogType createdLog = log(log);
+    public ExchangeLogType logAndCache(ExchangeLogType log, String pluginMessageId, String username) throws ExchangeLogException {
+        ExchangeLogType createdLog = log(log, username);
         logCache.put(pluginMessageId, createdLog.getGuid());
 
         return createdLog;
     }
 
     @Override
-    public ExchangeLogType log(ExchangeLogType log) throws ExchangeLogException {
+    public ExchangeLogType log(ExchangeLogType log, String username) throws ExchangeLogException {
         try {
-            String logText = ExchangeDataSourceRequestMapper.mapCreateExchangeLogToString(log);
+            String logText = ExchangeDataSourceRequestMapper.mapCreateExchangeLogToString(log, username);
             String messageId = producer.sendMessageOnQueue(logText, MessageQueue.INTERNAL);
             TextMessage response = consumer.getMessage(messageId, TextMessage.class);
             ExchangeLogType createdLog = ExchangeDataSourceResponseMapper.mapCreateExchangeLogResponse(response, messageId);
@@ -263,7 +263,7 @@ public class ExchangeLogServiceBean implements ExchangeLogService {
 
     private void sendAuditLogMessageForCreateUnsentMessage(String guid) {
         try {
-            String request = ExchangeAuditRequestMapper.mapCreateUnsentMessage(guid);
+            String request = ExchangeAuditRequestMapper.mapCreateUnsentMessage(guid, "NHI");
             producer.sendMessageOnQueue(request, MessageQueue.AUDIT);
         } catch (AuditModelMarshallException | ExchangeMessageException e) {
             LOG.error("Could not send audit log message. Unsent message was created with guid: " + guid);
@@ -272,7 +272,7 @@ public class ExchangeLogServiceBean implements ExchangeLogService {
 
     private void sendAuditLogMessageForRemoveUnsentMessage(String guid) {
         try {
-            String request = ExchangeAuditRequestMapper.mapRemoveUnsentMessage(guid);
+            String request = ExchangeAuditRequestMapper.mapRemoveUnsentMessage(guid, "NHI");
             producer.sendMessageOnQueue(request, MessageQueue.AUDIT);
         } catch (AuditModelMarshallException | ExchangeMessageException e) {
             LOG.error("Could not send audit log message. Unsent message was created with guid: " + guid);
@@ -281,7 +281,7 @@ public class ExchangeLogServiceBean implements ExchangeLogService {
 
     private void sendAuditLogMessageForUpdateExchangeLog(String guid) {
         try {
-            String request = ExchangeAuditRequestMapper.mapUpdateExchangeLog(guid);
+            String request = ExchangeAuditRequestMapper.mapUpdateExchangeLog(guid, "NHI");
             producer.sendMessageOnQueue(request, MessageQueue.AUDIT);
         } catch (AuditModelMarshallException | ExchangeMessageException e) {
             LOG.error("Could not send audit log message. Exchange log with guid: " + guid + " is updated");
@@ -290,7 +290,7 @@ public class ExchangeLogServiceBean implements ExchangeLogService {
 
     private void sendAuditLogMessageForResendUnsentMessage(String guid) {
         try {
-            String request = ExchangeAuditRequestMapper.mapResendSendingQueue(guid);
+            String request = ExchangeAuditRequestMapper.mapResendSendingQueue(guid, "NHI");
             producer.sendMessageOnQueue(request, MessageQueue.AUDIT);
         } catch (AuditModelMarshallException | ExchangeMessageException e) {
             LOG.error("Could not send audit log message. Resend sending queue with guid: " + guid);
@@ -299,7 +299,7 @@ public class ExchangeLogServiceBean implements ExchangeLogService {
 
     private void sendAuditLogMessageForCreateExchangeLog(String guid) {
         try {
-            String request = ExchangeAuditRequestMapper.mapCreateExchangeLog(guid);
+            String request = ExchangeAuditRequestMapper.mapCreateExchangeLog(guid, "NHI");
             producer.sendMessageOnQueue(request, MessageQueue.AUDIT);
         } catch (AuditModelMarshallException | ExchangeMessageException e) {
             LOG.error("Could not send audit log message. Exchange log was created with guid: " + guid);
@@ -308,7 +308,7 @@ public class ExchangeLogServiceBean implements ExchangeLogService {
 
     private void sendAuditLogMessageForUpdatePollStatus(String guid) {
         try {
-            String request = ExchangeAuditRequestMapper.mapUpdatePoll(guid);
+            String request = ExchangeAuditRequestMapper.mapUpdatePoll(guid, "NHI");
             producer.sendMessageOnQueue(request, MessageQueue.AUDIT);
         } catch (AuditModelMarshallException | ExchangeMessageException e) {
             LOG.error("Could not send audit log message. Exchange poll with guid: " + guid + " is updated");

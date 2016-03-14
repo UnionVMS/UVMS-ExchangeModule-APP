@@ -162,7 +162,7 @@
         <dependency>
             <groupId>eu.europa.ec.fisheries.uvms.audit</groupId>
             <artifactId>audit-model</artifactId>
-            <version>1.0.1</version>
+            <version>${audit.model.version}</version>
         </dependency>
     </dependencies>
     

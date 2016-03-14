@@ -143,8 +143,9 @@ public class ExchangeServiceBean implements ExchangeService {
     @Override
     public ExchangeLogType createExchangeLog(ExchangeLogType exchangeLog) throws ExchangeServiceException {
         LOG.info("Create Exchange log invoked in service layer");
+        //TODO: Do we use this method??
         try {
-            String request = ExchangeDataSourceRequestMapper.mapCreateExchangeLogToString(exchangeLog);
+            String request = ExchangeDataSourceRequestMapper.mapCreateExchangeLogToString(exchangeLog, "NHI");
             String messageId = producer.sendMessageOnQueue(request, MessageQueue.INTERNAL);
             TextMessage response = consumer.getMessage(messageId, TextMessage.class);
             ExchangeLogType exchangeLogType = ExchangeDataSourceResponseMapper.mapToExchangeLogTypeFromCreateExchageLogResponse(response, messageId);
@@ -184,7 +185,7 @@ public class ExchangeServiceBean implements ExchangeService {
 
     private void sendAuditLogMessageForRegisterService(String serviceName){
         try {
-            String request = ExchangeAuditRequestMapper.mapRegisterService(serviceName);
+            String request = ExchangeAuditRequestMapper.mapRegisterService(serviceName, "NHI");
             producer.sendMessageOnQueue(request, MessageQueue.AUDIT);
         } catch (AuditModelMarshallException | ExchangeMessageException e) {
             LOG.error("Could not send audit log message. Exchange registered service: " + serviceName );
@@ -193,7 +194,7 @@ public class ExchangeServiceBean implements ExchangeService {
 
     private void sendAuditLogMessageForUnregisterService(String serviceName){
         try {
-            String request = ExchangeAuditRequestMapper.mapUnregisterService(serviceName);
+            String request = ExchangeAuditRequestMapper.mapUnregisterService(serviceName, "NHI");
             producer.sendMessageOnQueue(request, MessageQueue.AUDIT);
         } catch (AuditModelMarshallException | ExchangeMessageException e) {
             LOG.error("Could not send audit log message. Exchange unregistered service: " + serviceName );
@@ -202,7 +203,7 @@ public class ExchangeServiceBean implements ExchangeService {
 
     private void sendAuditLogMessageForServiceStatusStopped(String serviceName){
         try {
-            String request = ExchangeAuditRequestMapper.mapServiceStatusStopped(serviceName);
+            String request = ExchangeAuditRequestMapper.mapServiceStatusStopped(serviceName, "NHI");
             producer.sendMessageOnQueue(request, MessageQueue.AUDIT);
         } catch (AuditModelMarshallException | ExchangeMessageException e) {
             LOG.error("Could not send audit log message. Exchange stopped service: " + serviceName );
@@ -211,7 +212,7 @@ public class ExchangeServiceBean implements ExchangeService {
 
     private void sendAuditLogMessageForServiceStatusUnknown(String serviceName){
         try {
-            String request = ExchangeAuditRequestMapper.mapServiceStatusUnknown(serviceName);
+            String request = ExchangeAuditRequestMapper.mapServiceStatusUnknown(serviceName, "NHI");
             producer.sendMessageOnQueue(request, MessageQueue.AUDIT);
         } catch (AuditModelMarshallException | ExchangeMessageException e) {
             LOG.error("Could not send audit log message. Exchange set service: " + serviceName +"status to unknown" );
@@ -220,7 +221,7 @@ public class ExchangeServiceBean implements ExchangeService {
 
     private void sendAuditLogMessageForServiceStatusStarted(String serviceName){
         try {
-            String request = ExchangeAuditRequestMapper.mapServiceStatusStarted(serviceName);
+            String request = ExchangeAuditRequestMapper.mapServiceStatusStarted(serviceName, "NHI");
             producer.sendMessageOnQueue(request, MessageQueue.AUDIT);
         } catch (AuditModelMarshallException | ExchangeMessageException e) {
             LOG.error("Could not send audit log message. Exchange started service: " + serviceName );
@@ -229,7 +230,7 @@ public class ExchangeServiceBean implements ExchangeService {
 
     private void sendAuditLogMessageForUpdateService(String serviceName){
         try {
-            String request = ExchangeAuditRequestMapper.mapUpdateService(serviceName);
+            String request = ExchangeAuditRequestMapper.mapUpdateService(serviceName, "NHI");
             producer.sendMessageOnQueue(request, MessageQueue.AUDIT);
         } catch (AuditModelMarshallException | ExchangeMessageException e) {
             LOG.error("Could not send audit log message. Exchange started service: " + serviceName );
@@ -249,7 +250,7 @@ public class ExchangeServiceBean implements ExchangeService {
 
     private void sendAuditLogMessageForCreateExchangeLog(String guid){
         try {
-            String request = ExchangeAuditRequestMapper.mapCreateExchangeLog(guid);
+            String request = ExchangeAuditRequestMapper.mapCreateExchangeLog(guid, "NHI");
             producer.sendMessageOnQueue(request, MessageQueue.AUDIT);
         } catch (AuditModelMarshallException | ExchangeMessageException e) {
             LOG.error("Could not send audit log message. Exchange log was created with guid: " + guid);

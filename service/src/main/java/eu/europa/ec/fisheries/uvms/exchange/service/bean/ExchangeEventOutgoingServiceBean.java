@@ -99,7 +99,7 @@ public class ExchangeEventOutgoingServiceBean implements ExchangeEventOutgoingSe
                     //System.out.println("SendReport: PluginMessageId: " + pluginMessageId);
                     try {
                         ExchangeLogType log = ExchangeLogMapper.getSendMovementExchangeLog(sendReport);
-                        exchangeLog.logAndCache(log, pluginMessageId);
+                        exchangeLog.logAndCache(log, pluginMessageId, request.getUsername());
                     } catch (ExchangeLogException e) {
                         LOG.error(e.getMessage());
                     }
@@ -171,7 +171,7 @@ public class ExchangeEventOutgoingServiceBean implements ExchangeEventOutgoingSe
 
                 try {
                     ExchangeLogType log = ExchangeLogMapper.getSendCommandExchangeLog(request.getCommand());
-                    exchangeLog.logAndCache(log, pluginMessageId);
+                    exchangeLog.logAndCache(log, pluginMessageId, request.getUsername());
                 } catch (ExchangeLogException e) {
                     LOG.error(e.getMessage());
                 }

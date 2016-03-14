@@ -9,6 +9,6 @@ import eu.europa.ec.fisheries.uvms.exchange.service.exception.ExchangeServiceExc
 @Local
 public interface ExchangeRulesService {
 
-    void sendMovementToRules(PluginType pluginType, RawMovementType movement) throws ExchangeServiceException;
+    void sendMovementToRules(PluginType pluginType, RawMovementType movement, String username) throws ExchangeServiceException;
 
 }

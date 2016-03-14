@@ -28,9 +28,9 @@ public class ExchangeRulesServiceBean implements ExchangeRulesService {
 	ExchangeMessageConsumer consumer;
 	
 	@Override
-	public void sendMovementToRules(PluginType pluginType, RawMovementType movement) throws ExchangeServiceException {
+	public void sendMovementToRules(PluginType pluginType, RawMovementType movement, String username) throws ExchangeServiceException {
 		try {
-            String request = RulesModuleRequestMapper.createSetMovementReportRequest(pluginType, movement);
+            String request = RulesModuleRequestMapper.createSetMovementReportRequest(pluginType, movement, username);
             producer.sendMessageOnQueue(request, MessageQueue.RULES);
 		} catch (RulesModelMapperException | ExchangeMessageException e) {
 			LOG.error("Couldn't send message to rules ");

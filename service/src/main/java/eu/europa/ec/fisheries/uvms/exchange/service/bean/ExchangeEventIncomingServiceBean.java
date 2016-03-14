@@ -110,6 +110,16 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
         LOG.info("Process movement");
         try {
             SetMovementReportRequest request = JAXBMarshaller.unmarshallTextMessage(message.getJmsMessage(), SetMovementReportRequest.class);
+            String username;
+
+            // A person has created a position
+            if(request.getRequest().getMovement().getSource().equals(MovementSourceType.MANUAL)){
+                username = request.getUsername();
+            }
+            // A plugin has reported a position
+            else{
+                username = request.getRequest().getPluginType().name();
+            }
 
             String pluginName = request.getRequest().getPluginName();
             PluginType pluginType = request.getRequest().getPluginType();
@@ -134,7 +144,7 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
                 rawMovement.setAckResponseMessageID(message.getJmsMessage().getJMSMessageID());
 
                 try {
-                    rulesService.sendMovementToRules(MovementMapper.mapPluginType(pluginType), rawMovement);
+                    rulesService.sendMovementToRules(MovementMapper.mapPluginType(pluginType), rawMovement, username);
                 } catch (ExchangeServiceException e) {
                     PluginFault fault = ExchangePluginResponseMapper.mapToPluginFaultResponse(FaultCode.EXCHANGE_PLUGIN_EVENT.getCode(), "Movement sent cannot be sent to Rules module [ " + e.getMessage() + " ]");
                     pluginErrorEvent.fire(new PluginMessageEvent(message.getJmsMessage(), service, fault));
@@ -159,11 +169,18 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
         LOG.debug("Received processed movement from Rules");
         try {
             ProcessedMovementResponse request = JAXBMarshaller.unmarshallTextMessage(message.getJmsMessage(), ProcessedMovementResponse.class);
+            String username;
             MovementRefType movementRefType = request.getMovementRefType();
             SetReportMovementType orgRequest = request.getOrgRequest();
 
+            if(orgRequest.getPluginType().equals(PluginType.MANUAL)){
+                username = request.getUsername();
+            }else{
+                username = orgRequest.getPluginName();
+            }
+
             ExchangeLogType log = ExchangeLogMapper.getReceivedMovementExchangeLog(orgRequest, movementRefType.getMovementRefGuid(), movementRefType.getType().value());
-            ExchangeLogType createdLog = exchangeLog.log(log);
+            ExchangeLogType createdLog = exchangeLog.log(log, username);
 
             LogRefType logTypeRef = createdLog.getTypeRef();
             if (logTypeRef != null && logTypeRef.getType() == TypeRefType.POLL) {

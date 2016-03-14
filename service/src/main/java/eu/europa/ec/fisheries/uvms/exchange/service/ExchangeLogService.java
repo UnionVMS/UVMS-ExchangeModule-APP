@@ -13,9 +13,9 @@ import eu.europa.ec.fisheries.uvms.exchange.service.exception.ExchangeLogExcepti
 @Local
 public interface ExchangeLogService {
 
-    public ExchangeLogType logAndCache(ExchangeLogType log, String pluginMessageId) throws ExchangeLogException;
+    public ExchangeLogType logAndCache(ExchangeLogType log, String pluginMessageId, String username) throws ExchangeLogException;
 
-    public ExchangeLogType log(ExchangeLogType log) throws ExchangeLogException;
+    public ExchangeLogType log(ExchangeLogType log, String username) throws ExchangeLogException;
 
     public ExchangeLogType updateStatus(String messageId, ExchangeLogStatusTypeType logStatus) throws ExchangeLogException;
 
