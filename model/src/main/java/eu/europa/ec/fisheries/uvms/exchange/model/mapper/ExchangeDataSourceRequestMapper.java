@@ -24,11 +24,12 @@ public class ExchangeDataSourceRequestMapper {
 
     final static Logger LOG = LoggerFactory.getLogger(ExchangeDataSourceRequestMapper.class);
 
-    public static String mapCreateExchangeLogToString(ExchangeLogType log) throws ExchangeModelMapperException {
+    public static String mapCreateExchangeLogToString(ExchangeLogType log, String username) throws ExchangeModelMapperException {
         try {
             CreateLogRequest request = new CreateLogRequest();
             request.setMethod(ExchangeDataSourceMethod.CREATE_LOG);
             request.setExchangeLog(log);
+            request.setUsername(username);
             return JAXBMarshaller.marshallJaxBObjectToString(request);
         } catch (Exception e) {
             LOG.error("[ Error when mapping GetServiceListRequest to String ] {}", e.getMessage());
