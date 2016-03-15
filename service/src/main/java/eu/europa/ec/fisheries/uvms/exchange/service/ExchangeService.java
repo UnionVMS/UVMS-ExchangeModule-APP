@@ -27,7 +27,7 @@ public interface ExchangeService {
      * @return
      * @throws ExchangeServiceException
      */
-    public ServiceResponseType registerService(ServiceType data, CapabilityListType capabilityList, SettingListType settingList) throws ExchangeServiceException;
+    public ServiceResponseType registerService(ServiceType data, CapabilityListType capabilityList, SettingListType settingList, String username) throws ExchangeServiceException;
 
     /**
      * Unregister a service
@@ -36,7 +36,7 @@ public interface ExchangeService {
      * @return
      * @throws ExchangeServiceException
      */
-    public ServiceResponseType unregisterService(ServiceType data) throws ExchangeServiceException;
+    public ServiceResponseType unregisterService(ServiceType data, String username) throws ExchangeServiceException;
 
     /**
      * Get a list with plugins depending on plugin types
@@ -62,7 +62,7 @@ public interface ExchangeService {
      * @return updated service
      * @throws ExchangeServiceException
      */
-    public ServiceResponseType upsertSettings(String serviceClassName, SettingListType settingList) throws ExchangeServiceException;
+    public ServiceResponseType upsertSettings(String serviceClassName, SettingListType settingList, String username) throws ExchangeServiceException;
 
     /**
      * 
@@ -71,7 +71,7 @@ public interface ExchangeService {
      * @return
      * @throws ExchangeServiceException
      */
-	public ServiceResponseType updateServiceStatus(String serviceClassName, StatusType status) throws ExchangeServiceException;
+	public ServiceResponseType updateServiceStatus(String serviceClassName, StatusType status, String username) throws ExchangeServiceException;
     
     /**
      *
@@ -89,7 +89,7 @@ public interface ExchangeService {
      * @return
      * @throws ExchangeServiceException
      */
-    public ExchangeLogType createExchangeLog(ExchangeLogType exchangeLog) throws ExchangeServiceException;
+    public ExchangeLogType createExchangeLog(ExchangeLogType exchangeLog, String username) throws ExchangeServiceException;
 
     /**
      *

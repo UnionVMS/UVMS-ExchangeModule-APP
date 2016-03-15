@@ -102,7 +102,7 @@ public class PluginServiceBean implements PluginService {
     private void registerService(RegisterServiceRequest register, String messageId) throws ExchangeModelMarshallException, ExchangeMessageException {
         try {
             overrideSettingsFromConfig(register);
-            ServiceResponseType service = exchangeService.registerService(register.getService(), register.getCapabilityList(), register.getSettingList());
+            ServiceResponseType service = exchangeService.registerService(register.getService(), register.getCapabilityList(), register.getSettingList(), register.getService().getName());
             //push to config module
             try {
                 String serviceClassName = register.getService().getServiceClassName();
@@ -192,7 +192,7 @@ public class PluginServiceBean implements PluginService {
         ServiceResponseType service = null;
         try {
             UnregisterServiceRequest unregister = JAXBMarshaller.unmarshallTextMessage(textMessage, UnregisterServiceRequest.class);
-            service = exchangeService.unregisterService(unregister.getService());
+            service = exchangeService.unregisterService(unregister.getService(), unregister.getService().getName());
             String serviceClassName = service.getServiceClassName();
 
             //NO ack back to plugin
@@ -203,11 +203,11 @@ public class PluginServiceBean implements PluginService {
         }
     }
     
-    private void updatePluginSetting(String serviceClassName, SettingType updatedSetting) throws ExchangeServiceException, ExchangeModelMarshallException, ExchangeMessageException {
+    private void updatePluginSetting(String serviceClassName, SettingType updatedSetting, String username) throws ExchangeServiceException, ExchangeModelMarshallException, ExchangeMessageException {
     	SettingListType settingListType = new SettingListType();
     	settingListType.getSetting().add(updatedSetting);
 
-    	ServiceResponseType service = exchangeService.upsertSettings(serviceClassName, settingListType);
+    	ServiceResponseType service = exchangeService.upsertSettings(serviceClassName, settingListType, username);
 
         // Send the plugin settings to the topic where all plugins should listen to
     	String text = ExchangePluginRequestMapper.createSetConfigRequest(service.getSettingList());
@@ -234,7 +234,7 @@ public class PluginServiceBean implements PluginService {
                     settingType.setKey(settingKey);
                     settingType.setValue(value);
                     
-                    updatePluginSetting(serviceClassName, settingType);
+                    updatePluginSetting(serviceClassName, settingType, "UVMS");
                     
                 } catch (ConfigServiceException e) {
                     LOG.error("Couldn't get updated parameter table value");
@@ -258,7 +258,7 @@ public class PluginServiceBean implements PluginService {
 		try {
 			TextMessage jmsMessage = settingEvent.getJmsMessage();
 			UpdatePluginSettingRequest request = JAXBMarshaller.unmarshallTextMessage(jmsMessage, UpdatePluginSettingRequest.class);
-			updatePluginSetting(request.getServiceClassName(), request.getSetting());
+			updatePluginSetting(request.getServiceClassName(), request.getSetting(), request.getUsername());
 			
 			String text = ExchangeModuleResponseMapper.mapUpdateSettingResponse(ExchangeModuleResponseMapper.mapAcknowledgeTypeOK());
 			producer.sendModuleResponseMessage(settingEvent.getJmsMessage(), text);

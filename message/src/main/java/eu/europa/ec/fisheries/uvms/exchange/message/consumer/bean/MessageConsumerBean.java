@@ -95,7 +95,11 @@ public class MessageConsumerBean implements MessageListener {
                     updateStateEvent.fire(new ExchangeMessageEvent(textMessage));
                 }
             }
-        } else {
+        } else if(!checkUsernameShouldBeProvided(request)) {
+            LOG.error("[ Error when receiving message in exchange, username must be set in the request: ]");
+            errorEvent.fire(new ExchangeMessageEvent(textMessage, ExchangeModuleResponseMapper.createFaultMessage(FaultCode.EXCHANGE_MESSAGE, "Username in the request must be set")));
+        } else{
+
             LOG.debug("BaseRequest method {}", request.getMethod());
             switch (request.getMethod()) {
                 case LIST_SERVICES:
@@ -124,6 +128,26 @@ public class MessageConsumerBean implements MessageListener {
                     errorEvent.fire(new ExchangeMessageEvent(textMessage, ExchangeModuleResponseMapper.createFaultMessage(FaultCode.EXCHANGE_MESSAGE, "Method not implemented")));
             }
         }
+    }
+
+    private boolean checkUsernameShouldBeProvided(ExchangeBaseRequest request){
+        boolean usernameProvided = false;
+        switch (request.getMethod()){
+            case SET_COMMAND:
+            case SEND_REPORT_TO_PLUGIN:
+            case SET_MOVEMENT_REPORT:
+            case UPDATE_PLUGIN_SETTING:
+            case PROCESSED_MOVEMENT:
+                if(request.getUsername()!=null){
+                    usernameProvided = true;
+                }
+                break;
+            default:
+                usernameProvided = true;
+                break;
+
+        }
+        return usernameProvided;
     }
 
     private ExchangeBaseRequest tryConsumeExchangeBaseRequest(TextMessage textMessage) {

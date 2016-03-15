@@ -4,11 +4,13 @@ import java.util.List;
 
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
+import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 
 import org.slf4j.Logger;
@@ -32,6 +34,9 @@ public class ExchangeSendingQueueResource {
 
 	@EJB
 	ExchangeLogService serviceLayer;
+
+    @Context
+    private HttpServletRequest request;
 
 	/**
 	 * 
@@ -76,7 +81,7 @@ public class ExchangeSendingQueueResource {
 		try {
 			//TODO swaggerize messageIdList
 			//boolean send = ExchangeMock.send(messageIdList);
-			serviceLayer.resend(messageIdList);
+			serviceLayer.resend(messageIdList, request.getRemoteUser());
 			return new ResponseDto(true, RestResponseCode.OK);
 		} catch (Exception ex) {
 			LOG.error("[ Error when geting log list. ] {} ", ex.getMessage());

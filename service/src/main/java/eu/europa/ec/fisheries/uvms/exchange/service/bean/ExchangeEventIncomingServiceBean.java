@@ -296,7 +296,7 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
                 //TODO if(poll probably transmitted)
                 logStatus = ExchangeLogStatusTypeType.SUCCESSFUL;
                 try {
-                    exchangeLog.removeUnsentMessage(ack.getUnsentMessageGuid());
+                    exchangeLog.removeUnsentMessage(ack.getUnsentMessageGuid(), serviceClassName);
                 } catch (ExchangeLogException ex) {
                     LOG.error(ex.getMessage());
                 }
@@ -307,7 +307,7 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
         }
 
         try {
-            ExchangeLogType updatedLog = exchangeLog.updateStatus(ack.getMessageId(), logStatus);
+            ExchangeLogType updatedLog = exchangeLog.updateStatus(ack.getMessageId(), logStatus, serviceClassName);
 
             // Long polling
             LogRefType typeRef = updatedLog.getTypeRef();
@@ -323,7 +323,7 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
     private void handleSetPollStatusAcknowledge(ExchangePluginMethod method, String serviceClassName, AcknowledgeType ack) {
         LOG.debug(method + " was acknowledged in " + serviceClassName);
         try {
-            PollStatus updatedLog = exchangeLog.setPollStatus(ack.getMessageId(), ack.getPollStatus().getPollId(), ack.getPollStatus().getStatus());
+            PollStatus updatedLog = exchangeLog.setPollStatus(ack.getMessageId(), ack.getPollStatus().getPollId(), ack.getPollStatus().getStatus(), serviceClassName);
 
             // Long polling
             pollEvent.fire(new NotificationMessage("guid", updatedLog.getPollGuid()));
@@ -335,7 +335,7 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
     private void handleUpdateServiceAcknowledge(String serviceClassName, AcknowledgeType ack, StatusType status) throws ExchangeServiceException {
         switch (ack.getType()) {
             case OK:
-                exchangeService.updateServiceStatus(serviceClassName, status);
+                exchangeService.updateServiceStatus(serviceClassName, status, serviceClassName);
                 break;
             case NOK:
                 //TODO Audit.log()

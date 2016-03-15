@@ -17,7 +17,7 @@ public interface ExchangeLogService {
 
     public ExchangeLogType log(ExchangeLogType log, String username) throws ExchangeLogException;
 
-    public ExchangeLogType updateStatus(String messageId, ExchangeLogStatusTypeType logStatus) throws ExchangeLogException;
+    public ExchangeLogType updateStatus(String messageId, ExchangeLogStatusTypeType logStatus, String username) throws ExchangeLogException;
 
     public GetLogListByQueryResponse getExchangeLogList(ExchangeListQuery query) throws ExchangeLogException;
 
@@ -27,13 +27,13 @@ public interface ExchangeLogService {
 
     public ExchangeLogType getExchangeLogByGuid(String guid) throws ExchangeLogException;
 
-    public String createUnsentMessage(String senderReceiver, XMLGregorianCalendar timestamp, String recipient, String message, List<UnsentMessageTypeProperty> properties) throws ExchangeLogException;
+    public String createUnsentMessage(String senderReceiver, XMLGregorianCalendar timestamp, String recipient, String message, List<UnsentMessageTypeProperty> properties, String username) throws ExchangeLogException;
 
-    public void resend(List<String> messageIdList) throws ExchangeLogException;
+    public void resend(List<String> messageIdList, String username) throws ExchangeLogException;
 
     public ExchangeLogStatusType getExchangeStatusHistory(TypeRefType type, String typeRefGuid) throws ExchangeLogException;
 
-    public PollStatus setPollStatus(String messageId, String pluginMessageId, ExchangeLogStatusTypeType logStatus) throws ExchangeLogException;
+    public PollStatus setPollStatus(String messageId, String pluginMessageId, ExchangeLogStatusTypeType logStatus, String username) throws ExchangeLogException;
 
-    public void removeUnsentMessage(String messageId) throws ExchangeLogException;
+    public void removeUnsentMessage(String messageId, String username) throws ExchangeLogException;
 }
