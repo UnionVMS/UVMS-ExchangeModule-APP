@@ -21,10 +21,10 @@
         <logback.core.version>1.1.2</logback.core.version>
         <dozer.version>5.5.1</dozer.version>
         <audit.model.version>1.0.3-SNAPSHOT</audit.model.version>
-        <movement.model.version>1.0.2</movement.model.version>
+        <movement.model.version>1.0.3-SNAPSHOT</movement.model.version>
         <usm4uvms.version>1.0.0</usm4uvms.version>
         <rules.version>1.0.3-SNAPSHOT</rules.version>
-        <asset.version>1.0.2</asset.version>
+        <asset.version>1.0.3-SNAPSHOT</asset.version>
         <audit.version>1.0.3-SNAPSHOT</audit.version>
         <longpolling.version>1.0.0</longpolling.version>
         <uvms.config.version>1.0.3-SNAPSHOT</uvms.config.version>
