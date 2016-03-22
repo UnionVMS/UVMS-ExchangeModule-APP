@@ -21,6 +21,10 @@
         <wsdl.registry.name>ExchangeRegistryService</wsdl.registry.name>
     </properties>
     
+    <scm>
+        <connection>scm:svn:https://webgate.ec.europa.eu/CITnet/svn/UNIONVMS/branches/dev/Modules/Audit/APP/model</connection>
+    </scm>
+
     <profiles>
         <profile>
             <id>generate-from-wsdl</id>
