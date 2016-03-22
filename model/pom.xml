@@ -22,7 +22,7 @@
     </properties>
     
     <scm>
-        <connection>scm:svn:https://webgate.ec.europa.eu/CITnet/svn/UNIONVMS/branches/dev/Modules/Audit/APP/model</connection>
+        <connection>scm:svn:https://webgate.ec.europa.eu/CITnet/svn/UNIONVMS/branches/dev/Modules/Exchange/APP/model</connection>
     </scm>
 
     <profiles>
