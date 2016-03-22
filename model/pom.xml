@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>eu.europa.ec.fisheries.uvms.exchange</groupId>
-    <version>1.0.3</version>
+    <version>1.0.4-SNAPSHOT</version>
     <artifactId>exchange-model</artifactId>
     <name>exchange-model</name>
     <packaging>ejb</packaging>
@@ -21,7 +21,7 @@
     </properties>
     
     <scm>
-        <connection>scm:svn:https://webgate.ec.europa.eu/CITnet/svn/UNIONVMS/tags/exchange-model-1.0.3</connection>
+        <connection>scm:svn:https://webgate.ec.europa.eu/CITnet/svn/UNIONVMS/branches/dev/Modules/Exchange/APP/model</connection>
     </scm>
 
     <profiles>
