@@ -15,6 +15,9 @@
         <wsdl.source.name>ExchangeDataSourceService</wsdl.source.name>
         <wsdl.plugin.name>ExchangePluginService</wsdl.plugin.name>
         <wsdl.registry.name>ExchangeRegistryService</wsdl.registry.name>
+        <javaee.version>7.0</javaee.version>
+        <joda-time.version>2.7</joda-time.version>
+        <junit.version>4.10</junit.version>
     </properties>
     
     <scm>
@@ -160,9 +163,27 @@
 
     <dependencies>
         <dependency>
+            <groupId>javax</groupId>
+            <artifactId>javaee-api</artifactId>
+            <version>${javaee.version}</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
             <groupId>eu.europa.ec.fisheries.uvms.audit</groupId>
             <artifactId>audit-model</artifactId>
             <version>1.0.3</version>
+        </dependency>
+        <dependency>
+            <groupId>joda-time</groupId>
+            <artifactId>joda-time</artifactId>
+            <version>${joda-time.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>${junit.version}</version>
+            <scope>test</scope>
         </dependency>
     </dependencies>
     
