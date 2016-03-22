@@ -19,7 +19,20 @@
         <joda-time.version>2.7</joda-time.version>
         <junit.version>4.10</junit.version>
     </properties>
-    
+
+    <distributionManagement>
+        <repository>
+            <id>digit-releases</id>
+            <name>DG DIGIT Repository</name>
+            <url>https://webgate.ec.europa.eu/CITnet/nexus/content/repositories/mare/</url>
+        </repository>
+        <snapshotRepository>
+            <id>digit-snapshots</id>
+            <name>DG DIGIT Snapshot Repository</name>
+            <url>https://webgate.ec.europa.eu/CITnet/nexus/content/repositories/mare-snapshots/</url>
+        </snapshotRepository>
+    </distributionManagement>
+
     <scm>
         <connection>scm:svn:https://webgate.ec.europa.eu/CITnet/svn/UNIONVMS/branches/dev/Modules/Exchange/APP/model</connection>
     </scm>
