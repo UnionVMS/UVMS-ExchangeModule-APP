@@ -20,8 +20,8 @@
         <joda-time.version>2.7</joda-time.version>
         <logback.core.version>1.1.2</logback.core.version>
         <dozer.version>5.5.1</dozer.version>
-        <audit.model.version>1.0.3-SNAPSHOT</audit.model.version>
-        <movement.model.version>1.0.3-SNAPSHOT</movement.model.version>
+        <audit.model.version>1.0.4-SNAPSHOT</audit.model.version>
+        <movement.model.version>1.0.4-SNAPSHOT</movement.model.version>
         <usm4uvms.version>1.0.0</usm4uvms.version>
         <rules.version>1.0.3-SNAPSHOT</rules.version>
         <asset.version>1.0.3-SNAPSHOT</asset.version>
