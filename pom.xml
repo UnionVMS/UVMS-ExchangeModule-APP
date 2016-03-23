@@ -28,6 +28,7 @@
         <audit.version>1.0.3-SNAPSHOT</audit.version>
         <longpolling.version>1.0.0</longpolling.version>
         <uvms.config.version>1.0.3-SNAPSHOT</uvms.config.version>
+        <exchange.model.version>1.0.4-SNAPSHOT</exchange.model.version>
     </properties>
     
     <dependencies>
