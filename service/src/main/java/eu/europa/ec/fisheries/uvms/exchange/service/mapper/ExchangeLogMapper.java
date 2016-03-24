@@ -122,20 +122,25 @@ public class ExchangeLogMapper {
 
         List<IdList> idList = terminalId.getMobileTerminalIdList();
         for (IdList id : idList) {
-            if (IdType.DNID.equals(id.getType())) {
-                dnid = id.getValue();
-            } else if (IdType.MEMBER_NUMBER.equals(id.getType())) {
-                memberNumber = id.getValue();
-            } else if (IdType.SERIAL_NUMBER.equals(id.getType())) {
-                serialNumber = id.getValue();
-            } else if (IdType.LES.equals(id.getType())) {
-                les = id.getValue();
+            switch (id.getType()) {
+                case DNID:
+                    dnid = id.getValue();
+                    break;
+                case MEMBER_NUMBER:
+                    memberNumber = id.getValue();
+                    break;
+                case SERIAL_NUMBER:
+                    serialNumber = id.getValue();
+                    break;
+                case LES:
+                    les = id.getValue();
+                    break;
             }
         }
 
         switch (source) {
             case INMARSAT_C:
-                return dnid + memberNumber;
+                return dnid + "." + memberNumber;
             case IRIDIUM:
                 return serialNumber;
             case AIS:
