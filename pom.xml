@@ -113,7 +113,6 @@
         <module>rest</module>
         <module>service</module>
         <module>message</module>
-        <module>model</module>
         <module>module</module>
     </modules>
 </project>
