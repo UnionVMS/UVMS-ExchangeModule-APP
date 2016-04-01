@@ -3,13 +3,13 @@
 
     <groupId>eu.europa.ec.fisheries.uvms.exchange</groupId>
     <artifactId>exchange</artifactId>
-    <version>2.0.0-SNAPSHOT</version>
+    <version>2.0.1-SNAPSHOT</version>
     <packaging>pom</packaging>
     <description>Maven projekt-archetype for UnionVms modules</description>
     
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <release.branch.name>uvms-1.0.3-auto-test</release.branch.name>
+        <release.branch.name>uvms-2.0.0-durin</release.branch.name>
         <mockito.version>1.9.5</mockito.version>
         <junit.version>4.10</junit.version>
         <javaee.version>7.0</javaee.version>
@@ -19,15 +19,15 @@
         <joda-time.version>2.7</joda-time.version>
         <logback.core.version>1.1.2</logback.core.version>
         <dozer.version>5.5.1</dozer.version>
-        <audit.model.version>2.0.0-SNAPSHOT</audit.model.version>
-        <movement.model.version>2.0.0-SNAPSHOT</movement.model.version>
-        <usm4uvms.version>2.0.0-SNAPSHOT</usm4uvms.version>
-        <rules.version>2.0.0-SNAPSHOT</rules.version>
-        <asset.version>2.0.0-SNAPSHOT</asset.version>
-        <audit.version>2.0.0-SNAPSHOT</audit.version>
-        <longpolling.version>2.0.0-SNAPSHOT</longpolling.version>
-        <uvms.config.version>2.0.0-SNAPSHOT</uvms.config.version>
-        <exchange.model.version>2.0.0-SNAPSHOT</exchange.model.version>
+        <audit.model.version>2.0.0</audit.model.version>
+        <movement.model.version>2.0.0</movement.model.version>
+        <usm4uvms.version>2.0.0</usm4uvms.version>
+        <rules.version>2.0.0</rules.version>
+        <asset.version>2.0.0</asset.version>
+        <audit.version>2.0.0</audit.version>
+        <longpolling.version>2.0.0</longpolling.version>
+        <uvms.config.version>2.0.0</uvms.config.version>
+        <exchange.model.version>2.0.0</exchange.model.version>
     </properties>
     
     <dependencies>
