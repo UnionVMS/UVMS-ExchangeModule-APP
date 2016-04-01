@@ -1,16 +1,15 @@
-<?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>eu.europa.ec.fisheries.uvms.exchange</groupId>
-    <version>1.0.4-SNAPSHOT</version>
+    <version>1.0.5-SNAPSHOT</version>
     <artifactId>exchange-model</artifactId>
     <name>exchange-model</name>
     <packaging>ejb</packaging>
     <description>This module shall have interfaces, XSD, and DTOs</description>
     
     <properties>
-        <!-- the name of the wsdlfiles wothout fileending -->
+        
         <wsdl.contract.name>ExchangeModuleService</wsdl.contract.name>
         <wsdl.source.name>ExchangeDataSourceService</wsdl.source.name>
         <wsdl.plugin.name>ExchangePluginService</wsdl.plugin.name>
@@ -18,8 +17,8 @@
         <javaee.version>7.0</javaee.version>
         <joda-time.version>2.7</joda-time.version>
         <junit.version>4.10</junit.version>
-        <audit.model.version>1.0.4-SNAPSHOT</audit.model.version>
-    </properties>
+        <audit.model.version>1.0.4</audit.model.version>
+    <release.branch.name>uvms-1.0.3-auto-test</release.branch.name></properties>
 
     <distributionManagement>
         <repository>
@@ -35,7 +34,7 @@
     </distributionManagement>
 
     <scm>
-        <connection>scm:svn:https://webgate.ec.europa.eu/CITnet/svn/UNIONVMS/branches/dev/Modules/Exchange/APP/model</connection>
+        <connection>scm:svn:https://webgate.ec.europa.eu/CITnet/svn/UNIONVMS/branches/releases/${release.branch.name}/Modules/Exchange/APP/model</connection>
     </scm>
 
     <profiles>
@@ -43,7 +42,7 @@
             <id>generate-from-wsdl</id>
             <build>
                 <plugins>
-                    <!-- MODULE CONTRACT -->
+                    
                     <plugin>
                         <artifactId>maven-clean-plugin</artifactId>
                         <version>2.6.1</version>
@@ -76,7 +75,7 @@
                                     <sourceRoot>${basedir}/src/main/java/</sourceRoot>
                                     <wsdlOptions>
                                         <wsdlOption>
-                                            <!-- This is for incoming and outgoing messages to the module -->
+                                            
                                             <wsdl>${basedir}/src/main/resources/contract/${wsdl.contract.name}.wsdl</wsdl>
                                             <bindingFiles>
                                                 <bindingFile>${basedir}/src/main/resources/binding.xml</bindingFile>
@@ -95,7 +94,7 @@
                                     <sourceRoot>${basedir}/src/main/java/</sourceRoot>
                                     <wsdlOptions>
                                         <wsdlOption>
-                                            <!-- This is for incoming and outgoing messages to the proxy services and local database -->
+                                            
                                             <wsdl>${basedir}/src/main/resources/contract/${wsdl.source.name}.wsdl</wsdl>
                                             <bindingFiles>
                                                 <bindingFile>${basedir}/src/main/resources/binding.xml</bindingFile>
@@ -114,7 +113,7 @@
                                     <sourceRoot>${basedir}/src/main/java/</sourceRoot>
                                     <wsdlOptions>
                                         <wsdlOption>
-                                            <!-- This is for incoming and outgoing messages to the proxy services and local database -->
+                                            
                                             <wsdl>${basedir}/src/main/resources/contract/${wsdl.registry.name}.wsdl</wsdl>
                                             <bindingFiles>
                                                 <bindingFile>${basedir}/src/main/resources/binding.xml</bindingFile>
