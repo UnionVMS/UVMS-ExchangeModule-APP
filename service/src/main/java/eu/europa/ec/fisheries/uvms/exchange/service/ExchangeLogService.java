@@ -31,7 +31,7 @@ public interface ExchangeLogService {
 
     public void resend(List<String> messageIdList, String username) throws ExchangeLogException;
 
-    public ExchangeLogStatusType getExchangeStatusHistory(TypeRefType type, String typeRefGuid) throws ExchangeLogException;
+    public ExchangeLogStatusType getExchangeStatusHistory(TypeRefType type, String typeRefGuid, String userName) throws ExchangeLogException;
 
     public PollStatus setPollStatus(String messageId, String pluginMessageId, ExchangeLogStatusTypeType logStatus, String username) throws ExchangeLogException;
 

@@ -27,7 +27,7 @@
         <audit.version>2.0.0</audit.version>
         <longpolling.version>2.0.0</longpolling.version>
         <uvms.config.version>2.0.0</uvms.config.version>
-        <exchange.model.version>2.0.0</exchange.model.version>
+        <exchange.model.version>2.0.1-SNAPSHOT</exchange.model.version>
     </properties>
     
     <dependencies>

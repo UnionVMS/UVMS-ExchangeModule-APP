@@ -30,6 +30,8 @@ import eu.europa.ec.fisheries.uvms.exchange.rest.mapper.ExchangeLogMapper;
 import eu.europa.ec.fisheries.uvms.exchange.service.ExchangeLogService;
 import eu.europa.ec.fisheries.uvms.rest.security.RequiresFeature;
 import eu.europa.ec.fisheries.uvms.rest.security.UnionVMSFeature;
+import javax.servlet.http.HttpServletRequest;
+import javax.ws.rs.core.Context;
 
 @Path("/exchange")
 @Stateless
@@ -39,6 +41,8 @@ public class ExchangeLogRestResource {
 
     @EJB
     ExchangeLogService serviceLayer;
+    @Context
+    private HttpServletRequest request;
 
     /**
      *
@@ -56,28 +60,28 @@ public class ExchangeLogRestResource {
     public ResponseDto getLogListByCriteria(final ExchangeListQuery query) {
         LOG.info("Get list invoked in rest layer");
         try {
-        	//TODO query in swagger
-        	GetLogListByQueryResponse response = serviceLayer.getExchangeLogList(query);
-        	ListQueryResponse exchangeLogList = ExchangeLogMapper.mapToQueryResponse(response);
-        	//ExchangeMock.mockLogList(query);
+            //TODO query in swagger
+            GetLogListByQueryResponse response = serviceLayer.getExchangeLogList(query);
+            ListQueryResponse exchangeLogList = ExchangeLogMapper.mapToQueryResponse(response);
+            //ExchangeMock.mockLogList(query);
             return new ResponseDto(exchangeLogList, RestResponseCode.OK);
         } catch (Exception ex) {
             LOG.error("[ Error when geting log list. ] {} ", ex.getMessage());
             return ErrorHandler.getFault(ex);
         }
     }
-    
+
     @POST
     @Consumes(value = {MediaType.APPLICATION_JSON})
     @Produces(value = {MediaType.APPLICATION_JSON})
     @Path(value = "/poll")
-	@RequiresFeature(UnionVMSFeature.viewExchange)
+    @RequiresFeature(UnionVMSFeature.viewExchange)
     public ResponseDto getPollStatus(PollQuery query) {
         try {
-        	LOG.debug("Get ExchangeLog status for Poll in rest layer");
-        	Date from = DateUtils.stringToDate(query.getStatusFromDate());
-        	Date to = DateUtils.stringToDate(query.getStatusToDate());
-        	List<ExchangeLogStatusType> response = serviceLayer.getExchangeStatusHistoryList(query.getStatus(), TypeRefType.POLL, from, to);
+            LOG.debug("Get ExchangeLog status for Poll in rest layer");
+            Date from = DateUtils.stringToDate(query.getStatusFromDate());
+            Date to = DateUtils.stringToDate(query.getStatusToDate());
+            List<ExchangeLogStatusType> response = serviceLayer.getExchangeStatusHistoryList(query.getStatus(), TypeRefType.POLL, from, to);
             return new ResponseDto(response, RestResponseCode.OK);
         } catch (Exception e) {
             LOG.error("[ Error when getting config search fields. ]", e.getMessage());
@@ -89,18 +93,18 @@ public class ExchangeLogRestResource {
     @Consumes(value = {MediaType.APPLICATION_JSON})
     @Produces(value = {MediaType.APPLICATION_JSON})
     @Path(value = "/poll/{typeRefGuid}")
-	@RequiresFeature(UnionVMSFeature.viewExchange)
+    @RequiresFeature(UnionVMSFeature.viewExchange)
     public ResponseDto getPollStatus(@PathParam("typeRefGuid") String typeRefGuid) {
         try {
-        	LOG.debug("Get ExchangeLog status for Poll by typeRefGuid");
-        	ExchangeLogStatusType response = serviceLayer.getExchangeStatusHistory(TypeRefType.POLL, typeRefGuid);
+            LOG.debug("Get ExchangeLog status for Poll by typeRefGuid");
+            ExchangeLogStatusType response = serviceLayer.getExchangeStatusHistory(TypeRefType.POLL, typeRefGuid, request.getRemoteUser());
             return new ResponseDto(response, RestResponseCode.OK);
         } catch (Exception e) {
             LOG.error("[ Error when getting config search fields. ]", e.getMessage());
             return ErrorHandler.getFault(e);
         }
     }
-    
+
     @GET
     @Produces(value = {MediaType.APPLICATION_JSON})
     @Path("/{guid}")

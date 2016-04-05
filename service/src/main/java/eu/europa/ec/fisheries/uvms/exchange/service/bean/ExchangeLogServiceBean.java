@@ -146,13 +146,13 @@ public class ExchangeLogServiceBean implements ExchangeLogService {
     }
 
     @Override
-    public ExchangeLogStatusType getExchangeStatusHistory(TypeRefType type, String typeRefGuid) throws ExchangeLogException {
+    public ExchangeLogStatusType getExchangeStatusHistory(TypeRefType type, String typeRefGuid, String userName) throws ExchangeLogException {
         LOG.info("Get poll status history in service layer");
         if (typeRefGuid == null || typeRefGuid.isEmpty()) {
             throw new ExchangeLogException("Invalid id");
         }
         try {
-            String text = ExchangeDataSourceRequestMapper.mapGetLogStatusHistoryRequest(typeRefGuid, type);
+            String text = ExchangeDataSourceRequestMapper.mapGetLogStatusHistoryRequest(typeRefGuid, type, userName);
             String messageId = producer.sendMessageOnQueue(text, MessageQueue.INTERNAL);
             TextMessage response = consumer.getMessage(messageId, TextMessage.class);
             ExchangeLogStatusType pollStatus = ExchangeDataSourceResponseMapper.mapGetLogStatusHistoryResponse(response, messageId);
