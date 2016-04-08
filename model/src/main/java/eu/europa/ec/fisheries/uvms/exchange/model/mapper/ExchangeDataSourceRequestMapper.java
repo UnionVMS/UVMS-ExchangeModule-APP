@@ -1,3 +1,6 @@
+/*
+Det här är en licenstext
+ */
 package eu.europa.ec.fisheries.uvms.exchange.model.mapper;
 
 import java.util.ArrayList;
@@ -165,11 +168,12 @@ public class ExchangeDataSourceRequestMapper {
         }
     }
 
-    public static String mapGetLogStatusHistoryRequest(String guid, TypeRefType typeRefType) throws ExchangeModelMarshallException {
+    public static String mapGetLogStatusHistoryRequest(String guid, TypeRefType typeRefType, String userName) throws ExchangeModelMarshallException {
         GetLogStatusHistoryRequest request = new GetLogStatusHistoryRequest();
         request.setMethod(ExchangeDataSourceMethod.GET_LOG_STATUS_HISTORY);
         request.setGuid(guid);
         request.setTypeRefType(typeRefType);
+        request.setUsername(userName);
         return JAXBMarshaller.marshallJaxBObjectToString(request);
     }
 
