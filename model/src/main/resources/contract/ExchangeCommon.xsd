@@ -62,6 +62,7 @@
                 <xsd:element name="email" type="plugin:EmailType"/>
             </xsd:choice>
             <xsd:element name="unsentMessageGuid" type="xsd:string" minOccurs="1" maxOccurs="1"/>
+            <xsd:element name="fwdRule" type="xsd:string"/>
         </xsd:sequence>
     </xsd:complexType>
     

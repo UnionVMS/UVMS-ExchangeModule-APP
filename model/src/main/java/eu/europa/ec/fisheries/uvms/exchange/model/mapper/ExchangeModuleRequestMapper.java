@@ -77,6 +77,7 @@ public class ExchangeModuleRequestMapper {
         request.setMethod(ExchangeModuleMethod.SEND_REPORT_TO_PLUGIN);
         SendMovementToPluginType sendMovementToPluginType = createSendMovementToPluginType(pluginName, type, fwdDate, fwdRule, recipient, payload, recipientInfoList, assetName, ircs, mmsi, externalMarking, flagState);
         request.setReport(sendMovementToPluginType);
+        request.setUsername("UVMS");
         return request;
     }
 
@@ -92,6 +93,7 @@ public class ExchangeModuleRequestMapper {
         report.setMovement(payload);
         report.setPluginType(type);
         report.setPluginName(pluginName);
+        report.setIrcs(payload.getIrcs());
         return report;
     }
 
@@ -103,25 +105,26 @@ public class ExchangeModuleRequestMapper {
         movementType.setAssetName(assetName);
     }
 
-    public static String createSetCommandSendPollRequest(String pluginName, PollType poll, String username) throws ExchangeModelMapperException {
-        SetCommandRequest request = createSetCommandRequest(pluginName, CommandTypeType.POLL, username);
+    public static String createSetCommandSendPollRequest(String pluginName, PollType poll, String username, String fwdRule) throws ExchangeModelMapperException {
+        SetCommandRequest request = createSetCommandRequest(pluginName, CommandTypeType.POLL, username, fwdRule);
         request.getCommand().setPoll(poll);
         return JAXBMarshaller.marshallJaxBObjectToString(request);
     }
 
-    public static String createSetCommandSendEmailRequest(String pluginName, EmailType email) throws ExchangeModelMapperException {
-        SetCommandRequest request = createSetCommandRequest(pluginName, CommandTypeType.EMAIL, "UVMS");
+    public static String createSetCommandSendEmailRequest(String pluginName, EmailType email, String fwdRule) throws ExchangeModelMapperException {
+        SetCommandRequest request = createSetCommandRequest(pluginName, CommandTypeType.EMAIL, "UVMS", fwdRule);
         request.getCommand().setEmail(email);
         return JAXBMarshaller.marshallJaxBObjectToString(request);
     }
 
-    private static SetCommandRequest createSetCommandRequest(String pluginName, CommandTypeType type, String username) throws ExchangeModelMapperException {
+    private static SetCommandRequest createSetCommandRequest(String pluginName, CommandTypeType type, String username, String fwdRule) throws ExchangeModelMapperException {
         SetCommandRequest request = new SetCommandRequest();
         request.setMethod(ExchangeModuleMethod.SET_COMMAND);
         CommandType commandType = new CommandType();
         commandType.setTimestamp(DateUtils.dateToXmlGregorian(DateUtils.nowUTC().toDate()));
         commandType.setCommand(type);
         commandType.setPluginName(pluginName);
+        commandType.setFwdRule(fwdRule);
         request.setUsername(username);
         request.setCommand(commandType);
         return request;

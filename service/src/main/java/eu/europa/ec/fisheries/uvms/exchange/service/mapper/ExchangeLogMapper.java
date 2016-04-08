@@ -3,6 +3,7 @@ package eu.europa.ec.fisheries.uvms.exchange.service.mapper;
 import java.util.ArrayList;
 import java.util.List;
 
+import eu.europa.ec.fisheries.schema.exchange.movement.v1.*;
 import eu.europa.ec.fisheries.schema.exchange.plugin.types.v1.EmailType;
 import eu.europa.ec.fisheries.schema.exchange.plugin.types.v1.PollType;
 import eu.europa.ec.fisheries.schema.exchange.v1.*;
@@ -15,10 +16,6 @@ import eu.europa.ec.fisheries.schema.exchange.movement.asset.v1.AssetId;
 import eu.europa.ec.fisheries.schema.exchange.movement.asset.v1.AssetIdList;
 import eu.europa.ec.fisheries.schema.exchange.movement.mobileterminal.v1.IdList;
 import eu.europa.ec.fisheries.schema.exchange.movement.mobileterminal.v1.MobileTerminalId;
-import eu.europa.ec.fisheries.schema.exchange.movement.v1.MovementBaseType;
-import eu.europa.ec.fisheries.schema.exchange.movement.v1.MovementSourceType;
-import eu.europa.ec.fisheries.schema.exchange.movement.v1.SendMovementToPluginType;
-import eu.europa.ec.fisheries.schema.exchange.movement.v1.SetReportMovementType;
 import eu.europa.ec.fisheries.schema.exchange.plugin.types.v1.PluginType;
 import eu.europa.ec.fisheries.schema.rules.mobileterminal.v1.IdType;
 import eu.europa.ec.fisheries.uvms.exchange.service.exception.ExchangeLogException;
@@ -69,10 +66,10 @@ public class ExchangeLogMapper {
         String senderReceiver = null;
 
         switch (pluginType) {
-            case SATELLITE_RECEIVER:
-                senderReceiver = getSenderReceiverOfMovement(movement.getSource(), movement.getMobileTerminalId());
-                break;
             case MANUAL:
+                senderReceiver = "SYSTEM";
+                break;
+            case SATELLITE_RECEIVER:
             case FLUX:
             case NAF:
                 senderReceiver = getSenderReceiver(movement.getAssetId());
@@ -94,59 +91,18 @@ public class ExchangeLogMapper {
         }
         for (AssetIdList idList : assetId.getAssetIdList()) {
             switch (idList.getIdType()) {
+                case IRCS:
+                    return idList.getValue();
                 case CFR:
                 case GUID:
                 case ID:
                 case IMO:
-                case IRCS:
                 case MMSI:
                 default:
                     return idList.getValue();
             }
         }
         throw new ExchangeLogException("No asset id value");
-    }
-
-    private static String getSenderReceiverOfMovement(MovementSourceType source, MobileTerminalId terminalId) throws ExchangeLogException {
-        if (source == null) {
-            throw new ExchangeLogException("No source of movement type");
-        }
-        if (terminalId == null) {
-            throw new ExchangeLogException("No mobile terminal id");
-        }
-
-        String dnid = null;
-        String memberNumber = null;
-        String serialNumber = null;
-        String les = null;
-
-        List<IdList> idList = terminalId.getMobileTerminalIdList();
-        for (IdList id : idList) {
-            switch (id.getType()) {
-                case DNID:
-                    dnid = id.getValue();
-                    break;
-                case MEMBER_NUMBER:
-                    memberNumber = id.getValue();
-                    break;
-                case SERIAL_NUMBER:
-                    serialNumber = id.getValue();
-                    break;
-                case LES:
-                    les = id.getValue();
-                    break;
-            }
-        }
-
-        switch (source) {
-            case INMARSAT_C:
-                return dnid + "." + memberNumber;
-            case IRIDIUM:
-                return serialNumber;
-            case AIS:
-                return serialNumber;
-        }
-        throw new ExchangeLogException("No id of mobile terminal value");
     }
 
     private static String getSenderReciverOfPoll(List<KeyValueType> pollRecieverList) throws ExchangeLogException {
@@ -180,9 +136,18 @@ public class ExchangeLogMapper {
     }
 
     public static String getSendMovementSenderReceiver(SendMovementToPluginType sendReport) {
-        String senderReceiver = sendReport.getPluginType().name();
+        String senderReceiver = "";
         if (sendReport.getPluginName() != null && !sendReport.getPluginName().isEmpty()) {
             senderReceiver = sendReport.getPluginName();
+        }
+        if (sendReport.getPluginType() != null) {
+            senderReceiver = sendReport.getPluginType().name();
+        }
+        if (sendReport.getMovement().getIrcs() != null) {
+            senderReceiver = sendReport.getMovement().getIrcs();
+        }
+        if (sendReport.getIrcs() != null) {
+            senderReceiver = sendReport.getIrcs();
         }
         try {
             senderReceiver = getSenderReceiver(sendReport.getMovement(), sendReport.getPluginType(), sendReport.getPluginName());
@@ -237,7 +202,10 @@ public class ExchangeLogMapper {
         SendEmailType log = new SendEmailType();
         log.setType(LogType.SEND_EMAIL);
         log.setDateRecieved(command.getTimestamp());
-        log.setSenderReceiver(command.getEmail().getTo());
+        log.setSenderReceiver("SYSTEM");
+        log.setRecipient(command.getEmail().getTo());
+        log.setFwdRule(command.getFwdRule());
+        log.setFwdDate(command.getTimestamp());
         return log;
     }
 
@@ -251,16 +219,11 @@ public class ExchangeLogMapper {
         log.setType(LogType.SEND_POLL);
         log.setDateRecieved(command.getTimestamp());
 
-        String senderReceiver = command.getPluginName();
-        try {
-            senderReceiver = getSenderReciverOfPoll(command.getPoll().getPollReceiver());
-        } catch (ExchangeLogException e) {
-            LOG.error(e.getMessage());
-        }
-        log.setSenderReceiver(senderReceiver);
+        log.setSenderReceiver("System");
         LogRefType logRefType = new LogRefType();
         logRefType.setRefGuid(command.getPoll().getPollId());
         logRefType.setType(TypeRefType.POLL);
+        log.setFwdDate(command.getTimestamp());
         log.setTypeRef(logRefType);
         return log;
     }

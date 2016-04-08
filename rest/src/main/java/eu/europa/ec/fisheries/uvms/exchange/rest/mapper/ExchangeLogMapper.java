@@ -45,6 +45,7 @@ public class ExchangeLogMapper {
     	case RECEIVE_MOVEMENT:
     		dto.setType(LogTypeLabel.RECEIVED_MOVEMENT);
     		dto.setSource(((ReceiveMovementType)log).getSource());
+			dto.setRecipient(((ReceiveMovementType)log).getRecipient());
     		break;
     	case SEND_MOVEMENT:
     		dto.setType(LogTypeLabel.SENT_MOVEMENT);
@@ -55,10 +56,16 @@ public class ExchangeLogMapper {
     		dto.setRecipient(sendLog.getRecipient());
     		break;
     	case SEND_EMAIL:
+			SendEmailType sendEmail = (SendEmailType)log;
     		dto.setType(LogTypeLabel.SENT_EMAIL);
+			dto.setRecipient(sendEmail.getRecipient());
+			dto.setRule(sendEmail.getFwdRule());
     		break;
     	case SEND_POLL:
+			SendPollType sendPoll = (SendPollType)log;
     		dto.setType(LogTypeLabel.SENT_POLL);
+			dto.setRule(sendPoll.getFwdRule());
+			dto.setRecipient(sendPoll.getRecipient());
     		break;
     	default:
     		break;

@@ -48,6 +48,7 @@
             <xsd:extension base="exchange:ExchangeLogType">
                 <xsd:sequence>
                     <xsd:element name="source" type="xsd:string"/>
+                    <xsd:element name="recipient" type="xsd:string"/>
                 </xsd:sequence>
             </xsd:extension>
         </xsd:complexContent>
@@ -67,13 +68,24 @@
    
    <xsd:complexType name="SendEmailType">
         <xsd:complexContent>
-            <xsd:extension base="exchange:ExchangeLogType"/>
+            <xsd:extension base="exchange:ExchangeLogType">
+                <xsd:sequence>
+                    <xsd:element name="fwdRule" type="xsd:string"/>
+                    <xsd:element name="recipient" type="xsd:string"/>
+                    <xsd:element name="fwdDate" type="xsd:dateTime"/>
+                </xsd:sequence>
+            </xsd:extension>
         </xsd:complexContent>
    </xsd:complexType>
    
    <xsd:complexType name="SendPollType">
         <xsd:complexContent>
             <xsd:extension base="exchange:ExchangeLogType">
+                <xsd:sequence>
+                    <xsd:element name="fwdRule" type="xsd:string"/>
+                    <xsd:element name="recipient" type="xsd:string"/>
+                    <xsd:element name="fwdDate" type="xsd:dateTime"/>
+                </xsd:sequence>
             </xsd:extension>
         </xsd:complexContent>
    </xsd:complexType>
