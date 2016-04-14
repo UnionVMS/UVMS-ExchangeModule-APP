@@ -89,18 +89,23 @@ public class ExchangeLogMapper {
         if (assetId.getAssetIdList() == null) {
             throw new ExchangeLogException("No asset id");
         }
+        String senderReceiver = null;
         for (AssetIdList idList : assetId.getAssetIdList()) {
             switch (idList.getIdType()) {
                 case IRCS:
-                    return idList.getValue();
+                    senderReceiver = idList.getValue();
+                    return senderReceiver;
                 case CFR:
                 case GUID:
                 case ID:
                 case IMO:
                 case MMSI:
                 default:
-                    return idList.getValue();
+                    senderReceiver = idList.getValue();
             }
+        }
+        if (senderReceiver != null) {
+            return senderReceiver;
         }
         throw new ExchangeLogException("No asset id value");
     }
