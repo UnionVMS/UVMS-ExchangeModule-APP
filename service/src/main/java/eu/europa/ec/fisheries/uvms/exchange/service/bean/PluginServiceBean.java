@@ -13,7 +13,11 @@ import javax.inject.Inject;
 import javax.jms.JMSException;
 import javax.jms.TextMessage;
 
-import eu.europa.ec.fisheries.schema.exchange.service.v1.ServiceType;
+import eu.europa.ec.fisheries.schema.exchange.service.v1.*;
+import eu.europa.ec.fisheries.uvms.exchange.message.constants.MessageQueue;
+import eu.europa.ec.fisheries.uvms.exchange.message.consumer.ExchangeMessageConsumer;
+import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelMapperException;
+import eu.europa.ec.fisheries.uvms.exchange.model.mapper.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,9 +25,6 @@ import eu.europa.ec.fisheries.schema.exchange.module.v1.UpdatePluginSettingReque
 import eu.europa.ec.fisheries.schema.exchange.plugin.types.v1.PluginType;
 import eu.europa.ec.fisheries.schema.exchange.registry.v1.RegisterServiceRequest;
 import eu.europa.ec.fisheries.schema.exchange.registry.v1.UnregisterServiceRequest;
-import eu.europa.ec.fisheries.schema.exchange.service.v1.ServiceResponseType;
-import eu.europa.ec.fisheries.schema.exchange.service.v1.SettingListType;
-import eu.europa.ec.fisheries.schema.exchange.service.v1.SettingType;
 import eu.europa.ec.fisheries.uvms.config.event.ConfigSettingEvent;
 import eu.europa.ec.fisheries.uvms.config.event.ConfigSettingUpdatedEvent;
 import eu.europa.ec.fisheries.uvms.config.exception.ConfigServiceException;
@@ -39,10 +40,6 @@ import eu.europa.ec.fisheries.uvms.exchange.message.exception.ExchangeMessageExc
 import eu.europa.ec.fisheries.uvms.exchange.message.producer.MessageProducer;
 import eu.europa.ec.fisheries.uvms.exchange.model.constant.FaultCode;
 import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelMarshallException;
-import eu.europa.ec.fisheries.uvms.exchange.model.mapper.ExchangeModuleResponseMapper;
-import eu.europa.ec.fisheries.uvms.exchange.model.mapper.ExchangePluginRequestMapper;
-import eu.europa.ec.fisheries.uvms.exchange.model.mapper.ExchangePluginResponseMapper;
-import eu.europa.ec.fisheries.uvms.exchange.model.mapper.JAXBMarshaller;
 import eu.europa.ec.fisheries.uvms.exchange.service.ExchangeService;
 import eu.europa.ec.fisheries.uvms.exchange.service.PluginService;
 import eu.europa.ec.fisheries.uvms.exchange.service.exception.ExchangeServiceException;
@@ -66,6 +63,9 @@ public class PluginServiceBean implements PluginService {
     @EJB
     MessageProducer producer;
 
+    @EJB
+    ExchangeMessageConsumer consumer;
+
     @Inject
     ParameterService parameterService;
 
@@ -74,7 +74,7 @@ public class PluginServiceBean implements PluginService {
 
     private boolean checkPluginType(PluginType pluginType, String responseTopicMessageSelector, String messageId) throws ExchangeModelMarshallException, ExchangeMessageException {
         LOG.debug("checkPluginType " + pluginType.name());
-        if (PluginType.EMAIL == pluginType || PluginType.FLUX == pluginType) {
+        if (PluginType.EMAIL == pluginType || PluginType.FLUX == pluginType || PluginType.NAF == pluginType) {
             //Check if type already exists
             List<PluginType> type = new ArrayList<>();
             type.add(pluginType);
@@ -120,9 +120,31 @@ public class PluginServiceBean implements PluginService {
             //TODO log to exchange log
             String response = ExchangePluginResponseMapper.mapToRegisterServiceResponseOK(messageId, service);
             producer.sendEventBusMessage(response, register.getService().getServiceResponseMessageName());
-        } catch (ExchangeServiceException e) {
+
+            startServiceOnRegister(register.getService().getServiceClassName());
+
+        } catch (ExchangeServiceException | ExchangeModelMapperException e) {
             String response = ExchangePluginResponseMapper.mapToRegisterServiceResponseNOK(messageId, "Exchange service exception when registering plugin [ " + e.getMessage() + " ]");
             producer.sendEventBusMessage(response, register.getService().getServiceResponseMessageName());
+        }
+    }
+
+    private void startServiceOnRegister(String serviceClassName) throws ExchangeModelMapperException, ExchangeMessageException, ExchangeServiceException {
+        String getServiceRequest = ExchangeDataSourceRequestMapper.mapGetServiceToString(serviceClassName);
+        String correlationId = producer.sendMessageOnQueue(getServiceRequest, MessageQueue.INTERNAL);
+        TextMessage getServiceResponse = consumer.getMessage(correlationId, TextMessage.class);
+        if (getServiceResponse != null) {
+            ServiceResponseType serviceResponseType = ExchangeDataSourceResponseMapper.mapToServiceTypeFromGetServiceResponse(getServiceResponse, correlationId);
+            StatusType status = serviceResponseType.getStatus();
+            if (StatusType.STARTED.equals(status)) {
+                LOG.info("Starting service {}", serviceClassName);
+                start(serviceClassName);
+            } else if (StatusType.STOPPED.equals(status)) {
+                LOG.info("Stopping service {}", serviceClassName);
+                stop(serviceClassName);
+            } else {
+                LOG.error("[ Status was null for service {} ]", serviceClassName);
+            }
         }
     }
 
