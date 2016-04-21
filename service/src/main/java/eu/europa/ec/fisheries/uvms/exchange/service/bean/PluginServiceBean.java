@@ -14,7 +14,6 @@ import javax.jms.JMSException;
 import javax.jms.TextMessage;
 
 import eu.europa.ec.fisheries.schema.exchange.service.v1.*;
-import eu.europa.ec.fisheries.uvms.exchange.message.constants.MessageQueue;
 import eu.europa.ec.fisheries.uvms.exchange.message.consumer.ExchangeMessageConsumer;
 import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelMapperException;
 import eu.europa.ec.fisheries.uvms.exchange.model.mapper.*;
@@ -121,7 +120,7 @@ public class PluginServiceBean implements PluginService {
             String response = ExchangePluginResponseMapper.mapToRegisterServiceResponseOK(messageId, service);
             producer.sendEventBusMessage(response, register.getService().getServiceResponseMessageName());
 
-            startServiceOnRegister(register.getService().getServiceClassName());
+            setServiceStatusOnRegister(register.getService().getServiceClassName());
 
         } catch (ExchangeServiceException | ExchangeModelMapperException e) {
             String response = ExchangePluginResponseMapper.mapToRegisterServiceResponseNOK(messageId, "Exchange service exception when registering plugin [ " + e.getMessage() + " ]");
@@ -129,13 +128,10 @@ public class PluginServiceBean implements PluginService {
         }
     }
 
-    private void startServiceOnRegister(String serviceClassName) throws ExchangeModelMapperException, ExchangeMessageException, ExchangeServiceException {
-        String getServiceRequest = ExchangeDataSourceRequestMapper.mapGetServiceToString(serviceClassName);
-        String correlationId = producer.sendMessageOnQueue(getServiceRequest, MessageQueue.INTERNAL);
-        TextMessage getServiceResponse = consumer.getMessage(correlationId, TextMessage.class);
-        if (getServiceResponse != null) {
-            ServiceResponseType serviceResponseType = ExchangeDataSourceResponseMapper.mapToServiceTypeFromGetServiceResponse(getServiceResponse, correlationId);
-            StatusType status = serviceResponseType.getStatus();
+    private void setServiceStatusOnRegister(String serviceClassName) throws ExchangeModelMapperException, ExchangeMessageException, ExchangeServiceException {
+        ServiceResponseType service = exchangeService.getService(serviceClassName);
+        if (service != null) {
+            StatusType status = service.getStatus();
             if (StatusType.STARTED.equals(status)) {
                 LOG.info("Starting service {}", serviceClassName);
                 start(serviceClassName);
