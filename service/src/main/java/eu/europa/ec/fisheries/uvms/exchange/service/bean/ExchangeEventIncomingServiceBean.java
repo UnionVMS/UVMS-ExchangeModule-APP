@@ -173,7 +173,7 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
             MovementRefType movementRefType = request.getMovementRefType();
             SetReportMovementType orgRequest = request.getOrgRequest();
 
-            if(orgRequest.getPluginType().equals(PluginType.MANUAL)){
+            if(PluginType.MANUAL.equals(orgRequest.getPluginType())){
                 username = request.getUsername();
             }else{
                 username = orgRequest.getPluginName();

@@ -73,22 +73,22 @@ public class MessageProducerBean implements MessageProducer, ConfigMessageProduc
 
             switch (queue) {
                 case INTERNAL:
-                    session.createProducer(localDbQueue).send(message);
+                    getProducer(session, localDbQueue).send(message);
                     break;
                 case EVENT:
-                	session.createProducer(eventQueue).send(message);
+                    getProducer(session, eventQueue).send(message);
                 	break;
                 case RULES:
-                    session.createProducer(rulesQueue).send(message);
+                    getProducer(session, rulesQueue).send(message);
                     break;
                 case CONFIG:
-                    session.createProducer(configQueue).send(message, Message.DEFAULT_DELIVERY_MODE, Message.DEFAULT_PRIORITY, CONFIG_TTL);
+                    getProducer(session, configQueue).send(message);
                     break;
                 case VESSEL:
-                    session.createProducer(vesselQueue).send(message);
+                    getProducer(session, vesselQueue).send(message);
                     break;
                 case AUDIT:
-                    session.createProducer(auditQueue).send(message);
+                    getProducer(session, auditQueue).send(message);
                 default:
                     break;
             }
@@ -112,7 +112,7 @@ public class MessageProducerBean implements MessageProducer, ConfigMessageProduc
             message.setStringProperty(ExchangeModelConstants.SERVICE_NAME, serviceName);
             message.setJMSReplyTo(eventQueue);
 
-            session.createProducer(eventBus).send(message);
+            getProducer(session, eventBus).send(message);
 
             return message.getJMSMessageID();
         } catch (Exception e) {
@@ -143,7 +143,7 @@ public class MessageProducerBean implements MessageProducer, ConfigMessageProduc
 
             TextMessage response = session.createTextMessage(data);
             response.setJMSCorrelationID(message.getJmsMessage().getJMSMessageID());
-            session.createProducer(message.getJmsMessage().getJMSReplyTo()).send(response);
+            getProducer(session, message.getJmsMessage().getJMSReplyTo()).send(response);
 
         } catch (ExchangeModelMapperException | JMSException e) {
             LOG.error("Error when returning Error message to recipient");
@@ -159,7 +159,7 @@ public class MessageProducerBean implements MessageProducer, ConfigMessageProduc
             TextMessage response = session.createTextMessage(data);
             response.setStringProperty(ExchangeModelConstants.SERVICE_NAME, message.getServiceType().getServiceResponseMessageName());
             response.setJMSCorrelationID(message.getJmsMessage().getJMSMessageID());
-            session.createProducer(eventBus).send(response);
+            getProducer(session, eventBus).send(response);
 
         } catch (ExchangeModelMapperException | JMSException e) {
             LOG.error("Error when returning Error message to recipient");
@@ -173,7 +173,7 @@ public class MessageProducerBean implements MessageProducer, ConfigMessageProduc
             Session session = connector.getNewSession();
             TextMessage response = session.createTextMessage(text);
             response.setJMSCorrelationID(message.getJMSMessageID());
-            session.createProducer(message.getJMSReplyTo()).send(response);
+            getProducer(session, message.getJMSReplyTo()).send(response);
         } catch (JMSException e) {
             LOG.error("[ Error when returning module exchange request. ]");
         }
@@ -189,7 +189,7 @@ public class MessageProducerBean implements MessageProducer, ConfigMessageProduc
 
             switch (queue) {
                 case MOVEMENT_RESPONSE:
-                    session.createProducer(movementResponseQueue).send(response);
+                    getProducer(session, movementResponseQueue).send(response);
                     break;
                 default:
                     break;
@@ -198,6 +198,13 @@ public class MessageProducerBean implements MessageProducer, ConfigMessageProduc
         } catch (JMSException e) {
             LOG.error("[ Error when returning asynchronous module exchange response. ]");
         }
+    }
+
+    private javax.jms.MessageProducer getProducer(Session session, Destination destination) throws JMSException {
+        javax.jms.MessageProducer producer = session.createProducer(destination);
+        producer.setDeliveryMode(DeliveryMode.NON_PERSISTENT);
+        producer.setTimeToLive(60000L);
+        return producer;
     }
 
 }
