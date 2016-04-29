@@ -3,13 +3,13 @@
 
     <groupId>eu.europa.ec.fisheries.uvms.exchange</groupId>
     <artifactId>exchange</artifactId>
-    <version>2.0.2-SNAPSHOT</version>
+    <version>2.0.3-SNAPSHOT</version>
     <packaging>pom</packaging>
     <description>Maven projekt-archetype for UnionVms modules</description>
     
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <release.branch.name>uvms-2.0.1-elrond</release.branch.name>
+        <release.branch.name>uvms-2.0.2-frodo</release.branch.name>
         <mockito.version>1.9.5</mockito.version>
         <junit.version>4.10</junit.version>
         <javaee.version>7.0</javaee.version>
@@ -26,7 +26,7 @@
         <asset.version>2.0.0</asset.version>
         <audit.version>2.0.0</audit.version>
         <longpolling.version>2.0.0</longpolling.version>
-        <uvms.config.version>2.0.2-SNAPSHOT</uvms.config.version>
+        <uvms.config.version>2.0.2</uvms.config.version>
         <exchange.model.version>2.0.1</exchange.model.version>
     </properties>
     
