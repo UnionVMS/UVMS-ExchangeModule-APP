@@ -79,7 +79,7 @@ public class MessageProducerBean implements MessageProducer, ConfigMessageProduc
                     getProducer(session, eventQueue).send(message);
                 	break;
                 case RULES:
-                    getProducer(session, rulesQueue).send(message);
+                    getProducer(session, rulesQueue, 0L).send(message);
                     break;
                 case CONFIG:
                     getProducer(session, configQueue).send(message);
@@ -200,11 +200,15 @@ public class MessageProducerBean implements MessageProducer, ConfigMessageProduc
         }
     }
 
-    private javax.jms.MessageProducer getProducer(Session session, Destination destination) throws JMSException {
+    private javax.jms.MessageProducer getProducer(Session session, Destination destination, long ttl) throws JMSException {
         javax.jms.MessageProducer producer = session.createProducer(destination);
         producer.setDeliveryMode(DeliveryMode.NON_PERSISTENT);
-        producer.setTimeToLive(60000L);
+        producer.setTimeToLive(ttl);
         return producer;
+    }
+
+    private javax.jms.MessageProducer getProducer(Session session, Destination destination) throws JMSException {
+        return getProducer(session, destination, 60000L);
     }
 
 }

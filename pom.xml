@@ -19,15 +19,15 @@
         <joda-time.version>2.7</joda-time.version>
         <logback.core.version>1.1.2</logback.core.version>
         <dozer.version>5.5.1</dozer.version>
-        <audit.model.version>2.0.0</audit.model.version>
-        <movement.model.version>2.0.0</movement.model.version>
-        <usm4uvms.version>2.0.0</usm4uvms.version>
-        <rules.version>2.0.0</rules.version>
-        <asset.version>2.0.0</asset.version>
-        <audit.version>2.0.0</audit.version>
+        <audit.model.version>2.0.3-SNAPSHOT</audit.model.version>
+        <movement.model.version>2.0.3-SNAPSHOT</movement.model.version>
+        <usm4uvms.version>2.0.3-SNAPSHOT</usm4uvms.version>
+        <rules.version>2.0.3-SNAPSHOT</rules.version>
+        <asset.version>2.0.3-SNAPSHOT</asset.version>
+        <audit.version>2.0.3-SNAPSHOT</audit.version>
         <longpolling.version>2.0.0</longpolling.version>
-        <uvms.config.version>2.0.2</uvms.config.version>
-        <exchange.model.version>2.0.1</exchange.model.version>
+        <uvms.config.version>2.0.3-SNAPSHOT</uvms.config.version>
+        <exchange.model.version>${project.version}</exchange.model.version>
     </properties>
     
     <dependencies>

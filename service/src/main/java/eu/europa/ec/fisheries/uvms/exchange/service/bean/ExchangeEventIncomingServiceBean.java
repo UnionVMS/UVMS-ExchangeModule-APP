@@ -115,6 +115,10 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
             // A person has created a position
             if(request.getRequest().getMovement().getSource().equals(MovementSourceType.MANUAL)){
                 username = request.getUsername();
+
+                // Send some response to Movement, if it originated from there (manual movement)
+                ProcessedMovementAck response = MovementModuleResponseMapper.mapProcessedMovementAck(eu.europa.ec.fisheries.schema.movement.common.v1.AcknowledgeTypeType.OK, message.getJmsMessage().getJMSMessageID(), "Movement successfully processed");
+                producer.sendModuleAckMessage(message.getJmsMessage().getJMSMessageID(), MessageQueue.MOVEMENT_RESPONSE, JAXBMarshaller.marshallJaxBObjectToString(response));
             }
             // A plugin has reported a position
             else{
@@ -186,12 +190,6 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
             if (logTypeRef != null && logTypeRef.getType() == TypeRefType.POLL) {
                 String pollGuid = logTypeRef.getRefGuid();
                 pollEvent.fire(new NotificationMessage("guid", pollGuid));
-            }
-
-            // Send some response to Movement, if it originated from there (manual movement)
-            if (orgRequest.getMovement().getSource() == MovementSourceType.MANUAL) {
-                ProcessedMovementAck response = MovementModuleResponseMapper.mapProcessedMovementAck(eu.europa.ec.fisheries.schema.movement.common.v1.AcknowledgeTypeType.OK, movementRefType.getMovementRefGuid(), "Movement successfully processed");
-                producer.sendModuleAckMessage(movementRefType.getAckResponseMessageID(), MessageQueue.MOVEMENT_RESPONSE, JAXBMarshaller.marshallJaxBObjectToString(response));
             }
         } catch (ExchangeLogException | ExchangeModelMarshallException e) {
             LOG.error(e.getMessage());
