@@ -32,7 +32,7 @@ public class ExchangeRulesServiceBean implements ExchangeRulesService {
 		try {
             String request = RulesModuleRequestMapper.createSetMovementReportRequest(pluginType, movement, username);
             producer.sendMessageOnQueue(request, MessageQueue.RULES);
-		} catch (RulesModelMapperException | ExchangeMessageException e) {
+        } catch (RulesModelMapperException | ExchangeMessageException e) {
 			LOG.error("Couldn't send message to rules ");
 			throw new ExchangeServiceException("Couldn't send message to rules");
 		}
