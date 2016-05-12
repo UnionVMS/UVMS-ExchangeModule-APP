@@ -18,6 +18,7 @@
         <joda-time.version>2.7</joda-time.version>
         <junit.version>4.10</junit.version>
         <audit.model.version>2.0.0</audit.model.version>
+        <jibx.version>1.1.4</jibx.version>
     <release.branch.name>uvms-2.0.2-frodo</release.branch.name></properties>
 
     <distributionManagement>
@@ -197,6 +198,11 @@
             <artifactId>junit</artifactId>
             <version>${junit.version}</version>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.jibx.schema.org.apache.maven</groupId>
+            <artifactId>org.jibx.schema.org.apache.maven.maven_v4_0_0</artifactId>
+            <version>${jibx.version}</version>
         </dependency>
     </dependencies>
     
