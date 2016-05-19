@@ -157,7 +157,11 @@ public class MessageProducerBean implements MessageProducer, ConfigMessageProduc
             LOG.debug("Sending error message back from Exchange module to recipient om JMS Topic with correlationID: {} ", message.getJmsMessage().getJMSMessageID());
             String data = JAXBMarshaller.marshallJaxBObjectToString(message.getErrorFault());
             TextMessage response = session.createTextMessage(data);
-            response.setStringProperty(ExchangeModelConstants.SERVICE_NAME, message.getServiceType().getServiceResponseMessageName());
+            if (message.getServiceType() != null) {
+                response.setStringProperty(ExchangeModelConstants.SERVICE_NAME, message.getServiceType().getServiceResponseMessageName());
+            } else {
+                response.setStringProperty(ExchangeModelConstants.SERVICE_NAME, "unknown");
+            }
             response.setJMSCorrelationID(message.getJmsMessage().getJMSMessageID());
             getProducer(session, eventBus).send(response);
 
