@@ -108,8 +108,7 @@ public class PluginServiceBean implements PluginService {
                 SettingListType settings = register.getSettingList();
                 for (SettingType setting : settings.getSetting()) {
                     String description = "Plugin " + serviceClassName + " " + setting.getKey() + " setting";
-                    String key = serviceClassName + PARAMETER_DELIMETER + setting.getKey();
-                    configService.pushSettingToConfig(SettingTypeMapper.map(key, setting.getValue(), description), false);
+                    configService.pushSettingToConfig(SettingTypeMapper.map(setting.getKey(), setting.getValue(), description), false);
                 }
             } catch (ConfigServiceException e) {
                 LOG.error("Couldn't register plugin settings in config parameter table");
@@ -119,7 +118,6 @@ public class PluginServiceBean implements PluginService {
             //TODO log to exchange log
             String response = ExchangePluginResponseMapper.mapToRegisterServiceResponseOK(messageId, service);
             producer.sendEventBusMessage(response, register.getService().getServiceResponseMessageName());
-
             setServiceStatusOnRegister(register.getService().getServiceClassName());
 
         } catch (ExchangeServiceException | ExchangeModelMapperException e) {
@@ -174,10 +172,8 @@ public class PluginServiceBean implements PluginService {
             List<eu.europa.ec.fisheries.schema.config.types.v1.SettingType> configServiceSettings = configService.getSettings(registerServiceRequest.getService().getServiceClassName());
             Map<String, SettingType>configServiceSettingsMap = putConfigSettingsInAMap(configServiceSettings);
             if(!configServiceSettingsMap.isEmpty()){
-                String serviceClassName = registerServiceRequest.getService().getServiceClassName();
                 for(SettingType type : currentRequestSettings){
-                    String key = serviceClassName + PARAMETER_DELIMETER + type.getKey();
-                    SettingType configSettingType = configServiceSettingsMap.get(key);
+                    SettingType configSettingType = configServiceSettingsMap.get(type.getKey());
                     if(configSettingType!=null && !configSettingType.getValue().equalsIgnoreCase(type.getValue())){
                         type.setValue(configSettingType.getValue());
                     }
