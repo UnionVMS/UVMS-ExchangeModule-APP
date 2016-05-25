@@ -52,6 +52,8 @@ public class ExchangeLogMapper {
         } else {
             log.setSource(request.getPluginType().name());
         }
+        log.setRecipient(getRecipient(request.getMovement(), request.getPluginType()));
+
         return log;
     }
 
@@ -291,5 +293,27 @@ public class ExchangeLogMapper {
             }
         }
         return null;
+    }
+
+    private static String getRecipient(MovementBaseType movementBaseType, PluginType pluginType) throws ExchangeLogException {
+        if(movementBaseType== null){
+            throw new ExchangeLogException("Movement is empty");
+        }
+        if(pluginType == null){
+            throw new ExchangeLogException("PluginType is empty");
+        }
+
+        String recipient = null;
+        switch (pluginType){
+            case MANUAL:
+            case FLUX:
+            case NAF:
+                recipient = movementBaseType.getFlagState();
+                break;
+            default:
+                recipient = "UNKNOWN";
+                break;
+        }
+        return recipient;
     }
 }
