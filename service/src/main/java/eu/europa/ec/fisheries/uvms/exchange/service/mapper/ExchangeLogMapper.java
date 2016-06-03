@@ -14,8 +14,6 @@ import eu.europa.ec.fisheries.schema.exchange.common.v1.CommandType;
 import eu.europa.ec.fisheries.schema.exchange.common.v1.KeyValueType;
 import eu.europa.ec.fisheries.schema.exchange.movement.asset.v1.AssetId;
 import eu.europa.ec.fisheries.schema.exchange.movement.asset.v1.AssetIdList;
-import eu.europa.ec.fisheries.schema.exchange.movement.mobileterminal.v1.IdList;
-import eu.europa.ec.fisheries.schema.exchange.movement.mobileterminal.v1.MobileTerminalId;
 import eu.europa.ec.fisheries.schema.exchange.plugin.types.v1.PluginType;
 import eu.europa.ec.fisheries.schema.rules.mobileterminal.v1.IdType;
 import eu.europa.ec.fisheries.uvms.exchange.service.exception.ExchangeLogException;
@@ -112,8 +110,8 @@ public class ExchangeLogMapper {
         throw new ExchangeLogException("No asset id value");
     }
 
-    private static String getSenderReciverOfPoll(List<KeyValueType> pollRecieverList) throws ExchangeLogException {
-        if (pollRecieverList == null || pollRecieverList.isEmpty()) {
+    private static String getRecipientOfPoll(List<KeyValueType> pollReceiverList) throws ExchangeLogException {
+        if (pollReceiverList == null || pollReceiverList.isEmpty()) {
             throw new ExchangeLogException("No poll receiver list");
         }
         String dnid = null;
@@ -121,7 +119,7 @@ public class ExchangeLogMapper {
         String satelliteNumber = null;
         String les = null;
 
-        for (KeyValueType pollReceiver : pollRecieverList) {
+        for (KeyValueType pollReceiver : pollReceiverList) {
             if (IdType.DNID.name().equalsIgnoreCase(pollReceiver.getKey())) {
                 dnid = pollReceiver.getValue();
             } else if (IdType.MEMBER_NUMBER.name().equalsIgnoreCase(pollReceiver.getKey())) {
@@ -226,6 +224,8 @@ public class ExchangeLogMapper {
         log.setType(LogType.SEND_POLL);
         log.setDateRecieved(command.getTimestamp());
 
+
+        log.setRecipient(getRecipientOfPoll(command.getPoll().getPollReceiver()));
         log.setSenderReceiver("System");
         LogRefType logRefType = new LogRefType();
         logRefType.setRefGuid(command.getPoll().getPollId());
