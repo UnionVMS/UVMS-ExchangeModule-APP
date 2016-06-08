@@ -21,7 +21,7 @@
         <dozer.version>5.5.1</dozer.version>
         <audit.model.version>2.0.5-SNAPSHOT</audit.model.version>
         <movement.model.version>2.0.5-SNAPSHOT</movement.model.version>
-        <usm4uvms.version>2.0.3</usm4uvms.version>
+        <usm4uvms.version>2.0.11</usm4uvms.version>
         <rules.version>2.0.5-SNAPSHOT</rules.version>
         <asset.version>2.0.5-SNAPSHOT</asset.version>
         <audit.version>2.0.5-SNAPSHOT</audit.version>
