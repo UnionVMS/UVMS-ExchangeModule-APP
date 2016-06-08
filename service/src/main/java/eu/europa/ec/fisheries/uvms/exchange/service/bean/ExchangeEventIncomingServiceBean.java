@@ -113,7 +113,7 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
             String username;
 
             // A person has created a position
-            if(request.getRequest().getMovement().getSource().equals(MovementSourceType.MANUAL)){
+            if(MovementSourceType.MANUAL.equals(request.getRequest().getMovement().getSource())){
                 username = request.getUsername();
 
                 // Send some response to Movement, if it originated from there (manual movement)
