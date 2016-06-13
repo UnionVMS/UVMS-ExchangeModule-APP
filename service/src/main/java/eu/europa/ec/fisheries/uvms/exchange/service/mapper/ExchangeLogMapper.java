@@ -72,7 +72,7 @@ public class ExchangeLogMapper {
             case SATELLITE_RECEIVER:
             case FLUX:
             case NAF:
-                senderReceiver = getSenderReceiver(movement.getAssetId());
+                senderReceiver = pluginType.name();
                 break;
             case EMAIL:
             case OTHER:
