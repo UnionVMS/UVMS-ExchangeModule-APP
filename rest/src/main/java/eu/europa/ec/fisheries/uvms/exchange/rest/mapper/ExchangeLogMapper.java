@@ -41,6 +41,7 @@ public class ExchangeLogMapper {
     
     public static ExchangeLog mapToExchangeLogDto(ExchangeLogType log) {
     	ExchangeLog dto = new ExchangeLog();
+        Date dateFwd = null;
     	switch(log.getType()) {
     	case RECEIVE_MOVEMENT:
     		dto.setType(LogTypeLabel.RECEIVED_MOVEMENT);
@@ -50,16 +51,18 @@ public class ExchangeLogMapper {
     	case SEND_MOVEMENT:
     		dto.setType(LogTypeLabel.SENT_MOVEMENT);
     		SendMovementType sendLog = (SendMovementType)log;
-    		Date dateFwd = sendLog.getFwdDate().toGregorianCalendar().getTime();
+    		dateFwd = sendLog.getFwdDate().toGregorianCalendar().getTime();
     		dto.setDateFwd(DateUtils.dateToString(dateFwd));
     		dto.setRule(sendLog.getFwdRule());
     		dto.setRecipient(sendLog.getRecipient());
     		break;
     	case SEND_EMAIL:
 			SendEmailType sendEmail = (SendEmailType)log;
-    		dto.setType(LogTypeLabel.SENT_EMAIL);
+            dateFwd = sendEmail.getFwdDate().toGregorianCalendar().getTime();
+            dto.setType(LogTypeLabel.SENT_EMAIL);
 			dto.setRecipient(sendEmail.getRecipient());
 			dto.setRule(sendEmail.getFwdRule());
+            dto.setDateFwd(DateUtils.dateToString(dateFwd));
     		break;
     	case SEND_POLL:
 			SendPollType sendPoll = (SendPollType)log;
