@@ -131,7 +131,7 @@ public class ExchangeLogMapper {
             }
         }
         if (dnid != null && memberNumber != null) {
-            return dnid + memberNumber;
+            return dnid + "." + memberNumber;
         } else if (satelliteNumber != null) {
             return satelliteNumber;
         } else if (les != null) {
