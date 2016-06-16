@@ -121,6 +121,12 @@ public class ExchangeEventOutgoingServiceBean implements ExchangeEventOutgoingSe
         if (serviceName == null || serviceName.isEmpty()) {
             String faultMessage = "First plugin of type " + sendReport.getPluginType() + " is invalid. Missing serviceClassName";
             exchangeErrorEvent.fire(new ExchangeMessageEvent(origin, ExchangeModuleResponseMapper.createFaultMessage(FaultCode.EXCHANGE_PLUGIN_INVALID, faultMessage)));
+            try {
+                List<UnsentMessageTypeProperty> unsentMessageProperties = ExchangeLogMapper.getUnsentMessageProperties(sendReport);
+                exchangeLog.createUnsentMessage(sendReport.getRecipient(), sendReport.getTimestamp(), ExchangeLogMapper.getSendMovementSenderReceiver(sendReport), origin.getText(), unsentMessageProperties, username);
+            } catch (ExchangeLogException | JMSException e) {
+                LOG.error("Couldn't create unsent message " + e.getMessage());
+            }
             return false;
         } else if (!sendReport.getPluginType().equals(service.getPluginType())) {
             String faultMessage = "First plugin of type " + sendReport.getPluginType() + " does not match plugin type of " + serviceName + ". Current type is " + service.getPluginType();
@@ -213,6 +219,12 @@ public class ExchangeEventOutgoingServiceBean implements ExchangeEventOutgoingSe
         } else if (service == null || service.getServiceClassName() == null || !service.getServiceClassName().equalsIgnoreCase(command.getPluginName())) {
             String faultMessage = "No plugin receiver available";
             exchangeErrorEvent.fire(new ExchangeMessageEvent(origin, ExchangeModuleResponseMapper.createFaultMessage(FaultCode.EXCHANGE_COMMAND_INVALID, faultMessage)));
+            try {
+                List<UnsentMessageTypeProperty> setUnsentMessageTypePropertiesForPoll = getSetUnsentMessageTypePropertiesForPoll(commandType);
+                exchangeLog.createUnsentMessage(service.getName(), command.getTimestamp(), command.getCommand().name(), origin.getText(), setUnsentMessageTypePropertiesForPoll, username);
+            } catch (ExchangeLogException | JMSException e) {
+                LOG.error("Couldn't create unsentMessage " + e.getMessage());
+            }
             return false;
         } else if (command.getTimestamp() == null) {
             String faultMessage = "No timestamp";

@@ -213,31 +213,30 @@ public class ExchangeLogServiceBean implements ExchangeLogService {
     @Override
     public void resend(List<String> messageIdList, String username) throws ExchangeLogException {
         LOG.debug("resend in service layer");
+        List<UnsentMessageType> unsentMessageList;
         try {
             String text = ExchangeDataSourceRequestMapper.mapResendMessage(messageIdList, username);
             String messageId = producer.sendMessageOnQueue(text, MessageQueue.INTERNAL);
             TextMessage response = consumer.getMessage(messageId, TextMessage.class);
-            List<UnsentMessageType> unsentMessageList = ExchangeDataSourceResponseMapper.mapResendMessageResponse(response, messageId);
+            unsentMessageList = ExchangeDataSourceResponseMapper.mapResendMessageResponse(response, messageId);
             sendAuditLogMessageForResendUnsentMessage(messageIdList.toString(), username);
-            if (unsentMessageList != null && !unsentMessageList.isEmpty()) {
-                sendingQueueEvent.fire(new NotificationMessage("messageIds", messageIdList));
+        } catch (ExchangeModelMapperException | ExchangeMessageException e) {
+            LOG.error("Couldn't read unsent messages", e);
+            throw new ExchangeLogException("Couldn't read unsent messages");
+        }
+        if (unsentMessageList != null && !unsentMessageList.isEmpty()) {
+            sendingQueueEvent.fire(new NotificationMessage("messageIds", messageIdList));
 
-                for (UnsentMessageType unsentMessage : unsentMessageList) {
-
+            for (UnsentMessageType unsentMessage : unsentMessageList) {
+                try {
                     String unsentMessageId = producer.sendMessageOnQueue(unsentMessage.getMessage(), MessageQueue.EVENT);
-                    TextMessage unsentResponse = consumer.getMessage(unsentMessageId, TextMessage.class);
+                    //TextMessage unsentResponse = consumer.getMessage(unsentMessageId, TextMessage.class);
                     sendAuditLogMessageForCreateUnsentMessage(unsentMessageId, username);
-                    try {
-                        ExchangeModuleResponseMapper.validateResponse(unsentResponse, unsentMessageId);
-                    } catch (JMSException | ExchangeValidationException e) {
-                        //TODO handle unsent message
-                        LOG.error("Couldn't resend message " + unsentMessage.getMessageId() + " : " + e.getMessage());
-                    }
+                    //ExchangeModuleResponseMapper.validateResponse(unsentResponse, unsentMessageId);
+                } catch (ExchangeMessageException e) {
+                    LOG.error("Error when sending/receiving message", e);
                 }
             }
-        } catch (ExchangeMessageException | ExchangeModelMapperException e) {
-            LOG.error("Couldn't add message to unsent list");
-            throw new ExchangeLogException("Couldn't add message to unsent list");
         }
     }
 
