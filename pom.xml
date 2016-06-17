@@ -22,12 +22,12 @@
         <audit.model.version>2.0.5</audit.model.version>
         <movement.model.version>2.0.5</movement.model.version>
         <usm4uvms.version>2.0.11</usm4uvms.version>
-        <rules.version>2.0.5</rules.version>
+        <rules.version>2.0.6-SNAPSHOT</rules.version>
         <asset.version>2.0.5</asset.version>
         <audit.version>2.0.5</audit.version>
         <longpolling.version>2.0.4</longpolling.version>
         <uvms.config.version>2.0.5</uvms.config.version>
-        <exchange.model.version>2.0.5</exchange.model.version>
+        <exchange.model.version>2.0.6-SNAPSHOT</exchange.model.version>
     </properties>
     
     <dependencies>
