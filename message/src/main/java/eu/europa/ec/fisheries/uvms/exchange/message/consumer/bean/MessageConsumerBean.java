@@ -74,6 +74,10 @@ public class MessageConsumerBean implements MessageListener {
     @HandleProcessedMovementEvent
     Event<ExchangeMessageEvent> processedMovementEvent;
 
+    @Inject
+    @SetFluxFAReportMessageEvent
+    Event<ExchangeMessageEvent> processFLUXFAReportMessageEvent;
+
     @Override
     @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
     public void onMessage(Message message) {
@@ -122,6 +126,10 @@ public class MessageConsumerBean implements MessageListener {
                     break;
                 case PROCESSED_MOVEMENT:
                     processedMovementEvent.fire(new ExchangeMessageEvent(textMessage));
+                    break;
+                case SET_FLUX_FA_REPORT_MESSAGE:
+                    LOG.debug("inside SET_FLUX_FA_REPORT_MESSAGE case");
+                    processFLUXFAReportMessageEvent.fire(new ExchangeMessageEvent(textMessage));
                     break;
                 default:
                     LOG.error("[ Not implemented method consumed: {} ] ", request.getMethod());

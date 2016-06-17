@@ -36,6 +36,9 @@
 
                     <!-- asynch processed movement response -->
                     <xsd:enumeration value="PROCESSED_MOVEMENT"/>
+					
+					<!-- FLUX FA Message from FLUX Activity Plugin -->
+					<xsd:enumeration value="SET_FLUX_FA_REPORT_MESSAGE"/>
                 </xsd:restriction>
             </xsd:simpleType>
             
@@ -52,6 +55,18 @@
                         <xsd:extension base="module:ExchangeBaseRequest">
                             <xsd:sequence>
                                 <xsd:element name="request" type="movement:SetReportMovementType"/>
+                            </xsd:sequence>
+                        </xsd:extension>
+                    </xsd:complexContent>
+                </xsd:complexType>
+            </xsd:element>
+			
+			<xsd:element name="SetFLUXFAReportMessageRequest">
+                <xsd:complexType>
+                    <xsd:complexContent>
+                        <xsd:extension base="module:ExchangeBaseRequest">
+                            <xsd:sequence>
+                                <xsd:element name="request" type="xsd:string"/>
                             </xsd:sequence>
                         </xsd:extension>
                     </xsd:complexContent>

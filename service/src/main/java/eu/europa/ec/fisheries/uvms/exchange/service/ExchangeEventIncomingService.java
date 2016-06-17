@@ -1,10 +1,10 @@
 package eu.europa.ec.fisheries.uvms.exchange.service;
 
-import javax.ejb.Local;
-import javax.enterprise.event.Observes;
-
 import eu.europa.ec.fisheries.uvms.exchange.message.event.*;
 import eu.europa.ec.fisheries.uvms.exchange.message.event.carrier.ExchangeMessageEvent;
+
+import javax.ejb.Local;
+import javax.enterprise.event.Observes;
 
 @Local
 public interface ExchangeEventIncomingService {
@@ -41,4 +41,11 @@ public interface ExchangeEventIncomingService {
      * @param message
      */
     public void processPluginPing(@Observes @PluginPingEvent ExchangeMessageEvent message);
+
+
+    /**
+     * Process FLUXFAReportMessage coming from Flux Activity plugin
+     * @param message
+     */
+    public void processFLUXFAReportMessage(@Observes @SetFluxFAReportMessageEvent ExchangeMessageEvent message);
 }
