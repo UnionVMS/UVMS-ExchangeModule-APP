@@ -194,7 +194,7 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
                 username = orgRequest.getPluginName();
             }
 
-            ExchangeLogType log = ExchangeLogMapper.getReceivedMovementExchangeLog(orgRequest, movementRefType.getMovementRefGuid(), movementRefType.getType().value());
+            ExchangeLogType log = ExchangeLogMapper.getReceivedMovementExchangeLog(orgRequest, movementRefType.getMovementRefGuid(), movementRefType.getType().value(), username);
             ExchangeLogType createdLog = exchangeLog.log(log, username);
 
             LogRefType logTypeRef = createdLog.getTypeRef();

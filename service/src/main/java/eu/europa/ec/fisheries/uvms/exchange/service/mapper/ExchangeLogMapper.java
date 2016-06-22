@@ -22,7 +22,7 @@ public class ExchangeLogMapper {
 
     final static Logger LOG = LoggerFactory.getLogger(ExchangeLogMapper.class);
 
-    public static ExchangeLogType getReceivedMovementExchangeLog(SetReportMovementType request, String typeRefGuid, String typeRefType) throws ExchangeLogException {
+    public static ExchangeLogType getReceivedMovementExchangeLog(SetReportMovementType request, String typeRefGuid, String typeRefType,String username) throws ExchangeLogException {
         if (request == null) {
             throw new ExchangeLogException("No request");
         }
@@ -44,7 +44,7 @@ public class ExchangeLogMapper {
 
         log.setStatus(ExchangeLogStatusTypeType.SUCCESSFUL);
 
-        log.setSenderReceiver(getSenderReceiver(request.getMovement(), request.getPluginType(), request.getPluginName()));
+        log.setSenderReceiver(getSenderReceiver(request.getMovement(), request.getPluginType(), request.getPluginName(), username));
         if (request.getMovement().getSource() != null) {
             log.setSource(request.getMovement().getSource().name());
         } else {
@@ -55,7 +55,7 @@ public class ExchangeLogMapper {
         return log;
     }
 
-    private static String getSenderReceiver(MovementBaseType movement, PluginType pluginType, String pluginName) throws ExchangeLogException {
+    private static String getSenderReceiver(MovementBaseType movement, PluginType pluginType, String pluginName, String username) throws ExchangeLogException {
         if (movement == null) {
             throw new ExchangeLogException("No movement");
         }
@@ -67,7 +67,7 @@ public class ExchangeLogMapper {
 
         switch (pluginType) {
             case MANUAL:
-                senderReceiver = "SYSTEM";
+                senderReceiver = username!=null ? username : "Unknown";
                 break;
             case SATELLITE_RECEIVER:
             case FLUX:
@@ -155,7 +155,7 @@ public class ExchangeLogMapper {
             senderReceiver = sendReport.getIrcs();
         }
         try {
-            senderReceiver = getSenderReceiver(sendReport.getMovement(), sendReport.getPluginType(), sendReport.getPluginName());
+            senderReceiver = getSenderReceiver(sendReport.getMovement(), sendReport.getPluginType(), sendReport.getPluginName(), null);
         } catch (ExchangeLogException e) {
             LOG.debug("Report sent to plugin couldn't map to senderReceiver");
         }
