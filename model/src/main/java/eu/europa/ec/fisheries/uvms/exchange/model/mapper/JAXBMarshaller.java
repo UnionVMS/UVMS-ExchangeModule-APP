@@ -47,9 +47,7 @@ public class JAXBMarshaller {
             marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
             StringWriter sw = new StringWriter();
             marshaller.marshal(data, sw);
-            long before = System.currentTimeMillis();
             String marshalled = sw.toString();
-            LOG.debug("StringWriter time: {}", (System.currentTimeMillis() - before));
             return marshalled;
         } catch (JAXBException ex) {
             throw new ExchangeModelMarshallException("[ Error when marshalling Object to String ]");
