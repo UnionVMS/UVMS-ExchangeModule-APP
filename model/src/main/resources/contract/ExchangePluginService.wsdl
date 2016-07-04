@@ -24,6 +24,8 @@
                     <xsd:enumeration value="START"/>
                     <xsd:enumeration value="STOP"/>
                     <xsd:enumeration value="PING"/>
+                    <xsd:enumeration value="SET_MDR_REQUEST"/>
+					<xsd:enumeration value="SET_FLUX_RESPONSE"/>
                 </xsd:restriction>
             </xsd:simpleType>
             
@@ -38,6 +40,18 @@
                     <xsd:element name="method" type="plugin:ExchangePluginMethod"/>
                 </xsd:sequence>
             </xsd:complexType>
+            
+             <xsd:element name="SetMdrPluginRequest">
+                <xsd:complexType>
+                    <xsd:complexContent>
+                        <xsd:extension base="plugin:PluginBaseRequest">
+                            <xsd:sequence>
+                                <xsd:element name="request" type="xsd:string" />
+                            </xsd:sequence>
+                        </xsd:extension>
+                    </xsd:complexContent>
+                </xsd:complexType>
+            </xsd:element>
             
             <xsd:element name="AcknowledgeResponse">
                 <xsd:complexType>
@@ -59,6 +73,20 @@
                             <xsd:sequence>
                                 <xsd:sequence>
                                     <xsd:element name="configurations" type="service:SettingListType" minOccurs="1" maxOccurs="1"/>
+                                </xsd:sequence>
+                            </xsd:sequence>
+                        </xsd:extension>
+                    </xsd:complexContent>
+                </xsd:complexType>
+            </xsd:element>
+			
+			<xsd:element name="SetFLUXFAResponseRequest">
+                <xsd:complexType>
+                    <xsd:complexContent>
+                        <xsd:extension base="plugin:PluginBaseRequest">
+                            <xsd:sequence>
+                                <xsd:sequence>
+                                    <xsd:element name="response" type="xsd:string"/>
                                 </xsd:sequence>
                             </xsd:sequence>
                         </xsd:extension>
@@ -133,6 +161,8 @@
 
         </xsd:schema>
     </types>
+	
+	
     
     <message name="PluginFault">
         <part name="body" element="types:PluginFault"/>

@@ -20,7 +20,6 @@
         <audit.model.version>2.0.0</audit.model.version>
         <jibx.version>1.1.4</jibx.version>
     <release.branch.name>uvms-2.0.6-kili</release.branch.name></properties>
-
     <distributionManagement>
         <repository>
             <id>digit-releases</id>
