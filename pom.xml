@@ -9,7 +9,7 @@
     
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <release.branch.name>uvms-2.0.6-kili</release.branch.name>
+        <release.branch.name>uvms-git-release</release.branch.name>
         <mockito.version>1.9.5</mockito.version>
         <junit.version>4.10</junit.version>
         <javaee.version>7.0</javaee.version>
@@ -20,15 +20,15 @@
         <logback.core.version>1.1.2</logback.core.version>
         <dozer.version>5.5.1</dozer.version>
         <audit.model.version>2.0.5</audit.model.version>
-        <movement.model.version>2.0.7-SNAPSHOT</movement.model.version>
+        <movement.model.version>2.0.7</movement.model.version>
         <usm4uvms.version>2.0.11</usm4uvms.version>
-        <rules.version>2.0.7-SNAPSHOT</rules.version>
-        <asset.version>2.0.7-SNAPSHOT</asset.version>
-        <audit.version>2.0.7-SNAPSHOT</audit.version>
+        <rules.version>2.0.7</rules.version>
+        <asset.version>2.0.7</asset.version>
+        <audit.version>2.0.7</audit.version>
         <longpolling.version>2.0.4</longpolling.version>
         <uvms.config.version>2.0.5</uvms.config.version>
-        <exchange.model.version>2.0.7-SNAPSHOT</exchange.model.version>
-		<activity.model>0.5.1-SNAPSHOT</activity.model>
+        <exchange.model.version>2.0.7</exchange.model.version>
+		<activity.model>0.5.1</activity.model>
         <project.scm.id>github</project.scm.id>
         <maven-release-plugin>2.5.3</maven-release-plugin>
     </properties>
