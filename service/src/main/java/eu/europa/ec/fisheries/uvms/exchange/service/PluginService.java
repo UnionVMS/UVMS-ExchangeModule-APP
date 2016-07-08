@@ -1,0 +1,40 @@
+/*
+﻿Developed with the contribution of the European Commission - Directorate General for Maritime Affairs and Fisheries
+© European Union, 2015-2016.
+
+This file is part of the Integrated Fisheries Data Management (IFDM) Suite. The IFDM Suite is free software: you can
+redistribute it and/or modify it under the terms of the GNU General Public License as published by the
+Free Software Foundation, either version 3 of the License, or any later version. The IFDM Suite is distributed in
+the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details. You should have received a
+copy of the GNU General Public License along with the IFDM Suite. If not, see <http://www.gnu.org/licenses/>.
+ */
+package eu.europa.ec.fisheries.uvms.exchange.service;
+
+import javax.ejb.Local;
+import javax.enterprise.event.Observes;
+
+import eu.europa.ec.fisheries.uvms.config.event.ConfigSettingEvent;
+import eu.europa.ec.fisheries.uvms.config.event.ConfigSettingUpdatedEvent;
+import eu.europa.ec.fisheries.uvms.exchange.message.event.UpdatePluginSettingEvent;
+import eu.europa.ec.fisheries.uvms.exchange.message.event.carrier.ExchangeMessageEvent;
+import eu.europa.ec.fisheries.uvms.exchange.message.event.carrier.PluginMessageEvent;
+import eu.europa.ec.fisheries.uvms.exchange.message.event.registry.RegisterServiceEvent;
+import eu.europa.ec.fisheries.uvms.exchange.message.event.registry.UnRegisterServiceEvent;
+import eu.europa.ec.fisheries.uvms.exchange.service.exception.ExchangeServiceException;
+
+@Local
+public interface PluginService {
+
+    public void registerService(@Observes @RegisterServiceEvent PluginMessageEvent message);
+    public void unregisterService(@Observes @UnRegisterServiceEvent PluginMessageEvent message);
+    
+    public void setConfig(@Observes @ConfigSettingUpdatedEvent ConfigSettingEvent settingEvent);
+
+    public void updatePluginSetting(@Observes @UpdatePluginSettingEvent ExchangeMessageEvent settingEvent);
+    
+    public boolean ping(String serviceClassName) throws ExchangeServiceException;
+	public boolean start(String serviceClassName) throws ExchangeServiceException;
+	public boolean stop(String serviceClassName) throws ExchangeServiceException;
+    
+}
