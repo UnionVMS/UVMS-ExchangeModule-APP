@@ -23,8 +23,8 @@
         <movement.model.version>2.0.7-SNAPSHOT</movement.model.version>
         <usm4uvms.version>2.0.14-SNAPSHOT</usm4uvms.version>
         <rules.version>2.0.7-SNAPSHOT</rules.version>
-        <asset.version>2.0.8-SNAPSHOT</asset.version>
-        <audit.version>2.0.8-SNAPSHOT</audit.version>
+        <asset.version>2.0.7-SNAPSHOT</asset.version>
+        <audit.version>2.0.7-SNAPSHOT</audit.version>
         <longpolling.version>2.0.4</longpolling.version>
         <uvms.config.version>2.0.5</uvms.config.version>
         <exchange.model.version>2.0.7-SNAPSHOT</exchange.model.version>
