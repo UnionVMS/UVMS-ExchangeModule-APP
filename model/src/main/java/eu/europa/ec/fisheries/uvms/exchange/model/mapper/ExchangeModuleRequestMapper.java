@@ -17,8 +17,8 @@ import eu.europa.ec.fisheries.schema.exchange.module.v1.SendMovementToPluginRequ
 import eu.europa.ec.fisheries.schema.exchange.module.v1.SetCommandRequest;
 import eu.europa.ec.fisheries.schema.exchange.module.v1.SetFLUXFAReportMessageRequest;
 import eu.europa.ec.fisheries.schema.exchange.module.v1.SetFLUXFAResponseMessageRequest;
-import eu.europa.ec.fisheries.schema.exchange.module.v1.SetFLUXMDRSyncMessageRequest;
-import eu.europa.ec.fisheries.schema.exchange.module.v1.SetFLUXMDRSyncMessageResponse;
+import eu.europa.ec.fisheries.schema.exchange.module.v1.SetFLUXMDRSyncMessageExchangeRequest;
+import eu.europa.ec.fisheries.schema.exchange.module.v1.SetFLUXMDRSyncMessageExchangeResponse;
 import eu.europa.ec.fisheries.schema.exchange.module.v1.SetMovementReportRequest;
 import eu.europa.ec.fisheries.schema.exchange.module.v1.UpdatePluginSettingRequest;
 import eu.europa.ec.fisheries.schema.exchange.movement.v1.MovementRefType;
@@ -173,7 +173,7 @@ public class ExchangeModuleRequestMapper {
 
     
     public static String createFluxMdrSyncEntityRequest(String reportType, String username) throws ExchangeModelMarshallException {
-        SetFLUXMDRSyncMessageRequest request = new SetFLUXMDRSyncMessageRequest();
+        SetFLUXMDRSyncMessageExchangeRequest request = new SetFLUXMDRSyncMessageExchangeRequest();
         request.setMethod(ExchangeModuleMethod.SET_MDR_SYNC_MESSAGE_REQUEST);
         request.setUsername(username);
         request.setRequest(reportType);
@@ -181,7 +181,7 @@ public class ExchangeModuleRequestMapper {
     }
     
     public static String createFluxMdrSyncEntityResponse(String reportType, String username) throws ExchangeModelMarshallException {
-        SetFLUXMDRSyncMessageResponse request = new SetFLUXMDRSyncMessageResponse();
+        SetFLUXMDRSyncMessageExchangeResponse request = new SetFLUXMDRSyncMessageExchangeResponse();
         request.setMethod(ExchangeModuleMethod.SET_MDR_SYNC_MESSAGE_RESPONSE);
         request.setUsername(username);
         request.setRequest(reportType);

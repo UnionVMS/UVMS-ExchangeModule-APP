@@ -97,7 +97,7 @@
                 </xsd:complexType>
             </xsd:element>
             
-            <xsd:element name="SetFLUXMDRSyncMessageRequest">
+            <xsd:element name="SetFLUXMDRSyncMessageExchangeRequest">
                 <xsd:complexType>
                     <xsd:complexContent>
                         <xsd:extension base="module:ExchangeBaseRequest">
@@ -109,7 +109,7 @@
                 </xsd:complexType>
             </xsd:element>
             
-            <xsd:element name="SetFLUXMDRSyncMessageResponse">
+            <xsd:element name="SetFLUXMDRSyncMessageExchangeResponse">
                 <xsd:complexType>
                     <xsd:complexContent>
                         <xsd:extension base="module:ExchangeBaseRequest">

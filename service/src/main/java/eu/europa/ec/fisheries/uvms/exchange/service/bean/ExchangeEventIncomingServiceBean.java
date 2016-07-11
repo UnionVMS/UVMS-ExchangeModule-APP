@@ -1,11 +1,25 @@
 package eu.europa.ec.fisheries.uvms.exchange.service.bean;
 
-import eu.europa.ec.fisheries.schema.exchange.common.v1.AcknowledgeType;
+import java.util.List;
 
-import eu.europa.ec.fisheries.schema.exchange.module.v1.*;
+import javax.ejb.EJB;
+import javax.ejb.Stateless;
+import javax.enterprise.event.Event;
+import javax.enterprise.event.Observes;
+import javax.inject.Inject;
+import javax.jms.JMSException;
+import javax.jms.TextMessage;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import eu.europa.ec.fisheries.schema.exchange.common.v1.AcknowledgeType;
+import eu.europa.ec.fisheries.schema.exchange.module.v1.GetServiceListRequest;
+import eu.europa.ec.fisheries.schema.exchange.module.v1.PingResponse;
+import eu.europa.ec.fisheries.schema.exchange.module.v1.ProcessedMovementResponse;
+import eu.europa.ec.fisheries.schema.exchange.module.v1.SetFLUXFAReportMessageRequest;
+import eu.europa.ec.fisheries.schema.exchange.module.v1.SetMovementReportRequest;
 import eu.europa.ec.fisheries.schema.exchange.movement.v1.MovementBaseType;
-import eu.europa.ec.fisheries.schema.exchange.movement.v1.MovementRefType;
-import eu.europa.ec.fisheries.schema.exchange.movement.v1.MovementSourceType;
 import eu.europa.ec.fisheries.schema.exchange.movement.v1.MovementRefType;
 import eu.europa.ec.fisheries.schema.exchange.movement.v1.MovementSourceType;
 import eu.europa.ec.fisheries.schema.exchange.movement.v1.SetReportMovementType;
@@ -13,19 +27,17 @@ import eu.europa.ec.fisheries.schema.exchange.plugin.types.v1.PluginFault;
 import eu.europa.ec.fisheries.schema.exchange.plugin.types.v1.PluginType;
 import eu.europa.ec.fisheries.schema.exchange.plugin.v1.AcknowledgeResponse;
 import eu.europa.ec.fisheries.schema.exchange.plugin.v1.ExchangePluginMethod;
-import eu.europa.ec.fisheries.schema.exchange.plugin.v1.SetMdrPluginRequest;
 import eu.europa.ec.fisheries.schema.exchange.service.v1.ServiceResponseType;
 import eu.europa.ec.fisheries.schema.exchange.service.v1.StatusType;
-import eu.europa.ec.fisheries.schema.exchange.v1.*;
-import eu.europa.ec.fisheries.schema.movement.module.v1.ProcessedMovementAck;
+import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogStatusTypeType;
+import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogType;
+import eu.europa.ec.fisheries.schema.exchange.v1.LogRefType;
+import eu.europa.ec.fisheries.schema.exchange.v1.PollStatus;
+import eu.europa.ec.fisheries.schema.exchange.v1.TypeRefType;
 import eu.europa.ec.fisheries.schema.movement.module.v1.ProcessedMovementAck;
 import eu.europa.ec.fisheries.schema.rules.movement.v1.RawMovementType;
-
-import eu.europa.ec.fisheries.uvms.exchange.message.constants.MessageQueue;
-import eu.europa.ec.fisheries.uvms.exchange.message.event.*;
-
 import eu.europa.ec.fisheries.uvms.activity.model.schemas.ActivityModuleMethod;
-import eu.europa.ec.fisheries.uvms.activity.model.schemas.SetFLUXMDRSyncMessageRequest;
+import eu.europa.ec.fisheries.uvms.activity.model.schemas.SetFLUXMDRSyncMessageActivityResponse;
 import eu.europa.ec.fisheries.uvms.exchange.message.constants.MessageQueue;
 import eu.europa.ec.fisheries.uvms.exchange.message.event.ErrorEvent;
 import eu.europa.ec.fisheries.uvms.exchange.message.event.ExchangeLogEvent;
@@ -36,7 +48,6 @@ import eu.europa.ec.fisheries.uvms.exchange.message.event.PluginConfigEvent;
 import eu.europa.ec.fisheries.uvms.exchange.message.event.PluginPingEvent;
 import eu.europa.ec.fisheries.uvms.exchange.message.event.SetFluxFAReportMessageEvent;
 import eu.europa.ec.fisheries.uvms.exchange.message.event.SetMovementEvent;
-
 import eu.europa.ec.fisheries.uvms.exchange.message.event.carrier.ExchangeMessageEvent;
 import eu.europa.ec.fisheries.uvms.exchange.message.event.carrier.PluginMessageEvent;
 import eu.europa.ec.fisheries.uvms.exchange.message.event.registry.PluginErrorEvent;
@@ -58,23 +69,7 @@ import eu.europa.ec.fisheries.uvms.exchange.service.exception.ExchangeServiceExc
 import eu.europa.ec.fisheries.uvms.exchange.service.mapper.ExchangeLogMapper;
 import eu.europa.ec.fisheries.uvms.exchange.service.mapper.MovementMapper;
 import eu.europa.ec.fisheries.uvms.longpolling.notifications.NotificationMessage;
-
 import eu.europa.ec.fisheries.uvms.movement.model.mapper.MovementModuleResponseMapper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-
-import eu.europa.ec.fisheries.uvms.movement.model.mapper.MovementModuleResponseMapper;
-
-
-import javax.ejb.EJB;
-import javax.ejb.Stateless;
-import javax.enterprise.event.Event;
-import javax.enterprise.event.Observes;
-import javax.inject.Inject;
-import javax.jms.JMSException;
-import javax.jms.TextMessage;
-import java.util.List;
 
 @Stateless
 public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingService {
@@ -138,10 +133,10 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
 		TextMessage requestMessage = message.getJmsMessage();
 		try {
 			LOG.info("Sending Flux Response Message To MDR Module queue (ActivityEven queuet).");
-			SetFLUXMDRSyncMessageRequest activityReq = new SetFLUXMDRSyncMessageRequest();
-			activityReq.setMethod(ActivityModuleMethod.GET_FLUX_MDR_ENTITY);
-			activityReq.setRequest(requestMessage.getText());
-			String strRequest = JAXBMarshaller.marshallJaxBObjectToString(activityReq);
+			SetFLUXMDRSyncMessageActivityResponse activityResponse = new SetFLUXMDRSyncMessageActivityResponse();
+			activityResponse.setMethod(ActivityModuleMethod.GET_FLUX_MDR_ENTITY);
+			activityResponse.setRequest(requestMessage.getText());
+			String strRequest = JAXBMarshaller.marshallJaxBObjectToString(activityResponse);
 			producer.sendMessageOnQueue(strRequest , MessageQueue.ACTIVITY_EVENT);
 			LOG.info("Request object sent to Activity Queue.");
 

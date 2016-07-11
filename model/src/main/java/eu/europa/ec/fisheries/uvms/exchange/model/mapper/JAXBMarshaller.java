@@ -82,9 +82,9 @@ public class JAXBMarshaller {
             R object = (R) unmarshaller.unmarshal(source);
             LOG.debug("Unmarshalling time: {}", (System.currentTimeMillis() - before));
             return object;
-        } catch (JMSException | JAXBException ex) {
+        } catch (JMSException | JAXBException | NullPointerException ex) {
             throw new ExchangeModelMarshallException("[Error when unmarshalling response in ResponseMapper ]");
-        }
+        } 
     }
 
 }

@@ -19,6 +19,7 @@ import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
 import javax.enterprise.event.Event;
 import javax.inject.Inject;
+import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.MessageListener;
 import javax.jms.TextMessage;
@@ -99,6 +100,10 @@ public class MessageConsumerBean implements MessageListener {
 
         TextMessage textMessage = (TextMessage) message;
         LOG.info("try consuming ExchangeBaseRequest");
+        if(isNullOrEmptyRequest(textMessage)){
+            LOG.error("GOT NULL TEXT MESSAGE IN EXCHANGE QUEUE.");
+            return;
+        }
         ExchangeBaseRequest request = tryConsumeExchangeBaseRequest(textMessage);
         LOG.info("unmarshalling successful. request:"+request);
         if (request == null) {
@@ -153,13 +158,21 @@ public class MessageConsumerBean implements MessageListener {
                     LOG.debug("inside SET_FLUX_FA_REPORT_MESSAGE case");
                     processFLUXFAReportMessageEvent.fire(new ExchangeMessageEvent(textMessage));
                     break;
-
-
                 default:
                     LOG.error("[ Not implemented method consumed: {} ] ", request.getMethod());
                     errorEvent.fire(new ExchangeMessageEvent(textMessage, ExchangeModuleResponseMapper.createFaultMessage(FaultCode.EXCHANGE_MESSAGE, "Method not implemented")));
             }
         }
+    }
+
+    private boolean isNullOrEmptyRequest(TextMessage message) {
+        String text = null;
+        try {
+            text = message.getText();
+        } catch (JMSException e) {
+            e.printStackTrace();
+        }
+        return text == null || text == "";
     }
 
     private boolean checkUsernameShouldBeProvided(ExchangeBaseRequest request){
