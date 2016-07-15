@@ -10,15 +10,11 @@ import javax.inject.Inject;
 import javax.jms.JMSException;
 import javax.jms.TextMessage;
 
+import eu.europa.ec.fisheries.schema.exchange.module.v1.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import eu.europa.ec.fisheries.schema.exchange.common.v1.AcknowledgeType;
-import eu.europa.ec.fisheries.schema.exchange.module.v1.GetServiceListRequest;
-import eu.europa.ec.fisheries.schema.exchange.module.v1.PingResponse;
-import eu.europa.ec.fisheries.schema.exchange.module.v1.ProcessedMovementResponse;
-import eu.europa.ec.fisheries.schema.exchange.module.v1.SetFLUXFAReportMessageRequest;
-import eu.europa.ec.fisheries.schema.exchange.module.v1.SetMovementReportRequest;
 import eu.europa.ec.fisheries.schema.exchange.movement.v1.MovementBaseType;
 import eu.europa.ec.fisheries.schema.exchange.movement.v1.MovementRefType;
 import eu.europa.ec.fisheries.schema.exchange.movement.v1.MovementSourceType;
@@ -133,11 +129,16 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
 		TextMessage requestMessage = message.getJmsMessage();
 		try {
 			LOG.info("Sending Flux Response Message To MDR Module queue (ActivityEven queuet).");
+
+            SetFLUXMDRSyncMessageExchangeResponse exchangeResponse = JAXBMarshaller.unmarshallTextMessage(requestMessage, SetFLUXMDRSyncMessageExchangeResponse.class);
+            String strRequest = exchangeResponse.getRequest();
+
 			SetFLUXMDRSyncMessageActivityResponse activityResponse = new SetFLUXMDRSyncMessageActivityResponse();
 			activityResponse.setMethod(ActivityModuleMethod.GET_FLUX_MDR_ENTITY);
-			activityResponse.setRequest(requestMessage.getText());
-			String strRequest = JAXBMarshaller.marshallJaxBObjectToString(activityResponse);
-			producer.sendMessageOnQueue(strRequest , MessageQueue.ACTIVITY_EVENT);
+			activityResponse.setRequest(strRequest);
+
+			String activityStrReq = JAXBMarshaller.marshallJaxBObjectToString(activityResponse);
+			producer.sendMessageOnQueue(activityStrReq , MessageQueue.ACTIVITY_EVENT);
 			LOG.info("Request object sent to Activity Queue.");
 
 		} catch (Exception e) {
