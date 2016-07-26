@@ -1,13 +1,13 @@
 /*
-﻿Developed with the contribution of the European Commission - Directorate General for Maritime Affairs and Fisheries
-© European Union, 2015-2016.
+ ﻿Developed with the contribution of the European Commission - Directorate General for Maritime Affairs and Fisheries
+ © European Union, 2015-2016.
 
-This file is part of the Integrated Fisheries Data Management (IFDM) Suite. The IFDM Suite is free software: you can
-redistribute it and/or modify it under the terms of the GNU General Public License as published by the
-Free Software Foundation, either version 3 of the License, or any later version. The IFDM Suite is distributed in
-the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
-FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details. You should have received a
-copy of the GNU General Public License along with the IFDM Suite. If not, see <http://www.gnu.org/licenses/>.
+ This file is part of the Integrated Fisheries Data Management (IFDM) Suite. The IFDM Suite is free software: you can
+ redistribute it and/or modify it under the terms of the GNU General Public License as published by the
+ Free Software Foundation, either version 3 of the License, or any later version. The IFDM Suite is distributed in
+ the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details. You should have received a
+ copy of the GNU General Public License along with the IFDM Suite. If not, see <http://www.gnu.org/licenses/>.
  */
 package eu.europa.ec.fisheries.uvms.exchange.service.bean;
 
@@ -34,15 +34,12 @@ import eu.europa.ec.fisheries.schema.exchange.module.v1.SetCommandRequest;
 import eu.europa.ec.fisheries.schema.exchange.module.v1.SetFLUXFAResponseMessageRequest;
 import eu.europa.ec.fisheries.schema.exchange.movement.v1.SendMovementToPluginType;
 import eu.europa.ec.fisheries.schema.exchange.plugin.types.v1.PluginType;
-import eu.europa.ec.fisheries.schema.exchange.plugin.v1.ExchangePluginMethod;
-import eu.europa.ec.fisheries.schema.exchange.plugin.v1.SetMdrPluginRequest;
 import eu.europa.ec.fisheries.schema.exchange.service.v1.ServiceResponseType;
 import eu.europa.ec.fisheries.schema.exchange.service.v1.StatusType;
 import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogType;
 import eu.europa.ec.fisheries.schema.exchange.v1.UnsentMessageTypeProperty;
 import eu.europa.ec.fisheries.uvms.exchange.message.consumer.ExchangeMessageConsumer;
 import eu.europa.ec.fisheries.uvms.exchange.message.event.ErrorEvent;
-import eu.europa.ec.fisheries.uvms.exchange.message.event.MdrSyncRequestMessageEvent;
 import eu.europa.ec.fisheries.uvms.exchange.message.event.SendCommandToPluginEvent;
 import eu.europa.ec.fisheries.uvms.exchange.message.event.SendFLUXFAResponseToPluginEvent;
 import eu.europa.ec.fisheries.uvms.exchange.message.event.SendReportToPluginEvent;
@@ -70,7 +67,7 @@ public class ExchangeEventOutgoingServiceBean implements ExchangeEventOutgoingSe
 
     final static Logger LOG = LoggerFactory.getLogger(ExchangeEventOutgoingServiceBean.class);
 
-	private static final String MDR_SERVICE_NAME = "eu.europa.ec.fisheries.uvms.plugins.flux.mdr";
+    private static final String MDR_SERVICE_NAME = "eu.europa.ec.fisheries.uvms.plugins.flux.mdr";
 
     @Inject
     @ErrorEvent
@@ -115,7 +112,7 @@ public class ExchangeEventOutgoingServiceBean implements ExchangeEventOutgoingSe
                     LOG.debug("Creating unsent message. Will be deleted on OK response.");
                     List<UnsentMessageTypeProperty> unsentMessageProperties = ExchangeLogMapper.getUnsentMessageProperties(sendReport);
                     String unsentMessageGuid = exchangeLog.createUnsentMessage(sendReport.getRecipient(), sendReport.getTimestamp(), ExchangeLogMapper.getSendMovementSenderReceiver(sendReport), message.getJmsMessage().getText(), unsentMessageProperties, request.getUsername());
-            
+
                     String text = ExchangePluginRequestMapper.createSetReportRequest(sendReport.getTimestamp(), sendReport, unsentMessageGuid);
                     String pluginMessageId = producer.sendEventBusMessage(text, serviceName);
 
@@ -138,29 +135,6 @@ public class ExchangeEventOutgoingServiceBean implements ExchangeEventOutgoingSe
             LOG.error("[ Error when creating unsent movement ]");
         }
     }
-    
-    /*
-	 * Method for Observing the @MdrSyncRequestMessageEvent, meaning a message from Activity MDR
-	 * module has arrived (synchronisation of a MDR Entity) which needs to be sent to EventBus Topic 
-	 * so that it gets intercepted by MDR Plugin Registered Subscriber and sent to Flux.
-	 * 
-	 */
-	@Override
-	public void forwardMdrSyncMessageToPlugin(@Observes @MdrSyncRequestMessageEvent ExchangeMessageEvent message) {
-		LOG.info("Received MdrSyncMessageEvent.");
-
-		TextMessage requestMessage = message.getJmsMessage();
-		try {
-			SetMdrPluginRequest pluginRequest = new SetMdrPluginRequest();
-			pluginRequest.setMethod(ExchangePluginMethod.SET_MDR_REQUEST);
-			pluginRequest.setRequest(requestMessage.getText());
-			String marshalledReq = JAXBMarshaller.marshallJaxBObjectToString(pluginRequest);	
-			producer.sendEventBusMessage(marshalledReq, MDR_SERVICE_NAME);
-			LOG.info("Request object sent to MDR plugin.");
-		} catch (Exception e) {
-			LOG.error("Something strange happend during message conversion");
-		}
-	}
 
     private boolean validate(ServiceResponseType service, SendMovementToPluginType sendReport, TextMessage origin, String username) {
         String serviceName = service.getServiceClassName(); //Use first and only
@@ -216,7 +190,7 @@ public class ExchangeEventOutgoingServiceBean implements ExchangeEventOutgoingSe
             if (validate(request.getCommand(), message.getJmsMessage(), service, commandType, request.getUsername())) {
                 List<UnsentMessageTypeProperty> setUnsentMessageTypePropertiesForPoll = getSetUnsentMessageTypePropertiesForPoll(commandType);
                 String unsentMessageGuid = exchangeLog.createUnsentMessage(service.getName(), request.getCommand().getTimestamp(), request.getCommand().getCommand().name(), message.getJmsMessage().getText(), setUnsentMessageTypePropertiesForPoll, request.getUsername());
-                
+
                 request.getCommand().setUnsentMessageGuid(unsentMessageGuid);
                 String text = ExchangePluginRequestMapper.createSetCommandRequest(request.getCommand());
                 String pluginMessageId = producer.sendEventBusMessage(text, pluginName);
@@ -249,17 +223,16 @@ public class ExchangeEventOutgoingServiceBean implements ExchangeEventOutgoingSe
         }
     }
 
-
     @Override
     public void sendFLUXFAResponseToPlugin(@Observes @SendFLUXFAResponseToPluginEvent ExchangeMessageEvent message) {
         SetFLUXFAResponseMessageRequest request = null;
         try {
             request = JAXBMarshaller.unmarshallTextMessage(message.getJmsMessage(), SetFLUXFAResponseMessageRequest.class);
-            LOG.debug("Got FLUXFAResponse in exchange :"+request.getRequest());
+            LOG.debug("Got FLUXFAResponse in exchange :" + request.getRequest());
 
             String text = ExchangePluginRequestMapper.createSetFLUXFAResponseRequest(message.getJmsMessage().getText());
             String pluginMessageId = producer.sendEventBusMessage(text, ExchangeServiceConstants.FLUX_ACTIVITY_PLUGIN_SERVICE_NAME);
-            LOG.debug("Message sent to Flux ERS Plugin :"+pluginMessageId);
+            LOG.debug("Message sent to Flux ERS Plugin :" + pluginMessageId);
         } catch (ExchangeModelMarshallException e) {
             e.printStackTrace();
         } catch (ExchangeMessageException e) {
@@ -267,7 +240,6 @@ public class ExchangeEventOutgoingServiceBean implements ExchangeEventOutgoingSe
         } catch (JMSException e) {
             e.printStackTrace();
         }
-
 
     }
 
@@ -345,8 +317,5 @@ public class ExchangeEventOutgoingServiceBean implements ExchangeEventOutgoingSe
         return properties;
 
     }
-
-
-
 
 }

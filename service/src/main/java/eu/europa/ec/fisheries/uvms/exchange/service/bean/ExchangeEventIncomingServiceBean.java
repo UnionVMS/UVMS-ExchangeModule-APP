@@ -1,13 +1,13 @@
 /*
-﻿Developed with the contribution of the European Commission - Directorate General for Maritime Affairs and Fisheries
-© European Union, 2015-2016.
+ ﻿Developed with the contribution of the European Commission - Directorate General for Maritime Affairs and Fisheries
+ © European Union, 2015-2016.
 
-This file is part of the Integrated Fisheries Data Management (IFDM) Suite. The IFDM Suite is free software: you can
-redistribute it and/or modify it under the terms of the GNU General Public License as published by the
-Free Software Foundation, either version 3 of the License, or any later version. The IFDM Suite is distributed in
-the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
-FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details. You should have received a
-copy of the GNU General Public License along with the IFDM Suite. If not, see <http://www.gnu.org/licenses/>.
+ This file is part of the Integrated Fisheries Data Management (IFDM) Suite. The IFDM Suite is free software: you can
+ redistribute it and/or modify it under the terms of the GNU General Public License as published by the
+ Free Software Foundation, either version 3 of the License, or any later version. The IFDM Suite is distributed in
+ the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details. You should have received a
+ copy of the GNU General Public License along with the IFDM Suite. If not, see <http://www.gnu.org/licenses/>.
  */
 package eu.europa.ec.fisheries.uvms.exchange.service.bean;
 
@@ -17,31 +17,21 @@ import eu.europa.ec.fisheries.schema.exchange.module.v1.*;
 import eu.europa.ec.fisheries.schema.exchange.movement.v1.MovementBaseType;
 import eu.europa.ec.fisheries.schema.exchange.movement.v1.MovementRefType;
 import eu.europa.ec.fisheries.schema.exchange.movement.v1.MovementSourceType;
-import eu.europa.ec.fisheries.schema.exchange.movement.v1.MovementRefType;
-import eu.europa.ec.fisheries.schema.exchange.movement.v1.MovementSourceType;
 import eu.europa.ec.fisheries.schema.exchange.movement.v1.SetReportMovementType;
 import eu.europa.ec.fisheries.schema.exchange.plugin.types.v1.PluginFault;
 import eu.europa.ec.fisheries.schema.exchange.plugin.types.v1.PluginType;
 import eu.europa.ec.fisheries.schema.exchange.plugin.v1.AcknowledgeResponse;
 import eu.europa.ec.fisheries.schema.exchange.plugin.v1.ExchangePluginMethod;
-import eu.europa.ec.fisheries.schema.exchange.plugin.v1.SetMdrPluginRequest;
 import eu.europa.ec.fisheries.schema.exchange.service.v1.ServiceResponseType;
 import eu.europa.ec.fisheries.schema.exchange.service.v1.StatusType;
 import eu.europa.ec.fisheries.schema.exchange.v1.*;
 import eu.europa.ec.fisheries.schema.movement.module.v1.ProcessedMovementAck;
-import eu.europa.ec.fisheries.schema.movement.module.v1.ProcessedMovementAck;
 import eu.europa.ec.fisheries.schema.rules.movement.v1.RawMovementType;
 
-import eu.europa.ec.fisheries.uvms.exchange.message.constants.MessageQueue;
-import eu.europa.ec.fisheries.uvms.exchange.message.event.*;
-
-import eu.europa.ec.fisheries.uvms.activity.model.schemas.ActivityModuleMethod;
-import eu.europa.ec.fisheries.uvms.activity.model.schemas.SetFLUXMDRSyncMessageRequest;
 import eu.europa.ec.fisheries.uvms.exchange.message.constants.MessageQueue;
 import eu.europa.ec.fisheries.uvms.exchange.message.event.ErrorEvent;
 import eu.europa.ec.fisheries.uvms.exchange.message.event.ExchangeLogEvent;
 import eu.europa.ec.fisheries.uvms.exchange.message.event.HandleProcessedMovementEvent;
-import eu.europa.ec.fisheries.uvms.exchange.message.event.MdrSyncResponseMessageEvent;
 import eu.europa.ec.fisheries.uvms.exchange.message.event.PingEvent;
 import eu.europa.ec.fisheries.uvms.exchange.message.event.PluginConfigEvent;
 import eu.europa.ec.fisheries.uvms.exchange.message.event.PluginPingEvent;
@@ -70,13 +60,10 @@ import eu.europa.ec.fisheries.uvms.exchange.service.mapper.ExchangeLogMapper;
 import eu.europa.ec.fisheries.uvms.exchange.service.mapper.MovementMapper;
 import eu.europa.ec.fisheries.uvms.longpolling.notifications.NotificationMessage;
 
-import eu.europa.ec.fisheries.uvms.movement.model.mapper.MovementModuleResponseMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
 import eu.europa.ec.fisheries.uvms.movement.model.mapper.MovementModuleResponseMapper;
-
 
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
@@ -126,8 +113,8 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
         try {
             SetFLUXFAReportMessageRequest request = JAXBMarshaller.unmarshallTextMessage(message.getJmsMessage(), SetFLUXFAReportMessageRequest.class);
 
-            LOG.debug("Got FLUXFAReportMessage in exchange :"+request.getRequest());
-            rulesService.sendFLUXFAReportMessageToRules(eu.europa.ec.fisheries.schema.rules.exchange.v1.PluginType.FLUX, request.getRequest(),  request.getUsername());
+            LOG.debug("Got FLUXFAReportMessage in exchange :" + request.getRequest());
+            rulesService.sendFLUXFAReportMessageToRules(eu.europa.ec.fisheries.schema.rules.exchange.v1.PluginType.FLUX, request.getRequest(), request.getUsername());
             LOG.info("Process FLUXFAReportMessage successful");
         } catch (ExchangeModelMarshallException e) {
             LOG.error("Couldn't map to SetFLUXFAReportMessageRequest when processing FLUXFAReportMessage from plugin");
@@ -136,30 +123,6 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
         }
 
     }
-    
-    /*
-	 * Method for Observing the @MdrSyncMessageEvent, meaning a message from Activity MDR
-	 * module has arrived (synchronisation of the mdr).
-	 * 
-	 */
-	@Override
-	public void sendResponseToActivityMdr(@Observes @MdrSyncResponseMessageEvent ExchangeMessageEvent message) {
-		LOG.info("Received @MdrSyncResponseMessageEvent.");
-
-		TextMessage requestMessage = message.getJmsMessage();
-		try {
-			LOG.info("Sending Flux Response Message To MDR Module queue (ActivityEven queuet).");
-			SetFLUXMDRSyncMessageRequest activityReq = new SetFLUXMDRSyncMessageRequest();
-			activityReq.setMethod(ActivityModuleMethod.GET_FLUX_MDR_ENTITY);
-			activityReq.setRequest(requestMessage.getText());
-			String strRequest = JAXBMarshaller.marshallJaxBObjectToString(activityReq);
-			producer.sendMessageOnQueue(strRequest , MessageQueue.ACTIVITY_EVENT);
-			LOG.info("Request object sent to Activity Queue.");
-
-		} catch (Exception e) {
-			LOG.error("Something strange happend during message conversion");
-		}
-	}
 
     @Override
     public void getPluginListByTypes(@Observes @PluginConfigEvent ExchangeMessageEvent message) {
@@ -184,15 +147,14 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
             String username;
 
             // A person has created a position
-            if(MovementSourceType.MANUAL.equals(request.getRequest().getMovement().getSource())){
+            if (MovementSourceType.MANUAL.equals(request.getRequest().getMovement().getSource())) {
                 username = request.getUsername();
 
                 // Send some response to Movement, if it originated from there (manual movement)
                 ProcessedMovementAck response = MovementModuleResponseMapper.mapProcessedMovementAck(eu.europa.ec.fisheries.schema.movement.common.v1.AcknowledgeTypeType.OK, message.getJmsMessage().getJMSMessageID(), "Movement successfully processed");
                 producer.sendModuleAckMessage(message.getJmsMessage().getJMSMessageID(), MessageQueue.MOVEMENT_RESPONSE, JAXBMarshaller.marshallJaxBObjectToString(response));
-            }
-            // A plugin has reported a position
-            else{
+            } // A plugin has reported a position
+            else {
                 username = request.getRequest().getPluginType().name();
             }
 
@@ -248,9 +210,9 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
             MovementRefType movementRefType = request.getMovementRefType();
             SetReportMovementType orgRequest = request.getOrgRequest();
 
-            if(PluginType.MANUAL.equals(orgRequest.getPluginType())){
+            if (PluginType.MANUAL.equals(orgRequest.getPluginType())) {
                 username = request.getUsername();
-            }else{
+            } else {
                 username = orgRequest.getPluginName();
             }
 

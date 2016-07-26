@@ -28,7 +28,6 @@
         <longpolling.version>2.0.4</longpolling.version>
         <uvms.config.version>2.0.5</uvms.config.version>
         <exchange.model.version>2.0.7-SNAPSHOT</exchange.model.version>
-		<activity.model>0.5.1-SNAPSHOT</activity.model>
         <project.scm.id>github</project.scm.id>
         <maven-release-plugin>2.5.3</maven-release-plugin>
     </properties>
@@ -40,8 +39,6 @@
             <version>${javaee.version}</version>
             <scope>provided</scope>
         </dependency>
-        
-        
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
@@ -57,15 +54,11 @@
             <artifactId>logback-core</artifactId>
             <version>${logback.core.version}</version>
         </dependency>
-        
-                
         <dependency>
             <groupId>joda-time</groupId>
             <artifactId>joda-time</artifactId>
             <version>${joda-time.version}</version>
         </dependency>
-        
-        
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
@@ -103,8 +96,8 @@
 
     <scm>
         <connection>scm:git:https://github.com/UnionVMS/UVMS-ExchangeModule-APP.git</connection>
-      <tag>HEAD</tag>
-  </scm>
+        <tag>HEAD</tag>
+    </scm>
     
     <build>
         <plugins>

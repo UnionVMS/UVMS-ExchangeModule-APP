@@ -1,13 +1,13 @@
 /*
-﻿Developed with the contribution of the European Commission - Directorate General for Maritime Affairs and Fisheries
-© European Union, 2015-2016.
+ ﻿Developed with the contribution of the European Commission - Directorate General for Maritime Affairs and Fisheries
+ © European Union, 2015-2016.
 
-This file is part of the Integrated Fisheries Data Management (IFDM) Suite. The IFDM Suite is free software: you can
-redistribute it and/or modify it under the terms of the GNU General Public License as published by the
-Free Software Foundation, either version 3 of the License, or any later version. The IFDM Suite is distributed in
-the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
-FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details. You should have received a
-copy of the GNU General Public License along with the IFDM Suite. If not, see <http://www.gnu.org/licenses/>.
+ This file is part of the Integrated Fisheries Data Management (IFDM) Suite. The IFDM Suite is free software: you can
+ redistribute it and/or modify it under the terms of the GNU General Public License as published by the
+ Free Software Foundation, either version 3 of the License, or any later version. The IFDM Suite is distributed in
+ the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details. You should have received a
+ copy of the GNU General Public License along with the IFDM Suite. If not, see <http://www.gnu.org/licenses/>.
  */
 package eu.europa.ec.fisheries.uvms.exchange.message.consumer.bean;
 
@@ -68,7 +68,7 @@ public class MessageConsumerBean implements MessageListener {
     @Inject
     @UpdatePluginSettingEvent
     Event<ExchangeMessageEvent> updatePluginSettingEvent;
-    
+
     @Inject
     @PluginPingEvent
     Event<ExchangeMessageEvent> updatePingStateEvent;
@@ -84,15 +84,6 @@ public class MessageConsumerBean implements MessageListener {
     @Inject
     @HandleProcessedMovementEvent
     Event<ExchangeMessageEvent> processedMovementEvent;
-    
-    @Inject
-    @MdrSyncRequestMessageEvent
-    Event<ExchangeMessageEvent> mdrSyncRequestMessageEvent;
-    
-    @Inject
-    @MdrSyncResponseMessageEvent
-    Event<ExchangeMessageEvent> mdrSyncResponseMessageEvent;
-
 
     @Inject
     @SetFluxFAReportMessageEvent
@@ -102,7 +93,6 @@ public class MessageConsumerBean implements MessageListener {
     @SendFLUXFAResponseToPluginEvent
     Event<ExchangeMessageEvent> processFLUXFAResponseMessageEvent;
 
-
     @Override
     @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
     public void onMessage(Message message) {
@@ -111,7 +101,7 @@ public class MessageConsumerBean implements MessageListener {
         TextMessage textMessage = (TextMessage) message;
         LOG.info("try consuming ExchangeBaseRequest");
         ExchangeBaseRequest request = tryConsumeExchangeBaseRequest(textMessage);
-        LOG.info("unmarshalling successful. request:"+request);
+        LOG.info("unmarshalling successful. request:" + request);
         if (request == null) {
             try {
                 //Handle PingResponse from plugin
@@ -126,7 +116,7 @@ public class MessageConsumerBean implements MessageListener {
                     updateStateEvent.fire(new ExchangeMessageEvent(textMessage));
                 }
             }
-        } else if(!checkUsernameShouldBeProvided(request)) {
+        } else if (!checkUsernameShouldBeProvided(request)) {
             LOG.error("[ Error when receiving message in exchange, username must be set in the request: ]");
             errorEvent.fire(new ExchangeMessageEvent(textMessage, ExchangeModuleResponseMapper.createFaultMessage(FaultCode.EXCHANGE_MESSAGE, "Username in the request must be set")));
         } else {
@@ -154,17 +144,10 @@ public class MessageConsumerBean implements MessageListener {
                 case PROCESSED_MOVEMENT:
                     processedMovementEvent.fire(new ExchangeMessageEvent(textMessage));
                     break;
-                case SET_MDR_SYNC_MESSAGE_REQUEST:
-                	mdrSyncRequestMessageEvent.fire(new ExchangeMessageEvent(textMessage));
-                	break;
-                case SET_MDR_SYNC_MESSAGE_RESPONSE:
-                	mdrSyncResponseMessageEvent.fire(new ExchangeMessageEvent(textMessage));
-                	break;
                 case SET_FLUX_FA_REPORT_MESSAGE:
                     LOG.debug("inside SET_FLUX_FA_REPORT_MESSAGE case");
                     processFLUXFAReportMessageEvent.fire(new ExchangeMessageEvent(textMessage));
                     break;
-
 
                 default:
                     LOG.error("[ Not implemented method consumed: {} ] ", request.getMethod());
@@ -173,15 +156,15 @@ public class MessageConsumerBean implements MessageListener {
         }
     }
 
-    private boolean checkUsernameShouldBeProvided(ExchangeBaseRequest request){
+    private boolean checkUsernameShouldBeProvided(ExchangeBaseRequest request) {
         boolean usernameProvided = false;
-        switch (request.getMethod()){
+        switch (request.getMethod()) {
             case SET_COMMAND:
             case SEND_REPORT_TO_PLUGIN:
             case SET_MOVEMENT_REPORT:
             case UPDATE_PLUGIN_SETTING:
             case PROCESSED_MOVEMENT:
-                if(request.getUsername()!=null){
+                if (request.getUsername() != null) {
                     usernameProvided = true;
                 }
                 break;
