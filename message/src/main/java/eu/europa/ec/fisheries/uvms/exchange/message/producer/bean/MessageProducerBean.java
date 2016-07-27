@@ -67,15 +67,11 @@ public class MessageProducerBean implements MessageProducer, ConfigMessageProduc
 
     @Resource(mappedName = ExchangeModelConstants.MOVEMENT_RESPONSE_QUEUE)
     private Queue movementResponseQueue;
-    
-    @Resource(mappedName = ExchangeModelConstants.ACTIVITY_RESPONSE_QUEUE)
-	private Queue activityQueue;
 
     private static final int CONFIG_TTL = 30000;
 
     @Inject
     JMSConnectorBean connector;
-
 
     @Override
     @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
@@ -104,8 +100,6 @@ public class MessageProducerBean implements MessageProducer, ConfigMessageProduc
                     break;
                 case AUDIT:
                     getProducer(session, auditQueue).send(message);
-                case ACTIVITY_EVENT:
-                    getProducer(session, activityQueue).send(message);
                 default:
                     break;
             }

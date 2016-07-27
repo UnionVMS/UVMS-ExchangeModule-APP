@@ -1,2 +1,4 @@
 target
 /rest/src/main/webapp
+*.iml
+logging.properties
