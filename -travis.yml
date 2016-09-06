@@ -1,0 +1,6 @@
+language: java
+install:
+ - mvn install -Pgenerate-from-wsdl
+after_success:
+  - echo "<settings><servers><server><id>focus-snapshots</id><username>\${env.FOCUS_USER}</username><password>\${env.FOCUS_PASS}</password></server></servers></settings>" > ~/settings.xml
+  - mvn deploy --settings ~/settings.xml
