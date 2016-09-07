@@ -55,14 +55,14 @@ public class ExchangeLogMapper {
     	case SEND_MOVEMENT:
     		dto.setType(LogTypeLabel.SENT_MOVEMENT);
     		SendMovementType sendLog = (SendMovementType)log;
-    		dateFwd = sendLog.getFwdDate().toGregorianCalendar().getTime();
+    		dateFwd = sendLog.getFwdDate();
     		dto.setDateFwd(DateUtils.dateToString(dateFwd));
     		dto.setRule(sendLog.getFwdRule());
     		dto.setRecipient(sendLog.getRecipient());
     		break;
     	case SEND_EMAIL:
 			SendEmailType sendEmail = (SendEmailType)log;
-            dateFwd = sendEmail.getFwdDate().toGregorianCalendar().getTime();
+            dateFwd = sendEmail.getFwdDate();
             dto.setType(LogTypeLabel.SENT_EMAIL);
 			dto.setRecipient(sendEmail.getRecipient());
 			dto.setRule(sendEmail.getFwdRule());
@@ -78,7 +78,7 @@ public class ExchangeLogMapper {
     		break;
     	}
     	
-    	Date dateReceived = log.getDateRecieved().toGregorianCalendar().getTime();
+    	Date dateReceived = log.getDateRecieved();
     	dto.setDateRecieved(DateUtils.dateToString(dateReceived));
     	dto.setId(log.getGuid());
     	dto.setIncoming(log.isIncoming());
@@ -119,7 +119,7 @@ public class ExchangeLogMapper {
 		List<SendingLog> sendingLog = new ArrayList<>();
 		for(UnsentMessageType message : messages) {
 			SendingLog log = new SendingLog();
-			Date dateRecieved = message.getDateReceived().toGregorianCalendar().getTime();
+			Date dateRecieved = message.getDateReceived();
 			log.setDateRecieved(DateUtils.dateToString(dateRecieved));
 			log.setMessageId(message.getMessageId());
 			log.setSenderRecipient(message.getSenderReceiver());

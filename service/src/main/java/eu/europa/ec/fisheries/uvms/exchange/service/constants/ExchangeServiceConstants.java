@@ -15,4 +15,7 @@ public class ExchangeServiceConstants {
 
     public static final String FIND_BY_NAME = "Parameter.findByName";
     public static final String LIST_ALL = "Parameter.listAll";
+    public static final String GLOBAL_DB_ACCESS_EXCHANGE_LOG = "java:global/exchange-dbaccess-module/exchange-dbaccess-domain/ExchangeLogModelBean!eu.europa.ec.fisheries.uvms.exchange.model.remote.ExchangeLogModel";
+    public static final String GLOBAL_DB_ACCESS_UNSENT_MESSAGE = "java:global/exchange-dbaccess-module/exchange-dbaccess-domain/UnsentModelBean!eu.europa.ec.fisheries.uvms.exchange.model.remote.UnsentModel";
+    public static final String GLOBAL_DB_ACCESS_SERVICE_REGISTRY = "java:global/exchange-dbaccess-module/exchange-dbaccess-domain/ServiceRegistryModelBean!eu.europa.ec.fisheries.uvms.exchange.model.remote.ServiceRegistryModel";
 }

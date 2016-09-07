@@ -22,10 +22,13 @@ import eu.europa.ec.fisheries.uvms.exchange.message.constants.MessageQueue;
 import eu.europa.ec.fisheries.uvms.exchange.message.consumer.ExchangeMessageConsumer;
 import eu.europa.ec.fisheries.uvms.exchange.message.exception.ExchangeMessageException;
 import eu.europa.ec.fisheries.uvms.exchange.message.producer.MessageProducer;
+import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelException;
 import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelMapperException;
 import eu.europa.ec.fisheries.uvms.exchange.model.mapper.ExchangeDataSourceRequestMapper;
 import eu.europa.ec.fisheries.uvms.exchange.model.mapper.ExchangeDataSourceResponseMapper;
+import eu.europa.ec.fisheries.uvms.exchange.model.remote.ServiceRegistryModel;
 import eu.europa.ec.fisheries.uvms.exchange.service.ExchangeService;
+import eu.europa.ec.fisheries.uvms.exchange.service.constants.ExchangeServiceConstants;
 import eu.europa.ec.fisheries.uvms.exchange.service.exception.ExchangeServiceException;
 import static eu.europa.ec.fisheries.uvms.exchange.service.util.StringUtil.compressServiceClassName;
 
@@ -52,6 +55,9 @@ public class ExchangeServiceBean implements ExchangeService {
     @EJB
     MessageProducer producer;
 
+    @EJB(lookup = ExchangeServiceConstants.GLOBAL_DB_ACCESS_SERVICE_REGISTRY)
+    ServiceRegistryModel serviceRegistryModel;
+
     /**
      * {@inheritDoc}
      *
@@ -62,14 +68,13 @@ public class ExchangeServiceBean implements ExchangeService {
     public ServiceResponseType registerService(ServiceType data, CapabilityListType capabilityList, SettingListType settingList, String username) throws ExchangeServiceException {
         LOG.info("Register service invoked in service layer");
         try {
-            String request = ExchangeDataSourceRequestMapper.mapRegisterServiceToString(data, capabilityList, settingList, username);
-            String messageId = producer.sendMessageOnQueue(request, MessageQueue.INTERNAL);
-            TextMessage response = consumer.getMessage(messageId, TextMessage.class);
-            ServiceResponseType serviceResponseType = ExchangeDataSourceResponseMapper.mapToRegisterServiceResponse(response, messageId);
+            ServiceResponseType serviceResponseType = serviceRegistryModel.registerService(data, capabilityList, settingList, username);
             sendAuditLogMessageForRegisterService(compressServiceClassName(serviceResponseType.getServiceClassName()), username);
             return serviceResponseType;
-        } catch (ExchangeModelMapperException | ExchangeMessageException ex) {
+        } catch (ExchangeModelMapperException ex) {
             throw new ExchangeServiceException(ex.getMessage());
+        } catch (ExchangeModelException e) {
+            throw new ExchangeServiceException(e.getMessage());
         }
     }
 
@@ -83,13 +88,10 @@ public class ExchangeServiceBean implements ExchangeService {
     public ServiceResponseType unregisterService(ServiceType data, String username) throws ExchangeServiceException {
         LOG.info("Unregister service invoked in service layer");
         try {
-            String request = ExchangeDataSourceRequestMapper.mapUnregisterServiceToString(data, username);
-            String messageId = producer.sendMessageOnQueue(request, MessageQueue.INTERNAL);
-            TextMessage response = consumer.getMessage(messageId, TextMessage.class);
-            ServiceResponseType serviceResponseType = ExchangeDataSourceResponseMapper.mapToUnregisterServiceResponse(response, messageId);
+            ServiceResponseType serviceResponseType = serviceRegistryModel.unregisterService(data, username);
             sendAuditLogMessageForUnregisterService(compressServiceClassName(serviceResponseType.getServiceClassName()), username);
             return serviceResponseType;
-        } catch (ExchangeModelMapperException | ExchangeMessageException ex) {
+        } catch (ExchangeModelException ex) {
             throw new ExchangeServiceException(ex.getMessage());
         }
     }
@@ -104,11 +106,9 @@ public class ExchangeServiceBean implements ExchangeService {
     public List<ServiceResponseType> getServiceList(List<PluginType> pluginTypes) throws ExchangeServiceException {
         LOG.info("Get list invoked in service layer");
         try {
-            String request = ExchangeDataSourceRequestMapper.mapGetServiceListToString(pluginTypes);
-            String messageId = producer.sendMessageOnQueue(request, MessageQueue.INTERNAL);
-            TextMessage response = consumer.getMessage(messageId, TextMessage.class);
-            return ExchangeDataSourceResponseMapper.mapToServiceTypeListFromResponse(response, messageId);
-        } catch (ExchangeModelMapperException | ExchangeMessageException e) {
+            List<ServiceResponseType> plugins = serviceRegistryModel.getPlugins(pluginTypes);
+            return plugins;
+        } catch (ExchangeModelException e) {
             throw new ExchangeServiceException(e.getMessage());
         }
     }
@@ -117,12 +117,10 @@ public class ExchangeServiceBean implements ExchangeService {
     public ServiceResponseType upsertSettings(String serviceClassName, SettingListType settingListType, String username) throws ExchangeServiceException {
         LOG.info("Upsert settings in service layer");
         try {
-            String request = ExchangeDataSourceRequestMapper.mapSetSettingsToString(serviceClassName, settingListType, username);
-            String messageId = producer.sendMessageOnQueue(request, MessageQueue.INTERNAL);
-            TextMessage response = consumer.getMessage(messageId, TextMessage.class);
+            ServiceResponseType updatedSettings = serviceRegistryModel.updatePluginSettings(serviceClassName, settingListType, username);
             sendAuditLogMessageForUpdateService(compressServiceClassName(serviceClassName), username);
-            return ExchangeDataSourceResponseMapper.mapToServiceTypeFromSetSettingsResponse(response, messageId);
-        } catch (ExchangeModelMapperException | ExchangeMessageException e) {
+            return updatedSettings;
+        } catch (ExchangeModelException  e) {
             throw new ExchangeServiceException(e.getMessage());
         }
     }
@@ -143,54 +141,22 @@ public class ExchangeServiceBean implements ExchangeService {
     @Override
     public ServiceResponseType getService(String serviceId) throws ExchangeServiceException {
         try {
-            String request = ExchangeDataSourceRequestMapper.mapGetServiceToString(serviceId);
-            String messageId = producer.sendMessageOnQueue(request, MessageQueue.INTERNAL);
-            TextMessage response = consumer.getMessage(messageId, TextMessage.class);
-            return ExchangeDataSourceResponseMapper.mapToServiceTypeFromGetServiceResponse(response, messageId);
-        } catch (ExchangeModelMapperException | ExchangeMessageException e) {
+            ServiceResponseType plugin = serviceRegistryModel.getPlugin(serviceId);
+            return plugin;
+        } catch (ExchangeModelException e) {
             throw new ExchangeServiceException(e.getMessage());
         }
     }
 
-    @Override
-    public ExchangeLogType createExchangeLog(ExchangeLogType exchangeLog, String username) throws ExchangeServiceException {
-        LOG.info("Create Exchange log invoked in service layer");
-        //TODO: Do we use this method??
-        try {
-            String request = ExchangeDataSourceRequestMapper.mapCreateExchangeLogToString(exchangeLog, username);
-            String messageId = producer.sendMessageOnQueue(request, MessageQueue.INTERNAL);
-            TextMessage response = consumer.getMessage(messageId, TextMessage.class);
-            ExchangeLogType exchangeLogType = ExchangeDataSourceResponseMapper.mapToExchangeLogTypeFromCreateExchageLogResponse(response, messageId);
-            sendAuditLogMessageForCreateExchangeLog(exchangeLog.getGuid(), username);
-            return exchangeLog;
-        } catch (ExchangeModelMapperException | ExchangeMessageException e) {
-            throw new ExchangeServiceException(e.getMessage());
-        }
-    }
-
-    @Override
-    public GetLogListByQueryResponse getExchangeLogByQuery(ExchangeListQuery query) throws ExchangeServiceException {
-        LOG.info("Create Exchange log invoked in service layer");
-        try {
-            String request = ExchangeDataSourceRequestMapper.mapGetExchageLogListByQueryToString(query);
-            String messageId = producer.sendMessageOnQueue(request, MessageQueue.INTERNAL);
-            TextMessage response = consumer.getMessage(messageId, TextMessage.class);
-            return ExchangeDataSourceResponseMapper.mapToGetLogListByQueryResponse(response, messageId);
-        } catch (ExchangeModelMapperException | ExchangeMessageException e) {
-            throw new ExchangeServiceException(e.getMessage());
-        }
-    }
 
     @Override
     public ServiceResponseType updateServiceStatus(String serviceClassName, StatusType status, String username) throws ExchangeServiceException {
         LOG.info("Update service status invoked in service layer");
         try {
-            String request = ExchangeDataSourceRequestMapper.mapSetServiceStatus(serviceClassName, status, username);
-            String messageId = producer.sendMessageOnQueue(request, MessageQueue.INTERNAL);
-            TextMessage response = consumer.getMessage(messageId, TextMessage.class);
+            ServiceResponseType updatedServiceStatus = serviceRegistryModel.updatePluginStatus(serviceClassName, status, username);
             sendAuditLogMessageForUpdateServiceStatus(serviceClassName, status, username);
-            return ExchangeDataSourceResponseMapper.mapSetServiceResponse(response, messageId);
-        } catch (ExchangeModelMapperException | ExchangeMessageException e) {
+            return updatedServiceStatus;
+        } catch (ExchangeModelException e) {
             throw new ExchangeServiceException(e.getMessage());
         }
     }
@@ -257,15 +223,6 @@ public class ExchangeServiceBean implements ExchangeService {
                 sendAuditLogMessageForServiceStatusStopped(compressServiceClassName(serviceName), username);
             default:
                 sendAuditLogMessageForServiceStatusUnknown(compressServiceClassName(serviceName), username);
-        }
-    }
-
-    private void sendAuditLogMessageForCreateExchangeLog(String guid, String username){
-        try {
-            String request = ExchangeAuditRequestMapper.mapCreateExchangeLog(guid, username);
-            producer.sendMessageOnQueue(request, MessageQueue.AUDIT);
-        } catch (AuditModelMarshallException | ExchangeMessageException e) {
-            LOG.error("Could not send audit log message. Exchange log was created with guid: " + guid);
         }
     }
 }
