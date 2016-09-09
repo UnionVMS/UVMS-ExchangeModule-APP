@@ -8,8 +8,6 @@ import eu.europa.ec.fisheries.schema.exchange.module.v1.SetCommandRequest;
 import eu.europa.ec.fisheries.schema.exchange.module.v1.SetFLUXFAResponseMessageRequest;
 import eu.europa.ec.fisheries.schema.exchange.movement.v1.SendMovementToPluginType;
 import eu.europa.ec.fisheries.schema.exchange.plugin.types.v1.PluginType;
-import eu.europa.ec.fisheries.schema.exchange.plugin.v1.ExchangePluginMethod;
-import eu.europa.ec.fisheries.schema.exchange.plugin.v1.SetMdrPluginRequest;
 import eu.europa.ec.fisheries.schema.exchange.service.v1.ServiceResponseType;
 import eu.europa.ec.fisheries.schema.exchange.service.v1.StatusType;
 import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogType;
@@ -33,6 +31,7 @@ import eu.europa.ec.fisheries.uvms.exchange.service.constants.ExchangeServiceCon
 import eu.europa.ec.fisheries.uvms.exchange.service.exception.ExchangeLogException;
 import eu.europa.ec.fisheries.uvms.exchange.service.exception.ExchangeServiceException;
 import eu.europa.ec.fisheries.uvms.exchange.service.mapper.ExchangeLogMapper;
+import eu.europa.ec.fisheries.uvms.exchange.service.mapper.ExchangeToMdrRulesMapper;
 import eu.europa.ec.fisheries.wsdl.asset.types.Asset;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -134,14 +133,11 @@ public class ExchangeEventOutgoingServiceBean implements ExchangeEventOutgoingSe
 
 		TextMessage requestMessage = message.getJmsMessage();
 		try {
-            SetMdrPluginRequest pluginRequest = new SetMdrPluginRequest();
-			pluginRequest.setMethod(ExchangePluginMethod.SET_MDR_REQUEST);
-			pluginRequest.setRequest(requestMessage.getText());
-			String marshalledReq = JAXBMarshaller.marshallJaxBObjectToString(pluginRequest);	
+			String marshalledReq = ExchangeToMdrRulesMapper.mapExchangeToMdrPluginRequest(requestMessage);
 			producer.sendEventBusMessage(marshalledReq, MDR_SERVICE_NAME);
 			LOG.info("Request object sent to MDR plugin.");
 		} catch (Exception e) {
-			LOG.error("Something strange happend during message conversion");
+			LOG.error("Something strange happend during message conversion",e);
 		}
 	}
 
