@@ -17,11 +17,12 @@
             <groupId>${project.groupId}</groupId>
             <artifactId>exchange-model</artifactId>
             <version>${exchange.model.version}</version>
+            <classifier>${envClassifier}</classifier>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>eu.europa.ec.fisheries.uvms</groupId>
-            <artifactId>uvms-config</artifactId>
+            <artifactId>${uvms.config.artifactId}</artifactId>
             <version>${uvms.config.version}</version>
         </dependency>
 
@@ -45,6 +46,7 @@
                 <version>2.3</version>
                 <configuration>
                     <ejbVersion>3.1</ejbVersion>
+                    <classifier>${envClassifier}</classifier>
                 </configuration>
             </plugin>
         </plugins>

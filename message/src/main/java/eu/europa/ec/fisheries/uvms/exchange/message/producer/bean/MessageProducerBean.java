@@ -12,6 +12,7 @@ copy of the GNU General Public License along with the IFDM Suite. If not, see <h
 package eu.europa.ec.fisheries.uvms.exchange.message.producer.bean;
 
 import javax.annotation.Resource;
+import javax.ejb.EJB;
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
@@ -73,7 +74,7 @@ public class MessageProducerBean implements MessageProducer, ConfigMessageProduc
 
     private static final int CONFIG_TTL = 30000;
 
-    @Inject
+    @EJB
     JMSConnectorBean connector;
 
 

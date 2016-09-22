@@ -18,12 +18,14 @@
             <groupId>${project.groupId}</groupId>
             <artifactId>exchange-service</artifactId>
             <version>${project.version}</version>
+            <classifier>${envClassifier}</classifier>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>exchange-model</artifactId>
             <version>${exchange.model.version}</version>
+            <classifier>${envClassifier}</classifier>
             <scope>provided</scope>
         </dependency>
         <dependency>
@@ -51,6 +53,7 @@
                 <version>2.4</version>
                 <configuration>
                     <failOnMissingWebXml>false</failOnMissingWebXml>
+                    <classifier>${envClassifier}</classifier>
                 </configuration>
             </plugin>
         </plugins>

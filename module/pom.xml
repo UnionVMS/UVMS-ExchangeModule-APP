@@ -25,22 +25,27 @@
                         <ejbModule>
                             <groupId>${project.groupId}</groupId>   
                             <artifactId>exchange-message</artifactId>
+                            <classifier>${envClassifier}</classifier>
                         </ejbModule>
                         <ejbModule>
                             <groupId>${project.groupId}</groupId>  
                             <artifactId>exchange-service</artifactId>
+                            <classifier>${envClassifier}</classifier>
                         </ejbModule>
-                        <ejbModule>
+                        <jarModule>
                             <groupId>${project.groupId}</groupId>  
-                            <artifactId>exchange-model</artifactId>							
-                        </ejbModule>
+                            <artifactId>exchange-model</artifactId>
+                        </jarModule>
                         <webModule>
                             <groupId>${project.groupId}</groupId>
                             <context-root>${project.parent.artifactId}</context-root>  
                             <artifactId>exchange-rest</artifactId>
+                            <classifier>${envClassifier}</classifier>
                         </webModule>
                     </modules>
                     <skinnyWars>true</skinnyWars>
+                    <classifier>${envClassifier}</classifier>
+                    <defaultLibBundleDir>APP-INF/lib</defaultLibBundleDir>
                 </configuration>
             </plugin>
         </plugins>
@@ -51,26 +56,35 @@
             <groupId>${project.groupId}</groupId>     
             <artifactId>exchange-message</artifactId>
             <version>${project.version}</version>
+            <classifier>${envClassifier}</classifier>
             <type>ejb</type>
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>  
             <artifactId>exchange-service</artifactId>
             <version>${project.version}</version>
+            <classifier>${envClassifier}</classifier>
             <type>ejb</type>
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>  
             <artifactId>exchange-model</artifactId>
             <version>${exchange.model.version}</version>
-            <type>ejb</type>
+            <classifier>${envClassifier}</classifier>
+            <type>jar</type>
         </dependency> 
         <dependency>
             <groupId>${project.groupId}</groupId>  
             <artifactId>exchange-rest</artifactId>
             <version>${project.version}</version>
+            <classifier>${envClassifier}</classifier>
             <type>war</type>
-        </dependency> 
+        </dependency>
+        <dependency>
+            <groupId>eu.europa.ec.fisheries.uvms</groupId>
+            <artifactId>usm4uvms</artifactId>
+            <version>${usm4uvms.version}</version>
+        </dependency>
     </dependencies>
     
     <!-- USE following command to run this profile: mvn clean install -P wildfly-deploy wildfly:deploy -Dhostname=127.0.0.1 -Dport=9990 -Dusername=admin -Dpassword=asdf  -->
@@ -84,7 +98,7 @@
                         <artifactId>wildfly-maven-plugin</artifactId>
                         <version>1.0.2.Final</version>
                         <configuration>
-                            <filename>${project.build.finalName}.${project.packaging}</filename>
+                            <filename>${project.build.finalName}-${envClassifier}.${project.packaging}</filename>
                             <targetDir>${project.build.directory}</targetDir>
                             <hostname>${hostname}</hostname>
                             <port>${port}</port>
@@ -95,7 +109,41 @@
                     </plugin>
                 </plugins>
             </build>
-        </profile>        
+        </profile>
+        <!-- COPY TO FOLDER -->
+        <profile>
+            <id>copy-ear</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-dependency-plugin</artifactId>
+                        <version>2.10</version>
+                        <executions>
+                            <execution>
+                                <id>copy-installed</id>
+                                <phase>install</phase>
+                                <goals>
+                                    <goal>copy</goal>
+                                </goals>
+                                <configuration>
+                                    <artifactItems>
+                                        <artifactItem>
+                                            <groupId>${project.groupId}</groupId>
+                                            <artifactId>${project.artifactId}</artifactId>
+                                            <version>${project.version}</version>
+                                            <classifier>${envClassifier}</classifier>
+                                            <type>${project.packaging}</type>
+                                        </artifactItem>
+                                    </artifactItems>
+                                    <outputDirectory>C:\dev\WebLogic\domain1213\servers\AdminServer\upload</outputDirectory>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
     </profiles>  
     
 </project>

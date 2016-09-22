@@ -31,7 +31,6 @@ import eu.europa.ec.fisheries.schema.exchange.common.v1.CommandType;
 import eu.europa.ec.fisheries.schema.exchange.common.v1.CommandTypeType;
 import eu.europa.ec.fisheries.schema.exchange.module.v1.SendMovementToPluginRequest;
 import eu.europa.ec.fisheries.schema.exchange.module.v1.SetCommandRequest;
-import eu.europa.ec.fisheries.schema.exchange.module.v1.SetFLUXFAResponseMessageRequest;
 import eu.europa.ec.fisheries.schema.exchange.movement.v1.SendMovementToPluginType;
 import eu.europa.ec.fisheries.schema.exchange.plugin.types.v1.PluginType;
 import eu.europa.ec.fisheries.schema.exchange.service.v1.ServiceResponseType;
@@ -41,7 +40,6 @@ import eu.europa.ec.fisheries.schema.exchange.v1.UnsentMessageTypeProperty;
 import eu.europa.ec.fisheries.uvms.exchange.message.consumer.ExchangeMessageConsumer;
 import eu.europa.ec.fisheries.uvms.exchange.message.event.ErrorEvent;
 import eu.europa.ec.fisheries.uvms.exchange.message.event.SendCommandToPluginEvent;
-import eu.europa.ec.fisheries.uvms.exchange.message.event.SendFLUXFAResponseToPluginEvent;
 import eu.europa.ec.fisheries.uvms.exchange.message.event.SendReportToPluginEvent;
 import eu.europa.ec.fisheries.uvms.exchange.message.event.carrier.ExchangeMessageEvent;
 import eu.europa.ec.fisheries.uvms.exchange.message.exception.ExchangeMessageException;
@@ -66,8 +64,6 @@ import eu.europa.ec.fisheries.wsdl.asset.types.Asset;
 public class ExchangeEventOutgoingServiceBean implements ExchangeEventOutgoingService {
 
     final static Logger LOG = LoggerFactory.getLogger(ExchangeEventOutgoingServiceBean.class);
-
-    private static final String MDR_SERVICE_NAME = "eu.europa.ec.fisheries.uvms.plugins.flux.mdr";
 
     @Inject
     @ErrorEvent
@@ -221,26 +217,6 @@ public class ExchangeEventOutgoingServiceBean implements ExchangeEventOutgoingSe
         } catch (JMSException ex) {
             LOG.error("[ Error when creating unsent message {} ]", ex.getMessage());
         }
-    }
-
-    @Override
-    public void sendFLUXFAResponseToPlugin(@Observes @SendFLUXFAResponseToPluginEvent ExchangeMessageEvent message) {
-        SetFLUXFAResponseMessageRequest request = null;
-        try {
-            request = JAXBMarshaller.unmarshallTextMessage(message.getJmsMessage(), SetFLUXFAResponseMessageRequest.class);
-            LOG.debug("Got FLUXFAResponse in exchange :" + request.getRequest());
-
-            String text = ExchangePluginRequestMapper.createSetFLUXFAResponseRequest(message.getJmsMessage().getText());
-            String pluginMessageId = producer.sendEventBusMessage(text, ExchangeServiceConstants.FLUX_ACTIVITY_PLUGIN_SERVICE_NAME);
-            LOG.debug("Message sent to Flux ERS Plugin :" + pluginMessageId);
-        } catch (ExchangeModelMarshallException e) {
-            e.printStackTrace();
-        } catch (ExchangeMessageException e) {
-            e.printStackTrace();
-        } catch (JMSException e) {
-            e.printStackTrace();
-        }
-
     }
 
     private boolean validate(CommandType command, TextMessage origin, ServiceResponseType service, CommandType commandType, String username) {

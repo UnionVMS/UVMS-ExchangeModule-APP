@@ -108,23 +108,6 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
     Event<NotificationMessage> pollEvent;
 
     @Override
-    public void processFLUXFAReportMessage(@Observes @SetFluxFAReportMessageEvent ExchangeMessageEvent message) {
-        LOG.info("Process FLUXFAReportMessage");
-        try {
-            SetFLUXFAReportMessageRequest request = JAXBMarshaller.unmarshallTextMessage(message.getJmsMessage(), SetFLUXFAReportMessageRequest.class);
-
-            LOG.debug("Got FLUXFAReportMessage in exchange :" + request.getRequest());
-            rulesService.sendFLUXFAReportMessageToRules(eu.europa.ec.fisheries.schema.rules.exchange.v1.PluginType.FLUX, request.getRequest(), request.getUsername());
-            LOG.info("Process FLUXFAReportMessage successful");
-        } catch (ExchangeModelMarshallException e) {
-            LOG.error("Couldn't map to SetFLUXFAReportMessageRequest when processing FLUXFAReportMessage from plugin");
-        } catch (ExchangeServiceException e) {
-            e.printStackTrace();
-        }
-
-    }
-
-    @Override
     public void getPluginListByTypes(@Observes @PluginConfigEvent ExchangeMessageEvent message) {
         LOG.info("Get plugin config LIST_SERVICE");
         try {

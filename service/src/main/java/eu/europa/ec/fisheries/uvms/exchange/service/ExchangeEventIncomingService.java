@@ -58,11 +58,4 @@ public interface ExchangeEventIncomingService {
      */
     public void processPluginPing(@Observes @PluginPingEvent ExchangeMessageEvent message);
 
-    /**
-     * Process FLUXFAReportMessage coming from Flux Activity plugin
-     *
-     * @param message
-     */
-    public void processFLUXFAReportMessage(@Observes @SetFluxFAReportMessageEvent ExchangeMessageEvent message);
-
 }

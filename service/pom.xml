@@ -25,12 +25,14 @@
             <groupId>${project.groupId}</groupId>
             <artifactId>exchange-model</artifactId>
             <version>${exchange.model.version}</version>
+            <classifier>${envClassifier}</classifier>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>exchange-message</artifactId>
             <version>${project.parent.version}</version>
+            <classifier>${envClassifier}</classifier>
             <scope>provided</scope>
         </dependency>
         <dependency>
@@ -85,6 +87,7 @@
                 <version>2.3</version>
                 <configuration>
                     <ejbVersion>3.1</ejbVersion>
+                    <classifier>${envClassifier}</classifier>
                 </configuration>
             </plugin>
             <plugin>

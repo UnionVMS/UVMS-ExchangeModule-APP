@@ -35,6 +35,4 @@ public interface ExchangeEventOutgoingService {
      * @param message
      */
     public void sendCommandToPlugin(@Observes @SendCommandToPluginEvent ExchangeMessageEvent message);
-
-    public void sendFLUXFAResponseToPlugin(@Observes @SendFLUXFAResponseToPluginEvent ExchangeMessageEvent message);
 }
