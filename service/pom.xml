@@ -19,7 +19,7 @@
         <application.logfile>/app/logs/${project.parent.artifactId}/${project.parent.artifactId}.log</application.logfile>
         <application.error.logfile>/app/logs/${project.parent.artifactId}/${project.parent.artifactId}-error.log</application.error.logfile>
         <hibernate.dialect>org.hibernate.dialect.PostgreSQLDialect</hibernate.dialect>
-        <jta.data-source>java:jboss/datasources/uvms_asset</jta.data-source>
+        <jta.data-source>java:jboss/datasources/uvms_exchange</jta.data-source>
         <jta.platform>org.hibernate.service.jta.platform.internal.JBossStandAloneJtaPlatform</jta.platform>
 
     </properties>
