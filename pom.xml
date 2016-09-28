@@ -19,14 +19,16 @@
         <joda-time.version>2.7</joda-time.version>
         <logback.core.version>1.1.2</logback.core.version>
         <dozer.version>5.5.1</dozer.version>
-        <audit.model.version>2.0.8-SNAPSHOT</audit.model.version>
+
+        <longpolling.version>2.0.5</longpolling.version>
+        <uvms.config.version>2.1.0-SNAPSHOT</uvms.config.version>
+        <usm4uvms.version>2.1.0-SNAPSHOT</usm4uvms.version>
+        <audit.model.version>2.1.0-SNAPSHOT</audit.model.version>
         <movement.model.version>2.1.0-SNAPSHOT</movement.model.version>
-        <usm4uvms.version>2.0.16-SNAPSHOT</usm4uvms.version>
         <rules.version>2.1.0-SNAPSHOT</rules.version>
         <asset.version>2.1.0-SNAPSHOT</asset.version>
-        <longpolling.version>2.0.6-SNAPSHOT</longpolling.version>
-        <uvms.config.version>2.0.8-SNAPSHOT</uvms.config.version>
         <exchange.model.version>2.1.0-SNAPSHOT</exchange.model.version>
+
         <project.scm.id>github</project.scm.id>
         <maven-release-plugin>2.5.3</maven-release-plugin>
     </properties>
