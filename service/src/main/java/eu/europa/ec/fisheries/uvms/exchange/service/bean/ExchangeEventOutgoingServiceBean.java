@@ -52,7 +52,7 @@ public class ExchangeEventOutgoingServiceBean implements ExchangeEventOutgoingSe
 
     final static Logger LOG = LoggerFactory.getLogger(ExchangeEventOutgoingServiceBean.class);
 
-	private static final String MDR_SERVICE_NAME = "eu.europa.ec.fisheries.uvms.plugins.flux.mdr";
+	private static final String MDR_SERVICE_NAME = "eu.europa.ec.fisheries.uvms.plugins.mdr";
 
     @Inject
     @ErrorEvent
