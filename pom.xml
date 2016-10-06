@@ -21,13 +21,13 @@
         <dozer.version>5.5.1</dozer.version>
 
         <longpolling.version>2.0.5</longpolling.version>
-        <uvms.config.version>2.1.0-SNAPSHOT</uvms.config.version>
-        <usm4uvms.version>2.1.0-SNAPSHOT</usm4uvms.version>
-        <audit.model.version>2.1.0-SNAPSHOT</audit.model.version>
-        <movement.model.version>2.1.0-SNAPSHOT</movement.model.version>
-        <rules.version>2.1.0-SNAPSHOT</rules.version>
-        <asset.version>2.1.0-SNAPSHOT</asset.version>
-        <exchange.model.version>2.1.0-SNAPSHOT</exchange.model.version>
+        <uvms.config.version>2.1.0</uvms.config.version>
+        <usm4uvms.version>2.1.0</usm4uvms.version>
+        <audit.model.version>2.1.0</audit.model.version>
+        <movement.model.version>2.1.0</movement.model.version>
+        <rules.version>2.1.0</rules.version>
+        <asset.version>2.1.0</asset.version>
+        <exchange.model.version>2.1.0</exchange.model.version>
 
         <project.scm.id>github</project.scm.id>
         <maven-release-plugin>2.5.3</maven-release-plugin>
