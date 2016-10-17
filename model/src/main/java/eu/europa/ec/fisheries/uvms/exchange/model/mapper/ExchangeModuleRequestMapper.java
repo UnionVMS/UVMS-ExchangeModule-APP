@@ -39,7 +39,7 @@ import eu.europa.ec.fisheries.schema.exchange.service.v1.SettingType;
 import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelMapperException;
 import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelMarshallException;
 import eu.europa.ec.fisheries.uvms.exchange.model.util.DateUtils;
-import un.unece.uncefact.data.standard.fluxresponsemessage._4.FLUXResponseMessageType;
+//import un.unece.uncefact.data.standard.fluxresponsemessage._4.FLUXResponseMessageType;
 
 public class ExchangeModuleRequestMapper {
 
@@ -197,7 +197,7 @@ public class ExchangeModuleRequestMapper {
         return JAXBMarshaller.marshallJaxBObjectToString(request);
     }
 
-    public static String createFluxFAResponseRequest(FLUXResponseMessageType response, String username) throws ExchangeModelMarshallException {
+    public static String createFluxFAResponseRequest(String response, String username) throws ExchangeModelMarshallException {
         SetFLUXFAResponseMessageRequest request = new SetFLUXFAResponseMessageRequest();
         request.setMethod(ExchangeModuleMethod.SET_FLUX_FA_RESPONSE_MESSAGE);
         request.setUsername(username);

@@ -20,7 +20,7 @@
             <xsd:import namespace="urn:service.exchange.schema.fisheries.ec.europa.eu:v1" schemaLocation="Service.xsd"/>
             <xsd:import namespace="urn:movement.exchange.schema.fisheries.ec.europa.eu:v1" schemaLocation="Movement.xsd"/>
             <xsd:import namespace="urn:types.plugin.exchange.schema.fisheries.ec.europa.eu:v1" schemaLocation="Plugin.xsd"/>
-			<xsd:import namespace="urn:un:unece:uncefact:data:standard:FLUXResponseMessage:4" schemaLocation="uncefact/data/standard/FLUXResponseMessage_4p0.xsd"/>
+		<!--	<xsd:import namespace="urn:un:unece:uncefact:data:standard:FLUXResponseMessage:4" schemaLocation="uncefact/data/standard/FLUXResponseMessage_4p0.xsd"/>-->
             
             <xsd:simpleType name="ExchangeModuleMethod">
                 <xsd:restriction base="xsd:string">
@@ -78,7 +78,7 @@
                     <xsd:complexContent>
                         <xsd:extension base="module:ExchangeBaseRequest">
                             <xsd:sequence>
-                                <xsd:element name="request" type="rsn:FLUXResponseMessageType"/>
+                                <xsd:element name="request" type="xsd:string"/>
                             </xsd:sequence>
                         </xsd:extension>
                     </xsd:complexContent>
