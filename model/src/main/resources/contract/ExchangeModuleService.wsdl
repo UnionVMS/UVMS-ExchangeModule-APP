@@ -57,6 +57,7 @@
                 <xsd:sequence>
                     <xsd:element name="method" type="module:ExchangeModuleMethod"/>
                     <xsd:element name="username" type="xsd:string"/>
+                    <xsd:element name="pluginType" type="plugin:PluginType" default="OTHER" />
                 </xsd:sequence>
             </xsd:complexType>
             

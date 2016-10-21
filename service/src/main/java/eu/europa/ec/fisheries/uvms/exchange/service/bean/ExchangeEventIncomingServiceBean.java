@@ -91,9 +91,13 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
         LOG.info("Process FLUXFAReportMessage");
         try {
             SetFLUXFAReportMessageRequest request = JAXBMarshaller.unmarshallTextMessage(message.getJmsMessage(), SetFLUXFAReportMessageRequest.class);
-
+            PluginType exchangePluginType = request.getPluginType();
+            eu.europa.ec.fisheries.schema.rules.exchange.v1.PluginType rulesPluginType =
+                    exchangePluginType == PluginType.MANUAL
+                            ? eu.europa.ec.fisheries.schema.rules.exchange.v1.PluginType.MANUAL
+                            : eu.europa.ec.fisheries.schema.rules.exchange.v1.PluginType.FLUX;
             LOG.debug("Got FLUXFAReportMessage in exchange :"+request.getRequest());
-            rulesService.sendFLUXFAReportMessageToRules(eu.europa.ec.fisheries.schema.rules.exchange.v1.PluginType.FLUX, request.getRequest(),  request.getUsername());
+            rulesService.sendFLUXFAReportMessageToRules(rulesPluginType, request.getRequest(),  request.getUsername());
             LOG.info("Process FLUXFAReportMessage successful");
         } catch (ExchangeModelMarshallException e) {
             LOG.error("Couldn't map to SetFLUXFAReportMessageRequest when processing FLUXFAReportMessage from plugin");
