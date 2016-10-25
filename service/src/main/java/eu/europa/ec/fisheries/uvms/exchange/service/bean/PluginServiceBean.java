@@ -61,7 +61,7 @@ public class PluginServiceBean implements PluginService {
 
     final static Logger LOG = LoggerFactory.getLogger(PluginServiceBean.class);
 
-    private static final String PARAMETER_DELIMETER = "/";
+    private static final String PARAMETER_DELIMETER = "\\.";
 
     @Inject
     @PluginErrorEvent
@@ -252,15 +252,14 @@ public class PluginServiceBean implements PluginService {
                     String value = parameterService.getStringValue(key);
                     String settingKey;
                     String[] splittedKey = key.split(PARAMETER_DELIMETER);
-                    if (splittedKey.length > 1) {
-                        String serviceClassName = splittedKey[0];
-                        if (splittedKey.length > 1) {
-                            settingKey = splittedKey[1];
-
-                        } else {
-                            //TODO: Investigate if the key should begin with module name +/+ key or only key ???
-                            settingKey = splittedKey[0];
+                    if (splittedKey.length > 2) {
+                        settingKey = splittedKey[splittedKey.length - 1];
+                        String serviceClassName = "";
+                        for (int i = 0; i < splittedKey.length - 2; i++) {
+                            serviceClassName += splittedKey[i] + ".";
                         }
+                        serviceClassName += splittedKey[splittedKey.length - 2];
+
                         SettingType settingType = new SettingType();
                         settingType.setKey(settingKey);
                         settingType.setValue(value);
