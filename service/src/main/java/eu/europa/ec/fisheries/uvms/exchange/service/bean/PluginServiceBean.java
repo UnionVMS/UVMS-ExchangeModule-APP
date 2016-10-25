@@ -253,7 +253,7 @@ public class PluginServiceBean implements PluginService {
                     String settingKey;
                     String[] splittedKey = key.split(PARAMETER_DELIMETER);
                     if (splittedKey.length > 2) {
-                        settingKey = splittedKey[splittedKey.length - 1];
+                        settingKey = key;
                         String serviceClassName = "";
                         for (int i = 0; i < splittedKey.length - 2; i++) {
                             serviceClassName += splittedKey[i] + ".";
@@ -261,7 +261,7 @@ public class PluginServiceBean implements PluginService {
                         serviceClassName += splittedKey[splittedKey.length - 2];
 
                         SettingType settingType = new SettingType();
-                        settingType.setKey(settingKey);
+                        settingType.setKey(key);
                         settingType.setValue(value);
                         updatePluginSetting(serviceClassName, settingType, "UVMS");
                     } else {
