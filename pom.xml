@@ -3,7 +3,7 @@
 
     <groupId>eu.europa.ec.fisheries.uvms.exchange</groupId>
     <artifactId>exchange</artifactId>
-    <version>2.0.10-SNAPSHOT</version>
+    <version>2.0.10</version>
     <packaging>pom</packaging>
     <description>Maven projekt-archetype for UnionVms modules</description>
     
@@ -97,7 +97,8 @@
         <connection>scm:git:https://emsanerac@webgate.ec.europa.eu/CITnet/stash/scm/unionvms/UVMS-ExchangeModule-APP.git</connection>
         <developerConnection>scm:git:https://emsanerac@webgate.ec.europa.eu/CITnet/stash/scm/unionvms/UVMS-ExchangeModule-APP.git</developerConnection>
         <url>https://emsanerac@webgate.ec.europa.eu/CITnet/stash/scm/unionvms/</url>
-    </scm>
+      <tag>exchange-2.0.10</tag>
+  </scm>
 
     <profiles>
         <profile>
