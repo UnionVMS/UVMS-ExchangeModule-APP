@@ -58,4 +58,5 @@ public interface ExchangeEventIncomingService {
      */
     public void processPluginPing(@Observes @PluginPingEvent ExchangeMessageEvent message);
 
+
 }

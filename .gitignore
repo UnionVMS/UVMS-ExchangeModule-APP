@@ -1,3 +1,5 @@
 target
 *.iml
-/service/src/main/resources/logging.properties
+logging.properties
+rest/src/main/webapp/apidocs/
+**/.idea

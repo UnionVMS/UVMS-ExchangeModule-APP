@@ -61,7 +61,7 @@ public class PluginServiceBean implements PluginService {
 
     final static Logger LOG = LoggerFactory.getLogger(PluginServiceBean.class);
 
-    private static final String PARAMETER_DELIMETER = "/";
+    private static final String PARAMETER_DELIMETER = "\\.";
 
     @Inject
     @PluginErrorEvent
@@ -252,18 +252,21 @@ public class PluginServiceBean implements PluginService {
                     String value = parameterService.getStringValue(key);
                     String settingKey;
                     String[] splittedKey = key.split(PARAMETER_DELIMETER);
-                    String serviceClassName = splittedKey[0];
-                    if(splittedKey.length>1){
-                        settingKey = splittedKey[1];
+                    if (splittedKey.length > 2) {
+                        settingKey = key;
+                        String serviceClassName = "";
+                        for (int i = 0; i < splittedKey.length - 2; i++) {
+                            serviceClassName += splittedKey[i] + ".";
+                        }
+                        serviceClassName += splittedKey[splittedKey.length - 2];
 
-                    }else{
-                        //TODO: Investigate if the key should begin with module name +/+ key or only key ???
-                        settingKey = splittedKey[0];
+                        SettingType settingType = new SettingType();
+                        settingType.setKey(key);
+                        settingType.setValue(value);
+                        updatePluginSetting(serviceClassName, settingType, "UVMS");
+                    } else {
+                        LOG.error("No key or malformed key sent in settingEvent: key: {}, value: {}", key, value);
                     }
-                    SettingType settingType = new SettingType();
-                    settingType.setKey(settingKey);
-                    settingType.setValue(value);
-                    updatePluginSetting(serviceClassName, settingType, "UVMS");
                 } catch (ConfigServiceException e) {
                     LOG.error("Couldn't get updated parameter table value");
                 } catch (ExchangeServiceException e) {
