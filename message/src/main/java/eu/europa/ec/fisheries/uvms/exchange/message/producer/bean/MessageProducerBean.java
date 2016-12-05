@@ -11,14 +11,18 @@ copy of the GNU General Public License along with the IFDM Suite. If not, see <h
  */
 package eu.europa.ec.fisheries.uvms.exchange.message.producer.bean;
 
+import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
+import javax.ejb.EJB;
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
 import javax.enterprise.event.Observes;
 import javax.inject.Inject;
 import javax.jms.*;
+import javax.naming.InitialContext;
 
+import eu.europa.ec.fisheries.uvms.message.JMSUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,37 +45,37 @@ public class MessageProducerBean implements MessageProducer, ConfigMessageProduc
 
     final static Logger LOG = LoggerFactory.getLogger(MessageProducerBean.class);
 
-    @Resource(mappedName = ExchangeModelConstants.QUEUE_DATASOURCE_INTERNAL)
-    private Queue localDbQueue;
-
-    @Resource(mappedName = ExchangeModelConstants.EXCHANGE_RESPONSE_QUEUE)
     private Queue responseQueue;
-
-    @Resource(mappedName = ExchangeModelConstants.EXCHANGE_MESSAGE_IN_QUEUE)
     private Queue eventQueue;
-
-    @Resource(mappedName = ExchangeModelConstants.PLUGIN_EVENTBUS)
     private Topic eventBus;
-
-    @Resource(mappedName = ExchangeModelConstants.QUEUE_INTEGRATION_RULES)
     private Queue rulesQueue;
-
-    @Resource(mappedName = ConfigConstants.CONFIG_MESSAGE_IN_QUEUE)
     private Queue configQueue;
-
-    @Resource(mappedName = ExchangeModelConstants.QUEUE_INTEGRATION_ASSET)
     private Queue vesselQueue;
-
-    @Resource(mappedName = ExchangeModelConstants.QUEUE_INTEGRATION_AUDIT)
     private Queue auditQueue;
-
-    @Resource(mappedName = ExchangeModelConstants.MOVEMENT_RESPONSE_QUEUE)
     private Queue movementResponseQueue;
 
-    private static final int CONFIG_TTL = 30000;
-
-    @Inject
+    @EJB
     JMSConnectorBean connector;
+
+    @PostConstruct
+    public void init() {
+        InitialContext ctx;
+        try {
+            ctx = new InitialContext();
+        } catch (Exception e) {
+            LOG.error("Failed to get InitialContext", e);
+            throw new RuntimeException(e);
+        }
+        responseQueue = JMSUtils.lookupQueue(ctx, ExchangeModelConstants.EXCHANGE_RESPONSE_QUEUE);
+        eventQueue = JMSUtils.lookupQueue(ctx, ExchangeModelConstants.EXCHANGE_MESSAGE_IN_QUEUE);
+        rulesQueue = JMSUtils.lookupQueue(ctx, ExchangeModelConstants.QUEUE_INTEGRATION_RULES);
+        configQueue = JMSUtils.lookupQueue(ctx, ConfigConstants.CONFIG_MESSAGE_IN_QUEUE);
+        vesselQueue = JMSUtils.lookupQueue(ctx, ExchangeModelConstants.QUEUE_INTEGRATION_ASSET);
+        auditQueue = JMSUtils.lookupQueue(ctx, ExchangeModelConstants.QUEUE_INTEGRATION_AUDIT);
+        movementResponseQueue = JMSUtils.lookupQueue(ctx, ExchangeModelConstants.MOVEMENT_RESPONSE_QUEUE);
+        eventBus = JMSUtils.lookupTopic(ctx, ExchangeModelConstants.PLUGIN_EVENTBUS);
+    }
+
 
     @Override
     @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
@@ -83,9 +87,6 @@ public class MessageProducerBean implements MessageProducer, ConfigMessageProduc
             message.setText(text);
 
             switch (queue) {
-                case INTERNAL:
-                    getProducer(session, localDbQueue).send(message);
-                    break;
                 case EVENT:
                     getProducer(session, eventQueue).send(message);
                 	break;

@@ -76,10 +76,10 @@ public class PluginServiceBean implements PluginService {
     @EJB
     ExchangeMessageConsumer consumer;
 
-    @Inject
+    @EJB
     ParameterService parameterService;
 
-    @Inject
+    @EJB
     UVMSConfigService configService;
 
     private boolean checkPluginType(PluginType pluginType, String responseTopicMessageSelector, String messageId) throws ExchangeModelMarshallException, ExchangeMessageException {
