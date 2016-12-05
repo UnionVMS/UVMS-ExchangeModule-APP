@@ -65,7 +65,7 @@
             <artifactId>exchange-model</artifactId>
             <version>${exchange.model.version}</version>
             <classifier>date</classifier>
-            <type>ejb</type>
+            <type>jar</type>
         </dependency> 
         <dependency>
             <groupId>${project.groupId}</groupId>  
