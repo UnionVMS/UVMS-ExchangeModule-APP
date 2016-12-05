@@ -14,6 +14,7 @@ package eu.europa.ec.fisheries.uvms.exchange.longpolling.service;
 import java.io.IOException;
 import java.util.List;
 
+import javax.ejb.EJB;
 import javax.enterprise.event.Observes;
 import javax.inject.Inject;
 import javax.json.Json;
@@ -34,17 +35,12 @@ import eu.europa.ec.fisheries.uvms.exchange.service.event.ExchangeSendingQueueEv
 import eu.europa.ec.fisheries.uvms.exchange.service.event.PollEvent;
 import eu.europa.ec.fisheries.uvms.longpolling.notifications.NotificationMessage;
 
-@WebServlet(asyncSupported = true, urlPatterns = {
-        LongPollingConstants.EXCHANGE_LOG_PATH,
-        LongPollingConstants.PLUGIN_STATUS_PATH,
-        LongPollingConstants.SENDING_QUEUE_PATH,
-        LongPollingConstants.POLL_PATH
-})
+@WebServlet(asyncSupported = true, urlPatterns = {LongPollingConstants.EXCHANGE_LOG_PATH, LongPollingConstants.PLUGIN_STATUS_PATH, LongPollingConstants.SENDING_QUEUE_PATH, LongPollingConstants.POLL_PATH})
 public class LongPollingHttpServlet extends HttpServlet {
 
     private static final long serialVersionUID = 1L;
 
-    @Inject
+    @EJB
     LongPollingContextHelper asyncContexts;
 
     @Override

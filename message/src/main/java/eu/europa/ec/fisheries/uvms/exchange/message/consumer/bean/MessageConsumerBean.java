@@ -38,7 +38,9 @@ import javax.jms.TextMessage;
 @MessageDriven(mappedName = ExchangeModelConstants.EXCHANGE_MESSAGE_IN_QUEUE, activationConfig = {
     @ActivationConfigProperty(propertyName = "messagingType", propertyValue = ExchangeModelConstants.CONNECTION_TYPE),
     @ActivationConfigProperty(propertyName = "destinationType", propertyValue = ExchangeModelConstants.DESTINATION_TYPE_QUEUE),
-    @ActivationConfigProperty(propertyName = "destination", propertyValue = ExchangeModelConstants.EXCHANGE_MESSAGE_IN_QUEUE_NAME)
+    @ActivationConfigProperty(propertyName = "destination", propertyValue = ExchangeModelConstants.EXCHANGE_MESSAGE_IN_QUEUE_NAME),
+    @ActivationConfigProperty(propertyName = "destinationJndiName", propertyValue = ExchangeModelConstants.EXCHANGE_MESSAGE_IN_QUEUE),
+    @ActivationConfigProperty(propertyName = "connectionFactoryJndiName", propertyValue = ExchangeModelConstants.CONNECTION_FACTORY)
 })
 //@formatter:on
 public class MessageConsumerBean implements MessageListener {
@@ -85,13 +87,6 @@ public class MessageConsumerBean implements MessageListener {
     @HandleProcessedMovementEvent
     Event<ExchangeMessageEvent> processedMovementEvent;
 
-    @Inject
-    @SetFluxFAReportMessageEvent
-    Event<ExchangeMessageEvent> processFLUXFAReportMessageEvent;
-
-    @Inject
-    @SendFLUXFAResponseToPluginEvent
-    Event<ExchangeMessageEvent> processFLUXFAResponseMessageEvent;
 
     @Override
     @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
@@ -99,9 +94,7 @@ public class MessageConsumerBean implements MessageListener {
         LOG.info("Message received in Exchange Message MDB");
 
         TextMessage textMessage = (TextMessage) message;
-        LOG.info("try consuming ExchangeBaseRequest");
         ExchangeBaseRequest request = tryConsumeExchangeBaseRequest(textMessage);
-        LOG.info("unmarshalling successful. request:" + request);
         if (request == null) {
             try {
                 //Handle PingResponse from plugin
@@ -119,7 +112,7 @@ public class MessageConsumerBean implements MessageListener {
         } else if (!checkUsernameShouldBeProvided(request)) {
             LOG.error("[ Error when receiving message in exchange, username must be set in the request: ]");
             errorEvent.fire(new ExchangeMessageEvent(textMessage, ExchangeModuleResponseMapper.createFaultMessage(FaultCode.EXCHANGE_MESSAGE, "Username in the request must be set")));
-        } else {
+        } else{
 
             LOG.debug("BaseRequest method {}", request.getMethod());
             switch (request.getMethod()) {
@@ -144,11 +137,6 @@ public class MessageConsumerBean implements MessageListener {
                 case PROCESSED_MOVEMENT:
                     processedMovementEvent.fire(new ExchangeMessageEvent(textMessage));
                     break;
-                case SET_FLUX_FA_REPORT_MESSAGE:
-                    LOG.debug("inside SET_FLUX_FA_REPORT_MESSAGE case");
-                    processFLUXFAReportMessageEvent.fire(new ExchangeMessageEvent(textMessage));
-                    break;
-
                 default:
                     LOG.error("[ Not implemented method consumed: {} ] ", request.getMethod());
                     errorEvent.fire(new ExchangeMessageEvent(textMessage, ExchangeModuleResponseMapper.createFaultMessage(FaultCode.EXCHANGE_MESSAGE, "Method not implemented")));
