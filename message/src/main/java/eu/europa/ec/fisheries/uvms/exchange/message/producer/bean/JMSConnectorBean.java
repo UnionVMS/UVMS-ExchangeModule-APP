@@ -29,9 +29,7 @@ import javax.naming.NamingException;
 public class JMSConnectorBean {
     final static org.slf4j.Logger LOG = LoggerFactory.getLogger(JMSConnectorBean.class);
 
-    @Resource(lookup = ExchangeModelConstants.CONNECTION_FACTORY)
     private ConnectionFactory connectionFactory;
-
     private Connection connection;
 
     @PostConstruct
