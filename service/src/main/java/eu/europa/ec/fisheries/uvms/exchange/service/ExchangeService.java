@@ -91,25 +91,4 @@ public interface ExchangeService {
      * @throws ExchangeServiceException
      */
     public ServiceResponseType getService(String serviceId) throws ExchangeServiceException;
-
-    /**
-     *
-     * Creates an ExchangeLog
-     *
-     * @param exchangeLog
-     * @return
-     * @throws ExchangeServiceException
-     */
-    public ExchangeLogType createExchangeLog(ExchangeLogType exchangeLog, String username) throws ExchangeServiceException;
-
-    /**
-     *
-     * Gets ExchangeLogs by a query
-     *
-     * @param query
-     * @return
-     * @throws ExchangeServiceException
-     */
-    public GetLogListByQueryResponse getExchangeLogByQuery(ExchangeListQuery query) throws ExchangeServiceException;
-
 }
