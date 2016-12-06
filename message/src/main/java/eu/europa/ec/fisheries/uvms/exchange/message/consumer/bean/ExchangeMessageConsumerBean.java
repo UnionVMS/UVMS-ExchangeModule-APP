@@ -25,7 +25,7 @@ public class ExchangeMessageConsumerBean implements ExchangeMessageConsumer, Con
     final static Logger LOG = LoggerFactory.getLogger(ExchangeMessageConsumerBean.class);
     private final static long TIMEOUT = 30*1000; //TODO timeout
 
-    @Resource(mappedName = ExchangeModelConstants.EXCHANGE_RESPONSE_QUEUE)
+    @Resource(mappedName = ExchangeModelConstants.EXCHANGE_QUEUE)
     private Queue responseQueue;
 
     @Resource(lookup = ExchangeModelConstants.CONNECTION_FACTORY)

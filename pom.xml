@@ -24,13 +24,14 @@
         <audit.model.version>2.0.5</audit.model.version>
         <movement.model.version>2.0.5</movement.model.version>
         <usm4uvms.version>2.0.16</usm4uvms.version>
-        <rules.version>2.0.8</rules.version>
+        <rules.version>2.0.9-SNAPSHOT</rules.version>
         <asset.version>2.0.5</asset.version>
         <audit.version>2.0.5</audit.version>
         <longpolling.version>2.0.4</longpolling.version>
         <uvms.config.version>2.0.8</uvms.config.version>
-        <exchange.model.version>2.0.8</exchange.model.version>
+        <exchange.model.version>2.0.9-SNAPSHOT</exchange.model.version>
 		<activity.model>0.5.4</activity.model>
+        <mdr.model.version>0.5.0-SNAPSHOT</mdr.model.version>
     </properties>
     
     <dependencies>
@@ -40,7 +41,6 @@
             <version>${javaee.version}</version>
             <scope>provided</scope>
         </dependency>
-        
         
         <dependency>
             <groupId>org.slf4j</groupId>
@@ -57,15 +57,13 @@
             <artifactId>logback-core</artifactId>
             <version>${logback.core.version}</version>
         </dependency>
-        
-                
+
         <dependency>
             <groupId>joda-time</groupId>
             <artifactId>joda-time</artifactId>
             <version>${joda-time.version}</version>
         </dependency>
-        
-        
+
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>

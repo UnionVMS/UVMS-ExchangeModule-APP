@@ -25,10 +25,10 @@ import javax.jms.MessageListener;
 import javax.jms.TextMessage;
 
 //@formatter:off
-@MessageDriven(mappedName = ExchangeModelConstants.EXCHANGE_MESSAGE_IN_QUEUE, activationConfig = {
+@MessageDriven(mappedName = ExchangeModelConstants.EXCHANGE_EVENT_QUEUE, activationConfig = {
     @ActivationConfigProperty(propertyName = "messagingType", propertyValue = ExchangeModelConstants.CONNECTION_TYPE),
     @ActivationConfigProperty(propertyName = "destinationType", propertyValue = ExchangeModelConstants.DESTINATION_TYPE_QUEUE),
-    @ActivationConfigProperty(propertyName = "destination", propertyValue = ExchangeModelConstants.EXCHANGE_MESSAGE_IN_QUEUE_NAME)
+    @ActivationConfigProperty(propertyName = "destination", propertyValue = ExchangeModelConstants.EXCHANGE_EVENT_QUEUE_NAME)
 })
 //@formatter:on
 public class MessageConsumerBean implements MessageListener {

@@ -70,6 +70,11 @@
             <artifactId>activity-model</artifactId>
             <version>${activity.model}</version>
         </dependency>
+        <dependency>
+            <groupId>eu.europa.ec.fisheries.uvms.mdr</groupId>
+            <artifactId>mdr-model</artifactId>
+            <version>${mdr.model.version}</version>
+        </dependency>
     </dependencies>
 
     <build>
