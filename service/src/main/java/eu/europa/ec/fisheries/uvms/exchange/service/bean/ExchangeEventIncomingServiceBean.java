@@ -14,9 +14,9 @@ import eu.europa.ec.fisheries.schema.exchange.service.v1.ServiceResponseType;
 import eu.europa.ec.fisheries.schema.exchange.service.v1.StatusType;
 import eu.europa.ec.fisheries.schema.exchange.v1.*;
 import eu.europa.ec.fisheries.schema.movement.module.v1.ProcessedMovementAck;
+import eu.europa.ec.fisheries.schema.rules.module.v1.RulesModuleMethod;
+import eu.europa.ec.fisheries.schema.rules.module.v1.SetFLUXMDRSyncMessageRulesResponse;
 import eu.europa.ec.fisheries.schema.rules.movement.v1.RawMovementType;
-import eu.europa.ec.fisheries.uvms.activity.model.schemas.ActivityModuleMethod;
-import eu.europa.ec.fisheries.uvms.activity.model.schemas.SetFLUXMDRSyncMessageActivityResponse;
 import eu.europa.ec.fisheries.uvms.exchange.message.constants.MessageQueue;
 import eu.europa.ec.fisheries.uvms.exchange.message.event.*;
 import eu.europa.ec.fisheries.uvms.exchange.message.event.carrier.ExchangeMessageEvent;
@@ -113,22 +113,19 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
 	 * 
 	 */
 	@Override
-	public void sendResponseToActivityMdr(@Observes @MdrSyncResponseMessageEvent ExchangeMessageEvent message) {
+	public void sendResponseToRulesModule(@Observes @MdrSyncResponseMessageEvent ExchangeMessageEvent message) {
 		LOG.info("Received @MdrSyncResponseMessageEvent.");
 
 		TextMessage requestMessage = message.getJmsMessage();
 		try {
 			LOG.info("Sending Flux Response Message To MDR Module queue (ActivityEven queuet).");
-
             SetFLUXMDRSyncMessageExchangeResponse exchangeResponse = JAXBMarshaller.unmarshallTextMessage(requestMessage, SetFLUXMDRSyncMessageExchangeResponse.class);
             String strRequest = exchangeResponse.getRequest();
-
-			SetFLUXMDRSyncMessageActivityResponse activityResponse = new SetFLUXMDRSyncMessageActivityResponse();
-			activityResponse.setMethod(ActivityModuleMethod.GET_FLUX_MDR_ENTITY);
-			activityResponse.setRequest(strRequest);
-
-			String activityStrReq = JAXBMarshaller.marshallJaxBObjectToString(activityResponse);
-			producer.sendMessageOnQueue(activityStrReq , MessageQueue.ACTIVITY_EVENT);
+            SetFLUXMDRSyncMessageRulesResponse mdrResponse = new SetFLUXMDRSyncMessageRulesResponse();
+			mdrResponse.setMethod(RulesModuleMethod.GET_FLUX_MDR_SYNC_RESPONSE);
+			mdrResponse.setRequest(strRequest);
+			String mdrStrReq = JAXBMarshaller.marshallJaxBObjectToString(mdrResponse);
+			producer.sendMessageOnQueue(mdrStrReq , MessageQueue.RULES);
 			LOG.info("Request object sent to Activity Queue.");
 
 		} catch (Exception e) {

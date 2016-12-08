@@ -48,6 +48,6 @@ public interface ExchangeEventIncomingService {
      */
     public void processFLUXFAReportMessage(@Observes @SetFluxFAReportMessageEvent ExchangeMessageEvent message);
 
-	void sendResponseToActivityMdr(@Observes @MdrSyncResponseMessageEvent ExchangeMessageEvent message);
+	void sendResponseToRulesModule(@Observes @MdrSyncResponseMessageEvent ExchangeMessageEvent message);
 
 }

@@ -1,16 +1,5 @@
 package eu.europa.ec.fisheries.uvms.exchange.message.producer.bean;
 
-import javax.annotation.Resource;
-import javax.ejb.Stateless;
-import javax.ejb.TransactionAttribute;
-import javax.ejb.TransactionAttributeType;
-import javax.enterprise.event.Observes;
-import javax.inject.Inject;
-import javax.jms.*;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import eu.europa.ec.fisheries.uvms.config.constants.ConfigConstants;
 import eu.europa.ec.fisheries.uvms.config.exception.ConfigMessageException;
 import eu.europa.ec.fisheries.uvms.config.message.ConfigMessageProducer;
@@ -24,6 +13,16 @@ import eu.europa.ec.fisheries.uvms.exchange.message.producer.MessageProducer;
 import eu.europa.ec.fisheries.uvms.exchange.model.constant.ExchangeModelConstants;
 import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelMapperException;
 import eu.europa.ec.fisheries.uvms.exchange.model.mapper.JAXBMarshaller;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.annotation.Resource;
+import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
+import javax.enterprise.event.Observes;
+import javax.inject.Inject;
+import javax.jms.*;
 
 @Stateless
 public class MessageProducerBean implements MessageProducer, ConfigMessageProducer {
@@ -33,32 +32,35 @@ public class MessageProducerBean implements MessageProducer, ConfigMessageProduc
     @Resource(mappedName = ExchangeModelConstants.QUEUE_DATASOURCE_INTERNAL)
     private Queue localDbQueue;
 
-    @Resource(mappedName = ExchangeModelConstants.EXCHANGE_RESPONSE_QUEUE)
+    @Resource(mappedName = ExchangeModelConstants.EXCHANGE_QUEUE)
     private Queue responseQueue;
 
-    @Resource(mappedName = ExchangeModelConstants.EXCHANGE_MESSAGE_IN_QUEUE)
+    @Resource(mappedName = ExchangeModelConstants.EXCHANGE_EVENT_QUEUE)
     private Queue eventQueue;
 
     @Resource(mappedName = ExchangeModelConstants.PLUGIN_EVENTBUS)
     private Topic eventBus;
 
-    @Resource(mappedName = ExchangeModelConstants.QUEUE_INTEGRATION_RULES)
+    @Resource(mappedName = ExchangeModelConstants.RULES_EVENT_QUEUE)
     private Queue rulesQueue;
 
     @Resource(mappedName = ConfigConstants.CONFIG_MESSAGE_IN_QUEUE)
     private Queue configQueue;
 
-    @Resource(mappedName = ExchangeModelConstants.QUEUE_INTEGRATION_ASSET)
+    @Resource(mappedName = ExchangeModelConstants.ASSET_EVENT_QUEUE)
     private Queue vesselQueue;
 
     @Resource(mappedName = ExchangeModelConstants.QUEUE_INTEGRATION_AUDIT)
     private Queue auditQueue;
 
-    @Resource(mappedName = ExchangeModelConstants.MOVEMENT_RESPONSE_QUEUE)
+    @Resource(mappedName = ExchangeModelConstants.MOVEMENT_EVENT_QUEUE)
     private Queue movementResponseQueue;
     
-    @Resource(mappedName = ExchangeModelConstants.ACTIVITY_RESPONSE_QUEUE)
+    @Resource(mappedName = ExchangeModelConstants.ACTIVITY_EVENT_QUEUE)
 	private Queue activityQueue;
+
+    @Resource(mappedName = ExchangeModelConstants.MDR_EVENT_QUEUE)
+    private Queue mdrQueue;
 
     private static final int CONFIG_TTL = 30000;
 
@@ -95,6 +97,8 @@ public class MessageProducerBean implements MessageProducer, ConfigMessageProduc
                     getProducer(session, auditQueue).send(message);
                 case ACTIVITY_EVENT:
                     getProducer(session, activityQueue).send(message);
+                case MDR_EVENT:
+                    getProducer(session, mdrQueue).send(message);
                 default:
                     break;
             }

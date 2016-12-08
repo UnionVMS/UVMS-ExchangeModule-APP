@@ -28,4 +28,6 @@ public class ExchangeModelConstants {
     public static final String MOVEMENT_RESPONSE_QUEUE = "java:/jms/queue/UVMSMovement";
 	public static final String ACTIVITY_RESPONSE_QUEUE = "java:/jms/queue/UVMSActivityEvent";
 
+    public static final String MDR_RESPONSE_QUEUE = "java:/jms/queue/UVMSMdrEvent";
+
 }
