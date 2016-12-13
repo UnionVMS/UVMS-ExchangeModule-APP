@@ -23,7 +23,7 @@
         <longpolling.version>2.0.5</longpolling.version>
         <uvms.common.version>2.0.13</uvms.common.version>
         <uvms.config.version>2.1.2</uvms.config.version>
-        <usm4uvms.version>2.1.1</usm4uvms.version>
+        <usm4uvms.version>2.1.4-SNAPSHOT</usm4uvms.version>
         <audit.model.version>2.1.1</audit.model.version>
         <movement.model.version>2.1.1</movement.model.version>
         <rules.version>2.1.1</rules.version>
