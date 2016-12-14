@@ -53,6 +53,8 @@ public class MessageProducerBean implements MessageProducer, ConfigMessageProduc
     private Queue vesselQueue;
     private Queue auditQueue;
     private Queue movementResponseQueue;
+    private Queue activityQueue;
+    private Queue mdrQueue;
 
     @EJB
     JMSConnectorBean connector;
@@ -74,6 +76,8 @@ public class MessageProducerBean implements MessageProducer, ConfigMessageProduc
         auditQueue = JMSUtils.lookupQueue(ctx, ExchangeModelConstants.QUEUE_INTEGRATION_AUDIT);
         movementResponseQueue = JMSUtils.lookupQueue(ctx, ExchangeModelConstants.MOVEMENT_RESPONSE_QUEUE);
         eventBus = JMSUtils.lookupTopic(ctx, ExchangeModelConstants.PLUGIN_EVENTBUS);
+        activityQueue = JMSUtils.lookupTopic(ctx, ExchangeModelConstants.ACTIVITY_EVENT_QUEUE);
+        mdrQueue = JMSUtils.lookupTopic(ctx, ExchangeModelConstants.MDR_EVENT_QUEUE);
     }
 
 
@@ -101,6 +105,10 @@ public class MessageProducerBean implements MessageProducer, ConfigMessageProduc
                     break;
                 case AUDIT:
                     getProducer(session, auditQueue).send(message);
+                case ACTIVITY_EVENT:
+                    getProducer(session, activityQueue).send(message);
+                case MDR_EVENT:
+                    getProducer(session, mdrQueue).send(message);
                 default:
                     break;
             }

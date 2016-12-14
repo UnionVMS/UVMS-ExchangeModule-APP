@@ -127,6 +127,28 @@ public class ExchangeEventOutgoingServiceBean implements ExchangeEventOutgoingSe
         }
     }
 
+
+    /*
+	 * Method for Observing the @MdrSyncRequestMessageEvent, meaning a message from Activity MDR
+	 * module has arrived (synchronisation of a MDR Entity) which needs to be sent to EventBus Topic
+	 * so that it gets intercepted by MDR Plugin Registered Subscriber and sent to Flux.
+	 *
+	 */
+    @Override
+    public void forwardMdrSyncMessageToPlugin(@Observes @MdrSyncRequestMessageEvent ExchangeMessageEvent message) {
+        LOG.info("Received MdrSyncMessageEvent.");
+
+        TextMessage requestMessage = message.getJmsMessage();
+        try {
+            String marshalledReq = ExchangeToMdrRulesMapper.mapExchangeToMdrPluginRequest(requestMessage);
+            producer.sendEventBusMessage(marshalledReq, MDR_SERVICE_NAME);
+            LOG.info("Request object sent to MDR plugin.");
+        } catch (Exception e) {
+            LOG.error("Something strange happend during message conversion",e);
+        }
+    }
+
+
     private boolean validate(ServiceResponseType service, SendMovementToPluginType sendReport, TextMessage origin, String username) {
         String serviceName = service.getServiceClassName(); //Use first and only
         if (serviceName == null || serviceName.isEmpty()) {
@@ -212,6 +234,23 @@ public class ExchangeEventOutgoingServiceBean implements ExchangeEventOutgoingSe
         } catch (JMSException ex) {
             LOG.error("[ Error when creating unsent message {} ]", ex.getMessage());
         }
+    }
+
+
+    @Override
+    public void sendFLUXFAResponseToPlugin(@Observes @SendFLUXFAResponseToPluginEvent ExchangeMessageEvent message) {
+        SetFLUXFAResponseMessageRequest request = null;
+        try {
+            request = JAXBMarshaller.unmarshallTextMessage(message.getJmsMessage(), SetFLUXFAResponseMessageRequest.class);
+            LOG.debug("Got FLUXFAResponse in exchange :"+request.getRequest());
+
+            String text = ExchangePluginRequestMapper.createSetFLUXFAResponseRequest(message.getJmsMessage().getText());
+            String pluginMessageId = producer.sendEventBusMessage(text, ExchangeServiceConstants.FLUX_ACTIVITY_PLUGIN_SERVICE_NAME);
+            LOG.debug("Message sent to Flux ERS Plugin :"+pluginMessageId);
+        } catch (ExchangeModelMarshallException | ExchangeMessageException | JMSException  e) {
+            LOG.error(e);
+        }
+
     }
 
     private boolean validate(CommandType command, TextMessage origin, ServiceResponseType service, CommandType commandType, String username) {

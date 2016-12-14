@@ -34,4 +34,17 @@ public interface ExchangeEventOutgoingService {
      * @param message
      */
     public void sendCommandToPlugin(@Observes @SendCommandToPluginEvent ExchangeMessageEvent message);
+
+    /**
+     * Sends MDR sync message to the MDR plugin
+     * @param message
+     */
+    void forwardMdrSyncMessageToPlugin(@Observes @MdrSyncRequestMessageEvent ExchangeMessageEvent message);
+
+    /**
+     * Sends FLUX FA response message to ERS/Activity plugin
+     * @param message
+     */
+    public void sendFLUXFAResponseToPlugin(@Observes @SendFLUXFAResponseToPluginEvent ExchangeMessageEvent message);
+
 }
