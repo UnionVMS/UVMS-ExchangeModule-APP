@@ -76,8 +76,8 @@ public class MessageProducerBean implements MessageProducer, ConfigMessageProduc
         auditQueue = JMSUtils.lookupQueue(ctx, ExchangeModelConstants.QUEUE_INTEGRATION_AUDIT);
         movementResponseQueue = JMSUtils.lookupQueue(ctx, ExchangeModelConstants.MOVEMENT_RESPONSE_QUEUE);
         eventBus = JMSUtils.lookupTopic(ctx, ExchangeModelConstants.PLUGIN_EVENTBUS);
-        activityQueue = JMSUtils.lookupTopic(ctx, ExchangeModelConstants.ACTIVITY_EVENT_QUEUE);
-        mdrQueue = JMSUtils.lookupTopic(ctx, ExchangeModelConstants.MDR_EVENT_QUEUE);
+        activityQueue = JMSUtils.lookupQueue(ctx, ExchangeModelConstants.ACTIVITY_EVENT_QUEUE);
+        mdrQueue = JMSUtils.lookupQueue(ctx, ExchangeModelConstants.MDR_EVENT_QUEUE);
     }
 
 
