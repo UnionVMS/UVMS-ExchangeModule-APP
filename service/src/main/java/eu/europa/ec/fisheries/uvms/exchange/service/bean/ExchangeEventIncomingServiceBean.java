@@ -25,6 +25,8 @@ import eu.europa.ec.fisheries.schema.exchange.service.v1.ServiceResponseType;
 import eu.europa.ec.fisheries.schema.exchange.service.v1.StatusType;
 import eu.europa.ec.fisheries.schema.exchange.v1.*;
 import eu.europa.ec.fisheries.schema.movement.module.v1.ProcessedMovementAck;
+import eu.europa.ec.fisheries.schema.rules.module.v1.RulesModuleMethod;
+import eu.europa.ec.fisheries.schema.rules.module.v1.SetFLUXMDRSyncMessageRulesResponse;
 import eu.europa.ec.fisheries.schema.rules.movement.v1.RawMovementType;
 import eu.europa.ec.fisheries.uvms.exchange.message.constants.MessageQueue;
 import eu.europa.ec.fisheries.uvms.exchange.message.event.*;
@@ -95,6 +97,52 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
     @PollEvent
     Event<NotificationMessage> pollEvent;
 
+    @Override
+    public void processFLUXFAReportMessage(@Observes @SetFluxFAReportMessageEvent ExchangeMessageEvent message) {
+        LOG.info("Process FLUXFAReportMessage");
+        try {
+            SetFLUXFAReportMessageRequest request = JAXBMarshaller.unmarshallTextMessage(message.getJmsMessage(), SetFLUXFAReportMessageRequest.class);
+            PluginType exchangePluginType = request.getPluginType();
+            eu.europa.ec.fisheries.schema.rules.exchange.v1.PluginType rulesPluginType =
+                    exchangePluginType == PluginType.MANUAL
+                            ? eu.europa.ec.fisheries.schema.rules.exchange.v1.PluginType.MANUAL
+                            : eu.europa.ec.fisheries.schema.rules.exchange.v1.PluginType.FLUX;
+            LOG.debug("Got FLUXFAReportMessage in exchange :"+request.getRequest());
+            rulesService.sendFLUXFAReportMessageToRules(rulesPluginType, request.getRequest(),  request.getUsername());
+            LOG.info("Process FLUXFAReportMessage successful");
+        } catch (ExchangeModelMarshallException e) {
+            LOG.error("Couldn't map to SetFLUXFAReportMessageRequest when processing FLUXFAReportMessage from plugin");
+        } catch (ExchangeServiceException e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    /*
+	 * Method for Observing the @MdrSyncMessageEvent, meaning a message from Activity MDR
+	 * module has arrived (synchronisation of the mdr).
+	 *
+	 */
+    @Override
+    public void sendResponseToRulesModule(@Observes @MdrSyncResponseMessageEvent ExchangeMessageEvent message) {
+        LOG.info("Received @MdrSyncResponseMessageEvent.");
+
+        TextMessage requestMessage = message.getJmsMessage();
+        try {
+            LOG.info("Sending Flux Response Message To MDR Module queue (ActivityEven queuet).");
+            SetFLUXMDRSyncMessageExchangeResponse exchangeResponse = JAXBMarshaller.unmarshallTextMessage(requestMessage, SetFLUXMDRSyncMessageExchangeResponse.class);
+            String strRequest = exchangeResponse.getRequest();
+            SetFLUXMDRSyncMessageRulesResponse mdrResponse = new SetFLUXMDRSyncMessageRulesResponse();
+            mdrResponse.setMethod(RulesModuleMethod.GET_FLUX_MDR_SYNC_RESPONSE);
+            mdrResponse.setRequest(strRequest);
+            String mdrStrReq = JAXBMarshaller.marshallJaxBObjectToString(mdrResponse);
+            producer.sendMessageOnQueue(mdrStrReq , MessageQueue.RULES);
+            LOG.info("Request object sent to Activity Queue.");
+
+        } catch (Exception e) {
+            LOG.error("Something strange happend during message conversion");
+        }
+    }
 
     @Override
     public void getPluginListByTypes(@Observes @PluginConfigEvent ExchangeMessageEvent message) {

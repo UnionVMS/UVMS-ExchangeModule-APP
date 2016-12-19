@@ -11,7 +11,9 @@
  */
 package eu.europa.ec.fisheries.uvms.exchange.service;
 
+import eu.europa.ec.fisheries.uvms.exchange.message.event.MdrSyncRequestMessageEvent;
 import eu.europa.ec.fisheries.uvms.exchange.message.event.SendCommandToPluginEvent;
+import eu.europa.ec.fisheries.uvms.exchange.message.event.SendFLUXFAResponseToPluginEvent;
 import eu.europa.ec.fisheries.uvms.exchange.message.event.SendReportToPluginEvent;
 import eu.europa.ec.fisheries.uvms.exchange.message.event.carrier.ExchangeMessageEvent;
 
@@ -34,4 +36,17 @@ public interface ExchangeEventOutgoingService {
      * @param message
      */
     public void sendCommandToPlugin(@Observes @SendCommandToPluginEvent ExchangeMessageEvent message);
+
+    /**
+     * Sends MDR sync message to the MDR plugin
+     * @param message
+     */
+    void forwardMdrSyncMessageToPlugin(@Observes @MdrSyncRequestMessageEvent ExchangeMessageEvent message);
+
+    /**
+     * Sends FLUX FA response message to ERS/Activity plugin
+     * @param message
+     */
+    public void sendFLUXFAResponseToPlugin(@Observes @SendFLUXFAResponseToPluginEvent ExchangeMessageEvent message);
+
 }
