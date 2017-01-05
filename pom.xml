@@ -9,7 +9,7 @@
     
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <release.branch.name>uvms-2.1.3-morgoth</release.branch.name>
+        <release.branch.name>uvms-3.0.0-boba-fett</release.branch.name>
         <mockito.version>1.9.5</mockito.version>
         <junit.version>4.10</junit.version>
         <javaee.version>7.0</javaee.version>
@@ -20,15 +20,15 @@
         <logback.core.version>1.1.2</logback.core.version>
         <dozer.version>5.5.1</dozer.version>
 
-        <longpolling.version>2.0.9-SNAPSHOT</longpolling.version>
-        <uvms.common.version>2.0.14-SNAPSHOT</uvms.common.version>
-        <uvms.config.version>3.0.0-SNAPSHOT</uvms.config.version>
-        <usm4uvms.version>3.0.0-SNAPSHOT</usm4uvms.version>
-        <audit.model.version>3.0.0-SNAPSHOT</audit.model.version>
-        <movement.model.version>3.0.0-SNAPSHOT</movement.model.version>
-        <rules.version>3.0.0-SNAPSHOT</rules.version>
-        <asset.version>3.0.0-SNAPSHOT</asset.version>
-        <exchange.model.version>3.0.0-SNAPSHOT</exchange.model.version>
+        <longpolling.version>2.0.9</longpolling.version>
+        <uvms.common.version>2.0.14</uvms.common.version>
+        <uvms.config.version>3.0.0</uvms.config.version>
+        <usm4uvms.version>3.0.0</usm4uvms.version>
+        <audit.model.version>3.0.0</audit.model.version>
+        <movement.model.version>3.0.0</movement.model.version>
+        <rules.version>3.0.0</rules.version>
+        <asset.version>3.0.0</asset.version>
+        <exchange.model.version>3.0.0</exchange.model.version>
       
         <project.scm.id>github</project.scm.id>
         <maven-release-plugin>2.5.3</maven-release-plugin>
@@ -121,7 +121,7 @@
 
 			<properties>
 				<scm.connection>scm:git:https://emserveje@webgate.ec.europa.eu/CITnet/stash/scm/unionvms/uvms-exchangemodule-app.git</scm.connection>
-			</properties>
+			<release.branch.name>uvms-3.0.0-boba-fett</release.branch.name></properties>
 		</profile>
 	</profiles>
     <build>
