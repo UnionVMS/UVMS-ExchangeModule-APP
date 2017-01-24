@@ -9,7 +9,7 @@
     
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <release.branch.name>uvms-3.0.3-C3PO</release.branch.name>
+        <release.branch.name>uvms-3.0.3-C3PO-2</release.branch.name>
         <mockito.version>1.9.5</mockito.version>
         <junit.version>4.10</junit.version>
         <javaee.version>7.0</javaee.version>
@@ -121,7 +121,7 @@
 
 			<properties>
 				<scm.connection>scm:git:https://emserveje@webgate.ec.europa.eu/CITnet/stash/scm/unionvms/uvms-exchangemodule-app.git</scm.connection>
-			<release.branch.name>uvms-3.0.3-C3PO</release.branch.name></properties>
+			<release.branch.name>uvms-3.0.3-C3PO-2</release.branch.name></properties>
 		</profile>
 	</profiles>
     <build>
