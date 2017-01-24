@@ -3,7 +3,7 @@
 
     <groupId>eu.europa.ec.fisheries.uvms.exchange</groupId>
     <artifactId>exchange</artifactId>
-    <version>3.0.3-SNAPSHOT</version>
+    <version>3.0.3</version>
     <packaging>pom</packaging>
     <description>Maven projekt-archetype for UnionVms modules</description>
     
@@ -100,7 +100,7 @@
 
     <scm>
         <connection>${scm.connection}</connection>
-        <tag>HEAD</tag>
+        <tag>exchange-3.0.3</tag>
     </scm>
 
 	<profiles>
