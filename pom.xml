@@ -20,15 +20,15 @@
         <logback.core.version>1.1.2</logback.core.version>
         <dozer.version>5.5.1</dozer.version>
 
-        <longpolling.version>2.0.9</longpolling.version>
-        <uvms.common.version>2.0.14</uvms.common.version>
-        <uvms.config.version>3.0.0</uvms.config.version>
-        <usm4uvms.version>3.0.0</usm4uvms.version>
-        <audit.model.version>3.0.0</audit.model.version>
-        <movement.model.version>3.0.0</movement.model.version>
-        <rules.version>3.0.0</rules.version>
-        <asset.version>3.0.0</asset.version>
-        <exchange.model.version>3.0.0</exchange.model.version>
+        <longpolling.version>2.0.13</longpolling.version>
+        <uvms.common.version>2.0.17</uvms.common.version>
+        <uvms.config.version>3.0.4</uvms.config.version>
+        <usm4uvms.version>3.0.4</usm4uvms.version>
+        <audit.model.version>3.0.4</audit.model.version>
+        <movement.model.version>3.0.4</movement.model.version>
+        <rules.version>3.0.4</rules.version>
+        <asset.version>3.0.4</asset.version>
+        <exchange.model.version>3.0.4</exchange.model.version>
       
         <project.scm.id>github</project.scm.id>
         <maven-release-plugin>2.5.3</maven-release-plugin>
