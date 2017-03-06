@@ -33,6 +33,7 @@ import eu.europa.ec.fisheries.uvms.exchange.message.event.*;
 import eu.europa.ec.fisheries.uvms.exchange.message.event.carrier.ExchangeMessageEvent;
 import eu.europa.ec.fisheries.uvms.exchange.message.event.carrier.PluginMessageEvent;
 import eu.europa.ec.fisheries.uvms.exchange.message.event.registry.PluginErrorEvent;
+import eu.europa.ec.fisheries.uvms.exchange.message.exception.ExchangeMessageException;
 import eu.europa.ec.fisheries.uvms.exchange.message.producer.MessageProducer;
 import eu.europa.ec.fisheries.uvms.exchange.model.constant.FaultCode;
 import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeException;
@@ -42,7 +43,6 @@ import eu.europa.ec.fisheries.uvms.exchange.model.mapper.ExchangePluginResponseM
 import eu.europa.ec.fisheries.uvms.exchange.model.mapper.JAXBMarshaller;
 import eu.europa.ec.fisheries.uvms.exchange.service.ExchangeEventIncomingService;
 import eu.europa.ec.fisheries.uvms.exchange.service.ExchangeLogService;
-import eu.europa.ec.fisheries.uvms.exchange.service.ExchangeRulesService;
 import eu.europa.ec.fisheries.uvms.exchange.service.ExchangeService;
 import eu.europa.ec.fisheries.uvms.exchange.service.event.ExchangePluginStatusEvent;
 import eu.europa.ec.fisheries.uvms.exchange.service.event.PollEvent;
@@ -52,6 +52,8 @@ import eu.europa.ec.fisheries.uvms.exchange.service.mapper.ExchangeLogMapper;
 import eu.europa.ec.fisheries.uvms.exchange.service.mapper.MovementMapper;
 import eu.europa.ec.fisheries.uvms.longpolling.notifications.NotificationMessage;
 import eu.europa.ec.fisheries.uvms.movement.model.mapper.MovementModuleResponseMapper;
+import eu.europa.ec.fisheries.uvms.rules.model.exception.RulesModelMapperException;
+import eu.europa.ec.fisheries.uvms.rules.model.mapper.RulesModuleRequestMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -86,9 +88,6 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
     @EJB
     ExchangeService exchangeService;
 
-    @EJB
-    ExchangeRulesService rulesService;
-
     @Inject
     @ExchangePluginStatusEvent
     Event<NotificationMessage> pluginStatusEvent;
@@ -108,12 +107,14 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
                             ? eu.europa.ec.fisheries.schema.rules.exchange.v1.PluginType.MANUAL
                             : eu.europa.ec.fisheries.schema.rules.exchange.v1.PluginType.FLUX;
             LOG.debug("Got FLUXFAReportMessage in exchange :"+request.getRequest());
-            rulesService.sendFLUXFAReportMessageToRules(rulesPluginType, request.getRequest(),  request.getUsername());
+            String msg = RulesModuleRequestMapper.createSetFLUXFAReportMessageRequest(rulesPluginType, request.getRequest(),  request.getUsername());
+
+            //Improvement that could be done is to pass the service. For this purpose
+            //we need first to set the plugin name, which requires BaseExchangeRequest XSD modification, as well as in ActivityPlugin
+            forwardToRules(msg,message, null);
             LOG.info("Process FLUXFAReportMessage successful");
-        } catch (ExchangeModelMarshallException e) {
-            LOG.error("Couldn't map to SetFLUXFAReportMessageRequest when processing FLUXFAReportMessage from plugin");
-        } catch (ExchangeServiceException e) {
-            e.printStackTrace();
+        } catch (RulesModelMapperException | ExchangeModelMarshallException e) {
+            LOG.error("Couldn't map to SetFLUXFAReportMessageRequest when processing FLUXFAReportMessage from plugin", e);
         }
 
     }
@@ -136,8 +137,9 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
             mdrResponse.setMethod(RulesModuleMethod.GET_FLUX_MDR_SYNC_RESPONSE);
             mdrResponse.setRequest(strRequest);
             String mdrStrReq = JAXBMarshaller.marshallJaxBObjectToString(mdrResponse);
-            producer.sendMessageOnQueue(mdrStrReq , MessageQueue.RULES);
-            LOG.info("Request object sent to Activity Queue.");
+
+            forwardToRules(mdrStrReq, null, null);
+            LOG.info("Request object sent to Rules Queue.");
 
         } catch (Exception e) {
             LOG.error("Something strange happend during message conversion");
@@ -179,9 +181,10 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
             }
 
             String pluginName = request.getRequest().getPluginName();
+            ServiceResponseType service = exchangeService.getService(pluginName);
+
             PluginType pluginType = request.getRequest().getPluginType();
 
-            ServiceResponseType service = exchangeService.getService(pluginName);
             LOG.debug("Process movement from {} of {} type", pluginName, pluginType);
 
             if (validate(request.getRequest(), service, message.getJmsMessage())) {
@@ -200,12 +203,8 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
                 // TODO: Temporary - probably better to change corr id to have the same though the entire flow; then we can use this to send response to original caller from anywhere needed
                 rawMovement.setAckResponseMessageID(message.getJmsMessage().getJMSMessageID());
 
-                try {
-                    rulesService.sendMovementToRules(MovementMapper.mapPluginType(pluginType), rawMovement, username);
-                } catch (ExchangeServiceException e) {
-                    PluginFault fault = ExchangePluginResponseMapper.mapToPluginFaultResponse(FaultCode.EXCHANGE_PLUGIN_EVENT.getCode(), "Movement sent cannot be sent to Rules module [ " + e.getMessage() + " ]");
-                    pluginErrorEvent.fire(new PluginMessageEvent(message.getJmsMessage(), service, fault));
-                }
+                String msg = RulesModuleRequestMapper.createSetMovementReportRequest(MovementMapper.mapPluginType(pluginType), rawMovement, username);
+                forwardToRules(msg, message, service);
             } else {
                 LOG.debug("Validation error. Event sent to plugin");
             }
@@ -217,6 +216,27 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
             LOG.error("Couldn't map to SetMovementReportRequest when processing movement from plugin");
         } catch (JMSException e) {
             LOG.error("Failed to get response queue");
+        } catch (RulesModelMapperException e) {
+            LOG.error("Failed to build Rules momvent request.", e);
+        }
+    }
+
+    /**
+     * forwards serialized message to Rules module
+     * @param messageToForward
+     * @param message is optional
+     * @param service is optional
+     */
+    private void forwardToRules(String messageToForward, ExchangeMessageEvent message, ServiceResponseType service) {
+        try {
+            producer.sendMessageOnQueue(messageToForward, MessageQueue.RULES); //sending to Rules
+        } catch (ExchangeMessageException e) {
+            LOG.error("Failed to forward message to Rules.", e);
+
+            if (service!= null && message != null) {
+                PluginFault fault = ExchangePluginResponseMapper.mapToPluginFaultResponse(FaultCode.EXCHANGE_PLUGIN_EVENT.getCode(), "Message cannot be sent to Rules module [ " + e.getMessage() + " ]");
+                pluginErrorEvent.fire(new PluginMessageEvent(message.getJmsMessage(), service, fault));
+            }
         }
     }
 
