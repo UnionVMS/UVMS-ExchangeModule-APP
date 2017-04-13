@@ -164,6 +164,10 @@ public class MessageConsumerBean implements MessageListener {
                     LOG.debug("inside SET_FLUX_FA_REPORT_MESSAGE case");
                     processFLUXFAReportMessageEvent.fire(new ExchangeMessageEvent(textMessage));
                     break;
+                case SET_FLUX_FA_RESPONSE_MESSAGE:
+                    LOG.debug("inside SET_FLUX_FA_RESPONSE_MESSAGE case");
+                    processFLUXFAResponseMessageEvent.fire(new ExchangeMessageEvent(textMessage));
+                    break;
                 default:
                     LOG.error("[ Not implemented method consumed: {} ] ", request.getMethod());
                     errorEvent.fire(new ExchangeMessageEvent(textMessage, ExchangeModuleResponseMapper.createFaultMessage(FaultCode.EXCHANGE_MESSAGE, "Method not implemented")));
