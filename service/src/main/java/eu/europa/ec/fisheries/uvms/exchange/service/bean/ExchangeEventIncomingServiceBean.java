@@ -21,6 +21,7 @@ import eu.europa.ec.fisheries.schema.exchange.plugin.types.v1.PluginFault;
 import eu.europa.ec.fisheries.schema.exchange.plugin.types.v1.PluginType;
 import eu.europa.ec.fisheries.schema.exchange.plugin.v1.AcknowledgeResponse;
 import eu.europa.ec.fisheries.schema.exchange.plugin.v1.ExchangePluginMethod;
+import eu.europa.ec.fisheries.schema.exchange.plugin.v1.SalesMessageResponse;
 import eu.europa.ec.fisheries.schema.exchange.service.v1.ServiceResponseType;
 import eu.europa.ec.fisheries.schema.exchange.service.v1.StatusType;
 import eu.europa.ec.fisheries.schema.exchange.v1.*;
@@ -28,6 +29,7 @@ import eu.europa.ec.fisheries.schema.movement.module.v1.ProcessedMovementAck;
 import eu.europa.ec.fisheries.schema.rules.module.v1.RulesModuleMethod;
 import eu.europa.ec.fisheries.schema.rules.module.v1.SetFLUXMDRSyncMessageRulesResponse;
 import eu.europa.ec.fisheries.schema.rules.movement.v1.RawMovementType;
+import eu.europa.ec.fisheries.uvms.exception.ServiceException;
 import eu.europa.ec.fisheries.uvms.exchange.message.constants.MessageQueue;
 import eu.europa.ec.fisheries.uvms.exchange.message.event.*;
 import eu.europa.ec.fisheries.uvms.exchange.message.event.carrier.ExchangeMessageEvent;
@@ -41,19 +43,19 @@ import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelMarshal
 import eu.europa.ec.fisheries.uvms.exchange.model.mapper.ExchangeModuleResponseMapper;
 import eu.europa.ec.fisheries.uvms.exchange.model.mapper.ExchangePluginResponseMapper;
 import eu.europa.ec.fisheries.uvms.exchange.model.mapper.JAXBMarshaller;
-import eu.europa.ec.fisheries.uvms.exchange.service.ExchangeEventIncomingService;
-import eu.europa.ec.fisheries.uvms.exchange.service.ExchangeLogService;
-import eu.europa.ec.fisheries.uvms.exchange.service.ExchangeService;
+import eu.europa.ec.fisheries.uvms.exchange.service.*;
 import eu.europa.ec.fisheries.uvms.exchange.service.event.ExchangePluginStatusEvent;
 import eu.europa.ec.fisheries.uvms.exchange.service.event.PollEvent;
 import eu.europa.ec.fisheries.uvms.exchange.service.exception.ExchangeLogException;
 import eu.europa.ec.fisheries.uvms.exchange.service.exception.ExchangeServiceException;
 import eu.europa.ec.fisheries.uvms.exchange.service.mapper.ExchangeLogMapper;
 import eu.europa.ec.fisheries.uvms.exchange.service.mapper.MovementMapper;
+import eu.europa.ec.fisheries.uvms.exchange.service.mapper.PluginTypeMapper;
 import eu.europa.ec.fisheries.uvms.longpolling.notifications.NotificationMessage;
 import eu.europa.ec.fisheries.uvms.movement.model.mapper.MovementModuleResponseMapper;
 import eu.europa.ec.fisheries.uvms.rules.model.exception.RulesModelMapperException;
 import eu.europa.ec.fisheries.uvms.rules.model.mapper.RulesModuleRequestMapper;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -87,6 +89,9 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
 
     @EJB
     ExchangeService exchangeService;
+
+    @EJB
+    ExchangeEventOutgoingService exchangeEventOutgoingService;
 
     @Inject
     @ExchangePluginStatusEvent
@@ -203,7 +208,7 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
                 // TODO: Temporary - probably better to change corr id to have the same though the entire flow; then we can use this to send response to original caller from anywhere needed
                 rawMovement.setAckResponseMessageID(message.getJmsMessage().getJMSMessageID());
 
-                String msg = RulesModuleRequestMapper.createSetMovementReportRequest(MovementMapper.mapPluginType(pluginType), rawMovement, username);
+                String msg = RulesModuleRequestMapper.createSetMovementReportRequest(PluginTypeMapper.map(pluginType), rawMovement, username);
                 forwardToRules(msg, message, service);
             } else {
                 LOG.debug("Validation error. Event sent to plugin");
@@ -237,6 +242,92 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
                 PluginFault fault = ExchangePluginResponseMapper.mapToPluginFaultResponse(FaultCode.EXCHANGE_PLUGIN_EVENT.getCode(), "Message cannot be sent to Rules module [ " + e.getMessage() + " ]");
                 pluginErrorEvent.fire(new PluginMessageEvent(message.getJmsMessage(), service, fault));
             }
+        }
+    }
+
+    @Override
+    public void processSalesReport(@Observes @SalesReportEvent ExchangeMessageEvent message) {
+        LOG.info("Process sales report in Exchange module");
+
+        try {
+            SetSalesReportRequest request = JAXBMarshaller.unmarshallTextMessage(message.getJmsMessage(), SetSalesReportRequest.class);
+            PluginType pluginType = request.getPluginType();
+            LOG.debug("Process sales report in the Exchange module from the {} plugin", pluginType);
+
+            String report = request.getReport();
+
+
+
+            try {
+                String forwardedMessageToRules = RulesModuleRequestMapper.createSetSalesReportRequest(PluginTypeMapper.map(pluginType), report);
+                forwardToRules(forwardedMessageToRules, null, null);
+            } catch (RulesModelMapperException e) {
+                PluginFault fault = ExchangePluginResponseMapper.mapToPluginFaultResponse(FaultCode.EXCHANGE_PLUGIN_EVENT.getCode(), "Sales report cannot be mapped in the Rules contract. Exception: " + ExceptionUtils.getStackTrace(e));
+                pluginErrorEvent.fire(new PluginMessageEvent(message.getJmsMessage(),null, fault));
+            }
+
+        } catch (ExchangeModelMarshallException e) {
+            try {
+                LOG.error("Couldn't map to SetSalesReportRequest when processing sales report from plugin. The message was " + message.getJmsMessage().getText(), e);
+            } catch (JMSException e1) {
+                LOG.error("Couldn't map to SetSalesReportRequest when processing sales report from plugin.", e);
+            }
+        }
+    }
+
+    @Override
+    public void processSalesQuery(@Observes @SalesQueryEvent ExchangeMessageEvent message) {
+        LOG.info("Process sales query in Exchange module");
+
+        try {
+            SetSalesQueryRequest request = JAXBMarshaller.unmarshallTextMessage(message.getJmsMessage(), SetSalesQueryRequest.class);
+            PluginType pluginType = request.getPluginType();
+            LOG.debug("Process sales query in the Exchange module from the {} plugin", pluginType);
+
+            String query = request.getQuery();
+
+            try {
+                String forwardedMessageToRules = RulesModuleRequestMapper.createSetSalesQueryRequest(PluginTypeMapper.map(pluginType), query);
+                forwardToRules(forwardedMessageToRules, null, null);
+            } catch (RulesModelMapperException e) {
+                PluginFault fault = ExchangePluginResponseMapper.mapToPluginFaultResponse(FaultCode.EXCHANGE_PLUGIN_EVENT.getCode(), "Sales query cannot be mapped in the Rules contract. Exception: " + ExceptionUtils.getStackTrace(e));
+                pluginErrorEvent.fire(new PluginMessageEvent(message.getJmsMessage(),null, fault));
+            }
+
+        } catch (ExchangeModelMarshallException e) {
+            try {
+                LOG.error("Couldn't map to SalesQueryRequest when processing sales query from plugin. The message was " + message.getJmsMessage().getText(), e);
+            } catch (JMSException e1) {
+                LOG.error("Couldn't map to SalesQueryRequest when processing sales query from plugin.", e);
+            }
+        }
+    }
+
+
+    //TODO
+    @Override
+    public void sendSalesMessageResponse(@Observes @SendSalesMessageEvent ExchangeMessageEvent message) throws ServiceException {
+        try {
+            SendSalesMessage request = JAXBMarshaller.unmarshallTextMessage(message.getJmsMessage(), SendSalesMessage.class);
+
+            SalesMessageResponse salesQueryResponse = new SalesMessageResponse();
+            salesQueryResponse.setRecipient(request.getRecipient());
+            salesQueryResponse.setMessage(request.getMessage());
+            salesQueryResponse.setMethod(ExchangePluginMethod.SALES_QUERY_RESPONSE);
+
+            exchangeEventOutgoingService.sendSalesQueryResponseToFLUX(salesQueryResponse);
+        } catch (ExchangeModelMarshallException | ExchangeMessageException e) {
+            throw new ServiceException("Error when sending a Sales response to FLUX", e);
+        }
+    }
+    //TODO
+    @Override
+    public void receiveSalesResponse(@Observes @ReceiveSalesResponseEvent ExchangeMessageEvent message) throws ServiceException {
+        try {
+            ReceivedSalesMessage request = JAXBMarshaller.unmarshallTextMessage(message.getJmsMessage(), ReceivedSalesMessage.class);
+            //TODO: log here
+        } catch (ExchangeModelMarshallException e) {
+            throw new ServiceException("Error when receiving a Sales response from FLUX", e);
         }
     }
 

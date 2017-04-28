@@ -9,18 +9,17 @@ the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the impl
 FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details. You should have received a
 copy of the GNU General Public License along with the IFDM Suite. If not, see <http://www.gnu.org/licenses/>.
  */
-package eu.europa.ec.fisheries.uvms.exchange.service.exception;
+package eu.europa.ec.fisheries.uvms.exchange.message.event;
 
-import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeException;
+import javax.inject.Qualifier;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
-public class ExchangeServiceException extends ExchangeException {
-    private static final long serialVersionUID = 1L;
+@Qualifier
+@Retention(RetentionPolicy.RUNTIME)
+@Target({ ElementType.METHOD, ElementType.FIELD, ElementType.PARAMETER, ElementType.TYPE })
+public @interface SendSalesMessageEvent {
 
-    public ExchangeServiceException(String message) {
-        super(message);
-    }
-
-    public ExchangeServiceException(String message, Throwable cause) {
-        super(message, cause);
-    }
 }

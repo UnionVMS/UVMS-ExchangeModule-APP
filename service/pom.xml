@@ -65,6 +65,11 @@
             <version>${dozer.version}</version>
         </dependency>
         <dependency>
+            <groupId>ma.glasnost.orika</groupId>
+            <artifactId>orika-core</artifactId>
+            <version>${orika.version}</version>
+        </dependency>
+        <dependency>
             <groupId>eu.europa.ec.fisheries.uvms</groupId>
             <artifactId>uvms-longpolling</artifactId>
             <version>${longpolling.version}</version>

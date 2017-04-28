@@ -56,6 +56,22 @@ public class MessageConsumerBean implements MessageListener {
     Event<ExchangeMessageEvent> processMovementEvent;
 
     @Inject
+    @SalesReportEvent
+    Event<ExchangeMessageEvent> salesReportEvent;
+
+    @Inject
+    @SalesQueryEvent
+    Event<ExchangeMessageEvent> salesQueryEvent;
+
+    @Inject
+    @SendSalesMessageEvent
+    Event<ExchangeMessageEvent> sendSalesMessageEvent;
+
+    @Inject
+    @ReceiveSalesResponseEvent
+    Event<ExchangeMessageEvent> receiveSalesResponseEvent;
+
+    @Inject
     @SendReportToPluginEvent
     Event<ExchangeMessageEvent> sendMessageToPluginEvent;
 
@@ -144,6 +160,18 @@ public class MessageConsumerBean implements MessageListener {
                     break;
                 case SET_MOVEMENT_REPORT:
                     processMovementEvent.fire(new ExchangeMessageEvent(textMessage));
+                    break;
+                case SET_SALES_REPORT:
+                    salesReportEvent.fire(new ExchangeMessageEvent(textMessage));
+                    break;
+                case SET_SALES_QUERY:
+                    salesQueryEvent.fire(new ExchangeMessageEvent(textMessage));
+                    break;
+                case SEND_SALES_MESSAGE:
+                    sendSalesMessageEvent.fire(new ExchangeMessageEvent(textMessage));
+                    break;
+                case RECEIVE_SALES_RESPONSE:
+                    receiveSalesResponseEvent.fire(new ExchangeMessageEvent(textMessage));
                     break;
                 case UPDATE_PLUGIN_SETTING:
                     updatePluginSettingEvent.fire(new ExchangeMessageEvent(textMessage));

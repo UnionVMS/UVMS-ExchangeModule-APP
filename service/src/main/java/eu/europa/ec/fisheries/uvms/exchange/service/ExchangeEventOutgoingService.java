@@ -11,11 +11,14 @@
  */
 package eu.europa.ec.fisheries.uvms.exchange.service;
 
+import eu.europa.ec.fisheries.schema.exchange.plugin.v1.SalesMessageResponse;
 import eu.europa.ec.fisheries.uvms.exchange.message.event.MdrSyncRequestMessageEvent;
 import eu.europa.ec.fisheries.uvms.exchange.message.event.SendCommandToPluginEvent;
 import eu.europa.ec.fisheries.uvms.exchange.message.event.SendFLUXFAResponseToPluginEvent;
 import eu.europa.ec.fisheries.uvms.exchange.message.event.SendReportToPluginEvent;
 import eu.europa.ec.fisheries.uvms.exchange.message.event.carrier.ExchangeMessageEvent;
+import eu.europa.ec.fisheries.uvms.exchange.message.exception.ExchangeMessageException;
+import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelMarshallException;
 
 import javax.ejb.Local;
 import javax.enterprise.event.Observes;
@@ -47,6 +50,7 @@ public interface ExchangeEventOutgoingService {
      * Sends FLUX FA response message to ERS/Activity plugin
      * @param message
      */
-    public void sendFLUXFAResponseToPlugin(@Observes @SendFLUXFAResponseToPluginEvent ExchangeMessageEvent message);
+    void sendFLUXFAResponseToPlugin(@Observes @SendFLUXFAResponseToPluginEvent ExchangeMessageEvent message);
 
+    void sendSalesQueryResponseToFLUX(SalesMessageResponse salesQueryResponse) throws ExchangeModelMarshallException, ExchangeMessageException;
 }
