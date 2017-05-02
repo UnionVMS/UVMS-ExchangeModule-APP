@@ -96,8 +96,8 @@ public interface ExchangeEventIncomingService {
     void sendSalesMessageResponse(@Observes @SendSalesMessageEvent ExchangeMessageEvent message) throws ServiceException, ServiceException;
 
     /**
-     * Receive Sales Response
+     * Receive Sales message
      * @param message
      */
-    void receiveSalesResponse(@Observes @ReceiveSalesResponseEvent ExchangeMessageEvent message) throws ServiceException;
+    void receiveSalesMessage(@Observes @ReceiveSalesResponseEvent ExchangeMessageEvent message) throws ServiceException;
 }

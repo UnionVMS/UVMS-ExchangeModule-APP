@@ -69,7 +69,7 @@ public class MessageConsumerBean implements MessageListener {
 
     @Inject
     @ReceiveSalesResponseEvent
-    Event<ExchangeMessageEvent> receiveSalesResponseEvent;
+    Event<ExchangeMessageEvent> receiveSalesMessageEvent;
 
     @Inject
     @SendReportToPluginEvent
@@ -170,8 +170,8 @@ public class MessageConsumerBean implements MessageListener {
                 case SEND_SALES_MESSAGE:
                     sendSalesMessageEvent.fire(new ExchangeMessageEvent(textMessage));
                     break;
-                case RECEIVE_SALES_RESPONSE:
-                    receiveSalesResponseEvent.fire(new ExchangeMessageEvent(textMessage));
+                case RECEIVE_SALES_MESSAGE:
+                    receiveSalesMessageEvent.fire(new ExchangeMessageEvent(textMessage));
                     break;
                 case UPDATE_PLUGIN_SETTING:
                     updatePluginSettingEvent.fire(new ExchangeMessageEvent(textMessage));

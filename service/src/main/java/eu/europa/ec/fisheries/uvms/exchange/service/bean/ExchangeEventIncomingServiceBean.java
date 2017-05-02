@@ -322,7 +322,7 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
     }
     //TODO
     @Override
-    public void receiveSalesResponse(@Observes @ReceiveSalesResponseEvent ExchangeMessageEvent message) throws ServiceException {
+    public void receiveSalesMessage(@Observes @ReceiveSalesResponseEvent ExchangeMessageEvent message) throws ServiceException {
         try {
             ReceivedSalesMessage request = JAXBMarshaller.unmarshallTextMessage(message.getJmsMessage(), ReceivedSalesMessage.class);
             //TODO: log here
