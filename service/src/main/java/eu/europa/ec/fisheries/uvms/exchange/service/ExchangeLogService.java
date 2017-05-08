@@ -29,12 +29,12 @@ public interface ExchangeLogService {
 
     /**
      * Create a new log entry.
-     * @param request TODO STIJN: describe
-     * @param logType TODO STIJN: describe
-     * @param status TODO STIJN: describe
-     * @param messageType TODO STIJN: describe
-     * @param messageText TODO STIJN: describe
-     * @param incoming TODO STIJN: describe
+     * @param request the incoming exchange request
+     * @param logType the type of the log
+     * @param status the status of the message (does it needs to be validated, is it valid, ...)
+     * @param messageType the type of the message
+     * @param messageText XML representation of the incoming/outgoing message
+     * @param incoming is this an incoming message (then true) or an outgoing message (then false)?
      * @return the created log entry
      */
     ExchangeLogType log(ExchangeBaseRequest request, LogType logType, ExchangeLogStatusTypeType status, TypeRefType messageType, String messageText, boolean incoming) throws ExchangeLogException;

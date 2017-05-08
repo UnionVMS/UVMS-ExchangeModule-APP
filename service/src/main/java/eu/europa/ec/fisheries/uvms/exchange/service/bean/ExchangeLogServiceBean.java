@@ -94,7 +94,6 @@ public class ExchangeLogServiceBean implements ExchangeLogService {
         }
     }
 
-    //TODO Stijn: use and test
     @Override
     public ExchangeLogType log(ExchangeBaseRequest request, LogType logType, ExchangeLogStatusTypeType status, TypeRefType messageType, String messageText, boolean incoming) throws ExchangeLogException {
         LogRefType ref = new LogRefType();
