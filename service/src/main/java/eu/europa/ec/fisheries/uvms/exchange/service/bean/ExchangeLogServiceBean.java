@@ -11,6 +11,7 @@ copy of the GNU General Public License along with the IFDM Suite. If not, see <h
  */
 package eu.europa.ec.fisheries.uvms.exchange.service.bean;
 
+import eu.europa.ec.fisheries.schema.exchange.module.v1.ExchangeBaseRequest;
 import eu.europa.ec.fisheries.schema.exchange.source.v1.GetLogListByQueryResponse;
 import eu.europa.ec.fisheries.schema.exchange.v1.*;
 import eu.europa.ec.fisheries.uvms.audit.model.exception.AuditModelMarshallException;
@@ -82,7 +83,6 @@ public class ExchangeLogServiceBean implements ExchangeLogService {
     @Override
     public ExchangeLogType log(ExchangeLogType log, String username) throws ExchangeLogException {
         try {
-
             ExchangeLogType exchangeLog = exchangeLogModel.createExchangeLog(log, username);
             sendAuditLogMessageForCreateExchangeLog(exchangeLog.getGuid(), username);
             exchangeLogEvent.fire(new NotificationMessage("guid", exchangeLog.getGuid()));
@@ -92,6 +92,25 @@ public class ExchangeLogServiceBean implements ExchangeLogService {
         } catch (ExchangeModelException e) {
             throw new ExchangeLogException("Couldn't create log exchange log.");
         }
+    }
+
+    //TODO Stijn: use and test
+    @Override
+    public ExchangeLogType log(ExchangeBaseRequest request, LogType logType, ExchangeLogStatusTypeType status, TypeRefType messageType, String messageText, boolean incoming) throws ExchangeLogException {
+        LogRefType ref = new LogRefType();
+        ref.setMessage(messageText);
+        ref.setRefGuid(request.getMessageGuid());
+        ref.setType(messageType);
+
+        ExchangeLogType log = new ExchangeLogType();
+        log.setSenderReceiver(request.getSenderOrReceiver());
+        log.setDateRecieved(request.getDate());
+        log.setType(logType);
+        log.setStatus(status);
+        log.setIncoming(incoming);
+        log.setTypeRef(ref);
+
+        return log(log, request.getUsername());
     }
 
     @Override

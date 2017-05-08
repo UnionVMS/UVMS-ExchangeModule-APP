@@ -22,7 +22,7 @@
         <orika.version>1.5.0</orika.version>
 
         <longpolling.version>2.0.13</longpolling.version>
-        <uvms.common.version>2.0.17</uvms.common.version>
+        <uvms.common.version>2.0.18-SNAPSHOT</uvms.common.version>
         <uvms.config.version>3.0.4</uvms.config.version>
         <usm4uvms.version>3.0.4</usm4uvms.version>
         <audit.model.version>3.0.4</audit.model.version>

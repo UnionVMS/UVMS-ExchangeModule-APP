@@ -43,7 +43,10 @@ import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelMarshal
 import eu.europa.ec.fisheries.uvms.exchange.model.mapper.ExchangeModuleResponseMapper;
 import eu.europa.ec.fisheries.uvms.exchange.model.mapper.ExchangePluginResponseMapper;
 import eu.europa.ec.fisheries.uvms.exchange.model.mapper.JAXBMarshaller;
-import eu.europa.ec.fisheries.uvms.exchange.service.*;
+import eu.europa.ec.fisheries.uvms.exchange.service.ExchangeEventIncomingService;
+import eu.europa.ec.fisheries.uvms.exchange.service.ExchangeEventOutgoingService;
+import eu.europa.ec.fisheries.uvms.exchange.service.ExchangeLogService;
+import eu.europa.ec.fisheries.uvms.exchange.service.ExchangeService;
 import eu.europa.ec.fisheries.uvms.exchange.service.event.ExchangePluginStatusEvent;
 import eu.europa.ec.fisheries.uvms.exchange.service.event.PollEvent;
 import eu.europa.ec.fisheries.uvms.exchange.service.exception.ExchangeLogException;
@@ -55,7 +58,6 @@ import eu.europa.ec.fisheries.uvms.longpolling.notifications.NotificationMessage
 import eu.europa.ec.fisheries.uvms.movement.model.mapper.MovementModuleResponseMapper;
 import eu.europa.ec.fisheries.uvms.rules.model.exception.RulesModelMapperException;
 import eu.europa.ec.fisheries.uvms.rules.model.mapper.RulesModuleRequestMapper;
-import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -256,23 +258,29 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
 
             String report = request.getReport();
 
+            exchangeLog.log(request, LogType.RECEIVE_SALES_REPORT, ExchangeLogStatusTypeType.ISSUED, TypeRefType.SALES_REPORT, report, true);
 
+            //String messageForRules = RulesModuleRequestMapper.createSetSalesReportRequest(PluginTypeMapper.map(pluginType), report);
+            forwardToRules("messageForRules", null, null); //TODO
 
+        } /*catch (RulesModelMapperException e) {
+            firePluginFault(message, "Sales report cannot be mapped in the Rules contract. Exception: " + ExceptionUtils.getStackTrace(e), e);
+        } */catch (ExchangeModelMarshallException e) {
             try {
-                String forwardedMessageToRules = RulesModuleRequestMapper.createSetSalesReportRequest(PluginTypeMapper.map(pluginType), report);
-                forwardToRules(forwardedMessageToRules, null, null);
-            } catch (RulesModelMapperException e) {
-                PluginFault fault = ExchangePluginResponseMapper.mapToPluginFaultResponse(FaultCode.EXCHANGE_PLUGIN_EVENT.getCode(), "Sales report cannot be mapped in the Rules contract. Exception: " + ExceptionUtils.getStackTrace(e));
-                pluginErrorEvent.fire(new PluginMessageEvent(message.getJmsMessage(),null, fault));
-            }
-
-        } catch (ExchangeModelMarshallException e) {
-            try {
-                LOG.error("Couldn't map to SetSalesReportRequest when processing sales report from plugin. The message was " + message.getJmsMessage().getText(), e);
+                String errorMessage = "Couldn't map to SetSalesReportRequest when processing sales report from plugin. The message was " + message.getJmsMessage().getText();
+                firePluginFault(message, errorMessage, e);
             } catch (JMSException e1) {
-                LOG.error("Couldn't map to SetSalesReportRequest when processing sales report from plugin.", e);
+                firePluginFault(message, "Couldn't map to SetSalesReportRequest when processing sales report from plugin.", e);
             }
+        } catch (ExchangeLogException e) {
+            firePluginFault(message, "Could not log the incoming sales report.", e);
         }
+    }
+
+    private void firePluginFault(ExchangeMessageEvent messageEvent, String errorMessage, Throwable exception) {
+        LOG.error(errorMessage, exception);
+        PluginFault fault = ExchangePluginResponseMapper.mapToPluginFaultResponse(FaultCode.EXCHANGE_PLUGIN_EVENT.getCode(), errorMessage);
+        pluginErrorEvent.fire(new PluginMessageEvent(messageEvent.getJmsMessage(),null, fault));
     }
 
     @Override
@@ -286,13 +294,13 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
 
             String query = request.getQuery();
 
-            try {
-                String forwardedMessageToRules = RulesModuleRequestMapper.createSetSalesQueryRequest(PluginTypeMapper.map(pluginType), query);
-                forwardToRules(forwardedMessageToRules, null, null);
-            } catch (RulesModelMapperException e) {
+            /*try {*/
+                //String forwardedMessageToRules = RulesModuleRequestMapper.createSetSalesQueryRequest(PluginTypeMapper.map(pluginType), query);
+                forwardToRules("forwardedMessageToRules", null, null); //TODO
+            /*} catch (RulesModelMapperException e) {
                 PluginFault fault = ExchangePluginResponseMapper.mapToPluginFaultResponse(FaultCode.EXCHANGE_PLUGIN_EVENT.getCode(), "Sales query cannot be mapped in the Rules contract. Exception: " + ExceptionUtils.getStackTrace(e));
                 pluginErrorEvent.fire(new PluginMessageEvent(message.getJmsMessage(),null, fault));
-            }
+            }*/
 
         } catch (ExchangeModelMarshallException e) {
             try {
