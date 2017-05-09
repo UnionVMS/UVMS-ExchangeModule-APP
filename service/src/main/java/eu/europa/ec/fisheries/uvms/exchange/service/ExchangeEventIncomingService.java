@@ -99,5 +99,11 @@ public interface ExchangeEventIncomingService {
      * Receive Sales message
      * @param message
      */
-    void receiveSalesMessage(@Observes @ReceiveSalesResponseEvent ExchangeMessageEvent message) throws ServiceException;
+    void receiveSalesResponse(@Observes @ReceiveSalesResponseEvent ExchangeMessageEvent message) throws ServiceException;
+
+    /**
+     * Updates the status of a message log.
+     * @param message
+     */
+    void updateLogStatus(@Observes @UpdateLogStatusEvent ExchangeMessageEvent message) throws ServiceException;
 }

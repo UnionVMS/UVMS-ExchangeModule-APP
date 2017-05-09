@@ -41,6 +41,19 @@ public interface ExchangeLogService {
 
     ExchangeLogType updateStatus(String messageId, ExchangeLogStatusTypeType logStatus, String username) throws ExchangeLogException;
 
+    /**
+     * Adds a new log status to a log with the specified log guid.
+     *
+     * Since the guid is not something that an end user will have to, this method is assumed to be used by the system.
+     * Therefore, the logged username will be "SYSTEM".
+     * 
+     * @param logGuid guid of the log. Notice that this is NOT the internal id.
+     * @param logStatus the next status
+     * @return the updated log
+     * @throws ExchangeLogException when something goes wrong
+     */
+    ExchangeLogType updateStatus(String logGuid, ExchangeLogStatusTypeType logStatus) throws ExchangeLogException;
+
     GetLogListByQueryResponse getExchangeLogList(ExchangeListQuery query) throws ExchangeLogException;
 
     List<UnsentMessageType> getUnsentMessageList() throws ExchangeLogException;

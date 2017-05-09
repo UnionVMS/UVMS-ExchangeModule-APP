@@ -121,6 +121,10 @@ public class MessageConsumerBean implements MessageListener {
     @SendFLUXFAResponseToPluginEvent
     Event<ExchangeMessageEvent> processFLUXFAResponseMessageEvent;
 
+    @Inject
+    @UpdateLogStatusEvent
+    Event<ExchangeMessageEvent> updateLogStatusEvent;
+
     @Override
     @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
     public void onMessage(Message message) {
@@ -195,6 +199,10 @@ public class MessageConsumerBean implements MessageListener {
                 case SET_FLUX_FA_RESPONSE_MESSAGE:
                     LOG.debug("inside SET_FLUX_FA_RESPONSE_MESSAGE case");
                     processFLUXFAResponseMessageEvent.fire(new ExchangeMessageEvent(textMessage));
+                    break;
+                case UPDATE_LOG_STATUS:
+                    LOG.debug("The status of a message log will be updated");
+                    updateLogStatusEvent.fire(new ExchangeMessageEvent(textMessage));
                     break;
                 default:
                     LOG.error("[ Not implemented method consumed: {} ] ", request.getMethod());

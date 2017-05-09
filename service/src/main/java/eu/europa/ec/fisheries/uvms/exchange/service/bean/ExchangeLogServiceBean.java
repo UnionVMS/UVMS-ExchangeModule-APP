@@ -117,24 +117,38 @@ public class ExchangeLogServiceBean implements ExchangeLogService {
         try {
             String logGuid = logCache.acknowledged(pluginMessageId);
 
-            ExchangeLogStatusType exchangeLogStatusType = new ExchangeLogStatusType();
-            exchangeLogStatusType.setGuid(logGuid);
-            ArrayList statusHistoryList = new ArrayList();
-            ExchangeLogStatusHistoryType statusHistory = new ExchangeLogStatusHistoryType();
-            statusHistory.setStatus(logStatus);
-            statusHistoryList.add(statusHistory);
-            exchangeLogStatusType.getHistory().addAll(statusHistoryList);
+            ExchangeLogStatusType exchangeLogStatusType = createExchangeLogStatusType(logStatus, logGuid);
             ExchangeLogType updatedLog = exchangeLogModel.updateExchangeLogStatus(exchangeLogStatusType, username);
 
             sendAuditLogMessageForUpdateExchangeLog(updatedLog.getGuid(), username);
             // For long polling
             exchangeLogEvent.fire(new NotificationMessage("guid", updatedLog.getGuid()));
             return updatedLog;
-        } catch (ExchangeModelMapperException e) {
-            throw new ExchangeLogException("Couldn't update status of exchange log");
         } catch (ExchangeModelException e) {
-            throw new ExchangeLogException("Couldn't update status of exchange log");
+            throw new ExchangeLogException("Couldn't update status of exchange log", e);
         }
+    }
+
+    private ExchangeLogStatusType createExchangeLogStatusType(ExchangeLogStatusTypeType logStatus, String logGuid) {
+        ExchangeLogStatusType exchangeLogStatusType = new ExchangeLogStatusType();
+        exchangeLogStatusType.setGuid(logGuid);
+        ArrayList statusHistoryList = new ArrayList();
+        ExchangeLogStatusHistoryType statusHistory = new ExchangeLogStatusHistoryType();
+        statusHistory.setStatus(logStatus);
+        statusHistoryList.add(statusHistory);
+        exchangeLogStatusType.getHistory().addAll(statusHistoryList);
+        return exchangeLogStatusType;
+    }
+
+    @Override
+    public ExchangeLogType updateStatus(String logGuid, ExchangeLogStatusTypeType logStatus) throws ExchangeLogException {
+        try {
+            ExchangeLogStatusType exchangeLogStatusType = createExchangeLogStatusType(logStatus, logGuid);
+            return exchangeLogModel.updateExchangeLogStatus(exchangeLogStatusType, "SYSTEM");
+        } catch (ExchangeModelException e) {
+            throw new ExchangeLogException("Couldn't update the status of the exchange log with guid " + logGuid + ". The new status should be " + logStatus, e);
+        }
+
     }
 
     @Override

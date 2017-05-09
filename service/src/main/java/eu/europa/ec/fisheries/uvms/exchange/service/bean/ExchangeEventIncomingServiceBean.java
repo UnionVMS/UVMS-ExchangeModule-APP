@@ -330,12 +330,28 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
     }
     //TODO
     @Override
-    public void receiveSalesMessage(@Observes @ReceiveSalesResponseEvent ExchangeMessageEvent message) throws ServiceException {
+    public void receiveSalesResponse(@Observes @ReceiveSalesResponseEvent ExchangeMessageEvent message) throws ServiceException {
         try {
             ReceivedSalesMessage request = JAXBMarshaller.unmarshallTextMessage(message.getJmsMessage(), ReceivedSalesMessage.class);
             //TODO: log here
         } catch (ExchangeModelMarshallException e) {
             throw new ServiceException("Error when receiving a Sales response from FLUX", e);
+        }
+    }
+
+    @Override
+    public void updateLogStatus(@Observes @UpdateLogStatusEvent ExchangeMessageEvent message) throws ServiceException {
+
+        try {
+            UpdateLogStatusRequest request = JAXBMarshaller.unmarshallTextMessage(message.getJmsMessage(), UpdateLogStatusRequest.class);
+            String logGuid = request.getLogGuid();
+            ExchangeLogStatusTypeType status = request.getNewStatus();
+
+            exchangeLog.updateStatus(logGuid, status);
+        } catch (ExchangeLogException e) {
+            throw new ServiceException("Could not update the status of a message log.", e);
+        } catch (ExchangeModelMarshallException e) {
+            throw new ServiceException("Could not unmarshall the incoming UpdateLogStatus message", e);
         }
     }
 
