@@ -11,7 +11,6 @@
  */
 package eu.europa.ec.fisheries.uvms.exchange.service;
 
-import eu.europa.ec.fisheries.schema.exchange.plugin.v1.SalesMessageResponse;
 import eu.europa.ec.fisheries.uvms.exchange.message.event.MdrSyncRequestMessageEvent;
 import eu.europa.ec.fisheries.uvms.exchange.message.event.SendCommandToPluginEvent;
 import eu.europa.ec.fisheries.uvms.exchange.message.event.SendFLUXFAResponseToPluginEvent;
@@ -52,5 +51,20 @@ public interface ExchangeEventOutgoingService {
      */
     void sendFLUXFAResponseToPlugin(@Observes @SendFLUXFAResponseToPluginEvent ExchangeMessageEvent message);
 
-    void sendSalesQueryResponseToFLUX(SalesMessageResponse salesQueryResponse) throws ExchangeModelMarshallException, ExchangeMessageException;
+    /**
+     * Sends a Sales response to the FLUX plugin
+     * @param salesResponse
+     * @throws ExchangeModelMarshallException
+     * @throws ExchangeMessageException
+     */
+    void sendSalesResponseToFLUX(eu.europa.ec.fisheries.schema.exchange.plugin.v1.SendSalesResponseRequest salesResponse) throws ExchangeModelMarshallException, ExchangeMessageException;
+
+
+    /**
+     * Sends a Sales report to the FLUX plugin
+     * @param salesReport
+     * @throws ExchangeModelMarshallException
+     * @throws ExchangeMessageException
+     */
+    void sendSalesReportToFLUX(eu.europa.ec.fisheries.schema.exchange.plugin.v1.SendSalesReportRequest salesReport) throws ExchangeModelMarshallException, ExchangeMessageException;
 }

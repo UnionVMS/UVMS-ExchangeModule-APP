@@ -11,7 +11,6 @@
  */
 package eu.europa.ec.fisheries.uvms.exchange.service;
 
-import eu.europa.ec.fisheries.uvms.exception.ServiceException;
 import eu.europa.ec.fisheries.uvms.exchange.message.event.*;
 import eu.europa.ec.fisheries.uvms.exchange.message.event.carrier.ExchangeMessageEvent;
 
@@ -50,18 +49,36 @@ public interface ExchangeEventIncomingService {
     void processMovement(@Observes @SetMovementEvent ExchangeMessageEvent message);
 
     /**
-     * Process a received sales report
+     * Logs and sends a received sales report through to Rules
      *
      * @param message received sales report
      */
-    void processSalesReport(@Observes @SalesReportEvent ExchangeMessageEvent message);
+    void receiveSalesReport(@Observes @ReceiveSalesReportEvent ExchangeMessageEvent message);
 
     /**
-     * Process a received sales query
+     * Logs and sends a received sales query through to Rules
      *
      * @param message received sales query
      */
-    void processSalesQuery(@Observes @SalesQueryEvent ExchangeMessageEvent message);
+    void receiveSalesQuery(@Observes @ReceiveSalesQueryEvent ExchangeMessageEvent message);
+
+    /**
+     * Logs and sends a received sales response through to Rules
+     * @param message
+     */
+    void receiveSalesResponse(@Observes @ReceiveSalesResponseEvent ExchangeMessageEvent message);
+
+    /**
+     * Logs and sends a sales report to FLUX
+     * @param message
+     */
+    void sendSalesReport(@Observes @SendSalesReportEvent ExchangeMessageEvent message);
+
+    /**
+     * Logs and sends a sales response to FLUX
+     * @param message
+     */
+    void sendSalesResponse(@Observes @SendSalesResponseEvent ExchangeMessageEvent message);
 
     /**
      * Process answer of commands sent to plugins
@@ -90,20 +107,8 @@ public interface ExchangeEventIncomingService {
     void sendResponseToRulesModule(@Observes @MdrSyncResponseMessageEvent ExchangeMessageEvent message);
 
     /**
-     * Send Sales Query Response to FLUX
-     * @param message
-     */
-    void sendSalesMessageResponse(@Observes @SendSalesMessageEvent ExchangeMessageEvent message) throws ServiceException, ServiceException;
-
-    /**
-     * Receive Sales message
-     * @param message
-     */
-    void receiveSalesResponse(@Observes @ReceiveSalesResponseEvent ExchangeMessageEvent message) throws ServiceException;
-
-    /**
      * Updates the status of a message log.
      * @param message
      */
-    void updateLogStatus(@Observes @UpdateLogStatusEvent ExchangeMessageEvent message) throws ServiceException;
+    void updateLogStatus(@Observes @UpdateLogStatusEvent ExchangeMessageEvent message);
 }

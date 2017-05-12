@@ -56,20 +56,24 @@ public class MessageConsumerBean implements MessageListener {
     Event<ExchangeMessageEvent> processMovementEvent;
 
     @Inject
-    @SalesReportEvent
-    Event<ExchangeMessageEvent> salesReportEvent;
+    @ReceiveSalesReportEvent
+    Event<ExchangeMessageEvent> receiveSalesReportEvent;
 
     @Inject
-    @SalesQueryEvent
-    Event<ExchangeMessageEvent> salesQueryEvent;
-
-    @Inject
-    @SendSalesMessageEvent
-    Event<ExchangeMessageEvent> sendSalesMessageEvent;
+    @ReceiveSalesQueryEvent
+    Event<ExchangeMessageEvent> receiveSalesQueryEvent;
 
     @Inject
     @ReceiveSalesResponseEvent
-    Event<ExchangeMessageEvent> receiveSalesMessageEvent;
+    Event<ExchangeMessageEvent> receiveSalesResponseEvent;
+
+    @Inject
+    @SendSalesReportEvent
+    Event<ExchangeMessageEvent> sendSalesReportEvent;
+
+    @Inject
+    @SendSalesResponseEvent
+    Event<ExchangeMessageEvent> sendSalesResponseEvent;
 
     @Inject
     @SendReportToPluginEvent
@@ -103,7 +107,6 @@ public class MessageConsumerBean implements MessageListener {
     @HandleProcessedMovementEvent
     Event<ExchangeMessageEvent> processedMovementEvent;
 
-
     @Inject
     @MdrSyncRequestMessageEvent
     Event<ExchangeMessageEvent> mdrSyncRequestMessageEvent;
@@ -111,7 +114,6 @@ public class MessageConsumerBean implements MessageListener {
     @Inject
     @MdrSyncResponseMessageEvent
     Event<ExchangeMessageEvent> mdrSyncResponseMessageEvent;
-
 
     @Inject
     @SetFluxFAReportMessageEvent
@@ -165,17 +167,20 @@ public class MessageConsumerBean implements MessageListener {
                 case SET_MOVEMENT_REPORT:
                     processMovementEvent.fire(new ExchangeMessageEvent(textMessage));
                     break;
-                case SET_SALES_REPORT:
-                    salesReportEvent.fire(new ExchangeMessageEvent(textMessage));
+                case RECEIVE_SALES_REPORT:
+                    receiveSalesReportEvent.fire(new ExchangeMessageEvent(textMessage));
                     break;
-                case SET_SALES_QUERY:
-                    salesQueryEvent.fire(new ExchangeMessageEvent(textMessage));
+                case RECEIVE_SALES_QUERY:
+                    receiveSalesQueryEvent.fire(new ExchangeMessageEvent(textMessage));
                     break;
-                case SEND_SALES_MESSAGE:
-                    sendSalesMessageEvent.fire(new ExchangeMessageEvent(textMessage));
+                case RECEIVE_SALES_RESPONSE:
+                    receiveSalesResponseEvent.fire(new ExchangeMessageEvent(textMessage));
                     break;
-                case RECEIVE_SALES_MESSAGE:
-                    receiveSalesMessageEvent.fire(new ExchangeMessageEvent(textMessage));
+                case SEND_SALES_RESPONSE:
+                    sendSalesResponseEvent.fire(new ExchangeMessageEvent(textMessage));
+                    break;
+                case SEND_SALES_REPORT:
+                    sendSalesReportEvent.fire(new ExchangeMessageEvent(textMessage));
                     break;
                 case UPDATE_PLUGIN_SETTING:
                     updatePluginSettingEvent.fire(new ExchangeMessageEvent(textMessage));

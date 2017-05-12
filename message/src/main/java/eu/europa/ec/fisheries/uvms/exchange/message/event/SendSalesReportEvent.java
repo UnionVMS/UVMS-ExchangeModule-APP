@@ -9,16 +9,17 @@ the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the impl
 FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details. You should have received a
 copy of the GNU General Public License along with the IFDM Suite. If not, see <http://www.gnu.org/licenses/>.
  */
-package eu.europa.ec.fisheries.uvms.exchange.rest.dto;
+package eu.europa.ec.fisheries.uvms.exchange.message.event;
 
-public enum LogTypeLabel {
-	RECEIVED_MOVEMENT,
-	SENT_MOVEMENT,
-	SENT_EMAIL,
-	SENT_POLL,
-	SENT_SALES_REPORT,
-	SENT_SALES_RESPONSE,
-	RECEIVED_SALES_REPORT,
-	RECEIVED_SALES_QUERY,
-	RECEIVED_SALES_RESPONSE
+import javax.inject.Qualifier;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+
+@Qualifier
+@Retention(RetentionPolicy.RUNTIME)
+@Target({ ElementType.METHOD, ElementType.FIELD, ElementType.PARAMETER, ElementType.TYPE })
+public @interface SendSalesReportEvent {
+
 }

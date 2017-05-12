@@ -72,11 +72,8 @@ public class ExchangeLogMapper {
             case SEND_SALES_REPORT:
                 dto.setType(LogTypeLabel.SENT_SALES_REPORT);
                 break;
-            case SEND_SALES_QUERY_RESPONSE:
-                dto.setType(LogTypeLabel.SENT_SALES_QUERY_RESPONSE);
-                break;
-            case SEND_SALES_REPORT_RESPONSE:
-                dto.setType(LogTypeLabel.SENT_SALES_REPORT_RESPONSE);
+            case SEND_SALES_RESPONSE:
+                dto.setType(LogTypeLabel.SENT_SALES_RESPONSE);
                 break;
             case RECEIVE_SALES_QUERY:
                 dto.setType(LogTypeLabel.RECEIVED_SALES_QUERY);
@@ -84,8 +81,8 @@ public class ExchangeLogMapper {
             case RECEIVE_SALES_REPORT:
                 dto.setType(LogTypeLabel.RECEIVED_SALES_REPORT);
                 break;
-            case RECEIVE_SALES_REPORT_RESPONSE:
-                dto.setType(LogTypeLabel.RECEIVED_SALES_REPORT_RESPONSE);
+            case RECEIVE_SALES_RESPONSE:
+                dto.setType(LogTypeLabel.RECEIVED_SALES_RESPONSE);
                 break;
             default:
                 break;

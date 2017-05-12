@@ -19,7 +19,8 @@ import eu.europa.ec.fisheries.schema.exchange.module.v1.SetCommandRequest;
 import eu.europa.ec.fisheries.schema.exchange.module.v1.SetFLUXFAResponseMessageRequest;
 import eu.europa.ec.fisheries.schema.exchange.movement.v1.SendMovementToPluginType;
 import eu.europa.ec.fisheries.schema.exchange.plugin.types.v1.PluginType;
-import eu.europa.ec.fisheries.schema.exchange.plugin.v1.SalesMessageResponse;
+import eu.europa.ec.fisheries.schema.exchange.plugin.v1.SendSalesReportRequest;
+import eu.europa.ec.fisheries.schema.exchange.plugin.v1.SendSalesResponseRequest;
 import eu.europa.ec.fisheries.schema.exchange.service.v1.ServiceResponseType;
 import eu.europa.ec.fisheries.schema.exchange.service.v1.StatusType;
 import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogType;
@@ -29,7 +30,6 @@ import eu.europa.ec.fisheries.uvms.exchange.message.event.*;
 import eu.europa.ec.fisheries.uvms.exchange.message.event.carrier.ExchangeMessageEvent;
 import eu.europa.ec.fisheries.uvms.exchange.message.exception.ExchangeMessageException;
 import eu.europa.ec.fisheries.uvms.exchange.message.producer.MessageProducer;
-import eu.europa.ec.fisheries.uvms.exchange.model.constant.ExchangeModelConstants;
 import eu.europa.ec.fisheries.uvms.exchange.model.constant.FaultCode;
 import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeException;
 import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelMarshallException;
@@ -84,10 +84,15 @@ public class ExchangeEventOutgoingServiceBean implements ExchangeEventOutgoingSe
     ExchangeAssetService exchangeAssetService;
 
     @Override
-    public void sendSalesQueryResponseToFLUX(SalesMessageResponse fluxSalesResponseMessage) throws ExchangeModelMarshallException, ExchangeMessageException {
-        String marshalledSalesQueryResponse = JAXBMarshaller.marshallJaxBObjectToString(fluxSalesResponseMessage);
+    public void sendSalesResponseToFLUX(SendSalesResponseRequest sendSalesResponseRequest) throws ExchangeModelMarshallException, ExchangeMessageException {
+        String marshalledRequest = JAXBMarshaller.marshallJaxBObjectToString(sendSalesResponseRequest);
+        producer.sendEventBusMessage(marshalledRequest, ExchangeServiceConstants.FLUX_SALES_PLUGIN_SERVICE_NAME);
+    }
 
-        producer.sendEventBusMessage(marshalledSalesQueryResponse, ExchangeModelConstants.FLUX_SERVICE_NAME);
+    @Override
+    public void sendSalesReportToFLUX(SendSalesReportRequest sendSalesReportRequest) throws ExchangeModelMarshallException, ExchangeMessageException {
+        String marshalledRequest = JAXBMarshaller.marshallJaxBObjectToString(sendSalesReportRequest);
+        producer.sendEventBusMessage(marshalledRequest, ExchangeServiceConstants.FLUX_SALES_PLUGIN_SERVICE_NAME);
     }
 
     @Override

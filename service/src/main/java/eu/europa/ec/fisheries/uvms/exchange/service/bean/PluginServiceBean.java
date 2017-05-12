@@ -11,35 +11,20 @@ copy of the GNU General Public License along with the IFDM Suite. If not, see <h
  */
 package eu.europa.ec.fisheries.uvms.exchange.service.bean;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import javax.ejb.EJB;
-import javax.ejb.Stateless;
-import javax.enterprise.event.Event;
-import javax.enterprise.event.Observes;
-import javax.inject.Inject;
-import javax.jms.JMSException;
-import javax.jms.TextMessage;
-
-import eu.europa.ec.fisheries.schema.exchange.service.v1.*;
-import eu.europa.ec.fisheries.uvms.exchange.message.consumer.ExchangeMessageConsumer;
-import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelMapperException;
-import eu.europa.ec.fisheries.uvms.exchange.model.mapper.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import eu.europa.ec.fisheries.schema.exchange.module.v1.UpdatePluginSettingRequest;
 import eu.europa.ec.fisheries.schema.exchange.plugin.types.v1.PluginType;
 import eu.europa.ec.fisheries.schema.exchange.registry.v1.RegisterServiceRequest;
 import eu.europa.ec.fisheries.schema.exchange.registry.v1.UnregisterServiceRequest;
+import eu.europa.ec.fisheries.schema.exchange.service.v1.ServiceResponseType;
+import eu.europa.ec.fisheries.schema.exchange.service.v1.SettingListType;
+import eu.europa.ec.fisheries.schema.exchange.service.v1.SettingType;
+import eu.europa.ec.fisheries.schema.exchange.service.v1.StatusType;
 import eu.europa.ec.fisheries.uvms.config.event.ConfigSettingEvent;
 import eu.europa.ec.fisheries.uvms.config.event.ConfigSettingUpdatedEvent;
 import eu.europa.ec.fisheries.uvms.config.exception.ConfigServiceException;
 import eu.europa.ec.fisheries.uvms.config.service.ParameterService;
 import eu.europa.ec.fisheries.uvms.config.service.UVMSConfigService;
+import eu.europa.ec.fisheries.uvms.exchange.message.consumer.ExchangeMessageConsumer;
 import eu.europa.ec.fisheries.uvms.exchange.message.event.UpdatePluginSettingEvent;
 import eu.europa.ec.fisheries.uvms.exchange.message.event.carrier.ExchangeMessageEvent;
 import eu.europa.ec.fisheries.uvms.exchange.message.event.carrier.PluginMessageEvent;
@@ -49,12 +34,31 @@ import eu.europa.ec.fisheries.uvms.exchange.message.event.registry.UnRegisterSer
 import eu.europa.ec.fisheries.uvms.exchange.message.exception.ExchangeMessageException;
 import eu.europa.ec.fisheries.uvms.exchange.message.producer.MessageProducer;
 import eu.europa.ec.fisheries.uvms.exchange.model.constant.FaultCode;
+import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelMapperException;
 import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelMarshallException;
+import eu.europa.ec.fisheries.uvms.exchange.model.mapper.ExchangeModuleResponseMapper;
+import eu.europa.ec.fisheries.uvms.exchange.model.mapper.ExchangePluginRequestMapper;
+import eu.europa.ec.fisheries.uvms.exchange.model.mapper.ExchangePluginResponseMapper;
+import eu.europa.ec.fisheries.uvms.exchange.model.mapper.JAXBMarshaller;
 import eu.europa.ec.fisheries.uvms.exchange.service.ExchangeService;
 import eu.europa.ec.fisheries.uvms.exchange.service.PluginService;
 import eu.europa.ec.fisheries.uvms.exchange.service.exception.ExchangeServiceException;
 import eu.europa.ec.fisheries.uvms.exchange.service.exception.InputArgumentException;
 import eu.europa.ec.fisheries.uvms.exchange.service.mapper.SettingTypeMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.ejb.EJB;
+import javax.ejb.Stateless;
+import javax.enterprise.event.Event;
+import javax.enterprise.event.Observes;
+import javax.inject.Inject;
+import javax.jms.JMSException;
+import javax.jms.TextMessage;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @Stateless
 public class PluginServiceBean implements PluginService {
@@ -84,7 +88,7 @@ public class PluginServiceBean implements PluginService {
 
     private boolean checkPluginType(PluginType pluginType, String responseTopicMessageSelector, String messageId) throws ExchangeModelMarshallException, ExchangeMessageException {
         LOG.debug("checkPluginType " + pluginType.name());
-        if (PluginType.EMAIL == pluginType || PluginType.FLUX == pluginType || PluginType.NAF == pluginType) {
+        if (PluginType.EMAIL == pluginType || PluginType.NAF == pluginType) {
             //Check if type already exists
             List<PluginType> type = new ArrayList<>();
             type.add(pluginType);

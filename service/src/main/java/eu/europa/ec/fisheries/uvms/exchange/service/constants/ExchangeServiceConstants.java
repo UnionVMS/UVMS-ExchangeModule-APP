@@ -19,5 +19,6 @@ public class ExchangeServiceConstants {
     public static final String GLOBAL_DB_ACCESS_UNSENT_MESSAGE = "java:global/exchange-dbaccess-module/exchange-dbaccess-domain/UnsentModelBean!eu.europa.ec.fisheries.uvms.exchange.model.remote.UnsentModel";
     public static final String GLOBAL_DB_ACCESS_SERVICE_REGISTRY = "java:global/exchange-dbaccess-module/exchange-dbaccess-domain/ServiceRegistryModelBean!eu.europa.ec.fisheries.uvms.exchange.model.remote.ServiceRegistryModel";
     public static final String FLUX_ACTIVITY_PLUGIN_SERVICE_NAME= "eu.europa.ec.fisheries.uvms.plugins.fluxActivity";
+    public static final String FLUX_SALES_PLUGIN_SERVICE_NAME = "eu.europa.ec.fisheries.uvms.plugins.flux";
     public static final String MDR_PLUGIN_SERVICE_NAME = "eu.europa.ec.fisheries.uvms.plugins.mdr";
 }

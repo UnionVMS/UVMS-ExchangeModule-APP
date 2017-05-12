@@ -244,7 +244,7 @@ public class ExchangeLogMapperTest {
     }
 
     @Test
-    public void mapToExchangeLogDtoWhenSendSalesQueryResponse() {
+    public void mapToExchangeLogDtoWhenSendSalesResponse() {
         //data set
         String guid = "logGuid";
         boolean incoming = false;
@@ -264,7 +264,7 @@ public class ExchangeLogMapperTest {
         log.setDateRecieved(dateReceived);
         log.setIncoming(incoming);
         log.setStatus(ExchangeLogStatusTypeType.SUCCESSFUL);
-        log.setType(LogType.SEND_SALES_QUERY_RESPONSE);
+        log.setType(LogType.SEND_SALES_RESPONSE);
         log.setTypeRef(ref);
         log.setSenderReceiver(senderReceiver);
 
@@ -272,46 +272,7 @@ public class ExchangeLogMapperTest {
         ExchangeLog dto = ExchangeLogMapper.mapToExchangeLogDto(log);
 
         //assert
-        assertEquals(LogTypeLabel.SENT_SALES_QUERY_RESPONSE, dto.getType());
-        assertNotNull(dto.getDateRecieved());
-        assertEquals(guid, dto.getId());
-        assertEquals(incoming, dto.isIncoming());
-        assertEquals(refGuid, dto.getLogData().getGuid());
-        assertEquals(refType, dto.getLogData().getType());
-        assertEquals(senderReceiver, dto.getSenderRecipient());
-        assertEquals("SUCCESSFUL", dto.getStatus());
-    }
-
-    @Test
-    public void mapToExchangeLogDtoWhenSendSalesReportResponse() {
-        //data set
-        String guid = "logGuid";
-        boolean incoming = false;
-        String refGuid = "refGuid";
-        TypeRefType refType = TypeRefType.SALES_RESPONSE;
-        String senderReceiver = "FRA";
-
-        Calendar calendar = new GregorianCalendar(2017,5,10,13,24,56);
-        Date dateReceived = calendar.getTime();
-
-        LogRefType ref = new LogRefType();
-        ref.setType(refType);
-        ref.setRefGuid(refGuid);
-
-        ExchangeLogType log = new ExchangeLogType();
-        log.setGuid(guid);
-        log.setDateRecieved(dateReceived);
-        log.setIncoming(incoming);
-        log.setStatus(ExchangeLogStatusTypeType.SUCCESSFUL);
-        log.setType(LogType.SEND_SALES_REPORT_RESPONSE);
-        log.setTypeRef(ref);
-        log.setSenderReceiver(senderReceiver);
-
-        //execute
-        ExchangeLog dto = ExchangeLogMapper.mapToExchangeLogDto(log);
-
-        //assert
-        assertEquals(LogTypeLabel.SENT_SALES_REPORT_RESPONSE, dto.getType());
+        assertEquals(LogTypeLabel.SENT_SALES_RESPONSE, dto.getType());
         assertNotNull(dto.getDateRecieved());
         assertEquals(guid, dto.getId());
         assertEquals(incoming, dto.isIncoming());
@@ -400,7 +361,7 @@ public class ExchangeLogMapperTest {
     }
 
     @Test
-    public void mapToExchangeLogDtoWhenReceiveSalesReportResponseAndTypeRefIsNotNull() {
+    public void mapToExchangeLogDtoWhenReceiveSalesResponseAndTypeRefIsNotNull() {
         //data set
         String guid = "logGuid";
         boolean incoming = true;
@@ -420,7 +381,7 @@ public class ExchangeLogMapperTest {
         log.setDateRecieved(dateReceived);
         log.setIncoming(incoming);
         log.setStatus(ExchangeLogStatusTypeType.SUCCESSFUL);
-        log.setType(LogType.RECEIVE_SALES_REPORT_RESPONSE);
+        log.setType(LogType.RECEIVE_SALES_RESPONSE);
         log.setTypeRef(ref);
         log.setSenderReceiver(senderReceiver);
 
@@ -428,7 +389,7 @@ public class ExchangeLogMapperTest {
         ExchangeLog dto = ExchangeLogMapper.mapToExchangeLogDto(log);
 
         //assert
-        assertEquals(LogTypeLabel.RECEIVED_SALES_REPORT_RESPONSE, dto.getType());
+        assertEquals(LogTypeLabel.RECEIVED_SALES_RESPONSE, dto.getType());
         assertNotNull(dto.getDateRecieved());
         assertEquals(guid, dto.getId());
         assertEquals(incoming, dto.isIncoming());
@@ -439,7 +400,7 @@ public class ExchangeLogMapperTest {
     }
 
     @Test
-    public void mapToExchangeLogDtoWhenReceiveSalesReportResponseAndTypeRefIsNull() {
+    public void mapToExchangeLogDtoWhenReceiveSalesResponseAndTypeRefIsNull() {
         //data set
         String guid = "logGuid";
         boolean incoming = true;
@@ -454,14 +415,14 @@ public class ExchangeLogMapperTest {
         log.setDateRecieved(dateReceived);
         log.setIncoming(incoming);
         log.setStatus(ExchangeLogStatusTypeType.SUCCESSFUL);
-        log.setType(LogType.RECEIVE_SALES_REPORT_RESPONSE);
+        log.setType(LogType.RECEIVE_SALES_RESPONSE);
         log.setSenderReceiver(senderReceiver);
 
         //execute
         ExchangeLog dto = ExchangeLogMapper.mapToExchangeLogDto(log);
 
         //assert
-        assertEquals(LogTypeLabel.RECEIVED_SALES_REPORT_RESPONSE, dto.getType());
+        assertEquals(LogTypeLabel.RECEIVED_SALES_RESPONSE, dto.getType());
         assertNotNull(dto.getDateRecieved());
         assertEquals(guid, dto.getId());
         assertEquals(incoming, dto.isIncoming());
