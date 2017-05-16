@@ -23,6 +23,7 @@ import eu.europa.ec.fisheries.schema.exchange.plugin.v1.SendSalesReportRequest;
 import eu.europa.ec.fisheries.schema.exchange.plugin.v1.SendSalesResponseRequest;
 import eu.europa.ec.fisheries.schema.exchange.service.v1.ServiceResponseType;
 import eu.europa.ec.fisheries.schema.exchange.service.v1.StatusType;
+import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogStatusTypeType;
 import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogType;
 import eu.europa.ec.fisheries.schema.exchange.v1.UnsentMessageTypeProperty;
 import eu.europa.ec.fisheries.uvms.exchange.message.consumer.ExchangeMessageConsumer;
@@ -258,12 +259,15 @@ public class ExchangeEventOutgoingServiceBean implements ExchangeEventOutgoingSe
         SetFLUXFAResponseMessageRequest request = null;
         try {
             request = JAXBMarshaller.unmarshallTextMessage(message.getJmsMessage(), SetFLUXFAResponseMessageRequest.class);
-            LOG.debug("Got FLUXFAResponse in exchange :"+request.getRequest());
-
-            String text = ExchangePluginRequestMapper.createSetFLUXFAResponseRequest(message.getJmsMessage().getText());
-            String pluginMessageId = producer.sendEventBusMessage(text, ExchangeServiceConstants.FLUX_ACTIVITY_PLUGIN_SERVICE_NAME);
-            LOG.debug("Message sent to Flux ERS Plugin :"+pluginMessageId);
-        } catch (ExchangeModelMarshallException | ExchangeMessageException | JMSException  e) {
+            LOG.debug("Got FLUXFAResponse in exchange :" + request.getRequest());
+            exchangeLog.updateStatus(request.getRequest(), request.getStatus());
+            if (!request.getStatus().equals(ExchangeLogStatusTypeType.FAILED)) {
+                String text = ExchangePluginRequestMapper.createSetFLUXFAResponseRequest(message.getJmsMessage().getText(), request.getDestination(), request.getFluxDataFlow(), request.getSenderOrReceiver());
+                LOG.debug("Message to plugin {}", text);
+                String pluginMessageId = producer.sendEventBusMessage(text, ExchangeServiceConstants.FLUX_ACTIVITY_PLUGIN_SERVICE_NAME);
+                LOG.debug("Message sent to Flux ERS Plugin :" + pluginMessageId);
+            }
+        } catch (ExchangeModelMarshallException | ExchangeMessageException | JMSException | ExchangeLogException e) {
             LOG.error("Unable to send FLUX FA Report to plugin.", e);
         }
 
