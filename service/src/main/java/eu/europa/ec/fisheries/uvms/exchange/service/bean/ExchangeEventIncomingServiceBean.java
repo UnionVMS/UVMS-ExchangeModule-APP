@@ -259,9 +259,9 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
             String report = request.getReport();
             PluginType plugin = request.getPluginType();
 
-            exchangeLog.log(request, LogType.RECEIVE_SALES_REPORT, ExchangeLogStatusTypeType.ISSUED, TypeRefType.SALES_REPORT, report, true);
+            ExchangeLogType log = exchangeLog.log(request, LogType.RECEIVE_SALES_REPORT, ExchangeLogStatusTypeType.ISSUED, TypeRefType.SALES_REPORT, report, true);
 
-            forwardToRules(RulesModuleRequestMapper.createReceiveSalesReportRequest(report, plugin.name()));
+            forwardToRules(RulesModuleRequestMapper.createReceiveSalesReportRequest(report, plugin.name(), log.getGuid()));
         } catch (ExchangeModelMarshallException e) {
             try {
                 String errorMessage = "Couldn't map to SetSalesReportRequest when processing sales report from plugin. The event was " + event.getJmsMessage().getText();
@@ -285,9 +285,9 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
             String query = request.getQuery();
             PluginType plugin = request.getPluginType();
 
-            exchangeLog.log(request, LogType.RECEIVE_SALES_QUERY, ExchangeLogStatusTypeType.ISSUED, TypeRefType.SALES_QUERY, query, true);
+            ExchangeLogType log = exchangeLog.log(request, LogType.RECEIVE_SALES_QUERY, ExchangeLogStatusTypeType.ISSUED, TypeRefType.SALES_QUERY, query, true);
 
-            forwardToRules(RulesModuleRequestMapper.createReceiveSalesQueryRequest(query, plugin.name()));
+            forwardToRules(RulesModuleRequestMapper.createReceiveSalesQueryRequest(query, plugin.name(), log.getGuid()));
 
         } catch (ExchangeModelMarshallException e) {
             try {
@@ -307,9 +307,10 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
         try {
             ReceiveSalesResponseRequest request = JAXBMarshaller.unmarshallTextMessage(event.getJmsMessage(), ReceiveSalesResponseRequest.class);
             String response = request.getResponse();
-            exchangeLog.log(request, LogType.RECEIVE_SALES_RESPONSE, ExchangeLogStatusTypeType.ISSUED, TypeRefType.SALES_RESPONSE, response, true);
 
-            forwardToRules(RulesModuleRequestMapper.createReceiveSalesResponseRequest(response));
+            ExchangeLogType log = exchangeLog.log(request, LogType.RECEIVE_SALES_RESPONSE, ExchangeLogStatusTypeType.ISSUED, TypeRefType.SALES_RESPONSE, response, true);
+
+            forwardToRules(RulesModuleRequestMapper.createReceiveSalesResponseRequest(response, log.getGuid()));
         } catch (ExchangeModelMarshallException e) {
             firePluginFault(event, "Error when receiving a Sales response from FLUX", e);
         } catch (ExchangeLogException e) {
