@@ -115,12 +115,15 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
             LOG.debug("Got FLUXFAReportMessage in exchange :"+request.getRequest());
             String msg = RulesModuleRequestMapper.createSetFLUXFAReportMessageRequest(rulesPluginType, request.getRequest(),  request.getUsername());
 
+            exchangeLog.log(request, LogType.RECEIVE_FLUX_FA_REPORT_MSG, ExchangeLogStatusTypeType.ISSUED, TypeRefType.FA_REPORT, msg, true);
             //Improvement that could be done is to pass the service. For this purpose
             //we need first to set the plugin name, which requires BaseExchangeRequest XSD modification, as well as in ActivityPlugin
             forwardToRules(msg,message, null);
             LOG.info("Process FLUXFAReportMessage successful");
         } catch (RulesModelMapperException | ExchangeModelMarshallException e) {
             LOG.error("Couldn't map to SetFLUXFAReportMessageRequest when processing FLUXFAReportMessage from plugin", e);
+        } catch (ExchangeLogException e) {
+            LOG.error("Couldn't log FAReportMessage received from plugin into database", e);
         }
 
     }
