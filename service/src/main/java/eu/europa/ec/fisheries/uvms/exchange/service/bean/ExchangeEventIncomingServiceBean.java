@@ -55,6 +55,7 @@ import eu.europa.ec.fisheries.uvms.exchange.service.mapper.PluginTypeMapper;
 import eu.europa.ec.fisheries.uvms.longpolling.notifications.NotificationMessage;
 import eu.europa.ec.fisheries.uvms.movement.model.mapper.MovementModuleResponseMapper;
 import eu.europa.ec.fisheries.uvms.rules.model.exception.RulesModelMapperException;
+import eu.europa.ec.fisheries.uvms.rules.model.exception.RulesModelMarshallException;
 import eu.europa.ec.fisheries.uvms.rules.model.mapper.RulesModuleRequestMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -226,21 +227,25 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
         }
     }
 
+    private void forwardToRules(String messageToForward) {
+        forwardToRules(messageToForward, null, null);
+    }
+
     /**
      * forwards serialized message to Rules module
      * @param messageToForward
-     * @param message is optional
+     * @param exchangeMessageEvent is optional
      * @param service is optional
      */
-    private void forwardToRules(String messageToForward, ExchangeMessageEvent message, ServiceResponseType service) {
+    private void forwardToRules(String messageToForward, ExchangeMessageEvent exchangeMessageEvent, ServiceResponseType service) {
         try {
-            producer.sendMessageOnQueue(messageToForward, MessageQueue.RULES); //sending to Rules
+            producer.sendMessageOnQueue(messageToForward, MessageQueue.RULES);
         } catch (ExchangeMessageException e) {
             LOG.error("Failed to forward message to Rules.", e);
 
-            if (service!= null && message != null) {
+            if (service!= null && exchangeMessageEvent != null) {
                 PluginFault fault = ExchangePluginResponseMapper.mapToPluginFaultResponse(FaultCode.EXCHANGE_PLUGIN_EVENT.getCode(), "Message cannot be sent to Rules module [ " + e.getMessage() + " ]");
-                pluginErrorEvent.fire(new PluginMessageEvent(message.getJmsMessage(), service, fault));
+                pluginErrorEvent.fire(new PluginMessageEvent(exchangeMessageEvent.getJmsMessage(), service, fault));
             }
         }
     }
@@ -252,12 +257,11 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
         try {
             ReceiveSalesReportRequest request = JAXBMarshaller.unmarshallTextMessage(event.getJmsMessage(), ReceiveSalesReportRequest.class);
             String report = request.getReport();
+            PluginType plugin = request.getPluginType();
 
             exchangeLog.log(request, LogType.RECEIVE_SALES_REPORT, ExchangeLogStatusTypeType.ISSUED, TypeRefType.SALES_REPORT, report, true);
 
-            //String messageForRules = RulesModuleRequestMapper.createReceiveSalesReportRequest(PluginTypeMapper.map(pluginType), report);
-            forwardToRules("messageForRules", null, null); //TODO
-
+            forwardToRules(RulesModuleRequestMapper.createReceiveSalesReportRequest(report, plugin.name()));
         } catch (ExchangeModelMarshallException e) {
             try {
                 String errorMessage = "Couldn't map to SetSalesReportRequest when processing sales report from plugin. The event was " + event.getJmsMessage().getText();
@@ -267,44 +271,51 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
             }
         } catch (ExchangeLogException e) {
             firePluginFault(event, "Could not log the incoming sales report.", e);
+        } catch (RulesModelMarshallException e) {
+            firePluginFault(event, "Could not create a request for the Rules module for an incoming sales report.", e);
         }
     }
 
     @Override
-    public void receiveSalesQuery(@Observes @ReceiveSalesQueryEvent ExchangeMessageEvent message) {
+    public void receiveSalesQuery(@Observes @ReceiveSalesQueryEvent ExchangeMessageEvent event) {
         LOG.info("Process sales query in Exchange module");
 
         try {
-            ReceiveSalesQueryRequest request = JAXBMarshaller.unmarshallTextMessage(message.getJmsMessage(), ReceiveSalesQueryRequest.class);
+            ReceiveSalesQueryRequest request = JAXBMarshaller.unmarshallTextMessage(event.getJmsMessage(), ReceiveSalesQueryRequest.class);
             String query = request.getQuery();
+            PluginType plugin = request.getPluginType();
 
             exchangeLog.log(request, LogType.RECEIVE_SALES_QUERY, ExchangeLogStatusTypeType.ISSUED, TypeRefType.SALES_QUERY, query, true);
 
-            forwardToRules("forwardedMessageToRules", null, null); //TODO STIJN
+            forwardToRules(RulesModuleRequestMapper.createReceiveSalesQueryRequest(query, plugin.name()));
 
         } catch (ExchangeModelMarshallException e) {
             try {
-                firePluginFault(message, "Couldn't map to SalesQueryRequest when processing sales query from plugin. The message was " + message.getJmsMessage().getText(), e);
+                firePluginFault(event, "Couldn't map to SalesQueryRequest when processing sales query from plugin. The message was " + event.getJmsMessage().getText(), e);
             } catch (JMSException e1) {
-                firePluginFault(message, "Couldn't map to SalesQueryRequest when processing sales query from plugin.", e);
+                firePluginFault(event, "Couldn't map to SalesQueryRequest when processing sales query from plugin.", e);
             }
         } catch (ExchangeLogException e) {
-            firePluginFault(message, "Could not log the incoming sales query.", e);
+            firePluginFault(event, "Could not log the incoming sales query.", e);
+        } catch (RulesModelMarshallException e) {
+            firePluginFault(event, "Could not create a request for the Rules module for an incoming sales query.", e);
         }
     }
 
     @Override
-    public void receiveSalesResponse(@Observes @ReceiveSalesResponseEvent ExchangeMessageEvent message) {
+    public void receiveSalesResponse(@Observes @ReceiveSalesResponseEvent ExchangeMessageEvent event) {
         try {
-            ReceiveSalesResponseRequest request = JAXBMarshaller.unmarshallTextMessage(message.getJmsMessage(), ReceiveSalesResponseRequest.class);
+            ReceiveSalesResponseRequest request = JAXBMarshaller.unmarshallTextMessage(event.getJmsMessage(), ReceiveSalesResponseRequest.class);
             String response = request.getResponse();
             exchangeLog.log(request, LogType.RECEIVE_SALES_RESPONSE, ExchangeLogStatusTypeType.ISSUED, TypeRefType.SALES_RESPONSE, response, true);
 
-            //TODO STIJN: forward to Rules
+            forwardToRules(RulesModuleRequestMapper.createReceiveSalesResponseRequest(response));
         } catch (ExchangeModelMarshallException e) {
-            firePluginFault(message, "Error when receiving a Sales response from FLUX", e);
+            firePluginFault(event, "Error when receiving a Sales response from FLUX", e);
         } catch (ExchangeLogException e) {
-            firePluginFault(message, "Could not log the incoming sales response.", e);
+            firePluginFault(event, "Could not log the incoming sales response.", e);
+        } catch (RulesModelMarshallException e) {
+            firePluginFault(event, "Could not create a request for the Rules module for an incoming sales response.", e);
         }
     }
 

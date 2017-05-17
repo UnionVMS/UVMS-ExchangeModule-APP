@@ -108,6 +108,7 @@ public class ExchangeLogServiceBean implements ExchangeLogService {
         log.setStatus(status);
         log.setIncoming(incoming);
         log.setTypeRef(ref);
+        log.setDestination(request.getDestination());
 
         return log(log, request.getUsername());
     }
