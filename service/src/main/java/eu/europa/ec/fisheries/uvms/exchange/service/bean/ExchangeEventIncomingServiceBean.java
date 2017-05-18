@@ -330,7 +330,7 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
             pluginRequest.setResponse(request.getResponse());
             pluginRequest.setMethod(ExchangePluginMethod.SEND_SALES_RESPONSE);
 
-            exchangeLog.log(request, LogType.SEND_SALES_RESPONSE, ExchangeLogStatusTypeType.ISSUED, TypeRefType.SALES_RESPONSE, request.getResponse(), false);
+            exchangeLog.log(request, LogType.SEND_SALES_RESPONSE, ExchangeLogStatusTypeType.SUCCESSFUL, TypeRefType.SALES_RESPONSE, request.getResponse(), false);
 
             exchangeEventOutgoingService.sendSalesResponseToFLUX(pluginRequest);
         } catch (ExchangeModelMarshallException | ExchangeMessageException e) {
@@ -350,7 +350,7 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
             pluginRequest.setReport(request.getReport());
             pluginRequest.setMethod(ExchangePluginMethod.SEND_SALES_RESPONSE);
 
-            exchangeLog.log(request, LogType.SEND_SALES_REPORT, ExchangeLogStatusTypeType.ISSUED, TypeRefType.SALES_REPORT, request.getReport(), false);
+            exchangeLog.log(request, LogType.SEND_SALES_REPORT, ExchangeLogStatusTypeType.SUCCESSFUL, TypeRefType.SALES_REPORT, request.getReport(), false);
 
             exchangeEventOutgoingService.sendSalesReportToFLUX(pluginRequest);
         } catch (ExchangeModelMarshallException | ExchangeMessageException e) {
