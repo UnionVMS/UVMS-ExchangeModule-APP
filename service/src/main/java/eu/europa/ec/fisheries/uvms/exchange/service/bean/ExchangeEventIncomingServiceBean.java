@@ -113,12 +113,22 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
                             ? eu.europa.ec.fisheries.schema.rules.exchange.v1.PluginType.MANUAL
                             : eu.europa.ec.fisheries.schema.rules.exchange.v1.PluginType.FLUX;
             LOG.debug("Got FLUXFAReportMessage in exchange :"+request.getRequest());
-            String msg = RulesModuleRequestMapper.createSetFLUXFAReportMessageRequest(rulesPluginType, request.getRequest(),  request.getUsername());
+            ExchangeLogType exchangeLogType=exchangeLog.log(request, LogType.RECEIVE_FLUX_FA_REPORT_MSG, ExchangeLogStatusTypeType.ISSUED, TypeRefType.FA_REPORT, request.getRequest(), true);
+            String logId=null;
+            if(exchangeLogType == null) {
+                LOG.error("ExchangeLogType received is NULL while trying to save RECEIVE_FLUX_FA_REPORT_MSG");
+            }else{
+                logId = exchangeLogType.getGuid();
+                LOG.info("SetFLUXFAReportMessageRequest Logged to Exchange:"+logId);
+            }
 
-            exchangeLog.log(request, LogType.RECEIVE_FLUX_FA_REPORT_MSG, ExchangeLogStatusTypeType.ISSUED, TypeRefType.FA_REPORT, msg, true);
+
+            String msg = RulesModuleRequestMapper.createSetFLUXFAReportMessageRequest(rulesPluginType, request.getRequest(),  request.getUsername(),logId);
+
             //Improvement that could be done is to pass the service. For this purpose
             //we need first to set the plugin name, which requires BaseExchangeRequest XSD modification, as well as in ActivityPlugin
             forwardToRules(msg,message, null);
+
             LOG.info("Process FLUXFAReportMessage successful");
         } catch (RulesModelMapperException | ExchangeModelMarshallException e) {
             LOG.error("Couldn't map to SetFLUXFAReportMessageRequest when processing FLUXFAReportMessage from plugin", e);
@@ -243,13 +253,14 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
     private void forwardToRules(String messageToForward, ExchangeMessageEvent exchangeMessageEvent, ServiceResponseType service) {
         try {
             producer.sendMessageOnQueue(messageToForward, MessageQueue.RULES);
+            LOG.info("Message sent to Rules");
         } catch (ExchangeMessageException e) {
             LOG.error("Failed to forward message to Rules.", e);
 
-            if (service!= null && exchangeMessageEvent != null) {
+      /*      if (service!= null && exchangeMessageEvent != null) {
                 PluginFault fault = ExchangePluginResponseMapper.mapToPluginFaultResponse(FaultCode.EXCHANGE_PLUGIN_EVENT.getCode(), "Message cannot be sent to Rules module [ " + e.getMessage() + " ]");
                 pluginErrorEvent.fire(new PluginMessageEvent(exchangeMessageEvent.getJmsMessage(), service, fault));
-            }
+            } */
         }
     }
 
