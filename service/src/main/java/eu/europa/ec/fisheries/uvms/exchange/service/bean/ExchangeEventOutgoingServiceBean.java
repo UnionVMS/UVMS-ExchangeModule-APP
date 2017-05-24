@@ -260,7 +260,7 @@ public class ExchangeEventOutgoingServiceBean implements ExchangeEventOutgoingSe
             LOG.debug("Got FLUXFAResponse in exchange :" + request.getRequest());
             ExchangeLogStatusTypeType exchangeLogStatusTypeType;
             if (!request.getStatus().equals(ExchangeLogStatusTypeType.FAILED)) {
-                String text = ExchangePluginRequestMapper.createSetFLUXFAResponseRequest(message.getJmsMessage().getText(), request.getDestination(), request.getFluxDataFlow(), request.getSenderOrReceiver());
+                String text = ExchangePluginRequestMapper.createSetFLUXFAResponseRequest(request.getRequest(), request.getDestination(), request.getFluxDataFlow(), request.getSenderOrReceiver());
                 LOG.debug("Message to plugin {}", text);
                 String pluginMessageId = producer.sendEventBusMessage(text, ExchangeServiceConstants.FLUX_ACTIVITY_PLUGIN_SERVICE_NAME);
                 LOG.debug("Message sent to Flux ERS Plugin :" + pluginMessageId);
@@ -269,7 +269,7 @@ public class ExchangeEventOutgoingServiceBean implements ExchangeEventOutgoingSe
                 exchangeLogStatusTypeType = ExchangeLogStatusTypeType.FAILED;
             }
             exchangeLog.log(request, LogType.SEND_FLUX_RESPONSE_MSG, exchangeLogStatusTypeType, TypeRefType.FA_RESPONSE, request.getRequest(), false);
-        } catch (ExchangeModelMarshallException | ExchangeMessageException | JMSException | ExchangeLogException e) {
+        } catch (ExchangeModelMarshallException | ExchangeMessageException | ExchangeLogException e) {
             LOG.error("Unable to send FLUX FA Report to plugin.", e);
         }
 
