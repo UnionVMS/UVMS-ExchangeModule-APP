@@ -261,10 +261,12 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
             ReceiveSalesReportRequest request = JAXBMarshaller.unmarshallTextMessage(event.getJmsMessage(), ReceiveSalesReportRequest.class);
             String report = request.getReport();
             PluginType plugin = request.getPluginType();
+            String sender = request.getSenderOrReceiver();
+            String messageGuid = request.getMessageGuid();
 
             ExchangeLogType log = exchangeLog.log(request, LogType.RECEIVE_SALES_REPORT, ExchangeLogStatusTypeType.ISSUED, TypeRefType.SALES_REPORT, report, true);
 
-            forwardToRules(RulesModuleRequestMapper.createReceiveSalesReportRequest(report, plugin.name(), log.getGuid()));
+            forwardToRules(RulesModuleRequestMapper.createReceiveSalesReportRequest(report, messageGuid, plugin.name(), log.getGuid(), sender));
         } catch (ExchangeModelMarshallException e) {
             try {
                 String errorMessage = "Couldn't map to SetSalesReportRequest when processing sales report from plugin. The event was " + event.getJmsMessage().getText();
@@ -287,10 +289,12 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
             ReceiveSalesQueryRequest request = JAXBMarshaller.unmarshallTextMessage(event.getJmsMessage(), ReceiveSalesQueryRequest.class);
             String query = request.getQuery();
             PluginType plugin = request.getPluginType();
+            String sender = request.getSenderOrReceiver();
+            String messageGuid = request.getMessageGuid();
 
             ExchangeLogType log = exchangeLog.log(request, LogType.RECEIVE_SALES_QUERY, ExchangeLogStatusTypeType.ISSUED, TypeRefType.SALES_QUERY, query, true);
 
-            forwardToRules(RulesModuleRequestMapper.createReceiveSalesQueryRequest(query, plugin.name(), log.getGuid()));
+            forwardToRules(RulesModuleRequestMapper.createReceiveSalesQueryRequest(query, messageGuid, plugin.name(), log.getGuid(), sender));
 
         } catch (ExchangeModelMarshallException e) {
             try {
