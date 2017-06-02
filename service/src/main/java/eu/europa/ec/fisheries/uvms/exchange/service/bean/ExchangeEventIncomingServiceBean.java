@@ -272,10 +272,12 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
             ReceiveSalesReportRequest request = JAXBMarshaller.unmarshallTextMessage(event.getJmsMessage(), ReceiveSalesReportRequest.class);
             String report = request.getReport();
             PluginType plugin = request.getPluginType();
+            String sender = request.getSenderOrReceiver();
+            String messageGuid = request.getMessageGuid();
 
-            exchangeLog.log(request, LogType.RECEIVE_SALES_REPORT, ExchangeLogStatusTypeType.ISSUED, TypeRefType.SALES_REPORT, report, true);
+            ExchangeLogType log = exchangeLog.log(request, LogType.RECEIVE_SALES_REPORT, ExchangeLogStatusTypeType.ISSUED, TypeRefType.SALES_REPORT, report, true);
 
-            forwardToRules(RulesModuleRequestMapper.createReceiveSalesReportRequest(report, plugin.name()));
+            forwardToRules(RulesModuleRequestMapper.createReceiveSalesReportRequest(report, messageGuid, plugin.name(), log.getGuid(), sender));
         } catch (ExchangeModelMarshallException e) {
             try {
                 String errorMessage = "Couldn't map to SetSalesReportRequest when processing sales report from plugin. The event was " + event.getJmsMessage().getText();
@@ -298,10 +300,12 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
             ReceiveSalesQueryRequest request = JAXBMarshaller.unmarshallTextMessage(event.getJmsMessage(), ReceiveSalesQueryRequest.class);
             String query = request.getQuery();
             PluginType plugin = request.getPluginType();
+            String sender = request.getSenderOrReceiver();
+            String messageGuid = request.getMessageGuid();
 
-            exchangeLog.log(request, LogType.RECEIVE_SALES_QUERY, ExchangeLogStatusTypeType.ISSUED, TypeRefType.SALES_QUERY, query, true);
+            ExchangeLogType log = exchangeLog.log(request, LogType.RECEIVE_SALES_QUERY, ExchangeLogStatusTypeType.ISSUED, TypeRefType.SALES_QUERY, query, true);
 
-            forwardToRules(RulesModuleRequestMapper.createReceiveSalesQueryRequest(query, plugin.name()));
+            forwardToRules(RulesModuleRequestMapper.createReceiveSalesQueryRequest(query, messageGuid, plugin.name(), log.getGuid(), sender));
 
         } catch (ExchangeModelMarshallException e) {
             try {
@@ -321,9 +325,10 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
         try {
             ReceiveSalesResponseRequest request = JAXBMarshaller.unmarshallTextMessage(event.getJmsMessage(), ReceiveSalesResponseRequest.class);
             String response = request.getResponse();
-            exchangeLog.log(request, LogType.RECEIVE_SALES_RESPONSE, ExchangeLogStatusTypeType.ISSUED, TypeRefType.SALES_RESPONSE, response, true);
 
-            forwardToRules(RulesModuleRequestMapper.createReceiveSalesResponseRequest(response));
+            ExchangeLogType log = exchangeLog.log(request, LogType.RECEIVE_SALES_RESPONSE, ExchangeLogStatusTypeType.ISSUED, TypeRefType.SALES_RESPONSE, response, true);
+
+            forwardToRules(RulesModuleRequestMapper.createReceiveSalesResponseRequest(response, log.getGuid()));
         } catch (ExchangeModelMarshallException e) {
             firePluginFault(event, "Error when receiving a Sales response from FLUX", e);
         } catch (ExchangeLogException e) {
@@ -343,7 +348,7 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
             pluginRequest.setResponse(request.getResponse());
             pluginRequest.setMethod(ExchangePluginMethod.SEND_SALES_RESPONSE);
 
-            exchangeLog.log(request, LogType.SEND_SALES_RESPONSE, ExchangeLogStatusTypeType.ISSUED, TypeRefType.SALES_RESPONSE, request.getResponse(), false);
+            exchangeLog.log(request, LogType.SEND_SALES_RESPONSE, ExchangeLogStatusTypeType.SUCCESSFUL, TypeRefType.SALES_RESPONSE, request.getResponse(), false);
 
             exchangeEventOutgoingService.sendSalesResponseToFLUX(pluginRequest);
         } catch (ExchangeModelMarshallException | ExchangeMessageException e) {
@@ -363,7 +368,7 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
             pluginRequest.setReport(request.getReport());
             pluginRequest.setMethod(ExchangePluginMethod.SEND_SALES_RESPONSE);
 
-            exchangeLog.log(request, LogType.SEND_SALES_REPORT, ExchangeLogStatusTypeType.ISSUED, TypeRefType.SALES_REPORT, request.getReport(), false);
+            exchangeLog.log(request, LogType.SEND_SALES_REPORT, ExchangeLogStatusTypeType.SUCCESSFUL, TypeRefType.SALES_REPORT, request.getReport(), false);
 
             exchangeEventOutgoingService.sendSalesReportToFLUX(pluginRequest);
         } catch (ExchangeModelMarshallException | ExchangeMessageException e) {
