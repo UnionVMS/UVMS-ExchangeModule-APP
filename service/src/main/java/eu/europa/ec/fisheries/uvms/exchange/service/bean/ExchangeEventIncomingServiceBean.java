@@ -113,7 +113,7 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
                             ? eu.europa.ec.fisheries.schema.rules.exchange.v1.PluginType.MANUAL
                             : eu.europa.ec.fisheries.schema.rules.exchange.v1.PluginType.FLUX;
             LOG.debug("Got FLUXFAReportMessage in exchange :"+request.getRequest());
-            ExchangeLogType exchangeLogType=exchangeLog.log(request, LogType.RECEIVE_FLUX_FA_REPORT_MSG, ExchangeLogStatusTypeType.ISSUED, TypeRefType.FA_REPORT, request.getRequest(), true);
+            ExchangeLogType exchangeLogType=exchangeLog.log(request, LogType.RCV_FLUX_FA_REPORT_MSG, ExchangeLogStatusTypeType.ISSUED, TypeRefType.FA_REPORT, request.getRequest(), true);
             String logId=null;
             if(exchangeLogType == null) {
                 LOG.error("ExchangeLogType received is NULL while trying to save RECEIVE_FLUX_FA_REPORT_MSG");
