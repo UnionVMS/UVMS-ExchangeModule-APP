@@ -56,6 +56,26 @@ public class MessageConsumerBean implements MessageListener {
     Event<ExchangeMessageEvent> processMovementEvent;
 
     @Inject
+    @ReceiveSalesReportEvent
+    Event<ExchangeMessageEvent> receiveSalesReportEvent;
+
+    @Inject
+    @ReceiveSalesQueryEvent
+    Event<ExchangeMessageEvent> receiveSalesQueryEvent;
+
+    @Inject
+    @ReceiveSalesResponseEvent
+    Event<ExchangeMessageEvent> receiveSalesResponseEvent;
+
+    @Inject
+    @SendSalesReportEvent
+    Event<ExchangeMessageEvent> sendSalesReportEvent;
+
+    @Inject
+    @SendSalesResponseEvent
+    Event<ExchangeMessageEvent> sendSalesResponseEvent;
+
+    @Inject
     @SendReportToPluginEvent
     Event<ExchangeMessageEvent> sendMessageToPluginEvent;
 
@@ -87,7 +107,6 @@ public class MessageConsumerBean implements MessageListener {
     @HandleProcessedMovementEvent
     Event<ExchangeMessageEvent> processedMovementEvent;
 
-
     @Inject
     @MdrSyncRequestMessageEvent
     Event<ExchangeMessageEvent> mdrSyncRequestMessageEvent;
@@ -96,7 +115,6 @@ public class MessageConsumerBean implements MessageListener {
     @MdrSyncResponseMessageEvent
     Event<ExchangeMessageEvent> mdrSyncResponseMessageEvent;
 
-
     @Inject
     @SetFluxFAReportMessageEvent
     Event<ExchangeMessageEvent> processFLUXFAReportMessageEvent;
@@ -104,6 +122,10 @@ public class MessageConsumerBean implements MessageListener {
     @Inject
     @SendFLUXFAResponseToPluginEvent
     Event<ExchangeMessageEvent> processFLUXFAResponseMessageEvent;
+
+    @Inject
+    @UpdateLogStatusEvent
+    Event<ExchangeMessageEvent> updateLogStatusEvent;
 
     @Override
     @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
@@ -145,6 +167,21 @@ public class MessageConsumerBean implements MessageListener {
                 case SET_MOVEMENT_REPORT:
                     processMovementEvent.fire(new ExchangeMessageEvent(textMessage));
                     break;
+                case RECEIVE_SALES_REPORT:
+                    receiveSalesReportEvent.fire(new ExchangeMessageEvent(textMessage));
+                    break;
+                case RECEIVE_SALES_QUERY:
+                    receiveSalesQueryEvent.fire(new ExchangeMessageEvent(textMessage));
+                    break;
+                case RECEIVE_SALES_RESPONSE:
+                    receiveSalesResponseEvent.fire(new ExchangeMessageEvent(textMessage));
+                    break;
+                case SEND_SALES_RESPONSE:
+                    sendSalesResponseEvent.fire(new ExchangeMessageEvent(textMessage));
+                    break;
+                case SEND_SALES_REPORT:
+                    sendSalesReportEvent.fire(new ExchangeMessageEvent(textMessage));
+                    break;
                 case UPDATE_PLUGIN_SETTING:
                     updatePluginSettingEvent.fire(new ExchangeMessageEvent(textMessage));
                     break;
@@ -167,6 +204,10 @@ public class MessageConsumerBean implements MessageListener {
                 case SET_FLUX_FA_RESPONSE_MESSAGE:
                     LOG.debug("inside SET_FLUX_FA_RESPONSE_MESSAGE case");
                     processFLUXFAResponseMessageEvent.fire(new ExchangeMessageEvent(textMessage));
+                    break;
+                case UPDATE_LOG_STATUS:
+                    LOG.debug("The status of a message log will be updated");
+                    updateLogStatusEvent.fire(new ExchangeMessageEvent(textMessage));
                     break;
                 default:
                     LOG.error("[ Not implemented method consumed: {} ] ", request.getMethod());

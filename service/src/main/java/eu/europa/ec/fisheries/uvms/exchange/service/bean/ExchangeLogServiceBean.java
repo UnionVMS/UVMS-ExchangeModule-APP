@@ -11,6 +11,7 @@ copy of the GNU General Public License along with the IFDM Suite. If not, see <h
  */
 package eu.europa.ec.fisheries.uvms.exchange.service.bean;
 
+import eu.europa.ec.fisheries.schema.exchange.module.v1.ExchangeBaseRequest;
 import eu.europa.ec.fisheries.schema.exchange.source.v1.GetLogListByQueryResponse;
 import eu.europa.ec.fisheries.schema.exchange.v1.*;
 import eu.europa.ec.fisheries.uvms.audit.model.exception.AuditModelMarshallException;
@@ -82,7 +83,6 @@ public class ExchangeLogServiceBean implements ExchangeLogService {
     @Override
     public ExchangeLogType log(ExchangeLogType log, String username) throws ExchangeLogException {
         try {
-
             ExchangeLogType exchangeLog = exchangeLogModel.createExchangeLog(log, username);
             sendAuditLogMessageForCreateExchangeLog(exchangeLog.getGuid(), username);
             exchangeLogEvent.fire(new NotificationMessage("guid", exchangeLog.getGuid()));
@@ -95,28 +95,61 @@ public class ExchangeLogServiceBean implements ExchangeLogService {
     }
 
     @Override
+    public ExchangeLogType log(ExchangeBaseRequest request, LogType logType, ExchangeLogStatusTypeType status, TypeRefType messageType, String messageText, boolean incoming) throws ExchangeLogException {
+        LogRefType ref = new LogRefType();
+        ref.setMessage(messageText);
+        ref.setRefGuid(request.getMessageGuid());
+        ref.setType(messageType);
+
+        ExchangeLogType log = new ExchangeLogType();
+        log.setSenderReceiver(request.getSenderOrReceiver());
+        log.setDateRecieved(request.getDate());
+        log.setType(logType);
+        log.setStatus(status);
+        log.setIncoming(incoming);
+        log.setTypeRef(ref);
+        log.setDestination(request.getDestination());
+
+        return log(log, request.getUsername());
+    }
+
+    @Override
     public ExchangeLogType updateStatus(String pluginMessageId, ExchangeLogStatusTypeType logStatus, String username) throws ExchangeLogException {
         try {
             String logGuid = logCache.acknowledged(pluginMessageId);
 
-            ExchangeLogStatusType exchangeLogStatusType = new ExchangeLogStatusType();
-            exchangeLogStatusType.setGuid(logGuid);
-            ArrayList statusHistoryList = new ArrayList();
-            ExchangeLogStatusHistoryType statusHistory = new ExchangeLogStatusHistoryType();
-            statusHistory.setStatus(logStatus);
-            statusHistoryList.add(statusHistory);
-            exchangeLogStatusType.getHistory().addAll(statusHistoryList);
+            ExchangeLogStatusType exchangeLogStatusType = createExchangeLogStatusType(logStatus, logGuid);
             ExchangeLogType updatedLog = exchangeLogModel.updateExchangeLogStatus(exchangeLogStatusType, username);
 
             sendAuditLogMessageForUpdateExchangeLog(updatedLog.getGuid(), username);
             // For long polling
             exchangeLogEvent.fire(new NotificationMessage("guid", updatedLog.getGuid()));
             return updatedLog;
-        } catch (ExchangeModelMapperException e) {
-            throw new ExchangeLogException("Couldn't update status of exchange log");
         } catch (ExchangeModelException e) {
-            throw new ExchangeLogException("Couldn't update status of exchange log");
+            throw new ExchangeLogException("Couldn't update status of exchange log", e);
         }
+    }
+
+    private ExchangeLogStatusType createExchangeLogStatusType(ExchangeLogStatusTypeType logStatus, String logGuid) {
+        ExchangeLogStatusType exchangeLogStatusType = new ExchangeLogStatusType();
+        exchangeLogStatusType.setGuid(logGuid);
+        ArrayList statusHistoryList = new ArrayList();
+        ExchangeLogStatusHistoryType statusHistory = new ExchangeLogStatusHistoryType();
+        statusHistory.setStatus(logStatus);
+        statusHistoryList.add(statusHistory);
+        exchangeLogStatusType.getHistory().addAll(statusHistoryList);
+        return exchangeLogStatusType;
+    }
+
+    @Override
+    public ExchangeLogType updateStatus(String logGuid, ExchangeLogStatusTypeType logStatus) throws ExchangeLogException {
+        try {
+            ExchangeLogStatusType exchangeLogStatusType = createExchangeLogStatusType(logStatus, logGuid);
+            return exchangeLogModel.updateExchangeLogStatus(exchangeLogStatusType, "SYSTEM");
+        } catch (ExchangeModelException e) {
+            throw new ExchangeLogException("Couldn't update the status of the exchange log with guid " + logGuid + ". The new status should be " + logStatus, e);
+        }
+
     }
 
     @Override

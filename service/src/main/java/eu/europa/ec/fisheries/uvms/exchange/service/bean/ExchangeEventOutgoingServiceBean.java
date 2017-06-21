@@ -19,10 +19,11 @@ import eu.europa.ec.fisheries.schema.exchange.module.v1.SetCommandRequest;
 import eu.europa.ec.fisheries.schema.exchange.module.v1.SetFLUXFAResponseMessageRequest;
 import eu.europa.ec.fisheries.schema.exchange.movement.v1.SendMovementToPluginType;
 import eu.europa.ec.fisheries.schema.exchange.plugin.types.v1.PluginType;
+import eu.europa.ec.fisheries.schema.exchange.plugin.v1.SendSalesReportRequest;
+import eu.europa.ec.fisheries.schema.exchange.plugin.v1.SendSalesResponseRequest;
 import eu.europa.ec.fisheries.schema.exchange.service.v1.ServiceResponseType;
 import eu.europa.ec.fisheries.schema.exchange.service.v1.StatusType;
-import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogType;
-import eu.europa.ec.fisheries.schema.exchange.v1.UnsentMessageTypeProperty;
+import eu.europa.ec.fisheries.schema.exchange.v1.*;
 import eu.europa.ec.fisheries.uvms.exchange.message.consumer.ExchangeMessageConsumer;
 import eu.europa.ec.fisheries.uvms.exchange.message.event.*;
 import eu.europa.ec.fisheries.uvms.exchange.message.event.carrier.ExchangeMessageEvent;
@@ -80,6 +81,18 @@ public class ExchangeEventOutgoingServiceBean implements ExchangeEventOutgoingSe
 
     @EJB
     ExchangeAssetService exchangeAssetService;
+
+    @Override
+    public void sendSalesResponseToFLUX(SendSalesResponseRequest sendSalesResponseRequest) throws ExchangeModelMarshallException, ExchangeMessageException {
+        String marshalledRequest = JAXBMarshaller.marshallJaxBObjectToString(sendSalesResponseRequest);
+        producer.sendEventBusMessage(marshalledRequest, ExchangeServiceConstants.FLUX_SALES_PLUGIN_SERVICE_NAME);
+    }
+
+    @Override
+    public void sendSalesReportToFLUX(SendSalesReportRequest sendSalesReportRequest) throws ExchangeModelMarshallException, ExchangeMessageException {
+        String marshalledRequest = JAXBMarshaller.marshallJaxBObjectToString(sendSalesReportRequest);
+        producer.sendEventBusMessage(marshalledRequest, ExchangeServiceConstants.FLUX_SALES_PLUGIN_SERVICE_NAME);
+    }
 
     @Override
     public void sendReportToPlugin(@Observes @SendReportToPluginEvent ExchangeMessageEvent message) {
@@ -244,12 +257,19 @@ public class ExchangeEventOutgoingServiceBean implements ExchangeEventOutgoingSe
         SetFLUXFAResponseMessageRequest request = null;
         try {
             request = JAXBMarshaller.unmarshallTextMessage(message.getJmsMessage(), SetFLUXFAResponseMessageRequest.class);
-            LOG.debug("Got FLUXFAResponse in exchange :"+request.getRequest());
-
-            String text = ExchangePluginRequestMapper.createSetFLUXFAResponseRequest(message.getJmsMessage().getText());
-            String pluginMessageId = producer.sendEventBusMessage(text, ExchangeServiceConstants.FLUX_ACTIVITY_PLUGIN_SERVICE_NAME);
-            LOG.debug("Message sent to Flux ERS Plugin :"+pluginMessageId);
-        } catch (ExchangeModelMarshallException | ExchangeMessageException | JMSException  e) {
+            LOG.debug("Got FLUXFAResponse in exchange :" + request.getRequest());
+            ExchangeLogStatusTypeType exchangeLogStatusTypeType;
+            if (!request.getStatus().equals(ExchangeLogStatusTypeType.FAILED)) {
+                String text = ExchangePluginRequestMapper.createSetFLUXFAResponseRequest(request.getRequest(), request.getDestination(), request.getFluxDataFlow(), request.getSenderOrReceiver());
+                LOG.debug("Message to plugin {}", text);
+                String pluginMessageId = producer.sendEventBusMessage(text, ExchangeServiceConstants.FLUX_ACTIVITY_PLUGIN_SERVICE_NAME);
+                LOG.debug("Message sent to Flux ERS Plugin :" + pluginMessageId);
+                exchangeLogStatusTypeType = ExchangeLogStatusTypeType.SUCCESSFUL;
+            } else {
+                exchangeLogStatusTypeType = ExchangeLogStatusTypeType.FAILED;
+            }
+            exchangeLog.log(request, LogType.SEND_FLUX_RESPONSE_MSG, exchangeLogStatusTypeType, TypeRefType.FA_RESPONSE, request.getRequest(), false);
+        } catch (ExchangeModelMarshallException | ExchangeMessageException | ExchangeLogException e) {
             LOG.error("Unable to send FLUX FA Report to plugin.", e);
         }
 

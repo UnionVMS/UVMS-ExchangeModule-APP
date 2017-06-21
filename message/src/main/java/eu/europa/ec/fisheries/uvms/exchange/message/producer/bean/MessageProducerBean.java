@@ -186,7 +186,7 @@ public class MessageProducerBean implements MessageProducer, ConfigMessageProduc
             getProducer(session, eventBus).send(response);
 
         } catch (ExchangeModelMapperException | JMSException e) {
-            LOG.error("Error when returning Error message to recipient");
+            LOG.error("Error when returning Error message to recipient", e);
         }
     }
 
@@ -226,7 +226,7 @@ public class MessageProducerBean implements MessageProducer, ConfigMessageProduc
 
     private javax.jms.MessageProducer getProducer(Session session, Destination destination, long ttl) throws JMSException {
         javax.jms.MessageProducer producer = session.createProducer(destination);
-        producer.setDeliveryMode(DeliveryMode.NON_PERSISTENT);
+        producer.setDeliveryMode(DeliveryMode.PERSISTENT);
         producer.setTimeToLive(ttl);
         return producer;
     }
