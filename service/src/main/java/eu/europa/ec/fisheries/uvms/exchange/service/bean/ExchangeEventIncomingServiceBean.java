@@ -112,22 +112,22 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
                     exchangePluginType == PluginType.MANUAL
                             ? eu.europa.ec.fisheries.schema.rules.exchange.v1.PluginType.MANUAL
                             : eu.europa.ec.fisheries.schema.rules.exchange.v1.PluginType.FLUX;
-            LOG.debug("Got FLUXFAReportMessage in exchange :"+request.getRequest());
-            ExchangeLogType exchangeLogType=exchangeLog.log(request, LogType.RCV_FLUX_FA_REPORT_MSG, ExchangeLogStatusTypeType.ISSUED, TypeRefType.FA_REPORT, request.getRequest(), true);
-            String logId=null;
-            if(exchangeLogType == null) {
+            LOG.debug("Got FLUXFAReportMessage in exchange :" + request.getRequest());
+            ExchangeLogType exchangeLogType = exchangeLog.log(request, LogType.RCV_FLUX_FA_REPORT_MSG, ExchangeLogStatusTypeType.ISSUED, TypeRefType.FA_REPORT, request.getRequest(), true);
+            String logId = null;
+            if (exchangeLogType == null) {
                 LOG.error("ExchangeLogType received is NULL while trying to save RECEIVE_FLUX_FA_REPORT_MSG");
-            }else{
+            } else {
                 logId = exchangeLogType.getGuid();
-                LOG.info("SetFLUXFAReportMessageRequest Logged to Exchange:"+logId);
+                LOG.info("SetFLUXFAReportMessageRequest Logged to Exchange:" + logId);
             }
 
 
-            String msg = RulesModuleRequestMapper.createSetFLUXFAReportMessageRequest(rulesPluginType, request.getRequest(),  request.getUsername(),logId);
+            String msg = RulesModuleRequestMapper.createSetFLUXFAReportMessageRequest(rulesPluginType, request.getRequest(), request.getUsername(), logId, request.getFluxDataFlow(), request.getSenderOrReceiver());
 
             //Improvement that could be done is to pass the service. For this purpose
             //we need first to set the plugin name, which requires BaseExchangeRequest XSD modification, as well as in ActivityPlugin
-            forwardToRules(msg,message, null);
+            forwardToRules(msg, message, null);
 
             LOG.info("Process FLUXFAReportMessage successful");
         } catch (RulesModelMapperException | ExchangeModelMarshallException e) {
@@ -139,7 +139,7 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
     }
 
     /*
-	 * Method for Observing the @MdrSyncMessageEvent, meaning a message from Activity MDR
+     * Method for Observing the @MdrSyncMessageEvent, meaning a message from Activity MDR
 	 * module has arrived (synchronisation of the mdr).
 	 *
 	 */
@@ -246,9 +246,10 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
 
     /**
      * forwards serialized message to Rules module
+     *
      * @param messageToForward
      * @param exchangeMessageEvent is optional
-     * @param service is optional
+     * @param service              is optional
      */
     private void forwardToRules(String messageToForward, ExchangeMessageEvent exchangeMessageEvent, ServiceResponseType service) {
         try {
@@ -426,7 +427,7 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
     private void firePluginFault(ExchangeMessageEvent messageEvent, String errorMessage, Throwable exception) {
         LOG.error(errorMessage, exception);
         PluginFault fault = ExchangePluginResponseMapper.mapToPluginFaultResponse(FaultCode.EXCHANGE_PLUGIN_EVENT.getCode(), errorMessage);
-        pluginErrorEvent.fire(new PluginMessageEvent(messageEvent.getJmsMessage(),null, fault));
+        pluginErrorEvent.fire(new PluginMessageEvent(messageEvent.getJmsMessage(), null, fault));
     }
 
     private void fireExchangeFault(ExchangeMessageEvent messageEvent, String errorMessage, Throwable exception) {

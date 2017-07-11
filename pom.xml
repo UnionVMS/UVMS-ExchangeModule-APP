@@ -26,7 +26,7 @@
         <usm4uvms.version>3.0.6</usm4uvms.version>
         <audit.model.version>3.0.4</audit.model.version>
         <movement.model.version>3.0.4</movement.model.version>
-        <rules.version>3.0.5</rules.version>
+        <rules.version>3.0.6-SNAPSHOT</rules.version>
         <asset.version>3.0.4</asset.version>
         <exchange.model.version>3.0.5</exchange.model.version>
       
