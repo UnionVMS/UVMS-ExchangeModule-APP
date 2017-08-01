@@ -1,6 +1,13 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
+     <parent>
+	<groupId>fish.focus.maven</groupId>
+	<artifactId>focus-pom</artifactId>
+	<version>1.5</version>
+	<relativePath />
+    </parent>
+
     <groupId>eu.europa.ec.fisheries.uvms.exchange</groupId>
     <artifactId>exchange</artifactId>
     <version>3.0.7-SNAPSHOT</version>
@@ -25,7 +32,7 @@
         <uvms.config.version>3.0.4</uvms.config.version>
         <usm4uvms.version>3.0.6</usm4uvms.version>
         <audit.model.version>3.0.4</audit.model.version>
-        <movement.model.version>3.0.4</movement.model.version>
+        <movement.model.version>3.0.6</movement.model.version>
         <rules.version>3.0.6-SNAPSHOT</rules.version>
         <asset.version>3.0.4</asset.version>
         <exchange.model.version>3.0.5</exchange.model.version>
@@ -81,7 +88,7 @@
         <repository>
             <id>focus-repo</id>
             <name>Focus nexus repository</name>
-            <url>http://nexus.focus.fish/</url>
+            <url>http://nexus.focus.fish/nexus/</url>
         </repository>
     </repositories>
 
