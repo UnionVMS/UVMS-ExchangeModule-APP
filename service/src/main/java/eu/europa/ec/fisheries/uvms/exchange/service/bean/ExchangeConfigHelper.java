@@ -15,6 +15,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.ejb.Stateless;
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
 
 import eu.europa.ec.fisheries.uvms.config.constants.ConfigHelper;
 import eu.europa.ec.fisheries.uvms.exchange.model.constant.ExchangeModelConstants;
@@ -22,6 +24,9 @@ import eu.europa.ec.fisheries.uvms.exchange.service.config.ParameterKey;
 
 @Stateless
 public class ExchangeConfigHelper implements ConfigHelper {
+
+    @PersistenceContext
+    protected EntityManager em;
 
     @Override
     public List<String> getAllParameterKeys() {
@@ -37,5 +42,10 @@ public class ExchangeConfigHelper implements ConfigHelper {
     public String getModuleName() {
         return ExchangeModelConstants.MODULE_NAME;
     }
+
+	@Override
+	public EntityManager getEntityManager() {
+		return em;
+	}
 
 }
