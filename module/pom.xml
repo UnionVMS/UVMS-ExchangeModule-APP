@@ -41,6 +41,7 @@
                     </modules>
                     <skinnyWars>true</skinnyWars>
                     <defaultLibBundleDir>APP-INF/lib</defaultLibBundleDir>
+                    <version>7</version>
                 </configuration>
             </plugin>
         </plugins>
