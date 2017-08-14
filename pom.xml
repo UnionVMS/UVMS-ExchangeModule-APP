@@ -28,9 +28,9 @@
         <dozer.version>5.5.1</dozer.version>
 
         <longpolling.version>2.0.13</longpolling.version>
-        <uvms.common.version>2.0.26</uvms.common.version>
+        <uvms.common.version>2.0.27</uvms.common.version>
         <uvms.config.version>3.1.1</uvms.config.version>
-        <usm4uvms.version>3.0.7</usm4uvms.version>
+        <usm4uvms.version>3.0.8</usm4uvms.version>
         <audit.model.version>3.0.4</audit.model.version>
         <movement.model.version>3.0.6</movement.model.version>
         <rules.version>3.0.6</rules.version>
