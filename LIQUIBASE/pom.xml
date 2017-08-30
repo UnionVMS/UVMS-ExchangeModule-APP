@@ -136,7 +136,10 @@
                         </execution>
                     </executions> 
                 </plugin>
-                <plugin>
+            </plugins>
+        </pluginManagement>
+        <plugins>
+        	<plugin>
                     <artifactId>maven-assembly-plugin</artifactId>
                     <version>2.4.1</version>
                     <configuration>
@@ -181,8 +184,7 @@
                         <version>${project.version}</version>
                         <file>target/liquibase.zip</file>
                     </configuration>
-                </plugin>
-            </plugins>
-        </pluginManagement>
+                </plugin>        	
+        </plugins>
     </build>
 </project>
