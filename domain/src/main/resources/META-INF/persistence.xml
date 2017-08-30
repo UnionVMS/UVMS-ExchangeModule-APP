@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<persistence version="2.0" xmlns="http://java.sun.com/xml/ns/persistence" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://java.sun.com/xml/ns/persistence">
+  <persistence-unit name="exchangePostgresPU" transaction-type="JTA">
+  
+    <class>eu.europa.ec.fisheries.uvms.exchange.entity.serviceregistry.ServiceSetting</class>
+    <class>eu.europa.ec.fisheries.uvms.exchange.entity.serviceregistry.ServiceCapability</class>
+    <class>eu.europa.ec.fisheries.uvms.exchange.entity.serviceregistry.Service</class>
+    <class>eu.europa.ec.fisheries.uvms.exchange.entity.exchangelog.EmailLog</class>
+    <class>eu.europa.ec.fisheries.uvms.exchange.entity.exchangelog.ExchangeLog</class>
+    <class>eu.europa.ec.fisheries.uvms.exchange.entity.exchangelog.ExchangeLogStatus</class>
+    <class>eu.europa.ec.fisheries.uvms.exchange.entity.unsent.UnsentMessage</class>
+    <class>eu.europa.ec.fisheries.uvms.exchange.entity.unsent.UnsentMessageProperty</class>
+    <exclude-unlisted-classes>true</exclude-unlisted-classes>
+    
+    <provider>org.hibernate.jpa.HibernatePersistenceProvider</provider>
+    <jta-data-source>jdbc/uvms_exchange</jta-data-source>
+    <properties>
+      <property name="hibernate.dialect" value="org.hibernate.dialect.PostgreSQLDialect"/>
+    </properties>
+  </persistence-unit>
+  <persistence-unit name="exchangeOraclePU" transaction-type="JTA">
+
+    <class>eu.europa.ec.fisheries.uvms.exchange.entity.serviceregistry.ServiceSetting</class>
+    <class>eu.europa.ec.fisheries.uvms.exchange.entity.serviceregistry.ServiceCapability</class>
+    <class>eu.europa.ec.fisheries.uvms.exchange.entity.serviceregistry.Service</class>
+    <class>eu.europa.ec.fisheries.uvms.exchange.entity.exchangelog.EmailLog</class>
+    <class>eu.europa.ec.fisheries.uvms.exchange.entity.exchangelog.ExchangeLog</class>
+    <class>eu.europa.ec.fisheries.uvms.exchange.entity.exchangelog.ExchangeLogStatus</class>
+    <class>eu.europa.ec.fisheries.uvms.exchange.entity.unsent.UnsentMessage</class>
+    <class>eu.europa.ec.fisheries.uvms.exchange.entity.unsent.UnsentMessageProperty</class>
+    <exclude-unlisted-classes>true</exclude-unlisted-classes>
+
+    <provider>org.hibernate.jpa.HibernatePersistenceProvider</provider>
+    <jta-data-source>jdbc/uvms_exchange</jta-data-source>
+    <properties>
+      <property name="hibernate.dialect" value="org.hibernate.dialect.Oracle10gDialect"/>
+    </properties>
+  </persistence-unit>
+</persistence>

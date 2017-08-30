@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.3.xsd">
+    
+    <changeSet author="johlyn" id="table for mapping settings from parameter table to service">
+        
+        <createTable remarks="table for mapping settings from parameter table to service" tableName="serviceparametermapping">
+            <column name="map_id" remarks="Id and code for table" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="map_pk"/>
+            </column>
+            <column name="map_service_id" remarks="The id of the mapped service" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="map_setting_id" remarks="The id of the setting" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="map_updattim" type="timestamp" remarks="Last updated date time.">
+                <constraints nullable="false"/>
+            </column>
+            <column name="map_upuser" type="varchar(60)" remarks="Last update userid.">
+                <constraints nullable="false"/>
+            </column>     
+        </createTable>
+        
+        <addAutoIncrement columnDataType="BIGINT" columnName="map_id"
+            startWith="100" tableName="serviceparametermapping"/>
+        
+        <addForeignKeyConstraint
+            constraintName="map_serv_fk"
+            baseTableName="serviceparametermapping"
+            baseColumnNames="map_service_id"
+            referencedTableName="service"
+            referencedColumnNames="serv_id"/>
+        
+        <addForeignKeyConstraint
+            constraintName="map_setting_fk"
+            baseTableName="serviceparametermapping"
+            baseColumnNames="map_setting_id"
+            referencedTableName="parameter"
+            referencedColumnNames="param_id"/>
+        
+        <rollback>
+            <dropTable tableName="servicemapping" cascadeConstraints="true"/>
+        </rollback>
+        
+    </changeSet>
+    
+</databaseChangeLog>	

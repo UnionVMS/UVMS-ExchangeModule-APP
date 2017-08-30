@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.3.xsd">
+
+    <changeSet author="johlyn" id="create the exchange log table">
+        <createTable remarks="Table containing the exchange logs in the exchange module" tableName="log">
+            <column name="log_id" remarks="Auto id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="log_pk"/>
+            </column>
+            <column name="log_guid" remarks="the id (guid) of the log" type="VARCHAR(36)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="log_type_ref_guid" remarks="id for message causing the log" type="VARCHAR(36)"/>
+            <column name="log_type_ref_type" remarks="type of message causing the log" type="VARCHAR(25)"/>
+            <column name="log_senderreceiver" remarks="The sender or receiver of the message logged" type="VARCHAR(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="log_daterecieved" remarks="The date the message recieved in exchange" type="timestamp">
+                <constraints nullable="false"/>
+            </column>
+            <column name="log_status" remarks="The status of the report" type="VARCHAR(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="log_updattim" type="timestamp" remarks="Last updated date time.">
+                <constraints nullable="false"/>
+            </column>
+            <column name="log_upuser" type="varchar(60)" remarks="Last update userid.">
+                <constraints nullable="false"/>
+            </column>
+            <column name="log_type" type="VARCHAR(25)" remarks="Type of log">
+                <constraints nullable="false"/>
+            </column>
+            <column name="log_transfer_incoming" type="BOOLEAN" remarks="Transfer type, incoming or outgoing"/>
+
+            <!-- receive movement -->
+            <column name="log_source" remarks="source of movement received" type="VARCHAR(50)"/>
+
+            <!-- send movement -->
+            <column name="log_fwdrule" remarks="rule of send movement" type="VARCHAR(50)"/>
+            <column name="log_recipient" remarks="recipient (flagstate) of send movement" type="VARCHAR(50)"/>
+            <column name="log_fwddate" remarks="date of send movement" type="TIMESTAMP"/>
+        </createTable>
+
+
+        <rollback>
+            <dropTable tableName="log" cascadeConstraints="true"/>
+        </rollback>
+    </changeSet>
+
+	<changeSet author="nhily" id="Add hibernate seq">
+		<createSequence sequenceName="HIBERNATE_SEQUENCE" startValue="100"/>
+		<rollback>
+			<dropSequence schemaName="exchange" sequenceName="HIBERNATE_SEQUENCE"/>
+		</rollback>
+	</changeSet>
+
+    <changeSet author="stihft" id="Add column containing the incoming/outgoing message">
+        <addColumn tableName="log">
+            <column name="log_type_ref_message" remarks="The incoming/outgoing message" type="clob" />
+        </addColumn>
+        <rollback>
+            <dropColumn tableName="log" columnName="log_type_ref_message" />
+        </rollback>
+    </changeSet>
+
+    <changeSet author="stihft" id="Add column containing the destination of the message">
+        <addColumn tableName="log">
+            <column name="log_destination" remarks="The destination of the message" type="varchar(50)" />
+        </addColumn>
+        <rollback>
+            <dropColumn tableName="log" columnName="destination" />
+        </rollback>
+    </changeSet>
+
+</databaseChangeLog>	

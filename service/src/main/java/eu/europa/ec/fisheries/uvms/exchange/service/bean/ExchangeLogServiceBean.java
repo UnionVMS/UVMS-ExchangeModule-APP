@@ -65,10 +65,10 @@ public class ExchangeLogServiceBean implements ExchangeLogService {
     @ExchangeSendingQueueEvent
     Event<NotificationMessage> sendingQueueEvent;
 
-    @EJB(lookup = ExchangeServiceConstants.GLOBAL_DB_ACCESS_EXCHANGE_LOG)
+    @EJB
     private ExchangeLogModel exchangeLogModel;
 
-    @EJB(lookup = ExchangeServiceConstants.GLOBAL_DB_ACCESS_UNSENT_MESSAGE)
+    @EJB
     private UnsentModel unsentModel;
 
 

@@ -55,7 +55,7 @@ public class ExchangeServiceBean implements ExchangeService {
     @EJB
     MessageProducer producer;
 
-    @EJB(lookup = ExchangeServiceConstants.GLOBAL_DB_ACCESS_SERVICE_REGISTRY)
+    @EJB
     ServiceRegistryModel serviceRegistryModel;
 
     /**

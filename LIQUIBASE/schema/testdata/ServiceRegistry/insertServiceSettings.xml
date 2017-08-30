@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.0.xsd">
+    
+    <changeSet author="jojoha" id="insert service-settings static default values">
+        
+        <!-- Inmarsat C Eik -->
+        <insert tableName="service_setting">
+            <column name="servset_id" value="1"/>
+            <column name="servset_serv_id" value="1"/>
+            <column name="servset_setting" value="eu.europa.plugin.inmarsat.eik.USER"/> 
+            <column name="servset_value" value="eikuser"/>
+            <column name="servset_updattim" value="${now}"/>
+            <column name="servset_upuser" value="jojoha"/>
+        </insert>
+        <insert tableName="service_setting">
+            <column name="servset_id" value="2"/>
+            <column name="servset_serv_id" value="1"/>
+            <column name="servset_setting" value="eu.europa.plugin.inmarsat.eik.URL"/> 
+            <column name="servset_value" value="http://test.eiktest"/>
+            <column name="servset_updattim" value="${now}"/>
+            <column name="servset_upuser" value="jojoha"/>
+        </insert>
+        
+        <!-- Inmarsat C Burum -->
+        <insert tableName="service_setting">
+            <column name="servset_id" value="3"/>
+            <column name="servset_serv_id" value="2"/>
+            <column name="servset_setting" value="eu.europa.plugin.inmarsat.burum.USER"/> 
+            <column name="servset_value" value="burumuser"/>
+            <column name="servset_updattim" value="${now}"/>
+            <column name="servset_upuser" value="jojoha"/>
+        </insert>
+        <insert tableName="service_setting">
+            <column name="servset_id" value="4"/>
+            <column name="servset_serv_id" value="2"/>
+            <column name="servset_setting" value="eu.europa.plugin.inmarsat.burum.TIMESPAN"/>
+            <column name="servset_value" value="100"/>
+            <column name="servset_updattim" value="${now}"/>
+            <column name="servset_upuser" value="jojoha"/>
+        </insert>
+        
+        <sql dbms="postgresql">
+            ALTER SEQUENCE exchange.service_setting_servset_id_seq RESTART WITH 100;
+            <comment>Until liquibase bugfix for startWith</comment>
+        </sql>
+        
+        <rollback>
+            <delete tableName="service_setting">
+                <where>
+                    servset_id in (1, 2, 3, 4, 5, 6)
+                </where>
+            </delete>
+        </rollback>
+    </changeSet>
+</databaseChangeLog>

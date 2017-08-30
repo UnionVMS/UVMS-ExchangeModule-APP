@@ -19,8 +19,14 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-ear-plugin</artifactId>
+                <extensions>true</extensions>
                 <configuration>
                     <modules>
+                    	<ejbModule>
+                            <groupId>${project.groupId}</groupId>
+                            <artifactId>exchange-dbaccess-domain</artifactId>
+                            <bundleFileName>exchange-dbaccess-domain.jar</bundleFileName>
+                        </ejbModule>                    	
                         <ejbModule>
                             <groupId>${project.groupId}</groupId>   
                             <artifactId>exchange-message</artifactId>
@@ -57,6 +63,12 @@
 	</dependencyManagement>
 
     <dependencies>
+         <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>exchange-dbaccess-domain</artifactId>
+            <version>${project.version}</version>
+            <type>ejb</type>
+        </dependency>    
         <dependency>
             <groupId>${project.groupId}</groupId>     
             <artifactId>exchange-message</artifactId>

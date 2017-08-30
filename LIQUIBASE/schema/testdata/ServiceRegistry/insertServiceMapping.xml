@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.0.xsd">
+
+    <changeSet author="jojoha" id="insert service mapping testdata">
+        <insert tableName="serviceparametermapping">
+            <column name="map_id" value="1"/>
+            <column name="map_setting_id" value="1"/> <!-- user -->
+            <column name="map_service_id" value="1"/> <!-- eik -->
+            <column name="map_updattim" value="${now}"/>
+            <column name="map_upuser" value="jojoha"/>
+        </insert>
+        <insert tableName="serviceparametermapping">
+            <column name="map_id" value="2"/>
+            <column name="map_setting_id" value="2"/> <!-- URL -->
+            <column name="map_service_id" value="1"/> <!-- eik -->
+            <column name="map_updattim" value="${now}"/>
+            <column name="map_upuser" value="jojoha"/>
+        </insert>
+        
+        <insert tableName="serviceparametermapping">
+            <column name="map_id" value="3"/>
+            <column name="map_setting_id" value="3"/> <!-- user -->
+            <column name="map_service_id" value="2"/> <!-- burum -->
+            <column name="map_updattim" value="${now}"/>
+            <column name="map_upuser" value="jojoha"/>
+        </insert>
+        
+        <insert tableName="serviceparametermapping">
+            <column name="map_id" value="4"/>
+            <column name="map_setting_id" value="4"/> <!-- timespan -->
+            <column name="map_service_id" value="2"/> <!-- burum -->
+            <column name="map_updattim" value="${now}"/>
+            <column name="map_upuser" value="jojoha"/>
+        </insert>
+        
+        <sql dbms="postgresql">
+            ALTER SEQUENCE exchange.serviceparametermapping_map_id_seq RESTART WITH 100;
+            <comment>Until liquibase bugfix for startWith</comment>
+        </sql>
+        
+        <rollback>
+            <delete tableName="serviceparametermapping">
+                <where>
+                    serv_id in (1, 2)
+                </where>
+            </delete>
+        </rollback>
+    </changeSet>
+</databaseChangeLog>

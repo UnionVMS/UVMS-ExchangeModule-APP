@@ -1,0 +1,205 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.0.xsd">
+
+	<property name="now" value="sysdate" dbms="oracle"/>
+	<property name="now" value="now()" dbms="postgresql"/>
+	
+    <changeSet author="jojoha" id="insert service static default values">
+        <insert tableName="log">
+            <column name="log_id" value="1"/>
+            <column name="log_guid" value="testdata_email_log"/>
+            <column name="log_senderreceiver" value="testdata@exchangelog"/>
+            <column name="log_daterecieved" valueDate="${now}"/>
+            <column name="log_status" value="SUCCESSFUL"/>
+            <column name="log_type" value="EMAIL"/>
+            <column name="log_transfer_incoming" valueBoolean="0"/>
+            <column name="log_updattim" valueDate="${now}"/>
+            <column name="log_upuser" value="johlyn"/>
+        </insert>
+        
+		 <insert tableName="log_status">
+            <column name="logstatus_id" value="1"/>
+            <column name="logstatus_status" value="ISSUED"/>
+            <column name="logstatus_timestamp" valueDate="${now}"/>
+            <column name="logstatus_log_id" value="1"/>
+            <column name="logstatus_updattim" valueDate="${now}"/>
+            <column name="logstatus_upuser" value="johlyn"/>
+        </insert>
+        
+        <insert tableName="log_status">
+            <column name="logstatus_id" value="2"/>
+            <column name="logstatus_status" value="SUCCESSFUL"/>
+            <column name="logstatus_timestamp" valueDate="${now}"/>
+            <column name="logstatus_log_id" value="1"/>
+            <column name="logstatus_updattim" valueDate="${now}"/>
+            <column name="logstatus_upuser" value="johlyn"/>
+        </insert>
+        
+        <insert tableName="log">
+            <column name="log_id" value="2"/>
+            <column name="log_guid" value="testdata_poll_log"/>
+            <column name="log_type_ref_guid" value="testdata_poll_id"/>
+            <column name="log_type_ref_type" value="POLL"/>
+            <column name="log_senderreceiver" value="1234567890"/>
+            <column name="log_daterecieved" valueDate="${now}"/>
+            <column name="log_status" value="ISSUED"/>
+            <column name="log_type" value="POLL"/>
+            <column name="log_transfer_incoming" valueBoolean="false"/>
+            <column name="log_updattim" valueDate="${now}"/>
+            <column name="log_upuser" value="johlyn"/>
+        </insert>
+        
+        <insert tableName="log_status">
+            <column name="logstatus_id" value="3"/>
+            <column name="logstatus_status" value="ISSUED"/>
+            <column name="logstatus_timestamp" valueDate="${now}"/>
+            <column name="logstatus_log_id" value="2"/>
+            <column name="logstatus_updattim" valueDate="${now}"/>
+            <column name="logstatus_upuser" value="johlyn"/>
+        </insert>
+        
+        <insert tableName="log">
+            <column name="log_id" value="3"/>
+            <column name="log_guid" value="testdata_send_movement"/>
+            <column name="log_type_ref_guid" value="testdata_send_movement"/>
+            <column name="log_type_ref_type" value="MOVEMENT"/>
+            <column name="log_senderreceiver" value="SWE000000001"/>
+            <column name="log_daterecieved" valueDate="${now}"/>
+            <column name="log_status" value="SUCCESSFUL"/>
+            <column name="log_type" value="SEND_MOVEMENT"/>
+            <column name="log_transfer_incoming" valueBoolean="false"/>
+            <column name="log_updattim" valueDate="${now}"/>
+            <column name="log_upuser" value="johlyn"/>
+            <column name="log_fwdrule" value="TESTDATA-RULE"/>
+            <column name="log_recipient" value="TESTDATA"/>
+            <column name="log_fwddate" valueDate="${now}"/>
+        </insert>
+        
+        <insert tableName="log_status">
+            <column name="logstatus_id" value="4"/>
+            <column name="logstatus_status" value="ISSUED"/>
+            <column name="logstatus_timestamp" valueDate="${now}"/>
+            <column name="logstatus_log_id" value="3"/>
+            <column name="logstatus_updattim" valueDate="${now}"/>
+            <column name="logstatus_upuser" value="johlyn"/>
+        </insert>
+        
+        <insert tableName="log_status">
+            <column name="logstatus_id" value="5"/>
+            <column name="logstatus_status" value="SUCCESSFUL"/>
+            <column name="logstatus_timestamp" valueDate="${now}"/>
+            <column name="logstatus_log_id" value="3"/>
+            <column name="logstatus_updattim" valueDate="${now}"/>
+            <column name="logstatus_upuser" value="johlyn"/>
+        </insert>
+        
+        <insert tableName="log">
+            <column name="log_id" value="4"/>
+            <column name="log_guid" value="tesdata_receive_movement"/>
+            <column name="log_type_ref_guid" value="tesdata_receive_movement"/>
+            <column name="log_type_ref_type" value="MOVEMENT"/>
+            <column name="log_senderreceiver" value="1234567890"/>
+            <column name="log_daterecieved" valueDate="${now}"/>
+            <column name="log_status" value="SUCCESSFUL"/>
+            <column name="log_type" value="RECEIVE_MOVEMENT"/>
+            <column name="log_transfer_incoming" valueBoolean="false"/>
+            <column name="log_updattim" valueDate="${now}"/>
+            <column name="log_upuser" value="johlyn"/>
+            <column name="log_source" value="INMARSAT_C"/>
+        </insert>
+        
+        <insert tableName="log_status">
+            <column name="logstatus_id" value="6"/>
+            <column name="logstatus_status" value="ISSUED"/>
+            <column name="logstatus_timestamp" valueDate="${now}"/>
+            <column name="logstatus_log_id" value="4"/>
+            <column name="logstatus_updattim" valueDate="${now}"/>
+            <column name="logstatus_upuser" value="johlyn"/>
+        </insert>
+        
+        <insert tableName="log_status">
+            <column name="logstatus_id" value="7"/>
+            <column name="logstatus_status" value="SUCCESSFUL"/>
+            <column name="logstatus_timestamp" valueDate="${now}"/>
+            <column name="logstatus_log_id" value="4"/>
+            <column name="logstatus_updattim" valueDate="${now}"/>
+            <column name="logstatus_upuser" value="johlyn"/>
+        </insert>
+        
+        <insert tableName="log">
+            <column name="log_id" value="5"/>
+            <column name="log_guid" value="tesdata_receive_movement_alarm"/>
+            <column name="log_type_ref_guid" value="tesdata_receive_movement_alarm"/>
+            <column name="log_type_ref_type" value="ALARM"/>
+            <column name="log_senderreceiver" value="1234567890"/>
+            <column name="log_daterecieved" valueDate="${now}"/>
+            <column name="log_status" value="FAILED"/>
+            <column name="log_type" value="RECEIVE_MOVEMENT"/>
+            <column name="log_transfer_incoming" valueBoolean="false"/>
+            <column name="log_updattim" valueDate="${now}"/>
+            <column name="log_upuser" value="johlyn"/>
+            <column name="log_source" value="INMARSAT_C"/>
+        </insert>
+        
+        <insert tableName="log_status">
+            <column name="logstatus_id" value="8"/>
+            <column name="logstatus_status" value="ISSUED"/>
+            <column name="logstatus_timestamp" valueDate="${now}"/>
+            <column name="logstatus_log_id" value="4"/>
+            <column name="logstatus_updattim" valueDate="${now}"/>
+            <column name="logstatus_upuser" value="johlyn"/>
+        </insert>
+        
+        <insert tableName="log_status">
+            <column name="logstatus_id" value="9"/>
+            <column name="logstatus_status" value="FAILED"/>
+            <column name="logstatus_timestamp" valueDate="${now}"/>
+            <column name="logstatus_log_id" value="4"/>
+            <column name="logstatus_updattim" valueDate="${now}"/>
+            <column name="logstatus_upuser" value="johlyn"/>
+        </insert>
+        
+        <rollback>
+            <delete tableName="log">
+                <where>
+                    log_id in (1, 2, 3, 4, 5)
+                </where>
+            </delete>
+            <delete tableName="log_status">
+                <where>
+                    logstatus_id in (1,2, 3, 4, 5, 6, 7, 8, 9)
+                </where>
+            </delete>
+        </rollback>
+    </changeSet>
+    <changeSet author="jojoha" id="update testdata_email_log with log_fwddate">
+        <update tableName="log">
+            <column name="log_fwddate" valueDate='${now}'/>
+            <where>log_id=1</where>
+        </update>
+    </changeSet>
+    <changeSet author="osdjup" id="update testdata_poll_log with log_fwddate">
+        <update tableName="log">
+            <column name="log_fwddate" valueDate='${now}'/>
+            <where>log_id=2</where>
+        </update>
+       
+		
+    </changeSet>
+
+    <changeSet author="stihft" id="update_poll_type">
+        <update tableName="log">
+            <column name="log_type" type="varchar(255)" value="SEND_POLL" />
+            <where>log_type = 'POLL'</where>
+        </update>
+    </changeSet>
+
+    <changeSet author="stihft" id="update_email_type">
+        <update tableName="log">
+            <column name="log_type" type="varchar(255)" value="SEND_EMAIL" />
+            <where>log_type = 'EMAIL'</where>
+        </update>
+    </changeSet>
+</databaseChangeLog>
