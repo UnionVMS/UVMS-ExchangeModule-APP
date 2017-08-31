@@ -1,9 +1,10 @@
 package eu.europa.ec.fisheries.uvms.exchange.service.mapper;
 
-import eu.europa.ec.fisheries.schema.exchange.plugin.types.v1.PluginType;
+import static org.junit.Assert.assertEquals;
+
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
+import eu.europa.ec.fisheries.schema.exchange.plugin.types.v1.PluginType;
 
 public class PluginTypeMapperTest {
 

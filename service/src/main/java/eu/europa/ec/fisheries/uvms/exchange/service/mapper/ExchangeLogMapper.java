@@ -14,10 +14,6 @@ package eu.europa.ec.fisheries.uvms.exchange.service.mapper;
 import java.util.ArrayList;
 import java.util.List;
 
-import eu.europa.ec.fisheries.schema.exchange.movement.v1.*;
-import eu.europa.ec.fisheries.schema.exchange.plugin.types.v1.EmailType;
-import eu.europa.ec.fisheries.schema.exchange.plugin.types.v1.PollType;
-import eu.europa.ec.fisheries.schema.exchange.v1.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,7 +21,23 @@ import eu.europa.ec.fisheries.schema.exchange.common.v1.CommandType;
 import eu.europa.ec.fisheries.schema.exchange.common.v1.KeyValueType;
 import eu.europa.ec.fisheries.schema.exchange.movement.asset.v1.AssetId;
 import eu.europa.ec.fisheries.schema.exchange.movement.asset.v1.AssetIdList;
+import eu.europa.ec.fisheries.schema.exchange.movement.v1.MovementBaseType;
+import eu.europa.ec.fisheries.schema.exchange.movement.v1.SendMovementToPluginType;
+import eu.europa.ec.fisheries.schema.exchange.movement.v1.SetReportMovementType;
+import eu.europa.ec.fisheries.schema.exchange.plugin.types.v1.EmailType;
 import eu.europa.ec.fisheries.schema.exchange.plugin.types.v1.PluginType;
+import eu.europa.ec.fisheries.schema.exchange.plugin.types.v1.PollType;
+import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogStatusTypeType;
+import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogType;
+import eu.europa.ec.fisheries.schema.exchange.v1.LogRefType;
+import eu.europa.ec.fisheries.schema.exchange.v1.LogType;
+import eu.europa.ec.fisheries.schema.exchange.v1.ReceiveMovementType;
+import eu.europa.ec.fisheries.schema.exchange.v1.SendEmailType;
+import eu.europa.ec.fisheries.schema.exchange.v1.SendMovementType;
+import eu.europa.ec.fisheries.schema.exchange.v1.SendPollType;
+import eu.europa.ec.fisheries.schema.exchange.v1.TypeRefType;
+import eu.europa.ec.fisheries.schema.exchange.v1.UnsentMessageTypeProperty;
+import eu.europa.ec.fisheries.schema.exchange.v1.UnsentMessageTypePropertyKey;
 import eu.europa.ec.fisheries.schema.rules.mobileterminal.v1.IdType;
 import eu.europa.ec.fisheries.uvms.exchange.service.exception.ExchangeLogException;
 
