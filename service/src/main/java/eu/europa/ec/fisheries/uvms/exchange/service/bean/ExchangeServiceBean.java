@@ -66,7 +66,7 @@ public class ExchangeServiceBean implements ExchangeService {
      */
     @Override
     public ServiceResponseType registerService(ServiceType data, CapabilityListType capabilityList, SettingListType settingList, String username) throws ExchangeServiceException {
-        LOG.info("Register service invoked in service layer");
+        LOG.info("Register service invoked in service layer: {} {}",data,username);
         try {
             ServiceResponseType serviceResponseType = serviceRegistryModel.registerService(data, capabilityList, settingList, username);
             sendAuditLogMessageForRegisterService(compressServiceClassName(serviceResponseType.getServiceClassName()), username);
@@ -86,7 +86,7 @@ public class ExchangeServiceBean implements ExchangeService {
      */
     @Override
     public ServiceResponseType unregisterService(ServiceType data, String username) throws ExchangeServiceException {
-        LOG.info("Unregister service invoked in service layer");
+        LOG.info("Unregister service invoked in service layer: {} {}",data,username);
         try {
             ServiceResponseType serviceResponseType = serviceRegistryModel.unregisterService(data, username);
             sendAuditLogMessageForUnregisterService(compressServiceClassName(serviceResponseType.getServiceClassName()), username);
@@ -104,7 +104,7 @@ public class ExchangeServiceBean implements ExchangeService {
      */
     @Override
     public List<ServiceResponseType> getServiceList(List<PluginType> pluginTypes) throws ExchangeServiceException {
-        LOG.info("Get list invoked in service layer");
+        LOG.info("Get list invoked in service layer:{}",pluginTypes);
         try {
             List<ServiceResponseType> plugins = serviceRegistryModel.getPlugins(pluginTypes);
             return plugins;
@@ -115,7 +115,7 @@ public class ExchangeServiceBean implements ExchangeService {
 
     @Override
     public ServiceResponseType upsertSettings(String serviceClassName, SettingListType settingListType, String username) throws ExchangeServiceException {
-        LOG.info("Upsert settings in service layer");
+        LOG.info("Upsert settings in service layer: {} {} {}",serviceClassName,settingListType,username);
         try {
             ServiceResponseType updatedSettings = serviceRegistryModel.updatePluginSettings(serviceClassName, settingListType, username);
             sendAuditLogMessageForUpdateService(compressServiceClassName(serviceClassName), username);
@@ -134,7 +134,7 @@ public class ExchangeServiceBean implements ExchangeService {
      */
     @Override
     public ServiceType getById(Long id) throws ExchangeServiceException {
-        LOG.info("Get by id invoked in service layer");
+        LOG.info("Get by id invoked in service layer:{}",id);
         throw new ExchangeServiceException("Get by id not implemented in service layer");
     }
 
@@ -151,7 +151,7 @@ public class ExchangeServiceBean implements ExchangeService {
 
     @Override
     public ServiceResponseType updateServiceStatus(String serviceClassName, StatusType status, String username) throws ExchangeServiceException {
-        LOG.info("Update service status invoked in service layer");
+        LOG.info("Update service status invoked in service layer: {} {} {}",serviceClassName,status,username);
         try {
             ServiceResponseType updatedServiceStatus = serviceRegistryModel.updatePluginStatus(serviceClassName, status, username);
             sendAuditLogMessageForUpdateServiceStatus(serviceClassName, status, username);

@@ -96,7 +96,7 @@ public class ExchangeEventOutgoingServiceBean implements ExchangeEventOutgoingSe
 
     @Override
     public void sendReportToPlugin(@Observes @SendReportToPluginEvent ExchangeMessageEvent message) {
-        LOG.info("Send report to plugin");
+        LOG.info("Send report to plugin: {}",message);
 
         try {
             SendMovementToPluginRequest request = JAXBMarshaller.unmarshallTextMessage(message.getJmsMessage(), SendMovementToPluginRequest.class);
@@ -115,7 +115,6 @@ public class ExchangeEventOutgoingServiceBean implements ExchangeEventOutgoingSe
                 String serviceName = service.getServiceClassName();
 
                 if (validate(service, sendReport, message.getJmsMessage(), request.getUsername())) {
-                    LOG.debug("Creating unsent message. Will be deleted on OK response.");
                     List<UnsentMessageTypeProperty> unsentMessageProperties = ExchangeLogMapper.getUnsentMessageProperties(sendReport);
                     String unsentMessageGuid = exchangeLog.createUnsentMessage(sendReport.getRecipient(), sendReport.getTimestamp(), ExchangeLogMapper.getSendMovementSenderReceiver(sendReport), message.getJmsMessage().getText(), unsentMessageProperties, request.getUsername());
 
@@ -131,14 +130,14 @@ public class ExchangeEventOutgoingServiceBean implements ExchangeEventOutgoingSe
                     }
 
                 } else {
-                    LOG.debug("Cannot send to plugin. Response sent to caller.");
+                    LOG.debug("Cannot send to plugin. Response sent to caller:{}",message);
                 }
             }
         } catch (ExchangeException e) {
-            LOG.error("[ Error when sending report to plugin ]");
+            LOG.error("[ Error when sending report to plugin {} ] {}",message,e);
 
         } catch (JMSException ex) {
-            LOG.error("[ Error when creating unsent movement ]");
+            LOG.error("[ Error when creating unsent movement {}] {}",message,e);
         }
     }
 
@@ -151,15 +150,14 @@ public class ExchangeEventOutgoingServiceBean implements ExchangeEventOutgoingSe
 	 */
     @Override
     public void forwardMdrSyncMessageToPlugin(@Observes @MdrSyncRequestMessageEvent ExchangeMessageEvent message) {
-        LOG.info("Received MdrSyncMessageEvent.");
+        LOG.info("Received MdrSyncMessageEvent:{}",message);
 
         TextMessage requestMessage = message.getJmsMessage();
         try {
             String marshalledReq = ExchangeToMdrRulesMapper.mapExchangeToMdrPluginRequest(requestMessage);
             producer.sendEventBusMessage(marshalledReq, ExchangeServiceConstants.MDR_PLUGIN_SERVICE_NAME);
-            LOG.info("Request object sent to MDR plugin.");
         } catch (Exception e) {
-            LOG.error("Something strange happend during message conversion",e);
+            LOG.error("Something strange happend during message conversion {} {}",message,e);
         }
     }
 
@@ -185,7 +183,6 @@ public class ExchangeEventOutgoingServiceBean implements ExchangeEventOutgoingSe
             exchangeErrorEvent.fire(new ExchangeMessageEvent(origin, ExchangeModuleResponseMapper.createFaultMessage(FaultCode.EXCHANGE_PLUGIN_INVALID, faultMessage)));
             return false;
         } else if (!StatusType.STARTED.equals(service.getStatus())) {
-            LOG.info("Plugin to send report to is not started");
             try {
                 List<UnsentMessageTypeProperty> unsentMessageProperties = ExchangeLogMapper.getUnsentMessageProperties(sendReport);
                 exchangeLog.createUnsentMessage(sendReport.getRecipient(), sendReport.getTimestamp(), ExchangeLogMapper.getSendMovementSenderReceiver(sendReport), origin.getText(), unsentMessageProperties, username);
@@ -207,7 +204,7 @@ public class ExchangeEventOutgoingServiceBean implements ExchangeEventOutgoingSe
 
     @Override
     public void sendCommandToPlugin(@Observes @SendCommandToPluginEvent ExchangeMessageEvent message) {
-        LOG.info("Send command to plugin");
+        LOG.info("Send command to plugin:{}",message);
         SetCommandRequest request = new SetCommandRequest();
         try {
             request = JAXBMarshaller.unmarshallTextMessage(message.getJmsMessage(), SetCommandRequest.class);
@@ -303,7 +300,7 @@ public class ExchangeEventOutgoingServiceBean implements ExchangeEventOutgoingSe
             exchangeErrorEvent.fire(new ExchangeMessageEvent(origin, ExchangeModuleResponseMapper.createFaultMessage(FaultCode.EXCHANGE_COMMAND_INVALID, faultMessage)));
             return false;
         } else if (!StatusType.STARTED.equals(service.getStatus())) {
-            LOG.info("Plugin to send report to is not started");
+            LOG.info("Plugin to send report to is not started:{}",service);
             try {
                 List<UnsentMessageTypeProperty> setUnsentMessageTypePropertiesForPoll = getSetUnsentMessageTypePropertiesForPoll(commandType);
                 exchangeLog.createUnsentMessage(service.getName(), command.getTimestamp(), command.getCommand().name(), origin.getText(), setUnsentMessageTypePropertiesForPoll, username);

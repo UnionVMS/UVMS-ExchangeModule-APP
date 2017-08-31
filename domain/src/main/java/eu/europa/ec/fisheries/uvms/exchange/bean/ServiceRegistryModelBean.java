@@ -42,8 +42,6 @@ public class ServiceRegistryModelBean implements ServiceRegistryModel {
 
     @Override
     public ServiceResponseType registerService(ServiceType serviceType, CapabilityListType capabilityList, SettingListType settingList, String username) throws ExchangeModelException {
-        LOG.info("Register service in DB");
-
         // Look for existing service
         Service service = dao.getServiceByServiceClassName(serviceType.getServiceClassName());
         if (service == null) {
@@ -73,8 +71,6 @@ public class ServiceRegistryModelBean implements ServiceRegistryModel {
 
     @Override
     public ServiceResponseType unregisterService(ServiceType serviceType, String username) throws ExchangeModelException {
-        LOG.info("Unregister service in DB");
-
         // Look for existing service
         Service service = dao.getServiceByServiceClassName(serviceType.getServiceClassName());
         ServiceResponseType response = null;
@@ -98,8 +94,6 @@ public class ServiceRegistryModelBean implements ServiceRegistryModel {
 
     @Override
     public List<ServiceResponseType> getPlugins(List<PluginType> pluginTypes) throws ExchangeModelException {
-        LOG.info("Get list of services depending on types");
-
         List<ServiceResponseType> services = new ArrayList<>();
 
        	List<Service> entityList = new ArrayList<>();
@@ -129,7 +123,7 @@ public class ServiceRegistryModelBean implements ServiceRegistryModel {
     
     @Override
     public List<SettingType> getPluginSettings(String serviceClassName) throws ExchangeModelException {
-        LOG.info("Get plugin settings");
+        LOG.info("Get plugin settings:{}",serviceClassName);
 
         List<SettingType> settings = new ArrayList<>();
         try {
@@ -139,7 +133,7 @@ public class ServiceRegistryModelBean implements ServiceRegistryModel {
             }
 
         } catch (ExchangeDaoException e) {
-            LOG.error("[ Error when getting list. ]" + e.getMessage());
+            LOG.error("[ Error when getting list. {}] {}", serviceClassName, e.getMessage());
             throw new ExchangeModelException("[ Error when getting list. ]");
         }
 
@@ -149,7 +143,7 @@ public class ServiceRegistryModelBean implements ServiceRegistryModel {
 
     @Override
     public List<CapabilityType> getPluginCapabilities(String serviceClassName) throws ExchangeModelException {
-        LOG.info("Get plugin capabilities");
+        LOG.info("Get plugin capabilities:{}",serviceClassName);
 
         List<CapabilityType> capabilities = new ArrayList<>();
         try {
@@ -161,7 +155,7 @@ public class ServiceRegistryModelBean implements ServiceRegistryModel {
             
 
         } catch (ExchangeDaoException e) {
-            LOG.error("[ Error when getting list. ]" + e.getMessage());
+            LOG.error("[ Error when getting list.{} ] {}",serviceClassName, e.getMessage());
             throw new ExchangeModelException("[ Error when getting list. ]");
         }
         return capabilities;
@@ -174,7 +168,7 @@ public class ServiceRegistryModelBean implements ServiceRegistryModel {
             return ServiceMapper.toServiceModel(service);
 
         } catch (NullPointerException e) {
-            LOG.error("[ Error when getting Service. ]" + e.getMessage());
+            LOG.error("[ Error when getting Service. {} ] {}",serviceClassName,  e.getMessage());
             throw new ExchangeModelException("[ Error when getting service. ]");
         }
     }

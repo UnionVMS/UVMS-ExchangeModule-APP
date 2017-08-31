@@ -181,7 +181,7 @@ public class ExchangeLogServiceBean implements ExchangeLogService {
 
     @Override
     public List<ExchangeLogStatusType> getExchangeStatusHistoryList(ExchangeLogStatusTypeType status, TypeRefType type, Date from, Date to) throws ExchangeLogException {
-        LOG.info("Get pollstatus list in service layer");
+        LOG.info("Get pollstatus list in service layer:{}",status);
         try {
             List<ExchangeLogStatusTypeType> statusList = new ArrayList<>();
             if (status != null) {
@@ -207,7 +207,7 @@ public class ExchangeLogServiceBean implements ExchangeLogService {
 
     @Override
     public ExchangeLogStatusType getExchangeStatusHistory(TypeRefType type, String typeRefGuid, String userName) throws ExchangeLogException {
-        LOG.info("Get poll status history in service layer");
+        LOG.info("Get poll status history in service layer:{}",type);
         if (typeRefGuid == null || typeRefGuid.isEmpty()) {
             throw new ExchangeLogException("Invalid id");
         }
@@ -225,14 +225,14 @@ public class ExchangeLogServiceBean implements ExchangeLogService {
             ExchangeLogType exchangeLogByGuid = exchangeLogModel.getExchangeLogByGuid(guid);
             return exchangeLogByGuid;
         } catch (ExchangeModelException e) {
-            LOG.error("[ Error when getting exchange log by GUID. ] {}", e.getMessage());
+            LOG.error("[ Error when getting exchange log by GUID. {}] {}",guid, e.getMessage());
             throw new ExchangeLogException("Error when getting exchange log by GUID.");
         }
     }
 
     @Override
     public String createUnsentMessage(String senderReceiver, Date timestamp, String recipient, String message, List<UnsentMessageTypeProperty> properties, String username) throws ExchangeLogException {
-        LOG.debug("createUnsentMessage in service layer");
+        LOG.debug("createUnsentMessage in service layer:{}",message);
         try {
             UnsentMessageType unsentMessage = new UnsentMessageType();
             unsentMessage.setDateReceived(timestamp);
@@ -247,28 +247,28 @@ public class ExchangeLogServiceBean implements ExchangeLogService {
             sendingQueueEvent.fire(new NotificationMessage("messageIds", unsentMessageIds));
             return createdUnsentMessageId;
         } catch (ExchangeModelException e) {
-            LOG.error("Couldn't add message to unsent list");
+            LOG.error("Couldn't add message to unsent list: {} {}",message,e);
             throw new ExchangeLogException("Couldn't add message to unsent list");
         }
     }
 
     @Override
     public void removeUnsentMessage(String unsentMessageId, String username) throws ExchangeLogException {
-        LOG.debug("removeUnsentMessage in service layer");
+        LOG.debug("removeUnsentMessage in service layer:{}",unsentMessageId);
         try {
             String removeMessageId = unsentModel.removeMessage(unsentMessageId);
             List<String> removedMessageIds = Arrays.asList(removeMessageId);
             sendAuditLogMessageForRemoveUnsentMessage(removeMessageId, username);
             sendingQueueEvent.fire(new NotificationMessage("messageIds", removedMessageIds));
         } catch (ExchangeModelException e) {
-            LOG.error("Couldn't add message to unsent list");
+            LOG.error("Couldn't add message to unsent list {} {}",unsentMessageId,e);
             throw new ExchangeLogException("Couldn't add message to unsent list");
         }
     }
 
     @Override
     public void resend(List<String> messageIdList, String username) throws ExchangeLogException {
-        LOG.debug("resend in service layer");
+        LOG.debug("resend in service layer:{} {}",messageIdList,username);
         List<UnsentMessageType> unsentMessageList;
         try {
             unsentMessageList = unsentModel.resend(messageIdList);
@@ -287,7 +287,7 @@ public class ExchangeLogServiceBean implements ExchangeLogService {
                     sendAuditLogMessageForCreateUnsentMessage(unsentMessageId, username);
                     //ExchangeModuleResponseMapper.validateResponse(unsentResponse, unsentMessageId);
                 } catch (ExchangeMessageException e) {
-                    LOG.error("Error when sending/receiving message", e);
+                    LOG.error("Error when sending/receiving message {} {}",messageIdList, e);
                 }
             }
         }

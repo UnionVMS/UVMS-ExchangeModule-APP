@@ -45,8 +45,6 @@ public class ExchangeLogModelBean implements ExchangeLogModel {
 
     @Override
     public ListResponseDto getExchangeLogListByQuery(ExchangeListQuery query) throws ExchangeModelException {
-        LOG.info("Get list of exchange logs from query.");
-
         if (query == null) {
             throw new InputArgumentException("Exchange list query is null");
         }
@@ -86,15 +84,13 @@ public class ExchangeLogModelBean implements ExchangeLogModel {
             response.setExchangeLogList(exchengeLogList);
             return response;
         } catch (ExchangeSearchMapperException | ExchangeDaoException | ParseException ex) {
-            LOG.error("[ Error when getting ExchangeLogs by query ] {} ", ex.getMessage());
+            LOG.error("[ Error when getting ExchangeLogs by query {}] {} ",query, ex.getMessage());
             throw new ExchangeModelException(ex.getMessage());
         }
     }
 
     @Override
 	public List<ExchangeLogStatusType> getExchangeLogStatusHistoryByQuery(ExchangeHistoryListQuery query) throws ExchangeModelException {
-    	LOG.info("Get list of exchange logs from query.");
-
         if (query == null) {
             throw new InputArgumentException("Exchange status list query is null");
         }
@@ -121,7 +117,7 @@ public class ExchangeLogModelBean implements ExchangeLogModel {
         	
         	return logStatusHistoryList;
         } catch (ExchangeDaoException e) {
-        	LOG.error("[ Error when get Exchange log status history ] " + e.getMessage());
+        	LOG.error("[ Error when get Exchange log status history {}] {} ",query, e.getMessage());
             throw new ExchangeModelException("Error when get Exchange log status history ");
         }
 	}
@@ -140,7 +136,7 @@ public class ExchangeLogModelBean implements ExchangeLogModel {
             ExchangeLog persistedLog = dao.createLog(exchangeLog);
             return LogMapper.toModel(persistedLog);
         } catch (ExchangeDaoException ex) {
-            LOG.error("[ Error when creating Exchange log ] {}", ex.getMessage());
+            LOG.error("[ Error when creating Exchange log {} {}] {}",log,username, ex.getMessage());
             throw new ExchangeModelException("Error when creating Exchange log ");
         }
     }
@@ -163,7 +159,7 @@ public class ExchangeLogModelBean implements ExchangeLogModel {
 			ExchangeLogType retType = LogMapper.toModel(retEntity);
 			return retType;
 		} catch (ExchangeDaoException ex) {
-			LOG.error("[ Error when update status of Exchange log ] {}", ex.getMessage());
+			LOG.error("[ Error when update status of Exchange log {} {}] {}",status,username, ex.getMessage());
             throw new ExchangeModelException("Error when update status of Exchange log", ex);
 		}
 	}
@@ -178,7 +174,7 @@ public class ExchangeLogModelBean implements ExchangeLogModel {
 				return LogMapper.toStatusModel(dao.getExchangeLogByTypeRefAndGuid(guid, typeRefType));
 			}
 		} catch (ExchangeDaoException e) {
-			LOG.error("[ Error when getting status history Exchange log ] {}", e.getMessage());
+			LOG.error("[ Error when getting status history Exchange log {} {}] {}",guid,typeRefType, e.getMessage());
             throw new ExchangeModelException("Error when getting status history of Exchange log ");
 		}
 	}
@@ -189,7 +185,7 @@ public class ExchangeLogModelBean implements ExchangeLogModel {
             ExchangeLog exchangeLog = dao.getExchangeLogByGuid(guid);
             return LogMapper.toModel(exchangeLog);
         } catch (ExchangeDaoException e) {
-            LOG.error("[ Error when getting exchange log by GUID. ] {}", e.getMessage());
+            LOG.error("[ Error when getting exchange log by GUID. {}] {}",guid, e.getMessage());
             throw new ExchangeModelException("Error when getting exchange log by GUID.");
         }
     }
@@ -209,7 +205,7 @@ public class ExchangeLogModelBean implements ExchangeLogModel {
             ExchangeLogType retType = LogMapper.toModel(retEntity);
             return retType;
         } catch (ExchangeDaoException ex) {
-            LOG.error("[ Error when update status of Exchange log ] {}", ex.getMessage());
+            LOG.error("[ Error when set poll status {} {}] {}",pollStatus,username, ex.getMessage());
             throw new ExchangeModelException("Error when update status of Exchange log ");
         }
     }

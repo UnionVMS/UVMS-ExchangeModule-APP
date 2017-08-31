@@ -84,11 +84,11 @@ public class ExchangeRegistryResource {
 	@Path("/start/{serviceClassName}")
 	@RequiresFeature(UnionVMSFeature.manageExchangeTransmissionStatuses)
 	public ResponseDto startService(@PathParam(value="serviceClassName") String serviceClassName) {
-		LOG.info("Start service invoked in rest layer");
+		LOG.info("Start service invoked in rest layer:{}",serviceClassName);
 		try {
 			return new ResponseDto(pluginService.start(serviceClassName), RestResponseCode.OK);
 		} catch (ExchangeServiceException ex) {
-			LOG.error("[ Error when starting service ]");
+			LOG.error("[ Error when starting service {}] {}",serviceClassName,ex);
 			return ErrorHandler.getFault(ex);
 		}
 	}
@@ -107,11 +107,11 @@ public class ExchangeRegistryResource {
 	@Path("/stop/{serviceClassName}")
 	@RequiresFeature(UnionVMSFeature.manageExchangeTransmissionStatuses)
 	public ResponseDto stopService(@PathParam(value="serviceClassName") String serviceClassName) {
-		LOG.info("Stop service invoked in rest layer");
+		LOG.info("Stop service invoked in rest layer:{}",serviceClassName);
 		try {
 			return new ResponseDto(pluginService.stop(serviceClassName), RestResponseCode.OK);
 		} catch (ExchangeServiceException | NullPointerException ex) {
-			LOG.error("[ Error when stopping service ] ", ex.getMessage());
+			LOG.error("[ Error when stopping service {} ] {} ",serviceClassName, ex.getMessage());
 			return ErrorHandler.getFault(ex);
 		}
 	}

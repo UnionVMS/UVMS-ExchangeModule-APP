@@ -159,7 +159,7 @@ public class PluginServiceBean implements PluginService {
 
     @Override
     public void registerService(@Observes @RegisterServiceEvent PluginMessageEvent event) {
-        LOG.info("register service");
+        LOG.info("register service:{}",event);
         TextMessage textMessage = event.getJmsMessage();
         RegisterServiceRequest register = null;
         try {
@@ -176,7 +176,7 @@ public class PluginServiceBean implements PluginService {
             }
 
         } catch (ExchangeModelMarshallException | ExchangeMessageException | JMSException e) {
-            LOG.error("Register service exception " + e.getMessage());
+            LOG.error("Register service exception {} {}",event, e.getMessage());
             errorEvent.fire(new PluginMessageEvent(textMessage, register.getService(), ExchangePluginResponseMapper.mapToPluginFaultResponse(FaultCode.EXCHANGE_PLUGIN_EVENT.getCode(), "Exception when register service")));
         }
     }
@@ -196,7 +196,7 @@ public class PluginServiceBean implements PluginService {
             }
 
         } catch (ConfigServiceException e) {
-            LOG.error("Register service exception, cannot read Exchange settings from Config " + e.getMessage());
+            LOG.error("Register service exception, cannot read Exchange settings from Config {} {}",registerServiceRequest, e.getMessage());
             // Ignore when we can't get the settings from Config. It is possible there is no Config module setup.
         }
     }
@@ -216,7 +216,7 @@ public class PluginServiceBean implements PluginService {
 
     @Override
     public void unregisterService(@Observes @UnRegisterServiceEvent PluginMessageEvent event) {
-        LOG.info("unregister service");
+        LOG.info("unregister service:{}", event);
         TextMessage textMessage = event.getJmsMessage();
         ServiceResponseType service = null;
         try {
@@ -289,7 +289,7 @@ public class PluginServiceBean implements PluginService {
 
     @Override
 	public void updatePluginSetting(@Observes @UpdatePluginSettingEvent ExchangeMessageEvent settingEvent) {
-		LOG.info("update plugin setting from module queue");
+		LOG.info("update plugin setting from module queue:{}",settingEvent);
 		try {
 			TextMessage jmsMessage = settingEvent.getJmsMessage();
 			UpdatePluginSettingRequest request = JAXBMarshaller.unmarshallTextMessage(jmsMessage, UpdatePluginSettingRequest.class);
