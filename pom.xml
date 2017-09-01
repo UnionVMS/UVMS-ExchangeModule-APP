@@ -31,11 +31,11 @@
         <uvms.common.version>2.0.27</uvms.common.version>
         <uvms.config.version>3.1.1</uvms.config.version>
         <usm4uvms.version>3.0.8</usm4uvms.version>
-        <audit.model.version>3.0.4</audit.model.version>
-        <movement.model.version>3.0.6</movement.model.version>
-        <rules.version>3.0.6</rules.version>
-        <asset.version>3.0.6</asset.version>
-        <exchange.model.version>3.0.5</exchange.model.version>
+        <audit.model.version>3.0.5</audit.model.version>
+        <movement.model.version>3.0.8</movement.model.version>
+        <rules.version>3.0.7</rules.version>
+        <asset.version>3.0.7</asset.version>
+        <exchange.model.version>3.0.7</exchange.model.version>
       
         <project.scm.id>github</project.scm.id>
         <maven-release-plugin>2.5.3</maven-release-plugin>
