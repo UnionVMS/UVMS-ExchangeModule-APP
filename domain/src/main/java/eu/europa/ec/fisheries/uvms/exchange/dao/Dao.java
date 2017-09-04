@@ -30,21 +30,6 @@ import javax.persistence.PersistenceContext;
 
 public class Dao {
 
+    @PersistenceContext(unitName = "exchangePU")
     protected EntityManager em;
-
-    @PersistenceContext(unitName = "exchangePostgresPU")
-    private EntityManager postgres;
-
-    @PersistenceContext(unitName = "exchangeOraclePU")
-    private EntityManager oracle;
-
-    @PostConstruct
-    public void initEntityManager() {
-        String dbDialect = System.getProperty("db.dialect");
-        if ("oracle".equalsIgnoreCase(dbDialect)) {
-            em = oracle;
-        } else {
-            em = postgres;
-        }
-    }
 }
