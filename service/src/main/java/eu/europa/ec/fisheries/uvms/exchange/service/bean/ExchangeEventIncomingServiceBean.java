@@ -329,7 +329,7 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
 
             ExchangeLogType log = exchangeLog.log(request, LogType.RECEIVE_SALES_RESPONSE, ExchangeLogStatusTypeType.ISSUED, TypeRefType.SALES_RESPONSE, response, true);
 
-            forwardToRules(RulesModuleRequestMapper.createReceiveSalesResponseRequest(response, log.getGuid()));
+            forwardToRules(RulesModuleRequestMapper.createReceiveSalesResponseRequest(response, log.getGuid(), request.getSenderOrReceiver()));
         } catch (ExchangeModelMarshallException e) {
             firePluginFault(event, "Error when receiving a Sales response from FLUX", e);
         } catch (ExchangeLogException e) {
