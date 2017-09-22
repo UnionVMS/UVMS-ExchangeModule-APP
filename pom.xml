@@ -29,7 +29,7 @@
         <longpolling.version>2.0.13</longpolling.version>
         <uvms.common.version>2.0.27</uvms.common.version>
         <uvms.config.version>4.0.0</uvms.config.version>
-        <usm4uvms.version>4.0.0</usm4uvms.version>
+        <usm4uvms.version>3.0.8</usm4uvms.version>
         <audit.model.version>4.0.0</audit.model.version>
         <movement.model.version>4.0.0</movement.model.version>
         <rules.version>3.0.8</rules.version>
