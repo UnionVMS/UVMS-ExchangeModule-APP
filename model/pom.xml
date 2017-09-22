@@ -189,7 +189,6 @@
 							<groupId>eu.europa.ec.fisheries.uvms.exchange</groupId>
 							<artifactId>exchange-model</artifactId>
 							<version>${exchange.api.check.against.version}</version>
-							<classifier>date</classifier>
 							<type>jar</type>
 						</dependency>
 					</oldVersion>
