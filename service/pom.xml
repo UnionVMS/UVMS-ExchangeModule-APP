@@ -48,7 +48,6 @@
             <groupId>eu.europa.ec.fisheries.uvms.movement</groupId>
             <artifactId>movement-model</artifactId>
             <version>${movement.model.version}</version>
-            <classifier>date</classifier>
             <type>jar</type>
         </dependency>
         <dependency>
