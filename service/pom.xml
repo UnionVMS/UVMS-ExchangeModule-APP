@@ -61,7 +61,6 @@
             <groupId>eu.europa.ec.fisheries.uvms.asset</groupId>
             <artifactId>asset-model</artifactId>
             <version>${asset.version}</version>
-            <classifier>date</classifier>
         </dependency>
         <dependency>
             <groupId>net.sf.dozer</groupId>
