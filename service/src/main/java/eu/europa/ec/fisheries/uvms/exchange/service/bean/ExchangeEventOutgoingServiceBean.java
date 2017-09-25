@@ -58,6 +58,8 @@ import javax.jms.TextMessage;
 import java.util.ArrayList;
 import java.util.List;
 
+import static eu.europa.ec.fisheries.schema.exchange.plugin.types.v1.PluginType.BELGIAN_ACTIVITY;
+
 @Stateless
 public class ExchangeEventOutgoingServiceBean implements ExchangeEventOutgoingService {
 
@@ -263,7 +265,8 @@ public class ExchangeEventOutgoingServiceBean implements ExchangeEventOutgoingSe
             if (!request.getStatus().equals(ExchangeLogStatusTypeType.FAILED)) {
                 String text = ExchangePluginRequestMapper.createSetFLUXFAResponseRequest(request.getRequest(), request.getDestination(), request.getFluxDataFlow(), request.getSenderOrReceiver());
                 LOG.debug("Message to plugin {}", text);
-                String pluginMessageId = producer.sendEventBusMessage(text, ExchangeServiceConstants.FLUX_ACTIVITY_PLUGIN_SERVICE_NAME);
+                String pluginMessageId = producer.sendEventBusMessage(text, ((request.getPluginType() == BELGIAN_ACTIVITY)
+                        ? ExchangeServiceConstants.BELGIAN_ACTIVITY_PLUGIN_SERVICE_NAME : ExchangeServiceConstants.FLUX_ACTIVITY_PLUGIN_SERVICE_NAME));
                 LOG.debug("Message sent to Flux ERS Plugin :" + pluginMessageId);
                 exchangeLogStatusTypeType = ExchangeLogStatusTypeType.SUCCESSFUL;
             } else {

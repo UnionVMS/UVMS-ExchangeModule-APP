@@ -107,11 +107,18 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
         LOG.info("Process FLUXFAReportMessage");
         try {
             SetFLUXFAReportMessageRequest request = JAXBMarshaller.unmarshallTextMessage(message.getJmsMessage(), SetFLUXFAReportMessageRequest.class);
-            PluginType exchangePluginType = request.getPluginType();
-            eu.europa.ec.fisheries.schema.rules.exchange.v1.PluginType rulesPluginType =
-                    exchangePluginType == PluginType.MANUAL
-                            ? eu.europa.ec.fisheries.schema.rules.exchange.v1.PluginType.MANUAL
-                            : eu.europa.ec.fisheries.schema.rules.exchange.v1.PluginType.FLUX;
+            eu.europa.ec.fisheries.schema.rules.exchange.v1.PluginType rulesPluginType = null;
+            switch (request.getPluginType()) {
+                case MANUAL:
+                    rulesPluginType = eu.europa.ec.fisheries.schema.rules.exchange.v1.PluginType.MANUAL;
+                    break;
+                case BELGIAN_ACTIVITY:
+                    rulesPluginType = eu.europa.ec.fisheries.schema.rules.exchange.v1.PluginType.BELGIAN_ACTIVITY;
+                    break;
+                default:
+                    rulesPluginType = eu.europa.ec.fisheries.schema.rules.exchange.v1.PluginType.FLUX;
+                    break;
+            }
             LOG.debug("Got FLUXFAReportMessage in exchange :" + request.getRequest());
             ExchangeLogType exchangeLogType = exchangeLog.log(request, LogType.RCV_FLUX_FA_REPORT_MSG, ExchangeLogStatusTypeType.ISSUED, TypeRefType.FA_REPORT, request.getRequest(), true);
             String logId = null;
