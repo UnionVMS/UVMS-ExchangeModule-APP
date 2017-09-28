@@ -11,6 +11,22 @@ copy of the GNU General Public License along with the IFDM Suite. If not, see <h
  */
 package eu.europa.ec.fisheries.uvms.exchange.service.bean;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.ejb.EJB;
+import javax.ejb.Stateless;
+import javax.enterprise.event.Event;
+import javax.enterprise.event.Observes;
+import javax.inject.Inject;
+import javax.jms.JMSException;
+import javax.jms.TextMessage;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import eu.europa.ec.fisheries.schema.exchange.module.v1.UpdatePluginSettingRequest;
 import eu.europa.ec.fisheries.schema.exchange.plugin.types.v1.PluginType;
 import eu.europa.ec.fisheries.schema.exchange.registry.v1.RegisterServiceRequest;
@@ -45,20 +61,6 @@ import eu.europa.ec.fisheries.uvms.exchange.service.PluginService;
 import eu.europa.ec.fisheries.uvms.exchange.service.exception.ExchangeServiceException;
 import eu.europa.ec.fisheries.uvms.exchange.service.exception.InputArgumentException;
 import eu.europa.ec.fisheries.uvms.exchange.service.mapper.SettingTypeMapper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import javax.ejb.EJB;
-import javax.ejb.Stateless;
-import javax.enterprise.event.Event;
-import javax.enterprise.event.Observes;
-import javax.inject.Inject;
-import javax.jms.JMSException;
-import javax.jms.TextMessage;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 @Stateless
 public class PluginServiceBean implements PluginService {
@@ -159,7 +161,7 @@ public class PluginServiceBean implements PluginService {
 
     @Override
     public void registerService(@Observes @RegisterServiceEvent PluginMessageEvent event) {
-        LOG.info("register service");
+        LOG.info("register service:{}",event);
         TextMessage textMessage = event.getJmsMessage();
         RegisterServiceRequest register = null;
         try {
@@ -176,7 +178,7 @@ public class PluginServiceBean implements PluginService {
             }
 
         } catch (ExchangeModelMarshallException | ExchangeMessageException | JMSException e) {
-            LOG.error("Register service exception " + e.getMessage());
+            LOG.error("Register service exception {} {}",event, e.getMessage());
             errorEvent.fire(new PluginMessageEvent(textMessage, register.getService(), ExchangePluginResponseMapper.mapToPluginFaultResponse(FaultCode.EXCHANGE_PLUGIN_EVENT.getCode(), "Exception when register service")));
         }
     }
@@ -196,7 +198,7 @@ public class PluginServiceBean implements PluginService {
             }
 
         } catch (ConfigServiceException e) {
-            LOG.error("Register service exception, cannot read Exchange settings from Config " + e.getMessage());
+            LOG.error("Register service exception, cannot read Exchange settings from Config {} {}",registerServiceRequest, e.getMessage());
             // Ignore when we can't get the settings from Config. It is possible there is no Config module setup.
         }
     }
@@ -216,7 +218,7 @@ public class PluginServiceBean implements PluginService {
 
     @Override
     public void unregisterService(@Observes @UnRegisterServiceEvent PluginMessageEvent event) {
-        LOG.info("unregister service");
+        LOG.info("unregister service:{}", event);
         TextMessage textMessage = event.getJmsMessage();
         ServiceResponseType service = null;
         try {
@@ -289,7 +291,7 @@ public class PluginServiceBean implements PluginService {
 
     @Override
 	public void updatePluginSetting(@Observes @UpdatePluginSettingEvent ExchangeMessageEvent settingEvent) {
-		LOG.info("update plugin setting from module queue");
+		LOG.info("update plugin setting from module queue:{}",settingEvent);
 		try {
 			TextMessage jmsMessage = settingEvent.getJmsMessage();
 			UpdatePluginSettingRequest request = JAXBMarshaller.unmarshallTextMessage(jmsMessage, UpdatePluginSettingRequest.class);

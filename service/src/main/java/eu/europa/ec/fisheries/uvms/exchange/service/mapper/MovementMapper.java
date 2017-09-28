@@ -11,12 +11,13 @@ copy of the GNU General Public License along with the IFDM Suite. If not, see <h
  */
 package eu.europa.ec.fisheries.uvms.exchange.service.mapper;
 
-import eu.europa.ec.fisheries.schema.rules.asset.v1.AssetIdType;
-import eu.europa.ec.fisheries.schema.rules.mobileterminal.v1.IdType;
-import org.dozer.DozerBeanMapper;
-
 import java.util.ArrayList;
 import java.util.List;
+
+import org.dozer.DozerBeanMapper;
+
+import eu.europa.ec.fisheries.schema.rules.asset.v1.AssetIdType;
+import eu.europa.ec.fisheries.schema.rules.mobileterminal.v1.IdType;
 
 public class MovementMapper {
 

@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.0.xsd">
+
+    <changeSet author="jojoha" id="insert Settings static default values">
+        <insert tableName="setting">
+            <column name="set_id" value="1"/>
+            <column name="set_name" value="username"/>
+            <column name="set_updattim" value="${now}"/>
+            <column name="set_upuser" value="jojoha"/>
+        </insert>
+        <insert tableName="setting">
+            <column name="set_id" value="2"/>
+            <column name="set_name" value="url"/>
+            <column name="set_updattim" value="${now}"/>
+            <column name="set_upuser" value="jojoha"/>
+        </insert>
+        <insert tableName="setting">
+            <column name="set_id" value="3"/>
+            <column name="set_name" value="password"/>
+            <column name="set_updattim" value="${now}"/>
+            <column name="set_upuser" value="jojoha"/>
+        </insert>
+        <rollback>
+            <delete tableName="setting">
+                <where>
+                    set_id in (1, 2, 3)
+                </where>
+            </delete>
+        </rollback>
+    </changeSet>
+</databaseChangeLog>

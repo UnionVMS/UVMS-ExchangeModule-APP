@@ -9,15 +9,19 @@
     <parent>
         <groupId>eu.europa.ec.fisheries.uvms.exchange</groupId>
         <artifactId>exchange</artifactId>
-        <version>3.0.7-SNAPSHOT</version>
+        <version>4.0.1-SNAPSHOT</version>
     </parent>
     
     <dependencies>
+    	<dependency>
+			<groupId>fish.focus.uvms.maven</groupId>
+			<artifactId>uvms-pom-monitoring-deps</artifactId>
+			<type>pom</type>
+		</dependency>    	
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>exchange-model</artifactId>
-            <version>${exchange.model.version}</version>
-            <classifier>date</classifier>
+            <version>${project.version}</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
