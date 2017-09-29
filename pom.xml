@@ -16,6 +16,7 @@
     
     <properties>
     	<exchange.api.check.against.version>4.0.0</exchange.api.check.against.version>
+    	<docker.dev.version>3.12.0</docker.dev.version>
         <mockito.version>1.10.19</mockito.version>
         <junit.version>4.12</junit.version>
         <javaee.version>7.0</javaee.version>
