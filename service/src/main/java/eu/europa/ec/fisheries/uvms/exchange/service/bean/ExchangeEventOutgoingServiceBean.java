@@ -95,7 +95,8 @@ public class ExchangeEventOutgoingServiceBean implements ExchangeEventOutgoingSe
     @Override
     public void sendSalesResponseToFLUX(SendSalesResponseRequest sendSalesResponseRequest) throws ExchangeModelMarshallException, ExchangeMessageException {
         String marshalledRequest = JAXBMarshaller.marshallJaxBObjectToString(sendSalesResponseRequest);
-        producer.sendEventBusMessage(marshalledRequest, ExchangeServiceConstants.FLUX_SALES_PLUGIN_SERVICE_NAME);
+        final String serviceName = (sendSalesResponseRequest.getRecipient().equals("OTHER") ? ExchangeServiceConstants.BELGIAN_AUCTION_SALES_PLUGIN_SERVICE_NAME : ExchangeServiceConstants.FLUX_SALES_PLUGIN_SERVICE_NAME);
+        producer.sendEventBusMessage(marshalledRequest, serviceName);
     }
 
     @Override

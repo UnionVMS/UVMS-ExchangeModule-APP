@@ -20,5 +20,6 @@ public class ExchangeServiceConstants {
     public static final String GLOBAL_DB_ACCESS_SERVICE_REGISTRY = "java:global/exchange-dbaccess-module/exchange-dbaccess-domain/ServiceRegistryModelBean!eu.europa.ec.fisheries.uvms.exchange.model.remote.ServiceRegistryModel";
     public static final String FLUX_ACTIVITY_PLUGIN_SERVICE_NAME= "eu.europa.ec.fisheries.uvms.plugins.fluxActivity";
     public static final String FLUX_SALES_PLUGIN_SERVICE_NAME = "eu.europa.ec.fisheries.uvms.plugins.flux.sales";
+    public static final String BELGIAN_AUCTION_SALES_PLUGIN_SERVICE_NAME = "eu.europa.ec.fisheries.uvms.plugins.belgianauction.sales";
     public static final String MDR_PLUGIN_SERVICE_NAME = "eu.europa.ec.fisheries.uvms.plugins.mdr";
 }

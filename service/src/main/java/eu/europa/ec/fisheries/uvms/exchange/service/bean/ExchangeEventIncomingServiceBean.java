@@ -355,7 +355,7 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
 
             ExchangeLogType log = exchangeLog.log(request, LogType.RECEIVE_SALES_RESPONSE, ExchangeLogStatusTypeType.ISSUED, TypeRefType.SALES_RESPONSE, response, true);
 
-            forwardToRules(RulesModuleRequestMapper.createReceiveSalesResponseRequest(response, log.getGuid()));
+            forwardToRules(RulesModuleRequestMapper.createReceiveSalesResponseRequest(response, log.getGuid(), request.getSenderOrReceiver()));
         } catch (ExchangeModelMarshallException e) {
             firePluginFault(event, "Error when receiving a Sales response from FLUX", e);
         } catch (ExchangeLogException e) {
@@ -389,10 +389,12 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
     public void sendSalesReport(@Observes @SendSalesReportEvent ExchangeMessageEvent message) {
         try {
             SendSalesReportRequest request = JAXBMarshaller.unmarshallTextMessage(message.getJmsMessage(), SendSalesReportRequest.class);
-
             eu.europa.ec.fisheries.schema.exchange.plugin.v1.SendSalesReportRequest pluginRequest = new eu.europa.ec.fisheries.schema.exchange.plugin.v1.SendSalesReportRequest();
             pluginRequest.setRecipient(request.getSenderOrReceiver());
             pluginRequest.setReport(request.getReport());
+            if (request.getSenderOrReceiver() != null) {
+                pluginRequest.setSenderOrReceiver(request.getSenderOrReceiver());
+            }
             pluginRequest.setMethod(ExchangePluginMethod.SEND_SALES_RESPONSE);
 
             exchangeLog.log(request, LogType.SEND_SALES_REPORT, ExchangeLogStatusTypeType.SUCCESSFUL, TypeRefType.SALES_REPORT, request.getReport(), false);

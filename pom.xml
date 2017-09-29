@@ -33,7 +33,7 @@
         <usm4uvms.version>3.0.8</usm4uvms.version>
         <audit.model.version>4.0.0</audit.model.version>
         <movement.model.version>4.0.0</movement.model.version>
-        <rules.version>3.0.8</rules.version>
+        <rules.version>3.0.9-SNAPSHOT</rules.version>
         <asset.version>4.0.0</asset.version>
       
         <project.scm.id>github</project.scm.id>
@@ -109,6 +109,15 @@
     </scm>
 
 	<profiles>
+        <profile>
+            <id>belgium-local</id>
+            <distributionManagement>
+                <snapshotRepository>
+                    <id>lv-snapshots</id>
+                    <url>https://apjenp01.dg3.be/nexus/repository/maven-snapshots/</url>
+                </snapshotRepository>
+            </distributionManagement>
+        </profile>
 		<profile>
 			<id>dg-mare</id>
 			<distributionManagement>
