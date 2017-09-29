@@ -11,6 +11,9 @@
  */
 package eu.europa.ec.fisheries.uvms.exchange.service;
 
+import javax.ejb.Local;
+import javax.enterprise.event.Observes;
+
 import eu.europa.ec.fisheries.uvms.exchange.message.event.MdrSyncRequestMessageEvent;
 import eu.europa.ec.fisheries.uvms.exchange.message.event.SendCommandToPluginEvent;
 import eu.europa.ec.fisheries.uvms.exchange.message.event.SendFLUXFAResponseToPluginEvent;
@@ -18,9 +21,6 @@ import eu.europa.ec.fisheries.uvms.exchange.message.event.SendReportToPluginEven
 import eu.europa.ec.fisheries.uvms.exchange.message.event.carrier.ExchangeMessageEvent;
 import eu.europa.ec.fisheries.uvms.exchange.message.exception.ExchangeMessageException;
 import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelMarshallException;
-
-import javax.ejb.Local;
-import javax.enterprise.event.Observes;
 
 @Local
 public interface ExchangeEventOutgoingService {

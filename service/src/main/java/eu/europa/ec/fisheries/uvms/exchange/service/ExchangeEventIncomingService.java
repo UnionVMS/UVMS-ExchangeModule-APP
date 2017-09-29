@@ -11,11 +11,24 @@
  */
 package eu.europa.ec.fisheries.uvms.exchange.service;
 
-import eu.europa.ec.fisheries.uvms.exchange.message.event.*;
-import eu.europa.ec.fisheries.uvms.exchange.message.event.carrier.ExchangeMessageEvent;
-
 import javax.ejb.Local;
 import javax.enterprise.event.Observes;
+
+import eu.europa.ec.fisheries.uvms.exchange.message.event.ExchangeLogEvent;
+import eu.europa.ec.fisheries.uvms.exchange.message.event.HandleProcessedMovementEvent;
+import eu.europa.ec.fisheries.uvms.exchange.message.event.MdrSyncResponseMessageEvent;
+import eu.europa.ec.fisheries.uvms.exchange.message.event.PingEvent;
+import eu.europa.ec.fisheries.uvms.exchange.message.event.PluginConfigEvent;
+import eu.europa.ec.fisheries.uvms.exchange.message.event.PluginPingEvent;
+import eu.europa.ec.fisheries.uvms.exchange.message.event.ReceiveSalesQueryEvent;
+import eu.europa.ec.fisheries.uvms.exchange.message.event.ReceiveSalesReportEvent;
+import eu.europa.ec.fisheries.uvms.exchange.message.event.ReceiveSalesResponseEvent;
+import eu.europa.ec.fisheries.uvms.exchange.message.event.SendSalesReportEvent;
+import eu.europa.ec.fisheries.uvms.exchange.message.event.SendSalesResponseEvent;
+import eu.europa.ec.fisheries.uvms.exchange.message.event.SetFluxFAReportMessageEvent;
+import eu.europa.ec.fisheries.uvms.exchange.message.event.SetMovementEvent;
+import eu.europa.ec.fisheries.uvms.exchange.message.event.UpdateLogStatusEvent;
+import eu.europa.ec.fisheries.uvms.exchange.message.event.carrier.ExchangeMessageEvent;
 
 @Local
 public interface ExchangeEventIncomingService {

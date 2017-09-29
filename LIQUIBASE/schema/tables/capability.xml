@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.3.xsd">
+
+    <changeSet author="jojoha" id="table for defining service capability types">
+
+        <createTable remarks="Table for defining service capability types" tableName="capability">
+            <column name="cap_id" remarks="Id and code for table" type="bigint">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="cap_pk"/>
+            </column>
+            <column name="cap_name" remarks="The name of the capability" type="VARCHAR(100)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="cap_updattim" type="timestamp" remarks="Last updated date time.">
+                <constraints nullable="false"/>
+            </column>
+            <column name="cap_upuser" type="varchar(60)" remarks="Last update userid.">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <createSequence sequenceName="capability_cap_id_seq"/>
+        <addDefaultValue columnName="cap_id" tableName="capability" defaultValueSequenceNext="capability_cap_id_seq"/>
+
+        <rollback>
+            <dropTable tableName="capability" cascadeConstraints="true"/>
+        </rollback>
+    </changeSet>
+
+</databaseChangeLog>

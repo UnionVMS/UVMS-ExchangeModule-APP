@@ -1,0 +1,956 @@
+<definitions name="ExchangeDataSource"
+             targetNamespace="urn:source.exchange.schema.fisheries.ec.europa.eu:v1"
+             xmlns:source="urn:source.exchange.schema.fisheries.ec.europa.eu:v1"
+             xmlns:service="urn:service.exchange.schema.fisheries.ec.europa.eu:v1"
+             xmlns:search="urn:search.exchange.schema.fisheries.ec.europa.eu:v1"
+             xmlns:common="urn:common.exchange.schema.fisheries.ec.europa.eu:v1"
+             xmlns:exchange="urn:exchange.schema.fisheries.ec.europa.eu:v1"
+             xmlns:plugin="urn:types.plugin.exchange.schema.fisheries.ec.europa.eu:v1"
+             xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+             xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+             xmlns="http://schemas.xmlsoap.org/wsdl/">
+
+    <types>
+        <xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" targetNamespace="urn:source.exchange.schema.fisheries.ec.europa.eu:v1">
+            
+            <xsd:import namespace="urn:common.exchange.schema.fisheries.ec.europa.eu:v1" schemaLocation="ExchangeCommon.xsd"/>
+            <xsd:import namespace="urn:exchange.schema.fisheries.ec.europa.eu:v1" schemaLocation="Exchange.xsd"/>
+            <xsd:import namespace="urn:service.exchange.schema.fisheries.ec.europa.eu:v1" schemaLocation="Service.xsd"/>
+            <xsd:import namespace="urn:types.plugin.exchange.schema.fisheries.ec.europa.eu:v1" schemaLocation="Plugin.xsd"/>
+            
+            <xsd:simpleType name="ExchangeDataSourceMethod">
+                <xsd:restriction base="xsd:string">
+                    <!-- SERVICE -->
+                    <xsd:enumeration value="LIST_SERVICES"/>
+                    <xsd:enumeration value="REGISTER_SERVICE"/>
+                    <xsd:enumeration value="UNREGISTER_SERVICE"/>
+                    <xsd:enumeration value="GET_SETTINGS"/>
+                    <xsd:enumeration value="SET_SETTINGS"/> <!-- change settings (config module) -->
+                    <xsd:enumeration value="GET_CAPABILITIES"/>
+                    <!-- <xsd:enumeration value="SET_CAPABILITIES"/>--> <!-- change capabilities -->
+                    <xsd:enumeration value="SET_SERVICE_STATUS"/>
+                    <xsd:enumeration value="GET_SERVICE"/>
+                    
+                    <!-- EXCHANGE LOG -->
+                    <xsd:enumeration value="GET_LOG_BY_QUERY"/>
+                    <xsd:enumeration value="CREATE_LOG"/>
+                    <xsd:enumeration value="UPDATE_LOG_STATUS"/>
+                    <xsd:enumeration value="GET_LOG_STATUS_HISTORY"/>
+                    <xsd:enumeration value="GET_LOG_STATUS_HISTORY_BY_QUERY"/>
+                    <xsd:enumeration value="GET_LOG_BY_GUID"/>
+                    <xsd:enumeration value="SET_POLL_STATUS"/>
+
+                    <!-- UNSENT MESSAGES -->
+                    <xsd:enumeration value="GET_UNSENT_MESSAGE_LIST"/>
+                    <xsd:enumeration value="CREATE_UNSENT_MESSAGE"/>
+                    <xsd:enumeration value="RESEND_UNSENT_MESSAGE"/>
+                    <xsd:enumeration value="REMOVE_UNSENT_MESSAGE"/>
+                    
+                    <!-- MISC -->
+                    <xsd:enumeration value="PING"/>
+                </xsd:restriction>
+            </xsd:simpleType>
+            
+            <xsd:complexType name="ExchangeBaseRequest" abstract="true">
+                <xsd:sequence>
+                    <xsd:element name="method" type="source:ExchangeDataSourceMethod"/>
+                    <xsd:element name="username" type="xsd:string"/>
+                </xsd:sequence>
+            </xsd:complexType>
+            
+            <!-- Unsent -->
+            <xsd:element name="GetUnsentMessageListRequest">
+                <xsd:complexType>
+                    <xsd:complexContent>
+                        <xsd:extension base="source:ExchangeBaseRequest">
+                        </xsd:extension>
+                    </xsd:complexContent>
+                </xsd:complexType>
+            </xsd:element>
+            
+            <xsd:element name="GetUnsentMessageListResponse">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element name="unsentMessage" type="exchange:UnsentMessageType" minOccurs="0" maxOccurs="unbounded"/>
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
+            
+            <xsd:element name="CreateUnsentMessageRequest">
+                <xsd:complexType>
+                    <xsd:complexContent>
+                        <xsd:extension base="source:ExchangeBaseRequest">
+                            <xsd:sequence>
+                                <xsd:element name="message" type="exchange:UnsentMessageType" minOccurs="1" maxOccurs="1"/>
+                            </xsd:sequence>
+                        </xsd:extension>
+                    </xsd:complexContent>
+                </xsd:complexType>
+            </xsd:element>
+            
+            <xsd:element name="CreateUnsentMessageResponse">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element name="unsentMessageId" type="xsd:string" minOccurs="0" maxOccurs="1"/>
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
+            
+            <xsd:element name="RemoveUnsentMessageRequest">
+                <xsd:complexType>
+                    <xsd:complexContent>
+                        <xsd:extension base="source:ExchangeBaseRequest">
+                            <xsd:sequence>
+                                <xsd:element name="unsentMessageId" type="xsd:string" minOccurs="1" maxOccurs="1"/>
+                            </xsd:sequence>
+                        </xsd:extension>
+                    </xsd:complexContent>
+                </xsd:complexType>
+            </xsd:element>
+            
+            <xsd:element name="RemoveUnsentMessageResponse">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element name="unsentMessageId" type="xsd:string" minOccurs="0" maxOccurs="1"/>
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
+            
+            <xsd:element name="ResendMessageRequest">
+                <xsd:complexType>
+                    <xsd:complexContent>
+                        <xsd:extension base="source:ExchangeBaseRequest">
+                            <xsd:sequence>
+                                <xsd:element name="unsentMessageId" type="xsd:string" minOccurs="0" maxOccurs="unbounded"/>
+                            </xsd:sequence>
+                        </xsd:extension>
+                    </xsd:complexContent>
+                </xsd:complexType>
+            </xsd:element>
+            
+            <xsd:element name="ResendMessageResponse">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element name="resentMessage" type="exchange:UnsentMessageType" minOccurs="0" maxOccurs="unbounded"/>
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
+            
+            <!-- ExchangeLog -->
+            <xsd:element name="GetLogListByQueryRequest">
+                <xsd:complexType>
+                    <xsd:complexContent>
+                        <xsd:extension base="source:ExchangeBaseRequest">
+                            <xsd:sequence>
+                                <xsd:element name="query" type="exchange:ExchangeListQuery" minOccurs="1" maxOccurs="1"/>
+                            </xsd:sequence>
+                        </xsd:extension>
+                    </xsd:complexContent>
+                </xsd:complexType>
+            </xsd:element>
+            
+            <xsd:element name="GetLogListByQueryResponse">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element name="totalNumberOfPages" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+                        <xsd:element name="currentPage" type="xsd:int" minOccurs="1" maxOccurs="1"/>
+                        <xsd:element name="exchangeLog" type="exchange:ExchangeLogType" minOccurs="0" maxOccurs="unbounded"/>
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
+            
+            <xsd:element name="CreateLogRequest">
+                <xsd:complexType>
+                    <xsd:complexContent>
+                        <xsd:extension base="source:ExchangeBaseRequest">
+                            <xsd:sequence>
+                                <xsd:element name="exchangeLog" type="exchange:ExchangeLogType" minOccurs="1" maxOccurs="1"/>
+                            </xsd:sequence>
+                        </xsd:extension>
+                    </xsd:complexContent>
+                </xsd:complexType>
+            </xsd:element>
+            
+            <xsd:element name="CreateLogResponse">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element name="exchangeLog" type="exchange:ExchangeLogType" minOccurs="1" maxOccurs="1"/>
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
+            
+            <xsd:element name="UpdateLogStatusRequest">
+                <xsd:complexType>
+                    <xsd:complexContent>
+                        <xsd:extension base="source:ExchangeBaseRequest">
+                            <xsd:sequence>
+                                <xsd:element name="status" type="exchange:ExchangeLogStatusType" minOccurs="1" maxOccurs="1"/>
+                            </xsd:sequence>
+                        </xsd:extension>
+                    </xsd:complexContent>
+                </xsd:complexType>
+            </xsd:element>
+            
+            <xsd:element name="UpdateLogStatusResponse">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element name="exchangeLog" type="exchange:ExchangeLogType" minOccurs="1" maxOccurs="1"/>
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
+            
+            <xsd:element name="GetLogStatusHistoryRequest">
+                <xsd:complexType>
+                    <xsd:complexContent>
+                        <xsd:extension base="source:ExchangeBaseRequest">
+                            <xsd:sequence>
+                                <xsd:element name="guid" type="xsd:string" minOccurs="1" maxOccurs="1"/>
+                                <xsd:element name="typeRefType" type="exchange:TypeRefType"/> 
+                            </xsd:sequence>
+                        </xsd:extension>
+                    </xsd:complexContent>
+                </xsd:complexType>
+            </xsd:element>
+            
+            <xsd:element name="GetLogStatusHistoryResponse">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element name="status" type="exchange:ExchangeLogStatusType" minOccurs="0" maxOccurs="1"/>
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
+            
+            <xsd:element name="GetLogStatusHistoryByQueryRequest">
+                <xsd:complexType>
+                    <xsd:complexContent>
+                        <xsd:extension base="source:ExchangeBaseRequest">
+                            <xsd:sequence>
+                                <xsd:element name="query" type="exchange:ExchangeHistoryListQuery" minOccurs="1" maxOccurs="1"/>
+                            </xsd:sequence>
+                        </xsd:extension>
+                    </xsd:complexContent>
+                </xsd:complexType>
+            </xsd:element>
+            
+            <xsd:element name="GetLogStatusHistoryByQueryResponse">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element name="statusLog" type="exchange:ExchangeLogStatusType" minOccurs="1" maxOccurs="unbounded"/>
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
+            
+            <!-- Service -->
+            <xsd:element name="GetServiceListRequest">
+                <xsd:complexType>
+                    <xsd:complexContent>
+                        <xsd:extension base="source:ExchangeBaseRequest">
+                            <xsd:sequence>
+                                <xsd:element name="type" type="plugin:PluginType" minOccurs="0" maxOccurs="unbounded"/>
+                            </xsd:sequence>
+                        </xsd:extension>
+                    </xsd:complexContent>
+                </xsd:complexType>
+            </xsd:element>
+            
+            <xsd:element name="GetServiceListResponse">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element name="service" type="service:ServiceResponseType" minOccurs="0" maxOccurs="unbounded"/>
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
+            
+            <xsd:element name="GetServiceRequest">
+                <xsd:complexType>
+                    <xsd:complexContent>
+                        <xsd:extension base="source:ExchangeBaseRequest">
+                            <xsd:sequence>
+                                <xsd:element name="serviceId" type="xsd:string" minOccurs="1" maxOccurs="1"/>
+                            </xsd:sequence>
+                        </xsd:extension>
+                    </xsd:complexContent>
+                </xsd:complexType>
+            </xsd:element>
+            
+            <xsd:element name="GetServiceResponse">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element name="service" type="service:ServiceResponseType"/>
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
+            
+            <xsd:element name="RegisterServiceRequest">
+                <xsd:complexType>
+                    <xsd:complexContent>
+                        <xsd:extension base="source:ExchangeBaseRequest">
+                            <xsd:sequence>
+                                <xsd:element name="service" type="service:ServiceType"/>
+                                <xsd:element name="settingList" type="service:SettingListType" minOccurs="1" maxOccurs="1"/>
+                                <xsd:element name="capabilityList" type="service:CapabilityListType" minOccurs="1" maxOccurs="1"/>
+                            </xsd:sequence>
+                        </xsd:extension>
+                    </xsd:complexContent>
+                </xsd:complexType>
+            </xsd:element>
+            
+            <xsd:element name="RegisterServiceResponse">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element name="service" type="service:ServiceResponseType" minOccurs="1" maxOccurs="1"/>
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
+            
+            <xsd:element name="UnregisterServiceRequest">
+                <xsd:complexType>
+                    <xsd:complexContent>
+                        <xsd:extension base="source:ExchangeBaseRequest">
+                            <xsd:sequence>
+                                <xsd:element name="service" type="service:ServiceType"/>
+                            </xsd:sequence>
+                        </xsd:extension>
+                    </xsd:complexContent>
+                </xsd:complexType>
+            </xsd:element>
+
+            <xsd:element name="UnregisterServiceResponse">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element name="service" type="service:ServiceResponseType" minOccurs="1" maxOccurs="1"/>
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
+            
+            <xsd:element name="SetServiceSettingsRequest">
+                <xsd:complexType>
+                    <xsd:complexContent>
+                        <xsd:extension base="source:ExchangeBaseRequest">
+                            <xsd:sequence>
+                                <xsd:element name="serviceName" type="xsd:string"/>
+                                <xsd:element name="settings" type="service:SettingListType"/>
+                            </xsd:sequence>
+                        </xsd:extension>
+                    </xsd:complexContent>
+                </xsd:complexType>
+            </xsd:element>
+            
+            <xsd:element name="SetServiceSettingsResponse">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element name="service" type="service:ServiceResponseType" minOccurs="1" maxOccurs="1"/>
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
+            
+            <xsd:element name="SetServiceStatusRequest">
+                <xsd:complexType>
+                    <xsd:complexContent>
+                        <xsd:extension base="source:ExchangeBaseRequest">
+                            <xsd:sequence>
+                                <xsd:element name="serviceName" type="xsd:string"/>
+                                <xsd:element name="status" type="service:StatusType"/>
+                            </xsd:sequence>
+                        </xsd:extension>
+                    </xsd:complexContent>
+                </xsd:complexType>
+            </xsd:element>
+            
+            <xsd:element name="SetServiceStatusResponse">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element name="service" type="service:ServiceResponseType"/>
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
+            
+            <xsd:element name="GetServiceSettingsRequest">
+                <xsd:complexType>
+                    <xsd:complexContent>
+                        <xsd:extension base="source:ExchangeBaseRequest">
+                            <xsd:sequence>
+                                <xsd:element name="serviceName" type="xsd:string"/>
+                            </xsd:sequence>
+                        </xsd:extension>
+                    </xsd:complexContent>
+                </xsd:complexType>
+            </xsd:element>
+            
+            <xsd:element name="GetServiceSettingsResponse">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element name="settings" type="service:SettingListType"/>
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
+            
+            <xsd:element name="GetServiceCapabilitiesRequest">
+                <xsd:complexType>
+                    <xsd:complexContent>
+                        <xsd:extension base="source:ExchangeBaseRequest">
+                            <xsd:sequence>
+                                <xsd:element name="serviceName" type="xsd:string"/>
+                            </xsd:sequence>
+                        </xsd:extension>
+                    </xsd:complexContent>
+                </xsd:complexType>
+            </xsd:element>
+            
+            <xsd:element name="GetServiceCapabilitiesResponse">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element name="capabilities" type="service:CapabilityListType"/>
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
+
+            <!-- Ping request -->
+            <xsd:element name="pingRequest">
+                <xsd:complexType>
+                    <xsd:complexContent>
+                        <xsd:extension base="source:ExchangeBaseRequest">
+                        </xsd:extension>
+                    </xsd:complexContent>
+                </xsd:complexType>
+            </xsd:element>
+
+            <xsd:element name="pingResponse">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element name="response" type="xsd:string"/>
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
+
+            <xsd:element name="GetExchangeLogRequest">
+                <xsd:complexType>
+                    <xsd:complexContent>
+                        <xsd:extension base="source:ExchangeBaseRequest">
+                            <xsd:sequence>
+                                <xsd:element name="guid" type="xsd:string"/>
+                            </xsd:sequence>
+                        </xsd:extension>
+                    </xsd:complexContent>
+                </xsd:complexType>
+            </xsd:element>
+
+            <xsd:element name="SingleExchangeLogResponse">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element name="exchangeLog" type="exchange:ExchangeLogType"/>
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
+
+            <xsd:element name="SetPollStatusRequest">
+                <xsd:complexType>
+                    <xsd:complexContent>
+                        <xsd:extension base="source:ExchangeBaseRequest">
+                            <xsd:sequence>
+                                <xsd:element name="status" type="exchange:PollStatus" minOccurs="1" maxOccurs="1"/>
+                            </xsd:sequence>
+                        </xsd:extension>
+                    </xsd:complexContent>
+                </xsd:complexType>
+            </xsd:element>
+
+            <xsd:element name="SetPollStatusResponse">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element name="exchangeLog" type="exchange:PollStatus" minOccurs="1" maxOccurs="1"/>
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
+
+        </xsd:schema>
+    </types>
+    
+    <message name="ExchangeFault">
+        <part name="body" element="common:exchangeFault"/>
+    </message>
+
+    <message name="GetUnsentMessageListRequest">  
+        <part name="body" element="source:GetUnsentMessageListRequest"/>
+    </message>
+    <message name="GetUnsentMessageListResponse">
+        <part name="body" element="source:GetUnsentMessageListResponse"/>
+    </message>
+
+    <message name="CreateUnsentMessageRequest">  
+        <part name="body" element="source:CreateUnsentMessageRequest"/>
+    </message>
+    <message name="CreateUnsentMessageResponse">
+        <part name="body" element="source:CreateUnsentMessageResponse"/>
+    </message>
+
+    <message name="ResendMessageRequest">  
+        <part name="body" element="source:ResendMessageRequest"/>
+    </message>
+    <message name="ResendMessageResponse">
+        <part name="body" element="source:ResendMessageResponse"/>
+    </message>
+
+    <message name="GetLogListByQueryRequest">
+        <part name="body" element="source:GetLogListByQueryRequest"/>
+    </message>
+    <message name="GetLogListByQueryResponse">
+        <part name="body" element="source:GetLogListByQueryResponse"/>
+    </message>
+    
+    <message name="CreateLogRequest">
+        <part name="body" element="source:CreateLogRequest"/>
+    </message>
+    <message name="CreateLogResponse">
+        <part name="body" element="source:CreateLogResponse"/>
+    </message>
+    
+    <message name="UpdateLogStatusRequest">
+        <part name="body" element="source:UpdateLogStatusRequest"/>
+    </message>
+    <message name="UpdateLogStatusResponse">
+        <part name="body" element="source:UpdateLogStatusResponse"/>
+    </message>
+    
+    <message name="GetLogStatusHistoryRequest">
+        <part name="body" element="source:GetLogStatusHistoryRequest"/>
+    </message>
+    <message name="GetLogStatusHistoryResponse">
+        <part name="body" element="source:GetLogStatusHistoryResponse"/>
+    </message>
+    
+    <message name="GetLogStatusHistoryByQueryRequest">
+        <part name="body" element="source:GetLogStatusHistoryByQueryRequest"/>
+    </message>
+    <message name="GetLogStatusHistoryByQueryResponse">
+        <part name="body" element="source:GetLogStatusHistoryByQueryResponse"/>
+    </message>
+    
+    <message name="GetServiceListRequest">
+        <part name="body" element="source:GetServiceListRequest"/>
+    </message>
+    <message name="GetServiceListResponse">
+        <part name="body" element="source:GetServiceListResponse"/>
+    </message>
+    
+    <message name="GetServiceRequest">
+        <part name="body" element="source:GetServiceRequest"/>
+    </message>
+    <message name="GetServiceResponse">
+        <part name="body" element="source:GetServiceResponse"/>
+    </message>
+    
+    <message name="RegisterServiceRequest">
+        <part name="body" element="source:RegisterServiceRequest"/>
+    </message>
+    <message name="RegisterServiceResponse">
+        <part name="body" element="source:RegisterServiceResponse"/>
+    </message>
+    
+    <message name="UnregisterServiceRequest">
+        <part name="body" element="source:UnregisterServiceRequest"/>
+    </message>
+    <message name="UnregisterServiceResponse">
+        <part name="body" element="source:UnregisterServiceResponse"/>
+    </message>
+    
+    <message name="SetServiceSettingsRequest">
+        <part name="body" element="source:SetServiceSettingsRequest"/>
+    </message>
+    <message name="SetServiceSettingsResponse">
+        <part name="body" element="source:SetServiceSettingsResponse"/>
+    </message>
+    
+    <message name="SetServiceStatusRequest">
+        <part name="body" element="source:SetServiceStatusRequest"/>
+    </message>
+    <message name="SetServiceStatusResponse">
+        <part name="body" element="source:SetServiceStatusResponse"/>
+    </message>
+    
+    <message name="GetServiceSettingsRequest">
+        <part name="body" element="source:GetServiceSettingsRequest"/>
+    </message>
+    <message name="GetServiceSettingsResponse">
+        <part name="body" element="source:GetServiceSettingsResponse"/>
+    </message>
+    
+    <message name="GetServiceCapabilitiesRequest">
+        <part name="body" element="source:GetServiceCapabilitiesRequest"/>
+    </message>
+    <message name="GetServiceCapabilitiesResponse">
+        <part name="body" element="source:GetServiceCapabilitiesResponse"/>
+    </message>
+
+    <message name="PingRequest">
+        <part name="body" element="source:pingRequest"/>
+    </message>
+    <message name="PingResponse">
+        <part name="body" element="source:pingResponse"/>
+    </message>
+
+    <message name="GetExchangeLogRequest">
+        <part name="body" element="source:GetExchangeLogRequest"/>
+    </message>
+    <message name="GetExchangeLogResponse">
+        <part name="body" element="source:SingleExchangeLogResponse"/>
+    </message>
+
+    <message name="SetPollStatusRequest">
+        <part name="body" element="source:SetPollStatusRequest"/>
+    </message>
+    <message name="SetPollStatusResponse">
+        <part name="body" element="source:SetPollStatusResponse"/>
+    </message>
+    
+    <portType name="ExchangeDataSourcePortType">
+
+        <operation name="GetUnsentMessageList">
+            <input message="source:GetUnsentMessageListRequest"/>
+            <output message="source:GetUnsentMessageListResponse"/>
+            <fault name="ExchangeFault" message="source:ExchangeFault"/>
+        </operation>
+
+        <operation name="CreateUnsentMessage">
+            <input message="source:CreateUnsentMessageRequest"/>
+            <output message="source:CreateUnsentMessageResponse"/>
+            <fault name="ExchangeFault" message="source:ExchangeFault"/>
+        </operation>
+        
+        <operation name="ResendMessage">
+            <input message="source:ResendMessageRequest"/>
+            <output message="source:ResendMessageResponse"/>
+            <fault name="ExchangeFault" message="source:ExchangeFault"/>
+        </operation>
+        
+        <operation name="GetLogListByQuery">
+            <input message="source:GetLogListByQueryRequest"/>
+            <output message="source:GetLogListByQueryResponse"/>
+            <fault name="ExchangeFault" message="source:ExchangeFault"/>
+        </operation>
+        
+        <operation name="CreateLog">
+            <input message="source:CreateLogRequest"/>
+            <output message="source:CreateLogResponse"/>
+            <fault name="ExchangeFault" message="source:ExchangeFault"/>
+        </operation>
+       
+        <operation name="UpdateLogStatus">
+            <input message="source:UpdateLogStatusRequest"/>
+            <output message="source:UpdateLogStatusResponse"/>
+            <fault name="ExchangeFault" message="source:ExchangeFault"/>
+        </operation>
+
+        <operation name="SetPollStatus">
+            <input message="source:SetPollStatusRequest"/>
+            <output message="source:SetPollStatusResponse"/>
+            <fault name="ExchangeFault" message="source:ExchangeFault"/>
+        </operation>
+       
+        <operation name="GetLogStatusHistory">
+            <input message="source:GetLogStatusHistoryRequest"/>
+            <output message="source:GetLogStatusHistoryResponse"/>
+            <fault name="ExchangeFault" message="source:ExchangeFault"/>
+        </operation>
+
+        <operation name="GetLogStatusHistoryByQuery">
+            <input message="source:GetLogStatusHistoryByQueryRequest"/>
+            <output message="source:GetLogStatusHistoryByQueryResponse"/>
+            <fault name="ExchangeFault" message="source:ExchangeFault"/>
+        </operation>
+               
+        <operation name="GetServiceList">
+            <input message="source:GetServiceListRequest"/>
+            <output message="source:GetServiceListResponse"/>
+            <fault name="ExchangeFault" message="source:ExchangeFault"/>
+        </operation>
+        
+        <operation name="GetService">
+            <input message="source:GetServiceRequest"/>
+            <output message="source:GetServiceResponse"/>
+            <fault name="ExchangeFault" message="source:ExchangeFault"/>
+        </operation>
+        
+        <operation name="RegisterService">
+            <input message="source:RegisterServiceRequest"/>
+            <output message="source:RegisterServiceResponse"/>
+            <fault name="ExchangeFault" message="source:ExchangeFault"/>
+        </operation>
+        
+        <operation name="UnregisterService">
+            <input message="source:UnregisterServiceRequest"/>
+            <output message="source:UnregisterServiceResponse"/>
+            <fault name="ExchangeFault" message="source:ExchangeFault"/>
+        </operation>
+        
+        <operation name="GetServiceCapabilities">
+            <input message="source:GetServiceCapabilitiesRequest"/>
+            <output message="source:GetServiceCapabilitiesResponse"/>
+            <fault name="ExchangeFault" message="source:ExchangeFault"/>
+        </operation>
+        
+        <operation name="SetServiceSettings">
+            <input message="source:SetServiceSettingsRequest"/>
+            <output message="source:SetServiceSettingsResponse"/>
+            <fault name="ExchangeFault" message="source:ExchangeFault"/>
+        </operation>
+        
+        <operation name="SetServiceStatus">
+            <input message="source:SetServiceStatusRequest"/>
+            <output message="source:SetServiceStatusResponse"/>
+            <fault name="ExchangeFault" message="source:ExchangeFault"/>
+        </operation>
+        
+        <operation name="GetServiceSettings">
+            <input message="source:GetServiceSettingsRequest"/>
+            <output message="source:GetServiceSettingsResponse"/>
+            <fault name="ExchangeFault" message="source:ExchangeFault"/>
+        </operation>
+        
+        <operation name="Ping">
+            <input message="source:PingRequest"/>
+            <output message="source:PingResponse"/>
+        </operation>
+
+        <operation name="GetExchangeLog">
+            <input message="source:GetExchangeLogRequest"/>
+            <output message="source:GetExchangeLogResponse"/>
+            <fault name="ExchangeFault" message="source:ExchangeFault"/>
+        </operation>
+
+    </portType>
+
+    <binding name="ExchangeDataSourceSoapBinding" type="source:ExchangeDataSourcePortType">
+        <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+
+        <operation name="GetUnsentMessageList">
+            <input>
+                <soap:body use="literal"/>
+            </input>
+            <output>
+                <soap:body use="literal"/>
+            </output>
+            <fault name="ExchangeFault">
+                <soap:fault name="ExchangeFault" use="literal"/>
+            </fault>
+        </operation>
+
+        <operation name="CreateUnsentMessage">
+            <input>
+                <soap:body use="literal"/>
+            </input>
+            <output>
+                <soap:body use="literal"/>
+            </output>
+            <fault name="ExchangeFault">
+                <soap:fault name="ExchangeFault" use="literal"/>
+            </fault>
+        </operation>
+        
+        <operation name="ResendMessage">
+            <input>
+                <soap:body use="literal"/>
+            </input>
+            <output>
+                <soap:body use="literal"/>
+            </output>
+            <fault name="ExchangeFault">
+                <soap:fault name="ExchangeFault" use="literal"/>
+            </fault>
+        </operation>
+        
+        <operation name="GetLogListByQuery">
+            <input>
+                <soap:body use="literal"/>
+            </input>
+            <output>
+                <soap:body use="literal"/>
+            </output>
+            <fault name="ExchangeFault">
+                <soap:fault name="ExchangeFault" use="literal"/>
+            </fault>
+        </operation>
+        
+        <operation name="CreateLog">
+            <input>
+                <soap:body use="literal"/>
+            </input>
+            <output>
+                <soap:body use="literal"/>
+            </output>
+            <fault name="ExchangeFault">
+                <soap:fault name="ExchangeFault" use="literal"/>
+            </fault>
+        </operation>
+        
+        <operation name="UpdateLogStatus">
+            <input>
+                <soap:body use="literal"/>
+            </input>
+            <output>
+                <soap:body use="literal"/>
+            </output>
+            <fault name="ExchangeFault">
+                <soap:fault name="ExchangeFault" use="literal"/>
+            </fault>
+        </operation>
+        
+        <operation name="GetLogStatusHistory">
+            <input>
+                <soap:body use="literal"/>
+            </input>
+            <output>
+                <soap:body use="literal"/>
+            </output>
+            <fault name="ExchangeFault">
+                <soap:fault name="ExchangeFault" use="literal"/>
+            </fault>
+        </operation>
+        
+        <operation name="GetLogStatusHistoryByQuery">
+            <input>
+                <soap:body use="literal"/>
+            </input>
+            <output>
+                <soap:body use="literal"/>
+            </output>
+            <fault name="ExchangeFault">
+                <soap:fault name="ExchangeFault" use="literal"/>
+            </fault>
+        </operation>
+        
+        <operation name="GetServiceList">
+            <input>
+                <soap:body use="literal"/>
+            </input>
+            <output>
+                <soap:body use="literal"/>
+            </output>
+            <fault name="ExchangeFault">
+                <soap:fault name="ExchangeFault" use="literal"/>
+            </fault>
+        </operation>
+        
+        <operation name="GetService">
+            <input>
+                <soap:body use="literal"/>
+            </input>
+            <output>
+                <soap:body use="literal"/>
+            </output>
+            <fault name="ExchangeFault">
+                <soap:fault name="ExchangeFault" use="literal"/>
+            </fault>
+        </operation>
+        
+        <operation name="RegisterService">
+            <input>
+                <soap:body use="literal"/>
+            </input>
+            <output>
+                <soap:body use="literal"/>
+            </output>
+            <fault name="ExchangeFault">
+                <soap:fault name="ExchangeFault" use="literal"/>
+            </fault>
+        </operation>
+        
+        <operation name="UnregisterService">
+            <input>
+                <soap:body use="literal"/>
+            </input>
+            <output>
+                <soap:body use="literal"/>
+            </output>
+            <fault name="ExchangeFault">
+                <soap:fault name="ExchangeFault" use="literal"/>
+            </fault>
+        </operation>
+        
+        <operation name="GetServiceCapabilities">
+            <input>
+                <soap:body use="literal"/>
+            </input>
+            <output>
+                <soap:body use="literal"/>
+            </output>
+            <fault name="ExchangeFault">
+                <soap:fault name="ExchangeFault" use="literal"/>
+            </fault>
+        </operation>
+        
+        <operation name="SetServiceSettings">
+            <input>
+                <soap:body use="literal"/>
+            </input>
+            <output>
+                <soap:body use="literal"/>
+            </output>
+            <fault name="ExchangeFault">
+                <soap:fault name="ExchangeFault" use="literal"/>
+            </fault>
+        </operation>
+        
+        <operation name="GetServiceSettings">
+            <input>
+                <soap:body use="literal"/>
+            </input>
+            <output>
+                <soap:body use="literal"/>
+            </output>
+            <fault name="ExchangeFault">
+                <soap:fault name="ExchangeFault" use="literal"/>
+            </fault>
+        </operation>
+
+        <operation name="SetServiceStatus">
+            <input>
+                <soap:body use="literal"/>
+            </input>
+            <output>
+                <soap:body use="literal"/>
+            </output>
+            <fault name="ExchangeFault">
+                <soap:fault name="ExchangeFault" use="literal"/>
+            </fault>
+        </operation>
+
+        <operation name="Ping">
+            <input>
+                <soap:body use="literal"/>
+            </input>
+            <output>
+                <soap:body use="literal"/>
+            </output>
+        </operation>
+
+        <operation name="GetExchangeLog">
+            <input>
+                <soap:body use="literal"/>
+            </input>
+            <output>
+                <soap:body use="literal"/>
+            </output>
+        </operation>
+
+        <operation name="SetPollStatus">
+            <input>
+                <soap:body use="literal"/>
+            </input>
+            <output>
+                <soap:body use="literal"/>
+            </output>
+            <fault name="ExchangeFault">
+                <soap:fault name="ExchangeFault" use="literal"/>
+            </fault>
+        </operation>
+        
+    </binding>
+
+    <service name="ExchangeDataSourceQueueService">
+        <port name="DataSourcePortType" binding="source:ExchangeDataSourceSoapBinding">
+            <soap:address location="http://REPLACE_ME"/>
+        </port>
+    </service>
+
+</definitions>

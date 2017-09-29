@@ -130,7 +130,7 @@ public class MessageConsumerBean implements MessageListener {
     @Override
     @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
     public void onMessage(Message message) {
-        LOG.info("Message received in Exchange Message MDB");
+        LOG.info("Message received in Exchange Message MDB:{}",message);
 
         TextMessage textMessage = (TextMessage) message;
         ExchangeBaseRequest request = tryConsumeExchangeBaseRequest(textMessage);
@@ -142,7 +142,7 @@ public class MessageConsumerBean implements MessageListener {
             } catch (ExchangeModelMarshallException e) {
                 AcknowledgeResponse type = tryConsumeAcknowledgeResponse(textMessage);
                 if (type == null) {
-                    LOG.error("[ Error when receiving message in exchange: ]");
+                    LOG.error("[ Error when receiving message in exchange: {}]",message);
                     errorEvent.fire(new ExchangeMessageEvent(textMessage, ExchangeModuleResponseMapper.createFaultMessage(FaultCode.EXCHANGE_MESSAGE, "Error when receiving message in exchange")));
                 } else {
                     updateStateEvent.fire(new ExchangeMessageEvent(textMessage));
@@ -153,7 +153,6 @@ public class MessageConsumerBean implements MessageListener {
             errorEvent.fire(new ExchangeMessageEvent(textMessage, ExchangeModuleResponseMapper.createFaultMessage(FaultCode.EXCHANGE_MESSAGE, "Username in the request must be set")));
         } else{
 
-            LOG.debug("BaseRequest method {}", request.getMethod());
             switch (request.getMethod()) {
                 case LIST_SERVICES:
                     pluginConfigEvent.fire(new ExchangeMessageEvent(textMessage));
@@ -198,15 +197,12 @@ public class MessageConsumerBean implements MessageListener {
                     mdrSyncResponseMessageEvent.fire(new ExchangeMessageEvent(textMessage));
                     break;
                 case SET_FLUX_FA_REPORT_MESSAGE:
-                    LOG.debug("inside SET_FLUX_FA_REPORT_MESSAGE case");
                     processFLUXFAReportMessageEvent.fire(new ExchangeMessageEvent(textMessage));
                     break;
                 case SET_FLUX_FA_RESPONSE_MESSAGE:
-                    LOG.debug("inside SET_FLUX_FA_RESPONSE_MESSAGE case");
                     processFLUXFAResponseMessageEvent.fire(new ExchangeMessageEvent(textMessage));
                     break;
                 case UPDATE_LOG_STATUS:
-                    LOG.debug("The status of a message log will be updated");
                     updateLogStatusEvent.fire(new ExchangeMessageEvent(textMessage));
                     break;
                 default:

@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.0.xsd">
+
+    <changeSet author="jojoha" id="insert capability static default values">
+        <insert tableName="capability">
+            <column name="cap_id" value="1"/>
+            <column name="cap_name" value="Configurable"/>
+            <column name="cap_updattim" value="${now}"/>
+            <column name="cap_upuser" value="jojoha"/>
+        </insert>
+        <insert tableName="capability">
+            <column name="cap_id" value="2"/>
+            <column name="cap_name" value="Pollable"/>
+            <column name="cap_updattim" value="${now}"/>
+            <column name="cap_upuser" value="jojoha"/>
+        </insert>
+        <rollback>
+            <delete tableName="capability">
+                <where>
+                    cap_id in (1, 2)
+                </where>
+            </delete>
+        </rollback>
+    </changeSet>
+</databaseChangeLog>

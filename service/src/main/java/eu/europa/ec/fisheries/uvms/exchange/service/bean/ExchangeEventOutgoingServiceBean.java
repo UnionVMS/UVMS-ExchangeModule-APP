@@ -11,6 +11,20 @@
  */
 package eu.europa.ec.fisheries.uvms.exchange.service.bean;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.ejb.EJB;
+import javax.ejb.Stateless;
+import javax.enterprise.event.Event;
+import javax.enterprise.event.Observes;
+import javax.inject.Inject;
+import javax.jms.JMSException;
+import javax.jms.TextMessage;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import eu.europa.ec.fisheries.schema.exchange.common.v1.AcknowledgeType;
 import eu.europa.ec.fisheries.schema.exchange.common.v1.CommandType;
 import eu.europa.ec.fisheries.schema.exchange.common.v1.CommandTypeType;
@@ -23,9 +37,17 @@ import eu.europa.ec.fisheries.schema.exchange.plugin.v1.SendSalesReportRequest;
 import eu.europa.ec.fisheries.schema.exchange.plugin.v1.SendSalesResponseRequest;
 import eu.europa.ec.fisheries.schema.exchange.service.v1.ServiceResponseType;
 import eu.europa.ec.fisheries.schema.exchange.service.v1.StatusType;
-import eu.europa.ec.fisheries.schema.exchange.v1.*;
+import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogStatusTypeType;
+import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogType;
+import eu.europa.ec.fisheries.schema.exchange.v1.LogType;
+import eu.europa.ec.fisheries.schema.exchange.v1.TypeRefType;
+import eu.europa.ec.fisheries.schema.exchange.v1.UnsentMessageTypeProperty;
 import eu.europa.ec.fisheries.uvms.exchange.message.consumer.ExchangeMessageConsumer;
-import eu.europa.ec.fisheries.uvms.exchange.message.event.*;
+import eu.europa.ec.fisheries.uvms.exchange.message.event.ErrorEvent;
+import eu.europa.ec.fisheries.uvms.exchange.message.event.MdrSyncRequestMessageEvent;
+import eu.europa.ec.fisheries.uvms.exchange.message.event.SendCommandToPluginEvent;
+import eu.europa.ec.fisheries.uvms.exchange.message.event.SendFLUXFAResponseToPluginEvent;
+import eu.europa.ec.fisheries.uvms.exchange.message.event.SendReportToPluginEvent;
 import eu.europa.ec.fisheries.uvms.exchange.message.event.carrier.ExchangeMessageEvent;
 import eu.europa.ec.fisheries.uvms.exchange.message.exception.ExchangeMessageException;
 import eu.europa.ec.fisheries.uvms.exchange.message.producer.MessageProducer;
@@ -45,18 +67,6 @@ import eu.europa.ec.fisheries.uvms.exchange.service.exception.ExchangeServiceExc
 import eu.europa.ec.fisheries.uvms.exchange.service.mapper.ExchangeLogMapper;
 import eu.europa.ec.fisheries.uvms.exchange.service.mapper.ExchangeToMdrRulesMapper;
 import eu.europa.ec.fisheries.wsdl.asset.types.Asset;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import javax.ejb.EJB;
-import javax.ejb.Stateless;
-import javax.enterprise.event.Event;
-import javax.enterprise.event.Observes;
-import javax.inject.Inject;
-import javax.jms.JMSException;
-import javax.jms.TextMessage;
-import java.util.ArrayList;
-import java.util.List;
 
 import static eu.europa.ec.fisheries.schema.exchange.plugin.types.v1.PluginType.BELGIAN_ACTIVITY;
 
@@ -99,7 +109,7 @@ public class ExchangeEventOutgoingServiceBean implements ExchangeEventOutgoingSe
 
     @Override
     public void sendReportToPlugin(@Observes @SendReportToPluginEvent ExchangeMessageEvent message) {
-        LOG.info("Send report to plugin");
+        LOG.info("Send report to plugin: {}",message);
 
         try {
             SendMovementToPluginRequest request = JAXBMarshaller.unmarshallTextMessage(message.getJmsMessage(), SendMovementToPluginRequest.class);
@@ -118,7 +128,6 @@ public class ExchangeEventOutgoingServiceBean implements ExchangeEventOutgoingSe
                 String serviceName = service.getServiceClassName();
 
                 if (validate(service, sendReport, message.getJmsMessage(), request.getUsername())) {
-                    LOG.debug("Creating unsent message. Will be deleted on OK response.");
                     List<UnsentMessageTypeProperty> unsentMessageProperties = ExchangeLogMapper.getUnsentMessageProperties(sendReport);
                     String unsentMessageGuid = exchangeLog.createUnsentMessage(sendReport.getRecipient(), sendReport.getTimestamp(), ExchangeLogMapper.getSendMovementSenderReceiver(sendReport), message.getJmsMessage().getText(), unsentMessageProperties, request.getUsername());
 
@@ -134,14 +143,14 @@ public class ExchangeEventOutgoingServiceBean implements ExchangeEventOutgoingSe
                     }
 
                 } else {
-                    LOG.debug("Cannot send to plugin. Response sent to caller.");
+                    LOG.debug("Cannot send to plugin. Response sent to caller:{}",message);
                 }
             }
         } catch (ExchangeException e) {
-            LOG.error("[ Error when sending report to plugin ]");
+            LOG.error("[ Error when sending report to plugin {} ] {}",message,e);
 
         } catch (JMSException ex) {
-            LOG.error("[ Error when creating unsent movement ]");
+            LOG.error("[ Error when creating unsent movement {}] {}",message,ex);
         }
     }
 
@@ -154,15 +163,14 @@ public class ExchangeEventOutgoingServiceBean implements ExchangeEventOutgoingSe
 	 */
     @Override
     public void forwardMdrSyncMessageToPlugin(@Observes @MdrSyncRequestMessageEvent ExchangeMessageEvent message) {
-        LOG.info("Received MdrSyncMessageEvent.");
+        LOG.info("Received MdrSyncMessageEvent:{}",message);
 
         TextMessage requestMessage = message.getJmsMessage();
         try {
             String marshalledReq = ExchangeToMdrRulesMapper.mapExchangeToMdrPluginRequest(requestMessage);
             producer.sendEventBusMessage(marshalledReq, ExchangeServiceConstants.MDR_PLUGIN_SERVICE_NAME);
-            LOG.info("Request object sent to MDR plugin.");
         } catch (Exception e) {
-            LOG.error("Something strange happend during message conversion",e);
+            LOG.error("Something strange happend during message conversion {} {}",message,e);
         }
     }
 
@@ -188,7 +196,6 @@ public class ExchangeEventOutgoingServiceBean implements ExchangeEventOutgoingSe
             exchangeErrorEvent.fire(new ExchangeMessageEvent(origin, ExchangeModuleResponseMapper.createFaultMessage(FaultCode.EXCHANGE_PLUGIN_INVALID, faultMessage)));
             return false;
         } else if (!StatusType.STARTED.equals(service.getStatus())) {
-            LOG.info("Plugin to send report to is not started");
             try {
                 List<UnsentMessageTypeProperty> unsentMessageProperties = ExchangeLogMapper.getUnsentMessageProperties(sendReport);
                 exchangeLog.createUnsentMessage(sendReport.getRecipient(), sendReport.getTimestamp(), ExchangeLogMapper.getSendMovementSenderReceiver(sendReport), origin.getText(), unsentMessageProperties, username);
@@ -210,7 +217,7 @@ public class ExchangeEventOutgoingServiceBean implements ExchangeEventOutgoingSe
 
     @Override
     public void sendCommandToPlugin(@Observes @SendCommandToPluginEvent ExchangeMessageEvent message) {
-        LOG.info("Send command to plugin");
+        LOG.info("Send command to plugin:{}",message);
         SetCommandRequest request = new SetCommandRequest();
         try {
             request = JAXBMarshaller.unmarshallTextMessage(message.getJmsMessage(), SetCommandRequest.class);
@@ -307,7 +314,7 @@ public class ExchangeEventOutgoingServiceBean implements ExchangeEventOutgoingSe
             exchangeErrorEvent.fire(new ExchangeMessageEvent(origin, ExchangeModuleResponseMapper.createFaultMessage(FaultCode.EXCHANGE_COMMAND_INVALID, faultMessage)));
             return false;
         } else if (!StatusType.STARTED.equals(service.getStatus())) {
-            LOG.info("Plugin to send report to is not started");
+            LOG.info("Plugin to send report to is not started:{}",service);
             try {
                 List<UnsentMessageTypeProperty> setUnsentMessageTypePropertiesForPoll = getSetUnsentMessageTypePropertiesForPoll(commandType);
                 exchangeLog.createUnsentMessage(service.getName(), command.getTimestamp(), command.getCommand().name(), origin.getText(), setUnsentMessageTypePropertiesForPoll, username);
