@@ -52,7 +52,7 @@ public class JAXBMarshaller {
             String marshalled = sw.toString();
             return marshalled;
         } catch (JAXBException ex) {
-            throw new ExchangeModelMarshallException("[ Error when marshalling Object to String ]");
+            throw new ExchangeModelMarshallException("[ Error when marshalling Object to String ]", ex);
         }
     }
 

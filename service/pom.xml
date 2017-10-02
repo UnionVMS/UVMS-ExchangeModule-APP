@@ -54,7 +54,6 @@
             <groupId>eu.europa.ec.fisheries.uvms.rules</groupId>
             <artifactId>rules-model</artifactId>
             <version>${rules.version}</version>
-            <classifier>date</classifier>
         </dependency>
         <dependency>
             <groupId>eu.europa.ec.fisheries.uvms.asset</groupId>
