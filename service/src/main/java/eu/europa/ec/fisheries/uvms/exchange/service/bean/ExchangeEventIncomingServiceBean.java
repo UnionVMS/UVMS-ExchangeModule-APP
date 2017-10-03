@@ -11,32 +11,8 @@
  */
 package eu.europa.ec.fisheries.uvms.exchange.service.bean;
 
-import java.util.List;
-
-import javax.ejb.EJB;
-import javax.ejb.Stateless;
-import javax.enterprise.event.Event;
-import javax.enterprise.event.Observes;
-import javax.inject.Inject;
-import javax.jms.JMSException;
-import javax.jms.TextMessage;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import eu.europa.ec.fisheries.schema.exchange.common.v1.AcknowledgeType;
-import eu.europa.ec.fisheries.schema.exchange.module.v1.GetServiceListRequest;
-import eu.europa.ec.fisheries.schema.exchange.module.v1.PingResponse;
-import eu.europa.ec.fisheries.schema.exchange.module.v1.ProcessedMovementResponse;
-import eu.europa.ec.fisheries.schema.exchange.module.v1.ReceiveSalesQueryRequest;
-import eu.europa.ec.fisheries.schema.exchange.module.v1.ReceiveSalesReportRequest;
-import eu.europa.ec.fisheries.schema.exchange.module.v1.ReceiveSalesResponseRequest;
-import eu.europa.ec.fisheries.schema.exchange.module.v1.SendSalesReportRequest;
-import eu.europa.ec.fisheries.schema.exchange.module.v1.SendSalesResponseRequest;
-import eu.europa.ec.fisheries.schema.exchange.module.v1.SetFLUXFAReportMessageRequest;
-import eu.europa.ec.fisheries.schema.exchange.module.v1.SetFLUXMDRSyncMessageExchangeResponse;
-import eu.europa.ec.fisheries.schema.exchange.module.v1.SetMovementReportRequest;
-import eu.europa.ec.fisheries.schema.exchange.module.v1.UpdateLogStatusRequest;
+import eu.europa.ec.fisheries.schema.exchange.module.v1.*;
 import eu.europa.ec.fisheries.schema.exchange.movement.v1.MovementBaseType;
 import eu.europa.ec.fisheries.schema.exchange.movement.v1.MovementRefType;
 import eu.europa.ec.fisheries.schema.exchange.movement.v1.MovementSourceType;
@@ -47,32 +23,13 @@ import eu.europa.ec.fisheries.schema.exchange.plugin.v1.AcknowledgeResponse;
 import eu.europa.ec.fisheries.schema.exchange.plugin.v1.ExchangePluginMethod;
 import eu.europa.ec.fisheries.schema.exchange.service.v1.ServiceResponseType;
 import eu.europa.ec.fisheries.schema.exchange.service.v1.StatusType;
-import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogStatusTypeType;
-import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogType;
-import eu.europa.ec.fisheries.schema.exchange.v1.LogRefType;
-import eu.europa.ec.fisheries.schema.exchange.v1.LogType;
-import eu.europa.ec.fisheries.schema.exchange.v1.PollStatus;
-import eu.europa.ec.fisheries.schema.exchange.v1.TypeRefType;
+import eu.europa.ec.fisheries.schema.exchange.v1.*;
 import eu.europa.ec.fisheries.schema.movement.module.v1.ProcessedMovementAck;
 import eu.europa.ec.fisheries.schema.rules.module.v1.RulesModuleMethod;
 import eu.europa.ec.fisheries.schema.rules.module.v1.SetFLUXMDRSyncMessageRulesResponse;
 import eu.europa.ec.fisheries.schema.rules.movement.v1.RawMovementType;
 import eu.europa.ec.fisheries.uvms.exchange.message.constants.MessageQueue;
-import eu.europa.ec.fisheries.uvms.exchange.message.event.ErrorEvent;
-import eu.europa.ec.fisheries.uvms.exchange.message.event.ExchangeLogEvent;
-import eu.europa.ec.fisheries.uvms.exchange.message.event.HandleProcessedMovementEvent;
-import eu.europa.ec.fisheries.uvms.exchange.message.event.MdrSyncResponseMessageEvent;
-import eu.europa.ec.fisheries.uvms.exchange.message.event.PingEvent;
-import eu.europa.ec.fisheries.uvms.exchange.message.event.PluginConfigEvent;
-import eu.europa.ec.fisheries.uvms.exchange.message.event.PluginPingEvent;
-import eu.europa.ec.fisheries.uvms.exchange.message.event.ReceiveSalesQueryEvent;
-import eu.europa.ec.fisheries.uvms.exchange.message.event.ReceiveSalesReportEvent;
-import eu.europa.ec.fisheries.uvms.exchange.message.event.ReceiveSalesResponseEvent;
-import eu.europa.ec.fisheries.uvms.exchange.message.event.SendSalesReportEvent;
-import eu.europa.ec.fisheries.uvms.exchange.message.event.SendSalesResponseEvent;
-import eu.europa.ec.fisheries.uvms.exchange.message.event.SetFluxFAReportMessageEvent;
-import eu.europa.ec.fisheries.uvms.exchange.message.event.SetMovementEvent;
-import eu.europa.ec.fisheries.uvms.exchange.message.event.UpdateLogStatusEvent;
+import eu.europa.ec.fisheries.uvms.exchange.message.event.*;
 import eu.europa.ec.fisheries.uvms.exchange.message.event.carrier.ExchangeMessageEvent;
 import eu.europa.ec.fisheries.uvms.exchange.message.event.carrier.PluginMessageEvent;
 import eu.europa.ec.fisheries.uvms.exchange.message.event.registry.PluginErrorEvent;
@@ -100,6 +57,17 @@ import eu.europa.ec.fisheries.uvms.movement.model.mapper.MovementModuleResponseM
 import eu.europa.ec.fisheries.uvms.rules.model.exception.RulesModelMapperException;
 import eu.europa.ec.fisheries.uvms.rules.model.exception.RulesModelMarshallException;
 import eu.europa.ec.fisheries.uvms.rules.model.mapper.RulesModuleRequestMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.ejb.EJB;
+import javax.ejb.Stateless;
+import javax.enterprise.event.Event;
+import javax.enterprise.event.Observes;
+import javax.inject.Inject;
+import javax.jms.JMSException;
+import javax.jms.TextMessage;
+import java.util.List;
 
 @Stateless
 public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingService {
@@ -377,15 +345,20 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
     public void sendSalesResponse(@Observes @SendSalesResponseEvent ExchangeMessageEvent message) {
         try {
             SendSalesResponseRequest request = JAXBMarshaller.unmarshallTextMessage(message.getJmsMessage(), SendSalesResponseRequest.class);
+            ExchangeLogStatusTypeType validationStatus = request.getValidationStatus();
 
-            eu.europa.ec.fisheries.schema.exchange.plugin.v1.SendSalesResponseRequest pluginRequest = new eu.europa.ec.fisheries.schema.exchange.plugin.v1.SendSalesResponseRequest();
-            pluginRequest.setRecipient(request.getSenderOrReceiver());
-            pluginRequest.setResponse(request.getResponse());
-            pluginRequest.setMethod(ExchangePluginMethod.SEND_SALES_RESPONSE);
+            exchangeLog.log(request, LogType.SEND_SALES_RESPONSE, validationStatus, TypeRefType.SALES_RESPONSE, request.getResponse(), false);
 
-            exchangeLog.log(request, LogType.SEND_SALES_RESPONSE, ExchangeLogStatusTypeType.SUCCESSFUL, TypeRefType.SALES_RESPONSE, request.getResponse(), false);
+            if (validationStatus == ExchangeLogStatusTypeType.SUCCESSFUL || validationStatus == ExchangeLogStatusTypeType.SUCCESSFUL_WITH_WARNINGS) {
+                eu.europa.ec.fisheries.schema.exchange.plugin.v1.SendSalesResponseRequest pluginRequest = new eu.europa.ec.fisheries.schema.exchange.plugin.v1.SendSalesResponseRequest();
+                pluginRequest.setRecipient(request.getSenderOrReceiver());
+                pluginRequest.setResponse(request.getResponse());
+                pluginRequest.setMethod(ExchangePluginMethod.SEND_SALES_RESPONSE);
 
-            exchangeEventOutgoingService.sendSalesResponseToFLUX(pluginRequest);
+                exchangeEventOutgoingService.sendSalesResponseToFLUX(pluginRequest);
+            } else {
+                LOG.error("Received invalid response from the Sales module: " + request.getResponse());
+            }
         } catch (ExchangeModelMarshallException | ExchangeMessageException e) {
             fireExchangeFault(message, "Error when sending a Sales response to FLUX", e);
         } catch (ExchangeLogException e) {
@@ -397,17 +370,24 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
     public void sendSalesReport(@Observes @SendSalesReportEvent ExchangeMessageEvent message) {
         try {
             SendSalesReportRequest request = JAXBMarshaller.unmarshallTextMessage(message.getJmsMessage(), SendSalesReportRequest.class);
-            eu.europa.ec.fisheries.schema.exchange.plugin.v1.SendSalesReportRequest pluginRequest = new eu.europa.ec.fisheries.schema.exchange.plugin.v1.SendSalesReportRequest();
-            pluginRequest.setRecipient(request.getSenderOrReceiver());
-            pluginRequest.setReport(request.getReport());
-            if (request.getSenderOrReceiver() != null) {
-                pluginRequest.setSenderOrReceiver(request.getSenderOrReceiver());
+            ExchangeLogStatusTypeType validationStatus = request.getValidationStatus();
+
+            exchangeLog.log(request, LogType.SEND_SALES_REPORT, validationStatus, TypeRefType.SALES_REPORT, request.getReport(), false);
+
+            if (validationStatus == ExchangeLogStatusTypeType.SUCCESSFUL || validationStatus == ExchangeLogStatusTypeType.SUCCESSFUL_WITH_WARNINGS) {
+                eu.europa.ec.fisheries.schema.exchange.plugin.v1.SendSalesReportRequest pluginRequest = new eu.europa.ec.fisheries.schema.exchange.plugin.v1.SendSalesReportRequest();
+                pluginRequest.setRecipient(request.getSenderOrReceiver());
+                pluginRequest.setReport(request.getReport());
+                if (request.getSenderOrReceiver() != null) {
+                    pluginRequest.setSenderOrReceiver(request.getSenderOrReceiver());
+                }
+                pluginRequest.setMethod(ExchangePluginMethod.SEND_SALES_RESPONSE);
+
+
+                exchangeEventOutgoingService.sendSalesReportToFLUX(pluginRequest);
+            } else {
+                LOG.error("Received invalid report from the Sales module: " + request.getReport());
             }
-            pluginRequest.setMethod(ExchangePluginMethod.SEND_SALES_RESPONSE);
-
-            exchangeLog.log(request, LogType.SEND_SALES_REPORT, ExchangeLogStatusTypeType.SUCCESSFUL, TypeRefType.SALES_REPORT, request.getReport(), false);
-
-            exchangeEventOutgoingService.sendSalesReportToFLUX(pluginRequest);
         } catch (ExchangeModelMarshallException | ExchangeMessageException e) {
             fireExchangeFault(message, "Error when sending a Sales response to FLUX", e);
         } catch (ExchangeLogException e) {
