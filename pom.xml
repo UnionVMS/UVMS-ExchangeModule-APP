@@ -33,7 +33,7 @@
         <exchange.model.version>4.0.1</exchange.model.version>
         <audit.model.version>4.0.0</audit.model.version>
         <movement.model.version>4.0.0</movement.model.version>
-        <rules.version>3.0.9-SNAPSHOT</rules.version>
+        <rules.version>3.0.9</rules.version>
         <asset.version>4.0.0</asset.version>
       
         <project.scm.id>github</project.scm.id>
