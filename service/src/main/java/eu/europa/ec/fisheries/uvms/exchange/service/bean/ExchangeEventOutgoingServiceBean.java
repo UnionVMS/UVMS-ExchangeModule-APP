@@ -68,6 +68,8 @@ import eu.europa.ec.fisheries.uvms.exchange.service.mapper.ExchangeLogMapper;
 import eu.europa.ec.fisheries.uvms.exchange.service.mapper.ExchangeToMdrRulesMapper;
 import eu.europa.ec.fisheries.wsdl.asset.types.Asset;
 
+import static eu.europa.ec.fisheries.schema.exchange.plugin.types.v1.PluginType.BELGIAN_ACTIVITY;
+
 @Stateless
 public class ExchangeEventOutgoingServiceBean implements ExchangeEventOutgoingService {
 
@@ -95,7 +97,8 @@ public class ExchangeEventOutgoingServiceBean implements ExchangeEventOutgoingSe
     @Override
     public void sendSalesResponseToFLUX(SendSalesResponseRequest sendSalesResponseRequest) throws ExchangeModelMarshallException, ExchangeMessageException {
         String marshalledRequest = JAXBMarshaller.marshallJaxBObjectToString(sendSalesResponseRequest);
-        producer.sendEventBusMessage(marshalledRequest, ExchangeServiceConstants.FLUX_SALES_PLUGIN_SERVICE_NAME);
+        final String serviceName = (sendSalesResponseRequest.getRecipient().equals("BELGIAN_SALES") ? ExchangeServiceConstants.BELGIAN_AUCTION_SALES_PLUGIN_SERVICE_NAME : ExchangeServiceConstants.FLUX_SALES_PLUGIN_SERVICE_NAME);
+        producer.sendEventBusMessage(marshalledRequest, serviceName);
     }
 
     @Override
@@ -269,7 +272,8 @@ public class ExchangeEventOutgoingServiceBean implements ExchangeEventOutgoingSe
             if (!request.getStatus().equals(ExchangeLogStatusTypeType.FAILED)) {
                 String text = ExchangePluginRequestMapper.createSetFLUXFAResponseRequest(request.getRequest(), request.getDestination(), request.getFluxDataFlow(), request.getSenderOrReceiver());
                 LOG.debug("Message to plugin {}", text);
-                String pluginMessageId = producer.sendEventBusMessage(text, ExchangeServiceConstants.FLUX_ACTIVITY_PLUGIN_SERVICE_NAME);
+                String pluginMessageId = producer.sendEventBusMessage(text, ((request.getPluginType() == BELGIAN_ACTIVITY)
+                        ? ExchangeServiceConstants.BELGIAN_ACTIVITY_PLUGIN_SERVICE_NAME : ExchangeServiceConstants.FLUX_ACTIVITY_PLUGIN_SERVICE_NAME));
                 LOG.debug("Message sent to Flux ERS Plugin :" + pluginMessageId);
                 exchangeLogStatusTypeType = ExchangeLogStatusTypeType.SUCCESSFUL;
             } else {
