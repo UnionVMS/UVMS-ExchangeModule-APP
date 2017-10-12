@@ -33,7 +33,6 @@
         <exchange.model.version>4.0.2</exchange.model.version>
         <audit.model.version>4.0.0</audit.model.version>
         <movement.model.version>4.0.0</movement.model.version>
-        <rules.version>3.0.9</rules.version>
         <rules.model.version>3.0.10</rules.model.version>
 
         <asset.version>4.0.0</asset.version>
