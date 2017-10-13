@@ -92,6 +92,15 @@ public class ExchangeModuleRequestMapper {
         return JAXBMarshaller.marshallJaxBObjectToString(receiveSalesResponseRequest);
     }
 
+    public static String createReceiveInvalidSalesMessage(String respondToInvalidMessageRequest, String userName) throws ExchangeModelMarshallException {
+        ReceiveInvalidSalesMessage receiveInvalidSalesMessage = new ReceiveInvalidSalesMessage();
+        receiveInvalidSalesMessage.setRespondToInvalidMessageRequest(respondToInvalidMessageRequest);
+        receiveInvalidSalesMessage.setUsername(userName);
+        receiveInvalidSalesMessage.setMethod(ExchangeModuleMethod.RECEIVE_INVALID_SALES_MESSAGE);
+
+        return JAXBMarshaller.marshallJaxBObjectToString(receiveInvalidSalesMessage);
+    }
+
     public static String createSendSalesResponseRequest(String response,
                                                  String guid, String dataFlow,
                                                  String senderOrReceiver, Date date,

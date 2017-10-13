@@ -341,6 +341,23 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
         }
     }
 
+
+    @Override
+    public void receiveInvalidSalesMessage(@Observes @ReceiveInvalidSalesMessageEvent ExchangeMessageEvent event) {
+        try {
+            ReceiveInvalidSalesMessage request = JAXBMarshaller.unmarshallTextMessage(event.getJmsMessage(), ReceiveInvalidSalesMessage.class);
+
+            exchangeLog.log(request, LogType.RECEIVE_SALES_REPORT, ExchangeLogStatusTypeType.FAILED, TypeRefType.SALES_REPORT, request.getRespondToInvalidMessageRequest(), true);
+
+            producer.sendMessageOnQueue(request.getRespondToInvalidMessageRequest(), MessageQueue.SALES);
+        } catch (ExchangeLogException e) {
+            firePluginFault(event, "Could not log the incoming invalid sales message", e);
+        } catch (ExchangeMessageException | ExchangeModelMarshallException e) {
+            firePluginFault(event, "Error when receiving an invalid sales message from FLUX", e);
+        }
+    }
+
+
     @Override
     public void sendSalesResponse(@Observes @SendSalesResponseEvent ExchangeMessageEvent message) {
         try {

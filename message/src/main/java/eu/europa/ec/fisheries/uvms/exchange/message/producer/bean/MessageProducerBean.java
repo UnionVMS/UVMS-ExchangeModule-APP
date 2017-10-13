@@ -26,6 +26,7 @@ import javax.jms.Session;
 import javax.jms.TextMessage;
 import javax.jms.Topic;
 
+import eu.europa.ec.fisheries.uvms.message.MessageConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -59,6 +60,7 @@ public class MessageProducerBean implements MessageProducer, ConfigMessageProduc
     private Queue movementResponseQueue;
     private Queue activityQueue;
     private Queue mdrQueue;
+    private Queue salesQueue;
     private ConnectionFactory connectionFactory;
 
     @PostConstruct
@@ -74,6 +76,7 @@ public class MessageProducerBean implements MessageProducer, ConfigMessageProduc
         eventBus = JMSUtils.lookupTopic(ExchangeModelConstants.PLUGIN_EVENTBUS);
         activityQueue = JMSUtils.lookupQueue(ExchangeModelConstants.ACTIVITY_EVENT_QUEUE);
         mdrQueue = JMSUtils.lookupQueue(ExchangeModelConstants.MDR_EVENT_QUEUE);
+        salesQueue = JMSUtils.lookupQueue(MessageConstants.QUEUE_SALES_EVENT);
     }
 
 
@@ -102,6 +105,9 @@ public class MessageProducerBean implements MessageProducer, ConfigMessageProduc
                     break;
                 case VESSEL:
                     getProducer(session, vesselQueue).send(message);
+                    break;
+                case SALES:
+                    getProducer(session, salesQueue).send(message);
                     break;
                 case AUDIT:
                     getProducer(session, auditQueue).send(message);
