@@ -34,6 +34,7 @@
                     <xsd:enumeration value="RECEIVE_SALES_REPORT"/>
                     <xsd:enumeration value="RECEIVE_SALES_QUERY"/>
                     <xsd:enumeration value="RECEIVE_SALES_RESPONSE"/>
+                    <xsd:enumeration value="RECEIVE_INVALID_SALES_MESSAGE"/> <!-- XSD validation of message failed -->
 
                     <!-- admin/config wants to-->
                     <xsd:enumeration value="PING"/>
@@ -123,6 +124,18 @@
                         <xsd:extension base="module:ExchangeBaseRequest">
                             <xsd:sequence>
                                 <xsd:element name="response" type="xsd:string"/>
+                            </xsd:sequence>
+                        </xsd:extension>
+                    </xsd:complexContent>
+                </xsd:complexType>
+            </xsd:element>
+
+            <xsd:element name="ReceiveInvalidSalesMessage">
+                <xsd:complexType>
+                    <xsd:complexContent>
+                        <xsd:extension base="module:ExchangeBaseRequest">
+                            <xsd:sequence>
+                                <xsd:element name="respondToInvalidMessageRequest" type="xsd:string"/>
                             </xsd:sequence>
                         </xsd:extension>
                     </xsd:complexContent>
