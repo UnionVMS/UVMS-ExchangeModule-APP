@@ -27,22 +27,23 @@
         <dozer.version>5.5.1</dozer.version>
 
         <longpolling.version>2.0.13</longpolling.version>
-        <uvms.common.version>2.0.27</uvms.common.version>
+        <uvms.common.version>2.0.29</uvms.common.version>
         <uvms.config.version>4.0.0</uvms.config.version>
         <usm4uvms.version>3.0.8</usm4uvms.version>
-        <exchange.model.version>4.0.2</exchange.model.version>
+        <exchange.model.version>4.0.3</exchange.model.version>
         <audit.model.version>4.0.0</audit.model.version>
         <movement.model.version>4.0.0</movement.model.version>
         <rules.model.version>3.0.10</rules.model.version>
 
         <asset.version>4.0.0</asset.version>
-      
+
         <project.scm.id>github</project.scm.id>
 
 		<scm.connection>scm:git:https://github.com/UnionVMS/UVMS-ExchangeModule-APP.git</scm.connection>
     </properties>
 
 	<dependencies>
+
 		<dependency>
 			<groupId>javax</groupId>
 			<artifactId>javaee-api</artifactId>
@@ -118,6 +119,9 @@
                     <url>https://apjenp01.dg3.be/nexus/repository/maven-snapshots/</url>
                 </snapshotRepository>
             </distributionManagement>
+            <properties>
+                <focus-pom.java.version>1.8</focus-pom.java.version>
+            </properties>
         </profile>
 		<profile>
 			<id>dg-mare</id>
