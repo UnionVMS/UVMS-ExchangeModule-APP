@@ -68,6 +68,10 @@ public class MessageConsumerBean implements MessageListener {
     Event<ExchangeMessageEvent> receiveSalesResponseEvent;
 
     @Inject
+    @ReceiveInvalidSalesMessageEvent
+    Event<ExchangeMessageEvent> receiveInvalidSalesMessageEvent;
+
+    @Inject
     @SendSalesReportEvent
     Event<ExchangeMessageEvent> sendSalesReportEvent;
 
@@ -174,6 +178,9 @@ public class MessageConsumerBean implements MessageListener {
                     break;
                 case RECEIVE_SALES_RESPONSE:
                     receiveSalesResponseEvent.fire(new ExchangeMessageEvent(textMessage));
+                    break;
+                case RECEIVE_INVALID_SALES_MESSAGE:
+                    receiveInvalidSalesMessageEvent.fire(new ExchangeMessageEvent(textMessage));
                     break;
                 case SEND_SALES_RESPONSE:
                     sendSalesResponseEvent.fire(new ExchangeMessageEvent(textMessage));
