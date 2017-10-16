@@ -5,17 +5,17 @@
 		<groupId>fish.focus.uvms.maven</groupId>
 		<artifactId>uvms-pom</artifactId>
 		<relativePath />
-		<version>1.11</version>
+		<version>1.12</version>
 	</parent>
 
     <groupId>eu.europa.ec.fisheries.uvms.exchange</groupId>
     <artifactId>exchange</artifactId>
-    <version>4.0.1-SNAPSHOT</version>
+    <version>4.0.3-SNAPSHOT</version>
     <packaging>pom</packaging>
     <description>Maven projekt-archetype for UnionVms modules</description>
     
     <properties>
-    	<exchange.api.check.against.version>4.0.0</exchange.api.check.against.version>
+    	<docker.dev.version>3.13.0</docker.dev.version>
         <mockito.version>1.10.19</mockito.version>
         <junit.version>4.12</junit.version>
         <javaee.version>7.0</javaee.version>
@@ -30,9 +30,11 @@
         <uvms.common.version>2.0.29</uvms.common.version>
         <uvms.config.version>4.0.0</uvms.config.version>
         <usm4uvms.version>3.0.8</usm4uvms.version>
+        <exchange.model.version>4.0.2</exchange.model.version>
         <audit.model.version>4.0.0</audit.model.version>
         <movement.model.version>4.0.0</movement.model.version>
-        <rules.version>3.0.9-SNAPSHOT</rules.version>
+        <rules.model.version>3.0.10</rules.model.version>
+
         <asset.version>4.0.0</asset.version>
 
         <project.scm.id>github</project.scm.id>
@@ -52,31 +54,31 @@
         	<dependency>
 				<groupId>fish.focus.uvms.maven</groupId>
 				<artifactId>uvms-pom-gis-deps</artifactId>
-				<version>1.11</version>
+				<version>1.12</version>
 				<type>pom</type>
 			</dependency>
 			<dependency>
 				<groupId>fish.focus.uvms.maven</groupId>
 				<artifactId>uvms-pom-logging-deps</artifactId>
-				<version>1.11</version>
+				<version>1.12</version>
 				<type>pom</type>
 			</dependency>
 			<dependency>
 				<groupId>fish.focus.uvms.maven</groupId>
 				<artifactId>uvms-pom-monitoring-deps</artifactId>
-				<version>1.11</version>
+				<version>1.12</version>
 				<type>pom</type>
 			</dependency>
 			<dependency>
 				<groupId>fish.focus.uvms.maven</groupId>
 				<artifactId>uvms-pom-test-deps</artifactId>
-				<version>1.11</version>
+				<version>1.12</version>
 				<type>pom</type>
 			</dependency>
 			<dependency>
 				<groupId>fish.focus.uvms.maven</groupId>
 				<artifactId>uvms-pom-arquillian-deps</artifactId>
-				<version>1.11</version>
+				<version>1.12</version>
 				<type>pom</type>
 			</dependency>
         </dependencies>
@@ -156,7 +158,6 @@
     </build>
     
     <modules>
-    	<module>model</module>
         <module>LIQUIBASE</module>
         <module>domain</module>
         <module>rest</module>

@@ -9,7 +9,7 @@
     <parent>
         <groupId>eu.europa.ec.fisheries.uvms.exchange</groupId>
         <artifactId>exchange</artifactId>
-        <version>4.0.1-SNAPSHOT</version>
+        <version>4.0.3-SNAPSHOT</version>
     </parent>
     
     <!-- PROPERTIES USED FOR LOGBACK -->
@@ -29,7 +29,7 @@
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>exchange-model</artifactId>
-            <version>${project.version}</version>
+            <version>${exchange.model.version}</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
@@ -53,7 +53,7 @@
         <dependency>
             <groupId>eu.europa.ec.fisheries.uvms.rules</groupId>
             <artifactId>rules-model</artifactId>
-            <version>${rules.version}</version>
+            <version>${rules.model.version}</version>
         </dependency>
         <dependency>
             <groupId>eu.europa.ec.fisheries.uvms.asset</groupId>
