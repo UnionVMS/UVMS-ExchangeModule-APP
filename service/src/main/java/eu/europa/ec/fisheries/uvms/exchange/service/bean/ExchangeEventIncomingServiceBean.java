@@ -57,8 +57,7 @@ import eu.europa.ec.fisheries.uvms.movement.model.mapper.MovementModuleResponseM
 import eu.europa.ec.fisheries.uvms.rules.model.exception.RulesModelMapperException;
 import eu.europa.ec.fisheries.uvms.rules.model.exception.RulesModelMarshallException;
 import eu.europa.ec.fisheries.uvms.rules.model.mapper.RulesModuleRequestMapper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
@@ -68,15 +67,6 @@ import javax.inject.Inject;
 import javax.jms.JMSException;
 import javax.jms.TextMessage;
 import java.util.List;
-import java.util.List;
-import javax.ejb.EJB;
-import javax.ejb.Stateless;
-import javax.enterprise.event.Event;
-import javax.enterprise.event.Observes;
-import javax.inject.Inject;
-import javax.jms.JMSException;
-import javax.jms.TextMessage;
-import lombok.extern.slf4j.Slf4j;
 
 @Stateless
 @Slf4j
@@ -382,7 +372,7 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
 
                 exchangeEventOutgoingService.sendSalesResponseToFLUX(pluginRequest);
             } else {
-                LOG.error("Received invalid response from the Sales module: " + request.getResponse());
+                log.error("Received invalid response from the Sales module: " + request.getResponse());
             }
         } catch (ExchangeModelMarshallException | ExchangeMessageException e) {
             fireExchangeFault(message, "Error when sending a Sales response to FLUX", e);
@@ -411,7 +401,7 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
 
                 exchangeEventOutgoingService.sendSalesReportToFLUX(pluginRequest);
             } else {
-                LOG.error("Received invalid report from the Sales module: " + request.getReport());
+                log.error("Received invalid report from the Sales module: " + request.getReport());
             }
         } catch (ExchangeModelMarshallException | ExchangeMessageException e) {
             fireExchangeFault(message, "Error when sending a Sales response to FLUX", e);
