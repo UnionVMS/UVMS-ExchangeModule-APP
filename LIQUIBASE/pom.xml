@@ -121,7 +121,7 @@
 									<goal>stop</goal>
 								</goals>
 								<configuration>
-									<allContainers>false</allContainers>
+									<allContainers>true</allContainers>
 								</configuration>
 							</execution>
 							<execution>
