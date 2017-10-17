@@ -109,10 +109,10 @@ public class ExchangeEventOutgoingServiceBean implements ExchangeEventOutgoingSe
 
     @Override
     public void sendReportToPlugin(@Observes @SendReportToPluginEvent ExchangeMessageEvent message) {
-        LOG.info("Send report to plugin: {}",message);
 
         try {
             SendMovementToPluginRequest request = JAXBMarshaller.unmarshallTextMessage(message.getJmsMessage(), SendMovementToPluginRequest.class);
+            LOG.info("Send report to plugin: {}",request);
             SendMovementToPluginType sendReport = request.getReport();
 
             List<PluginType> type = new ArrayList<>();
@@ -163,11 +163,11 @@ public class ExchangeEventOutgoingServiceBean implements ExchangeEventOutgoingSe
 	 */
     @Override
     public void forwardMdrSyncMessageToPlugin(@Observes @MdrSyncRequestMessageEvent ExchangeMessageEvent message) {
-        LOG.info("Received MdrSyncMessageEvent:{}",message);
 
         TextMessage requestMessage = message.getJmsMessage();
         try {
             String marshalledReq = ExchangeToMdrRulesMapper.mapExchangeToMdrPluginRequest(requestMessage);
+            LOG.info("Received MdrSyncMessageEvent:{}",marshalledReq);
             producer.sendEventBusMessage(marshalledReq, ExchangeServiceConstants.MDR_PLUGIN_SERVICE_NAME);
         } catch (Exception e) {
             LOG.error("Something strange happend during message conversion {} {}",message,e);
@@ -217,10 +217,10 @@ public class ExchangeEventOutgoingServiceBean implements ExchangeEventOutgoingSe
 
     @Override
     public void sendCommandToPlugin(@Observes @SendCommandToPluginEvent ExchangeMessageEvent message) {
-        LOG.info("Send command to plugin:{}",message);
         SetCommandRequest request = new SetCommandRequest();
         try {
             request = JAXBMarshaller.unmarshallTextMessage(message.getJmsMessage(), SetCommandRequest.class);
+            LOG.info("Send command to plugin:{}",request);
             String pluginName = request.getCommand().getPluginName();
             CommandType commandType = request.getCommand();
             ServiceResponseType service = exchangeService.getService(pluginName);

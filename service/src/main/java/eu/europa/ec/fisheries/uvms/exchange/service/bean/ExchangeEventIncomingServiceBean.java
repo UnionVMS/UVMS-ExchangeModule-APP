@@ -102,9 +102,9 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
 
     @Override
     public void processFLUXFAReportMessage(@Observes @SetFluxFAReportMessageEvent ExchangeMessageEvent message) {
-        log.info("Process FLUXFAReportMessage:{}",message);
         try {
             SetFLUXFAReportMessageRequest request = JAXBMarshaller.unmarshallTextMessage(message.getJmsMessage(), SetFLUXFAReportMessageRequest.class);
+            log.info("Process FLUXFAReportMessage:{}",request);
             eu.europa.ec.fisheries.schema.rules.exchange.v1.PluginType rulesPluginType;
             switch (request.getPluginType()) {
                 case MANUAL:
@@ -148,11 +148,11 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
 	 */
     @Override
     public void sendResponseToRulesModule(@Observes @MdrSyncResponseMessageEvent ExchangeMessageEvent message) {
-        log.info("Received @MdrSyncResponseMessageEvent.:{}",message);
 
         TextMessage requestMessage = message.getJmsMessage();
         try {
             SetFLUXMDRSyncMessageExchangeResponse exchangeResponse = JAXBMarshaller.unmarshallTextMessage(requestMessage, SetFLUXMDRSyncMessageExchangeResponse.class);
+            log.info("Received @MdrSyncResponseMessageEvent.:{}",exchangeResponse);
             String strRequest = exchangeResponse.getRequest();
             SetFLUXMDRSyncMessageRulesResponse mdrResponse = new SetFLUXMDRSyncMessageRulesResponse();
             mdrResponse.setMethod(RulesModuleMethod.GET_FLUX_MDR_SYNC_RESPONSE);
@@ -168,10 +168,10 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
 
     @Override
     public void getPluginListByTypes(@Observes @PluginConfigEvent ExchangeMessageEvent message) {
-        log.info("Get plugin config LIST_SERVICE:{}",message);
         try {
             TextMessage jmsMessage = message.getJmsMessage();
             GetServiceListRequest request = JAXBMarshaller.unmarshallTextMessage(jmsMessage, GetServiceListRequest.class);
+            log.info("Get plugin config LIST_SERVICE:{}",request);
             List<ServiceResponseType> serviceList = exchangeService.getServiceList(request.getType());
             producer.sendModuleResponseMessage(message.getJmsMessage(), ExchangeModuleResponseMapper.mapServiceListResponse(serviceList));
         } catch (ExchangeException e) {
@@ -183,9 +183,9 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
 
     @Override
     public void processMovement(@Observes @SetMovementEvent ExchangeMessageEvent message) {
-        log.info("Process movement:{}",message);
         try {
             SetMovementReportRequest request = JAXBMarshaller.unmarshallTextMessage(message.getJmsMessage(), SetMovementReportRequest.class);
+            log.info("Process movement:{}",request);
             String username;
 
             // A person has created a position
@@ -267,10 +267,10 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
 
     @Override
     public void receiveSalesReport(@Observes @ReceiveSalesReportEvent ExchangeMessageEvent event) {
-        log.info("Receive sales report in Exchange module:{}",event);
 
         try {
             ReceiveSalesReportRequest request = JAXBMarshaller.unmarshallTextMessage(event.getJmsMessage(), ReceiveSalesReportRequest.class);
+            log.info("Receive sales report in Exchange module:{}",request);
             String report = request.getReport();
             PluginType plugin = request.getPluginType();
             String sender = request.getSenderOrReceiver();
@@ -295,10 +295,10 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
 
     @Override
     public void receiveSalesQuery(@Observes @ReceiveSalesQueryEvent ExchangeMessageEvent event) {
-        log.info("Process sales query in Exchange module:{}",event);
 
         try {
             ReceiveSalesQueryRequest request = JAXBMarshaller.unmarshallTextMessage(event.getJmsMessage(), ReceiveSalesQueryRequest.class);
+            log.info("Process sales query in Exchange module:{}",request);
             String query = request.getQuery();
             PluginType plugin = request.getPluginType();
             String sender = request.getSenderOrReceiver();
@@ -428,9 +428,9 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
     // Async response handler for processed movements
     @Override
     public void handleProcessedMovement(@Observes @HandleProcessedMovementEvent ExchangeMessageEvent message) {
-        log.debug("Received processed movement from Rules:{}",message);
         try {
             ProcessedMovementResponse request = JAXBMarshaller.unmarshallTextMessage(message.getJmsMessage(), ProcessedMovementResponse.class);
+            log.debug("Received processed movement from Rules:{}",request);
             String username;
             MovementRefType movementRefType = request.getMovementRefType();
             SetReportMovementType orgRequest = request.getOrgRequest();
