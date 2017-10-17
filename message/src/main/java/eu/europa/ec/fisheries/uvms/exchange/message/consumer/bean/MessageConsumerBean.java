@@ -134,10 +134,10 @@ public class MessageConsumerBean implements MessageListener {
     @Override
     @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
     public void onMessage(Message message) {
-        LOG.info("Message received in Exchange Message MDB:{}",message);
 
         TextMessage textMessage = (TextMessage) message;
         ExchangeBaseRequest request = tryConsumeExchangeBaseRequest(textMessage);
+        LOG.info("ExchangeBaseRequest received in Exchange Message MDB:{}",request);
         if (request == null) {
             try {
                 //Handle PingResponse from plugin

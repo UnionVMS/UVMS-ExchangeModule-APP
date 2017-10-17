@@ -208,7 +208,7 @@ public class MessageProducerBean implements MessageProducer, ConfigMessageProduc
     public void sendModuleResponseMessage(TextMessage message, String text) {
         Connection connection = null;
         try {
-            LOG.info("Sending message back to recipient from ExchangeModule with correlationId {} on queue: {}", message.getJMSMessageID(), message.getJMSReplyTo());
+            LOG.info("Sending message back to recipient from ExchangeModule with text {} on queue: {}", text, message.getJMSReplyTo());
             connection = connectionFactory.createConnection();
             final Session session = JMSUtils.connectToQueue(connection);
             TextMessage response = session.createTextMessage(text);
@@ -226,7 +226,7 @@ public class MessageProducerBean implements MessageProducer, ConfigMessageProduc
         Connection connection = null;
 
         try {
-            LOG.info("Sending message asynchronous back to recipient from ExchangeModule with correlationId {} on queue: {}", messageId, queue);
+            LOG.info("Sending message asynchronous back to recipient from ExchangeModule with text {} on queue: {}", text, queue);
             connection = connectionFactory.createConnection();
             final Session session = JMSUtils.connectToQueue(connection);
             TextMessage response = session.createTextMessage(text);
