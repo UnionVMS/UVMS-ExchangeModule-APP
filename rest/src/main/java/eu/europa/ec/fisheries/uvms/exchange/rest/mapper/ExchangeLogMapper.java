@@ -13,7 +13,7 @@ package eu.europa.ec.fisheries.uvms.exchange.rest.mapper;
 
 import eu.europa.ec.fisheries.schema.exchange.source.v1.GetLogListByQueryResponse;
 import eu.europa.ec.fisheries.schema.exchange.v1.*;
-import eu.europa.ec.fisheries.uvms.common.DateUtils;
+import eu.europa.ec.fisheries.uvms.commons.date.DateUtils;
 import eu.europa.ec.fisheries.uvms.exchange.rest.dto.LogTypeLabel;
 import eu.europa.ec.fisheries.uvms.exchange.rest.dto.exchange.*;
 
