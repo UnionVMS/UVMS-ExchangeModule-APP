@@ -15,7 +15,7 @@
     <description>Maven projekt-archetype for UnionVms modules</description>
     
     <properties>
-    	<docker.dev.version>3.15.0</docker.dev.version>
+    	<docker.dev.version>3.16.0</docker.dev.version>
         <mockito.version>1.10.19</mockito.version>
         <junit.version>4.12</junit.version>
         <javaee.version>7.0</javaee.version>
@@ -28,9 +28,9 @@
         <lombok.version>1.16.18</lombok.version>
 
         <longpolling.version>2.0.13</longpolling.version>
-        <uvms.common.version>3.0.0</uvms.common.version>
+        <uvms.common.version>3.0.2</uvms.common.version>
         <uvms.config.version>4.0.0</uvms.config.version>
-        <usm4uvms.version>4.0.0</usm4uvms.version>
+        <usm4uvms.version>4.0.1</usm4uvms.version>
         <exchange.model.version>4.0.3</exchange.model.version>
         <audit.model.version>4.0.1</audit.model.version>
         <movement.model.version>4.0.2</movement.model.version>
