@@ -31,7 +31,7 @@
         <uvms.common.version>3.0.3</uvms.common.version>
         <uvms.config.version>4.0.0</uvms.config.version>
         <usm4uvms.version>4.0.2</usm4uvms.version>
-        <exchange.model.version>4.0.3</exchange.model.version>
+        <exchange.model.version>4.0.4</exchange.model.version>
         <audit.model.version>4.0.1</audit.model.version>
         <movement.model.version>4.0.2</movement.model.version>
         <rules.model.version>3.0.11</rules.model.version>
