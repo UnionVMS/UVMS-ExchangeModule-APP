@@ -32,11 +32,11 @@
         <uvms.config.version>4.0.0</uvms.config.version>
         <usm4uvms.version>4.0.2</usm4uvms.version>
         <exchange.model.version>4.0.4</exchange.model.version>
-        <audit.model.version>4.0.3</audit.model.version>
-        <movement.model.version>4.0.6</movement.model.version>
-        <rules.model.version>3.0.15</rules.model.version>
+        <audit.model.version>4.0.4</audit.model.version>
+        <movement.model.version>4.0.7</movement.model.version>
+        <rules.model.version>3.0.16</rules.model.version>
 
-        <asset.version>4.0.3</asset.version>
+        <asset.version>4.0.4</asset.version>
 
         <project.scm.id>github</project.scm.id>
 
