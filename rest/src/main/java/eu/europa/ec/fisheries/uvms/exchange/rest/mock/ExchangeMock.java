@@ -11,6 +11,7 @@ copy of the GNU General Public License along with the IFDM Suite. If not, see <h
  */
 package eu.europa.ec.fisheries.uvms.exchange.rest.mock;
 
+import eu.europa.ec.fisheries.schema.exchange.v1.SourceType;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -102,13 +103,24 @@ public class ExchangeMock {
 
 	public static Map<String, List> mockConfiguration() {
 		Map<String, List> configuration = new HashMap<>();
+
 		List<ExchangeLogStatusTypeType> statusList = new ArrayList<>();
 		statusList.addAll(Arrays.asList(ExchangeLogStatusTypeType.values()));
 		configuration.put("STATUS", statusList);
+
 		List<String> recipientList = new ArrayList<>();
 		recipientList.add("DNK");
 		recipientList.add("FIN");
 		configuration.put("RECIPIENT", recipientList);
+
+		List<TypeRefType> refTypes = new ArrayList<>();
+		refTypes.addAll(Arrays.asList(TypeRefType.values()));
+		configuration.put("TYPE", refTypes);
+
+		List<SourceType> sources = new ArrayList<>();
+		sources.addAll(Arrays.asList(SourceType.values()));
+		configuration.put("SOURCE", refTypes);
+
 		return configuration;
 	}
 }
