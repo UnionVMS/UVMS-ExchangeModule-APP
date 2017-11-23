@@ -69,13 +69,13 @@ public class RegistryBusEventListener implements MessageListener {
     @Override
     public void onMessage(Message message) {
 
-        LOG.info("Eventbus listener for Exchange Registry (ExchangeModelConstants.EXCHANGE_REGISTER_SERVICE): {} {}", ExchangeModelConstants.EXCHANGE_REGISTER_SERVICE,message);
 
         TextMessage textMessage = (TextMessage) message;
         ServiceType settings = null;
 
         try {
             ExchangeRegistryBaseRequest request = JAXBMarshaller.unmarshallTextMessage(textMessage, ExchangeRegistryBaseRequest.class);
+            LOG.info("Eventbus listener for Exchange Registry (ExchangeModelConstants.EXCHANGE_REGISTER_SERVICE): {} {}", ExchangeModelConstants.EXCHANGE_REGISTER_SERVICE,request);
             switch (request.getMethod()) {
                 case REGISTER_SERVICE:
                     RegisterServiceRequest regReq = JAXBMarshaller.unmarshallTextMessage(textMessage, RegisterServiceRequest.class);

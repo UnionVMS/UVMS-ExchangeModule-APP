@@ -9,7 +9,7 @@
     <parent>
         <groupId>eu.europa.ec.fisheries.uvms.exchange</groupId>
         <artifactId>exchange</artifactId>
-        <version>4.0.3-SNAPSHOT</version>
+        <version>4.0.8-SNAPSHOT</version>
     </parent>
     
     <dependencies>
@@ -30,15 +30,9 @@
             <version>${uvms.config.version}</version>
         </dependency>
         <dependency>
-            <groupId>eu.europa.ec.fisheries.uvms</groupId>
-            <artifactId>uvms-commons</artifactId>
+            <groupId>eu.europa.ec.fisheries.uvms.commons</groupId>
+            <artifactId>uvms-commons-message</artifactId>
             <version>${uvms.common.version}</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.geotools</groupId>
-                    <artifactId>gt-geojson</artifactId>
-                </exclusion>
-            </exclusions>
         </dependency>
 
     </dependencies>

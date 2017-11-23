@@ -5,17 +5,17 @@
 		<groupId>fish.focus.uvms.maven</groupId>
 		<artifactId>uvms-pom</artifactId>
 		<relativePath />
-		<version>1.12</version>
+		<version>1.14</version>
 	</parent>
 
     <groupId>eu.europa.ec.fisheries.uvms.exchange</groupId>
     <artifactId>exchange</artifactId>
-    <version>4.0.3-SNAPSHOT</version>
+    <version>4.0.8-SNAPSHOT</version>
     <packaging>pom</packaging>
     <description>Maven projekt-archetype for UnionVms modules</description>
     
     <properties>
-    	<docker.dev.version>3.13.0</docker.dev.version>
+    	<docker.dev.version>3.19.0</docker.dev.version>
         <mockito.version>1.10.19</mockito.version>
         <junit.version>4.12</junit.version>
         <javaee.version>7.0</javaee.version>
@@ -25,17 +25,18 @@
         <joda-time.version>2.7</joda-time.version>
         <logback.core.version>1.2.3</logback.core.version>
         <dozer.version>5.5.1</dozer.version>
+        <lombok.version>1.16.18</lombok.version>
 
         <longpolling.version>2.0.13</longpolling.version>
-        <uvms.common.version>2.0.29</uvms.common.version>
+        <uvms.common.version>3.0.5</uvms.common.version>
         <uvms.config.version>4.0.0</uvms.config.version>
-        <usm4uvms.version>3.0.8</usm4uvms.version>
-        <exchange.model.version>4.0.3</exchange.model.version>
-        <audit.model.version>4.0.0</audit.model.version>
-        <movement.model.version>4.0.0</movement.model.version>
-        <rules.model.version>3.0.10</rules.model.version>
+        <usm4uvms.version>4.0.4</usm4uvms.version>
+        <exchange.model.version>4.0.5</exchange.model.version>
+        <audit.model.version>4.0.4</audit.model.version>
+        <movement.model.version>4.0.7</movement.model.version>
+        <rules.model.version>3.0.16</rules.model.version>
 
-        <asset.version>4.0.0</asset.version>
+        <asset.version>4.0.4</asset.version>
 
         <project.scm.id>github</project.scm.id>
 
@@ -54,31 +55,31 @@
         	<dependency>
 				<groupId>fish.focus.uvms.maven</groupId>
 				<artifactId>uvms-pom-gis-deps</artifactId>
-				<version>1.12</version>
+				<version>1.14</version>
 				<type>pom</type>
 			</dependency>
 			<dependency>
 				<groupId>fish.focus.uvms.maven</groupId>
 				<artifactId>uvms-pom-logging-deps</artifactId>
-				<version>1.12</version>
+				<version>1.14</version>
 				<type>pom</type>
 			</dependency>
 			<dependency>
 				<groupId>fish.focus.uvms.maven</groupId>
 				<artifactId>uvms-pom-monitoring-deps</artifactId>
-				<version>1.12</version>
+				<version>1.14</version>
 				<type>pom</type>
 			</dependency>
 			<dependency>
 				<groupId>fish.focus.uvms.maven</groupId>
 				<artifactId>uvms-pom-test-deps</artifactId>
-				<version>1.12</version>
+				<version>1.14</version>
 				<type>pom</type>
 			</dependency>
 			<dependency>
 				<groupId>fish.focus.uvms.maven</groupId>
 				<artifactId>uvms-pom-arquillian-deps</artifactId>
-				<version>1.12</version>
+				<version>1.14</version>
 				<type>pom</type>
 			</dependency>
         </dependencies>
