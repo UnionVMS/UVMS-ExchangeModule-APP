@@ -11,6 +11,14 @@ copy of the GNU General Public License along with the IFDM Suite. If not, see <h
  */
 package eu.europa.ec.fisheries.uvms.exchange.search;
 
+import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeHistoryListQuery;
+import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeListCriteriaPair;
+import eu.europa.ec.fisheries.schema.exchange.v1.SearchField;
+import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeSearchMapperException;
+import eu.europa.ec.fisheries.uvms.exchange.model.util.DateUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -18,14 +26,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeHistoryListQuery;
-import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeListCriteriaPair;
-import eu.europa.ec.fisheries.schema.exchange.v1.SearchField;
-import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeSearchMapperException;
 
 /**
  **/
@@ -59,7 +59,6 @@ public class SearchFieldMapper {
     }
 
     /**
-     *
      * Creates a JPQL count query based on the search fields. This is used for
      * when paginating lists
      *
@@ -83,7 +82,6 @@ public class SearchFieldMapper {
     }
 
     /**
-     *
      * Created the complete search SQL with joins and sets the values based on
      * the criterias
      *
@@ -118,17 +116,17 @@ public class SearchFieldMapper {
                 if (criteria.getValue().size() == 1) {
                     SearchValue searchValue = criteria.getValue().get(0);
                     builder
-                    		.append(" ( ")
+                            .append(" ( ")
                             .append(buildTableAliasname(searchValue.getField()))
-                            .append(setValueAsType(searchValue))
+                            .append(setParameter(searchValue))
                             .append(" OR ").append(buildTableAliasname(searchValue.getField())).append(" IS NULL ")
                             .append(" ) ");
                 } else if (criteria.getValue().size() > 1) {
-                	builder
-                		.append(" ( ")
-                		.append(buildTableAliasname(criteria.getKey())).append(" IN (:").append(criteria.getKey().getSQLReplacementToken()).append(") ")
-                		.append(" OR ").append(buildTableAliasname(criteria.getKey())).append(" IS NULL ")
-                		.append(" ) ");
+                    builder
+                            .append(" ( ")
+                            .append(buildTableAliasname(criteria.getKey())).append(" IN (:").append(criteria.getKey().getSQLReplacementToken()).append(") ")
+                            .append(" OR ").append(buildTableAliasname(criteria.getKey())).append(" IS NULL ")
+                            .append(" ) ");
                 }
             }
         }
@@ -136,18 +134,7 @@ public class SearchFieldMapper {
         return builder.toString();
     }
 
-    /**
-     *
-     * Creates at String that sets values based on what class the SearchValue
-     * has. A String class returns [ = 'value' ] A Integer returns [ = value ]
-     * Date is specificaly handled and can return [ >= 'datavalue' ] or [ <=
-     * 'datavalue' ]
-     *
-     * @param entry
-     * @return
-     * @throws ParseException
-     */
-    private static String setValueAsType(SearchValue entry) throws ParseException {
+    private static String setParameter(SearchValue entry) throws ParseException {
         StringBuilder builder = new StringBuilder();
         if (entry.getField().getClazz().isAssignableFrom(Date.class)) {
             switch (entry.getField()) {
@@ -162,20 +149,15 @@ public class SearchFieldMapper {
                     break;
             }
         } else {
-        	if(entry.getValue().contains("*")) {
-        		builder.append(" LIKE ").append(buildValueFromClassType(entry));
-        	} else {
-        		builder.append(" = ").append(buildValueFromClassType(entry));
-        	}
+            builder.append(" = ").append(":").append(entry.getField().getSQLReplacementToken());
         }
 
         return builder.toString();
     }
 
     /**
-     *
      * Builds a table alias for the query based on the search field
-     *
+     * <p>
      * EG [ theTableAlias.theColumnName ]
      *
      * @param field
@@ -187,70 +169,39 @@ public class SearchFieldMapper {
         return builder.toString();
     }
 
-    /**
-     *
-     * Returns the representation of the value
-     *
-     * if Integer [ value ] else [ 'value' ]
-     *
-     *
-     * @param entry
-     * @return
-     */
-    private static String buildValueFromClassType(SearchValue entry) {
-        StringBuilder builder = new StringBuilder();
-        if (entry.getField().getClazz().isAssignableFrom(Integer.class)) {
-            builder.append(entry.getValue());
-        } else if(entry.getField().getClazz().isAssignableFrom(Boolean.class)){
-        	if("TRUE".equalsIgnoreCase(entry.getValue()) || "T".equalsIgnoreCase(entry.getValue())) {
-        		builder.append(true);
-        	} else {
-        		builder.append(false);
-        	}
-        } else {
-        	if(entry.getValue().contains("*")) {
-        		String value = entry.getValue().replace("*", "%");
-        		builder.append("'").append(value).append("'");
-        	} else {
-        		builder.append("'").append(entry.getValue()).append("'");
-        	}
-        }
-        return builder.toString();
-    }
-
-    /**
-     *
-     * Builds an IN JPQL representation for lists of values
-     *
-     * The resulting String = [ mc.value IN ( 'ABC123', 'ABC321' ) ]
-     *
-     *
-     * @param searchValues
-     * @param field
-     * @return
-     */
-    private static String buildInSqlStatement(List<SearchValue> searchValues, ExchangeSearchField field) {
+    public static <T> T buildValueFromClassType(SearchValue entry, Class<T> valueType) {
         StringBuilder builder = new StringBuilder();
 
-        builder.append(buildTableAliasname(field));
+        try {
+            if (valueType.isAssignableFrom(String.class)) {
+                if (entry.getValue().contains("*")) {
+                    String value = entry.getValue().replace("*", "%");
+                    builder.append("'").append(value).append("'");
+                } else {
+                    builder.append(entry.getValue());
+                }
 
-        builder.append(" IN ( ");
-        
-        boolean first = true;
-        for (SearchValue searchValue : searchValues) {
-            if (first) {
-                first = false;
-                builder.append(buildValueFromClassType(searchValue));
-            } else {
-                builder.append(", ").append(buildValueFromClassType(searchValue));
+                return valueType.cast(builder.toString());
+            } else if (valueType.isAssignableFrom(Boolean.class)) {
+                if ("TRUE".equalsIgnoreCase(entry.getValue()) || "T".equalsIgnoreCase(entry.getValue())) {
+                    return valueType.cast(Boolean.TRUE);
+                } else {
+                    return valueType.cast(Boolean.FALSE);
+                }
+            } else if (valueType.isAssignableFrom(Date.class)) {
+                return valueType.cast(DateUtils.parseToUTCDateTime(entry.getValue()));
+            } else if (valueType.isAssignableFrom(Integer.class)) {
+                return valueType.cast(Integer.valueOf(entry.getValue()));
             }
+
+            return valueType.cast(entry.getValue());
+        } catch (ClassCastException cce) {
+            LOG.error("Error casting parameter: " + entry.getField().getFieldName() + " having value: " + entry.getValue(), cce);
+            return null;
         }
-        builder.append(" )");
-        return builder.toString();
     }
 
     /**
-     *
      * Takes all the search values and categorizes them in lists to a key
      * according to the SearchField
      *
@@ -271,13 +222,12 @@ public class SearchFieldMapper {
     }
 
     /**
-     *
      * Converts List<ListCriteria> to List<SearchValue> so that a JPQL query can
      * be built based on the criterias
      *
      * @param listCriterias
      * @return
-     * @throws MovementDaoMappingException
+     * @throws ExchangeSearchMapperException
      */
     public static List<SearchValue> mapSearchField(List<ExchangeListCriteriaPair> listCriterias) throws ExchangeSearchMapperException {
 
@@ -300,18 +250,17 @@ public class SearchFieldMapper {
     }
 
     /**
-     *
      * Maps the Search Key to a SearchField. All SearchKeys that are not a part
      * of Movement are excluded
      *
      * @param key
      * @return
-     * @throws MovementSearchMapperException
+     * @throws ExchangeSearchMapperException
      */
     private static ExchangeSearchField mapCriteria(SearchField key) throws ExchangeSearchMapperException {
         switch (key) {
-        	case TRANSFER_INCOMING:
-        		return ExchangeSearchField.TRANSFER_INCOMING;
+            case TRANSFER_INCOMING:
+                return ExchangeSearchField.TRANSFER_INCOMING;
             case RECIPIENT:
                 return ExchangeSearchField.RECIPIENT;
             case DATE_RECEIVED_TO:
@@ -321,63 +270,65 @@ public class SearchFieldMapper {
             case SENDER_RECEIVER:
                 return ExchangeSearchField.SENDER_RECEIVER;
             case TYPE:
-            	return ExchangeSearchField.TYPE;
+                return ExchangeSearchField.TYPE;
             case STATUS:
-            	return ExchangeSearchField.STATUS;
+                return ExchangeSearchField.STATUS;
+            case SOURCE:
+                return ExchangeSearchField.SOURCE;
             default:
                 throw new ExchangeSearchMapperException("No field found: " + key.name());
         }
 
     }
 
-	public static String createSearchSql(ExchangeHistoryListQuery query) {
-		StringBuilder builder = new StringBuilder();
-		builder.append("SELECT els FROM ExchangeLogStatus els ");
-		builder.append("INNER JOIN FETCH els.log log ");
-		boolean status = query.getStatus() != null && !query.getStatus().isEmpty();
-		boolean type = query.getType() != null && !query.getType().isEmpty();
-		if(status || type || query.getTypeRefDateFrom() != null || query.getTypeRefDateTo() != null) {
-			builder.append(" WHERE ");
-		}
-		boolean first = true;
-		if(query.getStatus() != null && !query.getStatus().isEmpty()) {
-			String sqlStatus = " els.status IN :status ";
-			if(first) {
-				builder.append(sqlStatus);
-				first = false;
-			} else {
-				builder.append(" AND ").append(sqlStatus);
-			}
-		}
-		if(query.getType() != null && !query.getType().isEmpty()) {
-			String sqlType = " log.typeRefType IN :type ";
-			if(first) {
-				builder.append(sqlType);
-				first = false;
-			} else {
-				builder.append(" AND ").append(sqlType);
-			}
-		}
-		if(query.getTypeRefDateFrom() != null) {
-			String from = " els.statusTimestamp >= :from ";
-			if(first) {
-				builder.append(from);
-				first = false;
-			} else {
-				builder.append(" AND ").append(from);
-			}
-		}
-		if(query.getTypeRefDateTo() != null) {
-			String to = " els.statusTimestamp <= :to ";
-			if(first) {
-				builder.append(to);
-				first = false;
-			} else {
-				builder.append(" AND ").append(to);
-			}
-		}
-		
-		return builder.toString();
-	}
+    public static String createSearchSql(ExchangeHistoryListQuery query) {
+        StringBuilder builder = new StringBuilder();
+        builder.append("SELECT els FROM ExchangeLogStatus els ");
+        builder.append("INNER JOIN FETCH els.log log ");
+        boolean status = query.getStatus() != null && !query.getStatus().isEmpty();
+        boolean type = query.getType() != null && !query.getType().isEmpty();
+        if (status || type || query.getTypeRefDateFrom() != null || query.getTypeRefDateTo() != null) {
+            builder.append(" WHERE ");
+        }
+        boolean first = true;
+        if (query.getStatus() != null && !query.getStatus().isEmpty()) {
+            String sqlStatus = " els.status IN :status ";
+            if (first) {
+                builder.append(sqlStatus);
+                first = false;
+            } else {
+                builder.append(" AND ").append(sqlStatus);
+            }
+        }
+        if (query.getType() != null && !query.getType().isEmpty()) {
+            String sqlType = " log.typeRefType IN :type ";
+            if (first) {
+                builder.append(sqlType);
+                first = false;
+            } else {
+                builder.append(" AND ").append(sqlType);
+            }
+        }
+        if (query.getTypeRefDateFrom() != null) {
+            String from = " els.statusTimestamp >= :from ";
+            if (first) {
+                builder.append(from);
+                first = false;
+            } else {
+                builder.append(" AND ").append(from);
+            }
+        }
+        if (query.getTypeRefDateTo() != null) {
+            String to = " els.statusTimestamp <= :to ";
+            if (first) {
+                builder.append(to);
+                first = false;
+            } else {
+                builder.append(" AND ").append(to);
+            }
+        }
+
+        return builder.toString();
+    }
 
 }

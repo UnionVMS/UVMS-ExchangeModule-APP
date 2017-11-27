@@ -23,7 +23,8 @@ public enum ExchangeSearchField {
     SENDER_RECEIVER("senderReceiver", "senderReceiver", SearchTable.LOG, String.class),
     RECIPIENT("recipient", "recipient", SearchTable.LOG, String.class),
     STATUS("status", "status", SearchTable.LOG, String.class),
-    TYPE("type","type", SearchTable.LOG, String.class);
+    TYPE("type","type", SearchTable.LOG, String.class),
+    SOURCE("source","source", SearchTable.LOG, String.class);
 
     private final String fieldName;
     private final String sqlReplacementToken;
