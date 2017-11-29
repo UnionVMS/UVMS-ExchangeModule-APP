@@ -163,6 +163,8 @@ public class LogMapper {
         model.setStatus(entity.getStatus());
         model.setDestination(entity.getDestination());
         model.setType(logType);
+        model.setSource(entity.getSource());
+        model.setTypeRefType(entity.getTypeRefType());
 
         return model;
     }

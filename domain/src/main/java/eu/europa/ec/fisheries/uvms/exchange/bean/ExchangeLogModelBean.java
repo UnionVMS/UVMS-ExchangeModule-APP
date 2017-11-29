@@ -64,9 +64,9 @@ public class ExchangeLogModelBean implements ExchangeLogModel {
             List<SearchValue> searchKeyValues = SearchFieldMapper.mapSearchField(query.getExchangeSearchCriteria().getCriterias());
             
             String sql = SearchFieldMapper.createSelectSearchSql(searchKeyValues, true);
-            
+            LOG.info("sql:"+sql);
             String countSql = SearchFieldMapper.createCountSearchSql(searchKeyValues, true);
-
+            LOG.info("countSql:"+countSql);
             Long numberMatches = dao.getExchangeLogListSearchCount(countSql, searchKeyValues);
             
             List<ExchangeLog> exchangeLogEntityList = dao.getExchangeLogListPaginated(page, listSize, sql, searchKeyValues);

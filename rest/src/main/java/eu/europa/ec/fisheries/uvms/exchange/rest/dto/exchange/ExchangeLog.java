@@ -15,8 +15,6 @@ import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 
-import eu.europa.ec.fisheries.uvms.exchange.rest.dto.LogTypeLabel;
-
 @XmlAccessorType(XmlAccessType.FIELD)
 public class ExchangeLog {
 
@@ -39,7 +37,11 @@ public class ExchangeLog {
 	@XmlElement(required = true)
 	private String status;
 	@XmlElement(required = true)
-	private LogTypeLabel type;
+	private String type;
+
+	@XmlElement(required = true)
+	private String typeRefType;
+
 	@XmlElement(required = true)
 	private ExchangeLogData logData;
 	
@@ -103,10 +105,18 @@ public class ExchangeLog {
 	public void setLogData(ExchangeLogData logData) {
 		this.logData = logData;
 	}
-	public LogTypeLabel getType() {
+	public String getType() {
 		return type;
 	}
-	public void setType(LogTypeLabel type) {
+	public void setType(String type) {
 		this.type = type;
+	}
+
+	public String getTypeRefType() {
+		return typeRefType;
+	}
+
+	public void setTypeRefType(String typeRefType) {
+		this.typeRefType = typeRefType;
 	}
 }
