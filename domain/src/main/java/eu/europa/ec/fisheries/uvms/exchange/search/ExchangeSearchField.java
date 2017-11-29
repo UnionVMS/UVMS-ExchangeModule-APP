@@ -11,6 +11,9 @@ copy of the GNU General Public License along with the IFDM Suite. If not, see <h
  */
 package eu.europa.ec.fisheries.uvms.exchange.search;
 
+import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogStatusTypeType;
+import eu.europa.ec.fisheries.schema.exchange.v1.TypeRefType;
+
 import java.util.Date;
 
 /**
@@ -22,8 +25,8 @@ public enum ExchangeSearchField {
     TO_DATE("dateReceived", "toDate", SearchTable.LOG, Date.class),
     SENDER_RECEIVER("senderReceiver", "senderReceiver", SearchTable.LOG, String.class),
     RECIPIENT("recipient", "recipient", SearchTable.LOG, String.class),
-    STATUS("status", "status", SearchTable.LOG, String.class),
-    TYPE("type","type", SearchTable.LOG, String.class),
+    STATUS("status", "status", SearchTable.LOG, ExchangeLogStatusTypeType.class),
+    TYPE("typeRefType","typeRefType", SearchTable.LOG, TypeRefType.class),
     SOURCE("source","source", SearchTable.LOG, String.class);
 
     private final String fieldName;

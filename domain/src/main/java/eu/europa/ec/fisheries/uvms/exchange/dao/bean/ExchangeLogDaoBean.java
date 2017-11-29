@@ -112,7 +112,11 @@ public class ExchangeLogDaoBean extends Dao implements ExchangeLogDao {
             if (criteria.getValue().size() > 1) {
                 query.setParameter(criteria.getKey().getSQLReplacementToken(), criteria.getValue());
             } else {
-                query.setParameter(criteria.getKey().getSQLReplacementToken(), SearchFieldMapper.buildValueFromClassType(criteria.getValue().get(0), criteria.getKey().getClazz()));
+             /*   if(ExchangeSearchField.TYPE.equals(criteria.getKey())){
+                    query.setParameter(criteria.getKey().getSQLReplacementToken(), TypeRefType.valueOf(criteria.getValue().get(0).getValue()));
+                }else {*/
+                    query.setParameter(criteria.getKey().getSQLReplacementToken(), SearchFieldMapper.buildValueFromClassType(criteria.getValue().get(0), criteria.getKey().getClazz()));
+               // }
             }
         }
     }

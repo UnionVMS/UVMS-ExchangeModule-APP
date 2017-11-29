@@ -13,7 +13,9 @@ package eu.europa.ec.fisheries.uvms.exchange.search;
 
 import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeHistoryListQuery;
 import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeListCriteriaPair;
+import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogStatusTypeType;
 import eu.europa.ec.fisheries.schema.exchange.v1.SearchField;
+import eu.europa.ec.fisheries.schema.exchange.v1.TypeRefType;
 import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeSearchMapperException;
 import eu.europa.ec.fisheries.uvms.exchange.model.util.DateUtils;
 import org.slf4j.Logger;
@@ -119,13 +121,13 @@ public class SearchFieldMapper {
                             .append(" ( ")
                             .append(buildTableAliasname(searchValue.getField()))
                             .append(setParameter(searchValue))
-                            .append(" OR ").append(buildTableAliasname(searchValue.getField())).append(" IS NULL ")
+                         //   .append(" OR ").append(buildTableAliasname(searchValue.getField())).append(" IS NULL ")
                             .append(" ) ");
                 } else if (criteria.getValue().size() > 1) {
                     builder
                             .append(" ( ")
                             .append(buildTableAliasname(criteria.getKey())).append(" IN (:").append(criteria.getKey().getSQLReplacementToken()).append(") ")
-                            .append(" OR ").append(buildTableAliasname(criteria.getKey())).append(" IS NULL ")
+                           // .append(" OR ").append(buildTableAliasname(criteria.getKey())).append(" IS NULL ")
                             .append(" ) ");
                 }
             }
@@ -173,6 +175,7 @@ public class SearchFieldMapper {
         StringBuilder builder = new StringBuilder();
 
         try {
+
             if (valueType.isAssignableFrom(String.class)) {
                 if (entry.getValue().contains("*")) {
                     String value = entry.getValue().replace("*", "%");
@@ -192,6 +195,10 @@ public class SearchFieldMapper {
                 return valueType.cast(DateUtils.parseToUTCDateTime(entry.getValue()));
             } else if (valueType.isAssignableFrom(Integer.class)) {
                 return valueType.cast(Integer.valueOf(entry.getValue()));
+            }else if(valueType.isAssignableFrom(TypeRefType.class)){
+                return valueType.cast(TypeRefType.valueOf(entry.getValue()));
+            }else if(valueType.isAssignableFrom(ExchangeLogStatusTypeType.class)){
+                return valueType.cast(ExchangeLogStatusTypeType.valueOf(entry.getValue()));
             }
 
             return valueType.cast(entry.getValue());
