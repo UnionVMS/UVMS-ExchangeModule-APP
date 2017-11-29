@@ -14,6 +14,7 @@ package eu.europa.ec.fisheries.uvms.exchange.search;
 import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeHistoryListQuery;
 import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeListCriteriaPair;
 import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogStatusTypeType;
+import eu.europa.ec.fisheries.schema.exchange.v1.MessageDirection;
 import eu.europa.ec.fisheries.schema.exchange.v1.SearchField;
 import eu.europa.ec.fisheries.schema.exchange.v1.TypeRefType;
 import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeSearchMapperException;
@@ -246,8 +247,17 @@ public class SearchFieldMapper {
         List<SearchValue> searchFields = new ArrayList<>();
         for (ExchangeListCriteriaPair criteria : listCriterias) {
             try {
-                ExchangeSearchField field = mapCriteria(criteria.getKey());
-                searchFields.add(new SearchValue(field, criteria.getValue()));
+                if(SearchField.MESSAGE_DIRECTION.equals(criteria.getKey())){
+                    SearchValue searchValue= getSearchValueForMessageDirection(criteria);
+                    if(searchValue ==null){
+                        continue;
+                    }
+                    searchFields.add(searchValue);
+                }else{
+                    ExchangeSearchField field = mapCriteria(criteria.getKey());
+                    searchFields.add(new SearchValue(field, criteria.getValue()));
+                }
+
             } catch (ExchangeSearchMapperException ex) {
                 LOG.debug("[ Error when mapping to search field.. continuing with other criterias ]");
             }
@@ -256,6 +266,29 @@ public class SearchFieldMapper {
         return searchFields;
     }
 
+    private static SearchValue getSearchValueForMessageDirection(ExchangeListCriteriaPair criteria){
+        if(!SearchField.MESSAGE_DIRECTION.equals(criteria.getKey()) || criteria.getValue()==null){
+            return null;
+        }
+        MessageDirection messageDirection= MessageDirection.valueOf(criteria.getValue());
+        SearchValue searchValue =null;
+        switch(messageDirection){
+
+         case  ALL: searchValue= null;
+                    break;
+
+         case  INCOMING:
+                    searchValue=  new SearchValue(ExchangeSearchField.TRANSFER_INCOMING,"true");
+                    break;
+         case OUTGOING:
+                    searchValue=  new SearchValue(ExchangeSearchField.TRANSFER_INCOMING,"false");
+                    break;
+            default:
+                searchValue= null;
+        }
+      return searchValue;
+
+    }
     /**
      * Maps the Search Key to a SearchField. All SearchKeys that are not a part
      * of Movement are excluded
