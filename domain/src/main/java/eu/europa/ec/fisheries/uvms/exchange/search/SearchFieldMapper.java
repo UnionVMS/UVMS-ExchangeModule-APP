@@ -16,6 +16,7 @@ import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeListCriteriaPair;
 import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogStatusTypeType;
 import eu.europa.ec.fisheries.schema.exchange.v1.MessageDirection;
 import eu.europa.ec.fisheries.schema.exchange.v1.SearchField;
+import eu.europa.ec.fisheries.schema.exchange.v1.Sorting;
 import eu.europa.ec.fisheries.schema.exchange.v1.TypeRefType;
 import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeSearchMapperException;
 import eu.europa.ec.fisheries.uvms.exchange.model.util.DateUtils;
@@ -44,7 +45,7 @@ public class SearchFieldMapper {
      * @return
      * @throws ParseException
      */
-    public static String createSelectSearchSql(List<SearchValue> searchFields, boolean isDynamic) throws ParseException {
+    public static String createSelectSearchSql(List<SearchValue> searchFields, boolean isDynamic, Sorting sorting) throws ParseException, ExchangeSearchMapperException {
         StringBuilder selectBuffer = new StringBuilder();
         selectBuffer.append("SELECT DISTINCT ")
                 .append(SearchTable.LOG.getTableAlias())
@@ -56,7 +57,26 @@ public class SearchFieldMapper {
         if (searchFields != null) {
             selectBuffer.append(createSearchSql(searchFields, isDynamic));
         }
-        selectBuffer.append(" order by " + SearchTable.LOG.getTableAlias() + ".updateTime desc ");
+        if(sorting !=null && sorting.getSortBy()!=null ){
+            SearchField searchField= sorting.getSortBy();
+            ExchangeSearchField exchangeSearchField =null;
+            if(searchField!=null){
+                try {
+                     exchangeSearchField=  mapCriteria(searchField);
+                } catch (ExchangeSearchMapperException e) {
+                    LOG.error("Error while mapping criteria",e);
+                    throw e;
+                }
+            }
+            String fieldName= exchangeSearchField.getFieldName();
+            String sortingDirection= "ASC";
+            if(sorting.isReversed()){
+                sortingDirection="DESC";
+            }
+            selectBuffer.append(" order by " + SearchTable.LOG.getTableAlias() + ".").append(fieldName).append(" ").append(sortingDirection);
+        }else {
+            selectBuffer.append(" order by " + SearchTable.LOG.getTableAlias() + ".updateTime desc ");
+        }
         LOG.debug("[ SQL: ] " + selectBuffer.toString());
         return selectBuffer.toString();
     }
