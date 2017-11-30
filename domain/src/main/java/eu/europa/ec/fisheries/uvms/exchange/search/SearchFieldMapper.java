@@ -297,7 +297,7 @@ public class SearchFieldMapper {
      * @return
      * @throws ExchangeSearchMapperException
      */
-    private static ExchangeSearchField mapCriteria(SearchField key) throws ExchangeSearchMapperException {
+    public static ExchangeSearchField mapCriteria(SearchField key) throws ExchangeSearchMapperException {
         switch (key) {
             case TRANSFER_INCOMING:
                 return ExchangeSearchField.TRANSFER_INCOMING;
