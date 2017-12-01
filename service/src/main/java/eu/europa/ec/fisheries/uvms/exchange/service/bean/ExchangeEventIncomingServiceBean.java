@@ -370,7 +370,7 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
                 pluginRequest.setResponse(request.getResponse());
                 pluginRequest.setMethod(ExchangePluginMethod.SEND_SALES_RESPONSE);
 
-                exchangeEventOutgoingService.sendSalesResponseToFLUX(pluginRequest);
+                exchangeEventOutgoingService.sendSalesResponseToPlugin(pluginRequest, request.getPluginType());
             } else {
                 log.error("Received invalid response from the Sales module: " + request.getResponse());
             }
