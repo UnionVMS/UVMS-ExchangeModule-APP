@@ -16,6 +16,8 @@ import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeListCriteriaPair;
 import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogStatusTypeType;
 import eu.europa.ec.fisheries.schema.exchange.v1.MessageDirection;
 import eu.europa.ec.fisheries.schema.exchange.v1.SearchField;
+import eu.europa.ec.fisheries.schema.exchange.v1.SortField;
+import eu.europa.ec.fisheries.schema.exchange.v1.Sorting;
 import eu.europa.ec.fisheries.schema.exchange.v1.TypeRefType;
 import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeSearchMapperException;
 import eu.europa.ec.fisheries.uvms.exchange.model.util.DateUtils;
@@ -44,7 +46,7 @@ public class SearchFieldMapper {
      * @return
      * @throws ParseException
      */
-    public static String createSelectSearchSql(List<SearchValue> searchFields, boolean isDynamic) throws ParseException {
+    public static String createSelectSearchSql(List<SearchValue> searchFields, boolean isDynamic, Sorting sorting) throws ParseException, ExchangeSearchMapperException {
         StringBuilder selectBuffer = new StringBuilder();
         selectBuffer.append("SELECT DISTINCT ")
                 .append(SearchTable.LOG.getTableAlias())
@@ -56,9 +58,32 @@ public class SearchFieldMapper {
         if (searchFields != null) {
             selectBuffer.append(createSearchSql(searchFields, isDynamic));
         }
-        selectBuffer.append(" order by " + SearchTable.LOG.getTableAlias() + ".updateTime desc ");
+        getSortingString(sorting, selectBuffer);
         LOG.debug("[ SQL: ] " + selectBuffer.toString());
         return selectBuffer.toString();
+    }
+
+    private static void getSortingString(Sorting sorting, StringBuilder selectBuffer) throws ExchangeSearchMapperException {
+        if(sorting !=null && sorting.getSortBy()!=null ){
+            SortField sortField= sorting.getSortBy();
+            SortFieldMapper sortFieldMapper =null;
+            if(sortField!=null){
+                try {
+                    sortFieldMapper=  mapSortField(sortField);
+                } catch (ExchangeSearchMapperException e) {
+                    LOG.error("Error while mapping criteria",e);
+                    throw e;
+                }
+            }
+            String fieldName= sortFieldMapper.getFieldName();
+            String sortingDirection= "ASC";
+            if(sorting.isReversed()){
+                sortingDirection="DESC";
+            }
+            selectBuffer.append(" order by " + SearchTable.LOG.getTableAlias() + ".").append(fieldName).append(" ").append(sortingDirection);
+        }else {
+            selectBuffer.append(" order by " + SearchTable.LOG.getTableAlias() + ".updateTime desc ");
+        }
     }
 
     /**
@@ -297,7 +322,7 @@ public class SearchFieldMapper {
      * @return
      * @throws ExchangeSearchMapperException
      */
-    private static ExchangeSearchField mapCriteria(SearchField key) throws ExchangeSearchMapperException {
+    public static ExchangeSearchField mapCriteria(SearchField key) throws ExchangeSearchMapperException {
         switch (key) {
             case TRANSFER_INCOMING:
                 return ExchangeSearchField.TRANSFER_INCOMING;
@@ -320,6 +345,39 @@ public class SearchFieldMapper {
         }
 
     }
+
+    /**
+     * Maps the Search Key to a SearchField. All SearchKeys that are not a part
+     * of Movement are excluded
+     *
+     * @param key
+     * @return
+     * @throws ExchangeSearchMapperException
+     */
+    public static SortFieldMapper mapSortField(SortField key) throws ExchangeSearchMapperException {
+        switch (key) {
+            case DATE_RECEIVED:
+                return SortFieldMapper.DATE_RECEIVED;
+            case SOURCE:
+                return SortFieldMapper.SOURCE;
+            case TYPE:
+                return SortFieldMapper.TYPE;
+            case SENDER_RECEIVER:
+                return SortFieldMapper.SENDER_RECEIVER;
+            case RULE:
+                return SortFieldMapper.RULE;
+            case RECEPIENT:
+                return SortFieldMapper.RECEPIENT;
+            case STATUS:
+                return SortFieldMapper.STATUS;
+            case DATE_FORWARDED:
+                return SortFieldMapper.DATE_FORWARDED;
+            default:
+                throw new ExchangeSearchMapperException("No field found: " + key.name());
+        }
+
+    }
+
 
     public static String createSearchSql(ExchangeHistoryListQuery query) {
         StringBuilder builder = new StringBuilder();
