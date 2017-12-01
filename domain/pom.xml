@@ -9,11 +9,10 @@
     <parent>
         <groupId>eu.europa.ec.fisheries.uvms.exchange</groupId>
         <artifactId>exchange</artifactId>
-        <version>4.0.9-SNAPSHOT</version>
+        <version>4.0.10-SNAPSHOT</version>
     </parent>
     
     <properties>
-        <hibernate.dialect>org.hibernate.spatial.dialect.postgis.PostgisDialect</hibernate.dialect>    
         <application.name>${project.parent.artifactId}</application.name>
         <application.version>${project.parent.version}</application.version>
         <application.logfile>/app/logs/${project.parent.artifactId}/${project.parent.artifactId}.log</application.logfile>
@@ -49,7 +48,7 @@
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>properties-maven-plugin</artifactId>
-                <version>1.0-alpha-2</version>
+                <version>1.0.0</version>
                 <executions>
                     <execution>
                         <phase>generate-resources</phase>
@@ -63,11 +62,5 @@
                 </executions>
             </plugin>
         </plugins>
-        <resources>
-            <resource>
-                <directory>src/main/resources</directory>
-                <filtering>true</filtering>
-            </resource>
-        </resources>
     </build>
 </project>

@@ -10,7 +10,7 @@
 
     <groupId>eu.europa.ec.fisheries.uvms.exchange</groupId>
     <artifactId>exchange</artifactId>
-    <version>4.0.9-SNAPSHOT</version>
+    <version>4.0.10-SNAPSHOT</version>
     <packaging>pom</packaging>
     <description>Maven projekt-archetype for UnionVms modules</description>
     
@@ -28,15 +28,15 @@
         <lombok.version>1.16.18</lombok.version>
 
         <longpolling.version>2.0.13</longpolling.version>
-        <uvms.common.version>3.0.5</uvms.common.version>
+        <uvms.common.version>3.0.6</uvms.common.version>
         <uvms.config.version>4.0.0</uvms.config.version>
-        <usm4uvms.version>4.0.4</usm4uvms.version>
-        <exchange.model.version>4.0.6-SNAPSHOT</exchange.model.version>
-        <audit.model.version>4.0.4</audit.model.version>
-        <movement.model.version>4.0.7</movement.model.version>
-        <rules.model.version>3.0.16</rules.model.version>
+        <usm4uvms.version>4.0.5</usm4uvms.version>
+        <exchange.model.version>4.0.6</exchange.model.version>
+        <audit.model.version>4.0.6</audit.model.version>
+        <movement.model.version>4.0.9</movement.model.version>
+        <rules.model.version>3.0.17</rules.model.version>
 
-        <asset.version>4.0.4</asset.version>
+        <asset.version>4.0.6</asset.version>
 
         <project.scm.id>github</project.scm.id>
 
