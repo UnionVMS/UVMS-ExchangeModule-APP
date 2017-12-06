@@ -31,7 +31,7 @@ import eu.europa.ec.fisheries.schema.exchange.source.v1.GetLogListByQueryRespons
 import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeListQuery;
 import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogStatusType;
 import eu.europa.ec.fisheries.schema.exchange.v1.TypeRefType;
-import eu.europa.ec.fisheries.uvms.common.DateUtils;
+import eu.europa.ec.fisheries.uvms.commons.date.DateUtils;
 import eu.europa.ec.fisheries.uvms.exchange.rest.dto.PollQuery;
 import eu.europa.ec.fisheries.uvms.exchange.rest.dto.ResponseDto;
 import eu.europa.ec.fisheries.uvms.exchange.rest.dto.RestResponseCode;
@@ -69,7 +69,7 @@ public class ExchangeLogRestResource {
     @Path("/list")
     @RequiresFeature(UnionVMSFeature.viewExchange)
     public ResponseDto getLogListByCriteria(final ExchangeListQuery query) {
-        LOG.info("Get list invoked in rest layer");
+        LOG.info("Get list invoked in rest layer:{}",query);
         try {
             //TODO query in swagger
             GetLogListByQueryResponse response = serviceLayer.getExchangeLogList(query);
@@ -77,7 +77,7 @@ public class ExchangeLogRestResource {
             //ExchangeMock.mockLogList(query);
             return new ResponseDto(exchangeLogList, RestResponseCode.OK);
         } catch (Exception ex) {
-            LOG.error("[ Error when geting log list. ] {} ", ex.getMessage());
+            LOG.error("[ Error when geting log list. {} ] {} ",query, ex.getMessage());
             return ErrorHandler.getFault(ex);
         }
     }
@@ -89,13 +89,13 @@ public class ExchangeLogRestResource {
     @RequiresFeature(UnionVMSFeature.viewExchange)
     public ResponseDto getPollStatus(PollQuery query) {
         try {
-            LOG.debug("Get ExchangeLog status for Poll in rest layer");
+            LOG.info("Get ExchangeLog status for Poll in rest layer:{}",query);
             Date from = DateUtils.stringToDate(query.getStatusFromDate());
             Date to = DateUtils.stringToDate(query.getStatusToDate());
             List<ExchangeLogStatusType> response = serviceLayer.getExchangeStatusHistoryList(query.getStatus(), TypeRefType.POLL, from, to);
             return new ResponseDto(response, RestResponseCode.OK);
         } catch (Exception e) {
-            LOG.error("[ Error when getting config search fields. ]", e.getMessage());
+            LOG.error("[ Error when getting config search fields. {}] {}",query, e.getMessage());
             return ErrorHandler.getFault(e);
         }
     }
@@ -107,11 +107,11 @@ public class ExchangeLogRestResource {
     @RequiresFeature(UnionVMSFeature.viewExchange)
     public ResponseDto getPollStatus(@PathParam("typeRefGuid") String typeRefGuid) {
         try {
-            LOG.debug("Get ExchangeLog status for Poll by typeRefGuid");
+            LOG.info("Get ExchangeLog status for Poll by typeRefGuid:{}",typeRefGuid);
             ExchangeLogStatusType response = serviceLayer.getExchangeStatusHistory(TypeRefType.POLL, typeRefGuid, request.getRemoteUser());
             return new ResponseDto(response, RestResponseCode.OK);
         } catch (Exception e) {
-            LOG.error("[ Error when getting config search fields. ]", e.getMessage());
+            LOG.error("[ Error when getting config search fields. {} ] {}",typeRefGuid, e.getMessage());
             return ErrorHandler.getFault(e);
         }
     }

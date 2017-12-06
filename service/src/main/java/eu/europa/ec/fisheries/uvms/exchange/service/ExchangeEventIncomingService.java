@@ -11,16 +11,20 @@
  */
 package eu.europa.ec.fisheries.uvms.exchange.service;
 
-import eu.europa.ec.fisheries.uvms.exchange.message.event.*;
-import eu.europa.ec.fisheries.uvms.exchange.message.event.carrier.ExchangeMessageEvent;
-
 import javax.ejb.Local;
 import javax.enterprise.event.Observes;
+
+import eu.europa.ec.fisheries.uvms.exchange.message.event.*;
+import eu.europa.ec.fisheries.uvms.exchange.message.event.carrier.ExchangeMessageEvent;
 
 @Local
 public interface ExchangeEventIncomingService {
 
-    // Asynch response handler for processed movements
+    /**
+     * Async response handler for processed movements
+     *
+     * @param message
+     */
     void handleProcessedMovement(@Observes @HandleProcessedMovementEvent ExchangeMessageEvent message);
 
     /**
@@ -28,45 +32,85 @@ public interface ExchangeEventIncomingService {
      *
      * @param message
      */
-    public void ping(@Observes @PingEvent ExchangeMessageEvent message);
+    void ping(@Observes @PingEvent ExchangeMessageEvent message);
 
     /**
      * Get plugin list from APP module
      *
      * @param message
      */
-    public void getPluginListByTypes(@Observes @PluginConfigEvent ExchangeMessageEvent message);
+    void getPluginListByTypes(@Observes @PluginConfigEvent ExchangeMessageEvent message);
 
     /**
      * Process a received Movement
      *
      * @param message
      */
-    public void processMovement(@Observes @SetMovementEvent ExchangeMessageEvent message);
+    void processMovement(@Observes @SetMovementEvent ExchangeMessageEvent message);
+
+    /**
+     * Logs and sends a received sales report through to Rules
+     *
+     * @param message received sales report
+     */
+    void receiveSalesReport(@Observes @ReceiveSalesReportEvent ExchangeMessageEvent message);
+
+    /**
+     * Logs and sends a received sales query through to Rules
+     *
+     * @param message received sales query
+     */
+    void receiveSalesQuery(@Observes @ReceiveSalesQueryEvent ExchangeMessageEvent message);
+
+    /**
+     * Logs and sends a received sales response through to Rules
+     * @param message
+     */
+    void receiveSalesResponse(@Observes @ReceiveSalesResponseEvent ExchangeMessageEvent message);
+
+    /**
+     * Logs and sends a sales report to FLUX
+     * @param message
+     */
+    void sendSalesReport(@Observes @SendSalesReportEvent ExchangeMessageEvent message);
+
+    /**
+     * Logs and sends a sales response to FLUX
+     * @param message
+     */
+    void sendSalesResponse(@Observes @SendSalesResponseEvent ExchangeMessageEvent message);
 
     /**
      * Process answer of commands sent to plugins
      *
      * @param message
      */
-    public void processAcknowledge(@Observes @ExchangeLogEvent ExchangeMessageEvent message);
+    void processAcknowledge(@Observes @ExchangeLogEvent ExchangeMessageEvent message);
 
     /**
      * Process answer of ping sent to plugins
      *
      * @param message
      */
-    public void processPluginPing(@Observes @PluginPingEvent ExchangeMessageEvent message);
+    void processPluginPing(@Observes @PluginPingEvent ExchangeMessageEvent message);
 
     /**
      * Process FLUXFAReportMessage coming from Flux Activity plugin
      * @param message
      */
-    public void processFLUXFAReportMessage(@Observes @SetFluxFAReportMessageEvent ExchangeMessageEvent message);
+    void processFLUXFAReportMessage(@Observes @SetFluxFAReportMessageEvent ExchangeMessageEvent message);
 
     /**
      * Process MDR sync response message sent to Flux MDR plugin
      * @param message
      */
     void sendResponseToRulesModule(@Observes @MdrSyncResponseMessageEvent ExchangeMessageEvent message);
+
+    /**
+     * Updates the status of a message log.
+     * @param message
+     */
+    void updateLogStatus(@Observes @UpdateLogStatusEvent ExchangeMessageEvent message);
+
+    void receiveInvalidSalesMessage(@Observes @ReceiveInvalidSalesMessageEvent ExchangeMessageEvent event);
 }

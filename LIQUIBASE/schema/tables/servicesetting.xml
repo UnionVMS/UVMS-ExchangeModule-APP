@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.3.xsd">
+    
+    <changeSet author="jojoha" id="table for linking a service with settings">
+        
+        <createTable remarks="Table for linking a plugin service with settings" tableName="service_setting">
+            <column name="servset_id" remarks="Id and code for table" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="servset_pk"/>
+            </column>
+            <column name="servset_serv_id" remarks="Foreign key to the plugin service." type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="servset_setting" remarks="The setting key" type="VARCHAR(500)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="servset_value" remarks="The value of the setting" type="VARCHAR(4000)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="servset_updattim" type="timestamp" remarks="Last updated date time.">
+                <constraints nullable="false"/>
+            </column>
+            <column name="servset_upuser" type="varchar(60)" remarks="Last update userid.">
+                <constraints nullable="false"/>
+            </column>            
+        </createTable>
+        
+        <addForeignKeyConstraint
+            constraintName="serv_fk"
+            baseTableName="service_setting"
+            baseColumnNames="servset_serv_id"
+            referencedTableName="service"
+            referencedColumnNames="serv_id"/>
+        
+        <rollback>
+            <dropTable tableName="service_setting" cascadeConstraints="true"/>
+        </rollback>
+        
+    </changeSet>
+    
+</databaseChangeLog>	

@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.3.xsd">
+
+    <changeSet author="johlyn" id="unsent message">
+        <createTable remarks="Table containing the unsent messages in exchange module" tableName="unsent_message">
+            <column name="unsent_id" remarks="Auto id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="unsent_pk"/>
+            </column>
+            <column name="unsent_guid" remarks="the id (guid) of the message" type="VARCHAR(36)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="unsent_message" remarks="The unsent message" type="CLOB">
+                <constraints nullable="false"/>
+            </column>
+            <column name="unsent_senderreceiver" remarks="Receiver of the unsent message" type="VARCHAR(100)"/>
+            <column name="unsent_recipient" remarks="Recipient of the unsent message" type="VARCHAR(100)"/>
+            <column name="unsent_datereceived" remarks="DateReceived of the unsent message" type="timestamp">
+                <constraints nullable="false"/>
+            </column>
+            <column name="unsent_updattim" type="timestamp" remarks="Last updated date time.">
+                <constraints nullable="false"/>
+            </column>
+            <column name="unsent_upuser" type="varchar(60)" remarks="Last update userid.">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <rollback>
+            <dropTable tableName="unsent_message" cascadeConstraints="true"/>
+        </rollback>
+    </changeSet>
+</databaseChangeLog>

@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.3.xsd">
+    
+    <changeSet author="nhily" id="table for linking a service with settings">
+        
+        <createTable remarks="Table for linking a plugin service with settings" tableName="unsent_message_property">
+            <column name="unsentprop_id" remarks="Id and code for table" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="unsentprop_pk"/>
+            </column>
+            <column name="unsentprop_unsent_id" remarks="Foreign key to the plugin service." type="BIGINT">
+            </column>
+            <column name="unsentprop_key" remarks="The setting key" type="VARCHAR(50)">
+            </column>
+            <column name="unsentprop_value" remarks="The value of the setting" type="VARCHAR(400)">               
+            </column>
+        </createTable>
+        
+        <addForeignKeyConstraint
+            constraintName="unsent_fk"
+            baseTableName="unsent_message_property"
+            baseColumnNames="unsentprop_unsent_id"
+            referencedTableName="unsent_message"
+            referencedColumnNames="unsent_id"/>
+        
+        <rollback>
+            <dropTable tableName="unsent_message_property" cascadeConstraints="true"/>
+        </rollback>
+        
+    </changeSet>
+    
+</databaseChangeLog>	

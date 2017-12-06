@@ -1,0 +1,14 @@
+## Check status
+mvn liquibase:status -P postgres-local
+
+## Update database
+mvn liquibase:update -P postgres-local
+
+## Rollback the database to a specified tag
+mvn liquibase:rollback -P postgres-local -Dliquibase.rollbackTag=version_0.1
+## Rollback the database a specific number of changes
+mvn liquibase:rollback -P postgres-local -Dliquibase.rollbackCount=1
+
+#### Other profiles for different databases ####
+postgres-dev
+postgres-test

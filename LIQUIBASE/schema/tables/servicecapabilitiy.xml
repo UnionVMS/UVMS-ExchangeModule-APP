@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.3.xsd">
+    
+    <changeSet author="johlyn" id="table for linking a service with capabilities">
+        
+        <createTable remarks="Table for linking a plugin with capabilities" tableName="service_capability">
+            <column name="servcap_id" remarks="Id and code for table" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="servcap_pk"/>
+            </column>
+            <column name="servcap_serv_id" remarks="Foreign key to the plugin service." type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="servcap_capability" remarks="Capability" type="VARCHAR(25)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="servcap_value" remarks="Value of capability" type="VARCHAR(25)">
+                <constraints nullable="false"/>
+            </column>
+             <column name="servcap_updattim" type="timestamp" remarks="Last updated date time.">
+                <constraints nullable="false"/>
+            </column>
+            <column name="servcap_upuser" type="varchar(60)" remarks="Last update userid.">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        
+        
+        <addForeignKeyConstraint
+            constraintName="servcap_serv_fk"
+            baseTableName="service_capability"
+            baseColumnNames="servcap_serv_id"
+            referencedTableName="service"
+            referencedColumnNames="serv_id"/>
+        
+        <rollback>
+            <dropTable tableName="service_capability" cascadeConstraints="true"/>
+        </rollback>
+        
+    </changeSet>
+    
+</databaseChangeLog>	

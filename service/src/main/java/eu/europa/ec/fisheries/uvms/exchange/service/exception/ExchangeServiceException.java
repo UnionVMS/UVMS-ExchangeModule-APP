@@ -19,4 +19,8 @@ public class ExchangeServiceException extends ExchangeException {
     public ExchangeServiceException(String message) {
         super(message);
     }
+
+    public ExchangeServiceException(String message, Throwable cause) {
+        super(message, cause);
+    }
 }

@@ -69,13 +69,13 @@ public class RegistryBusEventListener implements MessageListener {
     @Override
     public void onMessage(Message message) {
 
-        LOG.info("Eventbus listener for Exchange Registry (ExchangeModelConstants.EXCHANGE_REGISTER_SERVICE): {}", ExchangeModelConstants.EXCHANGE_REGISTER_SERVICE);
 
         TextMessage textMessage = (TextMessage) message;
         ServiceType settings = null;
 
         try {
             ExchangeRegistryBaseRequest request = JAXBMarshaller.unmarshallTextMessage(textMessage, ExchangeRegistryBaseRequest.class);
+            LOG.info("Eventbus listener for Exchange Registry (ExchangeModelConstants.EXCHANGE_REGISTER_SERVICE): {} {}", ExchangeModelConstants.EXCHANGE_REGISTER_SERVICE,request);
             switch (request.getMethod()) {
                 case REGISTER_SERVICE:
                     RegisterServiceRequest regReq = JAXBMarshaller.unmarshallTextMessage(textMessage, RegisterServiceRequest.class);
@@ -92,7 +92,7 @@ public class RegistryBusEventListener implements MessageListener {
                     throw new ExchangeMessageException("[ Not implemented method consumed: " + request.getMethod() + " ]");
             }
         } catch (ExchangeMessageException | ExchangeModelMarshallException | NullPointerException e) {
-            LOG.error("[ Error when receiving message on topic in exchange: ]");
+            LOG.error("[ Error when receiving message on topic in exchange: {}] {}",message,e);
             errorEvent.fire(new PluginMessageEvent(textMessage, settings, ExchangePluginResponseMapper.mapToPluginFaultResponse(FaultCode.EXCHANGE_TOPIC_MESSAGE.getCode(), "Error when receiving message in exchange " + e.getMessage())));
         }
     }
