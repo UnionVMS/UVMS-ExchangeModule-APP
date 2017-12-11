@@ -28,18 +28,19 @@ import eu.europa.ec.fisheries.uvms.exchange.search.SearchValue;
 @Local
 public interface ExchangeLogDao {
 
-    public ExchangeLog createLog(ExchangeLog log) throws ExchangeDaoException;
+    ExchangeLog createLog(ExchangeLog log) throws ExchangeDaoException;
 
-    public List<ExchangeLog> getExchangeLogListPaginated(Integer page, Integer listSize, String sql, List<SearchValue> searchKeyValues) throws ExchangeDaoException;
+    List<ExchangeLog> getExchangeLogListPaginated(Integer page, Integer listSize, String sql, List<SearchValue> searchKeyValues) throws ExchangeDaoException;
 
-    public Long getExchangeLogListSearchCount(String countSql, List<SearchValue> searchKeyValues) throws ExchangeDaoException;
+    Long getExchangeLogListSearchCount(String countSql, List<SearchValue> searchKeyValues) throws ExchangeDaoException;
 
-	public ExchangeLog getExchangeLogByGuid(String logGuid) throws NoEntityFoundException, ExchangeDaoException;
+	ExchangeLog getExchangeLogByGuid(String logGuid) throws NoEntityFoundException, ExchangeDaoException;
 
-	public ExchangeLog getExchangeLogByTypeRefAndGuid(String typeRefGuid, TypeRefType type) throws NoEntityFoundException, ExchangeDaoException;
+	ExchangeLog getExchangeLogByTypeRefAndGuid(String typeRefGuid, TypeRefType type) throws NoEntityFoundException, ExchangeDaoException;
 	
-	public ExchangeLog updateLog(ExchangeLog exchangeLog) throws ExchangeDaoException;
+	ExchangeLog updateLog(ExchangeLog exchangeLog) throws ExchangeDaoException;
 	
-	public List<ExchangeLogStatus> getExchangeLogStatusHistory(String sql, ExchangeHistoryListQuery query) throws ExchangeDaoException;
+	List<ExchangeLogStatus> getExchangeLogStatusHistory(String sql, ExchangeHistoryListQuery query) throws ExchangeDaoException;
 
+	List<ExchangeLog> getExchangeLogByRangeOfRefGuids(List<String> guids);
 }

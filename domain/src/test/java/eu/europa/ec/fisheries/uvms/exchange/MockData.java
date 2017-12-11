@@ -11,7 +11,11 @@ copy of the GNU General Public License along with the IFDM Suite. If not, see <h
  */
 package eu.europa.ec.fisheries.uvms.exchange;
 
+import eu.europa.ec.fisheries.schema.exchange.v1.LogType;
+import eu.europa.ec.fisheries.schema.exchange.v1.TypeRefType;
+import eu.europa.ec.fisheries.uvms.exchange.entity.exchangelog.ExchangeLog;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import eu.europa.ec.fisheries.schema.exchange.service.v1.CapabilityListType;
@@ -81,5 +85,21 @@ public class MockData {
 		setting.setValue("value");
 		list.add(setting);
 		return list;
+	}
+
+	public static List<ExchangeLog> getLogEntities(){
+		ExchangeLog log1 = new ExchangeLog();
+		log1.setType(LogType.RECEIVE_FA_QUERY_MSG);
+		log1.setTypeRefGuid("SomeRefGuid_1AAA");
+		log1.setTransferIncoming(false);
+		log1.setGuid("AAA-BBB-CCC");
+		log1.setTypeRefType(TypeRefType.FA_QUERY);
+		ExchangeLog log2 = new ExchangeLog();
+		log2.setType(LogType.RECEIVE_FA_QUERY_MSG);
+		log2.setTypeRefGuid("SomeRefGuid_2BBB");
+		log2.setTransferIncoming(true);
+		log2.setGuid("CCC-DDD-EEE");
+		log2.setTypeRefType(TypeRefType.FA_RESPONSE);
+		return Arrays.asList(log1, log2);
 	}
 }

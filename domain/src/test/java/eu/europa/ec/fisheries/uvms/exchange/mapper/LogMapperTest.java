@@ -1,12 +1,22 @@
 package eu.europa.ec.fisheries.uvms.exchange.mapper;
 
-import eu.europa.ec.fisheries.schema.exchange.v1.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+
+import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogStatusTypeType;
+import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogType;
+import eu.europa.ec.fisheries.schema.exchange.v1.LogRefType;
+import eu.europa.ec.fisheries.schema.exchange.v1.LogType;
+import eu.europa.ec.fisheries.schema.exchange.v1.ReceiveMovementType;
+import eu.europa.ec.fisheries.schema.exchange.v1.SendEmailType;
+import eu.europa.ec.fisheries.schema.exchange.v1.SendMovementType;
+import eu.europa.ec.fisheries.schema.exchange.v1.SendPollType;
+import eu.europa.ec.fisheries.schema.exchange.v1.TypeRefType;
 import eu.europa.ec.fisheries.uvms.exchange.entity.exchangelog.ExchangeLog;
-import org.junit.Test;
-
 import java.util.Date;
-
-import static org.junit.Assert.*;
+import org.junit.Test;
 
 public class LogMapperTest {
 
