@@ -15,7 +15,7 @@
     <description>Maven projekt-archetype for UnionVms modules</description>
     
     <properties>
-    	<docker.dev.version>3.19.0</docker.dev.version>
+    	<docker.dev.version>3.22.0</docker.dev.version>
         <mockito.version>1.10.19</mockito.version>
         <junit.version>4.12</junit.version>
         <javaee.version>7.0</javaee.version>
