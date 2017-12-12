@@ -256,7 +256,7 @@ public class ExchangeLogModelBean implements ExchangeLogModel {
 
     @Override
     public String getExchangeLogRawXmlByGuid(String guid) {
-        String rawMsg = StringUtils.EMPTY;
+        String rawMsg = null;
         try {
             ExchangeLog exchangeLog = logDao.getExchangeLogByGuid(guid);
             rawMsg = exchangeLog.getTypeRefMessage();

@@ -23,6 +23,7 @@ import eu.europa.ec.fisheries.uvms.exchange.rest.dto.exchange.ListQueryResponse;
 import eu.europa.ec.fisheries.uvms.exchange.rest.error.ErrorHandler;
 import eu.europa.ec.fisheries.uvms.exchange.rest.mapper.ExchangeLogMapper;
 import eu.europa.ec.fisheries.uvms.exchange.service.ExchangeLogService;
+import eu.europa.ec.fisheries.uvms.exchange.utils.XMLUtils;
 import eu.europa.ec.fisheries.uvms.rest.security.RequiresFeature;
 import eu.europa.ec.fisheries.uvms.rest.security.UnionVMSFeature;
 import java.util.Date;
@@ -38,7 +39,9 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 
 @Path("/exchange")
 @Stateless
@@ -116,12 +119,17 @@ public class ExchangeLogRestResource {
     @Produces(value = {MediaType.APPLICATION_JSON})
     @Path("/message/{guid}")
     @RequiresFeature(UnionVMSFeature.viewExchange)
-    public ResponseDto getExchangeLogRawXMLByGuid(@PathParam("guid") String guid) {
+    public Response getExchangeLogRawXMLByGuid(@PathParam("guid") String guid) {
         try {
-            return new ResponseDto(serviceLayer.getExchangeLogRawMessageByGuid(guid), RestResponseCode.OK);
+            String rawMsg = serviceLayer.getExchangeLogRawMessageByGuid(guid);
+            String cleanXML = StringUtils.EMPTY;
+            if(StringUtils.isNotEmpty(rawMsg)){
+                cleanXML = rawMsg.replaceAll("\\s", "").replaceAll("\n", "");
+            }
+            return Response.ok(XMLUtils.preetyPrintPojo(cleanXML)).build();
         } catch (Exception e) {
             log.error("[ Error when getting exchange log by GUID. ] {}", e.getMessage());
-            return ErrorHandler.getFault(e);
+            return Response.status(Response.Status.NO_CONTENT).build();
         }
     }
 
