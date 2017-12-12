@@ -130,7 +130,7 @@ public class ExchangeLogDaoBean extends Dao implements ExchangeLogDao {
     }
 
     @Override
-    public ExchangeLog getExchangeLogByGuid(String logGuid) throws NoEntityFoundException, ExchangeDaoException {
+    public ExchangeLog getExchangeLogByGuid(String logGuid) throws ExchangeDaoException {
         try {
             TypedQuery<ExchangeLog> query = em.createNamedQuery(ExchangeConstants.LOG_BY_GUID, ExchangeLog.class);
             query.setParameter("guid", logGuid);
@@ -145,7 +145,15 @@ public class ExchangeLogDaoBean extends Dao implements ExchangeLogDao {
     }
 
     @Override
-    public ExchangeLog getExchangeLogByTypeRefAndGuid(String typeRefGuid, TypeRefType type) throws NoEntityFoundException, ExchangeDaoException {
+    public List<ExchangeLog> getExchangeLogByRangeOfRefGuids(List<String> logGuids) {
+        TypedQuery<ExchangeLog> query = em.createNamedQuery(ExchangeConstants.LOG_BY_TYPE_RANGE_OF_REF_GUIDS, ExchangeLog.class);
+        query.setParameter("refGuids", logGuids);
+        return query.getResultList();
+    }
+
+
+    @Override
+    public ExchangeLog getExchangeLogByTypeRefAndGuid(String typeRefGuid, TypeRefType type) throws ExchangeDaoException {
         try {
             TypedQuery<ExchangeLog> query = em.createNamedQuery(ExchangeConstants.LOG_BY_TYPE_REF_AND_GUID, ExchangeLog.class);
             query.setParameter("typeRefGuid", typeRefGuid);

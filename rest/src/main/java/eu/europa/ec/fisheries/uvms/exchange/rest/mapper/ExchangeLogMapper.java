@@ -38,8 +38,8 @@ public class ExchangeLogMapper {
 
     }
 
-    public static ExchangeLog mapToExchangeLogDto(ExchangeLogType log) {
-    	ExchangeLog dto = new ExchangeLog();
+    public static ExchangeLogDto mapToExchangeLogDto(ExchangeLogType log) {
+    	ExchangeLogDto dto = new ExchangeLogDto();
         Date dateFwd;
     	switch(log.getType()) {
             case RECEIVE_MOVEMENT:
@@ -111,6 +111,7 @@ public class ExchangeLogMapper {
     	}
     	dto.setSenderRecipient(log.getSenderReceiver());
     	dto.setStatus(log.getStatus().name());
+        dto.setRelatedLogData(log.getRelatedLogData());
         return dto;
     }
 
