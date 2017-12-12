@@ -279,6 +279,11 @@ public class ExchangeLogServiceBean implements ExchangeLogService {
     }
 
     @Override
+    public String getExchangeLogRawMessageByGuid(String guid) throws ExchangeLogException {
+        return exchangeLogModel.getExchangeLogRawXmlByGuid(guid);
+    }
+
+    @Override
     public void resend(List<String> messageIdList, String username) throws ExchangeLogException {
         LOG.debug("resend in service layer:{} {}",messageIdList,username);
         List<UnsentMessageType> unsentMessageList;
