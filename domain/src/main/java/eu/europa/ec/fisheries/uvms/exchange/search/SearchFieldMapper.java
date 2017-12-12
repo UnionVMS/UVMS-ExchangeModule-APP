@@ -21,6 +21,7 @@ import eu.europa.ec.fisheries.schema.exchange.v1.Sorting;
 import eu.europa.ec.fisheries.schema.exchange.v1.TypeRefType;
 import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeSearchMapperException;
 import eu.europa.ec.fisheries.uvms.exchange.model.util.DateUtils;
+import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -264,7 +265,7 @@ public class SearchFieldMapper {
      */
     public static List<SearchValue> mapSearchField(List<ExchangeListCriteriaPair> listCriterias) throws ExchangeSearchMapperException {
 
-        if (listCriterias == null || listCriterias.isEmpty()) {
+        if (CollectionUtils.isEmpty(listCriterias)) {
             LOG.debug(" Non valid search criteria when mapping ListCriterias to SearchValue, List is null or empty");
             return new ArrayList<>();
         }

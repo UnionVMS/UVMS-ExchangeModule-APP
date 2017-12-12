@@ -61,21 +61,21 @@ public class ExchangeLogServiceBean implements ExchangeLogService {
     final static Logger LOG = LoggerFactory.getLogger(ExchangeLogServiceBean.class);
 
     @EJB
-    MessageProducer producer;
+    private MessageProducer producer;
 
     @EJB
-    ExchangeMessageConsumer consumer;
+    private ExchangeMessageConsumer consumer;
 
     @EJB
-    ExchangeEventLogCache logCache;
+    private ExchangeEventLogCache logCache;
 
     @Inject
     @ExchangeLogEvent
-    Event<NotificationMessage> exchangeLogEvent;
+    private Event<NotificationMessage> exchangeLogEvent;
 
     @Inject
     @ExchangeSendingQueueEvent
-    Event<NotificationMessage> sendingQueueEvent;
+    private Event<NotificationMessage> sendingQueueEvent;
 
     @EJB
     private ExchangeLogModel exchangeLogModel;

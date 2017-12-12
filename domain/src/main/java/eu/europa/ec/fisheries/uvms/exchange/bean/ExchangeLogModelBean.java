@@ -24,6 +24,8 @@ import eu.europa.ec.fisheries.uvms.exchange.model.exception.InputArgumentExcepti
 import eu.europa.ec.fisheries.uvms.exchange.model.remote.ExchangeLogModel;
 import eu.europa.ec.fisheries.uvms.exchange.search.SearchFieldMapper;
 import eu.europa.ec.fisheries.uvms.exchange.search.SearchValue;
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,7 +42,23 @@ public class ExchangeLogModelBean implements ExchangeLogModel {
     final static Logger LOG = LoggerFactory.getLogger(ExchangeLogModelBean.class);
 
     @EJB
-    ExchangeLogDao dao;
+    private ExchangeLogDao logDao;
+
+
+    @Override
+    public ExchangeLogType getExchangeLogByGuid(String guid) throws ExchangeModelException {
+        try {
+            ExchangeLog exchangeLog = logDao.getExchangeLogByGuid(guid);
+            ExchangeLogType exchangeLogType = LogMapper.toModel(exchangeLog);
+
+            // Enriches the "first level logs" with info related to the related logs.
+            enrichDtosWithRelatedLogsInfo(Collections.singletonList(exchangeLogType));
+            return exchangeLogType;
+        } catch (ExchangeDaoException e) {
+            LOG.error("[ Error when getting exchange log by GUID. {}] {}",guid, e.getMessage());
+            throw new ExchangeModelException("Error when getting exchange log by GUID.");
+        }
+    }
 
 
     @Override
@@ -56,7 +74,7 @@ public class ExchangeLogModelBean implements ExchangeLogModel {
         }
         try {
             ListResponseDto response = new ListResponseDto();
-            List<ExchangeLogType> exchengeLogList = new ArrayList<>();
+            List<ExchangeLogType> exchLogTypes = new ArrayList<>();
 
             Integer page = query.getPagination().getPage();
             Integer listSize = query.getPagination().getListSize();
@@ -67,12 +85,15 @@ public class ExchangeLogModelBean implements ExchangeLogModel {
             LOG.info("sql:"+sql);
             String countSql = SearchFieldMapper.createCountSearchSql(searchKeyValues, true);
             LOG.info("countSql:"+countSql);
-            Long numberMatches = dao.getExchangeLogListSearchCount(countSql, searchKeyValues);
+            Long numberMatches = logDao.getExchangeLogListSearchCount(countSql, searchKeyValues);
             
-            List<ExchangeLog> exchangeLogEntityList = dao.getExchangeLogListPaginated(page, listSize, sql, searchKeyValues);
+            List<ExchangeLog> exchangeLogEntityList = logDao.getExchangeLogListPaginated(page, listSize, sql, searchKeyValues);
             for (ExchangeLog entity : exchangeLogEntityList) {
-                exchengeLogList.add(LogMapper.toModel(entity));
+                exchLogTypes.add(LogMapper.toModel(entity));
             }
+
+            // Enriches the "first level logs" with info related to the related logs.
+            enrichDtosWithRelatedLogsInfo(exchLogTypes);
 
             int numberOfPages = (int) ( numberMatches / listSize);
             if (numberMatches % listSize != 0) {
@@ -81,11 +102,31 @@ public class ExchangeLogModelBean implements ExchangeLogModel {
 
             response.setTotalNumberOfPages(numberOfPages);
             response.setCurrentPage(query.getPagination().getPage());
-            response.setExchangeLogList(exchengeLogList);
+            response.setExchangeLogList(exchLogTypes);
             return response;
         } catch (ExchangeSearchMapperException | ExchangeDaoException | ParseException ex) {
             LOG.error("[ Error when getting ExchangeLogs by query {}] {} ",query, ex.getMessage());
             throw new ExchangeModelException(ex.getMessage());
+        }
+    }
+
+    private void enrichDtosWithRelatedLogsInfo(List<ExchangeLogType> exchangeLogList) {
+        List<String> guids = new ArrayList<>();
+        for(ExchangeLogType log : exchangeLogList){
+            guids.add(log.getGuid());
+        }
+        List<ExchangeLog> relatedLogs= logDao.getExchangeLogByRangeOfRefGuids(guids);
+        if(CollectionUtils.isNotEmpty(relatedLogs)){
+            for(ExchangeLog logEntity : relatedLogs){
+                RelatedLogInfo refLogInfo = new RelatedLogInfo();
+                refLogInfo.setGuid(logEntity.getGuid());
+                refLogInfo.setType(logEntity.getTypeRefType().toString());
+                for(ExchangeLogType logType : exchangeLogList){
+                    if(StringUtils.equals(logEntity.getTypeRefGuid(), logType.getGuid())){
+                        logType.getRelatedLogData().add(refLogInfo);
+                    }
+                }
+            }
         }
     }
 
@@ -99,7 +140,7 @@ public class ExchangeLogModelBean implements ExchangeLogModel {
         	List<ExchangeLogStatusType> logStatusHistoryList = new ArrayList<>();
         
         	String sql = SearchFieldMapper.createSearchSql(query);
-        	List<ExchangeLogStatus> logList = dao.getExchangeLogStatusHistory(sql, query);
+        	List<ExchangeLogStatus> logList = logDao.getExchangeLogStatusHistory(sql, query);
         	
         	Set<String> uniqueExchangeLogGuid = new HashSet<>();
             Map<String, TypeRefType> logTypeMap = new HashMap<>();
@@ -110,7 +151,7 @@ public class ExchangeLogModelBean implements ExchangeLogModel {
 
         	//TODO not two db-calls?
         	for(String guid : uniqueExchangeLogGuid) {
-                ExchangeLog log = dao.getExchangeLogByGuid(guid);
+                ExchangeLog log = logDao.getExchangeLogByGuid(guid);
                 ExchangeLogStatusType statusType = LogMapper.toStatusModel(log);
                 logStatusHistoryList.add(statusType);
         	}
@@ -133,7 +174,7 @@ public class ExchangeLogModelBean implements ExchangeLogModel {
     	
         try {
             ExchangeLog exchangeLog = LogMapper.toNewEntity(log, username);
-            ExchangeLog persistedLog = dao.createLog(exchangeLog);
+            ExchangeLog persistedLog = logDao.createLog(exchangeLog);
             return LogMapper.toModel(persistedLog);
         } catch (ExchangeDaoException ex) {
             LOG.error("[ Error when creating Exchange log {} {}] {}",log,username, ex.getMessage());
@@ -141,7 +182,8 @@ public class ExchangeLogModelBean implements ExchangeLogModel {
         }
     }
 
-	@Override
+
+    @Override
 	public ExchangeLogType updateExchangeLogStatus(ExchangeLogStatusType status, String username) throws ExchangeModelException {
 		if(status == null || status.getGuid() == null || status.getGuid().isEmpty()) {
 			throw new InputArgumentException("No exchange log to update status");
@@ -151,11 +193,11 @@ public class ExchangeLogModelBean implements ExchangeLogModel {
 		}
 		try {
 			ExchangeLogStatusHistoryType updateStatus = status.getHistory().get(0);
-			ExchangeLog exchangeLog = dao.getExchangeLogByGuid(status.getGuid());
+			ExchangeLog exchangeLog = logDao.getExchangeLogByGuid(status.getGuid());
 			List<ExchangeLogStatus> statusList = exchangeLog.getStatusHistory();
 			statusList.add(LogMapper.toNewStatusEntity(exchangeLog, updateStatus.getStatus(), username));
 			exchangeLog.setStatus(updateStatus.getStatus());
-			ExchangeLog retEntity = dao.updateLog(exchangeLog);
+			ExchangeLog retEntity = logDao.updateLog(exchangeLog);
 			ExchangeLogType retType = LogMapper.toModel(retEntity);
 			return retType;
 		} catch (ExchangeDaoException ex) {
@@ -169,26 +211,16 @@ public class ExchangeLogModelBean implements ExchangeLogModel {
 		if(guid == null || guid.isEmpty()) throw new InputArgumentException("Non valid guid to fetch log status history");
 		try {
 			if(typeRefType == null || TypeRefType.UNKNOWN.equals(typeRefType)) {
-				return LogMapper.toStatusModel(dao.getExchangeLogByGuid(guid));
+				return LogMapper.toStatusModel(logDao.getExchangeLogByGuid(guid));
 			} else {
-				return LogMapper.toStatusModel(dao.getExchangeLogByTypeRefAndGuid(guid, typeRefType));
+				return LogMapper.toStatusModel(logDao.getExchangeLogByTypeRefAndGuid(guid, typeRefType));
 			}
 		} catch (ExchangeDaoException e) {
 			LOG.error("[ Error when getting status history Exchange log {} {}] {}",guid,typeRefType, e.getMessage());
             throw new ExchangeModelException("Error when getting status history of Exchange log ");
 		}
 	}
-	
-    @Override
-    public ExchangeLogType getExchangeLogByGuid(String guid) throws ExchangeModelException {
-        try {
-            ExchangeLog exchangeLog = dao.getExchangeLogByGuid(guid);
-            return LogMapper.toModel(exchangeLog);
-        } catch (ExchangeDaoException e) {
-            LOG.error("[ Error when getting exchange log by GUID. {}] {}",guid, e.getMessage());
-            throw new ExchangeModelException("Error when getting exchange log by GUID.");
-        }
-    }
+
 
     @Override
     public ExchangeLogType setPollStatus(PollStatus pollStatus, String username)throws ExchangeModelException {
@@ -197,11 +229,11 @@ public class ExchangeLogModelBean implements ExchangeLogModel {
         }
 
         try {
-            ExchangeLog exchangeLog = dao.getExchangeLogByTypeRefAndGuid(pollStatus.getPollGuid(), TypeRefType.POLL);
+            ExchangeLog exchangeLog = logDao.getExchangeLogByTypeRefAndGuid(pollStatus.getPollGuid(), TypeRefType.POLL);
             List<ExchangeLogStatus> statusList = exchangeLog.getStatusHistory();
             statusList.add(LogMapper.toNewStatusEntity(exchangeLog, pollStatus.getStatus(), username));
             exchangeLog.setStatus(pollStatus.getStatus());
-            ExchangeLog retEntity = dao.updateLog(exchangeLog);
+            ExchangeLog retEntity = logDao.updateLog(exchangeLog);
             ExchangeLogType retType = LogMapper.toModel(retEntity);
             return retType;
         } catch (ExchangeDaoException ex) {
