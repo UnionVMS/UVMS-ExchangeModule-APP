@@ -11,22 +11,6 @@ copy of the GNU General Public License along with the IFDM Suite. If not, see <h
  */
 package eu.europa.ec.fisheries.uvms.exchange.rest.service;
 
-import java.util.Date;
-import java.util.List;
-
-import javax.ejb.EJB;
-import javax.ejb.Stateless;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.core.MediaType;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import eu.europa.ec.fisheries.schema.exchange.source.v1.GetLogListByQueryResponse;
 import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeListQuery;
 import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogStatusType;
@@ -39,19 +23,34 @@ import eu.europa.ec.fisheries.uvms.exchange.rest.dto.exchange.ListQueryResponse;
 import eu.europa.ec.fisheries.uvms.exchange.rest.error.ErrorHandler;
 import eu.europa.ec.fisheries.uvms.exchange.rest.mapper.ExchangeLogMapper;
 import eu.europa.ec.fisheries.uvms.exchange.service.ExchangeLogService;
+import eu.europa.ec.fisheries.uvms.exchange.utils.XMLUtils;
 import eu.europa.ec.fisheries.uvms.rest.security.RequiresFeature;
 import eu.europa.ec.fisheries.uvms.rest.security.UnionVMSFeature;
+import java.util.Date;
+import java.util.List;
+import javax.ejb.EJB;
+import javax.ejb.Stateless;
 import javax.servlet.http.HttpServletRequest;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.GET;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 
 @Path("/exchange")
 @Stateless
+@Slf4j
 public class ExchangeLogRestResource {
 
-    final static Logger LOG = LoggerFactory.getLogger(ExchangeLogRestResource.class);
-
     @EJB
-    ExchangeLogService serviceLayer;
+    private ExchangeLogService serviceLayer;
+
     @Context
     private HttpServletRequest request;
 
@@ -69,7 +68,7 @@ public class ExchangeLogRestResource {
     @Path("/list")
     @RequiresFeature(UnionVMSFeature.viewExchange)
     public ResponseDto getLogListByCriteria(final ExchangeListQuery query) {
-        LOG.info("Get list invoked in rest layer:{}",query);
+        log.info("Get list invoked in rest layer:{}",query);
         try {
             //TODO query in swagger
             GetLogListByQueryResponse response = serviceLayer.getExchangeLogList(query);
@@ -77,7 +76,7 @@ public class ExchangeLogRestResource {
             //ExchangeMock.mockLogList(query);
             return new ResponseDto(exchangeLogList, RestResponseCode.OK);
         } catch (Exception ex) {
-            LOG.error("[ Error when geting log list. {} ] {} ",query, ex.getMessage());
+            log.error("[ Error when geting log list. {} ] {} ",query, ex.getMessage());
             return ErrorHandler.getFault(ex);
         }
     }
@@ -89,13 +88,13 @@ public class ExchangeLogRestResource {
     @RequiresFeature(UnionVMSFeature.viewExchange)
     public ResponseDto getPollStatus(PollQuery query) {
         try {
-            LOG.info("Get ExchangeLog status for Poll in rest layer:{}",query);
+            log.info("Get ExchangeLog status for Poll in rest layer:{}",query);
             Date from = DateUtils.stringToDate(query.getStatusFromDate());
             Date to = DateUtils.stringToDate(query.getStatusToDate());
             List<ExchangeLogStatusType> response = serviceLayer.getExchangeStatusHistoryList(query.getStatus(), TypeRefType.POLL, from, to);
             return new ResponseDto(response, RestResponseCode.OK);
         } catch (Exception e) {
-            LOG.error("[ Error when getting config search fields. {}] {}",query, e.getMessage());
+            log.error("[ Error when getting config search fields. {}] {}",query, e.getMessage());
             return ErrorHandler.getFault(e);
         }
     }
@@ -107,12 +106,30 @@ public class ExchangeLogRestResource {
     @RequiresFeature(UnionVMSFeature.viewExchange)
     public ResponseDto getPollStatus(@PathParam("typeRefGuid") String typeRefGuid) {
         try {
-            LOG.info("Get ExchangeLog status for Poll by typeRefGuid:{}",typeRefGuid);
+            log.info("Get ExchangeLog status for Poll by typeRefGuid:{}",typeRefGuid);
             ExchangeLogStatusType response = serviceLayer.getExchangeStatusHistory(TypeRefType.POLL, typeRefGuid, request.getRemoteUser());
             return new ResponseDto(response, RestResponseCode.OK);
         } catch (Exception e) {
-            LOG.error("[ Error when getting config search fields. {} ] {}",typeRefGuid, e.getMessage());
+            log.error("[ Error when getting config search fields. {} ] {}",typeRefGuid, e.getMessage());
             return ErrorHandler.getFault(e);
+        }
+    }
+
+    @GET
+    @Produces(value = {MediaType.APPLICATION_JSON})
+    @Path("/message/{guid}")
+    @RequiresFeature(UnionVMSFeature.viewExchange)
+    public Response getExchangeLogRawXMLByGuid(@PathParam("guid") String guid) {
+        try {
+            String rawMsg = serviceLayer.getExchangeLogRawMessageByGuid(guid);
+            String cleanXML = StringUtils.EMPTY;
+            if(StringUtils.isNotEmpty(rawMsg)){
+                cleanXML = rawMsg.replaceAll("\\s", "").replaceAll("\n", "");
+            }
+            return Response.ok(XMLUtils.preetyPrintPojo(cleanXML)).build();
+        } catch (Exception e) {
+            log.error("[ Error when getting exchange log by GUID. ] {}", e.getMessage());
+            return Response.status(Response.Status.NO_CONTENT).build();
         }
     }
 
@@ -124,7 +141,7 @@ public class ExchangeLogRestResource {
         try {
             return new ResponseDto(serviceLayer.getExchangeLogByGuid(guid), RestResponseCode.OK);
         } catch (Exception e) {
-            LOG.error("[ Error when getting exchange log by GUID. ] {}", e.getMessage());
+            log.error("[ Error when getting exchange log by GUID. ] {}", e.getMessage());
             return ErrorHandler.getFault(e);
         }
     }

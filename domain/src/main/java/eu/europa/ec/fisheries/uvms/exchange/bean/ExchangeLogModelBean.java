@@ -11,7 +11,14 @@ copy of the GNU General Public License along with the IFDM Suite. If not, see <h
  */
 package eu.europa.ec.fisheries.uvms.exchange.bean;
 
-import eu.europa.ec.fisheries.schema.exchange.v1.*;
+import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeHistoryListQuery;
+import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeListQuery;
+import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogStatusHistoryType;
+import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogStatusType;
+import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogType;
+import eu.europa.ec.fisheries.schema.exchange.v1.PollStatus;
+import eu.europa.ec.fisheries.schema.exchange.v1.RelatedLogInfo;
+import eu.europa.ec.fisheries.schema.exchange.v1.TypeRefType;
 import eu.europa.ec.fisheries.uvms.exchange.dao.ExchangeLogDao;
 import eu.europa.ec.fisheries.uvms.exchange.entity.exchangelog.ExchangeLog;
 import eu.europa.ec.fisheries.uvms.exchange.entity.exchangelog.ExchangeLogStatus;
@@ -24,15 +31,20 @@ import eu.europa.ec.fisheries.uvms.exchange.model.exception.InputArgumentExcepti
 import eu.europa.ec.fisheries.uvms.exchange.model.remote.ExchangeLogModel;
 import eu.europa.ec.fisheries.uvms.exchange.search.SearchFieldMapper;
 import eu.europa.ec.fisheries.uvms.exchange.search.SearchValue;
+import java.text.ParseException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import javax.ejb.EJB;
+import javax.ejb.Stateless;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import javax.ejb.EJB;
-import javax.ejb.Stateless;
-import java.text.ParseException;
-import java.util.*;
 
 /**
  **/
@@ -223,7 +235,7 @@ public class ExchangeLogModelBean implements ExchangeLogModel {
 
 
     @Override
-    public ExchangeLogType setPollStatus(PollStatus pollStatus, String username)throws ExchangeModelException {
+    public ExchangeLogType setPollStatus(PollStatus pollStatus, String username) throws ExchangeModelException {
         if(pollStatus == null || pollStatus.getPollGuid() == null){
             throw new InputArgumentException("No poll id to update status");
         }
@@ -240,5 +252,17 @@ public class ExchangeLogModelBean implements ExchangeLogModel {
             LOG.error("[ Error when set poll status {} {}] {}",pollStatus,username, ex.getMessage());
             throw new ExchangeModelException("Error when update status of Exchange log ");
         }
+    }
+
+    @Override
+    public String getExchangeLogRawXmlByGuid(String guid) {
+        String rawMsg = null;
+        try {
+            ExchangeLog exchangeLog = logDao.getExchangeLogByGuid(guid);
+            rawMsg = exchangeLog.getTypeRefMessage();
+        } catch (ExchangeDaoException e) {
+            LOG.error("[ERROR] Couldn't find Log with the following GUID : [["+guid+"]]", e);
+        }
+        return rawMsg;
     }
 }
