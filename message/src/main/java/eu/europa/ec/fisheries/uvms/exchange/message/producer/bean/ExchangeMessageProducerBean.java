@@ -22,7 +22,7 @@ import eu.europa.ec.fisheries.uvms.exchange.message.event.carrier.ExchangeMessag
 import eu.europa.ec.fisheries.uvms.exchange.message.event.carrier.PluginMessageEvent;
 import eu.europa.ec.fisheries.uvms.exchange.message.event.registry.PluginErrorEvent;
 import eu.europa.ec.fisheries.uvms.exchange.message.exception.ExchangeMessageException;
-import eu.europa.ec.fisheries.uvms.exchange.message.producer.MessageProducer;
+import eu.europa.ec.fisheries.uvms.exchange.message.producer.ExchangeMessageProducer;
 import eu.europa.ec.fisheries.uvms.exchange.model.constant.ExchangeModelConstants;
 import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelMapperException;
 import eu.europa.ec.fisheries.uvms.exchange.model.mapper.JAXBMarshaller;
@@ -37,9 +37,9 @@ import javax.enterprise.event.Observes;
 import javax.jms.*;
 
 @Stateless
-public class MessageProducerBean implements MessageProducer, ConfigMessageProducer {
+public class ExchangeMessageProducerBean implements ExchangeMessageProducer, ConfigMessageProducer {
 
-    final static Logger LOG = LoggerFactory.getLogger(MessageProducerBean.class);
+    final static Logger LOG = LoggerFactory.getLogger(ExchangeMessageProducerBean.class);
 
     private Queue responseQueue;
     private Queue eventQueue;
@@ -152,6 +152,17 @@ public class MessageProducerBean implements MessageProducer, ConfigMessageProduc
     public String sendConfigMessage(String text) throws ConfigMessageException {
         try {
             return sendMessageOnQueue(text, MessageQueue.CONFIG);
+        } catch (ExchangeMessageException e) {
+            LOG.error("[ Error when sending config message. ] {}", e.getMessage());
+            throw new ConfigMessageException("Error when sending config message.");
+        }
+    }
+
+    @Override
+    @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
+    public String sendRulesMessage(String text) throws ConfigMessageException {
+        try {
+            return sendMessageOnQueue(text, MessageQueue.RULES);
         } catch (ExchangeMessageException e) {
             LOG.error("[ Error when sending config message. ] {}", e.getMessage());
             throw new ConfigMessageException("Error when sending config message.");

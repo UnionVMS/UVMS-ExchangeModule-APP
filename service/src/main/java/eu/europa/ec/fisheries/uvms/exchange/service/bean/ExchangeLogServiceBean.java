@@ -11,19 +11,6 @@ copy of the GNU General Public License along with the IFDM Suite. If not, see <h
  */
 package eu.europa.ec.fisheries.uvms.exchange.service.bean;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
-
-import javax.ejb.EJB;
-import javax.ejb.Stateless;
-import javax.enterprise.event.Event;
-import javax.inject.Inject;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import eu.europa.ec.fisheries.schema.exchange.module.v1.ExchangeBaseRequest;
 import eu.europa.ec.fisheries.schema.exchange.source.v1.GetLogListByQueryResponse;
 import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeHistoryListQuery;
@@ -32,6 +19,7 @@ import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogStatusHistoryType;
 import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogStatusType;
 import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogStatusTypeType;
 import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogType;
+import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogWithValidationResults;
 import eu.europa.ec.fisheries.schema.exchange.v1.LogRefType;
 import eu.europa.ec.fisheries.schema.exchange.v1.LogType;
 import eu.europa.ec.fisheries.schema.exchange.v1.PollStatus;
@@ -42,7 +30,7 @@ import eu.europa.ec.fisheries.uvms.audit.model.exception.AuditModelMarshallExcep
 import eu.europa.ec.fisheries.uvms.exchange.message.constants.MessageQueue;
 import eu.europa.ec.fisheries.uvms.exchange.message.consumer.ExchangeMessageConsumer;
 import eu.europa.ec.fisheries.uvms.exchange.message.exception.ExchangeMessageException;
-import eu.europa.ec.fisheries.uvms.exchange.message.producer.MessageProducer;
+import eu.europa.ec.fisheries.uvms.exchange.message.producer.ExchangeMessageProducer;
 import eu.europa.ec.fisheries.uvms.exchange.model.dto.ListResponseDto;
 import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelException;
 import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelMapperException;
@@ -54,6 +42,17 @@ import eu.europa.ec.fisheries.uvms.exchange.service.event.ExchangeSendingQueueEv
 import eu.europa.ec.fisheries.uvms.exchange.service.exception.ExchangeLogException;
 import eu.europa.ec.fisheries.uvms.exchange.service.mapper.ExchangeAuditRequestMapper;
 import eu.europa.ec.fisheries.uvms.longpolling.notifications.NotificationMessage;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.List;
+import javax.ejb.EJB;
+import javax.ejb.Stateless;
+import javax.enterprise.event.Event;
+import javax.inject.Inject;
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Stateless
 public class ExchangeLogServiceBean implements ExchangeLogService {
@@ -61,13 +60,16 @@ public class ExchangeLogServiceBean implements ExchangeLogService {
     final static Logger LOG = LoggerFactory.getLogger(ExchangeLogServiceBean.class);
 
     @EJB
-    private MessageProducer producer;
+    private ExchangeMessageProducer producer;
 
     @EJB
     private ExchangeMessageConsumer consumer;
 
     @EJB
     private ExchangeEventLogCache logCache;
+
+    @EJB
+    private ExchangeToRulesSyncMsgBean exchangeToRulesSyncMsgBean;
 
     @Inject
     @ExchangeLogEvent
@@ -279,8 +281,11 @@ public class ExchangeLogServiceBean implements ExchangeLogService {
     }
 
     @Override
-    public String getExchangeLogRawMessageByGuid(String guid) throws ExchangeLogException {
-        return exchangeLogModel.getExchangeLogRawXmlByGuid(guid);
+    public ExchangeLogWithValidationResults getExchangeLogRawMessageByGuid(String guid) throws ExchangeLogException {
+        String rawMsg = exchangeLogModel.getExchangeLogRawXmlByGuid(guid);
+        ExchangeLogWithValidationResults validationFromRules = exchangeToRulesSyncMsgBean.getValidationFromRules(guid);
+        validationFromRules.setMsg(rawMsg != null ? rawMsg : StringUtils.EMPTY);
+        return validationFromRules;
     }
 
     @Override

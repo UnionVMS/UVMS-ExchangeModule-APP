@@ -34,7 +34,7 @@ import eu.europa.ec.fisheries.uvms.exchange.message.event.carrier.ExchangeMessag
 import eu.europa.ec.fisheries.uvms.exchange.message.event.carrier.PluginMessageEvent;
 import eu.europa.ec.fisheries.uvms.exchange.message.event.registry.PluginErrorEvent;
 import eu.europa.ec.fisheries.uvms.exchange.message.exception.ExchangeMessageException;
-import eu.europa.ec.fisheries.uvms.exchange.message.producer.MessageProducer;
+import eu.europa.ec.fisheries.uvms.exchange.message.producer.ExchangeMessageProducer;
 import eu.europa.ec.fisheries.uvms.exchange.model.constant.FaultCode;
 import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeException;
 import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelMarshallException;
@@ -84,7 +84,7 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
     ExchangeLogService exchangeLog;
 
     @EJB
-    MessageProducer producer;
+    ExchangeMessageProducer producer;
 
     @EJB
     ExchangeService exchangeService;
