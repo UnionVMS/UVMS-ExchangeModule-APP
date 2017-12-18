@@ -50,6 +50,7 @@ import javax.ejb.EJB;
 import javax.ejb.Stateless;
 import javax.enterprise.event.Event;
 import javax.inject.Inject;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -283,7 +284,7 @@ public class ExchangeLogServiceBean implements ExchangeLogService {
     public ExchangeLogWithValidationResults getExchangeLogRawMessageByGuid(String guid) throws ExchangeLogException {
         String rawMsg = exchangeLogModel.getExchangeLogRawXmlByGuid(guid);
         ExchangeLogWithValidationResults validationFromRules = exchangeToRulesSyncMsgBean.getValidationFromRules(guid);
-        validationFromRules.setMsg(rawMsg);
+        validationFromRules.setMsg(rawMsg != null ? rawMsg : StringUtils.EMPTY);
         return validationFromRules;
     }
 
