@@ -56,7 +56,7 @@
 			<dependency>
 				<groupId>fish.focus.uvms.maven</groupId>
 				<artifactId>uvms-pom-monitoring-deps</artifactId>
-				<version>1.14</version>
+				<version>1.15</version>
 				<type>pom</type>
 			</dependency>
 		</dependencies>
