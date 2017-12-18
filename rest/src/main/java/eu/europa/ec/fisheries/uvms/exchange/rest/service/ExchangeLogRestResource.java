@@ -14,6 +14,7 @@ package eu.europa.ec.fisheries.uvms.exchange.rest.service;
 import eu.europa.ec.fisheries.schema.exchange.source.v1.GetLogListByQueryResponse;
 import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeListQuery;
 import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogStatusType;
+import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogWithValidationResults;
 import eu.europa.ec.fisheries.schema.exchange.v1.TypeRefType;
 import eu.europa.ec.fisheries.uvms.commons.date.DateUtils;
 import eu.europa.ec.fisheries.uvms.exchange.rest.dto.PollQuery;
@@ -23,7 +24,6 @@ import eu.europa.ec.fisheries.uvms.exchange.rest.dto.exchange.ListQueryResponse;
 import eu.europa.ec.fisheries.uvms.exchange.rest.error.ErrorHandler;
 import eu.europa.ec.fisheries.uvms.exchange.rest.mapper.ExchangeLogMapper;
 import eu.europa.ec.fisheries.uvms.exchange.service.ExchangeLogService;
-import eu.europa.ec.fisheries.uvms.exchange.utils.XMLUtils;
 import eu.europa.ec.fisheries.uvms.rest.security.RequiresFeature;
 import eu.europa.ec.fisheries.uvms.rest.security.UnionVMSFeature;
 import java.util.Date;
@@ -39,7 +39,6 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
@@ -119,17 +118,17 @@ public class ExchangeLogRestResource {
     @Produces(value = {MediaType.APPLICATION_JSON})
     @Path("/message/{guid}")
     @RequiresFeature(UnionVMSFeature.viewExchange)
-    public Response getExchangeLogRawXMLByGuid(@PathParam("guid") String guid) {
+    public ResponseDto getExchangeLogRawXMLByGuid(@PathParam("guid") String guid) {
         try {
-            String rawMsg = serviceLayer.getExchangeLogRawMessageByGuid(guid);
-            String cleanXML = StringUtils.EMPTY;
-            if(StringUtils.isNotEmpty(rawMsg)){
-                cleanXML = rawMsg.replaceAll("\\s", "").replaceAll("\n", "");
+            ExchangeLogWithValidationResults rawMsg = serviceLayer.getExchangeLogRawMessageByGuid(guid);
+            String msgsTR = rawMsg.getMsg();
+            if(StringUtils.isNotEmpty(msgsTR)){
+                rawMsg.setMsg(msgsTR.replaceAll("\\s", "").replaceAll("\n", ""));
             }
-            return Response.ok(XMLUtils.preetyPrintPojo(cleanXML)).build();
+          return new ResponseDto(rawMsg, RestResponseCode.OK);
         } catch (Exception e) {
             log.error("[ Error when getting exchange log by GUID. ] {}", e.getMessage());
-            return Response.status(Response.Status.NO_CONTENT).build();
+            return ErrorHandler.getFault(e);
         }
     }
 

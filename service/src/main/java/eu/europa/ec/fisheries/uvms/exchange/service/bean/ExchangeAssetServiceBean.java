@@ -24,7 +24,7 @@ import eu.europa.ec.fisheries.uvms.asset.model.mapper.AssetModuleResponseMapper;
 import eu.europa.ec.fisheries.uvms.exchange.message.constants.MessageQueue;
 import eu.europa.ec.fisheries.uvms.exchange.message.consumer.ExchangeMessageConsumer;
 import eu.europa.ec.fisheries.uvms.exchange.message.exception.ExchangeMessageException;
-import eu.europa.ec.fisheries.uvms.exchange.message.producer.MessageProducer;
+import eu.europa.ec.fisheries.uvms.exchange.message.producer.ExchangeMessageProducer;
 import eu.europa.ec.fisheries.uvms.exchange.service.ExchangeAssetService;
 import eu.europa.ec.fisheries.uvms.exchange.service.exception.ExchangeServiceException;
 import eu.europa.ec.fisheries.wsdl.asset.types.Asset;
@@ -35,7 +35,7 @@ public class ExchangeAssetServiceBean implements ExchangeAssetService {
 	final static Logger LOG = LoggerFactory.getLogger(ExchangeAssetServiceBean.class);
 	
 	@EJB
-	MessageProducer producer;
+	ExchangeMessageProducer producer;
 	
 	@EJB
 	ExchangeMessageConsumer consumer;

@@ -11,6 +11,7 @@ copy of the GNU General Public License along with the IFDM Suite. If not, see <h
  */
 package eu.europa.ec.fisheries.uvms.exchange.service;
 
+import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogWithValidationResults;
 import java.util.Date;
 import java.util.List;
 
@@ -81,5 +82,5 @@ public interface ExchangeLogService {
 
     void removeUnsentMessage(String messageId, String username) throws ExchangeLogException;
 
-    String getExchangeLogRawMessageByGuid(String guid) throws ExchangeLogException;
+    ExchangeLogWithValidationResults getExchangeLogRawMessageByGuid(String guid) throws ExchangeLogException;
 }
