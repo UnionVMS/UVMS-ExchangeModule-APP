@@ -82,5 +82,7 @@ public interface ExchangeLogService {
 
     void removeUnsentMessage(String messageId, String username) throws ExchangeLogException;
 
-    ExchangeLogWithValidationResults getExchangeLogRawMessageByGuid(String guid) throws ExchangeLogException;
+    ExchangeLogWithValidationResults getExchangeLogRawMessageAndValidationByGuid(String guid) throws ExchangeLogException;
+
+    String getExchangeLogRawMessageByGuid(String guid);
 }
