@@ -72,7 +72,6 @@ public class ExchangeLogRestResource {
             //TODO query in swagger
             GetLogListByQueryResponse response = serviceLayer.getExchangeLogList(query);
             ListQueryResponse exchangeLogList = ExchangeLogMapper.mapToQueryResponse(response);
-            //ExchangeMock.mockLogList(query);
             return new ResponseDto(exchangeLogList, RestResponseCode.OK);
         } catch (Exception ex) {
             log.error("[ Error when geting log list. {} ] {} ",query, ex.getMessage());
@@ -120,7 +119,25 @@ public class ExchangeLogRestResource {
     @RequiresFeature(UnionVMSFeature.viewExchange)
     public ResponseDto getExchangeLogRawXMLByGuid(@PathParam("guid") String guid) {
         try {
-            ExchangeLogWithValidationResults rawMsg = serviceLayer.getExchangeLogRawMessageByGuid(guid);
+            String rawMsg = serviceLayer.getExchangeLogRawMessageByGuid(guid);
+            String cleanRawXml = StringUtils.EMPTY;
+            if(StringUtils.isNotEmpty(rawMsg)){
+                cleanRawXml= rawMsg.replaceAll("\\s", "").replaceAll("\n", "");
+            }
+            return new ResponseDto(cleanRawXml, RestResponseCode.OK);
+        } catch (Exception e) {
+            log.error("[ Error when getting exchange log by GUID. ] {}", e.getMessage());
+            return ErrorHandler.getFault(e);
+        }
+    }
+
+    @GET
+    @Produces(value = {MediaType.APPLICATION_JSON})
+    @Path("/validation/{guid}")
+    @RequiresFeature(UnionVMSFeature.viewExchange)
+    public ResponseDto getExchangeLogRawXMLAndValidationByGuid(@PathParam("guid") String guid) {
+        try {
+            ExchangeLogWithValidationResults rawMsg = serviceLayer.getExchangeLogRawMessageAndValidationByGuid(guid);
             String msgsTR = rawMsg.getMsg();
             if(StringUtils.isNotEmpty(msgsTR)){
                 rawMsg.setMsg(msgsTR.replaceAll("\\s", "").replaceAll("\n", ""));

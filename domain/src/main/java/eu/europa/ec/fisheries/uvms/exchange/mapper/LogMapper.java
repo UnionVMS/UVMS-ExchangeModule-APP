@@ -41,6 +41,21 @@ public class LogMapper {
             case SEND_EMAIL:
                 entity = toSendEmailEntity(log);
                 break;
+            case RECEIVE_FLUX_RESPONSE_MSG:
+                entity.setSource("FLUX");
+                break;
+            case RCV_FLUX_FA_REPORT_MSG:
+                entity.setSource("FLUX");
+                break;
+            case RECEIVE_FA_QUERY_MSG:
+                entity.setSource("FLUX");
+                break;
+            case SEND_FA_QUERY_MSG:
+                entity.setSource("FLUX");
+                break;
+            case SEND_FLUX_RESPONSE_MSG:
+                entity.setSource("FLUX");
+                break;
         }
 
         if (username == null) {
