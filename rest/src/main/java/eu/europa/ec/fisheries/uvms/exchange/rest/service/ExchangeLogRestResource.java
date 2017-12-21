@@ -14,7 +14,6 @@ package eu.europa.ec.fisheries.uvms.exchange.rest.service;
 import eu.europa.ec.fisheries.schema.exchange.source.v1.GetLogListByQueryResponse;
 import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeListQuery;
 import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogStatusType;
-import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogWithValidationResults;
 import eu.europa.ec.fisheries.schema.exchange.v1.TypeRefType;
 import eu.europa.ec.fisheries.uvms.commons.date.DateUtils;
 import eu.europa.ec.fisheries.uvms.exchange.rest.dto.PollQuery;
@@ -40,7 +39,6 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 
 @Path("/exchange")
 @Stateless
@@ -120,11 +118,7 @@ public class ExchangeLogRestResource {
     public ResponseDto getExchangeLogRawXMLByGuid(@PathParam("guid") String guid) {
         try {
             String rawMsg = serviceLayer.getExchangeLogRawMessageByGuid(guid);
-            String cleanRawXml = StringUtils.EMPTY;
-            if(StringUtils.isNotEmpty(rawMsg)){
-                cleanRawXml= rawMsg.replaceAll("\\s", "").replaceAll("\n", "");
-            }
-            return new ResponseDto(cleanRawXml, RestResponseCode.OK);
+            return new ResponseDto(rawMsg, RestResponseCode.OK);
         } catch (Exception e) {
             log.error("[ Error when getting exchange log by GUID. ] {}", e.getMessage());
             return ErrorHandler.getFault(e);
@@ -137,12 +131,7 @@ public class ExchangeLogRestResource {
     @RequiresFeature(UnionVMSFeature.viewExchange)
     public ResponseDto getExchangeLogRawXMLAndValidationByGuid(@PathParam("guid") String guid) {
         try {
-            ExchangeLogWithValidationResults rawMsg = serviceLayer.getExchangeLogRawMessageAndValidationByGuid(guid);
-            String msgsTR = rawMsg.getMsg();
-            if(StringUtils.isNotEmpty(msgsTR)){
-                rawMsg.setMsg(msgsTR.replaceAll("\\s", "").replaceAll("\n", ""));
-            }
-          return new ResponseDto(rawMsg, RestResponseCode.OK);
+          return new ResponseDto(serviceLayer.getExchangeLogRawMessageAndValidationByGuid(guid), RestResponseCode.OK);
         } catch (Exception e) {
             log.error("[ Error when getting exchange log by GUID. ] {}", e.getMessage());
             return ErrorHandler.getFault(e);

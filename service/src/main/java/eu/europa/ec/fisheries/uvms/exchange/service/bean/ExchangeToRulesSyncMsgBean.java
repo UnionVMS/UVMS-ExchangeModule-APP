@@ -14,6 +14,7 @@ import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogWithValidationResult
 import eu.europa.ec.fisheries.schema.exchange.v1.LogValidationResult;
 import eu.europa.ec.fisheries.schema.exchange.v1.RuleValidationLevel;
 import eu.europa.ec.fisheries.schema.exchange.v1.RuleValidationStatus;
+import eu.europa.ec.fisheries.schema.exchange.v1.TypeRefType;
 import eu.europa.ec.fisheries.schema.rules.rule.v1.ValidationMessageType;
 import eu.europa.ec.fisheries.schema.rules.rule.v1.ValidationMessageTypeResponse;
 import eu.europa.ec.fisheries.uvms.config.exception.ConfigMessageException;
@@ -47,13 +48,13 @@ public class ExchangeToRulesSyncMsgBean {
     private ExchangeMessageProducer exchangeProducerBean;
 
 
-    public ExchangeLogWithValidationResults getValidationFromRules(String guid) {
+    public ExchangeLogWithValidationResults getValidationFromRules(String guid, TypeRefType type) {
         if (StringUtils.isEmpty(guid)) {
             return new ExchangeLogWithValidationResults();
         }
         ExchangeLogWithValidationResults resp = new ExchangeLogWithValidationResults();
         try {
-            String getValidationsByGuidRequest = RulesModuleRequestMapper.createGetValidationsByGuidRequest(guid);
+            String getValidationsByGuidRequest = RulesModuleRequestMapper.createGetValidationsByGuidRequest(guid, type == null ? null : type.name());
             String correlationId = exchangeProducerBean.sendRulesMessage(getValidationsByGuidRequest);
             TextMessage validationRespMsg = exchangeConsumerBean.getMessage(correlationId, TextMessage.class);
             ValidationMessageTypeResponse validTypeRespFromRules = JAXBMarshaller.unmarshallTextMessage(validationRespMsg, ValidationMessageTypeResponse.class);
@@ -72,7 +73,11 @@ public class ExchangeToRulesSyncMsgBean {
     private LogValidationResult mapToLogValidationResult(ValidationMessageType validMsgFromRules) throws NullPointerException {
         LogValidationResult logResult = new LogValidationResult();
         logResult.setId(validMsgFromRules.getBrId());
-        logResult.setLevel(RuleValidationLevel.fromValue(validMsgFromRules.getLevel()));
+        try {
+            logResult.setLevel(RuleValidationLevel.fromValue(validMsgFromRules.getLevel()));
+        } catch (IllegalArgumentException ex){
+            log.error("[ERROR] The validation level "+validMsgFromRules.getLevel()+" doesn't exist in RuleValidationLevel class..");
+        }
         logResult.setStatus(EnumUtils.getEnum(RuleValidationStatus.class, validMsgFromRules.getErrorType().toString()));
         logResult.setXpaths(StringUtils.join(validMsgFromRules.getXpaths(), ','));
         return logResult;
