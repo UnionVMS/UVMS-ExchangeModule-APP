@@ -22,6 +22,7 @@ import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogType;
 import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogWithValidationResults;
 import eu.europa.ec.fisheries.schema.exchange.v1.LogRefType;
 import eu.europa.ec.fisheries.schema.exchange.v1.LogType;
+import eu.europa.ec.fisheries.schema.exchange.v1.LogWithRawMsgAndType;
 import eu.europa.ec.fisheries.schema.exchange.v1.PollStatus;
 import eu.europa.ec.fisheries.schema.exchange.v1.TypeRefType;
 import eu.europa.ec.fisheries.schema.exchange.v1.UnsentMessageType;
@@ -278,15 +279,15 @@ public class ExchangeLogServiceBean implements ExchangeLogService {
 
     @Override
     public ExchangeLogWithValidationResults getExchangeLogRawMessageAndValidationByGuid(String guid) throws ExchangeLogException {
-        String rawMsg = exchangeLogModel.getExchangeLogRawXmlByGuid(guid);
-        ExchangeLogWithValidationResults validationFromRules = exchangeToRulesSyncMsgBean.getValidationFromRules(guid);
-        validationFromRules.setMsg(rawMsg != null ? rawMsg : StringUtils.EMPTY);
+        LogWithRawMsgAndType rawMsg = exchangeLogModel.getExchangeLogRawXmlByGuid(guid);
+        ExchangeLogWithValidationResults validationFromRules = exchangeToRulesSyncMsgBean.getValidationFromRules(guid, rawMsg.getType());
+        validationFromRules.setMsg(rawMsg.getRawMsg() != null ? rawMsg.getRawMsg() : StringUtils.EMPTY);
         return validationFromRules;
     }
 
     @Override
     public String getExchangeLogRawMessageByGuid(String guid) {
-        return exchangeLogModel.getExchangeLogRawXmlByGuid(guid);
+        return exchangeLogModel.getExchangeLogRawXmlByGuid(guid).getRawMsg();
     }
 
     @Override

@@ -16,6 +16,7 @@ import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeListQuery;
 import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogStatusHistoryType;
 import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogStatusType;
 import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogType;
+import eu.europa.ec.fisheries.schema.exchange.v1.LogWithRawMsgAndType;
 import eu.europa.ec.fisheries.schema.exchange.v1.PollStatus;
 import eu.europa.ec.fisheries.schema.exchange.v1.RelatedLogInfo;
 import eu.europa.ec.fisheries.schema.exchange.v1.TypeRefType;
@@ -255,14 +256,17 @@ public class ExchangeLogModelBean implements ExchangeLogModel {
     }
 
     @Override
-    public String getExchangeLogRawXmlByGuid(String guid) {
-        String rawMsg = null;
+    public LogWithRawMsgAndType getExchangeLogRawXmlByGuid(String guid) {
+        LogWithRawMsgAndType logWrapper = new LogWithRawMsgAndType();
         try {
             ExchangeLog exchangeLog = logDao.getExchangeLogByGuid(guid);
-            rawMsg = exchangeLog.getTypeRefMessage();
+            String rawMsg = exchangeLog.getTypeRefMessage();
+            TypeRefType type = exchangeLog.getTypeRefType();
+            logWrapper.setRawMsg(rawMsg);
+            logWrapper.setType(type);
         } catch (ExchangeDaoException e) {
             LOG.error("[ERROR] Couldn't find Log with the following GUID : [["+guid+"]]", e);
         }
-        return rawMsg;
+        return logWrapper;
     }
 }

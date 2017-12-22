@@ -278,7 +278,7 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
 
             ExchangeLogType log = exchangeLog.log(request, LogType.RECEIVE_SALES_REPORT, ExchangeLogStatusTypeType.ISSUED, TypeRefType.SALES_REPORT, report, true);
 
-            forwardToRules(RulesModuleRequestMapper.createReceiveSalesReportRequest(report, messageGuid, plugin.name(), log.getGuid(), sender));
+            forwardToRules(RulesModuleRequestMapper.createReceiveSalesReportRequest(report, messageGuid, plugin.name(), log.getGuid(), sender, "TODO_TODO_MOCKED_ON_VALUE"));
         } catch (ExchangeModelMarshallException e) {
             try {
                 String errorMessage = "Couldn't map to SetSalesReportRequest when processing sales report from plugin. The event was " + event.getJmsMessage().getText();
@@ -306,7 +306,7 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
 
             ExchangeLogType log = exchangeLog.log(request, LogType.RECEIVE_SALES_QUERY, ExchangeLogStatusTypeType.ISSUED, TypeRefType.SALES_QUERY, query, true);
 
-            forwardToRules(RulesModuleRequestMapper.createReceiveSalesQueryRequest(query, messageGuid, plugin.name(), log.getGuid(), sender));
+            forwardToRules(RulesModuleRequestMapper.createReceiveSalesQueryRequest(query, messageGuid, plugin.name(), log.getGuid(), sender, "TODO_TODO_MOCKED"));
 
         } catch (ExchangeModelMarshallException e) {
             try {
