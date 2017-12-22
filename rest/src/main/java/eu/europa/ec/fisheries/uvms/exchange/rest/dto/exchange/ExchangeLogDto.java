@@ -11,12 +11,14 @@ copy of the GNU General Public License along with the IFDM Suite. If not, see <h
  */
 package eu.europa.ec.fisheries.uvms.exchange.rest.dto.exchange;
 
+import eu.europa.ec.fisheries.schema.exchange.v1.RelatedLogInfo;
+import java.util.List;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 
 @XmlAccessorType(XmlAccessType.FIELD)
-public class ExchangeLog {
+public class ExchangeLogDto {
 
 	@XmlElement(required = true)
 	private String id;
@@ -38,12 +40,12 @@ public class ExchangeLog {
 	private String status;
 	@XmlElement(required = true)
 	private String type;
-
 	@XmlElement(required = true)
 	private String typeRefType;
-
 	@XmlElement(required = true)
 	private ExchangeLogData logData;
+	@XmlElement(required = true)
+	private List<RelatedLogInfo> relatedLogData;
 	
 	public String getId() {
 		return id;
@@ -111,12 +113,16 @@ public class ExchangeLog {
 	public void setType(String type) {
 		this.type = type;
 	}
-
 	public String getTypeRefType() {
 		return typeRefType;
 	}
-
 	public void setTypeRefType(String typeRefType) {
 		this.typeRefType = typeRefType;
+	}
+	public List<RelatedLogInfo> getRelatedLogData() {
+		return relatedLogData;
+	}
+	public void setRelatedLogData(List<RelatedLogInfo> relatedLogData) {
+		this.relatedLogData = relatedLogData;
 	}
 }

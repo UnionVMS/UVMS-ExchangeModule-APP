@@ -21,16 +21,14 @@ public class ErrorHandler {
 
 	public static ResponseDto getFault(Exception e) {
 		if(e instanceof ExchangeException) {
-			
 			if(e instanceof ExchangeServiceException) {
 				if(e instanceof InputArgumentException) {
-					return new ResponseDto<String>(e.getMessage(), RestResponseCode.INPUT_ERROR);
+					return new ResponseDto<>(e.getMessage(), RestResponseCode.INPUT_ERROR);
 				}
-				return new ResponseDto<String>(e.getMessage(), RestResponseCode.SERVICE_ERROR);
+				return new ResponseDto<>(e.getMessage(), RestResponseCode.SERVICE_ERROR);
 			}
-			
-			return new ResponseDto<String>(e.getMessage(), RestResponseCode.EXCHANGE_ERROR);
+			return new ResponseDto<>(e.getMessage(), RestResponseCode.EXCHANGE_ERROR);
 		}
-		return new ResponseDto<String>(e.getMessage(), RestResponseCode.UNDEFINED_ERROR);
+		return new ResponseDto<>(e.getMessage(), RestResponseCode.UNDEFINED_ERROR);
 	}
 }

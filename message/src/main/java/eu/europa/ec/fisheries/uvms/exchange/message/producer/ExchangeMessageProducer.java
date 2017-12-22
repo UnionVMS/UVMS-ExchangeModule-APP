@@ -11,28 +11,31 @@ copy of the GNU General Public License along with the IFDM Suite. If not, see <h
  */
 package eu.europa.ec.fisheries.uvms.exchange.message.producer;
 
-import javax.ejb.Local;
-import javax.enterprise.event.Observes;
-import javax.jms.TextMessage;
-
+import eu.europa.ec.fisheries.uvms.config.exception.ConfigMessageException;
 import eu.europa.ec.fisheries.uvms.exchange.message.constants.MessageQueue;
 import eu.europa.ec.fisheries.uvms.exchange.message.event.ErrorEvent;
 import eu.europa.ec.fisheries.uvms.exchange.message.event.carrier.ExchangeMessageEvent;
 import eu.europa.ec.fisheries.uvms.exchange.message.event.carrier.PluginMessageEvent;
 import eu.europa.ec.fisheries.uvms.exchange.message.event.registry.PluginErrorEvent;
 import eu.europa.ec.fisheries.uvms.exchange.message.exception.ExchangeMessageException;
+import javax.ejb.Local;
+import javax.enterprise.event.Observes;
+import javax.jms.TextMessage;
 
 @Local
-public interface MessageProducer {
+public interface ExchangeMessageProducer {
 
-    public String sendMessageOnQueue(String text, MessageQueue queue) throws ExchangeMessageException;
+    String sendMessageOnQueue(String text, MessageQueue queue) throws ExchangeMessageException;
 
-    public String sendEventBusMessage(String text, String serviceName) throws ExchangeMessageException;
+    String sendEventBusMessage(String text, String serviceName) throws ExchangeMessageException;
     
-    public void sendModuleResponseMessage(TextMessage message, String text);
-    
-    public void sendModuleErrorResponseMessage(@Observes @ErrorEvent ExchangeMessageEvent event);
-    public void sendPluginErrorResponseMessage(@Observes @PluginErrorEvent PluginMessageEvent event);
+    void sendModuleResponseMessage(TextMessage message, String text);
+
+    String sendRulesMessage(String text) throws ConfigMessageException;
+
+    void sendModuleErrorResponseMessage(@Observes @ErrorEvent ExchangeMessageEvent event);
+
+    void sendPluginErrorResponseMessage(@Observes @PluginErrorEvent PluginMessageEvent event);
 
     void sendModuleAckMessage(String messageId, MessageQueue queue, String text);
 }

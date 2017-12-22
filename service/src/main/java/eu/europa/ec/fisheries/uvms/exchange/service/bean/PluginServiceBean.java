@@ -48,7 +48,7 @@ import eu.europa.ec.fisheries.uvms.exchange.message.event.registry.PluginErrorEv
 import eu.europa.ec.fisheries.uvms.exchange.message.event.registry.RegisterServiceEvent;
 import eu.europa.ec.fisheries.uvms.exchange.message.event.registry.UnRegisterServiceEvent;
 import eu.europa.ec.fisheries.uvms.exchange.message.exception.ExchangeMessageException;
-import eu.europa.ec.fisheries.uvms.exchange.message.producer.MessageProducer;
+import eu.europa.ec.fisheries.uvms.exchange.message.producer.ExchangeMessageProducer;
 import eu.europa.ec.fisheries.uvms.exchange.model.constant.FaultCode;
 import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelMapperException;
 import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelMarshallException;
@@ -71,22 +71,22 @@ public class PluginServiceBean implements PluginService {
 
     @Inject
     @PluginErrorEvent
-    Event<PluginMessageEvent> errorEvent;
+    private Event<PluginMessageEvent> errorEvent;
 
     @EJB
-    ExchangeService exchangeService;
+    private ExchangeService exchangeService;
 
     @EJB
-    MessageProducer producer;
+    private ExchangeMessageProducer producer;
 
     @EJB
-    ExchangeMessageConsumer consumer;
+    private  ExchangeMessageConsumer consumer;
 
     @EJB
-    ParameterService parameterService;
+    private ParameterService parameterService;
 
     @EJB
-    UVMSConfigService configService;
+    private UVMSConfigService configService;
 
     private boolean checkPluginType(PluginType pluginType, String responseTopicMessageSelector, String messageId) throws ExchangeModelMarshallException, ExchangeMessageException {
         LOG.debug("checkPluginType " + pluginType.name());

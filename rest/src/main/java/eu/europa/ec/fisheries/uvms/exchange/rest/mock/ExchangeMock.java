@@ -35,14 +35,14 @@ public class ExchangeMock {
 		return response;
 	}
 
-	private static List<ExchangeLog> mockExchangeLogList() {
-		List<ExchangeLog> logList = new ArrayList<>();
+	private static List<ExchangeLogDto> mockExchangeLogList() {
+		List<ExchangeLogDto> logList = new ArrayList<>();
 		logList.add(mockExchangeLog());
 		return logList;
 	}
 
-	public static ExchangeLog mockExchangeLog() {
-		ExchangeLog log = new ExchangeLog();
+	public static ExchangeLogDto mockExchangeLog() {
+		ExchangeLogDto log = new ExchangeLogDto();
 		log.setDateFwd("MOCK DateFwd");
 		log.setDateRecieved("MOCK dateReceived");
 		log.setSenderRecipient("MOCK senderRecipient");

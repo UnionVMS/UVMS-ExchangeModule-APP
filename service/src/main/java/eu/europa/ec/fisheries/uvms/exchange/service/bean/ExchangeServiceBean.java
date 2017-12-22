@@ -32,7 +32,7 @@ import eu.europa.ec.fisheries.uvms.config.service.ParameterService;
 import eu.europa.ec.fisheries.uvms.exchange.message.constants.MessageQueue;
 import eu.europa.ec.fisheries.uvms.exchange.message.consumer.ExchangeMessageConsumer;
 import eu.europa.ec.fisheries.uvms.exchange.message.exception.ExchangeMessageException;
-import eu.europa.ec.fisheries.uvms.exchange.message.producer.MessageProducer;
+import eu.europa.ec.fisheries.uvms.exchange.message.producer.ExchangeMessageProducer;
 import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelException;
 import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelMapperException;
 import eu.europa.ec.fisheries.uvms.exchange.model.remote.ServiceRegistryModel;
@@ -46,16 +46,16 @@ public class ExchangeServiceBean implements ExchangeService {
     final static Logger LOG = LoggerFactory.getLogger(ExchangeServiceBean.class);
 
     @EJB
-    ParameterService parameterService;
+    private ParameterService parameterService;
 
     @EJB
-    ExchangeMessageConsumer consumer;
+    private ExchangeMessageConsumer consumer;
 
     @EJB
-    MessageProducer producer;
+    private ExchangeMessageProducer producer;
 
     @EJB
-    ServiceRegistryModel serviceRegistryModel;
+    private ServiceRegistryModel serviceRegistryModel;
 
     /**
      * {@inheritDoc}

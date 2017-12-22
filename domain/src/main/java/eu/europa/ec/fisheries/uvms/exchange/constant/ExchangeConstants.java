@@ -23,6 +23,7 @@ public class ExchangeConstants {
     public static final String UNSENT_BY_GUID = "UnsentMessage.findByGuid";
     public static final String LOG_BY_GUID = "Log.findByGuid";
     public static final String LOG_BY_TYPE_REF_AND_GUID = "Log.findByTypeRefGuid";
+    public static final String LOG_BY_TYPE_RANGE_OF_REF_GUIDS = "Log.findByRangeOfRefGuids";
     
     public static final String QUEUE_DOMAIN_MODEL = "jms/queue/UVMSExchangeModel";
     public static final String QUEUE_DOMAIN_MODEL_NAME = "UVMSExchangeModel";
