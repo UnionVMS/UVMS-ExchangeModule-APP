@@ -11,18 +11,6 @@
  */
 package eu.europa.ec.fisheries.uvms.exchange.service.bean;
 
-import static eu.europa.ec.fisheries.schema.exchange.plugin.types.v1.PluginType.BELGIAN_ACTIVITY;
-
-import javax.ejb.EJB;
-import javax.ejb.Stateless;
-import javax.enterprise.event.Event;
-import javax.enterprise.event.Observes;
-import javax.inject.Inject;
-import javax.jms.JMSException;
-import javax.jms.TextMessage;
-import java.util.ArrayList;
-import java.util.List;
-
 import eu.europa.ec.fisheries.schema.exchange.common.v1.AcknowledgeType;
 import eu.europa.ec.fisheries.schema.exchange.common.v1.CommandType;
 import eu.europa.ec.fisheries.schema.exchange.common.v1.CommandTypeType;
@@ -40,11 +28,7 @@ import eu.europa.ec.fisheries.schema.exchange.v1.LogType;
 import eu.europa.ec.fisheries.schema.exchange.v1.TypeRefType;
 import eu.europa.ec.fisheries.schema.exchange.v1.UnsentMessageTypeProperty;
 import eu.europa.ec.fisheries.uvms.exchange.message.consumer.ExchangeMessageConsumer;
-import eu.europa.ec.fisheries.uvms.exchange.message.event.ErrorEvent;
-import eu.europa.ec.fisheries.uvms.exchange.message.event.MdrSyncRequestMessageEvent;
-import eu.europa.ec.fisheries.uvms.exchange.message.event.SendCommandToPluginEvent;
-import eu.europa.ec.fisheries.uvms.exchange.message.event.SendFLUXFAResponseToPluginEvent;
-import eu.europa.ec.fisheries.uvms.exchange.message.event.SendReportToPluginEvent;
+import eu.europa.ec.fisheries.uvms.exchange.message.event.*;
 import eu.europa.ec.fisheries.uvms.exchange.message.event.carrier.ExchangeMessageEvent;
 import eu.europa.ec.fisheries.uvms.exchange.message.exception.ExchangeMessageException;
 import eu.europa.ec.fisheries.uvms.exchange.message.producer.MessageProducer;
@@ -66,6 +50,18 @@ import eu.europa.ec.fisheries.uvms.exchange.service.mapper.ExchangeToMdrRulesMap
 import eu.europa.ec.fisheries.wsdl.asset.types.Asset;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import javax.ejb.EJB;
+import javax.ejb.Stateless;
+import javax.enterprise.event.Event;
+import javax.enterprise.event.Observes;
+import javax.inject.Inject;
+import javax.jms.JMSException;
+import javax.jms.TextMessage;
+import java.util.ArrayList;
+import java.util.List;
+
+import static eu.europa.ec.fisheries.schema.exchange.plugin.types.v1.PluginType.BELGIAN_ACTIVITY;
 
 @Stateless
 public class ExchangeEventOutgoingServiceBean implements ExchangeEventOutgoingService {
@@ -92,9 +88,12 @@ public class ExchangeEventOutgoingServiceBean implements ExchangeEventOutgoingSe
     ExchangeAssetService exchangeAssetService;
 
     @Override
-    public void sendSalesResponseToFLUX(SendSalesResponseRequest sendSalesResponseRequest) throws ExchangeModelMarshallException, ExchangeMessageException {
+    public void sendSalesResponseToPlugin(SendSalesResponseRequest sendSalesResponseRequest, PluginType pluginType) throws ExchangeModelMarshallException, ExchangeMessageException {
+        if (pluginType == null) {
+            throw new IllegalArgumentException("No plugin provided to send the Sales response to.");
+        }
         String marshalledRequest = JAXBMarshaller.marshallJaxBObjectToString(sendSalesResponseRequest);
-        final String serviceName = (sendSalesResponseRequest.getRecipient().equals("BELGIAN_SALES") ? ExchangeServiceConstants.BELGIAN_AUCTION_SALES_PLUGIN_SERVICE_NAME : ExchangeServiceConstants.FLUX_SALES_PLUGIN_SERVICE_NAME);
+        final String serviceName = pluginType == PluginType.BELGIAN_SALES ? ExchangeServiceConstants.BELGIAN_AUCTION_SALES_PLUGIN_SERVICE_NAME : ExchangeServiceConstants.FLUX_SALES_PLUGIN_SERVICE_NAME;
         producer.sendEventBusMessage(marshalledRequest, serviceName);
     }
 
@@ -265,8 +264,8 @@ public class ExchangeEventOutgoingServiceBean implements ExchangeEventOutgoingSe
         try {
             SetFLUXFAResponseMessageRequest request = JAXBMarshaller.unmarshallTextMessage(message.getJmsMessage(), SetFLUXFAResponseMessageRequest.class);
             LOG.debug("Got FLUXFAResponse in exchange :" + request.getRequest());
-            String text = ExchangePluginRequestMapper.createSetFLUXFAResponseRequest(
-                    request.getRequest(), request.getDestination(), request.getFluxDataFlow(), request.getSenderOrReceiver());
+            String text = ExchangePluginRequestMapper.createSetFLUXFAResponseRequestWithOn(
+                    request.getRequest(), request.getDestination(), request.getFluxDataFlow(), request.getSenderOrReceiver(), request.getOnValue());
             LOG.debug("Message to plugin {}", text);
             String pluginMessageId = producer.sendEventBusMessage(text, ((request.getPluginType() == BELGIAN_ACTIVITY)
                     ? ExchangeServiceConstants.BELGIAN_ACTIVITY_PLUGIN_SERVICE_NAME : ExchangeServiceConstants.FLUX_ACTIVITY_PLUGIN_SERVICE_NAME));

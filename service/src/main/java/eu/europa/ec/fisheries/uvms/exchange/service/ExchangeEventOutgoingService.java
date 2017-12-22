@@ -11,9 +11,7 @@
  */
 package eu.europa.ec.fisheries.uvms.exchange.service;
 
-import javax.ejb.Local;
-import javax.enterprise.event.Observes;
-
+import eu.europa.ec.fisheries.schema.exchange.plugin.types.v1.PluginType;
 import eu.europa.ec.fisheries.uvms.exchange.message.event.MdrSyncRequestMessageEvent;
 import eu.europa.ec.fisheries.uvms.exchange.message.event.SendCommandToPluginEvent;
 import eu.europa.ec.fisheries.uvms.exchange.message.event.SendFLUXFAResponseToPluginEvent;
@@ -21,6 +19,9 @@ import eu.europa.ec.fisheries.uvms.exchange.message.event.SendReportToPluginEven
 import eu.europa.ec.fisheries.uvms.exchange.message.event.carrier.ExchangeMessageEvent;
 import eu.europa.ec.fisheries.uvms.exchange.message.exception.ExchangeMessageException;
 import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelMarshallException;
+
+import javax.ejb.Local;
+import javax.enterprise.event.Observes;
 
 @Local
 public interface ExchangeEventOutgoingService {
@@ -53,11 +54,12 @@ public interface ExchangeEventOutgoingService {
 
     /**
      * Sends a Sales response to the FLUX plugin
-     * @param salesResponse
+     * @param salesResponse the sales response that needs to be sent
+     * @param pluginType type of the plugin which the Sales response should be sent through
      * @throws ExchangeModelMarshallException
      * @throws ExchangeMessageException
      */
-    void sendSalesResponseToFLUX(eu.europa.ec.fisheries.schema.exchange.plugin.v1.SendSalesResponseRequest salesResponse) throws ExchangeModelMarshallException, ExchangeMessageException;
+    void sendSalesResponseToPlugin(eu.europa.ec.fisheries.schema.exchange.plugin.v1.SendSalesResponseRequest salesResponse, PluginType pluginType) throws ExchangeModelMarshallException, ExchangeMessageException;
 
 
     /**

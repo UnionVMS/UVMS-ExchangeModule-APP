@@ -17,26 +17,25 @@ import eu.europa.ec.fisheries.schema.exchange.v1.TypeRefType;
 import java.util.Date;
 
 /**
- **/
-public enum ExchangeSearchField {
-
-	TRANSFER_INCOMING("transferIncoming", "transferIncoming", SearchTable.LOG, Boolean.class),
-    FROM_DATE("dateReceived", "fromDate", SearchTable.LOG, Date.class),
-    TO_DATE("dateReceived", "toDate", SearchTable.LOG, Date.class),
-    SENDER_RECEIVER("senderReceiver", "senderReceiver", SearchTable.LOG, String.class),
-    RECIPIENT("recipient", "recipient", SearchTable.LOG, String.class),
-    STATUS("status", "status", SearchTable.LOG, ExchangeLogStatusTypeType.class),
-    TYPE("typeRefType","typeRefType", SearchTable.LOG, TypeRefType.class),
-    SOURCE("source","source", SearchTable.LOG, String.class);
+ * Created by sanera on 30/11/2017.
+ */
+public enum SortFieldMapper {
+    DATE_RECEIVED("dateReceived", SearchTable.LOG, Date.class),
+    SOURCE("source",  SearchTable.LOG, String.class),
+    TYPE("typeRefType", SearchTable.LOG, TypeRefType.class),
+    SENDER_RECEIVER("senderReceiver",  SearchTable.LOG, String.class),
+    RULE("fwdRule",  SearchTable.LOG, String.class),
+    RECEPIENT("recipient",  SearchTable.LOG, String.class),
+    STATUS("status",SearchTable.LOG, ExchangeLogStatusTypeType.class),
+    DATE_FORWARDED("fwdDate",SearchTable.LOG, Date.class);
 
     private final String fieldName;
-    private final String sqlReplacementToken;
     private final SearchTable searchTables;
     private Class clazz;
 
-    private ExchangeSearchField(String fieldName, String sqlReplacementToken, SearchTable searchTables, Class clazz) {
+    private SortFieldMapper(String fieldName, SearchTable searchTables, Class clazz) {
         this.fieldName = fieldName;
-        this.sqlReplacementToken = sqlReplacementToken;
+
         this.searchTables = searchTables;
         this.clazz = clazz;
     }
@@ -49,12 +48,8 @@ public enum ExchangeSearchField {
         return searchTables;
     }
 
-    public String getSQLReplacementToken() {
-        return sqlReplacementToken;
-    }
 
     public Class getClazz() {
         return clazz;
     }
-
 }
