@@ -105,40 +105,65 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
         try {
             SetFLUXFAReportMessageRequest request = JAXBMarshaller.unmarshallTextMessage(message.getJmsMessage(), SetFLUXFAReportMessageRequest.class);
             log.info("Process FLUXFAReportMessage:{}",request);
-            eu.europa.ec.fisheries.schema.rules.exchange.v1.PluginType rulesPluginType;
-            switch (request.getPluginType()) {
-                case MANUAL:
-                    rulesPluginType = eu.europa.ec.fisheries.schema.rules.exchange.v1.PluginType.MANUAL;
-                    break;
-                case BELGIAN_ACTIVITY:
-                    rulesPluginType = eu.europa.ec.fisheries.schema.rules.exchange.v1.PluginType.BELGIAN_ACTIVITY;
-                    break;
-                default:
-                    rulesPluginType = eu.europa.ec.fisheries.schema.rules.exchange.v1.PluginType.FLUX;
-                    break;
-            }
             log.debug("Got FLUXFAReportMessage in exchange :" + request.getRequest());
             ExchangeLogType exchangeLogType = exchangeLog.log(request, LogType.RCV_FLUX_FA_REPORT_MSG, ExchangeLogStatusTypeType.ISSUED, TypeRefType.FA_REPORT, request.getRequest(), true);
-            String logId = null;
-            if (exchangeLogType == null) {
-                log.error("ExchangeLogType received is NULL while trying to save RECEIVE_FLUX_FA_REPORT_MSG {}",message);
-            } else {
-                logId = exchangeLogType.getGuid();
-                log.info("SetFLUXFAReportMessageRequest Logged to Exchange:" + logId);
-            }
-
-            String msg = RulesModuleRequestMapper.createSetFLUXFAReportMessageRequest(rulesPluginType, request.getRequest(), request.getUsername(), logId, request.getFluxDataFlow(), request.getSenderOrReceiver(), request.getOnValue());
-
-            //Improvement that could be done is to pass the service. For this purpose
-            //we need first to set the plugin name, which requires BaseExchangeRequest XSD modification, as well as in ActivityPlugin
+            String msg = RulesModuleRequestMapper.createSetFLUXFAReportMessageRequest(extractPluginType(request), request.getRequest()
+                    , request.getUsername(), extractLogId(message, exchangeLogType), request.getFluxDataFlow()
+                    , request.getSenderOrReceiver(), request.getOnValue());
             forwardToRules(msg, message, null);
-
         } catch (RulesModelMapperException | ExchangeModelMarshallException e) {
             log.error("Couldn't map to SetFLUXFAReportMessageRequest when processing FLUXFAReportMessage from plugin", e);
         } catch (ExchangeLogException e) {
             log.error("Couldn't log FAReportMessage received from plugin into database", e);
         }
+    }
 
+
+    @Override
+    public void processFAQueryReportMessage(@Observes @SetFaQueryMessageEvent ExchangeMessageEvent message) {
+        try {
+            SetFAQueryMessageRequest request = JAXBMarshaller.unmarshallTextMessage(message.getJmsMessage(), SetFAQueryMessageRequest.class);
+            log.info("Process FAQueryMessage:{}",request);
+            log.debug("Got FAQueryMessage in exchange :" + request.getRequest());
+            ExchangeLogType exchangeLogType = exchangeLog.log(request, LogType.RECEIVE_FA_QUERY_MSG, ExchangeLogStatusTypeType.ISSUED
+                    , TypeRefType.FA_QUERY, request.getRequest(), true);
+            String msg = RulesModuleRequestMapper.createSetFaQueryMessageRequest(extractPluginType(request)
+                    , request.getRequest(), request.getUsername(), extractLogId(message, exchangeLogType), request.getFluxDataFlow()
+                    , request.getSenderOrReceiver(), request.getOnValue());
+            forwardToRules(msg, message, null);
+        } catch (RulesModelMapperException | ExchangeModelMarshallException e) {
+            log.error("Couldn't map to SetFLUXFAReportMessageRequest when processing FLUXFAReportMessage from plugin", e);
+        } catch (ExchangeLogException e) {
+            log.error("Couldn't log FAReportMessage received from plugin into database", e);
+        }
+    }
+
+    private String extractLogId(ExchangeMessageEvent message, ExchangeLogType exchangeLogType) {
+        String logId = null;
+        if (exchangeLogType == null) {
+            log.error("ExchangeLogType received is NULL while trying to save {}",message);
+        } else {
+            logId = exchangeLogType.getGuid();
+            log.info("SetFAQueryMessage Logged to Exchange:" + logId);
+        }
+        return logId;
+    }
+
+
+    private eu.europa.ec.fisheries.schema.rules.exchange.v1.PluginType extractPluginType(ExchangeBaseRequest request) {
+        eu.europa.ec.fisheries.schema.rules.exchange.v1.PluginType rulesPluginType;
+        switch (request.getPluginType()) {
+            case MANUAL:
+                rulesPluginType = eu.europa.ec.fisheries.schema.rules.exchange.v1.PluginType.MANUAL;
+                break;
+            case BELGIAN_ACTIVITY:
+                rulesPluginType = eu.europa.ec.fisheries.schema.rules.exchange.v1.PluginType.BELGIAN_ACTIVITY;
+                break;
+            default:
+                rulesPluginType = eu.europa.ec.fisheries.schema.rules.exchange.v1.PluginType.FLUX;
+                break;
+        }
+        return rulesPluginType;
     }
 
     /*

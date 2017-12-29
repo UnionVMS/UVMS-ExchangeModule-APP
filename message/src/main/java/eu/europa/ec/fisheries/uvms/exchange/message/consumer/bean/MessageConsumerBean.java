@@ -128,6 +128,10 @@ public class MessageConsumerBean implements MessageListener {
     Event<ExchangeMessageEvent> processFLUXFAResponseMessageEvent;
 
     @Inject
+    @SetFaQueryMessageEvent
+    Event<ExchangeMessageEvent> receivedFaQueryFromFlux;
+
+    @Inject
     @UpdateLogStatusEvent
     Event<ExchangeMessageEvent> updateLogStatusEvent;
 
@@ -205,6 +209,9 @@ public class MessageConsumerBean implements MessageListener {
                     break;
                 case SET_FLUX_FA_REPORT_MESSAGE:
                     processFLUXFAReportMessageEvent.fire(new ExchangeMessageEvent(textMessage));
+                    break;
+                case SET_FA_QUERY_MESSAGE:
+                    receivedFaQueryFromFlux.fire(new ExchangeMessageEvent(textMessage));
                     break;
                 case SET_FLUX_FA_RESPONSE_MESSAGE:
                     processFLUXFAResponseMessageEvent.fire(new ExchangeMessageEvent(textMessage));
