@@ -29,7 +29,7 @@ import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogType;
 import eu.europa.ec.fisheries.schema.exchange.v1.LogType;
 import eu.europa.ec.fisheries.schema.exchange.v1.TypeRefType;
 import eu.europa.ec.fisheries.schema.exchange.v1.UnsentMessageTypeProperty;
-import eu.europa.ec.fisheries.uvms.exchange.message.consumer.ExchangeMessageConsumer;
+import eu.europa.ec.fisheries.uvms.exchange.message.consumer.ExchangeConsumer;
 import eu.europa.ec.fisheries.uvms.exchange.message.event.ErrorEvent;
 import eu.europa.ec.fisheries.uvms.exchange.message.event.MdrSyncRequestMessageEvent;
 import eu.europa.ec.fisheries.uvms.exchange.message.event.SendCommandToPluginEvent;
@@ -79,7 +79,7 @@ public class ExchangeEventOutgoingServiceBean implements ExchangeEventOutgoingSe
     ExchangeMessageProducer producer;
 
     @EJB
-    ExchangeMessageConsumer consumer;
+    ExchangeConsumer consumer;
 
     @EJB
     ExchangeLogService exchangeLog;

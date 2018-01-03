@@ -104,7 +104,6 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
     public void processFLUXFAReportMessage(@Observes @SetFluxFAReportMessageEvent ExchangeMessageEvent message) {
         try {
             SetFLUXFAReportMessageRequest request = JAXBMarshaller.unmarshallTextMessage(message.getJmsMessage(), SetFLUXFAReportMessageRequest.class);
-            log.info("Process FLUXFAReportMessage:{}",request);
             log.debug("Got FLUXFAReportMessage in exchange :" + request.getRequest());
             ExchangeLogType exchangeLogType = exchangeLog.log(request, LogType.RCV_FLUX_FA_REPORT_MSG, ExchangeLogStatusTypeType.ISSUED, TypeRefType.FA_REPORT, request.getRequest(), true);
             String msg = RulesModuleRequestMapper.createSetFLUXFAReportMessageRequest(extractPluginType(request), request.getRequest()
@@ -123,7 +122,6 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
     public void processFAQueryReportMessage(@Observes @SetFaQueryMessageEvent ExchangeMessageEvent message) {
         try {
             SetFAQueryMessageRequest request = JAXBMarshaller.unmarshallTextMessage(message.getJmsMessage(), SetFAQueryMessageRequest.class);
-            log.info("Process FAQueryMessage:{}",request);
             log.debug("Got FAQueryMessage in exchange :" + request.getRequest());
             ExchangeLogType exchangeLogType = exchangeLog.log(request, LogType.RECEIVE_FA_QUERY_MSG, ExchangeLogStatusTypeType.ISSUED
                     , TypeRefType.FA_QUERY, request.getRequest(), true);
@@ -173,19 +171,16 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
 	 */
     @Override
     public void sendResponseToRulesModule(@Observes @MdrSyncResponseMessageEvent ExchangeMessageEvent message) {
-
         TextMessage requestMessage = message.getJmsMessage();
         try {
             SetFLUXMDRSyncMessageExchangeResponse exchangeResponse = JAXBMarshaller.unmarshallTextMessage(requestMessage, SetFLUXMDRSyncMessageExchangeResponse.class);
-            log.info("Received @MdrSyncResponseMessageEvent.:{}",exchangeResponse);
+            log.debug("Received @MdrSyncResponseMessageEvent.:{}",exchangeResponse);
             String strRequest = exchangeResponse.getRequest();
             SetFLUXMDRSyncMessageRulesResponse mdrResponse = new SetFLUXMDRSyncMessageRulesResponse();
             mdrResponse.setMethod(RulesModuleMethod.GET_FLUX_MDR_SYNC_RESPONSE);
             mdrResponse.setRequest(strRequest);
             String mdrStrReq = JAXBMarshaller.marshallJaxBObjectToString(mdrResponse);
-
             forwardToRules(mdrStrReq, null, null);
-
         } catch (Exception e) {
             log.error("Something strange happend during message conversion {} {}",message,e);
         }
@@ -441,7 +436,6 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
             UpdateLogStatusRequest request = JAXBMarshaller.unmarshallTextMessage(message.getJmsMessage(), UpdateLogStatusRequest.class);
             String logGuid = request.getLogGuid();
             ExchangeLogStatusTypeType status = request.getNewStatus();
-
             exchangeLog.updateStatus(logGuid, status);
         } catch (ExchangeLogException e) {
             fireExchangeFault(message, "Could not update the status of a message log.", e);
@@ -459,13 +453,11 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
             String username;
             MovementRefType movementRefType = request.getMovementRefType();
             SetReportMovementType orgRequest = request.getOrgRequest();
-
             if (PluginType.MANUAL.equals(orgRequest.getPluginType())) {
                 username = request.getUsername();
             } else {
                 username = orgRequest.getPluginName();
             }
-
             ExchangeLogType log = ExchangeLogMapper.getReceivedMovementExchangeLog(orgRequest, movementRefType.getMovementRefGuid(), movementRefType.getType().value(), username);
             ExchangeLogType createdLog = exchangeLog.log(log, username);
 
