@@ -18,7 +18,7 @@ import eu.europa.ec.fisheries.schema.exchange.v1.TypeRefType;
 import eu.europa.ec.fisheries.schema.rules.rule.v1.ValidationMessageType;
 import eu.europa.ec.fisheries.schema.rules.rule.v1.ValidationMessageTypeResponse;
 import eu.europa.ec.fisheries.uvms.config.exception.ConfigMessageException;
-import eu.europa.ec.fisheries.uvms.exchange.message.consumer.ExchangeMessageConsumer;
+import eu.europa.ec.fisheries.uvms.exchange.message.consumer.ExchangeConsumer;
 import eu.europa.ec.fisheries.uvms.exchange.message.exception.ExchangeMessageException;
 import eu.europa.ec.fisheries.uvms.exchange.message.producer.ExchangeMessageProducer;
 import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelMarshallException;
@@ -42,7 +42,7 @@ import org.apache.commons.lang3.StringUtils;
 public class ExchangeToRulesSyncMsgBean {
 
     @EJB
-    private ExchangeMessageConsumer exchangeConsumerBean;
+    private ExchangeConsumer exchangeConsumerBean;
 
     @EJB
     private ExchangeMessageProducer exchangeProducerBean;

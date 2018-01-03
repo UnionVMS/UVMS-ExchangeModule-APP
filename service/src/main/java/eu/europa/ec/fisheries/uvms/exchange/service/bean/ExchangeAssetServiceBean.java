@@ -22,7 +22,7 @@ import eu.europa.ec.fisheries.uvms.asset.model.exception.AssetModelMapperExcepti
 import eu.europa.ec.fisheries.uvms.asset.model.mapper.AssetModuleRequestMapper;
 import eu.europa.ec.fisheries.uvms.asset.model.mapper.AssetModuleResponseMapper;
 import eu.europa.ec.fisheries.uvms.exchange.message.constants.MessageQueue;
-import eu.europa.ec.fisheries.uvms.exchange.message.consumer.ExchangeMessageConsumer;
+import eu.europa.ec.fisheries.uvms.exchange.message.consumer.ExchangeConsumer;
 import eu.europa.ec.fisheries.uvms.exchange.message.exception.ExchangeMessageException;
 import eu.europa.ec.fisheries.uvms.exchange.message.producer.ExchangeMessageProducer;
 import eu.europa.ec.fisheries.uvms.exchange.service.ExchangeAssetService;
@@ -38,7 +38,7 @@ public class ExchangeAssetServiceBean implements ExchangeAssetService {
 	ExchangeMessageProducer producer;
 	
 	@EJB
-	ExchangeMessageConsumer consumer;
+    ExchangeConsumer consumer;
 
 	@Override
 	public Asset getAsset(String assetGuid) throws ExchangeServiceException {

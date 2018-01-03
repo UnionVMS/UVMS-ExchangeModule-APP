@@ -29,7 +29,7 @@ import eu.europa.ec.fisheries.schema.exchange.v1.UnsentMessageType;
 import eu.europa.ec.fisheries.schema.exchange.v1.UnsentMessageTypeProperty;
 import eu.europa.ec.fisheries.uvms.audit.model.exception.AuditModelMarshallException;
 import eu.europa.ec.fisheries.uvms.exchange.message.constants.MessageQueue;
-import eu.europa.ec.fisheries.uvms.exchange.message.consumer.ExchangeMessageConsumer;
+import eu.europa.ec.fisheries.uvms.exchange.message.consumer.ExchangeConsumer;
 import eu.europa.ec.fisheries.uvms.exchange.message.exception.ExchangeMessageException;
 import eu.europa.ec.fisheries.uvms.exchange.message.producer.ExchangeMessageProducer;
 import eu.europa.ec.fisheries.uvms.exchange.model.dto.ListResponseDto;
@@ -53,16 +53,20 @@ import javax.enterprise.event.Event;
 import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Stateless
 @Slf4j
 public class ExchangeLogServiceBean implements ExchangeLogService {
 
+    final static Logger LOG = LoggerFactory.getLogger(ExchangeLogServiceBean.class);
+
     @EJB
     private ExchangeMessageProducer producer;
 
     @EJB
-    private ExchangeMessageConsumer consumer;
+    private ExchangeConsumer consumer;
 
     @EJB
     private ExchangeEventLogCache logCache;
@@ -97,11 +101,11 @@ public class ExchangeLogServiceBean implements ExchangeLogService {
     public ExchangeLogType log(ExchangeLogType log, String username) throws ExchangeLogException {
         try {
             ExchangeLogType exchangeLog = exchangeLogModel.createExchangeLog(log, username);
-            sendAuditLogMessageForCreateExchangeLog(exchangeLog.getGuid(), username);
-            exchangeLogEvent.fire(new NotificationMessage("guid", exchangeLog.getGuid()));
+            String guid = exchangeLog.getGuid();
+            sendAuditLogMessageForCreateExchangeLog(guid, username);
+            exchangeLogEvent.fire(new NotificationMessage("guid", guid));
+            LOG.debug("[INFO] Logging message with guid : [ "+guid+" ]..");
             return exchangeLog;
-        } catch (ExchangeModelMapperException e) {
-            throw new ExchangeLogException("Couldn't create log exchange log.");
         } catch (ExchangeModelException e) {
             throw new ExchangeLogException("Couldn't create log exchange log.");
         }
