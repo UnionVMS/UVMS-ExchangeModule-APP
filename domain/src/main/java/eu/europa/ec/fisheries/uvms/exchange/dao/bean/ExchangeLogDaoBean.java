@@ -11,6 +11,17 @@ copy of the GNU General Public License along with the IFDM Suite. If not, see <h
  */
 package eu.europa.ec.fisheries.uvms.exchange.dao.bean;
 
+import javax.ejb.Stateless;
+import javax.persistence.NoResultException;
+import javax.persistence.PersistenceException;
+import javax.persistence.Query;
+import javax.persistence.TypedQuery;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeHistoryListQuery;
 import eu.europa.ec.fisheries.schema.exchange.v1.TypeRefType;
 import eu.europa.ec.fisheries.uvms.exchange.constant.ExchangeConstants;
@@ -23,17 +34,8 @@ import eu.europa.ec.fisheries.uvms.exchange.exception.NoEntityFoundException;
 import eu.europa.ec.fisheries.uvms.exchange.search.ExchangeSearchField;
 import eu.europa.ec.fisheries.uvms.exchange.search.SearchFieldMapper;
 import eu.europa.ec.fisheries.uvms.exchange.search.SearchValue;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import javax.ejb.Stateless;
-import javax.persistence.NoResultException;
-import javax.persistence.PersistenceException;
-import javax.persistence.Query;
-import javax.persistence.TypedQuery;
 import org.apache.commons.collections.CollectionUtils;
+import org.hibernate.Session;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -108,6 +110,10 @@ public class ExchangeLogDaoBean extends Dao implements ExchangeLogDao {
         return query.getSingleResult();
     }
 
+    @Override public ExchangeLog getExchangeLogByGuid(String logGuid) throws ExchangeDaoException {
+        return getExchangeLogByGuid(logGuid, null);
+    }
+
     private void setQueryParameters(Query query, HashMap<ExchangeSearchField, List<SearchValue>> orderedValues) {
         for (Map.Entry<ExchangeSearchField, List<SearchValue>> criteria : orderedValues.entrySet()) {
             if (criteria.getValue().size() > 1) {
@@ -131,9 +137,10 @@ public class ExchangeLogDaoBean extends Dao implements ExchangeLogDao {
     }
 
     @Override
-    public ExchangeLog getExchangeLogByGuid(String logGuid) throws ExchangeDaoException {
+    public ExchangeLog getExchangeLogByGuid(String logGuid, TypeRefType typeRefType) throws ExchangeDaoException {
         try {
             TypedQuery<ExchangeLog> query = em.createNamedQuery(ExchangeConstants.LOG_BY_GUID, ExchangeLog.class);
+            query.setParameter("typeRefType", typeRefType);
             query.setParameter("guid", logGuid);
             return query.getSingleResult();
         } catch (NoResultException e) {
@@ -157,12 +164,12 @@ public class ExchangeLogDaoBean extends Dao implements ExchangeLogDao {
 
 
     @Override
-    public ExchangeLog getExchangeLogByTypeRefAndGuid(String typeRefGuid, TypeRefType type) throws ExchangeDaoException {
+    public List<ExchangeLog> getExchangeLogByTypesRefAndGuid(String typeRefGuid, List<TypeRefType> types) throws ExchangeDaoException {
         try {
-            TypedQuery<ExchangeLog> query = em.createNamedQuery(ExchangeConstants.LOG_BY_TYPE_REF_AND_GUID, ExchangeLog.class);
-            query.setParameter("typeRefGuid", typeRefGuid);
-            query.setParameter("typeRefType", type);
-            return query.getSingleResult();
+            org.hibernate.Query namedQuery = getEm().unwrap(Session.class).getNamedQuery(ExchangeConstants.LOG_BY_TYPE_REF_AND_GUID);
+            namedQuery.setParameter("typeRefGuid", typeRefGuid);
+            namedQuery.setParameterList("typeRefTypes", types);
+            return namedQuery.list();
         } catch (NoResultException e) {
             LOG.error("[ Error when getting entity by type ref ID. ] {}", e.getMessage());
             throw new NoEntityFoundException("[ Error when getting entity by type ref ID. ]");
