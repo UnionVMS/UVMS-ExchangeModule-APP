@@ -34,25 +34,6 @@
         <dependency>
             <groupId>eu.europa.ec.fisheries.uvms</groupId>
             <artifactId>usm4uvms</artifactId>
-            <version>${usm4uvms.version}</version>
-            <exclusions>
-            	<exclusion>
-            		<groupId>eu.europa.ec.fisheries.uvms</groupId>
-    				<artifactId>uvms-commons</artifactId>            		
-            	</exclusion>
-				<exclusion>
-					<groupId>org.jboss.resteasy</groupId>
-					<artifactId>resteasy-jaxrs</artifactId>
-				</exclusion>
-				<exclusion>
-				  <groupId>com.fasterxml.jackson.core</groupId>
-  				  <artifactId>jackson-databind</artifactId>				
-				</exclusion>
-				<exclusion>
-				    <groupId>net.sf.ehcache</groupId>
-  					<artifactId>ehcache</artifactId>				
-				</exclusion>
-			</exclusions>
 		</dependency>
 		<dependency>
 		    <groupId>net.sf.ehcache.internal</groupId>
@@ -73,6 +54,11 @@
         <dependency>
             <groupId>eu.europa.ec.fisheries.uvms.commons</groupId>
             <artifactId>uvms-commons-date</artifactId>
+            <version>${uvms.common.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>eu.europa.ec.fisheries.uvms.commons</groupId>
+            <artifactId>uvms-commons-service</artifactId>
             <version>${uvms.common.version}</version>
         </dependency>
         

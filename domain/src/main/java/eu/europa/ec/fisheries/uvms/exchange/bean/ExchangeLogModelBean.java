@@ -11,6 +11,18 @@ copy of the GNU General Public License along with the IFDM Suite. If not, see <h
  */
 package eu.europa.ec.fisheries.uvms.exchange.bean;
 
+import javax.ejb.EJB;
+import javax.ejb.Stateless;
+import java.text.ParseException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeHistoryListQuery;
 import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeListQuery;
 import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogStatusHistoryType;
@@ -32,16 +44,6 @@ import eu.europa.ec.fisheries.uvms.exchange.model.exception.InputArgumentExcepti
 import eu.europa.ec.fisheries.uvms.exchange.model.remote.ExchangeLogModel;
 import eu.europa.ec.fisheries.uvms.exchange.search.SearchFieldMapper;
 import eu.europa.ec.fisheries.uvms.exchange.search.SearchValue;
-import java.text.ParseException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import javax.ejb.EJB;
-import javax.ejb.Stateless;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -60,19 +62,33 @@ public class ExchangeLogModelBean implements ExchangeLogModel {
 
     @Override
     public ExchangeLogType getExchangeLogByGuid(String guid) throws ExchangeModelException {
+        ExchangeLogType exchangeLogType;
         try {
-            ExchangeLog exchangeLog = logDao.getExchangeLogByGuid(guid);
-            ExchangeLogType exchangeLogType = LogMapper.toModel(exchangeLog);
+            ExchangeLog exchangeLog = logDao.getExchangeLogByGuid(guid, null);
+            exchangeLogType = LogMapper.toModel(exchangeLog);
 
             // Enriches the "first level logs" with info related to the related logs.
             enrichDtosWithRelatedLogsInfo(Collections.singletonList(exchangeLogType));
-            return exchangeLogType;
-        } catch (ExchangeDaoException e) {
+        } catch (Exception e) {
             LOG.error("[ Error when getting exchange log by GUID. {}] {}",guid, e.getMessage());
-            throw new ExchangeModelException("Error when getting exchange log by GUID.");
+            exchangeLogType = null;
         }
+        return exchangeLogType;
     }
 
+    @Override
+    public ExchangeLogType getExchangeLogByGuidAndType(String guid, TypeRefType typeRefType) throws ExchangeModelException {
+        ExchangeLogType exchangeLogType;
+        try {
+            ExchangeLog exchangeLogByGuid = logDao.getExchangeLogByGuid(guid, typeRefType);
+            exchangeLogType = LogMapper.toModel(exchangeLogByGuid);
+        }
+        catch (Exception e){
+            LOG.error("[ Error when getting exchange log by GUID. {}] {}",guid, e.getMessage());
+            exchangeLogType = null;
+        }
+        return exchangeLogType;
+    }
 
     @Override
     public ListResponseDto getExchangeLogListByQuery(ExchangeListQuery query) throws ExchangeModelException {
@@ -226,33 +242,60 @@ public class ExchangeLogModelBean implements ExchangeLogModel {
 			if(typeRefType == null || TypeRefType.UNKNOWN.equals(typeRefType)) {
 				return LogMapper.toStatusModel(logDao.getExchangeLogByGuid(guid));
 			} else {
-				return LogMapper.toStatusModel(logDao.getExchangeLogByTypeRefAndGuid(guid, typeRefType));
+                List<ExchangeLog> exchangeLogByTypesRefAndGuid = logDao.getExchangeLogByTypesRefAndGuid(guid, Arrays.asList(typeRefType));
+                if (CollectionUtils.isNotEmpty(exchangeLogByTypesRefAndGuid)){
+                    return LogMapper.toStatusModel(exchangeLogByTypesRefAndGuid.get(0));
+                }
 			}
 		} catch (ExchangeDaoException e) {
 			LOG.error("[ Error when getting status history Exchange log {} {}] {}",guid,typeRefType, e.getMessage());
             throw new ExchangeModelException("Error when getting status history of Exchange log ");
 		}
+		return null;
 	}
 
+    @Override
+    public List<ExchangeLogStatusType> getExchangeLogsStatusHistories(String guid, List<TypeRefType> typeRefType) throws ExchangeModelException {
+
+        List<ExchangeLogStatusType> logStatusTypeList = new ArrayList<>();
+        try {
+            List<ExchangeLog> exchangeLogByTypesRefAndGuid = logDao.getExchangeLogByTypesRefAndGuid(guid, typeRefType);
+            if (CollectionUtils.isNotEmpty(exchangeLogByTypesRefAndGuid)){
+                for (ExchangeLog log : exchangeLogByTypesRefAndGuid){
+                    logStatusTypeList.add(LogMapper.toStatusModel(log));
+                }
+            }
+        } catch (Exception e){
+            LOG.error("[ Error when getting status history Exchange log {} {}] {}", guid, typeRefType, e.getMessage());
+            return logStatusTypeList;
+        }
+        return logStatusTypeList;
+    }
 
     @Override
     public ExchangeLogType setPollStatus(PollStatus pollStatus, String username) throws ExchangeModelException {
+
+        ExchangeLogType log = null;
         if(pollStatus == null || pollStatus.getPollGuid() == null){
             throw new InputArgumentException("No poll id to update status");
         }
 
         try {
-            ExchangeLog exchangeLog = logDao.getExchangeLogByTypeRefAndGuid(pollStatus.getPollGuid(), TypeRefType.POLL);
-            List<ExchangeLogStatus> statusList = exchangeLog.getStatusHistory();
-            statusList.add(LogMapper.toNewStatusEntity(exchangeLog, pollStatus.getStatus(), username));
-            exchangeLog.setStatus(pollStatus.getStatus());
-            ExchangeLog retEntity = logDao.updateLog(exchangeLog);
-            ExchangeLogType retType = LogMapper.toModel(retEntity);
-            return retType;
+            List<ExchangeLog> exchangeLogByTypesRefAndGuid = logDao.getExchangeLogByTypesRefAndGuid(pollStatus.getPollGuid(), Collections.singletonList(TypeRefType.POLL));
+
+            if (CollectionUtils.isNotEmpty(exchangeLogByTypesRefAndGuid)){
+                List<ExchangeLogStatus> statusList = exchangeLogByTypesRefAndGuid.get(0).getStatusHistory();
+                statusList.add(LogMapper.toNewStatusEntity(exchangeLogByTypesRefAndGuid.get(0), pollStatus.getStatus(), username));
+                exchangeLogByTypesRefAndGuid.get(0).setStatus(pollStatus.getStatus());
+                ExchangeLog retEntity = logDao.updateLog(exchangeLogByTypesRefAndGuid.get(0));
+                log = LogMapper.toModel(retEntity);
+            }
+
         } catch (ExchangeDaoException ex) {
             LOG.error("[ Error when set poll status {} {}] {}",pollStatus,username, ex.getMessage());
             throw new ExchangeModelException("Error when update status of Exchange log ");
         }
+        return log;
     }
 
     @Override

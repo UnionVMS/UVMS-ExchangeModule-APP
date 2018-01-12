@@ -41,6 +41,8 @@ public class ExchangeMessageProducerBean implements ExchangeMessageProducer, Con
 
     final static Logger LOG = LoggerFactory.getLogger(ExchangeMessageProducerBean.class);
 
+    public static final String RULES_RESPONSE_QUEUE = "jms/queue/UVMSRules";
+
     private Queue responseQueue;
     private Queue eventQueue;
     private Topic eventBus;
@@ -52,6 +54,8 @@ public class ExchangeMessageProducerBean implements ExchangeMessageProducer, Con
     private Queue activityQueue;
     private Queue mdrQueue;
     private Queue salesQueue;
+    private Queue rulesResponseQueue;
+
     private ConnectionFactory connectionFactory;
 
     @PostConstruct
@@ -68,6 +72,8 @@ public class ExchangeMessageProducerBean implements ExchangeMessageProducer, Con
         activityQueue = JMSUtils.lookupQueue(ExchangeModelConstants.ACTIVITY_EVENT_QUEUE);
         mdrQueue = JMSUtils.lookupQueue(ExchangeModelConstants.MDR_EVENT_QUEUE);
         salesQueue = JMSUtils.lookupQueue(MessageConstants.QUEUE_SALES_EVENT);
+        rulesResponseQueue = JMSUtils.lookupQueue(RULES_RESPONSE_QUEUE);
+
     }
 
 
@@ -89,7 +95,7 @@ public class ExchangeMessageProducerBean implements ExchangeMessageProducer, Con
                     getProducer(session, eventQueue).send(message);
                     break;
                 case RULES:
-                    getProducer(session, rulesQueue, 0L).send(message);
+                    getProducer(session, rulesQueue).send(message);
                     break;
                 case CONFIG:
                     getProducer(session, configQueue).send(message);
@@ -108,6 +114,9 @@ public class ExchangeMessageProducerBean implements ExchangeMessageProducer, Con
                     break;
                 case MDR_EVENT:
                     getProducer(session, mdrQueue).send(message);
+                    break;
+                case RULES_RESPONSE:
+                    getProducer(session, rulesResponseQueue).send(message);
                     break;
                 default:
                     break;
@@ -219,7 +228,7 @@ public class ExchangeMessageProducerBean implements ExchangeMessageProducer, Con
     public void sendModuleResponseMessage(TextMessage message, String text) {
         Connection connection = null;
         try {
-            LOG.info("Sending message back to recipient from ExchangeModule with text {} on queue: {}", text, message.getJMSReplyTo());
+            LOG.debug("Sending message back to recipient from ExchangeModule with text {} on queue: {}", text, message.getJMSReplyTo());
             connection = connectionFactory.createConnection();
             final Session session = JMSUtils.connectToQueue(connection);
             TextMessage response = session.createTextMessage(text);
@@ -237,7 +246,7 @@ public class ExchangeMessageProducerBean implements ExchangeMessageProducer, Con
         Connection connection = null;
 
         try {
-            LOG.info("Sending message asynchronous back to recipient from ExchangeModule with text {} on queue: {}", text, queue);
+            LOG.debug("Sending message asynchronous back to recipient from ExchangeModule with text {} on queue: {}", text, queue);
             connection = connectionFactory.createConnection();
             final Session session = JMSUtils.connectToQueue(connection);
             TextMessage response = session.createTextMessage(text);

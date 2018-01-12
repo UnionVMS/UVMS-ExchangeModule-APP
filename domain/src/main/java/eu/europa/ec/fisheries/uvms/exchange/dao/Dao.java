@@ -24,7 +24,6 @@
 
 package eu.europa.ec.fisheries.uvms.exchange.dao;
 
-import javax.annotation.PostConstruct;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 
@@ -32,4 +31,9 @@ public class Dao {
 
     @PersistenceContext(unitName = "exchangePU")
     protected EntityManager em;
+
+    public EntityManager getEm() {
+        return em;
+    }
+
 }

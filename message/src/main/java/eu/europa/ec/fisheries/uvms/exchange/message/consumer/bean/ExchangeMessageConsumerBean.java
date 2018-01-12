@@ -11,19 +11,6 @@
  */
 package eu.europa.ec.fisheries.uvms.exchange.message.consumer.bean;
 
-import eu.europa.ec.fisheries.schema.exchange.module.v1.ExchangeBaseRequest;
-import eu.europa.ec.fisheries.schema.exchange.plugin.v1.AcknowledgeResponse;
-import eu.europa.ec.fisheries.schema.exchange.plugin.v1.PingResponse;
-import eu.europa.ec.fisheries.uvms.exchange.message.event.*;
-import eu.europa.ec.fisheries.uvms.exchange.message.event.carrier.ExchangeMessageEvent;
-import eu.europa.ec.fisheries.uvms.exchange.model.constant.ExchangeModelConstants;
-import eu.europa.ec.fisheries.uvms.exchange.model.constant.FaultCode;
-import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelMarshallException;
-import eu.europa.ec.fisheries.uvms.exchange.model.mapper.ExchangeModuleResponseMapper;
-import eu.europa.ec.fisheries.uvms.exchange.model.mapper.JAXBMarshaller;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import javax.ejb.ActivationConfigProperty;
 import javax.ejb.MessageDriven;
 import javax.ejb.TransactionAttribute;
@@ -33,6 +20,42 @@ import javax.inject.Inject;
 import javax.jms.Message;
 import javax.jms.MessageListener;
 import javax.jms.TextMessage;
+
+import eu.europa.ec.fisheries.schema.exchange.module.v1.ExchangeBaseRequest;
+import eu.europa.ec.fisheries.schema.exchange.plugin.v1.AcknowledgeResponse;
+import eu.europa.ec.fisheries.schema.exchange.plugin.v1.PingResponse;
+import eu.europa.ec.fisheries.uvms.exchange.message.event.ErrorEvent;
+import eu.europa.ec.fisheries.uvms.exchange.message.event.ExchangeLogEvent;
+import eu.europa.ec.fisheries.uvms.exchange.message.event.HandleProcessedMovementEvent;
+import eu.europa.ec.fisheries.uvms.exchange.message.event.LogIdByTypeExists;
+import eu.europa.ec.fisheries.uvms.exchange.message.event.LogRefIdByTypeExists;
+import eu.europa.ec.fisheries.uvms.exchange.message.event.MdrSyncRequestMessageEvent;
+import eu.europa.ec.fisheries.uvms.exchange.message.event.MdrSyncResponseMessageEvent;
+import eu.europa.ec.fisheries.uvms.exchange.message.event.PingEvent;
+import eu.europa.ec.fisheries.uvms.exchange.message.event.PluginConfigEvent;
+import eu.europa.ec.fisheries.uvms.exchange.message.event.PluginPingEvent;
+import eu.europa.ec.fisheries.uvms.exchange.message.event.ReceiveInvalidSalesMessageEvent;
+import eu.europa.ec.fisheries.uvms.exchange.message.event.ReceiveSalesQueryEvent;
+import eu.europa.ec.fisheries.uvms.exchange.message.event.ReceiveSalesReportEvent;
+import eu.europa.ec.fisheries.uvms.exchange.message.event.ReceiveSalesResponseEvent;
+import eu.europa.ec.fisheries.uvms.exchange.message.event.SendCommandToPluginEvent;
+import eu.europa.ec.fisheries.uvms.exchange.message.event.SendFLUXFAResponseToPluginEvent;
+import eu.europa.ec.fisheries.uvms.exchange.message.event.SendReportToPluginEvent;
+import eu.europa.ec.fisheries.uvms.exchange.message.event.SendSalesReportEvent;
+import eu.europa.ec.fisheries.uvms.exchange.message.event.SendSalesResponseEvent;
+import eu.europa.ec.fisheries.uvms.exchange.message.event.SetFaQueryMessageEvent;
+import eu.europa.ec.fisheries.uvms.exchange.message.event.SetFluxFAReportMessageEvent;
+import eu.europa.ec.fisheries.uvms.exchange.message.event.SetMovementEvent;
+import eu.europa.ec.fisheries.uvms.exchange.message.event.UpdateLogStatusEvent;
+import eu.europa.ec.fisheries.uvms.exchange.message.event.UpdatePluginSettingEvent;
+import eu.europa.ec.fisheries.uvms.exchange.message.event.carrier.ExchangeMessageEvent;
+import eu.europa.ec.fisheries.uvms.exchange.model.constant.ExchangeModelConstants;
+import eu.europa.ec.fisheries.uvms.exchange.model.constant.FaultCode;
+import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelMarshallException;
+import eu.europa.ec.fisheries.uvms.exchange.model.mapper.ExchangeModuleResponseMapper;
+import eu.europa.ec.fisheries.uvms.exchange.model.mapper.JAXBMarshaller;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 //@formatter:off
 @MessageDriven(mappedName = ExchangeModelConstants.EXCHANGE_MESSAGE_IN_QUEUE, activationConfig = {
@@ -135,13 +158,21 @@ public class ExchangeMessageConsumerBean implements MessageListener {
     @UpdateLogStatusEvent
     Event<ExchangeMessageEvent> updateLogStatusEvent;
 
+    @Inject
+    @LogRefIdByTypeExists
+    Event<ExchangeMessageEvent> logRefIdByTyeExists;
+
+    @Inject
+    @LogIdByTypeExists
+    Event<ExchangeMessageEvent> logIdByTyeExists;
+
     @Override
     @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
     public void onMessage(Message message) {
 
         TextMessage textMessage = (TextMessage) message;
         ExchangeBaseRequest request = tryConsumeExchangeBaseRequest(textMessage);
-        LOG.info("Message received in Exchange Message MDB!");
+        LOG.info("Message received in Exchange Message MDB");
         LOG.debug("Request body : ", request);
         if (request == null) {
             LOG.error("[ERROR] ExchangeBaseRequest is null!! Check the message sent...");
@@ -220,6 +251,12 @@ public class ExchangeMessageConsumerBean implements MessageListener {
                     break;
                 case UPDATE_LOG_STATUS:
                     updateLogStatusEvent.fire(new ExchangeMessageEvent(textMessage));
+                    break;
+                case LOG_REF_ID_BY_TYPE_EXISTS:
+                    logRefIdByTyeExists.fire(new ExchangeMessageEvent(textMessage));
+                    break;
+                case LOG_ID_BY_TYPE_EXISTS:
+                    logIdByTyeExists.fire(new ExchangeMessageEvent(textMessage));
                     break;
                 default:
                     LOG.error("[ Not implemented method consumed: {} ] ", request.getMethod());

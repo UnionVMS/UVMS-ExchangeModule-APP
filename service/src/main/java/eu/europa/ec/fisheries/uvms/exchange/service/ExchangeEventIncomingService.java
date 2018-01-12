@@ -115,4 +115,17 @@ public interface ExchangeEventIncomingService {
     void updateLogStatus(@Observes @UpdateLogStatusEvent ExchangeMessageEvent message);
 
     void receiveInvalidSalesMessage(@Observes @ReceiveInvalidSalesMessageEvent ExchangeMessageEvent event);
+
+    /**
+     * Checks for a reference in log table for a certain type of message
+     * @param event
+     */
+    void logRefIdByTypeExists(@Observes @LogRefIdByTypeExists ExchangeMessageEvent event);
+
+    /**
+     * Checks for a guid in log table for a certain type of message
+     * @param event
+     */
+    void logIdByTypeExists(@Observes @LogIdByTypeExists ExchangeMessageEvent event);
+
 }

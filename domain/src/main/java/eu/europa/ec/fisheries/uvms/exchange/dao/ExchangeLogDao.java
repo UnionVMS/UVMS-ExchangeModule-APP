@@ -11,16 +11,14 @@ copy of the GNU General Public License along with the IFDM Suite. If not, see <h
  */
 package eu.europa.ec.fisheries.uvms.exchange.dao;
 
-import java.util.List;
-
 import javax.ejb.Local;
+import java.util.List;
 
 import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeHistoryListQuery;
 import eu.europa.ec.fisheries.schema.exchange.v1.TypeRefType;
 import eu.europa.ec.fisheries.uvms.exchange.entity.exchangelog.ExchangeLog;
 import eu.europa.ec.fisheries.uvms.exchange.entity.exchangelog.ExchangeLogStatus;
 import eu.europa.ec.fisheries.uvms.exchange.exception.ExchangeDaoException;
-import eu.europa.ec.fisheries.uvms.exchange.exception.NoEntityFoundException;
 import eu.europa.ec.fisheries.uvms.exchange.search.SearchValue;
 
 /**
@@ -34,9 +32,11 @@ public interface ExchangeLogDao {
 
     Long getExchangeLogListSearchCount(String countSql, List<SearchValue> searchKeyValues) throws ExchangeDaoException;
 
-	ExchangeLog getExchangeLogByGuid(String logGuid) throws NoEntityFoundException, ExchangeDaoException;
+    ExchangeLog getExchangeLogByGuid(String logGuid) throws ExchangeDaoException;
 
-	ExchangeLog getExchangeLogByTypeRefAndGuid(String typeRefGuid, TypeRefType type) throws NoEntityFoundException, ExchangeDaoException;
+    ExchangeLog getExchangeLogByGuid(String logGuid, TypeRefType type) throws ExchangeDaoException;
+
+	List<ExchangeLog> getExchangeLogByTypesRefAndGuid(String typeRefGuid, List<TypeRefType> types) throws ExchangeDaoException;
 	
 	ExchangeLog updateLog(ExchangeLog exchangeLog) throws ExchangeDaoException;
 	
