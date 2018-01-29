@@ -10,11 +10,6 @@ details. You should have received a copy of the GNU General Public License along
 */
 package eu.europa.ec.fisheries.uvms.exchange.service.bean;
 
-import javax.ejb.EJB;
-import javax.ejb.Singleton;
-import javax.jms.TextMessage;
-import java.util.List;
-
 import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogWithValidationResults;
 import eu.europa.ec.fisheries.schema.exchange.v1.LogValidationResult;
 import eu.europa.ec.fisheries.schema.exchange.v1.RuleValidationLevel;
@@ -22,14 +17,18 @@ import eu.europa.ec.fisheries.schema.exchange.v1.RuleValidationStatus;
 import eu.europa.ec.fisheries.schema.exchange.v1.TypeRefType;
 import eu.europa.ec.fisheries.schema.rules.rule.v1.ValidationMessageType;
 import eu.europa.ec.fisheries.schema.rules.rule.v1.ValidationMessageTypeResponse;
+import eu.europa.ec.fisheries.uvms.commons.message.api.MessageException;
 import eu.europa.ec.fisheries.uvms.config.exception.ConfigMessageException;
 import eu.europa.ec.fisheries.uvms.exchange.message.consumer.ExchangeConsumer;
-import eu.europa.ec.fisheries.uvms.exchange.message.exception.ExchangeMessageException;
 import eu.europa.ec.fisheries.uvms.exchange.message.producer.ExchangeMessageProducer;
 import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelMarshallException;
 import eu.europa.ec.fisheries.uvms.exchange.model.mapper.JAXBMarshaller;
 import eu.europa.ec.fisheries.uvms.rules.model.exception.RulesModelMarshallException;
 import eu.europa.ec.fisheries.uvms.rules.model.mapper.RulesModuleRequestMapper;
+import java.util.List;
+import javax.ejb.EJB;
+import javax.ejb.Singleton;
+import javax.jms.TextMessage;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.EnumUtils;
@@ -48,7 +47,6 @@ public class ExchangeToRulesSyncMsgBean {
     @EJB
     private ExchangeMessageProducer exchangeProducerBean;
 
-
     public ExchangeLogWithValidationResults getValidationFromRules(String guid, TypeRefType type) {
         if (StringUtils.isEmpty(guid)) {
             return new ExchangeLogWithValidationResults();
@@ -65,7 +63,7 @@ public class ExchangeToRulesSyncMsgBean {
                     resp.getValidationList().add(mapToLogValidationResult(validMsgFromRules));
                 }
             }
-        } catch (ConfigMessageException | ExchangeMessageException | RulesModelMarshallException | ExchangeModelMarshallException e) {
+        } catch (ConfigMessageException | MessageException | RulesModelMarshallException | ExchangeModelMarshallException e) {
             log.error("Error while trying to get Validation Results for RawMessage GUID from Rules!", e);
         }
         return resp;

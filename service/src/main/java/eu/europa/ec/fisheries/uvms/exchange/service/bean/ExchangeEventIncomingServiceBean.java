@@ -157,7 +157,8 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
         try {
             SetFLUXFAReportMessageRequest request = JAXBMarshaller.unmarshallTextMessage(message.getJmsMessage(), SetFLUXFAReportMessageRequest.class);
             log.debug("Got FLUXFAReportMessage in exchange :" + request.getRequest());
-            ExchangeLogType exchangeLogType = exchangeLog.log(request, LogType.RCV_FLUX_FA_REPORT_MSG, ExchangeLogStatusTypeType.ISSUED, TypeRefType.FA_REPORT, request.getRequest(), true);
+            ExchangeLogType exchangeLogType = exchangeLog.log(request, LogType.RCV_FLUX_FA_REPORT_MSG, ExchangeLogStatusTypeType.ISSUED
+                    , TypeRefType.FA_REPORT, request.getRequest(), true);
             String msg = RulesModuleRequestMapper.createSetFLUXFAReportMessageRequest(extractPluginType(request), request.getRequest()
                     , request.getUsername(), extractLogId(message, exchangeLogType), request.getFluxDataFlow()
                     , request.getSenderOrReceiver(), request.getOnValue());
