@@ -11,6 +11,7 @@ copy of the GNU General Public License along with the IFDM Suite. If not, see <h
  */
 package eu.europa.ec.fisheries.uvms.exchange.message.consumer.bean;
 
+import eu.europa.ec.fisheries.uvms.commons.message.api.MessageConstants;
 import javax.ejb.ActivationConfigProperty;
 import javax.ejb.MessageDriven;
 import javax.enterprise.event.Event;
@@ -37,18 +38,16 @@ import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelMarshal
 import eu.europa.ec.fisheries.uvms.exchange.model.mapper.ExchangePluginResponseMapper;
 import eu.europa.ec.fisheries.uvms.exchange.model.mapper.JAXBMarshaller;
 
-/**
- **/
-@MessageDriven(mappedName = ExchangeModelConstants.PLUGIN_EVENTBUS, activationConfig = {
-    @ActivationConfigProperty(propertyName = "messageSelector", propertyValue = ExchangeModelConstants.SERVICE_NAME + " = '" + ExchangeModelConstants.EXCHANGE_REGISTER_SERVICE + "'"),
-    @ActivationConfigProperty(propertyName = "messagingType", propertyValue = ExchangeModelConstants.CONNECTION_TYPE),
-    @ActivationConfigProperty(propertyName = "subscriptionDurability", propertyValue = "Durable"),
-    @ActivationConfigProperty(propertyName = "destinationType", propertyValue = ExchangeModelConstants.DESTINATION_TYPE_TOPIC),
-    @ActivationConfigProperty(propertyName = "destination", propertyValue = ExchangeModelConstants.EVENTBUS_NAME),
-    @ActivationConfigProperty(propertyName = "destinationJndiName", propertyValue = ExchangeModelConstants.PLUGIN_EVENTBUS),
-    @ActivationConfigProperty(propertyName = "subscriptionName", propertyValue = ExchangeModelConstants.EXCHANGE_REGISTER_SERVICE),
-    @ActivationConfigProperty(propertyName = "clientId", propertyValue = ExchangeModelConstants.EXCHANGE_REGISTER_SERVICE),
-    @ActivationConfigProperty(propertyName = "connectionFactoryJndiName", propertyValue = ExchangeModelConstants.CONNECTION_FACTORY)
+@MessageDriven(mappedName = MessageConstants.EVENT_BUS_TOPIC, activationConfig = {
+    @ActivationConfigProperty(propertyName = MessageConstants.MESSAGE_SELECTOR_STR, propertyValue = ExchangeModelConstants.SERVICE_NAME + " = '" + ExchangeModelConstants.EXCHANGE_REGISTER_SERVICE + "'"),
+    @ActivationConfigProperty(propertyName = MessageConstants.MESSAGING_TYPE_STR, propertyValue = MessageConstants.CONNECTION_TYPE),
+    @ActivationConfigProperty(propertyName = MessageConstants.SUBSCRIPTION_DURABILITY_STR, propertyValue = MessageConstants.DURABLE_CONNECTION),
+    @ActivationConfigProperty(propertyName = MessageConstants.DESTINATION_TYPE_STR, propertyValue = MessageConstants.DESTINATION_TYPE_TOPIC),
+    @ActivationConfigProperty(propertyName = MessageConstants.DESTINATION_STR, propertyValue = MessageConstants.EVENT_BUS_TOPIC),
+    @ActivationConfigProperty(propertyName = MessageConstants.DESTINATION_JNDI_NAME, propertyValue = MessageConstants.EVENT_BUS_TOPIC),
+    @ActivationConfigProperty(propertyName = MessageConstants.SUBSCRIPTION_NAME_STR, propertyValue = ExchangeModelConstants.EXCHANGE_REGISTER_SERVICE),
+    @ActivationConfigProperty(propertyName = MessageConstants.CLIENT_ID_STR, propertyValue = ExchangeModelConstants.EXCHANGE_REGISTER_SERVICE),
+    @ActivationConfigProperty(propertyName = MessageConstants.CONNECTION_FACTORY_JNDI_NAME, propertyValue = MessageConstants.CONNECTION_FACTORY)
 })
 public class RegistryBusEventListener implements MessageListener {
 
@@ -56,23 +55,20 @@ public class RegistryBusEventListener implements MessageListener {
 
     @Inject
     @RegisterServiceEvent
-    Event<PluginMessageEvent> registerServiceEvent;
+    private Event<PluginMessageEvent> registerServiceEvent;
 
     @Inject
     @UnRegisterServiceEvent
-    Event<PluginMessageEvent> unregisterServiceEvent;
+    private Event<PluginMessageEvent> unregisterServiceEvent;
 
     @Inject
     @PluginErrorEvent
-    Event<PluginMessageEvent> errorEvent;
+    private Event<PluginMessageEvent> errorEvent;
 
     @Override
     public void onMessage(Message message) {
-
-
         TextMessage textMessage = (TextMessage) message;
         ServiceType settings = null;
-
         try {
             ExchangeRegistryBaseRequest request = JAXBMarshaller.unmarshallTextMessage(textMessage, ExchangeRegistryBaseRequest.class);
             LOG.info("Eventbus listener for Exchange Registry (ExchangeModelConstants.EXCHANGE_REGISTER_SERVICE): {} {}", ExchangeModelConstants.EXCHANGE_REGISTER_SERVICE,request);

@@ -11,21 +11,10 @@
  */
 package eu.europa.ec.fisheries.uvms.exchange.message.consumer.bean;
 
-import eu.europa.ec.fisheries.uvms.exchange.message.event.SendFaQueryToPluginEvent;
-import eu.europa.ec.fisheries.uvms.exchange.message.event.SendFaReportToPluginEvent;
-import javax.ejb.ActivationConfigProperty;
-import javax.ejb.MessageDriven;
-import javax.ejb.TransactionAttribute;
-import javax.ejb.TransactionAttributeType;
-import javax.enterprise.event.Event;
-import javax.inject.Inject;
-import javax.jms.Message;
-import javax.jms.MessageListener;
-import javax.jms.TextMessage;
-
 import eu.europa.ec.fisheries.schema.exchange.module.v1.ExchangeBaseRequest;
 import eu.europa.ec.fisheries.schema.exchange.plugin.v1.AcknowledgeResponse;
 import eu.europa.ec.fisheries.schema.exchange.plugin.v1.PingResponse;
+import eu.europa.ec.fisheries.uvms.commons.message.api.MessageConstants;
 import eu.europa.ec.fisheries.uvms.exchange.message.event.ErrorEvent;
 import eu.europa.ec.fisheries.uvms.exchange.message.event.ExchangeLogEvent;
 import eu.europa.ec.fisheries.uvms.exchange.message.event.HandleProcessedMovementEvent;
@@ -42,6 +31,8 @@ import eu.europa.ec.fisheries.uvms.exchange.message.event.ReceiveSalesReportEven
 import eu.europa.ec.fisheries.uvms.exchange.message.event.ReceiveSalesResponseEvent;
 import eu.europa.ec.fisheries.uvms.exchange.message.event.SendCommandToPluginEvent;
 import eu.europa.ec.fisheries.uvms.exchange.message.event.SendFLUXFAResponseToPluginEvent;
+import eu.europa.ec.fisheries.uvms.exchange.message.event.SendFaQueryToPluginEvent;
+import eu.europa.ec.fisheries.uvms.exchange.message.event.SendFaReportToPluginEvent;
 import eu.europa.ec.fisheries.uvms.exchange.message.event.SendReportToPluginEvent;
 import eu.europa.ec.fisheries.uvms.exchange.message.event.SendSalesReportEvent;
 import eu.europa.ec.fisheries.uvms.exchange.message.event.SendSalesResponseEvent;
@@ -51,21 +42,29 @@ import eu.europa.ec.fisheries.uvms.exchange.message.event.SetMovementEvent;
 import eu.europa.ec.fisheries.uvms.exchange.message.event.UpdateLogStatusEvent;
 import eu.europa.ec.fisheries.uvms.exchange.message.event.UpdatePluginSettingEvent;
 import eu.europa.ec.fisheries.uvms.exchange.message.event.carrier.ExchangeMessageEvent;
-import eu.europa.ec.fisheries.uvms.exchange.model.constant.ExchangeModelConstants;
 import eu.europa.ec.fisheries.uvms.exchange.model.constant.FaultCode;
 import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelMarshallException;
 import eu.europa.ec.fisheries.uvms.exchange.model.mapper.ExchangeModuleResponseMapper;
 import eu.europa.ec.fisheries.uvms.exchange.model.mapper.JAXBMarshaller;
+import javax.ejb.ActivationConfigProperty;
+import javax.ejb.MessageDriven;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
+import javax.enterprise.event.Event;
+import javax.inject.Inject;
+import javax.jms.Message;
+import javax.jms.MessageListener;
+import javax.jms.TextMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 //@formatter:off
-@MessageDriven(mappedName = ExchangeModelConstants.EXCHANGE_MESSAGE_IN_QUEUE, activationConfig = {
-    @ActivationConfigProperty(propertyName = "messagingType", propertyValue = ExchangeModelConstants.CONNECTION_TYPE),
-    @ActivationConfigProperty(propertyName = "destinationType", propertyValue = ExchangeModelConstants.DESTINATION_TYPE_QUEUE),
-    @ActivationConfigProperty(propertyName = "destination", propertyValue = ExchangeModelConstants.EXCHANGE_MESSAGE_IN_QUEUE_NAME),
-    @ActivationConfigProperty(propertyName = "destinationJndiName", propertyValue = ExchangeModelConstants.EXCHANGE_MESSAGE_IN_QUEUE),
-    @ActivationConfigProperty(propertyName = "connectionFactoryJndiName", propertyValue = ExchangeModelConstants.CONNECTION_FACTORY)
+@MessageDriven(mappedName = MessageConstants.QUEUE_EXCHANGE_EVENT, activationConfig = {
+    @ActivationConfigProperty(propertyName = MessageConstants.MESSAGING_TYPE_STR, propertyValue = MessageConstants.CONNECTION_TYPE),
+    @ActivationConfigProperty(propertyName = MessageConstants.DESTINATION_TYPE_STR, propertyValue = MessageConstants.DESTINATION_TYPE_QUEUE),
+    @ActivationConfigProperty(propertyName = MessageConstants.DESTINATION_STR, propertyValue = MessageConstants.QUEUE_EXCHANGE_EVENT_NAME),
+    @ActivationConfigProperty(propertyName = MessageConstants.DESTINATION_JNDI_NAME, propertyValue = MessageConstants.QUEUE_EXCHANGE_EVENT),
+    @ActivationConfigProperty(propertyName = MessageConstants.CONNECTION_FACTORY_JNDI_NAME, propertyValue = MessageConstants.CONNECTION_FACTORY)
 })
 //@formatter:on
 public class ExchangeMessageConsumerBean implements MessageListener {

@@ -12,8 +12,8 @@ copy of the GNU General Public License along with the IFDM Suite. If not, see <h
 package eu.europa.ec.fisheries.uvms.exchange.message.producer.bean;
 
 import eu.europa.ec.fisheries.uvms.commons.message.api.MessageConstants;
-import eu.europa.ec.fisheries.uvms.commons.message.impl.JMSUtils;
-import eu.europa.ec.fisheries.uvms.config.constants.ConfigConstants;
+import eu.europa.ec.fisheries.uvms.commons.message.api.MessageException;
+import eu.europa.ec.fisheries.uvms.commons.message.impl.AbstractProducer;
 import eu.europa.ec.fisheries.uvms.config.exception.ConfigMessageException;
 import eu.europa.ec.fisheries.uvms.config.message.ConfigMessageProducer;
 import eu.europa.ec.fisheries.uvms.exchange.message.constants.MessageQueue;
@@ -22,144 +22,87 @@ import eu.europa.ec.fisheries.uvms.exchange.message.event.carrier.ExchangeMessag
 import eu.europa.ec.fisheries.uvms.exchange.message.event.carrier.PluginMessageEvent;
 import eu.europa.ec.fisheries.uvms.exchange.message.event.registry.PluginErrorEvent;
 import eu.europa.ec.fisheries.uvms.exchange.message.exception.ExchangeMessageException;
+import eu.europa.ec.fisheries.uvms.exchange.message.producer.ExchangeEventBusTopicProducer;
 import eu.europa.ec.fisheries.uvms.exchange.message.producer.ExchangeMessageProducer;
-import eu.europa.ec.fisheries.uvms.exchange.model.constant.ExchangeModelConstants;
 import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelMapperException;
 import eu.europa.ec.fisheries.uvms.exchange.model.mapper.JAXBMarshaller;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import javax.annotation.PostConstruct;
+import javax.ejb.EJB;
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
 import javax.enterprise.event.Observes;
-import javax.jms.*;
+import javax.jms.JMSException;
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Stateless
-public class ExchangeMessageProducerBean implements ExchangeMessageProducer, ConfigMessageProducer {
+public class ExchangeMessageProducerBean extends AbstractProducer implements ExchangeMessageProducer, ConfigMessageProducer {
 
     final static Logger LOG = LoggerFactory.getLogger(ExchangeMessageProducerBean.class);
 
-    public static final String RULES_RESPONSE_QUEUE = "jms/queue/UVMSRules";
+    @EJB
+    private ExchangeEventBusTopicProducer eventBusProducer;
 
-    private Queue responseQueue;
-    private Queue eventQueue;
-    private Topic eventBus;
-    private Queue rulesQueue;
-    private Queue configQueue;
-    private Queue vesselQueue;
-    private Queue auditQueue;
-    private Queue movementResponseQueue;
-    private Queue activityQueue;
-    private Queue mdrQueue;
-    private Queue salesQueue;
-    private Queue rulesResponseQueue;
-
-    private ConnectionFactory connectionFactory;
-
-    @PostConstruct
-    public void init() {
-        connectionFactory = JMSUtils.lookupConnectionFactory();
-        responseQueue = JMSUtils.lookupQueue(ExchangeModelConstants.EXCHANGE_RESPONSE_QUEUE);
-        eventQueue = JMSUtils.lookupQueue(ExchangeModelConstants.EXCHANGE_MESSAGE_IN_QUEUE);
-        rulesQueue = JMSUtils.lookupQueue(ExchangeModelConstants.QUEUE_INTEGRATION_RULES);
-        configQueue = JMSUtils.lookupQueue(ConfigConstants.CONFIG_MESSAGE_IN_QUEUE);
-        vesselQueue = JMSUtils.lookupQueue(ExchangeModelConstants.QUEUE_INTEGRATION_ASSET);
-        auditQueue = JMSUtils.lookupQueue(ExchangeModelConstants.QUEUE_INTEGRATION_AUDIT);
-        movementResponseQueue = JMSUtils.lookupQueue(ExchangeModelConstants.MOVEMENT_RESPONSE_QUEUE);
-        eventBus = JMSUtils.lookupTopic(ExchangeModelConstants.PLUGIN_EVENTBUS);
-        activityQueue = JMSUtils.lookupQueue(ExchangeModelConstants.ACTIVITY_EVENT_QUEUE);
-        mdrQueue = JMSUtils.lookupQueue(ExchangeModelConstants.MDR_EVENT_QUEUE);
-        salesQueue = JMSUtils.lookupQueue(MessageConstants.QUEUE_SALES_EVENT);
-        rulesResponseQueue = JMSUtils.lookupQueue(RULES_RESPONSE_QUEUE);
-
-    }
-
+    @EJB
+    private ExchangeMovementProducer movementProducer;
 
     @Override
     @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
     public String sendMessageOnQueue(String text, MessageQueue queue) throws ExchangeMessageException {
-        Connection connection = null;
-        Session session = null;
-        MessageProducer producer = null;
         try {
-            connection = connectionFactory.createConnection();
-            session = JMSUtils.connectToQueue(connection);
-            TextMessage message = session.createTextMessage();
-            message.setJMSReplyTo(responseQueue);
-            message.setText(text);
+            String replyToQueue = MessageConstants.QUEUE_EXCHANGE;
+            String destination = null;
             switch (queue) {
                 case EVENT:
-                    producer = getProducer(session, eventQueue);
-                    producer.send(message);
+                    destination = MessageConstants.QUEUE_EXCHANGE_EVENT;
                     break;
                 case RULES:
-                    producer = getProducer(session, rulesQueue);
-                    producer.send(message);
+                    destination = MessageConstants.QUEUE_MODULE_RULES;
                     break;
                 case CONFIG:
-                    producer = getProducer(session, configQueue);
-                    producer.send(message);
+                    destination = MessageConstants.QUEUE_CONFIG;
                     break;
                 case VESSEL:
-                    producer = getProducer(session, vesselQueue);
-                    producer.send(message);
+                    destination = MessageConstants.QUEUE_ASSET_EVENT;
                     break;
                 case SALES:
-                    producer = getProducer(session, salesQueue);
-                    producer.send(message);
+                    destination = MessageConstants.QUEUE_SALES_EVENT;
                     break;
                 case AUDIT:
-                    producer = getProducer(session, auditQueue);
-                    producer.send(message);
+                    destination = MessageConstants.QUEUE_AUDIT_EVENT;
                     break;
                 case ACTIVITY_EVENT:
-                    producer = getProducer(session, activityQueue);
-                    producer.send(message);
+                    destination = MessageConstants.QUEUE_MODULE_ACTIVITY;
                     break;
                 case MDR_EVENT:
-                    producer = getProducer(session, mdrQueue);
-                    producer.send(message);
+                    destination = MessageConstants.QUEUE_MDR_EVENT;
                     break;
                 case RULES_RESPONSE:
-                    producer = getProducer(session, rulesResponseQueue);
-                    producer.send(message);
+                    destination = MessageConstants.QUEUE_RULES;
                     break;
                 default:
                     break;
             }
-            return message.getJMSMessageID();
-        } catch (Exception e) {
+            if(StringUtils.isNotEmpty(destination)){
+                return this.sendMessageToSpecificQueue(text, destination, replyToQueue);
+            }
+            return null;
+        } catch (MessageException e) {
             LOG.error("[ Error when sending message. ]");
             throw new ExchangeMessageException("[ Error when sending message. ]");
-        } finally {
-            JMSUtils.disconnectQueue(connection, session, producer);
         }
     }
 
     @Override
     @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
     public String sendEventBusMessage(String text, String serviceName) throws ExchangeMessageException {
-        Connection connection = null;
-        Session session = null;
-        MessageProducer producer = null;
         try {
             LOG.debug("Sending event bus message from Exchange module to recipient om JMS Topic to: {} ", serviceName);
-            connection = connectionFactory.createConnection();
-            session = JMSUtils.connectToQueue(connection);
-            TextMessage message = session.createTextMessage();
-            message.setText(text);
-            message.setStringProperty(ExchangeModelConstants.SERVICE_NAME, serviceName);
-            message.setJMSReplyTo(eventQueue);
-            producer = getProducer(session, eventBus);
-            producer.send(message);
-            return message.getJMSMessageID();
-        } catch (Exception e) {
+            return eventBusProducer.sendEventBusMessage(text, serviceName, MessageConstants.QUEUE_EXCHANGE_EVENT);
+        } catch (MessageException e) {
             LOG.error("[ Error when sending message. ] ", e);
             throw new ExchangeMessageException("[ Error when sending message. ]");
-        } finally {
-            JMSUtils.disconnectQueue(connection, session, producer);
         }
     }
 
@@ -187,86 +130,35 @@ public class ExchangeMessageProducerBean implements ExchangeMessageProducer, Con
 
     @Override
     public void sendModuleErrorResponseMessage(@Observes @ErrorEvent ExchangeMessageEvent message) {
-        Connection connection = null;
-        Session session = null;
-        javax.jms.MessageProducer producer = null;
         try {
-            connection = connectionFactory.createConnection();
-            session = JMSUtils.connectToQueue(connection);
             LOG.debug("Sending error message back from Exchange module to recipient om JMS Queue with correlationID: {} ", message.getJmsMessage().getJMSMessageID());
             String data = JAXBMarshaller.marshallJaxBObjectToString(message.getErrorFault());
-            TextMessage response = session.createTextMessage(data);
-            response.setJMSCorrelationID(message.getJmsMessage().getJMSMessageID());
-            producer = getProducer(session, message.getJmsMessage().getJMSReplyTo());
-            producer.send(response);
+            this.sendModuleResponseMessage(message.getJmsMessage(), data);
         } catch (ExchangeModelMapperException | JMSException e) {
             LOG.error("Error when returning Error message to recipient");
-        } finally {
-            JMSUtils.disconnectQueue(connection, session, producer);
         }
     }
 
     @Override
     public void sendPluginErrorResponseMessage(@Observes @PluginErrorEvent PluginMessageEvent message) {
-        Connection connection = null;
-        Session session = null;
-        javax.jms.MessageProducer producer = null;
         try {
-            connection = connectionFactory.createConnection();
-            session = JMSUtils.connectToQueue(connection);
-            LOG.debug("Sending error message back from Exchange module to recipient om JMS Topic with correlationID: {} ", message.getJmsMessage().getJMSMessageID());
             String data = JAXBMarshaller.marshallJaxBObjectToString(message.getErrorFault());
-            TextMessage response = session.createTextMessage(data);
-            if (message.getServiceType() != null) {
-                response.setStringProperty(ExchangeModelConstants.SERVICE_NAME, message.getServiceType().getServiceResponseMessageName());
-            } else {
-                response.setStringProperty(ExchangeModelConstants.SERVICE_NAME, "unknown");
-            }
-            response.setJMSCorrelationID(message.getJmsMessage().getJMSMessageID());
-            producer = getProducer(session, eventBus);
-            producer.send(response);
-        } catch (ExchangeModelMapperException | JMSException e) {
+            final String jmsMessageID = message.getJmsMessage().getJMSMessageID();
+            final String serviceName = message.getServiceType() != null ? message.getServiceType().getServiceResponseMessageName() : "unknown";
+            eventBusProducer.sendEventBusMessageWithSpecificIds(data, serviceName, null, null, jmsMessageID);
+            LOG.debug("Sending error message back from Exchange module to recipient om JMS Topic with correlationID: {} ", jmsMessageID);
+        } catch (ExchangeModelMapperException | JMSException | MessageException e) {
             LOG.error("Error when returning Error message to recipient", e);
-        } finally {
-            JMSUtils.disconnectQueue(connection, session, producer);
-        }
-    }
-
-    @Override
-    public void sendModuleResponseMessage(TextMessage message, String text) {
-        Connection connection = null;
-        Session session = null;
-        javax.jms.MessageProducer producer = null;
-        try {
-            LOG.debug("Sending message back to recipient from ExchangeModule with text {} on queue: {}", text, message.getJMSReplyTo());
-            connection = connectionFactory.createConnection();
-            session = JMSUtils.connectToQueue(connection);
-            TextMessage response = session.createTextMessage(text);
-            response.setJMSCorrelationID(message.getJMSMessageID());
-            producer = getProducer(session, message.getJMSReplyTo());
-            producer.send(response);
-        } catch (JMSException e) {
-            LOG.error("[ Error when returning module exchange request. ]");
-        } finally {
-            JMSUtils.disconnectQueue(connection, session, producer);
         }
     }
 
     @Override
     public void sendModuleAckMessage(String messageId, MessageQueue queue, String text) {
-        Connection connection = null;
-        Session session = null;
-        javax.jms.MessageProducer producer = null;
         try {
             LOG.debug("Sending message asynchronous back to recipient from ExchangeModule with text {} on queue: {}", text, queue);
-            connection = connectionFactory.createConnection();
-            session = JMSUtils.connectToQueue(connection);
-            TextMessage response = session.createTextMessage(text);
-            response.setJMSCorrelationID(messageId);
             switch (queue) {
                 case MOVEMENT_RESPONSE:
-                    producer = getProducer(session, movementResponseQueue);
-                    producer.send(response);
+                    movementProducer.sendMessageWithSpecificIds(text, movementProducer.getDestination(), null, messageId, messageId);
                     break;
                 default:
                     LOG.error("[ERROR] Module queue not implemented!");
@@ -274,20 +166,12 @@ public class ExchangeMessageProducerBean implements ExchangeMessageProducer, Con
             }
         } catch (JMSException e) {
             LOG.error("[ Error when returning asynchronous module exchange response. ]");
-        } finally {
-            JMSUtils.disconnectQueue(connection, session, producer);
         }
     }
 
-    private javax.jms.MessageProducer getProducer(Session session, Destination destination, long ttl) throws JMSException {
-        javax.jms.MessageProducer producer = session.createProducer(destination);
-        producer.setDeliveryMode(DeliveryMode.PERSISTENT);
-        producer.setTimeToLive(ttl);
-        return producer;
-    }
-
-    private javax.jms.MessageProducer getProducer(Session session, Destination destination) throws JMSException {
-        return getProducer(session, destination, 60000L);
+    @Override
+    public String getDestinationName() {
+        return MessageConstants.QUEUE_EXCHANGE;
     }
 
 }

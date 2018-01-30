@@ -11,12 +11,12 @@ copy of the GNU General Public License along with the IFDM Suite. If not, see <h
  */
 package eu.europa.ec.fisheries.uvms.exchange.message.consumer.bean;
 
+import eu.europa.ec.fisheries.uvms.commons.message.api.MessageConstants;
 import eu.europa.ec.fisheries.uvms.commons.message.api.MessageException;
 import eu.europa.ec.fisheries.uvms.commons.message.impl.AbstractConsumer;
 import eu.europa.ec.fisheries.uvms.config.exception.ConfigMessageException;
 import eu.europa.ec.fisheries.uvms.config.message.ConfigMessageConsumer;
 import eu.europa.ec.fisheries.uvms.exchange.message.consumer.ExchangeConsumer;
-import eu.europa.ec.fisheries.uvms.exchange.model.constant.ExchangeModelConstants;
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
@@ -30,7 +30,7 @@ public class ExchangeConsumerBean extends AbstractConsumer implements ExchangeCo
 
     @Override
     public String getDestinationName() {
-        return ExchangeModelConstants.EXCHANGE_RESPONSE_QUEUE;
+        return MessageConstants.QUEUE_EXCHANGE;
     }
 
     @Override
