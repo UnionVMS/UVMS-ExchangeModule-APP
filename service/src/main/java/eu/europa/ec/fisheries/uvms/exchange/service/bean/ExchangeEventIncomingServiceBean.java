@@ -123,34 +123,34 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
 
     @Inject
     @ErrorEvent
-    Event<ExchangeMessageEvent> exchangeErrorEvent;
+    private Event<ExchangeMessageEvent> exchangeErrorEvent;
 
     @Inject
     @PluginErrorEvent
-    Event<PluginMessageEvent> pluginErrorEvent;
+    private Event<PluginMessageEvent> pluginErrorEvent;
+
+    @Inject
+    @ExchangePluginStatusEvent
+    private Event<NotificationMessage> pluginStatusEvent;
+
+    @Inject
+    @PollEvent
+    private Event<NotificationMessage> pollEvent;
 
     @EJB
-    ExchangeLogService exchangeLog;
+    private ExchangeLogService exchangeLog;
 
     @EJB
     private ExchangeLogModel exchangeLogModel;
 
     @EJB
-    ExchangeMessageProducer producer;
+    private ExchangeMessageProducer producer;
 
     @EJB
-    ExchangeService exchangeService;
+    private ExchangeService exchangeService;
 
     @EJB
-    ExchangeEventOutgoingService exchangeEventOutgoingService;
-
-    @Inject
-    @ExchangePluginStatusEvent
-    Event<NotificationMessage> pluginStatusEvent;
-
-    @Inject
-    @PollEvent
-    Event<NotificationMessage> pollEvent;
+    private ExchangeEventOutgoingService exchangeEventOutgoingService;
 
     @Override
     public void processFLUXFAReportMessage(@Observes @SetFluxFAReportMessageEvent ExchangeMessageEvent message) {

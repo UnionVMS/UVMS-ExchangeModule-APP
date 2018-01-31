@@ -78,22 +78,22 @@ public class ExchangeEventOutgoingServiceBean implements ExchangeEventOutgoingSe
 
     @Inject
     @ErrorEvent
-    Event<ExchangeMessageEvent> exchangeErrorEvent;
+    private Event<ExchangeMessageEvent> exchangeErrorEvent;
 
     @EJB
-    ExchangeMessageProducer producer;
+    private ExchangeMessageProducer producer;
 
     @EJB
-    ExchangeConsumer consumer;
+    private ExchangeConsumer consumer;
 
     @EJB
-    ExchangeLogService exchangeLog;
+    private ExchangeLogService exchangeLog;
 
     @EJB
-    ExchangeService exchangeService;
+    private ExchangeService exchangeService;
 
     @EJB
-    ExchangeAssetService exchangeAssetService;
+    private ExchangeAssetService exchangeAssetService;
 
     @Override
     public void sendSalesResponseToPlugin(SendSalesResponseRequest sendSalesResponseRequest, PluginType pluginType) throws ExchangeModelMarshallException, ExchangeMessageException {
