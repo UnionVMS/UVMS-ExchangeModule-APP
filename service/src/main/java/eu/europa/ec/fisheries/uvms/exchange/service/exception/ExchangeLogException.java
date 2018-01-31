@@ -20,4 +20,8 @@ public class ExchangeLogException extends ExchangeException {
 		super(message);
 	}
 
+	public ExchangeLogException(String message, Throwable e) {
+		super(message, e);
+	}
+
 }

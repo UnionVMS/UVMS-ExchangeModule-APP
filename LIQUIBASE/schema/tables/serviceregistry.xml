@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.3.xsd">
+    
+    <changeSet author="andtho" id="create service registry table">
+        <createTable remarks="Table containing list of plugins" tableName="service">
+            <column name="serv_id" remarks="Id and code for parameter." type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="servreg_pk"/>
+            </column>
+            <column name="serv_serviceclassname" remarks="Fully qualified name of service." type="VARCHAR(500)">
+                <constraints unique="true"/>
+            </column>
+            <column name="serv_name" remarks="Service display name." type="VARCHAR(100)">
+                <constraints unique="true"/>
+            </column>
+            <column name="serv_serviceresponse" remarks="The response topic message." type="VARCHAR(500)">
+                <constraints unique="true"/>
+            </column>
+            <column name="serv_desc" remarks="Service description." type="VARCHAR(200)"/>
+            <column name="serv_active" remarks="If the service is active." type="boolean"/>
+            <column name="serv_type" remarks="Type of service." type="VARCHAR(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="serv_sat_type" remarks="Type of service satellite." type="VARCHAR(50)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="serv_status" remarks="Status of service." type="VARCHAR(20)"/>
+            <column name="serv_updattim" type="timestamp" remarks="Last updated date time.">
+                <constraints nullable="false"/>
+            </column>
+            <column name="serv_upuser" type="varchar(60)" remarks="Last update userid.">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        
+        
+        <rollback>
+            <dropTable tableName="service" cascadeConstraints="true"/>
+        </rollback>
+    </changeSet>
+
+</databaseChangeLog>	

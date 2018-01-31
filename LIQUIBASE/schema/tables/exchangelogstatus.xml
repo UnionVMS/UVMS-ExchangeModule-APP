@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.3.xsd">
+    
+    <changeSet author="johlyn" id="create the exchange log table">
+        <createTable remarks="Table containing the exchange logs in the exchange module" tableName="log_status">
+            <column name="logstatus_id" remarks="Auto id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="log_status_pk"/>
+            </column>
+            <column name="logstatus_status" remarks="The status of the report" type="VARCHAR(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="logstatus_timestamp" type="timestamp" remarks="Timestamp for status.">
+                <constraints nullable="false"/>
+            </column>
+            <column name="logstatus_log_id" type="BIGINT" remarks="Fk to log table.">
+                <constraints nullable="false"/>
+            </column>
+            <column name="logstatus_updattim" type="timestamp" remarks="Last updated date time.">
+                <constraints nullable="false"/>
+            </column>
+            <column name="logstatus_upuser" type="varchar(60)" remarks="Last update userid.">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        
+        <addForeignKeyConstraint baseColumnNames="logstatus_log_id"
+			baseTableName="log_status" constraintName="log_status_log_fk"
+			referencedColumnNames="log_id" referencedTableName="log" />
+        
+        <rollback>
+            <dropTable tableName="log_status" cascadeConstraints="true"/>
+        </rollback>
+    </changeSet>
+</databaseChangeLog>

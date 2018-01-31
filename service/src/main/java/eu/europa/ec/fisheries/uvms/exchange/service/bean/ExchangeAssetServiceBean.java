@@ -11,33 +11,34 @@ copy of the GNU General Public License along with the IFDM Suite. If not, see <h
  */
 package eu.europa.ec.fisheries.uvms.exchange.service.bean;
 
+import javax.ejb.EJB;
+import javax.ejb.Stateless;
+import javax.jms.TextMessage;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import eu.europa.ec.fisheries.uvms.asset.model.exception.AssetModelMapperException;
 import eu.europa.ec.fisheries.uvms.asset.model.mapper.AssetModuleRequestMapper;
 import eu.europa.ec.fisheries.uvms.asset.model.mapper.AssetModuleResponseMapper;
 import eu.europa.ec.fisheries.uvms.exchange.message.constants.MessageQueue;
-import eu.europa.ec.fisheries.uvms.exchange.message.consumer.ExchangeMessageConsumer;
+import eu.europa.ec.fisheries.uvms.exchange.message.consumer.ExchangeConsumer;
 import eu.europa.ec.fisheries.uvms.exchange.message.exception.ExchangeMessageException;
-import eu.europa.ec.fisheries.uvms.exchange.message.producer.MessageProducer;
+import eu.europa.ec.fisheries.uvms.exchange.message.producer.ExchangeMessageProducer;
 import eu.europa.ec.fisheries.uvms.exchange.service.ExchangeAssetService;
 import eu.europa.ec.fisheries.uvms.exchange.service.exception.ExchangeServiceException;
 import eu.europa.ec.fisheries.wsdl.asset.types.Asset;
 import eu.europa.ec.fisheries.wsdl.asset.types.AssetIdType;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import javax.ejb.EJB;
-import javax.ejb.Stateless;
-import javax.jms.TextMessage;
 
 @Stateless
 public class ExchangeAssetServiceBean implements ExchangeAssetService {
 	final static Logger LOG = LoggerFactory.getLogger(ExchangeAssetServiceBean.class);
 	
 	@EJB
-	MessageProducer producer;
+	ExchangeMessageProducer producer;
 	
 	@EJB
-	ExchangeMessageConsumer consumer;
+    ExchangeConsumer consumer;
 
 	@Override
 	public Asset getAsset(String assetGuid) throws ExchangeServiceException {

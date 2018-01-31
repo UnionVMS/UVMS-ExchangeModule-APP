@@ -11,28 +11,6 @@ copy of the GNU General Public License along with the IFDM Suite. If not, see <h
  */
 package eu.europa.ec.fisheries.uvms.exchange.service.bean;
 
-import eu.europa.ec.fisheries.schema.exchange.source.v1.GetLogListByQueryResponse;
-import eu.europa.ec.fisheries.schema.exchange.v1.*;
-import eu.europa.ec.fisheries.uvms.audit.model.exception.AuditModelMarshallException;
-import eu.europa.ec.fisheries.uvms.exchange.message.constants.MessageQueue;
-import eu.europa.ec.fisheries.uvms.exchange.message.consumer.ExchangeMessageConsumer;
-import eu.europa.ec.fisheries.uvms.exchange.message.exception.ExchangeMessageException;
-import eu.europa.ec.fisheries.uvms.exchange.message.producer.MessageProducer;
-import eu.europa.ec.fisheries.uvms.exchange.model.dto.ListResponseDto;
-import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelException;
-import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelMapperException;
-import eu.europa.ec.fisheries.uvms.exchange.model.remote.ExchangeLogModel;
-import eu.europa.ec.fisheries.uvms.exchange.model.remote.UnsentModel;
-import eu.europa.ec.fisheries.uvms.exchange.service.ExchangeLogService;
-import eu.europa.ec.fisheries.uvms.exchange.service.constants.ExchangeServiceConstants;
-import eu.europa.ec.fisheries.uvms.exchange.service.event.ExchangeLogEvent;
-import eu.europa.ec.fisheries.uvms.exchange.service.event.ExchangeSendingQueueEvent;
-import eu.europa.ec.fisheries.uvms.exchange.service.exception.ExchangeLogException;
-import eu.europa.ec.fisheries.uvms.exchange.service.mapper.ExchangeAuditRequestMapper;
-import eu.europa.ec.fisheries.uvms.longpolling.notifications.NotificationMessage;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
 import javax.enterprise.event.Event;
@@ -42,32 +20,73 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
+import eu.europa.ec.fisheries.schema.exchange.module.v1.ExchangeBaseRequest;
+import eu.europa.ec.fisheries.schema.exchange.source.v1.GetLogListByQueryResponse;
+import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeHistoryListQuery;
+import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeListQuery;
+import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogStatusHistoryType;
+import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogStatusType;
+import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogStatusTypeType;
+import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogType;
+import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogWithValidationResults;
+import eu.europa.ec.fisheries.schema.exchange.v1.LogRefType;
+import eu.europa.ec.fisheries.schema.exchange.v1.LogType;
+import eu.europa.ec.fisheries.schema.exchange.v1.LogWithRawMsgAndType;
+import eu.europa.ec.fisheries.schema.exchange.v1.PollStatus;
+import eu.europa.ec.fisheries.schema.exchange.v1.TypeRefType;
+import eu.europa.ec.fisheries.schema.exchange.v1.UnsentMessageType;
+import eu.europa.ec.fisheries.schema.exchange.v1.UnsentMessageTypeProperty;
+import eu.europa.ec.fisheries.uvms.audit.model.exception.AuditModelMarshallException;
+import eu.europa.ec.fisheries.uvms.exchange.message.constants.MessageQueue;
+import eu.europa.ec.fisheries.uvms.exchange.message.consumer.ExchangeConsumer;
+import eu.europa.ec.fisheries.uvms.exchange.message.exception.ExchangeMessageException;
+import eu.europa.ec.fisheries.uvms.exchange.message.producer.ExchangeMessageProducer;
+import eu.europa.ec.fisheries.uvms.exchange.model.dto.ListResponseDto;
+import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelException;
+import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelMapperException;
+import eu.europa.ec.fisheries.uvms.exchange.model.remote.ExchangeLogModel;
+import eu.europa.ec.fisheries.uvms.exchange.model.remote.UnsentModel;
+import eu.europa.ec.fisheries.uvms.exchange.service.ExchangeLogService;
+import eu.europa.ec.fisheries.uvms.exchange.service.event.ExchangeLogEvent;
+import eu.europa.ec.fisheries.uvms.exchange.service.event.ExchangeSendingQueueEvent;
+import eu.europa.ec.fisheries.uvms.exchange.service.exception.ExchangeLogException;
+import eu.europa.ec.fisheries.uvms.exchange.service.mapper.ExchangeAuditRequestMapper;
+import eu.europa.ec.fisheries.uvms.longpolling.notifications.NotificationMessage;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 @Stateless
+@Slf4j
 public class ExchangeLogServiceBean implements ExchangeLogService {
 
     final static Logger LOG = LoggerFactory.getLogger(ExchangeLogServiceBean.class);
 
     @EJB
-    MessageProducer producer;
+    private ExchangeMessageProducer producer;
 
     @EJB
-    ExchangeMessageConsumer consumer;
+    private ExchangeConsumer consumer;
 
     @EJB
-    ExchangeEventLogCache logCache;
+    private ExchangeEventLogCache logCache;
+
+    @EJB
+    private ExchangeToRulesSyncMsgBean exchangeToRulesSyncMsgBean;
 
     @Inject
     @ExchangeLogEvent
-    Event<NotificationMessage> exchangeLogEvent;
+    private Event<NotificationMessage> exchangeLogEvent;
 
     @Inject
     @ExchangeSendingQueueEvent
-    Event<NotificationMessage> sendingQueueEvent;
+    private Event<NotificationMessage> sendingQueueEvent;
 
-    @EJB(lookup = ExchangeServiceConstants.GLOBAL_DB_ACCESS_EXCHANGE_LOG)
+    @EJB
     private ExchangeLogModel exchangeLogModel;
 
-    @EJB(lookup = ExchangeServiceConstants.GLOBAL_DB_ACCESS_UNSENT_MESSAGE)
+    @EJB
     private UnsentModel unsentModel;
 
 
@@ -82,16 +101,34 @@ public class ExchangeLogServiceBean implements ExchangeLogService {
     @Override
     public ExchangeLogType log(ExchangeLogType log, String username) throws ExchangeLogException {
         try {
-
             ExchangeLogType exchangeLog = exchangeLogModel.createExchangeLog(log, username);
-            sendAuditLogMessageForCreateExchangeLog(exchangeLog.getGuid(), username);
-            exchangeLogEvent.fire(new NotificationMessage("guid", exchangeLog.getGuid()));
+            String guid = exchangeLog.getGuid();
+            sendAuditLogMessageForCreateExchangeLog(guid, username);
+            exchangeLogEvent.fire(new NotificationMessage("guid", guid));
+            LOG.debug("[INFO] Logging message with guid : [ "+guid+" ]..");
             return exchangeLog;
-        } catch (ExchangeModelMapperException e) {
-            throw new ExchangeLogException("Couldn't create log exchange log.");
         } catch (ExchangeModelException e) {
             throw new ExchangeLogException("Couldn't create log exchange log.");
         }
+    }
+
+    @Override
+    public ExchangeLogType log(ExchangeBaseRequest request, LogType logType, ExchangeLogStatusTypeType status, TypeRefType messageType, String messageText, boolean incoming) throws ExchangeLogException {
+        LogRefType ref = new LogRefType();
+        ref.setMessage(messageText);
+        ref.setRefGuid(request.getMessageGuid());
+        ref.setType(messageType);
+
+        ExchangeLogType log = new ExchangeLogType();
+        log.setSenderReceiver(request.getSenderOrReceiver());
+        log.setDateRecieved(request.getDate());
+        log.setType(logType);
+        log.setStatus(status);
+        log.setIncoming(incoming);
+        log.setTypeRef(ref);
+        log.setDestination(request.getDestination());
+
+        return log(log, request.getUsername());
     }
 
     @Override
@@ -99,37 +136,49 @@ public class ExchangeLogServiceBean implements ExchangeLogService {
         try {
             String logGuid = logCache.acknowledged(pluginMessageId);
 
-            ExchangeLogStatusType exchangeLogStatusType = new ExchangeLogStatusType();
-            exchangeLogStatusType.setGuid(logGuid);
-            ArrayList statusHistoryList = new ArrayList();
-            ExchangeLogStatusHistoryType statusHistory = new ExchangeLogStatusHistoryType();
-            statusHistory.setStatus(logStatus);
-            statusHistoryList.add(statusHistory);
-            exchangeLogStatusType.getHistory().addAll(statusHistoryList);
+            ExchangeLogStatusType exchangeLogStatusType = createExchangeLogStatusType(logStatus, logGuid);
             ExchangeLogType updatedLog = exchangeLogModel.updateExchangeLogStatus(exchangeLogStatusType, username);
 
             sendAuditLogMessageForUpdateExchangeLog(updatedLog.getGuid(), username);
             // For long polling
             exchangeLogEvent.fire(new NotificationMessage("guid", updatedLog.getGuid()));
             return updatedLog;
-        } catch (ExchangeModelMapperException e) {
-            throw new ExchangeLogException("Couldn't update status of exchange log");
         } catch (ExchangeModelException e) {
-            throw new ExchangeLogException("Couldn't update status of exchange log");
+            throw new ExchangeLogException("Couldn't update status of exchange log", e);
         }
+    }
+
+    private ExchangeLogStatusType createExchangeLogStatusType(ExchangeLogStatusTypeType logStatus, String logGuid) {
+        ExchangeLogStatusType exchangeLogStatusType = new ExchangeLogStatusType();
+        exchangeLogStatusType.setGuid(logGuid);
+        ArrayList statusHistoryList = new ArrayList();
+        ExchangeLogStatusHistoryType statusHistory = new ExchangeLogStatusHistoryType();
+        statusHistory.setStatus(logStatus);
+        statusHistoryList.add(statusHistory);
+        exchangeLogStatusType.getHistory().addAll(statusHistoryList);
+        return exchangeLogStatusType;
+    }
+
+    @Override
+    public ExchangeLogType updateStatus(String logGuid, ExchangeLogStatusTypeType logStatus) throws ExchangeLogException {
+        try {
+            ExchangeLogStatusType exchangeLogStatusType = createExchangeLogStatusType(logStatus, logGuid);
+            return exchangeLogModel.updateExchangeLogStatus(exchangeLogStatusType, "SYSTEM");
+        } catch (ExchangeModelException e) {
+            throw new ExchangeLogException("Couldn't update the status of the exchange log with guid " + logGuid + ". The new status should be " + logStatus, e);
+        }
+
     }
 
     @Override
     public GetLogListByQueryResponse getExchangeLogList(ExchangeListQuery query) throws ExchangeLogException {
+        GetLogListByQueryResponse response = new GetLogListByQueryResponse();
         try {
             ListResponseDto exchangeLogList = exchangeLogModel.getExchangeLogListByQuery(query);
-            GetLogListByQueryResponse response = new GetLogListByQueryResponse();
             response.setCurrentPage(exchangeLogList.getCurrentPage());
             response.setTotalNumberOfPages(exchangeLogList.getTotalNumberOfPages());
             response.getExchangeLog().addAll(exchangeLogList.getExchangeLogList());
             return response;
-        } catch (ExchangeModelMapperException e) {
-            throw new ExchangeLogException("Couldn't get exchange log list.");
         } catch (ExchangeModelException e) {
             throw new ExchangeLogException("Couldn't get exchange log list.");
         }
@@ -137,7 +186,7 @@ public class ExchangeLogServiceBean implements ExchangeLogService {
 
     @Override
     public List<UnsentMessageType> getUnsentMessageList() throws ExchangeLogException {
-        LOG.info("Get unsent message list in service layer");
+        log.info("Get unsent message list in service layer");
         try {
             List<UnsentMessageType> unsentMessageList = unsentModel.getMessageList();
             return unsentMessageList;
@@ -148,7 +197,7 @@ public class ExchangeLogServiceBean implements ExchangeLogService {
 
     @Override
     public List<ExchangeLogStatusType> getExchangeStatusHistoryList(ExchangeLogStatusTypeType status, TypeRefType type, Date from, Date to) throws ExchangeLogException {
-        LOG.info("Get pollstatus list in service layer");
+        log.info("Get pollstatus list in service layer:{}",status);
         try {
             List<ExchangeLogStatusTypeType> statusList = new ArrayList<>();
             if (status != null) {
@@ -174,7 +223,7 @@ public class ExchangeLogServiceBean implements ExchangeLogService {
 
     @Override
     public ExchangeLogStatusType getExchangeStatusHistory(TypeRefType type, String typeRefGuid, String userName) throws ExchangeLogException {
-        LOG.info("Get poll status history in service layer");
+        log.info("Get poll status history in service layer:{}",type);
         if (typeRefGuid == null || typeRefGuid.isEmpty()) {
             throw new ExchangeLogException("Invalid id");
         }
@@ -192,14 +241,14 @@ public class ExchangeLogServiceBean implements ExchangeLogService {
             ExchangeLogType exchangeLogByGuid = exchangeLogModel.getExchangeLogByGuid(guid);
             return exchangeLogByGuid;
         } catch (ExchangeModelException e) {
-            LOG.error("[ Error when getting exchange log by GUID. ] {}", e.getMessage());
+            log.error("[ Error when getting exchange log by GUID. {}] {}",guid, e.getMessage());
             throw new ExchangeLogException("Error when getting exchange log by GUID.");
         }
     }
 
     @Override
     public String createUnsentMessage(String senderReceiver, Date timestamp, String recipient, String message, List<UnsentMessageTypeProperty> properties, String username) throws ExchangeLogException {
-        LOG.debug("createUnsentMessage in service layer");
+        log.debug("createUnsentMessage in service layer:{}",message);
         try {
             UnsentMessageType unsentMessage = new UnsentMessageType();
             unsentMessage.setDateReceived(timestamp);
@@ -214,34 +263,47 @@ public class ExchangeLogServiceBean implements ExchangeLogService {
             sendingQueueEvent.fire(new NotificationMessage("messageIds", unsentMessageIds));
             return createdUnsentMessageId;
         } catch (ExchangeModelException e) {
-            LOG.error("Couldn't add message to unsent list");
+            log.error("Couldn't add message to unsent list: {} {}",message,e);
             throw new ExchangeLogException("Couldn't add message to unsent list");
         }
     }
 
     @Override
     public void removeUnsentMessage(String unsentMessageId, String username) throws ExchangeLogException {
-        LOG.debug("removeUnsentMessage in service layer");
+        log.debug("removeUnsentMessage in service layer:{}",unsentMessageId);
         try {
             String removeMessageId = unsentModel.removeMessage(unsentMessageId);
             List<String> removedMessageIds = Arrays.asList(removeMessageId);
             sendAuditLogMessageForRemoveUnsentMessage(removeMessageId, username);
             sendingQueueEvent.fire(new NotificationMessage("messageIds", removedMessageIds));
         } catch (ExchangeModelException e) {
-            LOG.error("Couldn't add message to unsent list");
+            log.error("Couldn't add message to unsent list {} {}",unsentMessageId,e);
             throw new ExchangeLogException("Couldn't add message to unsent list");
         }
     }
 
     @Override
+    public ExchangeLogWithValidationResults getExchangeLogRawMessageAndValidationByGuid(String guid) throws ExchangeLogException {
+        LogWithRawMsgAndType rawMsg = exchangeLogModel.getExchangeLogRawXmlByGuid(guid);
+        ExchangeLogWithValidationResults validationFromRules = exchangeToRulesSyncMsgBean.getValidationFromRules(guid, rawMsg.getType());
+        validationFromRules.setMsg(rawMsg.getRawMsg() != null ? rawMsg.getRawMsg() : StringUtils.EMPTY);
+        return validationFromRules;
+    }
+
+    @Override
+    public String getExchangeLogRawMessageByGuid(String guid) {
+        return exchangeLogModel.getExchangeLogRawXmlByGuid(guid).getRawMsg();
+    }
+
+    @Override
     public void resend(List<String> messageIdList, String username) throws ExchangeLogException {
-        LOG.debug("resend in service layer");
+        log.debug("resend in service layer:{} {}",messageIdList,username);
         List<UnsentMessageType> unsentMessageList;
         try {
             unsentMessageList = unsentModel.resend(messageIdList);
             sendAuditLogMessageForResendUnsentMessage(messageIdList.toString(), username);
         } catch (ExchangeModelException e) {
-            LOG.error("Couldn't read unsent messages", e);
+            log.error("Couldn't read unsent messages", e);
             throw new ExchangeLogException("Couldn't read unsent messages");
         }
         if (unsentMessageList != null && !unsentMessageList.isEmpty()) {
@@ -254,7 +316,7 @@ public class ExchangeLogServiceBean implements ExchangeLogService {
                     sendAuditLogMessageForCreateUnsentMessage(unsentMessageId, username);
                     //ExchangeModuleResponseMapper.validateResponse(unsentResponse, unsentMessageId);
                 } catch (ExchangeMessageException e) {
-                    LOG.error("Error when sending/receiving message", e);
+                    log.error("Error when sending/receiving message {} {}",messageIdList, e);
                 }
             }
         }
@@ -287,7 +349,7 @@ public class ExchangeLogServiceBean implements ExchangeLogService {
             String request = ExchangeAuditRequestMapper.mapCreateUnsentMessage(guid, username);
             producer.sendMessageOnQueue(request, MessageQueue.AUDIT);
         } catch (AuditModelMarshallException | ExchangeMessageException e) {
-            LOG.error("Could not send audit log message. Unsent message was created with guid: " + guid);
+            log.error("Could not send audit log message. Unsent message was created with guid: " + guid);
         }
     }
 
@@ -296,7 +358,7 @@ public class ExchangeLogServiceBean implements ExchangeLogService {
             String request = ExchangeAuditRequestMapper.mapRemoveUnsentMessage(guid, username);
             producer.sendMessageOnQueue(request, MessageQueue.AUDIT);
         } catch (AuditModelMarshallException | ExchangeMessageException e) {
-            LOG.error("Could not send audit log message. Unsent message was created with guid: " + guid);
+            log.error("Could not send audit log message. Unsent message was created with guid: " + guid);
         }
     }
 
@@ -305,7 +367,7 @@ public class ExchangeLogServiceBean implements ExchangeLogService {
             String request = ExchangeAuditRequestMapper.mapUpdateExchangeLog(guid, username);
             producer.sendMessageOnQueue(request, MessageQueue.AUDIT);
         } catch (AuditModelMarshallException | ExchangeMessageException e) {
-            LOG.error("Could not send audit log message. Exchange log with guid: " + guid + " is updated");
+            log.error("Could not send audit log message. Exchange log with guid: " + guid + " is updated");
         }
     }
 
@@ -314,7 +376,7 @@ public class ExchangeLogServiceBean implements ExchangeLogService {
             String request = ExchangeAuditRequestMapper.mapResendSendingQueue(guid, username);
             producer.sendMessageOnQueue(request, MessageQueue.AUDIT);
         } catch (AuditModelMarshallException | ExchangeMessageException e) {
-            LOG.error("Could not send audit log message. Resend sending queue with guid: " + guid);
+            log.error("Could not send audit log message. Resend sending queue with guid: " + guid);
         }
     }
 
@@ -323,7 +385,7 @@ public class ExchangeLogServiceBean implements ExchangeLogService {
             String request = ExchangeAuditRequestMapper.mapCreateExchangeLog(guid, username);
             producer.sendMessageOnQueue(request, MessageQueue.AUDIT);
         } catch (AuditModelMarshallException | ExchangeMessageException e) {
-            LOG.error("Could not send audit log message. Exchange log was created with guid: " + guid);
+            log.error("Could not send audit log message. Exchange log was created with guid: " + guid);
         }
     }
 
@@ -332,7 +394,7 @@ public class ExchangeLogServiceBean implements ExchangeLogService {
             String request = ExchangeAuditRequestMapper.mapUpdatePoll(guid, username);
             producer.sendMessageOnQueue(request, MessageQueue.AUDIT);
         } catch (AuditModelMarshallException | ExchangeMessageException e) {
-            LOG.error("Could not send audit log message. Exchange poll with guid: " + guid + " is updated");
+            log.error("Could not send audit log message. Exchange poll with guid: " + guid + " is updated");
         }
     }
 }

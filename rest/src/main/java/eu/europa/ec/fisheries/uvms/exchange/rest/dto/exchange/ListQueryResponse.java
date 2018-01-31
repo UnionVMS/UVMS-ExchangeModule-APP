@@ -25,32 +25,29 @@ public class ListQueryResponse {
 
     @XmlElement(required = true)
     private int currentPage;
+
     @XmlElement(required = true)
     private int totalNumberOfPages;
+
     @XmlElement(required = true)
-    private List<ExchangeLog> logList;
+    private List<ExchangeLogDto> logList;
 
     public ListQueryResponse() {
         logList = new ArrayList<>();
     }
-
     public int getCurrentPage() {
         return currentPage;
     }
-
     public void setCurrentPage(int currentPage) {
         this.currentPage = currentPage;
     }
-
     public int getTotalNumberOfPages() {
         return totalNumberOfPages;
     }
-
     public void setTotalNumberOfPages(int totalNumberOfPages) {
         this.totalNumberOfPages = totalNumberOfPages;
     }
-
-    public List<ExchangeLog> getLogs() {
+    public List<ExchangeLogDto> getLogs() {
         return logList;
     }
 

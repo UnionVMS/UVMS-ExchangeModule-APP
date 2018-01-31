@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.0.xsd">
+    
+    <changeSet author="johlyn" id="insert service-settings test values">
+        
+        <!-- Plugin 1 : EIK -->
+        <insert tableName="parameter">
+            <column name="param_id" value="1"/>
+            <column name="param_key" value="eu.europa.plugin.inmarsat.eik.USER"/>
+            <column name="param_description" value="User setting of EIK"/>
+            <column name="param_value" value="eikuser"/> 
+        </insert>
+        <insert tableName="parameter">
+            <column name="param_id" value="2"/>
+            <column name="param_key" value="eu.europa.plugin.inmarsat.eik.URL"/>
+            <column name="param_description" value="URL setting of EIK"/>
+            <column name="param_value" value="http://test.eiktest"/> 
+        </insert>
+        
+        <!-- Plugin 2 : Burum -->
+        <insert tableName="parameter">
+            <column name="param_id" value="3"/>
+            <column name="param_key" value="eu.europa.plugin.inmarsat.burum.TIMESPAN"/>
+            <column name="param_description" value="Timespan setting of Burum"/>
+            <column name="param_value" value="100"/> 
+        </insert>
+        <insert tableName="parameter">
+            <column name="param_id" value="4"/>
+            <column name="param_key" value="eu.europa.plugin.inmarsat.burum.URL"/>
+            <column name="param_description" value="URL setting of Burum"/>
+            <column name="param_value" value="http://test.burumtest"/> 
+        </insert>
+        
+        <rollback>
+            <delete tableName="service_setting">
+                <where>
+                    servset_id in (1, 2, 3, 4, 5, 6)
+                </where>
+            </delete>
+        </rollback>
+    </changeSet>
+</databaseChangeLog>

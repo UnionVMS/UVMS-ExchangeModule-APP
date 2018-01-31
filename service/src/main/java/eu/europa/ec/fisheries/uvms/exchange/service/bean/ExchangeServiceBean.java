@@ -11,35 +11,34 @@ copy of the GNU General Public License along with the IFDM Suite. If not, see <h
  */
 package eu.europa.ec.fisheries.uvms.exchange.service.bean;
 
-import eu.europa.ec.fisheries.schema.exchange.plugin.types.v1.PluginType;
-import eu.europa.ec.fisheries.schema.exchange.service.v1.*;
-import eu.europa.ec.fisheries.schema.exchange.source.v1.GetLogListByQueryResponse;
-import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeListQuery;
-import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogType;
-import eu.europa.ec.fisheries.uvms.audit.model.exception.AuditModelMarshallException;
-import eu.europa.ec.fisheries.uvms.config.service.ParameterService;
-import eu.europa.ec.fisheries.uvms.exchange.message.constants.MessageQueue;
-import eu.europa.ec.fisheries.uvms.exchange.message.consumer.ExchangeMessageConsumer;
-import eu.europa.ec.fisheries.uvms.exchange.message.exception.ExchangeMessageException;
-import eu.europa.ec.fisheries.uvms.exchange.message.producer.MessageProducer;
-import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelException;
-import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelMapperException;
-import eu.europa.ec.fisheries.uvms.exchange.model.mapper.ExchangeDataSourceRequestMapper;
-import eu.europa.ec.fisheries.uvms.exchange.model.mapper.ExchangeDataSourceResponseMapper;
-import eu.europa.ec.fisheries.uvms.exchange.model.remote.ServiceRegistryModel;
-import eu.europa.ec.fisheries.uvms.exchange.service.ExchangeService;
-import eu.europa.ec.fisheries.uvms.exchange.service.constants.ExchangeServiceConstants;
-import eu.europa.ec.fisheries.uvms.exchange.service.exception.ExchangeServiceException;
 import static eu.europa.ec.fisheries.uvms.exchange.service.util.StringUtil.compressServiceClassName;
 
-import eu.europa.ec.fisheries.uvms.exchange.service.mapper.ExchangeAuditRequestMapper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.util.List;
 
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
-import javax.jms.TextMessage;
-import java.util.List;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import eu.europa.ec.fisheries.schema.exchange.plugin.types.v1.PluginType;
+import eu.europa.ec.fisheries.schema.exchange.service.v1.CapabilityListType;
+import eu.europa.ec.fisheries.schema.exchange.service.v1.ServiceResponseType;
+import eu.europa.ec.fisheries.schema.exchange.service.v1.ServiceType;
+import eu.europa.ec.fisheries.schema.exchange.service.v1.SettingListType;
+import eu.europa.ec.fisheries.schema.exchange.service.v1.StatusType;
+import eu.europa.ec.fisheries.uvms.audit.model.exception.AuditModelMarshallException;
+import eu.europa.ec.fisheries.uvms.config.service.ParameterService;
+import eu.europa.ec.fisheries.uvms.exchange.message.constants.MessageQueue;
+import eu.europa.ec.fisheries.uvms.exchange.message.consumer.ExchangeConsumer;
+import eu.europa.ec.fisheries.uvms.exchange.message.exception.ExchangeMessageException;
+import eu.europa.ec.fisheries.uvms.exchange.message.producer.ExchangeMessageProducer;
+import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelException;
+import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelMapperException;
+import eu.europa.ec.fisheries.uvms.exchange.model.remote.ServiceRegistryModel;
+import eu.europa.ec.fisheries.uvms.exchange.service.ExchangeService;
+import eu.europa.ec.fisheries.uvms.exchange.service.exception.ExchangeServiceException;
+import eu.europa.ec.fisheries.uvms.exchange.service.mapper.ExchangeAuditRequestMapper;
 
 @Stateless
 public class ExchangeServiceBean implements ExchangeService {
@@ -47,16 +46,16 @@ public class ExchangeServiceBean implements ExchangeService {
     final static Logger LOG = LoggerFactory.getLogger(ExchangeServiceBean.class);
 
     @EJB
-    ParameterService parameterService;
+    private ParameterService parameterService;
 
     @EJB
-    ExchangeMessageConsumer consumer;
+    private ExchangeConsumer consumer;
 
     @EJB
-    MessageProducer producer;
+    private ExchangeMessageProducer producer;
 
-    @EJB(lookup = ExchangeServiceConstants.GLOBAL_DB_ACCESS_SERVICE_REGISTRY)
-    ServiceRegistryModel serviceRegistryModel;
+    @EJB
+    private ServiceRegistryModel serviceRegistryModel;
 
     /**
      * {@inheritDoc}
@@ -66,7 +65,7 @@ public class ExchangeServiceBean implements ExchangeService {
      */
     @Override
     public ServiceResponseType registerService(ServiceType data, CapabilityListType capabilityList, SettingListType settingList, String username) throws ExchangeServiceException {
-        LOG.info("Register service invoked in service layer");
+        LOG.info("Register service invoked in service layer: {} {}",data,username);
         try {
             ServiceResponseType serviceResponseType = serviceRegistryModel.registerService(data, capabilityList, settingList, username);
             sendAuditLogMessageForRegisterService(compressServiceClassName(serviceResponseType.getServiceClassName()), username);
@@ -86,7 +85,7 @@ public class ExchangeServiceBean implements ExchangeService {
      */
     @Override
     public ServiceResponseType unregisterService(ServiceType data, String username) throws ExchangeServiceException {
-        LOG.info("Unregister service invoked in service layer");
+        LOG.info("Unregister service invoked in service layer: {} {}",data,username);
         try {
             ServiceResponseType serviceResponseType = serviceRegistryModel.unregisterService(data, username);
             sendAuditLogMessageForUnregisterService(compressServiceClassName(serviceResponseType.getServiceClassName()), username);
@@ -104,7 +103,7 @@ public class ExchangeServiceBean implements ExchangeService {
      */
     @Override
     public List<ServiceResponseType> getServiceList(List<PluginType> pluginTypes) throws ExchangeServiceException {
-        LOG.info("Get list invoked in service layer");
+        LOG.info("Get list invoked in service layer:{}",pluginTypes);
         try {
             List<ServiceResponseType> plugins = serviceRegistryModel.getPlugins(pluginTypes);
             return plugins;
@@ -115,7 +114,7 @@ public class ExchangeServiceBean implements ExchangeService {
 
     @Override
     public ServiceResponseType upsertSettings(String serviceClassName, SettingListType settingListType, String username) throws ExchangeServiceException {
-        LOG.info("Upsert settings in service layer");
+        LOG.info("Upsert settings in service layer: {} {} {}",serviceClassName,settingListType,username);
         try {
             ServiceResponseType updatedSettings = serviceRegistryModel.updatePluginSettings(serviceClassName, settingListType, username);
             sendAuditLogMessageForUpdateService(compressServiceClassName(serviceClassName), username);
@@ -134,7 +133,7 @@ public class ExchangeServiceBean implements ExchangeService {
      */
     @Override
     public ServiceType getById(Long id) throws ExchangeServiceException {
-        LOG.info("Get by id invoked in service layer");
+        LOG.info("Get by id invoked in service layer:{}",id);
         throw new ExchangeServiceException("Get by id not implemented in service layer");
     }
 
@@ -151,7 +150,7 @@ public class ExchangeServiceBean implements ExchangeService {
 
     @Override
     public ServiceResponseType updateServiceStatus(String serviceClassName, StatusType status, String username) throws ExchangeServiceException {
-        LOG.info("Update service status invoked in service layer");
+        LOG.info("Update service status invoked in service layer: {} {} {}",serviceClassName,status,username);
         try {
             ServiceResponseType updatedServiceStatus = serviceRegistryModel.updatePluginStatus(serviceClassName, status, username);
             sendAuditLogMessageForUpdateServiceStatus(serviceClassName, status, username);

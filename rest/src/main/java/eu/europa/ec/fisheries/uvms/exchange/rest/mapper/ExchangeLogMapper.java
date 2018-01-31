@@ -13,15 +13,10 @@ package eu.europa.ec.fisheries.uvms.exchange.rest.mapper;
 
 import eu.europa.ec.fisheries.schema.exchange.source.v1.GetLogListByQueryResponse;
 import eu.europa.ec.fisheries.schema.exchange.v1.*;
-import eu.europa.ec.fisheries.uvms.common.DateUtils;
-import eu.europa.ec.fisheries.uvms.exchange.model.mapper.ExchangeModuleRequestMapper;
-import eu.europa.ec.fisheries.uvms.exchange.model.mapper.ExchangeModuleResponseMapper;
-import eu.europa.ec.fisheries.uvms.exchange.model.mapper.JAXBMarshaller;
+import eu.europa.ec.fisheries.uvms.commons.date.DateUtils;
 import eu.europa.ec.fisheries.uvms.exchange.rest.dto.LogTypeLabel;
 import eu.europa.ec.fisheries.uvms.exchange.rest.dto.exchange.*;
 
-import javax.jms.Message;
-import javax.jms.TextMessage;
 import java.util.*;
 
 /**
@@ -42,46 +37,72 @@ public class ExchangeLogMapper {
         return dto;
 
     }
-    
-    public static ExchangeLog mapToExchangeLogDto(ExchangeLogType log) {
-    	ExchangeLog dto = new ExchangeLog();
-        Date dateFwd = null;
+
+    public static ExchangeLogDto mapToExchangeLogDto(ExchangeLogType log) {
+    	ExchangeLogDto dto = new ExchangeLogDto();
+        Date dateFwd;
     	switch(log.getType()) {
-    	case RECEIVE_MOVEMENT:
-    		dto.setType(LogTypeLabel.RECEIVED_MOVEMENT);
-    		dto.setSource(((ReceiveMovementType)log).getSource());
-			dto.setRecipient(((ReceiveMovementType)log).getRecipient());
-    		break;
-    	case SEND_MOVEMENT:
-    		dto.setType(LogTypeLabel.SENT_MOVEMENT);
-    		SendMovementType sendLog = (SendMovementType)log;
-    		dateFwd = sendLog.getFwdDate();
-    		dto.setDateFwd(DateUtils.dateToString(dateFwd));
-    		dto.setRule(sendLog.getFwdRule());
-    		dto.setRecipient(sendLog.getRecipient());
-    		break;
-    	case SEND_EMAIL:
-			SendEmailType sendEmail = (SendEmailType)log;
-            dateFwd = sendEmail.getFwdDate();
-            dto.setType(LogTypeLabel.SENT_EMAIL);
-			dto.setRecipient(sendEmail.getRecipient());
-			dto.setRule(sendEmail.getFwdRule());
-            dto.setDateFwd(DateUtils.dateToString(dateFwd));
-    		break;
-    	case SEND_POLL:
-			SendPollType sendPoll = (SendPollType)log;
-    		dto.setType(LogTypeLabel.SENT_POLL);
-			dto.setRule(sendPoll.getFwdRule());
-			dto.setRecipient(sendPoll.getRecipient());
-    		break;
-    	default:
-    		break;
+            case RECEIVE_MOVEMENT:
+                dto.setType(LogTypeLabel.RECEIVED_MOVEMENT.toString());
+                dto.setSource(((ReceiveMovementType)log).getSource());
+                dto.setRecipient(((ReceiveMovementType)log).getRecipient());
+                break;
+            case SEND_MOVEMENT:
+                dto.setType(LogTypeLabel.SENT_MOVEMENT.toString());
+                SendMovementType sendLog = (SendMovementType)log;
+                dateFwd = sendLog.getFwdDate();
+                dto.setDateFwd(DateUtils.dateToString(dateFwd));
+                dto.setRule(sendLog.getFwdRule());
+                dto.setRecipient(sendLog.getRecipient());
+                break;
+            case SEND_EMAIL:
+                SendEmailType sendEmail = (SendEmailType)log;
+                dateFwd = sendEmail.getFwdDate();
+                dto.setType(LogTypeLabel.SENT_EMAIL.toString());
+                dto.setRecipient(sendEmail.getRecipient());
+                dto.setRule(sendEmail.getFwdRule());
+                dto.setDateFwd(DateUtils.dateToString(dateFwd));
+                break;
+            case SEND_POLL:
+                SendPollType sendPoll = (SendPollType)log;
+                dto.setType(LogTypeLabel.SENT_POLL.toString());
+                dto.setRule(sendPoll.getFwdRule());
+                dto.setRecipient(sendPoll.getRecipient());
+                break;
+            case SEND_SALES_REPORT:
+                dto.setType(LogTypeLabel.SENT_SALES_REPORT.toString());
+                break;
+            case SEND_SALES_RESPONSE:
+                dto.setType(LogTypeLabel.SENT_SALES_RESPONSE.toString());
+                break;
+            case RECEIVE_SALES_QUERY:
+                dto.setType(LogTypeLabel.RECEIVED_SALES_QUERY.toString());
+                break;
+            case RECEIVE_SALES_REPORT:
+                dto.setType(LogTypeLabel.RECEIVED_SALES_REPORT.toString());
+                break;
+            case RECEIVE_SALES_RESPONSE:
+                dto.setType(LogTypeLabel.RECEIVED_SALES_RESPONSE.toString());
+                break;
+            default:
+                if(log.getType() !=null) {
+                    dto.setType(log.getType().toString());
+                }
+                break;
     	}
     	
     	Date dateReceived = log.getDateRecieved();
     	dto.setDateRecieved(DateUtils.dateToString(dateReceived));
     	dto.setId(log.getGuid());
     	dto.setIncoming(log.isIncoming());
+        if(log.getTypeRefType()!=null) {
+            dto.setTypeRefType(log.getTypeRefType().toString());
+        }
+
+        if(dto.getSource()==null){
+            dto.setSource(log.getSource());
+        }
+
     	if(log.getTypeRef() != null) {
     		ExchangeLogData logData = new ExchangeLogData();
     		logData.setGuid(log.getTypeRef().getRefGuid());
@@ -90,6 +111,7 @@ public class ExchangeLogMapper {
     	}
     	dto.setSenderRecipient(log.getSenderReceiver());
     	dto.setStatus(log.getStatus().name());
+        dto.setRelatedLogData(log.getRelatedLogData());
         return dto;
     }
 

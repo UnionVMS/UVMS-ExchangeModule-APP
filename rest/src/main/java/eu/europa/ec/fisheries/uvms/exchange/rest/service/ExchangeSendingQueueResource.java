@@ -88,14 +88,14 @@ public class ExchangeSendingQueueResource {
 	@Path("/send")
 	@RequiresFeature(UnionVMSFeature.manageExchangeSendingQueue)
 	public ResponseDto send(final List<String> messageIdList) {
-		LOG.info("Get list invoked in rest layer");
+		LOG.info("Get list invoked in rest layer:{}",messageIdList);
 		try {
 			//TODO swaggerize messageIdList
 			//boolean send = ExchangeMock.send(messageIdList);
 			serviceLayer.resend(messageIdList, request.getRemoteUser());
 			return new ResponseDto(true, RestResponseCode.OK);
 		} catch (Exception ex) {
-			LOG.error("[ Error when geting log list. ] {} ", ex.getMessage());
+			LOG.error("[ Error when geting log list. {} ] {} ",messageIdList, ex.getMessage());
 			return ErrorHandler.getFault(ex);
 		}
 	}
