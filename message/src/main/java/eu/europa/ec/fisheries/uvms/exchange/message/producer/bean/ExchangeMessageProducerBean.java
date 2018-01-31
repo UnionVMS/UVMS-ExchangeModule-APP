@@ -14,6 +14,7 @@ package eu.europa.ec.fisheries.uvms.exchange.message.producer.bean;
 import eu.europa.ec.fisheries.uvms.commons.message.api.MessageConstants;
 import eu.europa.ec.fisheries.uvms.commons.message.api.MessageException;
 import eu.europa.ec.fisheries.uvms.commons.message.impl.AbstractProducer;
+import eu.europa.ec.fisheries.uvms.commons.message.impl.JMSUtils;
 import eu.europa.ec.fisheries.uvms.config.exception.ConfigMessageException;
 import eu.europa.ec.fisheries.uvms.config.message.ConfigMessageProducer;
 import eu.europa.ec.fisheries.uvms.exchange.message.constants.MessageQueue;
@@ -25,13 +26,15 @@ import eu.europa.ec.fisheries.uvms.exchange.message.exception.ExchangeMessageExc
 import eu.europa.ec.fisheries.uvms.exchange.message.producer.ExchangeMessageProducer;
 import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelMapperException;
 import eu.europa.ec.fisheries.uvms.exchange.model.mapper.JAXBMarshaller;
+import javax.annotation.PostConstruct;
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
 import javax.enterprise.event.Observes;
 import javax.jms.JMSException;
-import org.apache.commons.lang3.StringUtils;
+import javax.jms.Queue;
+import javax.jms.Topic;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -46,45 +49,42 @@ public class ExchangeMessageProducerBean extends AbstractProducer implements Exc
     @EJB
     private ExchangeMovementProducer movementProducer;
 
+    private Queue exchangeResponseQueue;
+    private Queue exchangeEventQueue;
+    private Topic eventBus;
+    private Queue rulesQueue;
+    private Queue configQueue;
+    private Queue vesselQueue;
+    private Queue auditQueue;
+    private Queue movementResponseQueue;
+    private Queue activityQueue;
+    private Queue mdrQueue;
+    private Queue salesQueue;
+    private Queue rulesResponseQueue;
+
+    @PostConstruct
+    public void init() {
+        exchangeResponseQueue = JMSUtils.lookupQueue(MessageConstants.QUEUE_EXCHANGE);
+        exchangeEventQueue = JMSUtils.lookupQueue(MessageConstants.QUEUE_EXCHANGE_EVENT);
+        rulesQueue = JMSUtils.lookupQueue(MessageConstants.QUEUE_MODULE_RULES);
+        configQueue = JMSUtils.lookupQueue(MessageConstants.QUEUE_CONFIG);
+        vesselQueue = JMSUtils.lookupQueue(MessageConstants.QUEUE_ASSET_EVENT);
+        auditQueue = JMSUtils.lookupQueue(MessageConstants.QUEUE_AUDIT_EVENT);
+        movementResponseQueue = JMSUtils.lookupQueue(MessageConstants.QUEUE_MOVEMENT);
+        eventBus = JMSUtils.lookupTopic(MessageConstants.EVENT_BUS_TOPIC);
+        activityQueue = JMSUtils.lookupQueue(MessageConstants.QUEUE_MODULE_ACTIVITY);
+        mdrQueue = JMSUtils.lookupQueue(MessageConstants.QUEUE_MDR_EVENT);
+        salesQueue = JMSUtils.lookupQueue(MessageConstants.QUEUE_SALES_EVENT);
+        rulesResponseQueue = JMSUtils.lookupQueue(MessageConstants.QUEUE_RULES);
+    }
+
     @Override
     @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
     public String sendMessageOnQueue(String text, MessageQueue queue) throws ExchangeMessageException {
         try {
-            String replyToQueue = MessageConstants.QUEUE_EXCHANGE;
-            String destination = null;
-            switch (queue) {
-                case EVENT:
-                    destination = MessageConstants.QUEUE_EXCHANGE_EVENT;
-                    break;
-                case RULES:
-                    destination = MessageConstants.QUEUE_MODULE_RULES;
-                    break;
-                case CONFIG:
-                    destination = MessageConstants.QUEUE_CONFIG;
-                    break;
-                case VESSEL:
-                    destination = MessageConstants.QUEUE_ASSET_EVENT;
-                    break;
-                case SALES:
-                    destination = MessageConstants.QUEUE_SALES_EVENT;
-                    break;
-                case AUDIT:
-                    destination = MessageConstants.QUEUE_AUDIT_EVENT;
-                    break;
-                case ACTIVITY_EVENT:
-                    destination = MessageConstants.QUEUE_MODULE_ACTIVITY;
-                    break;
-                case MDR_EVENT:
-                    destination = MessageConstants.QUEUE_MDR_EVENT;
-                    break;
-                case RULES_RESPONSE:
-                    destination = MessageConstants.QUEUE_RULES;
-                    break;
-                default:
-                    break;
-            }
-            if(StringUtils.isNotEmpty(destination)){
-                return this.sendMessageToSpecificQueue(text, destination, replyToQueue);
+            Queue destination = getDestinationQueue(queue);
+            if(destination != null){
+                return this.sendMessageToSpecificQueue(text, destination, exchangeResponseQueue);
             }
             return null;
         } catch (MessageException e) {
@@ -98,7 +98,7 @@ public class ExchangeMessageProducerBean extends AbstractProducer implements Exc
     public String sendEventBusMessage(String text, String serviceName) throws ExchangeMessageException {
         try {
             LOG.debug("Sending event bus message from Exchange module to recipient om JMS Topic to: {} ", serviceName);
-            return eventBusProducer.sendEventBusMessage(text, serviceName, MessageConstants.QUEUE_EXCHANGE_EVENT);
+            return eventBusProducer.sendEventBusMessage(text, serviceName, exchangeEventQueue);
         } catch (MessageException e) {
             LOG.error("[ Error when sending message. ] ", e);
             throw new ExchangeMessageException("[ Error when sending message. ]");
@@ -166,6 +166,42 @@ public class ExchangeMessageProducerBean extends AbstractProducer implements Exc
         } catch (JMSException e) {
             LOG.error("[ Error when returning asynchronous module exchange response. ]");
         }
+    }
+
+    private Queue getDestinationQueue(MessageQueue queue) {
+        Queue destination = null;
+        switch (queue) {
+            case EVENT:
+                destination = exchangeEventQueue;
+                break;
+            case RULES:
+                destination = rulesQueue;
+                break;
+            case CONFIG:
+                destination = configQueue;
+                break;
+            case VESSEL:
+                destination = vesselQueue;
+                break;
+            case SALES:
+                destination = salesQueue;
+                break;
+            case AUDIT:
+                destination = auditQueue;
+                break;
+            case ACTIVITY_EVENT:
+                destination = activityQueue;
+                break;
+            case MDR_EVENT:
+                destination = mdrQueue;
+                break;
+            case RULES_RESPONSE:
+                destination = rulesResponseQueue;
+                break;
+            default:
+                break;
+        }
+        return destination;
     }
 
     @Override
