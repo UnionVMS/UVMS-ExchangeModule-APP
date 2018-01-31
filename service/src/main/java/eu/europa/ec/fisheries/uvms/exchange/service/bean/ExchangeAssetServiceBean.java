@@ -11,6 +11,7 @@ copy of the GNU General Public License along with the IFDM Suite. If not, see <h
  */
 package eu.europa.ec.fisheries.uvms.exchange.service.bean;
 
+import eu.europa.ec.fisheries.uvms.commons.message.api.MessageException;
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
 import javax.jms.TextMessage;
@@ -47,14 +48,13 @@ public class ExchangeAssetServiceBean implements ExchangeAssetService {
             String messageId = producer.sendMessageOnQueue(request, MessageQueue.VESSEL);
             TextMessage response = consumer.getMessage(messageId, TextMessage.class);
             return AssetModuleResponseMapper.mapToAssetFromResponse(response, messageId);
-
-		} catch (ExchangeMessageException e) {
+		} catch (ExchangeMessageException | MessageException e) {
 			LOG.error("Couldn't send message to vessel module");
 			throw new ExchangeServiceException("Couldn't send message to vessel module");
 		} catch (AssetModelMapperException e) {
             LOG.error("Couldn't map asset object by guid:  {}", assetGuid);
             throw new ExchangeServiceException("Couldn't map asset object by guid:  " + assetGuid);
         }
-    }
+	}
 
 }

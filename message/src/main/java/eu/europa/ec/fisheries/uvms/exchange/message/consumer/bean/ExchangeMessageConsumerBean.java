@@ -11,19 +11,10 @@
  */
 package eu.europa.ec.fisheries.uvms.exchange.message.consumer.bean;
 
-import javax.ejb.ActivationConfigProperty;
-import javax.ejb.MessageDriven;
-import javax.ejb.TransactionAttribute;
-import javax.ejb.TransactionAttributeType;
-import javax.enterprise.event.Event;
-import javax.inject.Inject;
-import javax.jms.Message;
-import javax.jms.MessageListener;
-import javax.jms.TextMessage;
-
 import eu.europa.ec.fisheries.schema.exchange.module.v1.ExchangeBaseRequest;
 import eu.europa.ec.fisheries.schema.exchange.plugin.v1.AcknowledgeResponse;
 import eu.europa.ec.fisheries.schema.exchange.plugin.v1.PingResponse;
+import eu.europa.ec.fisheries.uvms.commons.message.api.MessageConstants;
 import eu.europa.ec.fisheries.uvms.exchange.message.event.ErrorEvent;
 import eu.europa.ec.fisheries.uvms.exchange.message.event.ExchangeLogEvent;
 import eu.europa.ec.fisheries.uvms.exchange.message.event.HandleProcessedMovementEvent;
@@ -40,6 +31,8 @@ import eu.europa.ec.fisheries.uvms.exchange.message.event.ReceiveSalesReportEven
 import eu.europa.ec.fisheries.uvms.exchange.message.event.ReceiveSalesResponseEvent;
 import eu.europa.ec.fisheries.uvms.exchange.message.event.SendCommandToPluginEvent;
 import eu.europa.ec.fisheries.uvms.exchange.message.event.SendFLUXFAResponseToPluginEvent;
+import eu.europa.ec.fisheries.uvms.exchange.message.event.SendFaQueryToPluginEvent;
+import eu.europa.ec.fisheries.uvms.exchange.message.event.SendFaReportToPluginEvent;
 import eu.europa.ec.fisheries.uvms.exchange.message.event.SendReportToPluginEvent;
 import eu.europa.ec.fisheries.uvms.exchange.message.event.SendSalesReportEvent;
 import eu.europa.ec.fisheries.uvms.exchange.message.event.SendSalesResponseEvent;
@@ -49,21 +42,29 @@ import eu.europa.ec.fisheries.uvms.exchange.message.event.SetMovementEvent;
 import eu.europa.ec.fisheries.uvms.exchange.message.event.UpdateLogStatusEvent;
 import eu.europa.ec.fisheries.uvms.exchange.message.event.UpdatePluginSettingEvent;
 import eu.europa.ec.fisheries.uvms.exchange.message.event.carrier.ExchangeMessageEvent;
-import eu.europa.ec.fisheries.uvms.exchange.model.constant.ExchangeModelConstants;
 import eu.europa.ec.fisheries.uvms.exchange.model.constant.FaultCode;
 import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelMarshallException;
 import eu.europa.ec.fisheries.uvms.exchange.model.mapper.ExchangeModuleResponseMapper;
 import eu.europa.ec.fisheries.uvms.exchange.model.mapper.JAXBMarshaller;
+import javax.ejb.ActivationConfigProperty;
+import javax.ejb.MessageDriven;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
+import javax.enterprise.event.Event;
+import javax.inject.Inject;
+import javax.jms.Message;
+import javax.jms.MessageListener;
+import javax.jms.TextMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 //@formatter:off
-@MessageDriven(mappedName = ExchangeModelConstants.EXCHANGE_MESSAGE_IN_QUEUE, activationConfig = {
-    @ActivationConfigProperty(propertyName = "messagingType", propertyValue = ExchangeModelConstants.CONNECTION_TYPE),
-    @ActivationConfigProperty(propertyName = "destinationType", propertyValue = ExchangeModelConstants.DESTINATION_TYPE_QUEUE),
-    @ActivationConfigProperty(propertyName = "destination", propertyValue = ExchangeModelConstants.EXCHANGE_MESSAGE_IN_QUEUE_NAME),
-    @ActivationConfigProperty(propertyName = "destinationJndiName", propertyValue = ExchangeModelConstants.EXCHANGE_MESSAGE_IN_QUEUE),
-    @ActivationConfigProperty(propertyName = "connectionFactoryJndiName", propertyValue = ExchangeModelConstants.CONNECTION_FACTORY)
+@MessageDriven(mappedName = MessageConstants.QUEUE_EXCHANGE_EVENT, activationConfig = {
+    @ActivationConfigProperty(propertyName = MessageConstants.MESSAGING_TYPE_STR, propertyValue = MessageConstants.CONNECTION_TYPE),
+    @ActivationConfigProperty(propertyName = MessageConstants.DESTINATION_TYPE_STR, propertyValue = MessageConstants.DESTINATION_TYPE_QUEUE),
+    @ActivationConfigProperty(propertyName = MessageConstants.DESTINATION_STR, propertyValue = MessageConstants.QUEUE_EXCHANGE_EVENT_NAME),
+    @ActivationConfigProperty(propertyName = MessageConstants.DESTINATION_JNDI_NAME, propertyValue = MessageConstants.QUEUE_EXCHANGE_EVENT),
+    @ActivationConfigProperty(propertyName = MessageConstants.CONNECTION_FACTORY_JNDI_NAME, propertyValue = MessageConstants.CONNECTION_FACTORY)
 })
 //@formatter:on
 public class ExchangeMessageConsumerBean implements MessageListener {
@@ -72,104 +73,111 @@ public class ExchangeMessageConsumerBean implements MessageListener {
 
     @Inject
     @PluginConfigEvent
-    Event<ExchangeMessageEvent> pluginConfigEvent;
+    private Event<ExchangeMessageEvent> pluginConfigEvent;
 
     @Inject
     @SetMovementEvent
-    Event<ExchangeMessageEvent> processMovementEvent;
+    private Event<ExchangeMessageEvent> processMovementEvent;
 
     @Inject
     @ReceiveSalesReportEvent
-    Event<ExchangeMessageEvent> receiveSalesReportEvent;
+    private Event<ExchangeMessageEvent> receiveSalesReportEvent;
 
     @Inject
     @ReceiveSalesQueryEvent
-    Event<ExchangeMessageEvent> receiveSalesQueryEvent;
+    private Event<ExchangeMessageEvent> receiveSalesQueryEvent;
 
     @Inject
     @ReceiveSalesResponseEvent
-    Event<ExchangeMessageEvent> receiveSalesResponseEvent;
+    private Event<ExchangeMessageEvent> receiveSalesResponseEvent;
 
     @Inject
     @ReceiveInvalidSalesMessageEvent
-    Event<ExchangeMessageEvent> receiveInvalidSalesMessageEvent;
+    private Event<ExchangeMessageEvent> receiveInvalidSalesMessageEvent;
 
     @Inject
     @SendSalesReportEvent
-    Event<ExchangeMessageEvent> sendSalesReportEvent;
+    private Event<ExchangeMessageEvent> sendSalesReportEvent;
 
     @Inject
     @SendSalesResponseEvent
-    Event<ExchangeMessageEvent> sendSalesResponseEvent;
+    private Event<ExchangeMessageEvent> sendSalesResponseEvent;
 
     @Inject
     @SendReportToPluginEvent
-    Event<ExchangeMessageEvent> sendMessageToPluginEvent;
+    private Event<ExchangeMessageEvent> sendMessageToPluginEvent;
 
     @Inject
     @SendCommandToPluginEvent
-    Event<ExchangeMessageEvent> sendCommandToPluginEvent;
+    private Event<ExchangeMessageEvent> sendCommandToPluginEvent;
 
     @Inject
     @ExchangeLogEvent
-    Event<ExchangeMessageEvent> updateStateEvent;
+    private Event<ExchangeMessageEvent> updateStateEvent;
 
     @Inject
     @UpdatePluginSettingEvent
-    Event<ExchangeMessageEvent> updatePluginSettingEvent;
+    private Event<ExchangeMessageEvent> updatePluginSettingEvent;
 
     @Inject
     @PluginPingEvent
-    Event<ExchangeMessageEvent> updatePingStateEvent;
+    private Event<ExchangeMessageEvent> updatePingStateEvent;
 
     @Inject
     @PingEvent
-    Event<ExchangeMessageEvent> pingEvent;
+    private Event<ExchangeMessageEvent> pingEvent;
 
     @Inject
     @ErrorEvent
-    Event<ExchangeMessageEvent> errorEvent;
+    private Event<ExchangeMessageEvent> errorEvent;
 
     @Inject
     @HandleProcessedMovementEvent
-    Event<ExchangeMessageEvent> processedMovementEvent;
+    private Event<ExchangeMessageEvent> processedMovementEvent;
 
     @Inject
     @MdrSyncRequestMessageEvent
-    Event<ExchangeMessageEvent> mdrSyncRequestMessageEvent;
+    private Event<ExchangeMessageEvent> mdrSyncRequestMessageEvent;
 
     @Inject
     @MdrSyncResponseMessageEvent
-    Event<ExchangeMessageEvent> mdrSyncResponseMessageEvent;
+    private Event<ExchangeMessageEvent> mdrSyncResponseMessageEvent;
 
     @Inject
     @SetFluxFAReportMessageEvent
-    Event<ExchangeMessageEvent> processFLUXFAReportMessageEvent;
+    private Event<ExchangeMessageEvent> processFLUXFAReportMessageEvent;
 
     @Inject
-    @SendFLUXFAResponseToPluginEvent
-    Event<ExchangeMessageEvent> processFLUXFAResponseMessageEvent;
+    @SendFaReportToPluginEvent
+    private Event<ExchangeMessageEvent> sendFaReportToPluginMessageEvent;
 
     @Inject
     @SetFaQueryMessageEvent
-    Event<ExchangeMessageEvent> receivedFaQueryFromFlux;
+    private Event<ExchangeMessageEvent> receivedFaQueryFromFlux;
+
+    @Inject
+    @SendFaQueryToPluginEvent
+    private Event<ExchangeMessageEvent> sendFaQueryToPluginEvent;
+
+    @Inject
+    @SendFLUXFAResponseToPluginEvent
+    private Event<ExchangeMessageEvent> processFLUXFAResponseMessageEvent;
 
     @Inject
     @UpdateLogStatusEvent
-    Event<ExchangeMessageEvent> updateLogStatusEvent;
+    private Event<ExchangeMessageEvent> updateLogStatusEvent;
 
     @Inject
     @LogRefIdByTypeExists
-    Event<ExchangeMessageEvent> logRefIdByTyeExists;
+    private Event<ExchangeMessageEvent> logRefIdByTyeExists;
 
     @Inject
     @LogIdByTypeExists
-    Event<ExchangeMessageEvent> logIdByTyeExists;
+    private Event<ExchangeMessageEvent> logIdByTyeExists;
 
     @Override
     @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
     public void onMessage(Message message) {
-
         TextMessage textMessage = (TextMessage) message;
         ExchangeBaseRequest request = tryConsumeExchangeBaseRequest(textMessage);
         LOG.info("Message received in Exchange Message MDB");
@@ -243,8 +251,14 @@ public class ExchangeMessageConsumerBean implements MessageListener {
                 case SET_FLUX_FA_REPORT_MESSAGE:
                     processFLUXFAReportMessageEvent.fire(new ExchangeMessageEvent(textMessage));
                     break;
+                case SEND_FLUX_FA_REPORT_MESSAGE :
+                    sendFaReportToPluginMessageEvent.fire(new ExchangeMessageEvent(textMessage));
+                    break;
                 case SET_FA_QUERY_MESSAGE:
                     receivedFaQueryFromFlux.fire(new ExchangeMessageEvent(textMessage));
+                    break;
+                case SEND_FA_QUERY_MESSAGE:
+                    sendFaQueryToPluginEvent.fire(new ExchangeMessageEvent(textMessage));
                     break;
                 case SET_FLUX_FA_RESPONSE_MESSAGE:
                     processFLUXFAResponseMessageEvent.fire(new ExchangeMessageEvent(textMessage));

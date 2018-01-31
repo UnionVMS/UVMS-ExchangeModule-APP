@@ -123,41 +123,42 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
 
     @Inject
     @ErrorEvent
-    Event<ExchangeMessageEvent> exchangeErrorEvent;
+    private Event<ExchangeMessageEvent> exchangeErrorEvent;
 
     @Inject
     @PluginErrorEvent
-    Event<PluginMessageEvent> pluginErrorEvent;
+    private Event<PluginMessageEvent> pluginErrorEvent;
+
+    @Inject
+    @ExchangePluginStatusEvent
+    private Event<NotificationMessage> pluginStatusEvent;
+
+    @Inject
+    @PollEvent
+    private Event<NotificationMessage> pollEvent;
 
     @EJB
-    ExchangeLogService exchangeLog;
+    private ExchangeLogService exchangeLog;
 
     @EJB
     private ExchangeLogModel exchangeLogModel;
 
     @EJB
-    ExchangeMessageProducer producer;
+    private ExchangeMessageProducer producer;
 
     @EJB
-    ExchangeService exchangeService;
+    private ExchangeService exchangeService;
 
     @EJB
-    ExchangeEventOutgoingService exchangeEventOutgoingService;
-
-    @Inject
-    @ExchangePluginStatusEvent
-    Event<NotificationMessage> pluginStatusEvent;
-
-    @Inject
-    @PollEvent
-    Event<NotificationMessage> pollEvent;
+    private ExchangeEventOutgoingService exchangeEventOutgoingService;
 
     @Override
     public void processFLUXFAReportMessage(@Observes @SetFluxFAReportMessageEvent ExchangeMessageEvent message) {
         try {
             SetFLUXFAReportMessageRequest request = JAXBMarshaller.unmarshallTextMessage(message.getJmsMessage(), SetFLUXFAReportMessageRequest.class);
             log.debug("Got FLUXFAReportMessage in exchange :" + request.getRequest());
-            ExchangeLogType exchangeLogType = exchangeLog.log(request, LogType.RCV_FLUX_FA_REPORT_MSG, ExchangeLogStatusTypeType.ISSUED, TypeRefType.FA_REPORT, request.getRequest(), true);
+            ExchangeLogType exchangeLogType = exchangeLog.log(request, LogType.RCV_FLUX_FA_REPORT_MSG, ExchangeLogStatusTypeType.ISSUED
+                    , TypeRefType.FA_REPORT, request.getRequest(), true);
             String msg = RulesModuleRequestMapper.createSetFLUXFAReportMessageRequest(extractPluginType(request), request.getRequest()
                     , request.getUsername(), extractLogId(message, exchangeLogType), request.getFluxDataFlow()
                     , request.getSenderOrReceiver(), request.getOnValue());

@@ -18,6 +18,8 @@ import eu.europa.ec.fisheries.schema.exchange.common.v1.CommandType;
 import eu.europa.ec.fisheries.schema.exchange.common.v1.CommandTypeType;
 import eu.europa.ec.fisheries.schema.exchange.module.v1.SendMovementToPluginRequest;
 import eu.europa.ec.fisheries.schema.exchange.module.v1.SetCommandRequest;
+import eu.europa.ec.fisheries.schema.exchange.module.v1.SetFAQueryMessageRequest;
+import eu.europa.ec.fisheries.schema.exchange.module.v1.SetFLUXFAReportMessageRequest;
 import eu.europa.ec.fisheries.schema.exchange.module.v1.SetFLUXFAResponseMessageRequest;
 import eu.europa.ec.fisheries.schema.exchange.movement.v1.SendMovementToPluginType;
 import eu.europa.ec.fisheries.schema.exchange.plugin.types.v1.PluginType;
@@ -25,6 +27,7 @@ import eu.europa.ec.fisheries.schema.exchange.plugin.v1.SendSalesReportRequest;
 import eu.europa.ec.fisheries.schema.exchange.plugin.v1.SendSalesResponseRequest;
 import eu.europa.ec.fisheries.schema.exchange.service.v1.ServiceResponseType;
 import eu.europa.ec.fisheries.schema.exchange.service.v1.StatusType;
+import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogStatusTypeType;
 import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogType;
 import eu.europa.ec.fisheries.schema.exchange.v1.LogType;
 import eu.europa.ec.fisheries.schema.exchange.v1.TypeRefType;
@@ -34,6 +37,8 @@ import eu.europa.ec.fisheries.uvms.exchange.message.event.ErrorEvent;
 import eu.europa.ec.fisheries.uvms.exchange.message.event.MdrSyncRequestMessageEvent;
 import eu.europa.ec.fisheries.uvms.exchange.message.event.SendCommandToPluginEvent;
 import eu.europa.ec.fisheries.uvms.exchange.message.event.SendFLUXFAResponseToPluginEvent;
+import eu.europa.ec.fisheries.uvms.exchange.message.event.SendFaQueryToPluginEvent;
+import eu.europa.ec.fisheries.uvms.exchange.message.event.SendFaReportToPluginEvent;
 import eu.europa.ec.fisheries.uvms.exchange.message.event.SendReportToPluginEvent;
 import eu.europa.ec.fisheries.uvms.exchange.message.event.carrier.ExchangeMessageEvent;
 import eu.europa.ec.fisheries.uvms.exchange.message.exception.ExchangeMessageException;
@@ -73,22 +78,22 @@ public class ExchangeEventOutgoingServiceBean implements ExchangeEventOutgoingSe
 
     @Inject
     @ErrorEvent
-    Event<ExchangeMessageEvent> exchangeErrorEvent;
+    private Event<ExchangeMessageEvent> exchangeErrorEvent;
 
     @EJB
-    ExchangeMessageProducer producer;
+    private ExchangeMessageProducer producer;
 
     @EJB
-    ExchangeConsumer consumer;
+    private ExchangeConsumer consumer;
 
     @EJB
-    ExchangeLogService exchangeLog;
+    private ExchangeLogService exchangeLog;
 
     @EJB
-    ExchangeService exchangeService;
+    private ExchangeService exchangeService;
 
     @EJB
-    ExchangeAssetService exchangeAssetService;
+    private ExchangeAssetService exchangeAssetService;
 
     @Override
     public void sendSalesResponseToPlugin(SendSalesResponseRequest sendSalesResponseRequest, PluginType pluginType) throws ExchangeModelMarshallException, ExchangeMessageException {
@@ -263,7 +268,6 @@ public class ExchangeEventOutgoingServiceBean implements ExchangeEventOutgoingSe
 
     @Override
     public void sendFLUXFAResponseToPlugin(@Observes @SendFLUXFAResponseToPluginEvent ExchangeMessageEvent message) {
-
         try {
             SetFLUXFAResponseMessageRequest request = JAXBMarshaller.unmarshallTextMessage(message.getJmsMessage(), SetFLUXFAResponseMessageRequest.class);
             LOG.debug("Got FLUXFAResponse in exchange :" + request.getRequest());
@@ -277,7 +281,41 @@ public class ExchangeEventOutgoingServiceBean implements ExchangeEventOutgoingSe
         } catch (ExchangeModelMarshallException | ExchangeMessageException | ExchangeLogException e) {
             LOG.error("Unable to send FLUX FA Report to plugin.", e);
         }
+    }
 
+    @Override
+    public void sendFLUXFAQueryToPlugin(@Observes @SendFaQueryToPluginEvent ExchangeMessageEvent message) {
+        try {
+            SetFAQueryMessageRequest request = JAXBMarshaller.unmarshallTextMessage(message.getJmsMessage(), SetFAQueryMessageRequest.class);
+            LOG.debug("Got SetFAQueryMessageRequest in exchange : " + request.getRequest());
+            String text = ExchangePluginRequestMapper.createSendFLUXFAQueryRequest(
+                    request.getRequest(), request.getDestination(), request.getFluxDataFlow(), request.getSenderOrReceiver());
+            LOG.debug("Message to plugin {}", text);
+            String pluginMessageId = producer.sendEventBusMessage(text, ((request.getPluginType() == BELGIAN_ACTIVITY)
+                    ? ExchangeServiceConstants.BELGIAN_ACTIVITY_PLUGIN_SERVICE_NAME : ExchangeServiceConstants.FLUX_ACTIVITY_PLUGIN_SERVICE_NAME));
+            LOG.info("Message sent to Flux ERS Plugin :" + pluginMessageId);
+            exchangeLog.log(request, LogType.SEND_FA_QUERY_MSG, ExchangeLogStatusTypeType.SENT, TypeRefType.FA_QUERY, request.getRequest(), false);
+        } catch (ExchangeModelMarshallException | ExchangeMessageException | ExchangeLogException e) {
+            LOG.error("Unable to send FLUX FA Report to plugin.", e);
+        }
+    }
+
+
+    @Override
+    public void sendFLUXFAReportToPlugin(@Observes @SendFaReportToPluginEvent ExchangeMessageEvent message) {
+        try {
+            SetFLUXFAReportMessageRequest request = JAXBMarshaller.unmarshallTextMessage(message.getJmsMessage(), SetFLUXFAReportMessageRequest.class);
+            LOG.debug("Got SetFAQueryMessageRequest in exchange : " + request.getRequest());
+            String text = ExchangePluginRequestMapper.createSendFLUXFAReportRequest(
+                    request.getRequest(), request.getDestination(), request.getFluxDataFlow(), request.getSenderOrReceiver());
+            LOG.debug("Message to plugin {}", text);
+            String pluginMessageId = producer.sendEventBusMessage(text, ((request.getPluginType() == BELGIAN_ACTIVITY)
+                    ? ExchangeServiceConstants.BELGIAN_ACTIVITY_PLUGIN_SERVICE_NAME : ExchangeServiceConstants.FLUX_ACTIVITY_PLUGIN_SERVICE_NAME));
+            LOG.info("Message sent to Flux ERS Plugin :" + pluginMessageId);
+            exchangeLog.log(request, LogType.SEND_FLUX_FA_REPORT_MSG, ExchangeLogStatusTypeType.SENT, TypeRefType.FA_REPORT, request.getRequest(), false);
+        } catch (ExchangeModelMarshallException | ExchangeMessageException | ExchangeLogException e) {
+            LOG.error("Unable to send FLUX FA Report to plugin.", e);
+        }
     }
 
     private boolean validate(CommandType command, TextMessage origin, ServiceResponseType service, CommandType commandType, String username) {

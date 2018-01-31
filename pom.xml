@@ -28,10 +28,10 @@
         <lombok.version>1.16.18</lombok.version>
 
         <longpolling.version>2.0.13</longpolling.version>
-        <uvms.common.version>3.0.8</uvms.common.version>
+        <uvms.commons.version>3.0.9-SNAPSHOT</uvms.commons.version>
         <uvms.config.version>4.0.0</uvms.config.version>
         <usm4uvms.version>4.0.8</usm4uvms.version>
-        <exchange.model.version>4.0.9</exchange.model.version>
+        <exchange.model.version>4.0.10-SNAPSHOT</exchange.model.version>
         <audit.model.version>4.0.6</audit.model.version>
         <movement.model.version>4.0.9</movement.model.version>
         <rules.model.version>3.0.21</rules.model.version>

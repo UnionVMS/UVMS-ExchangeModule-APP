@@ -53,6 +53,9 @@ public class LogMapper {
             case SEND_FA_QUERY_MSG:
                 entity.setSource("FLUX");
                 break;
+            case SEND_FLUX_FA_REPORT_MSG:
+                entity.setSource("FLUX");
+                break;
             case SEND_FLUX_RESPONSE_MSG:
                 entity.setSource("FLUX");
                 break;
