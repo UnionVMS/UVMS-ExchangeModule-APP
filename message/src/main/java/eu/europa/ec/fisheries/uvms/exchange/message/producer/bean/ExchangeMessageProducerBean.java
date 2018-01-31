@@ -163,7 +163,7 @@ public class ExchangeMessageProducerBean extends AbstractProducer implements Exc
                     LOG.error("[ERROR] Module queue not implemented!");
                     break;
             }
-        } catch (JMSException e) {
+        } catch (MessageException e) {
             LOG.error("[ Error when returning asynchronous module exchange response. ]");
         }
     }
