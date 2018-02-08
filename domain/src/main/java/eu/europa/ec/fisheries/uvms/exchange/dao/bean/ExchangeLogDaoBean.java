@@ -35,7 +35,7 @@ import eu.europa.ec.fisheries.uvms.exchange.search.ExchangeSearchField;
 import eu.europa.ec.fisheries.uvms.exchange.search.SearchFieldMapper;
 import eu.europa.ec.fisheries.uvms.exchange.search.SearchValue;
 import org.apache.commons.collections.CollectionUtils;
-import org.hibernate.Session;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -166,10 +166,10 @@ public class ExchangeLogDaoBean extends Dao implements ExchangeLogDao {
     @Override
     public List<ExchangeLog> getExchangeLogByTypesRefAndGuid(String typeRefGuid, List<TypeRefType> types) throws ExchangeDaoException {
         try {
-            org.hibernate.Query namedQuery = getEm().unwrap(Session.class).getNamedQuery(ExchangeConstants.LOG_BY_TYPE_REF_AND_GUID);
+			TypedQuery<ExchangeLog> namedQuery = em.createNamedQuery(ExchangeConstants.LOG_BY_TYPE_REF_AND_GUID, ExchangeLog.class);
             namedQuery.setParameter("typeRefGuid", typeRefGuid);
-            namedQuery.setParameterList("typeRefTypes", types);
-            return namedQuery.list();
+            namedQuery.setParameter("typeRefTypes", types);
+            return namedQuery.getResultList();
         } catch (NoResultException e) {
             LOG.error("[ Error when getting entity by type ref ID. ] {}", e.getMessage());
             throw new NoEntityFoundException("[ Error when getting entity by type ref ID. ]");
