@@ -42,7 +42,7 @@
         <audit.model.version>4.0.6</audit.model.version>
         <exchange.model.version>4.0.10-SNAPSHOT</exchange.model.version>
         <movement.model.version>4.0.9</movement.model.version>
-        <rules.model.version>3.0.21</rules.model.version>
+        <rules.model.version>3.0.22-SNAPSHOT</rules.model.version>
 
     </properties>
 

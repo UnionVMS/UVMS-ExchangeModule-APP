@@ -29,6 +29,7 @@ import eu.europa.ec.fisheries.uvms.exchange.message.event.ReceiveInvalidSalesMes
 import eu.europa.ec.fisheries.uvms.exchange.message.event.ReceiveSalesQueryEvent;
 import eu.europa.ec.fisheries.uvms.exchange.message.event.ReceiveSalesReportEvent;
 import eu.europa.ec.fisheries.uvms.exchange.message.event.ReceiveSalesResponseEvent;
+import eu.europa.ec.fisheries.uvms.exchange.message.event.ReceivedFluxFaResponseMessageEvent;
 import eu.europa.ec.fisheries.uvms.exchange.message.event.SendCommandToPluginEvent;
 import eu.europa.ec.fisheries.uvms.exchange.message.event.SendFLUXFAResponseToPluginEvent;
 import eu.europa.ec.fisheries.uvms.exchange.message.event.SendFaQueryToPluginEvent;
@@ -60,11 +61,11 @@ import org.slf4j.LoggerFactory;
 
 //@formatter:off
 @MessageDriven(mappedName = MessageConstants.QUEUE_EXCHANGE_EVENT, activationConfig = {
-    @ActivationConfigProperty(propertyName = MessageConstants.MESSAGING_TYPE_STR, propertyValue = MessageConstants.CONNECTION_TYPE),
-    @ActivationConfigProperty(propertyName = MessageConstants.DESTINATION_TYPE_STR, propertyValue = MessageConstants.DESTINATION_TYPE_QUEUE),
-    @ActivationConfigProperty(propertyName = MessageConstants.DESTINATION_STR, propertyValue = MessageConstants.QUEUE_EXCHANGE_EVENT_NAME),
-    @ActivationConfigProperty(propertyName = MessageConstants.DESTINATION_JNDI_NAME, propertyValue = MessageConstants.QUEUE_EXCHANGE_EVENT),
-    @ActivationConfigProperty(propertyName = MessageConstants.CONNECTION_FACTORY_JNDI_NAME, propertyValue = MessageConstants.CONNECTION_FACTORY)
+        @ActivationConfigProperty(propertyName = MessageConstants.MESSAGING_TYPE_STR, propertyValue = MessageConstants.CONNECTION_TYPE),
+        @ActivationConfigProperty(propertyName = MessageConstants.DESTINATION_TYPE_STR, propertyValue = MessageConstants.DESTINATION_TYPE_QUEUE),
+        @ActivationConfigProperty(propertyName = MessageConstants.DESTINATION_STR, propertyValue = MessageConstants.QUEUE_EXCHANGE_EVENT_NAME),
+        @ActivationConfigProperty(propertyName = MessageConstants.DESTINATION_JNDI_NAME, propertyValue = MessageConstants.QUEUE_EXCHANGE_EVENT),
+        @ActivationConfigProperty(propertyName = MessageConstants.CONNECTION_FACTORY_JNDI_NAME, propertyValue = MessageConstants.CONNECTION_FACTORY)
 })
 //@formatter:on
 public class ExchangeMessageConsumerBean implements MessageListener {
@@ -164,6 +165,10 @@ public class ExchangeMessageConsumerBean implements MessageListener {
     private Event<ExchangeMessageEvent> processFLUXFAResponseMessageEvent;
 
     @Inject
+    @ReceivedFluxFaResponseMessageEvent
+    private Event<ExchangeMessageEvent> receivedFLUXFAResponseMessageEvent;
+
+    @Inject
     @UpdateLogStatusEvent
     private Event<ExchangeMessageEvent> updateLogStatusEvent;
 
@@ -182,19 +187,20 @@ public class ExchangeMessageConsumerBean implements MessageListener {
         ExchangeBaseRequest request = tryConsumeExchangeBaseRequest(textMessage);
         LOG.info("Message received in Exchange Message MDB");
         LOG.debug("Request body : ", request);
+        final ExchangeMessageEvent messageEventWrapper = new ExchangeMessageEvent(textMessage);
         if (request == null) {
             LOG.error("[ERROR] ExchangeBaseRequest is null!! Check the message sent...");
             try {
                 //Handle PingResponse from plugin
                 JAXBMarshaller.unmarshallTextMessage(textMessage, PingResponse.class);
-                updatePingStateEvent.fire(new ExchangeMessageEvent(textMessage));
+                updatePingStateEvent.fire(messageEventWrapper);
             } catch (ExchangeModelMarshallException e) {
                 AcknowledgeResponse type = tryConsumeAcknowledgeResponse(textMessage);
                 if (type == null) {
-                    LOG.error("[ Error when receiving message in exchange: {}]",message);
+                    LOG.error("[ Error when receiving message in exchange: {}]", message);
                     errorEvent.fire(new ExchangeMessageEvent(textMessage, ExchangeModuleResponseMapper.createFaultMessage(FaultCode.EXCHANGE_MESSAGE, "Error when receiving message in exchange")));
                 } else {
-                    updateStateEvent.fire(new ExchangeMessageEvent(textMessage));
+                    updateStateEvent.fire(messageEventWrapper);
                 }
             }
         } else if (!checkUsernameShouldBeProvided(request)) {
@@ -204,73 +210,76 @@ public class ExchangeMessageConsumerBean implements MessageListener {
             LOG.info("[INFO] Going to process following message type (aka Exchange Method) : " + request.getMethod());
             switch (request.getMethod()) {
                 case LIST_SERVICES:
-                    pluginConfigEvent.fire(new ExchangeMessageEvent(textMessage));
+                    pluginConfigEvent.fire(messageEventWrapper);
                     break;
                 case SET_COMMAND:
-                    sendCommandToPluginEvent.fire(new ExchangeMessageEvent(textMessage));
+                    sendCommandToPluginEvent.fire(messageEventWrapper);
                     break;
                 case SEND_REPORT_TO_PLUGIN:
-                    sendMessageToPluginEvent.fire(new ExchangeMessageEvent(textMessage));
+                    sendMessageToPluginEvent.fire(messageEventWrapper);
                     break;
                 case SET_MOVEMENT_REPORT:
-                    processMovementEvent.fire(new ExchangeMessageEvent(textMessage));
+                    processMovementEvent.fire(messageEventWrapper);
                     break;
                 case RECEIVE_SALES_REPORT:
-                    receiveSalesReportEvent.fire(new ExchangeMessageEvent(textMessage));
+                    receiveSalesReportEvent.fire(messageEventWrapper);
                     break;
                 case RECEIVE_SALES_QUERY:
-                    receiveSalesQueryEvent.fire(new ExchangeMessageEvent(textMessage));
+                    receiveSalesQueryEvent.fire(messageEventWrapper);
                     break;
                 case RECEIVE_SALES_RESPONSE:
-                    receiveSalesResponseEvent.fire(new ExchangeMessageEvent(textMessage));
+                    receiveSalesResponseEvent.fire(messageEventWrapper);
                     break;
                 case RECEIVE_INVALID_SALES_MESSAGE:
-                    receiveInvalidSalesMessageEvent.fire(new ExchangeMessageEvent(textMessage));
+                    receiveInvalidSalesMessageEvent.fire(messageEventWrapper);
                     break;
                 case SEND_SALES_RESPONSE:
-                    sendSalesResponseEvent.fire(new ExchangeMessageEvent(textMessage));
+                    sendSalesResponseEvent.fire(messageEventWrapper);
                     break;
                 case SEND_SALES_REPORT:
-                    sendSalesReportEvent.fire(new ExchangeMessageEvent(textMessage));
+                    sendSalesReportEvent.fire(messageEventWrapper);
                     break;
                 case UPDATE_PLUGIN_SETTING:
-                    updatePluginSettingEvent.fire(new ExchangeMessageEvent(textMessage));
+                    updatePluginSettingEvent.fire(messageEventWrapper);
                     break;
                 case PING:
-                    pingEvent.fire(new ExchangeMessageEvent(textMessage));
+                    pingEvent.fire(messageEventWrapper);
                     break;
                 case PROCESSED_MOVEMENT:
-                    processedMovementEvent.fire(new ExchangeMessageEvent(textMessage));
+                    processedMovementEvent.fire(messageEventWrapper);
                     break;
                 case SET_MDR_SYNC_MESSAGE_REQUEST:
-                    mdrSyncRequestMessageEvent.fire(new ExchangeMessageEvent(textMessage));
+                    mdrSyncRequestMessageEvent.fire(messageEventWrapper);
                     break;
                 case SET_MDR_SYNC_MESSAGE_RESPONSE:
-                    mdrSyncResponseMessageEvent.fire(new ExchangeMessageEvent(textMessage));
+                    mdrSyncResponseMessageEvent.fire(messageEventWrapper);
                     break;
                 case SET_FLUX_FA_REPORT_MESSAGE:
-                    processFLUXFAReportMessageEvent.fire(new ExchangeMessageEvent(textMessage));
+                    processFLUXFAReportMessageEvent.fire(messageEventWrapper);
                     break;
-                case SEND_FLUX_FA_REPORT_MESSAGE :
-                    sendFaReportToPluginMessageEvent.fire(new ExchangeMessageEvent(textMessage));
+                case SEND_FLUX_FA_REPORT_MESSAGE:
+                    sendFaReportToPluginMessageEvent.fire(messageEventWrapper);
                     break;
                 case SET_FA_QUERY_MESSAGE:
-                    receivedFaQueryFromFlux.fire(new ExchangeMessageEvent(textMessage));
+                    receivedFaQueryFromFlux.fire(messageEventWrapper);
                     break;
                 case SEND_FA_QUERY_MESSAGE:
-                    sendFaQueryToPluginEvent.fire(new ExchangeMessageEvent(textMessage));
+                    sendFaQueryToPluginEvent.fire(messageEventWrapper);
                     break;
                 case SET_FLUX_FA_RESPONSE_MESSAGE:
-                    processFLUXFAResponseMessageEvent.fire(new ExchangeMessageEvent(textMessage));
+                    processFLUXFAResponseMessageEvent.fire(messageEventWrapper);
+                    break;
+                case RCV_FLUX_FA_RESPONSE_MESSAGE:
+                    receivedFLUXFAResponseMessageEvent.fire(messageEventWrapper);
                     break;
                 case UPDATE_LOG_STATUS:
-                    updateLogStatusEvent.fire(new ExchangeMessageEvent(textMessage));
+                    updateLogStatusEvent.fire(messageEventWrapper);
                     break;
                 case LOG_REF_ID_BY_TYPE_EXISTS:
-                    logRefIdByTyeExists.fire(new ExchangeMessageEvent(textMessage));
+                    logRefIdByTyeExists.fire(messageEventWrapper);
                     break;
                 case LOG_ID_BY_TYPE_EXISTS:
-                    logIdByTyeExists.fire(new ExchangeMessageEvent(textMessage));
+                    logIdByTyeExists.fire(messageEventWrapper);
                     break;
                 default:
                     LOG.error("[ Not implemented method consumed: {} ] ", request.getMethod());

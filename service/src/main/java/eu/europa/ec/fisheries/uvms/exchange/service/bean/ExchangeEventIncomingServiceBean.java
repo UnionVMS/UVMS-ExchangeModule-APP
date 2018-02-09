@@ -13,6 +13,8 @@ package eu.europa.ec.fisheries.uvms.exchange.service.bean;
 
 import static eu.europa.ec.fisheries.uvms.commons.message.impl.JAXBUtils.unMarshallMessage;
 
+import eu.europa.ec.fisheries.schema.exchange.module.v1.RcvFLUXFaResponseMessageRequest;
+import eu.europa.ec.fisheries.uvms.exchange.message.event.ReceivedFluxFaResponseMessageEvent;
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
 import javax.enterprise.event.Event;
@@ -164,7 +166,7 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
                     , request.getSenderOrReceiver(), request.getOnValue());
             forwardToRules(msg, message, null);
         } catch (RulesModelMapperException | ExchangeModelMarshallException e) {
-            log.error("Couldn't map to SetFLUXFAReportMessageRequest when processing FLUXFAReportMessage from plugin", e);
+            log.error("Couldn't map to SetFLUXFAReportMessageRequest when processing FLUXFAReportMessage coming from fa-plugin!", e);
         } catch (ExchangeLogException e) {
             log.error("Couldn't log FAReportMessage received from plugin into database", e);
         }
@@ -172,7 +174,7 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
 
 
     @Override
-    public void processFAQueryReportMessage(@Observes @SetFaQueryMessageEvent ExchangeMessageEvent message) {
+    public void processFAQueryMessage(@Observes @SetFaQueryMessageEvent ExchangeMessageEvent message) {
         try {
             SetFAQueryMessageRequest request = JAXBMarshaller.unmarshallTextMessage(message.getJmsMessage(), SetFAQueryMessageRequest.class);
             log.debug("Got FAQueryMessage in exchange :" + request.getRequest());
@@ -183,9 +185,27 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
                     , request.getSenderOrReceiver(), request.getOnValue());
             forwardToRules(msg, message, null);
         } catch (RulesModelMapperException | ExchangeModelMarshallException e) {
-            log.error("Couldn't map to SetFLUXFAReportMessageRequest when processing FLUXFAReportMessage from plugin", e);
+            log.error("Couldn't map to SetFAQueryMessageRequest when processing FAQueryMessage coming from fa-plugin!", e);
         } catch (ExchangeLogException e) {
-            log.error("Couldn't log FAReportMessage received from plugin into database", e);
+            log.error("Couldn't log FAQueryMessage received from plugin into database", e);
+        }
+    }
+
+    @Override
+    public void processFluxFAResponseMessage(@Observes @ReceivedFluxFaResponseMessageEvent ExchangeMessageEvent message) {
+        try {
+            RcvFLUXFaResponseMessageRequest request = JAXBMarshaller.unmarshallTextMessage(message.getJmsMessage(), RcvFLUXFaResponseMessageRequest.class);
+            log.debug("Got FLUXResponseMessage in exchange :" + request.getRequest());
+            ExchangeLogType exchangeLogType = exchangeLog.log(request, LogType.RECEIVE_FLUX_RESPONSE_MSG, ExchangeLogStatusTypeType.ISSUED
+                    , TypeRefType.FA_RESPONSE, request.getRequest(), true);
+            String msg = RulesModuleRequestMapper.createRcvFluxFaResponseMessageRequest(extractPluginType(request)
+                    , request.getRequest(), request.getUsername(), extractLogId(message, exchangeLogType), request.getFluxDataFlow()
+                    , request.getSenderOrReceiver(), request.getOnValue());
+            forwardToRules(msg, message, null);
+        } catch (RulesModelMapperException | ExchangeModelMarshallException e) {
+            log.error("Couldn't map to RcvFLUXFaResponseMessageRequest when processing FLUXResponseMessage coming from fa-plugin!", e);
+        } catch (ExchangeLogException e) {
+            log.error("Couldn't log FLUXResponseMessage received from plugin into database", e);
         }
     }
 
@@ -195,7 +215,7 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
             log.error("ExchangeLogType received is NULL while trying to save {}",message);
         } else {
             logId = exchangeLogType.getGuid();
-            log.info("SetFAQueryMessage Logged to Exchange:" + logId);
+            log.info("Logged to Exchange message with following GUID :" + logId);
         }
         return logId;
     }
