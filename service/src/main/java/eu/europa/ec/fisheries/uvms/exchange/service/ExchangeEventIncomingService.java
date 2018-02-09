@@ -100,7 +100,9 @@ public interface ExchangeEventIncomingService {
      */
     void processFLUXFAReportMessage(@Observes @SetFluxFAReportMessageEvent ExchangeMessageEvent message);
 
-    void processFAQueryReportMessage(@Observes @SetFaQueryMessageEvent ExchangeMessageEvent message);
+    void processFAQueryMessage(@Observes @SetFaQueryMessageEvent ExchangeMessageEvent message);
+
+    void processFluxFAResponseMessage(@Observes @ReceivedFluxFaResponseMessageEvent ExchangeMessageEvent message);
 
     /**
      * Process MDR sync response message sent to Flux MDR plugin
