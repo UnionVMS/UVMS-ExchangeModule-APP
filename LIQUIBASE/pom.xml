@@ -8,34 +8,6 @@
     </parent>
 
     <artifactId>liquibase</artifactId>
-    <name>liquibase</name>
-
-    <properties>
-        <project.scm.id>github</project.scm.id>
-        <repository.id>${project.distributionManagement.snapshotRepository.id}</repository.id>
-        <repository.url>${project.distributionManagement.snapshotRepository.url}</repository.url>
-    </properties>
-
-    <distributionManagement>
-        <repository>
-            <id>focus-releases</id>
-            <name>UnionVms Repository</name>
-            <url>http://nexus.focus.fish/nexus/content/repositories/releases/</url>
-        </repository>
-        <snapshotRepository>
-            <id>focus-snapshots</id>
-            <name>UnionVms Snapshot Repository</name>
-            <url>http://nexus.focus.fish/nexus/content/repositories/snapshots/</url>
-        </snapshotRepository>
-    </distributionManagement>
-
-    <repositories>
-        <repository>
-            <id>focus-repo</id>
-            <name>Focus nexus repository</name>
-            <url>http://nexus.focus.fish/</url>
-        </repository>
-    </repositories>
 
     <profiles>
         <profile>
