@@ -200,7 +200,6 @@ public class ExchangeLogModelBean implements ExchangeLogModel {
     	if(log.getType() == null) {
     		throw new InputArgumentException("No type in log to create");
     	}
-    	
         try {
             ExchangeLog exchangeLog = LogMapper.toNewEntity(log, username);
             ExchangeLog persistedLog = logDao.createLog(exchangeLog);
