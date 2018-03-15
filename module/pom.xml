@@ -1,19 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-    
     <modelVersion>4.0.0</modelVersion>
-    <artifactId>exchange-module</artifactId>
-    <name>${project.parent.artifactId}-module</name>
-    <packaging>ear</packaging>
     
     <parent>
         <groupId>eu.europa.ec.fisheries.uvms.exchange</groupId>
         <artifactId>exchange</artifactId>
-        <version>4.0.11-SNAPSHOT</version>
+        <version>4.0.12-SNAPSHOT</version>
     </parent>
     
+    <artifactId>exchange-module</artifactId>
+    <packaging>ear</packaging>
+    
     <build>
-        <finalName>${project.name}</finalName>
         <plugins>
             <!-- This configuration specifies what ends up in application.xml -->
             <plugin>
@@ -25,7 +23,7 @@
                     	<ejbModule>
                             <groupId>${project.groupId}</groupId>
                             <artifactId>exchange-dbaccess-domain</artifactId>
-                            <bundleFileName>exchange-dbaccess-domain.jar</bundleFileName>
+                            <bundleFileName>exchange-dbaccess-domain.jar</bundleFileName> <!-- TODO:Why?-->
                         </ejbModule>                    	
                         <ejbModule>
                             <groupId>${project.groupId}</groupId>   
@@ -35,13 +33,9 @@
                             <groupId>${project.groupId}</groupId>  
                             <artifactId>exchange-service</artifactId>
                         </ejbModule>
-                        <jarModule>
-                            <groupId>${project.groupId}</groupId>  
-                            <artifactId>exchange-model</artifactId>
-                        </jarModule>
                         <webModule>
                             <groupId>${project.groupId}</groupId>
-                            <context-root>${project.parent.artifactId}</context-root>  
+                            <context-root>${context.root}${project.parent.artifactId}</context-root>
                             <artifactId>exchange-rest</artifactId>
                         </webModule>
                     </modules>
@@ -51,16 +45,6 @@
             </plugin>
         </plugins>
     </build>
-    <dependencyManagement>
-        <dependencies>
-			<dependency>
-				<groupId>fish.focus.uvms.maven</groupId>
-				<artifactId>uvms-pom-monitoring-deps</artifactId>
-				<version>1.16</version>
-				<type>pom</type>
-			</dependency>
-		</dependencies>
-	</dependencyManagement>
 
     <dependencies>
          <dependency>
@@ -83,26 +67,9 @@
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>  
-            <artifactId>exchange-model</artifactId>
-            <version>${exchange.model.version}</version>
-            <type>jar</type>
-        </dependency> 
-        <dependency>
-            <groupId>${project.groupId}</groupId>  
             <artifactId>exchange-rest</artifactId>
             <version>${project.version}</version>
             <type>war</type>
-        </dependency>
-		<dependency>
-		    <groupId>net.sf.ehcache.internal</groupId>
-		    <artifactId>ehcache-core</artifactId>
-            <version>2.10.4</version>
-            <exclusions>
-            	<exclusion>
-            		 <groupId>org.slf4j</groupId>
-    				 <artifactId>slf4j-api</artifactId>
-            	</exclusion>
-            </exclusions>         
         </dependency>		
     </dependencies>
     
@@ -137,7 +104,7 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-dependency-plugin</artifactId>
-                        <version>2.10</version>
+                        <version>3.0.2</version>
                         <executions>
                             <execution>
                                 <id>copy-installed</id>
