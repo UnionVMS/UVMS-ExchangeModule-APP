@@ -30,7 +30,6 @@ public class LogMapperTest {
         ExchangeLogStatusTypeType status = ExchangeLogStatusTypeType.SUCCESSFUL;
 
         String source = "FLUX";
-        String recipient = "SWE";
         String message = "<xml></xml>";
 
         LogRefType logRefType = new LogRefType();
@@ -45,7 +44,6 @@ public class LogMapperTest {
         input.setSenderReceiver(senderOrReceiver);
         input.setStatus(status);
         input.setSource(source);
-        input.setRecipient(recipient);
 
         String username = "stainii";
 
@@ -67,7 +65,6 @@ public class LogMapperTest {
         assertEquals(username, result.getUpdatedBy());
         assertNotNull(result.getUpdateTime());
         assertEquals(source, result.getSource());
-        assertEquals(recipient, result.getRecipient());
         assertTrue(result.getTransferIncoming());
         assertEquals(LogType.RECEIVE_MOVEMENT, result.getType());
     }

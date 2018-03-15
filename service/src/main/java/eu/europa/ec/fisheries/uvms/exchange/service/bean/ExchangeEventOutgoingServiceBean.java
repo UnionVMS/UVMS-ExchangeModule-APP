@@ -167,14 +167,13 @@ public class ExchangeEventOutgoingServiceBean implements ExchangeEventOutgoingSe
 	 */
     @Override
     public void forwardMdrSyncMessageToPlugin(@Observes @MdrSyncRequestMessageEvent ExchangeMessageEvent message) {
-
         TextMessage requestMessage = message.getJmsMessage();
         try {
+            LOG.info("[INFO] Received MdrSyncMessageEvent. Going to send to the Plugin now..");
             String marshalledReq = ExchangeToMdrRulesMapper.mapExchangeToMdrPluginRequest(requestMessage);
-            LOG.info("Received MdrSyncMessageEvent:{}",marshalledReq);
             producer.sendEventBusMessage(marshalledReq, ExchangeServiceConstants.MDR_PLUGIN_SERVICE_NAME);
         } catch (Exception e) {
-            LOG.error("Something strange happend during message conversion {} {}",message,e);
+            LOG.error("[ERROR] Something strange happend during message conversion {} {}",message,e);
         }
     }
 
