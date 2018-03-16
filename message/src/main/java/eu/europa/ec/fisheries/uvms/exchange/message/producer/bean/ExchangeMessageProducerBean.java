@@ -132,8 +132,8 @@ public class ExchangeMessageProducerBean extends AbstractProducer implements Exc
         try {
             LOG.debug("Sending error message back from Exchange module to recipient om JMS Queue with correlationID: {} ", message.getJmsMessage().getJMSMessageID());
             String data = JAXBMarshaller.marshallJaxBObjectToString(message.getErrorFault());
-            this.sendModuleResponseMessage(message.getJmsMessage(), data);
-        } catch (ExchangeModelMapperException | JMSException e) {
+            this.sendResponseMessageToSender(message.getJmsMessage(), data);
+        } catch (ExchangeModelMapperException | JMSException | MessageException e) {
             LOG.error("Error when returning Error message to recipient");
         }
     }
