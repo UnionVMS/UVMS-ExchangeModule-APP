@@ -19,9 +19,9 @@
     </scm>
 
     <properties>
-        
+
         <scm.connection>scm:git:https://github.com/UnionVMS/UVMS-ExchangeModule-APP.git</scm.connection>
-        
+
         <!-- Third party libs -->
         <mockito.version>1.10.19</mockito.version>
         <junit.version>4.12</junit.version>
@@ -29,20 +29,22 @@
         <dozer.version>5.5.1</dozer.version>
         <lombok.version>1.16.18</lombok.version>
         <ehcache.version>2.10.4</ehcache.version>
-        
+
         <!-- Uvms libs -->
         <longpolling.version>2.0.13</longpolling.version>
         <uvms.commons.version>3.0.14-SNAPSHOT</uvms.commons.version>
         <uvms.config.version>4.0.0</uvms.config.version>
         <usm4uvms.version>4.0.8</usm4uvms.version>
         <uvms-pom-deps.version>1.16</uvms-pom-deps.version>
-        
+
         <!-- Uvms models -->
         <asset.model.version>4.0.10</asset.model.version>
+        <exchange.model.version>4.0.11-SNAPSHOT</exchange.model.version>
         <audit.model.version>4.0.6</audit.model.version>
-        <exchange.model.version>4.0.10</exchange.model.version>
         <movement.model.version>4.0.9</movement.model.version>
-        <rules.model.version>3.0.22</rules.model.version>
+        <rules.model.version>3.0.23-SNAPSHOT</rules.model.version>
+
+        <asset.version>4.0.9</asset.version>
 
     </properties>
 
@@ -80,9 +82,9 @@
                         <groupId>org.slf4j</groupId>
                         <artifactId>slf4j-api</artifactId>
                     </exclusion>
-                </exclusions>           
-            </dependency>	
-        
+                </exclusions>
+            </dependency>
+
             <!-- Uvms libs -->
             <dependency>
                 <groupId>eu.europa.ec.fisheries.uvms</groupId>
@@ -114,15 +116,15 @@
             <dependency>
                 <groupId>eu.europa.ec.fisheries.uvms</groupId>
                 <artifactId>uvms-config</artifactId>
-                <version>${uvms.config.version}</version>    
+                <version>${uvms.config.version}</version>
             </dependency>
             <dependency>
                 <groupId>eu.europa.ec.fisheries.uvms.commons</groupId>
                 <artifactId>uvms-commons-message</artifactId>
-                <version>${uvms.commons.version}</version>    
+                <version>${uvms.commons.version}</version>
             </dependency>
 
-        
+
             <!-- Deps -->
             <dependency>
                 <groupId>fish.focus.uvms.maven</groupId>

@@ -191,7 +191,7 @@ public class ExchangeMessageConsumerBean implements MessageListener {
         LOG.debug("Request body : ", request);
         final ExchangeMessageEvent messageEventWrapper = new ExchangeMessageEvent(textMessage);
         if (request == null) {
-            LOG.error("[ERROR] ExchangeBaseRequest is null!! Check the message sent...");
+            LOG.warn("[ERROR] ExchangeBaseRequest is null!! Check the message sent...");
             try {
                 //Handle PingResponse from plugin
                 JAXBMarshaller.unmarshallTextMessage(textMessage, PingResponse.class);
