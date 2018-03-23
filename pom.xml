@@ -32,7 +32,7 @@
 
         <!-- Uvms libs -->
         <longpolling.version>2.0.13</longpolling.version>
-        <uvms.commons.version>3.0.15</uvms.commons.version>
+        <uvms.commons.version>3.0.17-SNAPSHOT</uvms.commons.version>
         <uvms.config.version>4.0.0</uvms.config.version>
         <usm4uvms.version>4.0.8</usm4uvms.version>
         <uvms-pom-deps.version>1.16</uvms-pom-deps.version>
