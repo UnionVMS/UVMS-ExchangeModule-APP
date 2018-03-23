@@ -49,6 +49,14 @@ public interface ExchangeEventIncomingService {
     void processMovement(@Observes @SetMovementEvent ExchangeMessageEvent message);
 
     /**
+     * Logs and sends a received asset information to Asset
+     *
+     * @param message received sales report
+     */
+    void receiveAssetInformation(@Observes @ReceiveAssetInformationEvent ExchangeMessageEvent message);
+
+
+    /**
      * Logs and sends a received sales report through to Rules
      *
      * @param message received sales report
