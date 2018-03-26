@@ -14,6 +14,7 @@ package eu.europa.ec.fisheries.uvms.exchange.service.bean;
 import static eu.europa.ec.fisheries.uvms.commons.message.impl.JAXBUtils.unMarshallMessage;
 
 import eu.europa.ec.fisheries.schema.exchange.module.v1.*;
+import eu.europa.ec.fisheries.schema.exchange.plugin.v1.PluginBaseRequest;
 import eu.europa.ec.fisheries.uvms.exchange.message.event.*;
 
 import javax.ejb.EJB;
@@ -24,6 +25,7 @@ import javax.inject.Inject;
 import javax.jms.JMSException;
 import javax.jms.TextMessage;
 import javax.xml.bind.JAXBException;
+import java.util.Date;
 import java.util.List;
 
 import eu.europa.ec.fisheries.schema.exchange.common.v1.AcknowledgeType;
@@ -546,6 +548,55 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
             fireExchangeFault(message, "Could not log the outgoing sales report.", e);
         }
     }
+
+
+    @Override
+    public void sendAssetInformation(@Observes @SendAssetInformationEvent ExchangeMessageEvent event) {
+        try {
+            SendAssetInformationRequest incomingRequest = JAXBMarshaller.unmarshallTextMessage(event.getJmsMessage(), SendAssetInformationRequest.class);
+            String message = incomingRequest.getAssets();
+            String destination = incomingRequest.getDestination();
+            String senderOrReceiver = incomingRequest.getSenderOrReceiver();
+
+            eu.europa.ec.fisheries.schema.exchange.plugin.v1.SendAssetInformationRequest outgoingRequest = new eu.europa.ec.fisheries.schema.exchange.plugin.v1.SendAssetInformationRequest();
+            outgoingRequest.setRequest(message);
+            outgoingRequest.setDestination(destination);
+            outgoingRequest.setSenderOrReceiver(senderOrReceiver);
+            outgoingRequest.setMethod(ExchangePluginMethod.SEND_VESSEL_INFORMATION);
+
+            exchangeEventOutgoingService.sendAssetInformationToFLUX(outgoingRequest);
+            exchangeLog.log(incomingRequest, LogType.SEND_ASSET_INFORMATION, ExchangeLogStatusTypeType.SUCCESSFUL, TypeRefType.ASSETS, message, false);
+        } catch (ExchangeModelMarshallException | ExchangeMessageException e) {
+            fireExchangeFault(event, "Error when sending asset information to FLUX", e);
+        } catch (ExchangeLogException e) {
+            firePluginFault(event, "Could not log the outgoing asset information.", e);
+        }
+    }
+
+    @Override
+    public void queryAssetInformation(@Observes @QueryAssetInformationEvent ExchangeMessageEvent event) {
+        try {
+            QueryAssetInformationRequest incomingRequest = JAXBMarshaller.unmarshallTextMessage(event.getJmsMessage(), QueryAssetInformationRequest.class);
+            String message = incomingRequest.getAssets();
+            String destination = incomingRequest.getDestination();
+            String senderOrReceiver = incomingRequest.getSenderOrReceiver();
+
+            eu.europa.ec.fisheries.schema.exchange.plugin.v1.SendQueryAssetInformationRequest outgoingRequest = new eu.europa.ec.fisheries.schema.exchange.plugin.v1.SendQueryAssetInformationRequest();
+            outgoingRequest.setQuery(message);
+            outgoingRequest.setDestination(destination);
+            outgoingRequest.setSenderOrReceiver(senderOrReceiver);
+            outgoingRequest.setMethod(ExchangePluginMethod.SEND_VESSEL_QUERY);
+
+            exchangeEventOutgoingService.sendAssetInformationToFLUX(outgoingRequest);
+            exchangeLog.log(incomingRequest, LogType.QUERY_ASSET_INFORMATION, ExchangeLogStatusTypeType.SUCCESSFUL, TypeRefType.ASSETS, message, false);
+        } catch (ExchangeModelMarshallException | ExchangeMessageException e) {
+            fireExchangeFault(event, "Error when sending asset information query to FLUX", e);
+        } catch (ExchangeLogException e) {
+            firePluginFault(event, "Could not log the outgoing asset information query.", e);
+        }
+    }
+
+
 
     @Override
     public void updateLogStatus(@Observes @UpdateLogStatusEvent ExchangeMessageEvent message) {

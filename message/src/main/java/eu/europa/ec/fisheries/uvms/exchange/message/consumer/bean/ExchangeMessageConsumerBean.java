@@ -79,6 +79,14 @@ public class ExchangeMessageConsumerBean implements MessageListener {
     private Event<ExchangeMessageEvent> receiveAssetInformationEvent;
 
     @Inject
+    @SendAssetInformationEvent
+    private Event<ExchangeMessageEvent> sendAssetInformationEvent;
+
+    @Inject
+    @QueryAssetInformationEvent
+    private Event<ExchangeMessageEvent> queryAssetInformationEvent;
+
+    @Inject
     @SendSalesResponseEvent
     private Event<ExchangeMessageEvent> sendSalesResponseEvent;
 
@@ -222,6 +230,12 @@ public class ExchangeMessageConsumerBean implements MessageListener {
                     break;
                 case RECEIVE_ASSET_INFORMATION:
                     receiveAssetInformationEvent.fire(messageEventWrapper);
+                    break;
+                case SEND_ASSET_INFORMATION:
+                    sendAssetInformationEvent.fire(messageEventWrapper);
+                    break;
+                case QUERY_ASSET_INFORMATION:
+                    queryAssetInformationEvent.fire(messageEventWrapper);
                     break;
                 case PING:
                     pingEvent.fire(messageEventWrapper);
