@@ -269,14 +269,18 @@ public class ExchangeEventOutgoingServiceBean implements ExchangeEventOutgoingSe
     public void sendFLUXFAResponseToPlugin(@Observes @SendFLUXFAResponseToPluginEvent ExchangeMessageEvent message) {
         try {
             SetFLUXFAResponseMessageRequest request = JAXBMarshaller.unmarshallTextMessage(message.getJmsMessage(), SetFLUXFAResponseMessageRequest.class);
-            LOG.debug("Got FLUXFAResponse in exchange :" + request.getRequest());
+            LOG.debug("[INFO] Got FLUXFAResponse in exchange :" + request.getRequest());
             String text = ExchangePluginRequestMapper.createSetFLUXFAResponseRequestWithOn(
                     request.getRequest(), request.getDestination(), request.getFluxDataFlow(), request.getSenderOrReceiver(), request.getOnValue());
-            LOG.debug("Message to plugin {}", text);
-            String pluginMessageId = producer.sendEventBusMessage(text, ((request.getPluginType() == BELGIAN_ACTIVITY)
-                    ? ExchangeServiceConstants.BELGIAN_ACTIVITY_PLUGIN_SERVICE_NAME : ExchangeServiceConstants.FLUX_ACTIVITY_PLUGIN_SERVICE_NAME));
-            LOG.debug("Message sent to Flux ERS Plugin :" + pluginMessageId);
-            exchangeLog.log(request, LogType.SEND_FLUX_RESPONSE_MSG, request.getStatus(), TypeRefType.FA_RESPONSE, request.getRequest(), false);
+            final ExchangeLogType log = exchangeLog.log(request, LogType.SEND_FLUX_RESPONSE_MSG, request.getStatus(), TypeRefType.FA_RESPONSE, request.getRequest(), false);
+            if(!log.getStatus().equals(ExchangeLogStatusTypeType.FAILED)){ // Send response only if it is NOT FAILED
+                LOG.debug("[INFO] Sending FLUXFAResponse to Flux Activity Plugin {}", text);
+                String pluginMessageId = producer.sendEventBusMessage(text, ((request.getPluginType() == BELGIAN_ACTIVITY)
+                        ? ExchangeServiceConstants.BELGIAN_ACTIVITY_PLUGIN_SERVICE_NAME : ExchangeServiceConstants.FLUX_ACTIVITY_PLUGIN_SERVICE_NAME));
+                LOG.debug("[INFO] FLUXFAResponse sent to Flux Activity Plugin {}" + pluginMessageId);
+            } else {
+                LOG.info("[WARN] FLUXFAResponse is FAILED so won't be sent to Flux Activity Plugin {}", text);
+            }
         } catch (ExchangeModelMarshallException | ExchangeMessageException | ExchangeLogException e) {
             LOG.error("Unable to send FLUX FA Report to plugin.", e);
         }

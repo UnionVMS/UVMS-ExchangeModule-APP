@@ -119,7 +119,7 @@ public class ExchangeMock {
 
 		List<SourceType> sources = new ArrayList<>();
 		sources.addAll(Arrays.asList(SourceType.values()));
-		configuration.put("SOURCE", refTypes);
+		configuration.put("SOURCE", sources);
 
 		return configuration;
 	}
