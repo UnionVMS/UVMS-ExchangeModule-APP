@@ -11,19 +11,25 @@ copy of the GNU General Public License along with the IFDM Suite. If not, see <h
  */
 package eu.europa.ec.fisheries.uvms.exchange.mapper;
 
-import eu.europa.ec.fisheries.schema.exchange.v1.*;
+import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogStatusHistoryType;
+import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogStatusType;
+import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogStatusTypeType;
+import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogType;
+import eu.europa.ec.fisheries.schema.exchange.v1.LogRefType;
+import eu.europa.ec.fisheries.schema.exchange.v1.LogType;
+import eu.europa.ec.fisheries.schema.exchange.v1.ReceiveMovementType;
+import eu.europa.ec.fisheries.schema.exchange.v1.SendEmailType;
+import eu.europa.ec.fisheries.schema.exchange.v1.SendMovementType;
+import eu.europa.ec.fisheries.schema.exchange.v1.SendPollType;
 import eu.europa.ec.fisheries.uvms.exchange.entity.exchangelog.ExchangeLog;
 import eu.europa.ec.fisheries.uvms.exchange.entity.exchangelog.ExchangeLogStatus;
 import eu.europa.ec.fisheries.uvms.exchange.model.util.DateUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.util.ArrayList;
 import java.util.List;
 
 public class LogMapper {
 
-    final static Logger LOG = LoggerFactory.getLogger(LogMapper.class);
+    private static final String FLUX = "FLUX";
 
     public static ExchangeLog toNewEntity(ExchangeLogType log, String username) {
         ExchangeLog entity = new ExchangeLog();
@@ -42,22 +48,12 @@ public class LogMapper {
                 entity = toSendEmailEntity(log);
                 break;
             case RECEIVE_FLUX_RESPONSE_MSG:
-                entity.setSource("FLUX");
-                break;
             case RCV_FLUX_FA_REPORT_MSG:
-                entity.setSource("FLUX");
-                break;
             case RECEIVE_FA_QUERY_MSG:
-                entity.setSource("FLUX");
-                break;
             case SEND_FA_QUERY_MSG:
-                entity.setSource("FLUX");
-                break;
             case SEND_FLUX_FA_REPORT_MSG:
-                entity.setSource("FLUX");
-                break;
             case SEND_FLUX_RESPONSE_MSG:
-                entity.setSource("FLUX");
+                entity.setSource(FLUX);
                 break;
         }
 
@@ -103,12 +99,10 @@ public class LogMapper {
         return entity;
     }
 
-    private static ExchangeLog toReceiveMovementEntity(ExchangeLogType log) {
-        ReceiveMovementType type = (ReceiveMovementType) log;
+    private static ExchangeLog toReceiveMovementEntity(ExchangeLogType type) {
         ExchangeLog entity = new ExchangeLog();
         entity.setSource(type.getSource());
         entity.setTransferIncoming(true);
-        entity.setRecipient(type.getRecipient());
         return entity;
     }
 

@@ -15,7 +15,34 @@ import eu.europa.ec.fisheries.schema.exchange.module.v1.ExchangeBaseRequest;
 import eu.europa.ec.fisheries.schema.exchange.plugin.v1.AcknowledgeResponse;
 import eu.europa.ec.fisheries.schema.exchange.plugin.v1.PingResponse;
 import eu.europa.ec.fisheries.uvms.commons.message.api.MessageConstants;
-import eu.europa.ec.fisheries.uvms.exchange.message.event.*;
+import eu.europa.ec.fisheries.uvms.commons.message.context.MappedDiagnosticContext;
+import eu.europa.ec.fisheries.uvms.exchange.message.event.ErrorEvent;
+import eu.europa.ec.fisheries.uvms.exchange.message.event.ExchangeLogEvent;
+import eu.europa.ec.fisheries.uvms.exchange.message.event.HandleProcessedMovementEvent;
+import eu.europa.ec.fisheries.uvms.exchange.message.event.LogIdByTypeExists;
+import eu.europa.ec.fisheries.uvms.exchange.message.event.LogRefIdByTypeExists;
+import eu.europa.ec.fisheries.uvms.exchange.message.event.MdrSyncRequestMessageEvent;
+import eu.europa.ec.fisheries.uvms.exchange.message.event.MdrSyncResponseMessageEvent;
+import eu.europa.ec.fisheries.uvms.exchange.message.event.PingEvent;
+import eu.europa.ec.fisheries.uvms.exchange.message.event.PluginConfigEvent;
+import eu.europa.ec.fisheries.uvms.exchange.message.event.PluginPingEvent;
+import eu.europa.ec.fisheries.uvms.exchange.message.event.ReceiveInvalidSalesMessageEvent;
+import eu.europa.ec.fisheries.uvms.exchange.message.event.ReceiveSalesQueryEvent;
+import eu.europa.ec.fisheries.uvms.exchange.message.event.ReceiveSalesReportEvent;
+import eu.europa.ec.fisheries.uvms.exchange.message.event.ReceiveSalesResponseEvent;
+import eu.europa.ec.fisheries.uvms.exchange.message.event.ReceivedFluxFaResponseMessageEvent;
+import eu.europa.ec.fisheries.uvms.exchange.message.event.SendCommandToPluginEvent;
+import eu.europa.ec.fisheries.uvms.exchange.message.event.SendFLUXFAResponseToPluginEvent;
+import eu.europa.ec.fisheries.uvms.exchange.message.event.SendFaQueryToPluginEvent;
+import eu.europa.ec.fisheries.uvms.exchange.message.event.SendFaReportToPluginEvent;
+import eu.europa.ec.fisheries.uvms.exchange.message.event.SendReportToPluginEvent;
+import eu.europa.ec.fisheries.uvms.exchange.message.event.SendSalesReportEvent;
+import eu.europa.ec.fisheries.uvms.exchange.message.event.SendSalesResponseEvent;
+import eu.europa.ec.fisheries.uvms.exchange.message.event.SetFaQueryMessageEvent;
+import eu.europa.ec.fisheries.uvms.exchange.message.event.SetFluxFAReportMessageEvent;
+import eu.europa.ec.fisheries.uvms.exchange.message.event.SetMovementEvent;
+import eu.europa.ec.fisheries.uvms.exchange.message.event.UpdateLogStatusEvent;
+import eu.europa.ec.fisheries.uvms.exchange.message.event.UpdatePluginSettingEvent;
 import eu.europa.ec.fisheries.uvms.exchange.message.event.carrier.ExchangeMessageEvent;
 import eu.europa.ec.fisheries.uvms.exchange.model.constant.FaultCode;
 import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelMarshallException;
@@ -73,18 +100,6 @@ public class ExchangeMessageConsumerBean implements MessageListener {
     @Inject
     @SendSalesReportEvent
     private Event<ExchangeMessageEvent> sendSalesReportEvent;
-
-    @Inject
-    @ReceiveAssetInformationEvent
-    private Event<ExchangeMessageEvent> receiveAssetInformationEvent;
-
-    @Inject
-    @SendAssetInformationEvent
-    private Event<ExchangeMessageEvent> sendAssetInformationEvent;
-
-    @Inject
-    @QueryAssetInformationEvent
-    private Event<ExchangeMessageEvent> queryAssetInformationEvent;
 
     @Inject
     @SendSalesResponseEvent
@@ -170,12 +185,13 @@ public class ExchangeMessageConsumerBean implements MessageListener {
     @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
     public void onMessage(Message message) {
         TextMessage textMessage = (TextMessage) message;
+        MappedDiagnosticContext.addMessagePropertiesToThreadMappedDiagnosticContext(textMessage);
         ExchangeBaseRequest request = tryConsumeExchangeBaseRequest(textMessage);
         LOG.info("Message received in Exchange Message MDB");
         LOG.debug("Request body : ", request);
         final ExchangeMessageEvent messageEventWrapper = new ExchangeMessageEvent(textMessage);
         if (request == null) {
-            LOG.error("[ERROR] ExchangeBaseRequest is null!! Check the message sent...");
+            LOG.warn("[ERROR] ExchangeBaseRequest is null!! Check the message sent...");
             try {
                 //Handle PingResponse from plugin
                 JAXBMarshaller.unmarshallTextMessage(textMessage, PingResponse.class);
@@ -227,15 +243,6 @@ public class ExchangeMessageConsumerBean implements MessageListener {
                     break;
                 case UPDATE_PLUGIN_SETTING:
                     updatePluginSettingEvent.fire(messageEventWrapper);
-                    break;
-                case RECEIVE_ASSET_INFORMATION:
-                    receiveAssetInformationEvent.fire(messageEventWrapper);
-                    break;
-                case SEND_ASSET_INFORMATION:
-                    sendAssetInformationEvent.fire(messageEventWrapper);
-                    break;
-                case QUERY_ASSET_INFORMATION:
-                    queryAssetInformationEvent.fire(messageEventWrapper);
                     break;
                 case PING:
                     pingEvent.fire(messageEventWrapper);
