@@ -10,12 +10,12 @@
 
     <groupId>eu.europa.ec.fisheries.uvms.exchange</groupId>
     <artifactId>exchange</artifactId>
-    <version>4.0.16-SNAPSHOT</version>
+    <version>4.0.16</version>
     <packaging>pom</packaging>
     
     <scm>
         <connection>${scm.connection}</connection>
-        <tag>HEAD</tag>
+        <tag>exchange-4.0.16</tag>
     </scm>
 
     <properties>
