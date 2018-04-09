@@ -15,6 +15,7 @@ import eu.europa.ec.fisheries.schema.exchange.module.v1.ExchangeBaseRequest;
 import eu.europa.ec.fisheries.schema.exchange.plugin.v1.AcknowledgeResponse;
 import eu.europa.ec.fisheries.schema.exchange.plugin.v1.PingResponse;
 import eu.europa.ec.fisheries.uvms.commons.message.api.MessageConstants;
+import eu.europa.ec.fisheries.uvms.commons.message.context.MappedDiagnosticContext;
 import eu.europa.ec.fisheries.uvms.exchange.message.event.ErrorEvent;
 import eu.europa.ec.fisheries.uvms.exchange.message.event.ExchangeLogEvent;
 import eu.europa.ec.fisheries.uvms.exchange.message.event.HandleProcessedMovementEvent;
@@ -184,6 +185,7 @@ public class ExchangeMessageConsumerBean implements MessageListener {
     @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
     public void onMessage(Message message) {
         TextMessage textMessage = (TextMessage) message;
+        MappedDiagnosticContext.addMessagePropertiesToThreadMappedDiagnosticContext(textMessage);
         ExchangeBaseRequest request = tryConsumeExchangeBaseRequest(textMessage);
         LOG.info("Message received in Exchange Message MDB");
         LOG.debug("Request body : ", request);

@@ -10,7 +10,7 @@
 
     <groupId>eu.europa.ec.fisheries.uvms.exchange</groupId>
     <artifactId>exchange</artifactId>
-    <version>4.0.15-SNAPSHOT</version>
+    <version>4.0.17-SNAPSHOT</version>
     <packaging>pom</packaging>
     
     <scm>
@@ -32,14 +32,14 @@
 
         <!-- Uvms libs -->
         <longpolling.version>2.0.13</longpolling.version>
-        <uvms.commons.version>3.0.15</uvms.commons.version>
+        <uvms.commons.version>3.0.17</uvms.commons.version>
         <uvms.config.version>4.0.0</uvms.config.version>
         <usm4uvms.version>4.0.8</usm4uvms.version>
         <uvms-pom-deps.version>1.16</uvms-pom-deps.version>
 
         <!-- Uvms models -->
         <asset.model.version>4.0.10</asset.model.version>
-        <exchange.model.version>4.0.12</exchange.model.version>
+        <exchange.model.version>4.0.13</exchange.model.version>
         <audit.model.version>4.0.6</audit.model.version>
         <movement.model.version>4.0.9</movement.model.version>
         <rules.model.version>3.0.23</rules.model.version>
