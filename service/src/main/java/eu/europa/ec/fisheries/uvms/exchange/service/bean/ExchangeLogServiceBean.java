@@ -283,10 +283,16 @@ public class ExchangeLogServiceBean implements ExchangeLogService {
     }
 
     @Override
-    public ExchangeLogWithValidationResults getExchangeLogRawMessageAndValidationByGuid(String guid) throws ExchangeLogException {
+    public ExchangeLogWithValidationResults getExchangeLogRawMessageAndValidationByGuid(String guid) {
         LogWithRawMsgAndType rawMsg = exchangeLogModel.getExchangeLogRawXmlByGuid(guid);
-        ExchangeLogWithValidationResults validationFromRules = exchangeToRulesSyncMsgBean.getValidationFromRules(guid, rawMsg.getType());
-        validationFromRules.setMsg(rawMsg.getRawMsg() != null ? rawMsg.getRawMsg() : StringUtils.EMPTY);
+        ExchangeLogWithValidationResults validationFromRules = new ExchangeLogWithValidationResults();
+        if(rawMsg.getType() != null){
+            if(TypeRefType.FA_RESPONSE.equals(rawMsg.getType())){
+                guid = rawMsg.getRefGuid();
+            }
+            validationFromRules = exchangeToRulesSyncMsgBean.getValidationFromRules(guid, rawMsg.getType());
+            validationFromRules.setMsg(rawMsg.getRawMsg() != null ? rawMsg.getRawMsg() : StringUtils.EMPTY);
+        }
         return validationFromRules;
     }
 
