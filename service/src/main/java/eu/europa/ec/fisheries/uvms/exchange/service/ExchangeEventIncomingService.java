@@ -49,6 +49,27 @@ public interface ExchangeEventIncomingService {
     void processMovement(@Observes @SetMovementEvent ExchangeMessageEvent message);
 
     /**
+     * Logs and sends a received asset information to Asset
+     *
+     * @param message received asset information message
+     */
+    void receiveAssetInformation(@Observes @ReceiveAssetInformationEvent ExchangeMessageEvent message);
+
+    /**
+     * Logs and sends a send asset information to FLUX fleet plugin
+     *
+     * @param message send asset information message
+     */
+    void sendAssetInformation(@Observes @SendAssetInformationEvent ExchangeMessageEvent message);
+
+    /**
+     * Logs and sends a query asset information to FLUX fleet plugin
+     *
+     * @param message query asset information message
+     */
+    void queryAssetInformation(@Observes @QueryAssetInformationEvent ExchangeMessageEvent message);
+
+    /**
      * Logs and sends a received sales report through to Rules
      *
      * @param message received sales report
