@@ -24,6 +24,8 @@ import eu.europa.ec.fisheries.schema.exchange.v1.SendPollType;
 import eu.europa.ec.fisheries.uvms.exchange.entity.exchangelog.ExchangeLog;
 import eu.europa.ec.fisheries.uvms.exchange.entity.exchangelog.ExchangeLogStatus;
 import eu.europa.ec.fisheries.uvms.exchange.model.util.DateUtils;
+import org.slf4j.MDC;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -95,7 +97,7 @@ public class LogMapper {
         entity.setUpdateTime(DateUtils.nowUTC().toDate());
         entity.setType(log.getType());
         entity.setDestination(log.getDestination());
-
+        entity.setMDCRequestId(MDC.get("requestId"));
         return entity;
     }
 

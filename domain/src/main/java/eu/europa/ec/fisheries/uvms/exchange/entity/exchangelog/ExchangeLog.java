@@ -124,6 +124,9 @@ public class ExchangeLog {
 	@Column(name="log_destination")
 	private String destination;
 
+	@Size(max=36)
+	@Column(name="log_mdc_request_id")
+	private String mdcRequestId;
 
 	@PrePersist
 	public void prepersist() {
@@ -273,4 +276,9 @@ public class ExchangeLog {
 	public void setDestination(String destination) {
 		this.destination = destination;
 	}
+
+	public void setMDCRequestId(String mdcRequestId) {
+		this.mdcRequestId = mdcRequestId;
+	}
+
 }
