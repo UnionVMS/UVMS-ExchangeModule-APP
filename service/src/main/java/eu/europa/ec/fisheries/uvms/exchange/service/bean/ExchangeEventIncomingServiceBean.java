@@ -226,7 +226,7 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
         try {
             TextMessage jmsMessage = message.getJmsMessage();
             GetServiceListRequest request = JAXBMarshaller.unmarshallTextMessage(jmsMessage, GetServiceListRequest.class);
-            log.info("Get plugin config LIST_SERVICE:{}", request);
+            log.info("[INFO] Get plugin config LIST_SERVICE:{}", request.getType());
             List<ServiceResponseType> serviceList = exchangeService.getServiceList(request.getType());
             producer.sendModuleResponseMessage(message.getJmsMessage(), ExchangeModuleResponseMapper.mapServiceListResponse(serviceList));
         } catch (ExchangeException e) {
@@ -242,7 +242,7 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
             final TextMessage jmsMessage = message.getJmsMessage();
             final String jmsMessageID = jmsMessage.getJMSMessageID();
             SetMovementReportRequest request = JAXBMarshaller.unmarshallTextMessage(jmsMessage, SetMovementReportRequest.class);
-            log.info("[INFO] Processing Movement : {}", request);
+            log.info("[INFO] Processing Movement : {}", request.getRefGuid());
             String username;
             SetReportMovementType setRepMovType = request.getRequest();
             if (MovementSourceType.MANUAL.equals(setRepMovType.getMovement().getSource())) {// A person has created a position
@@ -324,7 +324,6 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
         try {
             ReceiveAssetInformationRequest request = JAXBMarshaller.unmarshallTextMessage(event.getJmsMessage(), ReceiveAssetInformationRequest.class);
             String message = request.getAssets();
-
             forwardToAsset(message);
             exchangeLog.log(request, LogType.RECEIVE_ASSET_INFORMATION, ExchangeLogStatusTypeType.SUCCESSFUL, TypeRefType.ASSETS, message, true);
         } catch (ExchangeModelMarshallException e) {
@@ -356,17 +355,14 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
 
     @Override
     public void receiveSalesReport(@Observes @ReceiveSalesReportEvent ExchangeMessageEvent event) {
-
         try {
             ReceiveSalesReportRequest request = JAXBMarshaller.unmarshallTextMessage(event.getJmsMessage(), ReceiveSalesReportRequest.class);
-            log.info("Receive sales report in Exchange module:{}", request);
+            log.info("Receive sales report in Exchange module : {}", request.getReport());
             String report = request.getReport();
             PluginType plugin = request.getPluginType();
             String sender = request.getSenderOrReceiver();
             String messageGuid = request.getMessageGuid();
-
             ExchangeLogType log = exchangeLog.log(request, LogType.RECEIVE_SALES_REPORT, ExchangeLogStatusTypeType.ISSUED, TypeRefType.SALES_REPORT, report, true);
-
             forwardToRules(RulesModuleRequestMapper.createReceiveSalesReportRequest(report, messageGuid, plugin.name(), log.getGuid(), sender, request.getOnValue()));
         } catch (ExchangeModelMarshallException e) {
             try {
@@ -697,13 +693,12 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
 
     @Override
     public void processAcknowledge(@Observes @ExchangeLogEvent ExchangeMessageEvent message) {
-        log.info("Process acknowledge:{}", message);
-
         try {
             AcknowledgeResponse response = JAXBMarshaller.unmarshallTextMessage(message.getJmsMessage(), AcknowledgeResponse.class);
             AcknowledgeType acknowledge = response.getResponse();
             String serviceClassName = response.getServiceClassName();
             ExchangePluginMethod method = response.getMethod();
+            log.info("[INFO] Process acknowledge : {}", method);
             switch (method) {
                 case SET_COMMAND:
                     // Only Acknowledge for poll should have a poll status set
