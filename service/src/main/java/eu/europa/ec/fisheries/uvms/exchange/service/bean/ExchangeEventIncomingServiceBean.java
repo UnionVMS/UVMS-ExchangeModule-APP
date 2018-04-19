@@ -357,7 +357,7 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
     public void receiveSalesReport(@Observes @ReceiveSalesReportEvent ExchangeMessageEvent event) {
         try {
             ReceiveSalesReportRequest request = JAXBMarshaller.unmarshallTextMessage(event.getJmsMessage(), ReceiveSalesReportRequest.class);
-            log.info("Receive sales report in Exchange module : {}", request.getReport());
+            log.debug("Receive sales report in Exchange module : {}", request.getReport());
             String report = request.getReport();
             PluginType plugin = request.getPluginType();
             String sender = request.getSenderOrReceiver();
@@ -366,8 +366,7 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
             forwardToRules(RulesModuleRequestMapper.createReceiveSalesReportRequest(report, messageGuid, plugin.name(), log.getGuid(), sender, request.getOnValue()));
         } catch (ExchangeModelMarshallException e) {
             try {
-                String errorMessage = "Couldn't map to SetSalesReportRequest when processing sales report from plugin. The event was " + event.getJmsMessage().getText();
-                firePluginFault(event, errorMessage, e);
+                firePluginFault(event, "Couldn't map to SetSalesReportRequest when processing sales report from plugin. The event was " + event.getJmsMessage().getText(), e);
             } catch (JMSException e1) {
                 firePluginFault(event, "Couldn't map to SetSalesReportRequest when processing sales report from plugin.", e);
             }
