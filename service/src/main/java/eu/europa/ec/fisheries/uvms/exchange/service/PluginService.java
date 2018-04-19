@@ -11,9 +11,6 @@ copy of the GNU General Public License along with the IFDM Suite. If not, see <h
  */
 package eu.europa.ec.fisheries.uvms.exchange.service;
 
-import javax.ejb.Local;
-import javax.enterprise.event.Observes;
-
 import eu.europa.ec.fisheries.uvms.config.event.ConfigSettingEvent;
 import eu.europa.ec.fisheries.uvms.config.event.ConfigSettingUpdatedEvent;
 import eu.europa.ec.fisheries.uvms.exchange.message.event.UpdatePluginSettingEvent;
@@ -22,19 +19,18 @@ import eu.europa.ec.fisheries.uvms.exchange.message.event.carrier.PluginMessageE
 import eu.europa.ec.fisheries.uvms.exchange.message.event.registry.RegisterServiceEvent;
 import eu.europa.ec.fisheries.uvms.exchange.message.event.registry.UnRegisterServiceEvent;
 import eu.europa.ec.fisheries.uvms.exchange.service.exception.ExchangeServiceException;
+import javax.ejb.Local;
+import javax.enterprise.event.Observes;
 
 @Local
 public interface PluginService {
 
-    public void registerService(@Observes @RegisterServiceEvent PluginMessageEvent message);
-    public void unregisterService(@Observes @UnRegisterServiceEvent PluginMessageEvent message);
-    
-    public void setConfig(@Observes @ConfigSettingUpdatedEvent ConfigSettingEvent settingEvent);
-
-    public void updatePluginSetting(@Observes @UpdatePluginSettingEvent ExchangeMessageEvent settingEvent);
-    
-    public boolean ping(String serviceClassName) throws ExchangeServiceException;
-	public boolean start(String serviceClassName) throws ExchangeServiceException;
-	public boolean stop(String serviceClassName) throws ExchangeServiceException;
+    void registerService(@Observes @RegisterServiceEvent PluginMessageEvent message);
+    void unregisterService(@Observes @UnRegisterServiceEvent PluginMessageEvent message);
+    void setConfig(@Observes @ConfigSettingUpdatedEvent ConfigSettingEvent settingEvent);
+    void updatePluginSetting(@Observes @UpdatePluginSettingEvent ExchangeMessageEvent settingEvent);
+    boolean ping(String serviceClassName) throws ExchangeServiceException;
+	boolean start(String serviceClassName) throws ExchangeServiceException;
+	boolean stop(String serviceClassName) throws ExchangeServiceException;
     
 }

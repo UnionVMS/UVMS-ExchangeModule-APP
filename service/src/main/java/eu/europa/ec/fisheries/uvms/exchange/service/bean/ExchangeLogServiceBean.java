@@ -11,15 +11,6 @@ copy of the GNU General Public License along with the IFDM Suite. If not, see <h
  */
 package eu.europa.ec.fisheries.uvms.exchange.service.bean;
 
-import javax.ejb.EJB;
-import javax.ejb.Stateless;
-import javax.enterprise.event.Event;
-import javax.inject.Inject;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
-
 import eu.europa.ec.fisheries.schema.exchange.module.v1.ExchangeBaseRequest;
 import eu.europa.ec.fisheries.schema.exchange.source.v1.GetLogListByQueryResponse;
 import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeHistoryListQuery;
@@ -43,7 +34,6 @@ import eu.europa.ec.fisheries.uvms.exchange.message.exception.ExchangeMessageExc
 import eu.europa.ec.fisheries.uvms.exchange.message.producer.ExchangeMessageProducer;
 import eu.europa.ec.fisheries.uvms.exchange.model.dto.ListResponseDto;
 import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelException;
-import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelMapperException;
 import eu.europa.ec.fisheries.uvms.exchange.model.remote.ExchangeLogModel;
 import eu.europa.ec.fisheries.uvms.exchange.model.remote.UnsentModel;
 import eu.europa.ec.fisheries.uvms.exchange.service.ExchangeLogService;
@@ -52,6 +42,14 @@ import eu.europa.ec.fisheries.uvms.exchange.service.event.ExchangeSendingQueueEv
 import eu.europa.ec.fisheries.uvms.exchange.service.exception.ExchangeLogException;
 import eu.europa.ec.fisheries.uvms.exchange.service.mapper.ExchangeAuditRequestMapper;
 import eu.europa.ec.fisheries.uvms.longpolling.notifications.NotificationMessage;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.List;
+import javax.ejb.EJB;
+import javax.ejb.Stateless;
+import javax.enterprise.event.Event;
+import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -135,10 +133,8 @@ public class ExchangeLogServiceBean implements ExchangeLogService {
     public ExchangeLogType updateStatus(String pluginMessageId, ExchangeLogStatusTypeType logStatus, String username) throws ExchangeLogException {
         try {
             String logGuid = logCache.acknowledged(pluginMessageId);
-
             ExchangeLogStatusType exchangeLogStatusType = createExchangeLogStatusType(logStatus, logGuid);
             ExchangeLogType updatedLog = exchangeLogModel.updateExchangeLogStatus(exchangeLogStatusType, username);
-
             sendAuditLogMessageForUpdateExchangeLog(updatedLog.getGuid(), username);
             // For long polling
             exchangeLogEvent.fire(new NotificationMessage("guid", updatedLog.getGuid()));
@@ -167,7 +163,6 @@ public class ExchangeLogServiceBean implements ExchangeLogService {
         } catch (ExchangeModelException e) {
             throw new ExchangeLogException("Couldn't update the status of the exchange log with guid " + logGuid + ". The new status should be " + logStatus, e);
         }
-
     }
 
     @Override
@@ -207,13 +202,11 @@ public class ExchangeLogServiceBean implements ExchangeLogService {
             if (type != null) {
                 typeList.add(type);
             }
-
             ExchangeHistoryListQuery query = new ExchangeHistoryListQuery();
             query.setTypeRefDateFrom(from);
             query.setTypeRefDateTo(to);
             query.getStatus().addAll(statusList);
             query.getType().addAll(typeList);
-
             List<ExchangeLogStatusType> pollStatusList = exchangeLogModel.getExchangeLogStatusHistoryByQuery(query);
             return pollStatusList;
         } catch (ExchangeModelException e) {
@@ -248,7 +241,7 @@ public class ExchangeLogServiceBean implements ExchangeLogService {
 
     @Override
     public String createUnsentMessage(String senderReceiver, Date timestamp, String recipient, String message, List<UnsentMessageTypeProperty> properties, String username) throws ExchangeLogException {
-        log.debug("createUnsentMessage in service layer:{}",message);
+        log.debug("[INFO] CreateUnsentMessage in service layer:{}",message);
         try {
             UnsentMessageType unsentMessage = new UnsentMessageType();
             unsentMessage.setDateReceived(timestamp);
@@ -343,8 +336,6 @@ public class ExchangeLogServiceBean implements ExchangeLogService {
             // For long polling
             exchangeLogEvent.fire(new NotificationMessage("guid", pollStatus.getExchangeLogGuid()));
             return pollStatus;
-        } catch (ExchangeModelMapperException e) {
-            throw new ExchangeLogException("Couldn't update status of exchange log");
         } catch (ExchangeModelException e) {
             throw new ExchangeLogException("Couldn't update status of exchange log");
         }

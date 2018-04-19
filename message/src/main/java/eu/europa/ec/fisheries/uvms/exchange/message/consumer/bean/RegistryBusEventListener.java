@@ -71,7 +71,7 @@ public class RegistryBusEventListener implements MessageListener {
         ServiceType settings = null;
         try {
             ExchangeRegistryBaseRequest request = JAXBMarshaller.unmarshallTextMessage(textMessage, ExchangeRegistryBaseRequest.class);
-            LOG.info("Eventbus listener for Exchange Registry (ExchangeModelConstants.EXCHANGE_REGISTER_SERVICE): {} {}", ExchangeModelConstants.EXCHANGE_REGISTER_SERVICE,request);
+            LOG.info("[INFO] Eventbus listener for Exchange Registry (ExchangeModelConstants.EXCHANGE_REGISTER_SERVICE): {} {}", ExchangeModelConstants.EXCHANGE_REGISTER_SERVICE);
             switch (request.getMethod()) {
                 case REGISTER_SERVICE:
                     RegisterServiceRequest regReq = JAXBMarshaller.unmarshallTextMessage(textMessage, RegisterServiceRequest.class);
