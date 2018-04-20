@@ -111,7 +111,7 @@ public class ExchangeLogServiceBean implements ExchangeLogService {
     }
 
     @Override
-    public ExchangeLogType log(ExchangeBaseRequest request, LogType logType, ExchangeLogStatusTypeType status, TypeRefType messageType, String messageText, boolean incoming) throws ExchangeLogException {
+    public ExchangeLogType log(ExchangeBaseRequest request, LogType logType, ExchangeLogStatusTypeType status, TypeRefType messageType, String messageText, boolean incoming, String logUuid) throws ExchangeLogException {
         LogRefType ref = new LogRefType();
         ref.setMessage(messageText);
         ref.setRefGuid(request.getMessageGuid());
@@ -125,6 +125,7 @@ public class ExchangeLogServiceBean implements ExchangeLogService {
         log.setIncoming(incoming);
         log.setTypeRef(ref);
         log.setDestination(request.getDestination());
+        log.setGuid(logUuid);
 
         return log(log, request.getUsername());
     }

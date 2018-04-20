@@ -59,6 +59,8 @@ public class LogMapper {
                 break;
         }
 
+        entity.setGuid(log.getGuid());
+
         if (username == null) {
             username = "SYSTEM";
         }
