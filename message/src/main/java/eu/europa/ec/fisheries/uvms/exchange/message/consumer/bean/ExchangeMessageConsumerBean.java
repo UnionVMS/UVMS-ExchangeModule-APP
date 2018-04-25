@@ -187,7 +187,7 @@ public class ExchangeMessageConsumerBean implements MessageListener {
         TextMessage textMessage = (TextMessage) message;
         MappedDiagnosticContext.addMessagePropertiesToThreadMappedDiagnosticContext(textMessage);
         ExchangeBaseRequest request = tryConsumeExchangeBaseRequest(textMessage);
-        LOG.info("Message received in Exchange Message MDB");
+        LOG.info("Message received in Exchange Message MDB. Times redelivered: " + getTimesRedelivered(message));
         LOG.debug("Request body : ", request);
         final ExchangeMessageEvent messageEventWrapper = new ExchangeMessageEvent(textMessage);
         if (request == null) {
@@ -326,4 +326,12 @@ public class ExchangeMessageConsumerBean implements MessageListener {
         }
     }
 
+    private int getTimesRedelivered(Message message) {
+        try {
+            return (message.getIntProperty("JMSXDeliveryCount") - 1);
+
+        } catch (Exception e) {
+            return 0;
+        }
+    }
 }

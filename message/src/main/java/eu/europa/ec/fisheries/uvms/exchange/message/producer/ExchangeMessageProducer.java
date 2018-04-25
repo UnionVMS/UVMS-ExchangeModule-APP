@@ -33,6 +33,8 @@ public interface ExchangeMessageProducer {
 
     String sendRulesMessage(String text) throws ConfigMessageException;
 
+    String sendRulesMessage(String text, String messageSelector) throws ExchangeMessageException;
+
     void sendModuleErrorResponseMessage(@Observes @ErrorEvent ExchangeMessageEvent event);
 
     void sendPluginErrorResponseMessage(@Observes @PluginErrorEvent PluginMessageEvent event);

@@ -38,6 +38,9 @@ import javax.jms.Topic;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.HashMap;
+import java.util.Map;
+
 @Stateless
 public class ExchangeMessageProducerBean extends AbstractProducer implements ExchangeMessageProducer, ConfigMessageProducer {
 
@@ -48,6 +51,9 @@ public class ExchangeMessageProducerBean extends AbstractProducer implements Exc
 
     @EJB
     private ExchangeMovementProducer movementProducer;
+
+    @EJB
+    private ExchangeRulesProducer rulesProducer;
 
     private Queue exchangeResponseQueue;
     private Queue exchangeEventQueue;
@@ -124,6 +130,22 @@ public class ExchangeMessageProducerBean extends AbstractProducer implements Exc
         } catch (ExchangeMessageException e) {
             LOG.error("[ Error when sending config message. ] {}", e.getMessage());
             throw new ConfigMessageException("Error when sending config message.");
+        }
+    }
+
+    @Override
+    @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
+    public String sendRulesMessage(String text, String messageSelector) throws ExchangeMessageException {
+        try {
+            Map<String, String> messageProperties = new HashMap<>();
+            if (messageSelector != null) {
+                messageProperties.put("messageSelector", messageSelector);
+            }
+            return rulesProducer.sendModuleMessageWithProps(text, exchangeResponseQueue, messageProperties);
+
+        } catch (MessageException e) {
+            LOG.error("[ Error when sending rules message. ] {}", e.getMessage());
+            throw new ExchangeMessageException("Error when sending rules message.");
         }
     }
 

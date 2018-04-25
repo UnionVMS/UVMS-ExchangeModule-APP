@@ -208,10 +208,13 @@ public class ExchangeServiceBean implements ExchangeService {
         switch (status){
             case STARTED:
                 sendAuditLogMessageForServiceStatusStarted(compressServiceClassName(serviceName), username);
+                break;
             case STOPPED:
                 sendAuditLogMessageForServiceStatusStopped(compressServiceClassName(serviceName), username);
+                break;
             default:
                 sendAuditLogMessageForServiceStatusUnknown(compressServiceClassName(serviceName), username);
+                break;
         }
     }
 }
