@@ -11,6 +11,15 @@ copy of the GNU General Public License along with the IFDM Suite. If not, see <h
  */
 package eu.europa.ec.fisheries.uvms.exchange.service.bean;
 
+import javax.ejb.EJB;
+import javax.ejb.Stateless;
+import javax.enterprise.event.Event;
+import javax.inject.Inject;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.List;
+
 import eu.europa.ec.fisheries.schema.exchange.module.v1.ExchangeBaseRequest;
 import eu.europa.ec.fisheries.schema.exchange.source.v1.GetLogListByQueryResponse;
 import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeHistoryListQuery;
@@ -42,14 +51,6 @@ import eu.europa.ec.fisheries.uvms.exchange.service.event.ExchangeSendingQueueEv
 import eu.europa.ec.fisheries.uvms.exchange.service.exception.ExchangeLogException;
 import eu.europa.ec.fisheries.uvms.exchange.service.mapper.ExchangeAuditRequestMapper;
 import eu.europa.ec.fisheries.uvms.longpolling.notifications.NotificationMessage;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
-import javax.ejb.EJB;
-import javax.ejb.Stateless;
-import javax.enterprise.event.Event;
-import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -279,8 +280,8 @@ public class ExchangeLogServiceBean implements ExchangeLogService {
     public ExchangeLogWithValidationResults getExchangeLogRawMessageAndValidationByGuid(String guid) {
         LogWithRawMsgAndType rawMsg = exchangeLogModel.getExchangeLogRawXmlByGuid(guid);
         ExchangeLogWithValidationResults validationFromRules = new ExchangeLogWithValidationResults();
-        if(rawMsg.getType() != null){
-            if(TypeRefType.FA_RESPONSE.equals(rawMsg.getType())){
+        if (rawMsg.getType() != null){
+            if (TypeRefType.FA_RESPONSE.equals(rawMsg.getType())){
                 guid = rawMsg.getRefGuid();
             }
             validationFromRules = exchangeToRulesSyncMsgBean.getValidationFromRules(guid, rawMsg.getType());

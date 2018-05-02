@@ -10,6 +10,11 @@ details. You should have received a copy of the GNU General Public License along
 */
 package eu.europa.ec.fisheries.uvms.exchange.service.bean;
 
+import javax.ejb.EJB;
+import javax.ejb.Singleton;
+import javax.jms.TextMessage;
+import java.util.List;
+
 import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogWithValidationResults;
 import eu.europa.ec.fisheries.schema.exchange.v1.LogValidationResult;
 import eu.europa.ec.fisheries.schema.exchange.v1.RuleValidationLevel;
@@ -25,10 +30,6 @@ import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelMarshal
 import eu.europa.ec.fisheries.uvms.exchange.model.mapper.JAXBMarshaller;
 import eu.europa.ec.fisheries.uvms.rules.model.exception.RulesModelMarshallException;
 import eu.europa.ec.fisheries.uvms.rules.model.mapper.RulesModuleRequestMapper;
-import java.util.List;
-import javax.ejb.EJB;
-import javax.ejb.Singleton;
-import javax.jms.TextMessage;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.EnumUtils;
@@ -79,6 +80,10 @@ public class ExchangeToRulesSyncMsgBean {
         }
         logResult.setStatus(EnumUtils.getEnum(RuleValidationStatus.class, validMsgFromRules.getErrorType().toString()));
         logResult.setXpaths(StringUtils.join(validMsgFromRules.getXpaths(), ','));
+        logResult.setNote(validMsgFromRules.getNote());
+        logResult.setEntity(validMsgFromRules.getEntity());
+        logResult.setExpression(validMsgFromRules.getExpression());
+        logResult.setMessage(validMsgFromRules.getMessage());
         return logResult;
     }
 
