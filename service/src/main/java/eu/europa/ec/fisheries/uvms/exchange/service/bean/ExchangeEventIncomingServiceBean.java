@@ -294,8 +294,12 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
         }
     }
 
-    private void forwardToRules(String messageToForward) {
-        forwardToRules(messageToForward, null, null);
+    private void forwardToRules(String messageToForward, ExchangeMessageEvent exchangeMessageEvent, ServiceResponseType service) {
+        forwardToRules(messageToForward, exchangeMessageEvent, service, null);
+    }
+
+    private void forwardToRules(String messageToForward, String messageSelector) {
+        forwardToRules(messageToForward, null, null, messageSelector);
     }
 
     /**
@@ -305,10 +309,11 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
      * @param exchangeMessageEvent is optional
      * @param service              is optional
      */
-    private void forwardToRules(String messageToForward, ExchangeMessageEvent exchangeMessageEvent, ServiceResponseType service) {
+    private void forwardToRules(String messageToForward, ExchangeMessageEvent exchangeMessageEvent, ServiceResponseType service, String messageSelector) {
         try {
             log.info("[INFO] Forwarding the msg to rules Module.");
-            producer.sendMessageOnQueue(messageToForward, MessageQueue.RULES);
+            producer.sendRulesMessage(messageToForward, messageSelector);
+
         } catch (ExchangeMessageException e) {
             log.error("[ERROR] Failed to forward message to Rules: {} {}", messageToForward, e);
 
@@ -363,7 +368,10 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
             String sender = request.getSenderOrReceiver();
             String messageGuid = request.getMessageGuid();
             ExchangeLogType log = exchangeLog.log(request, LogType.RECEIVE_SALES_REPORT, ExchangeLogStatusTypeType.ISSUED, TypeRefType.SALES_REPORT, report, true);
-            forwardToRules(RulesModuleRequestMapper.createReceiveSalesReportRequest(report, messageGuid, plugin.name(), log.getGuid(), sender, request.getOnValue()));
+
+            String receiveSalesReportRequest =RulesModuleRequestMapper.createReceiveSalesReportRequest(report, messageGuid, plugin.name(), log.getGuid(), sender, request.getOnValue());
+            String messageSelector = "ReceiveSalesReportRequest";
+            forwardToRules(receiveSalesReportRequest, messageSelector);
         } catch (ExchangeModelMarshallException e) {
             try {
                 firePluginFault(event, "Couldn't map to SetSalesReportRequest when processing sales report from plugin. The event was " + event.getJmsMessage().getText(), e);
@@ -390,7 +398,9 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
 
             ExchangeLogType log = exchangeLog.log(request, LogType.RECEIVE_SALES_QUERY, ExchangeLogStatusTypeType.ISSUED, TypeRefType.SALES_QUERY, query, true);
 
-            forwardToRules(RulesModuleRequestMapper.createReceiveSalesQueryRequest(query, messageGuid, plugin.name(), log.getGuid(), sender, request.getOnValue()));
+            String receiveSalesQueryRequest = RulesModuleRequestMapper.createReceiveSalesQueryRequest(query, messageGuid, plugin.name(), log.getGuid(), sender, request.getOnValue());
+            String messageSelector = "ReceiveSalesQueryRequest";
+            forwardToRules(receiveSalesQueryRequest, messageSelector);
 
         } catch (ExchangeModelMarshallException e) {
             try {
@@ -413,7 +423,9 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
 
             ExchangeLogType log = exchangeLog.log(request, LogType.RECEIVE_SALES_RESPONSE, ExchangeLogStatusTypeType.ISSUED, TypeRefType.SALES_RESPONSE, response, true);
 
-            forwardToRules(RulesModuleRequestMapper.createReceiveSalesResponseRequest(response, log.getGuid(), request.getSenderOrReceiver()));
+            String receiveSalesResponseRequest = RulesModuleRequestMapper.createReceiveSalesResponseRequest(response, log.getGuid(), request.getSenderOrReceiver());
+            String messageSelector = "ReceiveSalesResponseRequest";
+            forwardToRules(receiveSalesResponseRequest, messageSelector);
         } catch (ExchangeModelMarshallException e) {
             firePluginFault(event, "Error when receiving a Sales response from FLUX", e);
         } catch (ExchangeLogException e) {
