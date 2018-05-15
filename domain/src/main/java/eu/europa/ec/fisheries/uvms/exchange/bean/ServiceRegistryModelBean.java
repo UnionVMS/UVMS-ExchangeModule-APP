@@ -114,6 +114,7 @@ public class ServiceRegistryModelBean implements ServiceRegistryModel {
     	Service service = dao.getServiceByServiceClassName(serviceClassName);
     	if(service != null) {
     		List<ServiceSetting> newSettings = ServiceMapper.mapSettingsList(service, settings, username);
+    		service.getServiceSettingList().clear();
     		service.getServiceSettingList().addAll(newSettings);
     		dao.updateService(service);
     		return ServiceMapper.toServiceModel(service);
