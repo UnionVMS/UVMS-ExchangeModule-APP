@@ -10,7 +10,7 @@
 
     <groupId>eu.europa.ec.fisheries.uvms.exchange</groupId>
     <artifactId>exchange</artifactId>
-    <version>4.0.18-SNAPSHOT</version>
+    <version>4.0.20-SNAPSHOT</version>
     <packaging>pom</packaging>
     
     <scm>
@@ -39,10 +39,10 @@
 
         <!-- Uvms models -->
         <asset.model.version>4.0.10</asset.model.version>
-        <exchange.model.version>4.0.14</exchange.model.version>
+        <exchange.model.version>4.0.15</exchange.model.version>
         <audit.model.version>4.0.6</audit.model.version>
         <movement.model.version>4.0.9</movement.model.version>
-        <rules.model.version>3.0.23</rules.model.version>
+        <rules.model.version>3.0.29</rules.model.version>
 
         <asset.version>4.0.9</asset.version>
 
