@@ -371,8 +371,7 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
             String messageGuid = request.getMessageGuid();
             produceNewUUID();
             forwardToRules(RulesModuleRequestMapper.createReceiveSalesReportRequest(report, messageGuid, plugin.name(), logUUID, sender, request.getOnValue()));
-            exchangeLog.log(request, LogType.RECEIVE_SALES_REPORT, ExchangeLogStatusTypeType.ISSUED, TypeRefType.SALES_REPORT, report, true, logUUID);
-            ExchangeLogType log = exchangeLog.log(request, LogType.RECEIVE_SALES_REPORT, ExchangeLogStatusTypeType.ISSUED, TypeRefType.SALES_REPORT, report, true);
+            ExchangeLogType log = exchangeLog.log(request, LogType.RECEIVE_SALES_REPORT, ExchangeLogStatusTypeType.ISSUED, TypeRefType.SALES_REPORT, report, true, logUUID);
 
             String receiveSalesReportRequest =RulesModuleRequestMapper.createReceiveSalesReportRequest(report, messageGuid, plugin.name(), log.getGuid(), sender, request.getOnValue());
             String messageSelector = "ReceiveSalesReportRequest";
@@ -400,12 +399,10 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
             PluginType plugin = request.getPluginType();
             String sender = request.getSenderOrReceiver();
             String messageGuid = request.getMessageGuid();
+
             produceNewUUID();
             forwardToRules(RulesModuleRequestMapper.createReceiveSalesQueryRequest(query, messageGuid, plugin.name(), logUUID, sender, request.getOnValue()));
-            exchangeLog.log(request, LogType.RECEIVE_SALES_QUERY, ExchangeLogStatusTypeType.ISSUED, TypeRefType.SALES_QUERY, query, true, logUUID);
-
-            ExchangeLogType log = exchangeLog.log(request, LogType.RECEIVE_SALES_QUERY, ExchangeLogStatusTypeType.ISSUED, TypeRefType.SALES_QUERY, query, true);
-
+            ExchangeLogType log = exchangeLog.log(request, LogType.RECEIVE_SALES_QUERY, ExchangeLogStatusTypeType.ISSUED, TypeRefType.SALES_QUERY, query, true, logUUID);
             String receiveSalesQueryRequest = RulesModuleRequestMapper.createReceiveSalesQueryRequest(query, messageGuid, plugin.name(), log.getGuid(), sender, request.getOnValue());
             String messageSelector = "ReceiveSalesQueryRequest";
             forwardToRules(receiveSalesQueryRequest, messageSelector);
@@ -430,10 +427,7 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
             String response = request.getResponse();
             produceNewUUID();
             forwardToRules(RulesModuleRequestMapper.createReceiveSalesResponseRequest(response, logUUID, request.getSenderOrReceiver()));
-            exchangeLog.log(request, LogType.RECEIVE_SALES_RESPONSE, ExchangeLogStatusTypeType.ISSUED, TypeRefType.SALES_RESPONSE, response, true, logUUID);
-
-            ExchangeLogType log = exchangeLog.log(request, LogType.RECEIVE_SALES_RESPONSE, ExchangeLogStatusTypeType.ISSUED, TypeRefType.SALES_RESPONSE, response, true);
-
+            ExchangeLogType log = exchangeLog.log(request, LogType.RECEIVE_SALES_RESPONSE, ExchangeLogStatusTypeType.ISSUED, TypeRefType.SALES_RESPONSE, response, true, logUUID);
             String receiveSalesResponseRequest = RulesModuleRequestMapper.createReceiveSalesResponseRequest(response, log.getGuid(), request.getSenderOrReceiver());
             String messageSelector = "ReceiveSalesResponseRequest";
             forwardToRules(receiveSalesResponseRequest, messageSelector);
@@ -741,14 +735,14 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
      * @param exchangeMessageEvent is optional
      * @param service              is optional
      */
-    private void forwardToRules(String messageToForward, ExchangeMessageEvent exchangeMessageEvent, ServiceResponseType service) {
+/*    private void forwardToRules(String messageToForward, ExchangeMessageEvent exchangeMessageEvent, ServiceResponseType service) {
         try {
             log.info("[INFO] Forwarding the msg to rules Module.");
             producer.sendMessageOnQueue(messageToForward, MessageQueue.RULES);
         } catch (ExchangeMessageException e) {
             log.error("[ERROR] Failed to forward message to Rules: {} {}", messageToForward, e);
         }
-    }
+    }*/
 
     /**
      * forwards serialized message to Asset module
