@@ -46,7 +46,7 @@ public interface ExchangeLogService {
      * @param incoming is this an incoming message (then true) or an outgoing message (then false)?
      * @return the created log entry
      */
-    ExchangeLogType log(ExchangeBaseRequest request, LogType logType, ExchangeLogStatusTypeType status, TypeRefType messageType, String messageText, boolean incoming) throws ExchangeLogException;
+    ExchangeLogType log(ExchangeBaseRequest request, LogType logType, ExchangeLogStatusTypeType status, TypeRefType messageType, String messageText, boolean incoming, String logUuid) throws ExchangeLogException;
 
     ExchangeLogType updateStatus(String messageId, ExchangeLogStatusTypeType logStatus, String username) throws ExchangeLogException;
 

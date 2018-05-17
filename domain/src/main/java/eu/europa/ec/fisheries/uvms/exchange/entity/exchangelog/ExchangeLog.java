@@ -11,6 +11,13 @@ copy of the GNU General Public License along with the IFDM Suite. If not, see <h
  */
 package eu.europa.ec.fisheries.uvms.exchange.entity.exchangelog;
 
+import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogStatusTypeType;
+import eu.europa.ec.fisheries.schema.exchange.v1.LogType;
+import eu.europa.ec.fisheries.schema.exchange.v1.TypeRefType;
+import eu.europa.ec.fisheries.uvms.exchange.constant.ExchangeConstants;
+import java.util.Date;
+import java.util.List;
+import java.util.UUID;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -29,14 +36,8 @@ import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
-import java.util.Date;
-import java.util.List;
-import java.util.UUID;
-
-import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogStatusTypeType;
-import eu.europa.ec.fisheries.schema.exchange.v1.LogType;
-import eu.europa.ec.fisheries.schema.exchange.v1.TypeRefType;
-import eu.europa.ec.fisheries.uvms.exchange.constant.ExchangeConstants;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 
 @Entity
 @Table(name="log")
@@ -47,6 +48,7 @@ import eu.europa.ec.fisheries.uvms.exchange.constant.ExchangeConstants;
   @NamedQuery(name = ExchangeConstants.LOG_BY_TYPE_REF_AND_GUID, query = "SELECT log FROM ExchangeLog log WHERE log.typeRefGuid = :typeRefGuid AND log.typeRefType in (:typeRefTypes)")
 })
 //@formatter:on
+@Slf4j
 public class ExchangeLog {
 
 	@Id
@@ -130,7 +132,10 @@ public class ExchangeLog {
 
 	@PrePersist
 	public void prepersist() {
-		setGuid(UUID.randomUUID().toString());
+		if(StringUtils.isEmpty(getGuid())){
+			log.warn("[WARN] The log GUID was missing so a new one was generated... Check logging methods if the GUID is always being set correctly (ExchangeLogType.setGuid(...){})! ");
+			setGuid(UUID.randomUUID().toString());
+		}
 	}
 	
 	public Long getId() {
