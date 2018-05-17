@@ -161,14 +161,12 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
     @EJB
     private ExchangeEventOutgoingService exchangeEventOutgoingService;
 
-    private String logUUID;
-
     @Override
     public void processFLUXFAReportMessage(@Observes @SetFluxFAReportMessageEvent ExchangeMessageEvent message) {
         try {
             SetFLUXFAReportMessageRequest request = JAXBMarshaller.unmarshallTextMessage(message.getJmsMessage(), SetFLUXFAReportMessageRequest.class);
             log.debug("[INFO] Got FLUXFAReportMessage in exchange :" + request.getRequest());
-            produceNewUUID();
+            String logUUID = produceNewUUID();
             String msg = RulesModuleRequestMapper.createSetFLUXFAReportMessageRequest(extractPluginType(request), request.getRequest(), request.getUsername(), logUUID, request.getFluxDataFlow(), request.getSenderOrReceiver(), request.getOnValue());
             forwardToRules(msg, message, null);
             exchangeLog.log(request, LogType.RCV_FLUX_FA_REPORT_MSG, ExchangeLogStatusTypeType.ISSUED, TypeRefType.FA_REPORT, request.getRequest(), true, logUUID);
@@ -185,7 +183,7 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
         try {
             SetFAQueryMessageRequest request = JAXBMarshaller.unmarshallTextMessage(message.getJmsMessage(), SetFAQueryMessageRequest.class);
             log.debug("Got FAQueryMessage in exchange :" + request.getRequest());
-            produceNewUUID();
+            String logUUID = produceNewUUID();
             String msg = RulesModuleRequestMapper.createSetFaQueryMessageRequest(extractPluginType(request)
                     , request.getRequest(), request.getUsername(), logUUID, request.getFluxDataFlow()
                     , request.getSenderOrReceiver(), request.getOnValue());
@@ -203,7 +201,7 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
         try {
             RcvFLUXFaResponseMessageRequest request = JAXBMarshaller.unmarshallTextMessage(message.getJmsMessage(), RcvFLUXFaResponseMessageRequest.class);
             log.debug("Got FLUXResponseMessage in exchange :" + request.getRequest());
-            produceNewUUID();
+            String logUUID = produceNewUUID();
             String msg = RulesModuleRequestMapper.createRcvFluxFaResponseMessageRequest(extractPluginType(request), request.getRequest(), request.getUsername(), logUUID, request.getFluxDataFlow(),
                     request.getSenderOrReceiver(), request.getOnValue());
             forwardToRules(msg, message, null);
@@ -289,7 +287,7 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
                 // TODO : then we can use this to send response to original caller from anywhere needed
                 rawMovement.setAckResponseMessageID(jmsMessageID);
                 log.info("[INFO] Logging received movement.");
-                produceNewUUID();
+                String logUUID = produceNewUUID();
                 forwardToRules(RulesModuleRequestMapper.createSetMovementReportRequest(PluginTypeMapper.map(pluginType), rawMovement, username), message, service);
                 exchangeLog.log(request, LogType.RECEIVE_MOVEMENT, ExchangeLogStatusTypeType.ISSUED, TypeRefType.MOVEMENT, JAXBMarshaller.marshallJaxBObjectToString(request), true, logUUID);
                 log.info("[INFO] Finished forwarding received movement to rules module.");
@@ -345,7 +343,7 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
             ReceiveAssetInformationRequest request = JAXBMarshaller.unmarshallTextMessage(event.getJmsMessage(), ReceiveAssetInformationRequest.class);
             String message = request.getAssets();
             forwardToAsset(message);
-            produceNewUUID();
+            String logUUID = produceNewUUID();
             exchangeLog.log(request, LogType.RECEIVE_ASSET_INFORMATION, ExchangeLogStatusTypeType.SUCCESSFUL, TypeRefType.ASSETS, message, true, logUUID);
         } catch (ExchangeModelMarshallException e) {
             try {
@@ -369,7 +367,7 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
             PluginType plugin = request.getPluginType();
             String sender = request.getSenderOrReceiver();
             String messageGuid = request.getMessageGuid();
-            produceNewUUID();
+            String logUUID = produceNewUUID();
             forwardToRules(RulesModuleRequestMapper.createReceiveSalesReportRequest(report, messageGuid, plugin.name(), logUUID, sender, request.getOnValue()));
             ExchangeLogType log = exchangeLog.log(request, LogType.RECEIVE_SALES_REPORT, ExchangeLogStatusTypeType.ISSUED, TypeRefType.SALES_REPORT, report, true, logUUID);
 
@@ -400,7 +398,7 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
             String sender = request.getSenderOrReceiver();
             String messageGuid = request.getMessageGuid();
 
-            produceNewUUID();
+            String logUUID = produceNewUUID();
             forwardToRules(RulesModuleRequestMapper.createReceiveSalesQueryRequest(query, messageGuid, plugin.name(), logUUID, sender, request.getOnValue()));
             ExchangeLogType log = exchangeLog.log(request, LogType.RECEIVE_SALES_QUERY, ExchangeLogStatusTypeType.ISSUED, TypeRefType.SALES_QUERY, query, true, logUUID);
             String receiveSalesQueryRequest = RulesModuleRequestMapper.createReceiveSalesQueryRequest(query, messageGuid, plugin.name(), log.getGuid(), sender, request.getOnValue());
@@ -425,7 +423,7 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
         try {
             ReceiveSalesResponseRequest request = JAXBMarshaller.unmarshallTextMessage(event.getJmsMessage(), ReceiveSalesResponseRequest.class);
             String response = request.getResponse();
-            produceNewUUID();
+            String logUUID = produceNewUUID();
             forwardToRules(RulesModuleRequestMapper.createReceiveSalesResponseRequest(response, logUUID, request.getSenderOrReceiver()));
             ExchangeLogType log = exchangeLog.log(request, LogType.RECEIVE_SALES_RESPONSE, ExchangeLogStatusTypeType.ISSUED, TypeRefType.SALES_RESPONSE, response, true, logUUID);
             String receiveSalesResponseRequest = RulesModuleRequestMapper.createReceiveSalesResponseRequest(response, log.getGuid(), request.getSenderOrReceiver());
@@ -444,7 +442,7 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
     public void receiveInvalidSalesMessage(@Observes @ReceiveInvalidSalesMessageEvent ExchangeMessageEvent event) {
         try {
             ReceiveInvalidSalesMessage request = JAXBMarshaller.unmarshallTextMessage(event.getJmsMessage(), ReceiveInvalidSalesMessage.class);
-            produceNewUUID();
+            String logUUID = produceNewUUID();
             producer.sendMessageOnQueue(request.getRespondToInvalidMessageRequest(), MessageQueue.SALES);
             exchangeLog.log(request, LogType.RECEIVE_SALES_REPORT, ExchangeLogStatusTypeType.FAILED, TypeRefType.SALES_REPORT, request.getRespondToInvalidMessageRequest(), true, logUUID);
         } catch (ExchangeLogException e) {
@@ -496,7 +494,7 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
         try {
             SendSalesResponseRequest request = JAXBMarshaller.unmarshallTextMessage(message.getJmsMessage(), SendSalesResponseRequest.class);
             ExchangeLogStatusTypeType validationStatus = request.getValidationStatus();
-            produceNewUUID();
+            String logUUID = produceNewUUID();
             if (validationStatus == ExchangeLogStatusTypeType.SUCCESSFUL || validationStatus == ExchangeLogStatusTypeType.SUCCESSFUL_WITH_WARNINGS) {
                 eu.europa.ec.fisheries.schema.exchange.plugin.v1.SendSalesResponseRequest pluginRequest = new eu.europa.ec.fisheries.schema.exchange.plugin.v1.SendSalesResponseRequest();
                 pluginRequest.setRecipient(request.getSenderOrReceiver());
@@ -519,7 +517,7 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
         try {
             SendSalesReportRequest request = JAXBMarshaller.unmarshallTextMessage(message.getJmsMessage(), SendSalesReportRequest.class);
             ExchangeLogStatusTypeType validationStatus = request.getValidationStatus();
-            produceNewUUID();
+            String logUUID = produceNewUUID();
             if (validationStatus == ExchangeLogStatusTypeType.SUCCESSFUL || validationStatus == ExchangeLogStatusTypeType.SUCCESSFUL_WITH_WARNINGS) {
                 eu.europa.ec.fisheries.schema.exchange.plugin.v1.SendSalesReportRequest pluginRequest = new eu.europa.ec.fisheries.schema.exchange.plugin.v1.SendSalesReportRequest();
                 pluginRequest.setRecipient(request.getSenderOrReceiver());
@@ -544,7 +542,7 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
     @Override
     public void sendAssetInformation(@Observes @SendAssetInformationEvent ExchangeMessageEvent event) {
         try {
-            produceNewUUID();
+            String logUUID = produceNewUUID();
             SendAssetInformationRequest incomingRequest = JAXBMarshaller.unmarshallTextMessage(event.getJmsMessage(), SendAssetInformationRequest.class);
             String message = incomingRequest.getAssets();
             String destination = incomingRequest.getDestination();
@@ -566,7 +564,7 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
     @Override
     public void queryAssetInformation(@Observes @QueryAssetInformationEvent ExchangeMessageEvent event) {
         try {
-            produceNewUUID();
+            String logUUID = produceNewUUID();
             QueryAssetInformationRequest incomingRequest = JAXBMarshaller.unmarshallTextMessage(event.getJmsMessage(), QueryAssetInformationRequest.class);
             String message = incomingRequest.getAssets();
             String destination = incomingRequest.getDestination();
@@ -603,7 +601,7 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
     @Override
     public void handleProcessedMovement(@Observes @HandleProcessedMovementEvent ExchangeMessageEvent message) {
         try {
-            produceNewUUID();
+            String logUUID = produceNewUUID();
             ProcessedMovementResponse request = JAXBMarshaller.unmarshallTextMessage(message.getJmsMessage(), ProcessedMovementResponse.class);
             log.debug("[INFO] Received processed movement from Rules:{}", request);
             MovementRefType movementRefType = request.getMovementRefType();
@@ -845,8 +843,8 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
         return msg;
     }
 
-    private void produceNewUUID(){
-        logUUID = UUID.randomUUID().toString();
+    private String produceNewUUID(){
+        return UUID.randomUUID().toString();
     }
 
 }
