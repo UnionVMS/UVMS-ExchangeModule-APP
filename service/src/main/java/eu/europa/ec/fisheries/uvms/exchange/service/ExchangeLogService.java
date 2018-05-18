@@ -14,6 +14,7 @@ package eu.europa.ec.fisheries.uvms.exchange.service;
 import javax.ejb.Local;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 
 import eu.europa.ec.fisheries.schema.exchange.module.v1.ExchangeBaseRequest;
 import eu.europa.ec.fisheries.schema.exchange.source.v1.GetLogListByQueryResponse;
@@ -23,6 +24,7 @@ import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogStatusTypeType;
 import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogType;
 import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogWithValidationResults;
 import eu.europa.ec.fisheries.schema.exchange.v1.LogType;
+import eu.europa.ec.fisheries.schema.exchange.v1.LogWithRawMsgAndType;
 import eu.europa.ec.fisheries.schema.exchange.v1.PollStatus;
 import eu.europa.ec.fisheries.schema.exchange.v1.TypeRefType;
 import eu.europa.ec.fisheries.schema.exchange.v1.UnsentMessageType;
@@ -61,7 +63,7 @@ public interface ExchangeLogService {
      * @return the updated log
      * @throws ExchangeLogException when something goes wrong
      */
-    ExchangeLogType updateStatus(String logGuid, ExchangeLogStatusTypeType logStatus) throws ExchangeLogException;
+    ExchangeLogType updateStatus(String logGuid, ExchangeLogStatusTypeType logStatus, Boolean duplicate) throws ExchangeLogException;
 
     GetLogListByQueryResponse getExchangeLogList(ExchangeListQuery query) throws ExchangeLogException;
 
@@ -70,6 +72,8 @@ public interface ExchangeLogService {
     List<ExchangeLogStatusType> getExchangeStatusHistoryList(ExchangeLogStatusTypeType status, TypeRefType type, Date from, Date to) throws ExchangeLogException;
 
     ExchangeLogType getExchangeLogByGuid(String guid) throws ExchangeLogException;
+
+    Set<ExchangeLogType> getExchangeLogsByRefUUID(String guid, TypeRefType type) throws ExchangeLogException;
 
     String createUnsentMessage(String senderReceiver, Date timestamp, String recipient, String message, List<UnsentMessageTypeProperty> properties, String username) throws ExchangeLogException;
 
@@ -81,7 +85,7 @@ public interface ExchangeLogService {
 
     void removeUnsentMessage(String messageId, String username) throws ExchangeLogException;
 
-    ExchangeLogWithValidationResults getExchangeLogRawMessageAndValidationByGuid(String guid) throws ExchangeLogException;
+    ExchangeLogWithValidationResults getExchangeLogRawMessageAndValidationByGuid(String guid, LogWithRawMsgAndType rawMsg) throws ExchangeLogException;
 
-    String getExchangeLogRawMessageByGuid(String guid);
+    LogWithRawMsgAndType getExchangeLogRawMessage(String guid);
 }

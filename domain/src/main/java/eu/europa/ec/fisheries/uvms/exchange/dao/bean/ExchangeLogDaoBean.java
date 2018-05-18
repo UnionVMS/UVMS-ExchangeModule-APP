@@ -169,6 +169,7 @@ public class ExchangeLogDaoBean extends Dao implements ExchangeLogDao {
 			TypedQuery<ExchangeLog> namedQuery = em.createNamedQuery(ExchangeConstants.LOG_BY_TYPE_REF_AND_GUID, ExchangeLog.class);
             namedQuery.setParameter("typeRefGuid", typeRefGuid);
             namedQuery.setParameter("typeRefTypes", types);
+            namedQuery.setParameter("duplicate", false);
             return namedQuery.getResultList();
         } catch (NoResultException e) {
             LOG.error("[ Error when getting entity by type ref ID. ] {}", e.getMessage());

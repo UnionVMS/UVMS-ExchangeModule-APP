@@ -11,22 +11,6 @@ copy of the GNU General Public License along with the IFDM Suite. If not, see <h
  */
 package eu.europa.ec.fisheries.uvms.exchange.rest.service;
 
-import eu.europa.ec.fisheries.schema.exchange.source.v1.GetLogListByQueryResponse;
-import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeListQuery;
-import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogStatusType;
-import eu.europa.ec.fisheries.schema.exchange.v1.TypeRefType;
-import eu.europa.ec.fisheries.uvms.commons.date.DateUtils;
-import eu.europa.ec.fisheries.uvms.exchange.rest.dto.PollQuery;
-import eu.europa.ec.fisheries.uvms.exchange.rest.dto.ResponseDto;
-import eu.europa.ec.fisheries.uvms.exchange.rest.dto.RestResponseCode;
-import eu.europa.ec.fisheries.uvms.exchange.rest.dto.exchange.ListQueryResponse;
-import eu.europa.ec.fisheries.uvms.exchange.rest.error.ErrorHandler;
-import eu.europa.ec.fisheries.uvms.exchange.rest.mapper.ExchangeLogMapper;
-import eu.europa.ec.fisheries.uvms.exchange.service.ExchangeLogService;
-import eu.europa.ec.fisheries.uvms.rest.security.RequiresFeature;
-import eu.europa.ec.fisheries.uvms.rest.security.UnionVMSFeature;
-import java.util.Date;
-import java.util.List;
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
 import javax.servlet.http.HttpServletRequest;
@@ -38,7 +22,32 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
+import java.util.Collections;
+import java.util.Date;
+import java.util.List;
+import java.util.Set;
+
+import eu.europa.ec.fisheries.schema.exchange.source.v1.GetLogListByQueryResponse;
+import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeListQuery;
+import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogStatusType;
+import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogType;
+import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogWithValidationResults;
+import eu.europa.ec.fisheries.schema.exchange.v1.LogType;
+import eu.europa.ec.fisheries.schema.exchange.v1.LogWithRawMsgAndType;
+import eu.europa.ec.fisheries.schema.exchange.v1.TypeRefType;
+import eu.europa.ec.fisheries.uvms.commons.date.DateUtils;
+import eu.europa.ec.fisheries.uvms.exchange.rest.dto.PollQuery;
+import eu.europa.ec.fisheries.uvms.exchange.rest.dto.ResponseDto;
+import eu.europa.ec.fisheries.uvms.exchange.rest.dto.RestResponseCode;
+import eu.europa.ec.fisheries.uvms.exchange.rest.dto.exchange.BusinessRuleComparator;
+import eu.europa.ec.fisheries.uvms.exchange.rest.dto.exchange.ListQueryResponse;
+import eu.europa.ec.fisheries.uvms.exchange.rest.error.ErrorHandler;
+import eu.europa.ec.fisheries.uvms.exchange.rest.mapper.ExchangeLogMapper;
+import eu.europa.ec.fisheries.uvms.exchange.service.ExchangeLogService;
+import eu.europa.ec.fisheries.uvms.rest.security.RequiresFeature;
+import eu.europa.ec.fisheries.uvms.rest.security.UnionVMSFeature;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections.CollectionUtils;
 
 @Path("/exchange")
 @Stateless
@@ -117,8 +126,8 @@ public class ExchangeLogRestResource {
     @RequiresFeature(UnionVMSFeature.viewExchange)
     public ResponseDto getExchangeLogRawXMLByGuid(@PathParam("guid") String guid) {
         try {
-            String rawMsg = serviceLayer.getExchangeLogRawMessageByGuid(guid);
-            return new ResponseDto(rawMsg, RestResponseCode.OK);
+            LogWithRawMsgAndType exchangeLogRawMessageByGuid = serviceLayer.getExchangeLogRawMessage(guid);
+            return new ResponseDto(exchangeLogRawMessageByGuid.getRawMsg(), RestResponseCode.OK);
         } catch (Exception e) {
             log.error("[ Error when getting exchange log by GUID. ] {}", e.getMessage());
             return ErrorHandler.getFault(e);
@@ -131,7 +140,37 @@ public class ExchangeLogRestResource {
     @RequiresFeature(UnionVMSFeature.viewExchange)
     public ResponseDto getExchangeLogRawXMLAndValidationByGuid(@PathParam("guid") String guid) {
         try {
-          return new ResponseDto(serviceLayer.getExchangeLogRawMessageAndValidationByGuid(guid), RestResponseCode.OK);
+            String refUUID;
+            ExchangeLogType exchangeLogByUUID = serviceLayer.getExchangeLogByGuid(guid);
+            ExchangeLogWithValidationResults results = null;
+
+            LogType type = exchangeLogByUUID.getType();
+
+            if (type == LogType.RCV_FLUX_FA_REPORT_MSG && exchangeLogByUUID.isDuplicate()) {
+                refUUID = exchangeLogByUUID.getTypeRef().getRefGuid();
+                Set<ExchangeLogType> exchangeLogsByRefUUID = serviceLayer.getExchangeLogsByRefUUID(refUUID, exchangeLogByUUID.getTypeRefType());
+                if (CollectionUtils.isNotEmpty(exchangeLogsByRefUUID)){
+                    ExchangeLogType next = exchangeLogsByRefUUID.iterator().next();
+                    LogWithRawMsgAndType rawMsg = serviceLayer.getExchangeLogRawMessage(guid);
+                    results = serviceLayer.getExchangeLogRawMessageAndValidationByGuid(next.getGuid(), rawMsg);
+                }
+            }
+
+            else if (type == LogType.SEND_FLUX_RESPONSE_MSG ){
+                LogWithRawMsgAndType rawMsg = serviceLayer.getExchangeLogRawMessage(guid);
+                results = serviceLayer.getExchangeLogRawMessageAndValidationByGuid(rawMsg.getRefGuid(), rawMsg);
+            }
+
+            else {
+                LogWithRawMsgAndType rawMsg = serviceLayer.getExchangeLogRawMessage(guid);
+                results = serviceLayer.getExchangeLogRawMessageAndValidationByGuid(guid, rawMsg);
+            }
+
+            if (results != null && CollectionUtils.isNotEmpty(results.getValidationList())){
+                Collections.sort(results.getValidationList(), new BusinessRuleComparator());
+            }
+            return new ResponseDto(results, RestResponseCode.OK);
+
         } catch (Exception e) {
             log.error("[ Error when getting exchange log by GUID. ] {}", e.getMessage());
             return ErrorHandler.getFault(e);
@@ -142,7 +181,7 @@ public class ExchangeLogRestResource {
     @Produces(value = {MediaType.APPLICATION_JSON})
     @Path("/{guid}")
     @RequiresFeature(UnionVMSFeature.viewExchange)
-    public ResponseDto getExchangeLogByGuid(@PathParam("guid") String guid) {
+    public ResponseDto getExchangeLogByUUID(@PathParam("guid") String guid) {
         try {
             return new ResponseDto(serviceLayer.getExchangeLogByGuid(guid), RestResponseCode.OK);
         } catch (Exception e) {

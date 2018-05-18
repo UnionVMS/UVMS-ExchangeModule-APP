@@ -11,15 +11,20 @@
  */
 package eu.europa.ec.fisheries.uvms.exchange.service;
 
+import javax.ejb.Local;
+import javax.enterprise.event.Observes;
+
 import eu.europa.ec.fisheries.schema.exchange.plugin.types.v1.PluginType;
 import eu.europa.ec.fisheries.schema.exchange.plugin.v1.PluginBaseRequest;
-import eu.europa.ec.fisheries.uvms.exchange.message.event.*;
+import eu.europa.ec.fisheries.uvms.exchange.message.event.MdrSyncRequestMessageEvent;
+import eu.europa.ec.fisheries.uvms.exchange.message.event.SendCommandToPluginEvent;
+import eu.europa.ec.fisheries.uvms.exchange.message.event.SendFLUXFAResponseToPluginEvent;
+import eu.europa.ec.fisheries.uvms.exchange.message.event.SendFaQueryToPluginEvent;
+import eu.europa.ec.fisheries.uvms.exchange.message.event.SendFaReportToPluginEvent;
+import eu.europa.ec.fisheries.uvms.exchange.message.event.SendReportToPluginEvent;
 import eu.europa.ec.fisheries.uvms.exchange.message.event.carrier.ExchangeMessageEvent;
 import eu.europa.ec.fisheries.uvms.exchange.message.exception.ExchangeMessageException;
 import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelMarshallException;
-
-import javax.ejb.Local;
-import javax.enterprise.event.Observes;
 
 @Local
 public interface ExchangeEventOutgoingService {
@@ -29,14 +34,14 @@ public interface ExchangeEventOutgoingService {
      *
      * @param message
      */
-    public void sendReportToPlugin(@Observes @SendReportToPluginEvent ExchangeMessageEvent message);
+    void sendReportToPlugin(@Observes @SendReportToPluginEvent ExchangeMessageEvent message);
 
     /**
      * Send a command to a plugin
      *
      * @param message
      */
-    public void sendCommandToPlugin(@Observes @SendCommandToPluginEvent ExchangeMessageEvent message);
+    void sendCommandToPlugin(@Observes @SendCommandToPluginEvent ExchangeMessageEvent message);
 
     /**
      * Sends MDR sync message to the MDR plugin
