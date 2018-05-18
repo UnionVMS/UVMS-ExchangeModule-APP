@@ -11,6 +11,9 @@ copy of the GNU General Public License along with the IFDM Suite. If not, see <h
  */
 package eu.europa.ec.fisheries.uvms.exchange.mapper;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogStatusHistoryType;
 import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogStatusType;
 import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogStatusTypeType;
@@ -23,15 +26,15 @@ import eu.europa.ec.fisheries.schema.exchange.v1.SendMovementType;
 import eu.europa.ec.fisheries.schema.exchange.v1.SendPollType;
 import eu.europa.ec.fisheries.uvms.exchange.entity.exchangelog.ExchangeLog;
 import eu.europa.ec.fisheries.uvms.exchange.entity.exchangelog.ExchangeLogStatus;
-import eu.europa.ec.fisheries.uvms.exchange.model.util.DateUtils;
 import org.slf4j.MDC;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class LogMapper {
 
     private static final String FLUX = "FLUX";
+
+    private LogMapper(){
+
+    }
 
     public static ExchangeLog toNewEntity(ExchangeLogType log, String username) {
         ExchangeLog entity = new ExchangeLog();
@@ -49,6 +52,16 @@ public class LogMapper {
             case SEND_EMAIL:
                 entity = toSendEmailEntity(log);
                 break;
+            case RECEIVE_SALES_REPORT:
+                break;
+            case RECEIVE_SALES_QUERY:
+                break;
+            case RECEIVE_SALES_RESPONSE:
+                break;
+            case SEND_SALES_RESPONSE:
+                break;
+            case SEND_SALES_REPORT:
+                break;
             case RECEIVE_FLUX_RESPONSE_MSG:
             case RCV_FLUX_FA_REPORT_MSG:
             case RECEIVE_FA_QUERY_MSG:
@@ -56,6 +69,12 @@ public class LogMapper {
             case SEND_FLUX_FA_REPORT_MSG:
             case SEND_FLUX_RESPONSE_MSG:
                 entity.setSource(FLUX);
+                break;
+            case RECEIVE_ASSET_INFORMATION:
+                break;
+            case SEND_ASSET_INFORMATION:
+                break;
+            case QUERY_ASSET_INFORMATION:
                 break;
         }
 
@@ -81,9 +100,9 @@ public class LogMapper {
         ExchangeLogStatus statusLog = new ExchangeLogStatus();
         statusLog.setLog(entity);
         statusLog.setStatus(status);
-        statusLog.setStatusTimestamp(DateUtils.nowUTC().toDate());
+        statusLog.setStatusTimestamp(eu.europa.ec.fisheries.uvms.commons.date.DateUtils.nowUTC().toDate());
         statusLog.setUpdatedBy(username);
-        statusLog.setUpdateTime(DateUtils.nowUTC().toDate());
+        statusLog.setUpdateTime(eu.europa.ec.fisheries.uvms.commons.date.DateUtils.nowUTC().toDate());
         statusHistory.add(statusLog);
 
         entity.setStatus(status);
@@ -94,7 +113,7 @@ public class LogMapper {
 
         entity.setStatusHistory(statusHistory);
         entity.setUpdatedBy(username);
-        entity.setUpdateTime(DateUtils.nowUTC().toDate());
+        entity.setUpdateTime(eu.europa.ec.fisheries.uvms.commons.date.DateUtils.nowUTC().toDate());
         entity.setType(log.getType());
         entity.setDestination(log.getDestination());
         entity.setMDCRequestId(MDC.get("requestId"));
@@ -179,7 +198,7 @@ public class LogMapper {
         model.setType(logType);
         model.setSource(entity.getSource());
         model.setTypeRefType(entity.getTypeRefType());
-
+        model.setDuplicate(entity.getDuplicate());
 
         if (entity.getTypeRefType() != null) {
             LogRefType logRefType = new LogRefType();
@@ -196,9 +215,9 @@ public class LogMapper {
         ExchangeLogStatus entity = new ExchangeLogStatus();
         entity.setLog(parent);
         entity.setStatus(status);
-        entity.setStatusTimestamp(DateUtils.nowUTC().toDate());
+        entity.setStatusTimestamp(eu.europa.ec.fisheries.uvms.commons.date.DateUtils.nowUTC().toDate());
         entity.setUpdatedBy(username);
-        entity.setUpdateTime(DateUtils.nowUTC().toDate());
+        entity.setUpdateTime(eu.europa.ec.fisheries.uvms.commons.date.DateUtils.nowUTC().toDate());
         return entity;
     }
 

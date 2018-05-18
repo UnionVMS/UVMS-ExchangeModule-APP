@@ -13,8 +13,40 @@ package eu.europa.ec.fisheries.uvms.exchange.service.bean;
 
 import static eu.europa.ec.fisheries.uvms.commons.message.impl.JAXBUtils.unMarshallMessage;
 
+import javax.ejb.EJB;
+import javax.ejb.Stateless;
+import javax.enterprise.event.Event;
+import javax.enterprise.event.Observes;
+import javax.inject.Inject;
+import javax.jms.JMSException;
+import javax.jms.TextMessage;
+import javax.xml.bind.JAXBException;
+import java.util.List;
+
 import eu.europa.ec.fisheries.schema.exchange.common.v1.AcknowledgeType;
-import eu.europa.ec.fisheries.schema.exchange.module.v1.*;
+import eu.europa.ec.fisheries.schema.exchange.module.v1.ExchangeBaseRequest;
+import eu.europa.ec.fisheries.schema.exchange.module.v1.GetServiceListRequest;
+import eu.europa.ec.fisheries.schema.exchange.module.v1.LogIdByTypeExistsRequest;
+import eu.europa.ec.fisheries.schema.exchange.module.v1.LogIdByTypeExistsResponse;
+import eu.europa.ec.fisheries.schema.exchange.module.v1.LogRefIdByTypeExistsRequest;
+import eu.europa.ec.fisheries.schema.exchange.module.v1.LogRefIdByTypeExistsResponse;
+import eu.europa.ec.fisheries.schema.exchange.module.v1.PingResponse;
+import eu.europa.ec.fisheries.schema.exchange.module.v1.ProcessedMovementResponse;
+import eu.europa.ec.fisheries.schema.exchange.module.v1.QueryAssetInformationRequest;
+import eu.europa.ec.fisheries.schema.exchange.module.v1.RcvFLUXFaResponseMessageRequest;
+import eu.europa.ec.fisheries.schema.exchange.module.v1.ReceiveAssetInformationRequest;
+import eu.europa.ec.fisheries.schema.exchange.module.v1.ReceiveInvalidSalesMessage;
+import eu.europa.ec.fisheries.schema.exchange.module.v1.ReceiveSalesQueryRequest;
+import eu.europa.ec.fisheries.schema.exchange.module.v1.ReceiveSalesReportRequest;
+import eu.europa.ec.fisheries.schema.exchange.module.v1.ReceiveSalesResponseRequest;
+import eu.europa.ec.fisheries.schema.exchange.module.v1.SendAssetInformationRequest;
+import eu.europa.ec.fisheries.schema.exchange.module.v1.SendSalesReportRequest;
+import eu.europa.ec.fisheries.schema.exchange.module.v1.SendSalesResponseRequest;
+import eu.europa.ec.fisheries.schema.exchange.module.v1.SetFAQueryMessageRequest;
+import eu.europa.ec.fisheries.schema.exchange.module.v1.SetFLUXFAReportMessageRequest;
+import eu.europa.ec.fisheries.schema.exchange.module.v1.SetFLUXMDRSyncMessageExchangeResponse;
+import eu.europa.ec.fisheries.schema.exchange.module.v1.SetMovementReportRequest;
+import eu.europa.ec.fisheries.schema.exchange.module.v1.UpdateLogStatusRequest;
 import eu.europa.ec.fisheries.schema.exchange.movement.v1.MovementBaseType;
 import eu.europa.ec.fisheries.schema.exchange.movement.v1.MovementRefType;
 import eu.europa.ec.fisheries.schema.exchange.movement.v1.MovementSourceType;
@@ -39,7 +71,29 @@ import eu.europa.ec.fisheries.schema.rules.module.v1.SetFLUXMDRSyncMessageRulesR
 import eu.europa.ec.fisheries.schema.rules.movement.v1.RawMovementType;
 import eu.europa.ec.fisheries.uvms.commons.message.impl.JAXBUtils;
 import eu.europa.ec.fisheries.uvms.exchange.message.constants.MessageQueue;
-import eu.europa.ec.fisheries.uvms.exchange.message.event.*;
+import eu.europa.ec.fisheries.uvms.exchange.message.event.ErrorEvent;
+import eu.europa.ec.fisheries.uvms.exchange.message.event.ExchangeLogEvent;
+import eu.europa.ec.fisheries.uvms.exchange.message.event.HandleProcessedMovementEvent;
+import eu.europa.ec.fisheries.uvms.exchange.message.event.LogIdByTypeExists;
+import eu.europa.ec.fisheries.uvms.exchange.message.event.LogRefIdByTypeExists;
+import eu.europa.ec.fisheries.uvms.exchange.message.event.MdrSyncResponseMessageEvent;
+import eu.europa.ec.fisheries.uvms.exchange.message.event.PingEvent;
+import eu.europa.ec.fisheries.uvms.exchange.message.event.PluginConfigEvent;
+import eu.europa.ec.fisheries.uvms.exchange.message.event.PluginPingEvent;
+import eu.europa.ec.fisheries.uvms.exchange.message.event.QueryAssetInformationEvent;
+import eu.europa.ec.fisheries.uvms.exchange.message.event.ReceiveAssetInformationEvent;
+import eu.europa.ec.fisheries.uvms.exchange.message.event.ReceiveInvalidSalesMessageEvent;
+import eu.europa.ec.fisheries.uvms.exchange.message.event.ReceiveSalesQueryEvent;
+import eu.europa.ec.fisheries.uvms.exchange.message.event.ReceiveSalesReportEvent;
+import eu.europa.ec.fisheries.uvms.exchange.message.event.ReceiveSalesResponseEvent;
+import eu.europa.ec.fisheries.uvms.exchange.message.event.ReceivedFluxFaResponseMessageEvent;
+import eu.europa.ec.fisheries.uvms.exchange.message.event.SendAssetInformationEvent;
+import eu.europa.ec.fisheries.uvms.exchange.message.event.SendSalesReportEvent;
+import eu.europa.ec.fisheries.uvms.exchange.message.event.SendSalesResponseEvent;
+import eu.europa.ec.fisheries.uvms.exchange.message.event.SetFaQueryMessageEvent;
+import eu.europa.ec.fisheries.uvms.exchange.message.event.SetFluxFAReportMessageEvent;
+import eu.europa.ec.fisheries.uvms.exchange.message.event.SetMovementEvent;
+import eu.europa.ec.fisheries.uvms.exchange.message.event.UpdateLogStatusEvent;
 import eu.europa.ec.fisheries.uvms.exchange.message.event.carrier.ExchangeMessageEvent;
 import eu.europa.ec.fisheries.uvms.exchange.message.event.carrier.PluginMessageEvent;
 import eu.europa.ec.fisheries.uvms.exchange.message.event.registry.PluginErrorEvent;
@@ -69,15 +123,6 @@ import eu.europa.ec.fisheries.uvms.movement.model.mapper.MovementModuleResponseM
 import eu.europa.ec.fisheries.uvms.rules.model.exception.RulesModelMapperException;
 import eu.europa.ec.fisheries.uvms.rules.model.exception.RulesModelMarshallException;
 import eu.europa.ec.fisheries.uvms.rules.model.mapper.RulesModuleRequestMapper;
-import java.util.List;
-import javax.ejb.EJB;
-import javax.ejb.Stateless;
-import javax.enterprise.event.Event;
-import javax.enterprise.event.Observes;
-import javax.inject.Inject;
-import javax.jms.JMSException;
-import javax.jms.TextMessage;
-import javax.xml.bind.JAXBException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 
@@ -311,11 +356,6 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
             producer.sendMessageOnQueue(messageToForward, MessageQueue.RULES);
         } catch (ExchangeMessageException e) {
             log.error("[ERROR] Failed to forward message to Rules: {} {}", messageToForward, e);
-
-      /*      if (service!= null && exchangeMessageEvent != null) {
-                PluginFault fault = ExchangePluginResponseMapper.mapToPluginFaultResponse(FaultCode.EXCHANGE_PLUGIN_EVENT.getCode(), "Message cannot be sent to Rules module [ " + e.getMessage() + " ]");
-                pluginErrorEvent.fire(new PluginMessageEvent(exchangeMessageEvent.getJmsMessage(), service, fault));
-            } */
         }
     }
 
@@ -594,7 +634,8 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
             UpdateLogStatusRequest request = JAXBMarshaller.unmarshallTextMessage(message.getJmsMessage(), UpdateLogStatusRequest.class);
             String logGuid = request.getLogGuid();
             ExchangeLogStatusTypeType status = request.getNewStatus();
-            exchangeLog.updateStatus(logGuid, status);
+            boolean duplicate = request.isDuplicate();
+            exchangeLog.updateStatus(logGuid, status, duplicate);
         } catch (ExchangeLogException e) {
             fireExchangeFault(message, "Could not update the status of a message log.", e);
         } catch (ExchangeModelMarshallException e) {
@@ -734,19 +775,17 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
     private void handleUpdateExchangeLogAcknowledge(ExchangePluginMethod method, String serviceClassName, AcknowledgeType ack) {
 
         ExchangeLogStatusTypeType logStatus = ExchangeLogStatusTypeType.FAILED;
-        switch (ack.getType()) {
-            case OK:
-                //TODO if(poll probably transmitted)
-                logStatus = ExchangeLogStatusTypeType.SUCCESSFUL;
-                try {
-                    exchangeLog.removeUnsentMessage(ack.getUnsentMessageGuid(), serviceClassName);
-                } catch (ExchangeLogException ex) {
-                    log.error(ex.getMessage());
-                }
-                break;
-            case NOK:
-                log.debug(method + " was NOK: " + ack.getMessage());
-                break;
+        if (ack.getType() == eu.europa.ec.fisheries.schema.exchange.common.v1.AcknowledgeTypeType.OK) {//TODO if(poll probably transmitted)
+            logStatus = ExchangeLogStatusTypeType.SUCCESSFUL;
+            try {
+                exchangeLog.removeUnsentMessage(ack.getUnsentMessageGuid(), serviceClassName);
+            } catch (ExchangeLogException ex) {
+                log.error(ex.getMessage());
+            }
+
+        } else if (ack.getType() == eu.europa.ec.fisheries.schema.exchange.common.v1.AcknowledgeTypeType.NOK) {
+            log.debug(method + " was NOK: " + ack.getMessage());
+
         }
 
         try {
@@ -776,26 +815,21 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
     }
 
     private void handleUpdateServiceAcknowledge(String serviceClassName, AcknowledgeType ack, StatusType status) throws ExchangeServiceException {
-        switch (ack.getType()) {
-            case OK:
-                exchangeService.updateServiceStatus(serviceClassName, status, serviceClassName);
-                break;
-            case NOK:
-                //TODO Audit.log()
-                log.error("Couldn't start service " + serviceClassName);
-                break;
+        if (ack.getType() == eu.europa.ec.fisheries.schema.exchange.common.v1.AcknowledgeTypeType.OK) {
+            exchangeService.updateServiceStatus(serviceClassName, status, serviceClassName);
+
+        } else if (ack.getType() == eu.europa.ec.fisheries.schema.exchange.common.v1.AcknowledgeTypeType.NOK) {//TODO Audit.log()
+            log.error("Couldn't start service " + serviceClassName);
+
         }
     }
 
     private void handleAcknowledge(ExchangePluginMethod method, String serviceClassName, AcknowledgeType ack) {
         log.debug(method + " was acknowledged in " + serviceClassName);
-        switch (ack.getType()) {
-            case OK:
-                break;
-            case NOK:
-                //TODO Audit.log()
-                log.error(serviceClassName + " didn't like it. " + ack.getMessage());
-                break;
+        if (ack.getType() == eu.europa.ec.fisheries.schema.exchange.common.v1.AcknowledgeTypeType.OK) {
+        } else if (ack.getType() == eu.europa.ec.fisheries.schema.exchange.common.v1.AcknowledgeTypeType.NOK) {//TODO Audit.log()
+            log.error(serviceClassName + " didn't like it. " + ack.getMessage());
+
         }
     }
 

@@ -16,9 +16,10 @@ import javax.ejb.Stateless;
 import javax.enterprise.event.Event;
 import javax.inject.Inject;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 
 import eu.europa.ec.fisheries.schema.exchange.module.v1.ExchangeBaseRequest;
 import eu.europa.ec.fisheries.schema.exchange.source.v1.GetLogListByQueryResponse;
@@ -157,9 +158,10 @@ public class ExchangeLogServiceBean implements ExchangeLogService {
     }
 
     @Override
-    public ExchangeLogType updateStatus(String logGuid, ExchangeLogStatusTypeType logStatus) throws ExchangeLogException {
+    public ExchangeLogType updateStatus(String logGuid, ExchangeLogStatusTypeType logStatus, Boolean duplicate) throws ExchangeLogException {
         try {
             ExchangeLogStatusType exchangeLogStatusType = createExchangeLogStatusType(logStatus, logGuid);
+            exchangeLogStatusType.setDuplicate(duplicate);
             return exchangeLogModel.updateExchangeLogStatus(exchangeLogStatusType, "SYSTEM");
         } catch (ExchangeModelException e) {
             throw new ExchangeLogException("Couldn't update the status of the exchange log with guid " + logGuid + ". The new status should be " + logStatus, e);
@@ -232,11 +234,20 @@ public class ExchangeLogServiceBean implements ExchangeLogService {
     @Override
     public ExchangeLogType getExchangeLogByGuid(String guid) throws ExchangeLogException {
         try {
-            ExchangeLogType exchangeLogByGuid = exchangeLogModel.getExchangeLogByGuid(guid);
-            return exchangeLogByGuid;
+            return exchangeLogModel.getExchangeLogByGuid(guid);
         } catch (ExchangeModelException e) {
             log.error("[ Error when getting exchange log by GUID. {}] {}",guid, e.getMessage());
             throw new ExchangeLogException("Error when getting exchange log by GUID.");
+        }
+    }
+
+    @Override
+    public Set<ExchangeLogType> getExchangeLogsByRefUUID(String guid, TypeRefType type) throws ExchangeLogException {
+        try {
+            return exchangeLogModel.getExchangeLogByRefUUIDAndType(guid, type);
+        } catch (ExchangeModelException e) {
+            log.error("[ Error when getting exchange log by refUUID. {}] {}",guid, e.getMessage());
+            throw new ExchangeLogException("Error when getting exchange log by refUUID.");
         }
     }
 
@@ -252,7 +263,7 @@ public class ExchangeLogServiceBean implements ExchangeLogService {
             unsentMessage.getProperties().addAll(properties);
             String createdUnsentMessageId = unsentModel.createMessage(unsentMessage, username);
 
-            List<String> unsentMessageIds = Arrays.asList(createdUnsentMessageId);
+            List<String> unsentMessageIds = Collections.singletonList(createdUnsentMessageId);
             sendAuditLogMessageForCreateUnsentMessage(createdUnsentMessageId, username);
             sendingQueueEvent.fire(new NotificationMessage("messageIds", unsentMessageIds));
             return createdUnsentMessageId;
@@ -267,7 +278,7 @@ public class ExchangeLogServiceBean implements ExchangeLogService {
         log.debug("removeUnsentMessage in service layer:{}",unsentMessageId);
         try {
             String removeMessageId = unsentModel.removeMessage(unsentMessageId);
-            List<String> removedMessageIds = Arrays.asList(removeMessageId);
+            List<String> removedMessageIds = Collections.singletonList(removeMessageId);
             sendAuditLogMessageForRemoveUnsentMessage(removeMessageId, username);
             sendingQueueEvent.fire(new NotificationMessage("messageIds", removedMessageIds));
         } catch (ExchangeModelException e) {
@@ -277,22 +288,15 @@ public class ExchangeLogServiceBean implements ExchangeLogService {
     }
 
     @Override
-    public ExchangeLogWithValidationResults getExchangeLogRawMessageAndValidationByGuid(String guid) {
-        LogWithRawMsgAndType rawMsg = exchangeLogModel.getExchangeLogRawXmlByGuid(guid);
-        ExchangeLogWithValidationResults validationFromRules = new ExchangeLogWithValidationResults();
-        if (rawMsg.getType() != null){
-            if (TypeRefType.FA_RESPONSE.equals(rawMsg.getType())){
-                guid = rawMsg.getRefGuid();
-            }
-            validationFromRules = exchangeToRulesSyncMsgBean.getValidationFromRules(guid, rawMsg.getType());
-            validationFromRules.setMsg(rawMsg.getRawMsg() != null ? rawMsg.getRawMsg() : StringUtils.EMPTY);
-        }
+    public ExchangeLogWithValidationResults getExchangeLogRawMessageAndValidationByGuid(String guid, LogWithRawMsgAndType rawMsg) {
+        ExchangeLogWithValidationResults validationFromRules = exchangeToRulesSyncMsgBean.getValidationFromRules(guid, rawMsg.getType());
+        validationFromRules.setMsg(rawMsg.getRawMsg() != null ? rawMsg.getRawMsg() : StringUtils.EMPTY);
         return validationFromRules;
     }
 
     @Override
-    public String getExchangeLogRawMessageByGuid(String guid) {
-        return exchangeLogModel.getExchangeLogRawXmlByGuid(guid).getRawMsg();
+    public LogWithRawMsgAndType getExchangeLogRawMessage(String guid) {
+        return exchangeLogModel.getExchangeLogRawXmlByGuid(guid);
     }
 
     @Override
