@@ -153,6 +153,10 @@ public class ExchangeEventOutgoingServiceBean implements ExchangeEventOutgoingSe
                         LOG.error(e.getMessage());
                     }
 
+                    AcknowledgeType ackType = ExchangeModuleResponseMapper.mapAcknowledgeTypeOK();
+                    String moduleResponse = ExchangeModuleResponseMapper.mapSendMovementToPluginResponse(ackType);
+                    producer.sendModuleResponseMessage(message.getJmsMessage(), moduleResponse);
+
                 } else {
                     LOG.debug("Cannot send to plugin. Response sent to caller:{}",message);
                 }
