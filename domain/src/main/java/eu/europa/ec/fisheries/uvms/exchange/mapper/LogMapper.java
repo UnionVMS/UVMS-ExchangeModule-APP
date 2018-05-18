@@ -198,7 +198,16 @@ public class LogMapper {
         model.setType(logType);
         model.setSource(entity.getSource());
         model.setTypeRefType(entity.getTypeRefType());
-        model.setDuplicate(entity.getDuplicate());
+
+
+        Boolean duplicate = entity.getDuplicate();
+        if (duplicate != null){
+            model.setDuplicate(entity.getDuplicate());
+        }
+        else {
+            model.setDuplicate(false);
+        }
+
 
         if (entity.getTypeRefType() != null) {
             LogRefType logRefType = new LogRefType();

@@ -34,14 +34,14 @@ public interface ExchangeEventOutgoingService {
      *
      * @param message
      */
-    void sendReportToPlugin(@Observes @SendReportToPluginEvent ExchangeMessageEvent message);
+    public void sendReportToPlugin(@Observes @SendReportToPluginEvent ExchangeMessageEvent message);
 
     /**
      * Send a command to a plugin
      *
      * @param message
      */
-    void sendCommandToPlugin(@Observes @SendCommandToPluginEvent ExchangeMessageEvent message);
+    public void sendCommandToPlugin(@Observes @SendCommandToPluginEvent ExchangeMessageEvent message);
 
     /**
      * Sends MDR sync message to the MDR plugin
