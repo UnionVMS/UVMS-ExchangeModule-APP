@@ -73,4 +73,10 @@
         </rollback>
     </changeSet>
 
+    <changeSet author="emrinalgr" id="Add column for duplicated messages">
+        <addColumn tableName="log">
+            <column name="duplicate" type="BOOLEAN" defaultValueBoolean="false"/>
+        </addColumn>
+    </changeSet>
+
 </databaseChangeLog>	

@@ -9,9 +9,13 @@ the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the impl
 FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details. You should have received a
 copy of the GNU General Public License along with the IFDM Suite. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package eu.europa.ec.fisheries.uvms.exchange.constant;
 
 public class ExchangeConstants {
+
+    private ExchangeConstants() {
+    }
 
     public static final String SERVICE_FIND_ALL = "Service.findAll";
     public static final String SERVICE_FIND_BY_TYPES = "Service.findByTypes";
@@ -24,15 +28,5 @@ public class ExchangeConstants {
     public static final String LOG_BY_GUID = "Log.findByGuid";
     public static final String LOG_BY_TYPE_REF_AND_GUID = "Log.findByTypeRefGuid";
     public static final String LOG_BY_TYPE_RANGE_OF_REF_GUIDS = "Log.findByRangeOfRefGuids";
-    
-    public static final String QUEUE_DOMAIN_MODEL = "jms/queue/UVMSExchangeModel";
-    public static final String QUEUE_DOMAIN_MODEL_NAME = "UVMSExchangeModel";
-
-    public static final String CONNECTION_FACTORY = "ConnectionFactory";
-    public static final String CONNECTION_TYPE = "javax.jms.MessageListener";
-    public static final String DESTINATION_TYPE_QUEUE = "javax.jms.Queue";
-
-    public static final String SPACE = " ";
-    public static final String UPDATE_USER = "UVMS";
 
 }

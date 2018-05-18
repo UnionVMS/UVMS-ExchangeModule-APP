@@ -44,7 +44,7 @@ import eu.europa.ec.fisheries.uvms.exchange.constant.ExchangeConstants;
 @NamedQueries({
   @NamedQuery(name = ExchangeConstants.LOG_BY_GUID, query = "SELECT log FROM ExchangeLog log WHERE log.guid = :guid AND ((:typeRefType = null) OR log.typeRefType = :typeRefType))"),
   @NamedQuery(name = ExchangeConstants.LOG_BY_TYPE_RANGE_OF_REF_GUIDS, query = "SELECT DISTINCT log FROM ExchangeLog log WHERE log.typeRefGuid IN (:refGuids)"),
-  @NamedQuery(name = ExchangeConstants.LOG_BY_TYPE_REF_AND_GUID, query = "SELECT log FROM ExchangeLog log WHERE log.typeRefGuid = :typeRefGuid AND log.typeRefType in (:typeRefTypes)")
+  @NamedQuery(name = ExchangeConstants.LOG_BY_TYPE_REF_AND_GUID, query = "SELECT log FROM ExchangeLog log WHERE log.typeRefGuid = :typeRefGuid AND ((:duplicate IS null) OR (duplicate = :duplicate)) AND log.typeRefType in (:typeRefTypes)")
 })
 //@formatter:on
 public class ExchangeLog {
@@ -76,6 +76,8 @@ public class ExchangeLog {
 	
 	@Column(name = "log_transfer_incoming")
 	private Boolean transferIncoming;
+
+	private Boolean duplicate;
 	
 	@NotNull
 	@Column(name = "log_senderreceiver")
@@ -131,7 +133,11 @@ public class ExchangeLog {
 	@PrePersist
 	public void prepersist() {
 		setGuid(UUID.randomUUID().toString());
-	}
+        Boolean dup = getDuplicate();
+        if (dup == null){
+            setDuplicate(false);
+        }
+    }
 	
 	public Long getId() {
 		return id;
@@ -281,4 +287,11 @@ public class ExchangeLog {
 		this.mdcRequestId = mdcRequestId;
 	}
 
+    public Boolean getDuplicate() {
+        return duplicate;
+    }
+
+    public void setDuplicate(Boolean duplicate) {
+        this.duplicate = duplicate;
+    }
 }

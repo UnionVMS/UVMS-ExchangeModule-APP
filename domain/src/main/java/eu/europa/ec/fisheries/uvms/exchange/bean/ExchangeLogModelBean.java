@@ -91,6 +91,24 @@ public class ExchangeLogModelBean implements ExchangeLogModel {
     }
 
     @Override
+    public Set<ExchangeLogType> getExchangeLogByRefUUIDAndType(String refUUID, TypeRefType typeRefType) throws ExchangeModelException {
+        Set<ExchangeLogType> exchangeLogTypeSet = new HashSet<>();
+        try {
+            List<ExchangeLog> exchangeLogByTypesRefAndGuid = logDao.getExchangeLogByTypesRefAndGuid(refUUID, Collections.singletonList(typeRefType));
+            if (CollectionUtils.isNotEmpty(exchangeLogByTypesRefAndGuid)){
+                for (ExchangeLog exchangeLog : exchangeLogByTypesRefAndGuid) {
+                    exchangeLogTypeSet.add(LogMapper.toModel(exchangeLog));
+                }
+            }
+        }
+        catch (Exception e){
+            LOG.error("[ Error when getting exchange log by refUUID. {}] {}",refUUID, e.getMessage());
+            exchangeLogTypeSet = null;
+        }
+        return exchangeLogTypeSet;
+    }
+
+    @Override
     public ListResponseDto getExchangeLogListByQuery(ExchangeListQuery query) throws ExchangeModelException {
         if (query == null) {
             throw new InputArgumentException("Exchange list query is null");
@@ -110,10 +128,10 @@ public class ExchangeLogModelBean implements ExchangeLogModel {
 
             List<SearchValue> searchKeyValues = SearchFieldMapper.mapSearchField(query.getExchangeSearchCriteria().getCriterias());
             
-            String sql = SearchFieldMapper.createSelectSearchSql(searchKeyValues, true,query.getSorting());
-            LOG.info("sql:"+sql);
+            String sql = SearchFieldMapper.createSelectSearchSql(searchKeyValues, true, query.getSorting());
+            LOG.debug("sql:" + sql);
             String countSql = SearchFieldMapper.createCountSearchSql(searchKeyValues, true);
-            LOG.info("countSql:"+countSql);
+            LOG.debug("countSql:" + countSql);
             Long numberMatches = logDao.getExchangeLogListSearchCount(countSql, searchKeyValues);
             
             List<ExchangeLog> exchangeLogEntityList = logDao.getExchangeLogListPaginated(page, listSize, sql, searchKeyValues);
@@ -225,6 +243,7 @@ public class ExchangeLogModelBean implements ExchangeLogModel {
 			List<ExchangeLogStatus> statusList = exchangeLog.getStatusHistory();
 			statusList.add(LogMapper.toNewStatusEntity(exchangeLog, updateStatus.getStatus(), username));
 			exchangeLog.setStatus(updateStatus.getStatus());
+            exchangeLog.setDuplicate(status.isDuplicate());
 			ExchangeLog retEntity = logDao.updateLog(exchangeLog);
 			ExchangeLogType retType = LogMapper.toModel(retEntity);
 			return retType;
