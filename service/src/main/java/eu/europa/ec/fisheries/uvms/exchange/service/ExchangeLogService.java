@@ -14,11 +14,8 @@ package eu.europa.ec.fisheries.uvms.exchange.service;
 import javax.ejb.Local;
 import java.util.Date;
 import java.util.List;
-import java.util.Set;
 
 import eu.europa.ec.fisheries.schema.exchange.module.v1.ExchangeBaseRequest;
-import eu.europa.ec.fisheries.schema.exchange.source.v1.GetLogListByQueryResponse;
-import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeListQuery;
 import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogStatusType;
 import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogStatusTypeType;
 import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogType;
@@ -65,15 +62,9 @@ public interface ExchangeLogService {
      */
     ExchangeLogType updateStatus(String logGuid, ExchangeLogStatusTypeType logStatus, Boolean duplicate) throws ExchangeLogException;
 
-    GetLogListByQueryResponse getExchangeLogList(ExchangeListQuery query) throws ExchangeLogException;
-
     List<UnsentMessageType> getUnsentMessageList() throws ExchangeLogException;
 
     List<ExchangeLogStatusType> getExchangeStatusHistoryList(ExchangeLogStatusTypeType status, TypeRefType type, Date from, Date to) throws ExchangeLogException;
-
-    ExchangeLogType getExchangeLogByGuid(String guid) throws ExchangeLogException;
-
-    Set<ExchangeLogType> getExchangeLogsByRefUUID(String guid, TypeRefType type) throws ExchangeLogException;
 
     String createUnsentMessage(String senderReceiver, Date timestamp, String recipient, String message, List<UnsentMessageTypeProperty> properties, String username) throws ExchangeLogException;
 
@@ -87,5 +78,4 @@ public interface ExchangeLogService {
 
     ExchangeLogWithValidationResults getExchangeLogRawMessageAndValidationByGuid(String guid, LogWithRawMsgAndType rawMsg) throws ExchangeLogException;
 
-    LogWithRawMsgAndType getExchangeLogRawMessage(String guid);
 }
