@@ -19,12 +19,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
-import java.util.Set;
 
 import eu.europa.ec.fisheries.schema.exchange.module.v1.ExchangeBaseRequest;
-import eu.europa.ec.fisheries.schema.exchange.source.v1.GetLogListByQueryResponse;
 import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeHistoryListQuery;
-import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeListQuery;
 import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogStatusHistoryType;
 import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogStatusType;
 import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogStatusTypeType;
@@ -42,7 +39,6 @@ import eu.europa.ec.fisheries.uvms.exchange.message.constants.MessageQueue;
 import eu.europa.ec.fisheries.uvms.exchange.message.consumer.ExchangeConsumer;
 import eu.europa.ec.fisheries.uvms.exchange.message.exception.ExchangeMessageException;
 import eu.europa.ec.fisheries.uvms.exchange.message.producer.ExchangeMessageProducer;
-import eu.europa.ec.fisheries.uvms.exchange.model.dto.ListResponseDto;
 import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelException;
 import eu.europa.ec.fisheries.uvms.exchange.model.remote.ExchangeLogModel;
 import eu.europa.ec.fisheries.uvms.exchange.model.remote.UnsentModel;
@@ -169,20 +165,6 @@ public class ExchangeLogServiceBean implements ExchangeLogService {
     }
 
     @Override
-    public GetLogListByQueryResponse getExchangeLogList(ExchangeListQuery query) throws ExchangeLogException {
-        GetLogListByQueryResponse response = new GetLogListByQueryResponse();
-        try {
-            ListResponseDto exchangeLogList = exchangeLogModel.getExchangeLogListByQuery(query);
-            response.setCurrentPage(exchangeLogList.getCurrentPage());
-            response.setTotalNumberOfPages(exchangeLogList.getTotalNumberOfPages());
-            response.getExchangeLog().addAll(exchangeLogList.getExchangeLogList());
-            return response;
-        } catch (ExchangeModelException e) {
-            throw new ExchangeLogException("Couldn't get exchange log list.");
-        }
-    }
-
-    @Override
     public List<UnsentMessageType> getUnsentMessageList() throws ExchangeLogException {
         log.info("Get unsent message list in service layer");
         try {
@@ -232,26 +214,6 @@ public class ExchangeLogServiceBean implements ExchangeLogService {
     }
 
     @Override
-    public ExchangeLogType getExchangeLogByGuid(String guid) throws ExchangeLogException {
-        try {
-            return exchangeLogModel.getExchangeLogByGuid(guid);
-        } catch (ExchangeModelException e) {
-            log.error("[ Error when getting exchange log by GUID. {}] {}",guid, e.getMessage());
-            throw new ExchangeLogException("Error when getting exchange log by GUID.");
-        }
-    }
-
-    @Override
-    public Set<ExchangeLogType> getExchangeLogsByRefUUID(String guid, TypeRefType type) throws ExchangeLogException {
-        try {
-            return exchangeLogModel.getExchangeLogByRefUUIDAndType(guid, type);
-        } catch (ExchangeModelException e) {
-            log.error("[ Error when getting exchange log by refUUID. {}] {}",guid, e.getMessage());
-            throw new ExchangeLogException("Error when getting exchange log by refUUID.");
-        }
-    }
-
-    @Override
     public String createUnsentMessage(String senderReceiver, Date timestamp, String recipient, String message, List<UnsentMessageTypeProperty> properties, String username) throws ExchangeLogException {
         log.debug("[INFO] CreateUnsentMessage in service layer:{}",message);
         try {
@@ -292,11 +254,6 @@ public class ExchangeLogServiceBean implements ExchangeLogService {
         ExchangeLogWithValidationResults validationFromRules = exchangeToRulesSyncMsgBean.getValidationFromRules(guid, rawMsg.getType());
         validationFromRules.setMsg(rawMsg.getRawMsg() != null ? rawMsg.getRawMsg() : StringUtils.EMPTY);
         return validationFromRules;
-    }
-
-    @Override
-    public LogWithRawMsgAndType getExchangeLogRawMessage(String guid) {
-        return exchangeLogModel.getExchangeLogRawXmlByGuid(guid);
     }
 
     @Override

@@ -44,6 +44,7 @@ import eu.europa.ec.fisheries.uvms.exchange.rest.dto.exchange.ListQueryResponse;
 import eu.europa.ec.fisheries.uvms.exchange.rest.error.ErrorHandler;
 import eu.europa.ec.fisheries.uvms.exchange.rest.mapper.ExchangeLogMapper;
 import eu.europa.ec.fisheries.uvms.exchange.service.ExchangeLogService;
+import eu.europa.ec.fisheries.uvms.exchange.service.bean.ExchangeLogRestServiceBean;
 import eu.europa.ec.fisheries.uvms.rest.security.RequiresFeature;
 import eu.europa.ec.fisheries.uvms.rest.security.UnionVMSFeature;
 import lombok.extern.slf4j.Slf4j;
@@ -56,6 +57,9 @@ public class ExchangeLogRestResource {
 
     @EJB
     private ExchangeLogService serviceLayer;
+
+    @EJB
+    private ExchangeLogRestServiceBean logRestServiceBean;
 
     @Context
     private HttpServletRequest request;
@@ -77,7 +81,7 @@ public class ExchangeLogRestResource {
         log.info("Get list invoked in rest layer:{}",query);
         try {
             //TODO query in swagger
-            GetLogListByQueryResponse response = serviceLayer.getExchangeLogList(query);
+            GetLogListByQueryResponse response = logRestServiceBean.getExchangeLogList(query);
             ListQueryResponse exchangeLogList = ExchangeLogMapper.mapToQueryResponse(response);
             return new ResponseDto(exchangeLogList, RestResponseCode.OK);
         } catch (Exception ex) {
@@ -126,7 +130,7 @@ public class ExchangeLogRestResource {
     @RequiresFeature(UnionVMSFeature.viewExchange)
     public ResponseDto getExchangeLogRawXMLByGuid(@PathParam("guid") String guid) {
         try {
-            LogWithRawMsgAndType exchangeLogRawMessageByGuid = serviceLayer.getExchangeLogRawMessage(guid);
+            LogWithRawMsgAndType exchangeLogRawMessageByGuid = logRestServiceBean.getExchangeLogRawMessage(guid);
             return new ResponseDto(exchangeLogRawMessageByGuid.getRawMsg(), RestResponseCode.OK);
         } catch (Exception e) {
             log.error("[ Error when getting exchange log by GUID. ] {}", e.getMessage());
@@ -141,28 +145,28 @@ public class ExchangeLogRestResource {
     public ResponseDto getExchangeLogRawXMLAndValidationByGuid(@PathParam("guid") String guid) {
         try {
             String refUUID;
-            ExchangeLogType exchangeLogByUUID = serviceLayer.getExchangeLogByGuid(guid);
+            ExchangeLogType exchangeLogByUUID = logRestServiceBean.getExchangeLogByGuid(guid);
             ExchangeLogWithValidationResults results = null;
 
             LogType type = exchangeLogByUUID.getType();
 
             if (type == LogType.RCV_FLUX_FA_REPORT_MSG && exchangeLogByUUID.isDuplicate()) {
                 refUUID = exchangeLogByUUID.getTypeRef().getRefGuid();
-                Set<ExchangeLogType> exchangeLogsByRefUUID = serviceLayer.getExchangeLogsByRefUUID(refUUID, exchangeLogByUUID.getTypeRefType());
+                Set<ExchangeLogType> exchangeLogsByRefUUID = logRestServiceBean.getExchangeLogsByRefUUID(refUUID, exchangeLogByUUID.getTypeRefType());
                 if (CollectionUtils.isNotEmpty(exchangeLogsByRefUUID)){
                     ExchangeLogType next = exchangeLogsByRefUUID.iterator().next();
-                    LogWithRawMsgAndType rawMsg = serviceLayer.getExchangeLogRawMessage(guid);
+                    LogWithRawMsgAndType rawMsg = logRestServiceBean.getExchangeLogRawMessage(guid);
                     results = serviceLayer.getExchangeLogRawMessageAndValidationByGuid(next.getGuid(), rawMsg);
                 }
             }
 
             else if (type == LogType.SEND_FLUX_RESPONSE_MSG ){
-                LogWithRawMsgAndType rawMsg = serviceLayer.getExchangeLogRawMessage(guid);
+                LogWithRawMsgAndType rawMsg = logRestServiceBean.getExchangeLogRawMessage(guid);
                 results = serviceLayer.getExchangeLogRawMessageAndValidationByGuid(rawMsg.getRefGuid(), rawMsg);
             }
 
             else {
-                LogWithRawMsgAndType rawMsg = serviceLayer.getExchangeLogRawMessage(guid);
+                LogWithRawMsgAndType rawMsg = logRestServiceBean.getExchangeLogRawMessage(guid);
                 results = serviceLayer.getExchangeLogRawMessageAndValidationByGuid(guid, rawMsg);
             }
 
@@ -183,7 +187,7 @@ public class ExchangeLogRestResource {
     @RequiresFeature(UnionVMSFeature.viewExchange)
     public ResponseDto getExchangeLogByUUID(@PathParam("guid") String guid) {
         try {
-            return new ResponseDto(serviceLayer.getExchangeLogByGuid(guid), RestResponseCode.OK);
+            return new ResponseDto(logRestServiceBean.getExchangeLogByGuid(guid), RestResponseCode.OK);
         } catch (Exception e) {
             log.error("[ Error when getting exchange log by GUID. ] {}", e.getMessage());
             return ErrorHandler.getFault(e);
