@@ -537,7 +537,7 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
                 if (request.getSenderOrReceiver() != null) {
                     pluginRequest.setSenderOrReceiver(request.getSenderOrReceiver());
                 }
-                pluginRequest.setMethod(ExchangePluginMethod.SEND_SALES_RESPONSE);
+                pluginRequest.setMethod(ExchangePluginMethod.SEND_SALES_REPORT);
 
 
                 exchangeEventOutgoingService.sendSalesReportToFLUX(pluginRequest);
