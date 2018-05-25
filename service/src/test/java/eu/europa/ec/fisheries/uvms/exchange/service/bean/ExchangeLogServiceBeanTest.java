@@ -47,7 +47,7 @@ public class ExchangeLogServiceBeanTest {
         doReturn(expectedUpdatedLog).when(exchangeLogModel).updateExchangeLogStatus(isA(ExchangeLogStatusType.class), eq("SYSTEM"));
 
         //execute
-        ExchangeLogType actualUpdatedLog = exchangeLogService.updateStatus(logGuid, status);
+        ExchangeLogType actualUpdatedLog = exchangeLogService.updateStatus(logGuid, status, false);
 
         //verify and assert
         verify(exchangeLogModel).updateExchangeLogStatus(captorForExchangeLogStatusType.capture(), eq("SYSTEM"));
@@ -67,7 +67,7 @@ public class ExchangeLogServiceBeanTest {
 
         doThrow(new ExchangeModelException("noooooooooooooooooooo!!!")).when(exchangeLogModel).updateExchangeLogStatus(isA(ExchangeLogStatusType.class), eq("SYSTEM"));
 
-        exchangeLogService.updateStatus("12345", ExchangeLogStatusTypeType.FAILED);
+        exchangeLogService.updateStatus("12345", ExchangeLogStatusTypeType.FAILED, false);
     }
 
 }

@@ -10,17 +10,22 @@ details. You should have received a copy of the GNU General Public License along
 */
 package eu.europa.ec.fisheries.uvms.exchange;
 
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+
+import java.util.List;
+import java.util.Set;
 
 import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeListCriteria;
 import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeListPagination;
 import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeListQuery;
 import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogType;
+import eu.europa.ec.fisheries.schema.exchange.v1.TypeRefType;
 import eu.europa.ec.fisheries.uvms.exchange.bean.ExchangeLogModelBean;
 import eu.europa.ec.fisheries.uvms.exchange.dao.ExchangeLogDao;
 import eu.europa.ec.fisheries.uvms.exchange.entity.exchangelog.ExchangeLog;
 import eu.europa.ec.fisheries.uvms.exchange.model.dto.ListResponseDto;
-import java.util.List;
+import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelException;
 import lombok.SneakyThrows;
 import org.junit.Before;
 import org.junit.Test;
@@ -53,6 +58,14 @@ public class ExchangeLogModelTest {
         refLogs = MockData.getLogEntities();
         refLogs.get(0).setTypeRefGuid(logs.get(0).getGuid());
         refLogs.get(0).setTypeRefGuid(logs.get(1).getGuid());
+    }
+
+    @Test
+    public void testGetExchangeLogByRefUUIDAndType() throws ExchangeModelException {
+        Mockito.when(logDao.getExchangeLogByTypesRefAndGuid(Mockito.anyString(), Mockito.anyList()))
+                .thenReturn(logs);
+        Set<ExchangeLogType> exchangeLogByRefUUIDAndType = exchangeLogModel.getExchangeLogByRefUUIDAndType("refUUID", TypeRefType.FA_QUERY);
+        assertFalse(exchangeLogByRefUUIDAndType.isEmpty());
     }
 
     @Test

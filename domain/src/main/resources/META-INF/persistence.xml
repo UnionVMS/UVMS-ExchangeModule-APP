@@ -18,9 +18,8 @@
 		<jta-data-source>jdbc/uvms_exchange</jta-data-source>
 		<properties>
 			<property name="hibernate.dialect" value="${hibernate.dialect}" />
-			<property name="hibernate.cache.use_second_level_cache"
-				value="true" />
-			<property name="hibernate.generate_statistics" value="true" />
+			<property name="hibernate.cache.use_second_level_cache" value="true" />
+			<property name="hibernate.generate_statistics" value="false" />
 		</properties>
 		<shared-cache-mode>ALL</shared-cache-mode>
 	</persistence-unit>

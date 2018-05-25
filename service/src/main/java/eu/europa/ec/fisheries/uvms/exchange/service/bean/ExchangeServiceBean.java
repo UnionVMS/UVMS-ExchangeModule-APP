@@ -32,6 +32,8 @@ import eu.europa.ec.fisheries.uvms.exchange.service.mapper.ExchangeAuditRequestM
 import java.util.List;
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -56,6 +58,7 @@ public class ExchangeServiceBean implements ExchangeService {
      * @throws ExchangeServiceException
      */
     @Override
+    @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
     public ServiceResponseType registerService(ServiceType data, CapabilityListType capabilityList, SettingListType settingList, String username) throws ExchangeServiceException {
         LOG.info("Register service invoked in service layer: {} {}",data,username);
         try {

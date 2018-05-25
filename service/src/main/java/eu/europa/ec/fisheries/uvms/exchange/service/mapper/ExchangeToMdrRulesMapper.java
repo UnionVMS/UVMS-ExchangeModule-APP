@@ -18,6 +18,7 @@ public class ExchangeToMdrRulesMapper {
         SetMdrPluginRequest pluginRequest = new SetMdrPluginRequest();
         pluginRequest.setMethod(ExchangePluginMethod.SET_MDR_REQUEST);
         pluginRequest.setRequest(exchangeRequest.getRequest());
+        pluginRequest.setFr(exchangeRequest.getFr());
         return JAXBMarshaller.marshallJaxBObjectToString(pluginRequest);
     }
 }
