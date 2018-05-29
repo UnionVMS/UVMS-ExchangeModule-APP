@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
-                   xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.3.xsd">
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.3.xsd">
     
     <changeSet author="johlyn" id="table for linking a service with capabilities">
         
@@ -38,6 +38,20 @@
             <dropTable tableName="service_capability" cascadeConstraints="true"/>
         </rollback>
         
+    </changeSet>
+
+    <changeSet author="stihft" id="addIndexOnColumnServcap_serv_id">
+        <createIndex
+            indexName="service_capability_i_1"
+            tableName="service_capability">
+            <column name="servcap_serv_id" type="bigint"/>
+        </createIndex>
+
+        <rollback>
+            <dropIndex
+                indexName="service_capability_i_1"
+                tableName="service_capability"/>
+        </rollback>
     </changeSet>
     
 </databaseChangeLog>	
