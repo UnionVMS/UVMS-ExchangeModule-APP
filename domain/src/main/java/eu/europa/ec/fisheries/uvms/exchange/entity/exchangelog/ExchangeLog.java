@@ -58,7 +58,6 @@ public class ExchangeLog {
 	@Enumerated(EnumType.STRING)
 	private LogType type;
 	
-	@Size(max=36)
 	@Column(name="log_type_ref_guid")
 	private String typeRefGuid;
 	
