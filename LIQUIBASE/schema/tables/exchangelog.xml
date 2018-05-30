@@ -11,7 +11,7 @@
             <column name="log_guid" remarks="the id (guid) of the log" type="VARCHAR(36)">
                 <constraints nullable="false" unique="true"/>
             </column>
-            <column name="log_type_ref_guid" remarks="id for message causing the log" type="VARCHAR(36)"/>
+            <column name="log_type_ref_guid" remarks="id for message causing the log" type="VARCHAR"/>
             <column name="log_type_ref_type" remarks="type of message causing the log" type="VARCHAR(25)"/>
             <column name="log_senderreceiver" remarks="The sender or receiver of the message logged" type="VARCHAR(50)">
                 <constraints nullable="false"/>
