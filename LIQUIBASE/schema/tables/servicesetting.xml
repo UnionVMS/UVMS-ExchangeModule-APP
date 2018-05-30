@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
-                   xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.3.xsd">
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.3.xsd">
     
     <changeSet author="jojoha" id="table for linking a service with settings">
         
@@ -37,6 +37,20 @@
             <dropTable tableName="service_setting" cascadeConstraints="true"/>
         </rollback>
         
+    </changeSet>
+
+    <changeSet author="stihft" id="addIndexOnColumnServset_serv_id">
+        <createIndex
+                indexName="service_setting_i_1"
+                tableName="service_setting">
+            <column name="servset_serv_id" type="bigint"/>
+        </createIndex>
+
+        <rollback>
+            <dropIndex
+                    indexName="service_setting_i_1"
+                    tableName="service_setting"/>
+        </rollback>
     </changeSet>
     
 </databaseChangeLog>	
