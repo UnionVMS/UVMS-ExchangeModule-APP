@@ -11,12 +11,26 @@ copy of the GNU General Public License along with the IFDM Suite. If not, see <h
  */
 package eu.europa.ec.fisheries.uvms.exchange;
 
+import static junit.framework.TestCase.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import eu.europa.ec.fisheries.schema.exchange.service.v1.CapabilityListType;
+import eu.europa.ec.fisheries.schema.exchange.service.v1.ServiceResponseType;
+import eu.europa.ec.fisheries.schema.exchange.service.v1.ServiceType;
+import eu.europa.ec.fisheries.schema.exchange.service.v1.SettingListType;
+import eu.europa.ec.fisheries.uvms.exchange.bean.ServiceRegistryModelBean;
+import eu.europa.ec.fisheries.uvms.exchange.dao.ServiceRegistryDao;
+import eu.europa.ec.fisheries.uvms.exchange.entity.exchangelog.ExchangeLog;
+import eu.europa.ec.fisheries.uvms.exchange.entity.serviceregistry.Service;
+import eu.europa.ec.fisheries.uvms.exchange.entity.serviceregistry.ServiceCapability;
+import eu.europa.ec.fisheries.uvms.exchange.entity.serviceregistry.ServiceSetting;
+import eu.europa.ec.fisheries.uvms.exchange.exception.ExchangeDaoException;
+import eu.europa.ec.fisheries.uvms.exchange.exception.ExchangeDaoMappingException;
+import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelException;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -25,19 +39,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.runners.MockitoJUnitRunner;
-
-import eu.europa.ec.fisheries.schema.exchange.service.v1.CapabilityListType;
-import eu.europa.ec.fisheries.schema.exchange.service.v1.ServiceResponseType;
-import eu.europa.ec.fisheries.schema.exchange.service.v1.ServiceType;
-import eu.europa.ec.fisheries.schema.exchange.service.v1.SettingListType;
-import eu.europa.ec.fisheries.uvms.exchange.bean.ServiceRegistryModelBean;
-import eu.europa.ec.fisheries.uvms.exchange.dao.ServiceRegistryDao;
-import eu.europa.ec.fisheries.uvms.exchange.entity.serviceregistry.Service;
-import eu.europa.ec.fisheries.uvms.exchange.entity.serviceregistry.ServiceCapability;
-import eu.europa.ec.fisheries.uvms.exchange.entity.serviceregistry.ServiceSetting;
-import eu.europa.ec.fisheries.uvms.exchange.exception.ExchangeDaoException;
-import eu.europa.ec.fisheries.uvms.exchange.exception.ExchangeDaoMappingException;
-import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelException;
 
 @RunWith(MockitoJUnitRunner.class)
 public class DomainModelBeanTest {
@@ -78,4 +79,14 @@ public class DomainModelBeanTest {
         //assertEquals(id.toString(), result.getId());
     }
 
+    @Test
+    public void testSizeOfGuids(){
+        ExchangeLog exchangeLog = new ExchangeLog();
+        exchangeLog.setTypeRefGuid("367637676376376337863873683763873690282082822908298");
+        exchangeLog.prepersist();
+
+        assertTrue(exchangeLog.getTypeRefGuid().length() > 36);
+        assertTrue(exchangeLog.getGuid().length() == 36);
+
+    }
 }
