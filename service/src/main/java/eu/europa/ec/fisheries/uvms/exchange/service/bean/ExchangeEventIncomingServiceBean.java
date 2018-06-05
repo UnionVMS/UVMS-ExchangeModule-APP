@@ -69,6 +69,7 @@ import eu.europa.ec.fisheries.schema.rules.asset.v1.AssetId;
 import eu.europa.ec.fisheries.schema.rules.module.v1.RulesModuleMethod;
 import eu.europa.ec.fisheries.schema.rules.module.v1.SetFLUXMDRSyncMessageRulesResponse;
 import eu.europa.ec.fisheries.schema.rules.movement.v1.RawMovementType;
+import eu.europa.ec.fisheries.uvms.commons.message.api.MessageException;
 import eu.europa.ec.fisheries.uvms.commons.message.impl.JAXBUtils;
 import eu.europa.ec.fisheries.uvms.exchange.message.constants.MessageQueue;
 import eu.europa.ec.fisheries.uvms.exchange.message.event.ErrorEvent;
@@ -106,7 +107,7 @@ import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelMarshal
 import eu.europa.ec.fisheries.uvms.exchange.model.mapper.ExchangeModuleResponseMapper;
 import eu.europa.ec.fisheries.uvms.exchange.model.mapper.ExchangePluginResponseMapper;
 import eu.europa.ec.fisheries.uvms.exchange.model.mapper.JAXBMarshaller;
-import eu.europa.ec.fisheries.uvms.exchange.model.remote.ExchangeLogModel;
+import eu.europa.ec.fisheries.uvms.exchange.ExchangeLogModel;
 import eu.europa.ec.fisheries.uvms.exchange.service.ExchangeEventIncomingService;
 import eu.europa.ec.fisheries.uvms.exchange.service.ExchangeEventOutgoingService;
 import eu.europa.ec.fisheries.uvms.exchange.service.ExchangeLogService;
@@ -274,7 +275,7 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
             log.info("[INFO] Get plugin config LIST_SERVICE:{}", request.getType());
             List<ServiceResponseType> serviceList = exchangeService.getServiceList(request.getType());
             producer.sendModuleResponseMessage(message.getJmsMessage(), ExchangeModuleResponseMapper.mapServiceListResponse(serviceList));
-        } catch (ExchangeException e) {
+        } catch (ExchangeException | MessageException e) {
             log.error("[ Error when getting plugin list from source {}] {}", message, e);
             exchangeErrorEvent.fire(new ExchangeMessageEvent(message.getJmsMessage(), ExchangeModuleResponseMapper.createFaultMessage(
                     FaultCode.EXCHANGE_MESSAGE, "Excpetion when getting service list")));
@@ -509,7 +510,7 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
             String responseAsString = JAXBUtils.marshallJaxBObjectToString(response);
             producer.sendModuleResponseMessage(event.getJmsMessage(), responseAsString);
 
-        } catch (ExchangeModelException | JAXBException | JMSException e) {
+        } catch (ExchangeModelException | MessageException | JAXBException | JMSException e) {
             fireExchangeFault(event, "Could not un-marshall " + LogRefIdByTypeExistsRequest.class, e);
         }
     }
@@ -531,7 +532,7 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
             String responseAsString = JAXBUtils.marshallJaxBObjectToString(response);
             producer.sendModuleResponseMessage(event.getJmsMessage(), responseAsString);
 
-        } catch (ExchangeModelException | JAXBException | JMSException e) {
+        } catch (ExchangeModelException | MessageException | JAXBException | JMSException e) {
             fireExchangeFault(event, "Could not un-marshall " + LogRefIdByTypeExistsRequest.class, e);
         }
 
@@ -727,7 +728,7 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
             PingResponse response = new PingResponse();
             response.setResponse("pong");
             producer.sendModuleResponseMessage(message.getJmsMessage(), JAXBMarshaller.marshallJaxBObjectToString(response));
-        } catch (ExchangeModelMarshallException e) {
+        } catch (ExchangeModelMarshallException | MessageException e) {
             log.error("[ Error when marshalling ping response ]");
         }
     }

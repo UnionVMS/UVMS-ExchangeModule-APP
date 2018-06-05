@@ -19,7 +19,7 @@ import eu.europa.ec.fisheries.uvms.exchange.exception.NoEntityFoundException;
 import eu.europa.ec.fisheries.uvms.exchange.mapper.UnsentMessageMapper;
 import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelException;
 import eu.europa.ec.fisheries.uvms.exchange.model.exception.InputArgumentException;
-import eu.europa.ec.fisheries.uvms.exchange.model.remote.UnsentModel;
+import eu.europa.ec.fisheries.uvms.exchange.UnsentModel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

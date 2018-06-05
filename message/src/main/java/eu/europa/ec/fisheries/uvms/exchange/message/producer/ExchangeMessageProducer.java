@@ -11,6 +11,7 @@ copy of the GNU General Public License along with the IFDM Suite. If not, see <h
  */
 package eu.europa.ec.fisheries.uvms.exchange.message.producer;
 
+import eu.europa.ec.fisheries.uvms.commons.message.api.MessageException;
 import eu.europa.ec.fisheries.uvms.config.exception.ConfigMessageException;
 import eu.europa.ec.fisheries.uvms.exchange.message.constants.MessageQueue;
 import eu.europa.ec.fisheries.uvms.exchange.message.event.ErrorEvent;
@@ -29,7 +30,7 @@ public interface ExchangeMessageProducer {
 
     String sendEventBusMessage(String text, String serviceName) throws ExchangeMessageException;
     
-    void sendModuleResponseMessage(TextMessage message, String text);
+    void sendModuleResponseMessage(TextMessage message, String text) throws MessageException;
 
     String sendRulesMessage(String text) throws ConfigMessageException;
 

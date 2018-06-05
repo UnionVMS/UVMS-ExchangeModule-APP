@@ -33,6 +33,7 @@ import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogType;
 import eu.europa.ec.fisheries.schema.exchange.v1.LogType;
 import eu.europa.ec.fisheries.schema.exchange.v1.TypeRefType;
 import eu.europa.ec.fisheries.schema.exchange.v1.UnsentMessageTypeProperty;
+import eu.europa.ec.fisheries.uvms.commons.message.api.MessageException;
 import eu.europa.ec.fisheries.uvms.exchange.message.consumer.ExchangeConsumer;
 import eu.europa.ec.fisheries.uvms.exchange.message.event.ErrorEvent;
 import eu.europa.ec.fisheries.uvms.exchange.message.event.MdrSyncRequestMessageEvent;
@@ -161,7 +162,7 @@ public class ExchangeEventOutgoingServiceBean implements ExchangeEventOutgoingSe
                     LOG.debug("Cannot send to plugin. Response sent to caller:{}",message);
                 }
             }
-        } catch (ExchangeException e) {
+        } catch (ExchangeException  | MessageException e) {
             LOG.error("[ Error when sending report to plugin {} ] {}",message,e);
 
         } catch (JMSException ex) {
@@ -221,7 +222,7 @@ public class ExchangeEventOutgoingServiceBean implements ExchangeEventOutgoingSe
                 AcknowledgeType ackType = ExchangeModuleResponseMapper.mapAcknowledgeTypeNOK(origin.getJMSMessageID(), "Plugin to send movement is not started");
                 String moduleResponse = ExchangeModuleResponseMapper.mapSendMovementToPluginResponse(ackType);
                 producer.sendModuleResponseMessage(origin, moduleResponse);
-            } catch (JMSException | ExchangeModelMarshallException e) {
+            } catch (JMSException | ExchangeModelMarshallException | MessageException e) {
                 LOG.error("Plugin not started, couldn't send module response: " + e.getMessage());
             }
             return false;
@@ -265,7 +266,7 @@ public class ExchangeEventOutgoingServiceBean implements ExchangeEventOutgoingSe
                 LOG.debug("Can not send to plugin. Response sent to caller.");
             }
 
-        } catch (NullPointerException | ExchangeException e) {
+        } catch (NullPointerException | ExchangeException | MessageException e) {
             if (request.getCommand().getCommand() != CommandTypeType.EMAIL) {
                 LOG.error("[ Error when sending command to plugin {} ]", e.getMessage());
                 exchangeErrorEvent.fire(new ExchangeMessageEvent(message.getJmsMessage(), ExchangeModuleResponseMapper.createFaultMessage(FaultCode.EXCHANGE_EVENT_SERVICE, "Exception when sending command to plugin")));
@@ -372,7 +373,7 @@ public class ExchangeEventOutgoingServiceBean implements ExchangeEventOutgoingSe
                 AcknowledgeType ackType = ExchangeModuleResponseMapper.mapAcknowledgeTypeNOK(origin.getJMSMessageID(), "Plugin to send command to is not started");
                 String moduleResponse = ExchangeModuleResponseMapper.mapSetCommandResponse(ackType);
                 producer.sendModuleResponseMessage(origin, moduleResponse);
-            } catch (JMSException | ExchangeModelMarshallException e) {
+            } catch (JMSException | ExchangeModelMarshallException | MessageException e) {
                 LOG.error("Plugin not started, couldn't send module response: " + e.getMessage());
             }
 

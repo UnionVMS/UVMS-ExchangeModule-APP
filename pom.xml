@@ -4,7 +4,7 @@
     <parent>
         <groupId>fish.focus.uvms.maven</groupId>
         <artifactId>uvms-pom</artifactId>
-        <version>1.17</version>
+        <version>1.18</version>
         <relativePath />
     </parent>
 
@@ -32,17 +32,17 @@
 
         <!-- Uvms libs -->
         <longpolling.version>2.0.13</longpolling.version>
-        <uvms.commons.version>3.0.17</uvms.commons.version>
+        <uvms.commons.version>3.0.21-SNAPSHOT</uvms.commons.version>
         <uvms.config.version>4.0.1-SNAPSHOT</uvms.config.version>
         <usm4uvms.version>4.0.8</usm4uvms.version>
-        <uvms-pom-deps.version>1.16</uvms-pom-deps.version>
+        <uvms-pom-deps.version>1.18</uvms-pom-deps.version>
 
         <!-- Uvms models -->
-        <asset.model.version>4.0.10</asset.model.version>
+        <asset.model.version>4.0.12</asset.model.version>
         <exchange.model.version>4.0.17</exchange.model.version>
-        <audit.model.version>4.0.6</audit.model.version>
-        <movement.model.version>4.0.9</movement.model.version>
-        <rules.model.version>3.0.29</rules.model.version>
+        <audit.model.version>4.0.8</audit.model.version>
+        <movement.model.version>4.0.14</movement.model.version>
+        <rules.model.version>3.0.32</rules.model.version>
 
         <asset.version>4.0.9</asset.version>
 
@@ -173,12 +173,6 @@
             <groupId>javax</groupId>
             <artifactId>javaee-api</artifactId>
             <scope>provided</scope>
-        </dependency>
-          <!-- Deps -->
-        <dependency>
-            <groupId>fish.focus.uvms.maven</groupId>
-            <artifactId>uvms-pom-monitoring-deps</artifactId>
-            <type>pom</type>
         </dependency>
     </dependencies>
 
