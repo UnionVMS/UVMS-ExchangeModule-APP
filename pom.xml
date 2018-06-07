@@ -5,7 +5,6 @@
         <groupId>fish.focus.uvms.maven</groupId>
         <artifactId>uvms-pom</artifactId>
         <version>1.18</version>
-        <relativePath />
     </parent>
 
     <groupId>eu.europa.ec.fisheries.uvms.exchange</groupId>
@@ -19,6 +18,7 @@
     </scm>
 
     <properties>
+        <installAtEnd>false</installAtEnd>
 
         <scm.connection>scm:git:https://github.com/UnionVMS/UVMS-ExchangeModule-APP.git</scm.connection>
 
@@ -211,19 +211,8 @@
         </profile>
     </profiles>
     <build>
-        <pluginManagement>
-           <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-ejb-plugin</artifactId>
-                <configuration>
-                    <ejbVersion>3.1</ejbVersion>
-                </configuration>
-            </plugin>
-        </plugins>
-        </pluginManagement>
         <plugins>
-            <plugin><!--TODO: Why?-->
+            <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-plugin-plugin</artifactId>
                 <version>3.4</version>
@@ -234,7 +223,7 @@
             </plugin>
         </plugins>
     </build>
-    
+
     <modules>
         <module>LIQUIBASE</module>
         <module>commons</module>
