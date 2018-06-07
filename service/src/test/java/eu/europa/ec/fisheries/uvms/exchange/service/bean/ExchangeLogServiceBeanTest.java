@@ -12,7 +12,7 @@ import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogStatusType;
 import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogStatusTypeType;
 import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogType;
 import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelException;
-import eu.europa.ec.fisheries.uvms.exchange.model.remote.ExchangeLogModel;
+import eu.europa.ec.fisheries.uvms.exchange.ExchangeLogModel;
 import eu.europa.ec.fisheries.uvms.exchange.service.exception.ExchangeLogException;
 import org.junit.Rule;
 import org.junit.Test;

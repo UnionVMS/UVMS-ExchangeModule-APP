@@ -41,7 +41,7 @@ import eu.europa.ec.fisheries.uvms.exchange.model.dto.ListResponseDto;
 import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelException;
 import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeSearchMapperException;
 import eu.europa.ec.fisheries.uvms.exchange.model.exception.InputArgumentException;
-import eu.europa.ec.fisheries.uvms.exchange.model.remote.ExchangeLogModel;
+import eu.europa.ec.fisheries.uvms.exchange.ExchangeLogModel;
 import eu.europa.ec.fisheries.uvms.exchange.search.SearchFieldMapper;
 import eu.europa.ec.fisheries.uvms.exchange.search.SearchValue;
 import org.apache.commons.collections.CollectionUtils;

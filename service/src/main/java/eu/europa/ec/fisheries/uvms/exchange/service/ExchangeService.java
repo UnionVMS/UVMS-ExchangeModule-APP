@@ -35,7 +35,7 @@ public interface ExchangeService {
      * @return
      * @throws ExchangeServiceException
      */
-    public ServiceResponseType registerService(ServiceType data, CapabilityListType capabilityList, SettingListType settingList, String username) throws ExchangeServiceException;
+    ServiceResponseType registerService(ServiceType data, CapabilityListType capabilityList, SettingListType settingList, String username) throws ExchangeServiceException;
 
     /**
      * Unregister a service
@@ -44,7 +44,7 @@ public interface ExchangeService {
      * @return
      * @throws ExchangeServiceException
      */
-    public ServiceResponseType unregisterService(ServiceType data, String username) throws ExchangeServiceException;
+    ServiceResponseType unregisterService(ServiceType data, String username) throws ExchangeServiceException;
 
     /**
      * Get a list with plugins depending on plugin types
@@ -52,7 +52,7 @@ public interface ExchangeService {
      * @return
      * @throws ExchangeServiceException
      */
-    public List<ServiceResponseType> getServiceList(List<PluginType> pluginTypes) throws ExchangeServiceException;
+    List<ServiceResponseType> getServiceList(List<PluginType> pluginTypes) throws ExchangeServiceException;
     
     /**
      * Get an object by id
@@ -61,7 +61,7 @@ public interface ExchangeService {
      * @return
      * @throws ExchangeServiceException
      */
-    public ServiceType getById(Long id) throws ExchangeServiceException;
+    ServiceType getById(Long id) throws ExchangeServiceException;
 
     /**
      * Upsert Service with settings
@@ -70,7 +70,7 @@ public interface ExchangeService {
      * @return updated service
      * @throws ExchangeServiceException
      */
-    public ServiceResponseType upsertSettings(String serviceClassName, SettingListType settingList, String username) throws ExchangeServiceException;
+    ServiceResponseType upsertSettings(String serviceClassName, SettingListType settingList, String username) throws ExchangeServiceException;
 
     /**
      * 
@@ -79,7 +79,7 @@ public interface ExchangeService {
      * @return
      * @throws ExchangeServiceException
      */
-	public ServiceResponseType updateServiceStatus(String serviceClassName, StatusType status, String username) throws ExchangeServiceException;
+	ServiceResponseType updateServiceStatus(String serviceClassName, StatusType status, String username) throws ExchangeServiceException;
     
     /**
      *
@@ -87,5 +87,5 @@ public interface ExchangeService {
      * @return
      * @throws ExchangeServiceException
      */
-    public ServiceResponseType getService(String serviceId) throws ExchangeServiceException;
+    ServiceResponseType getService(String serviceId) throws ExchangeServiceException;
 }

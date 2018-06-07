@@ -20,7 +20,7 @@ import eu.europa.ec.fisheries.uvms.exchange.entity.serviceregistry.ServiceSettin
 import eu.europa.ec.fisheries.uvms.exchange.exception.ExchangeDaoException;
 import eu.europa.ec.fisheries.uvms.exchange.mapper.ServiceMapper;
 import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelException;
-import eu.europa.ec.fisheries.uvms.exchange.model.remote.ServiceRegistryModel;
+import eu.europa.ec.fisheries.uvms.exchange.ServiceRegistryModel;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.slf4j.Logger;

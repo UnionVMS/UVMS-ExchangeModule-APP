@@ -19,6 +19,7 @@ import eu.europa.ec.fisheries.schema.exchange.service.v1.ServiceResponseType;
 import eu.europa.ec.fisheries.schema.exchange.service.v1.SettingListType;
 import eu.europa.ec.fisheries.schema.exchange.service.v1.SettingType;
 import eu.europa.ec.fisheries.schema.exchange.service.v1.StatusType;
+import eu.europa.ec.fisheries.uvms.commons.message.api.MessageException;
 import eu.europa.ec.fisheries.uvms.config.event.ConfigSettingEvent;
 import eu.europa.ec.fisheries.uvms.config.event.ConfigSettingUpdatedEvent;
 import eu.europa.ec.fisheries.uvms.config.exception.ConfigServiceException;
@@ -285,7 +286,7 @@ public class PluginServiceBean implements PluginService {
 			updatePluginSetting(request.getServiceClassName(), request.getSetting(), request.getUsername());
 			String text = ExchangeModuleResponseMapper.mapUpdateSettingResponse(ExchangeModuleResponseMapper.mapAcknowledgeTypeOK());
 			producer.sendModuleResponseMessage(settingEvent.getJmsMessage(), text);
-		} catch (ExchangeModelMarshallException | ExchangeServiceException | ExchangeMessageException e) {
+		} catch (ExchangeModelMarshallException | ExchangeServiceException | ExchangeMessageException | MessageException e) {
 			log.error("Couldn't unmarshall update setting request");
 			settingEvent.setErrorFault(ExchangeModuleResponseMapper.createFaultMessage(FaultCode.EXCHANGE_EVENT_SERVICE, "Couldn't update plugin setting"));
 			producer.sendModuleErrorResponseMessage(settingEvent);
