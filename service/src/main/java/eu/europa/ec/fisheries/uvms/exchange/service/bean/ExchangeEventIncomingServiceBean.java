@@ -24,29 +24,7 @@ import javax.xml.bind.JAXBException;
 import java.util.List;
 
 import eu.europa.ec.fisheries.schema.exchange.common.v1.AcknowledgeType;
-import eu.europa.ec.fisheries.schema.exchange.module.v1.ExchangeBaseRequest;
-import eu.europa.ec.fisheries.schema.exchange.module.v1.GetServiceListRequest;
-import eu.europa.ec.fisheries.schema.exchange.module.v1.LogIdByTypeExistsRequest;
-import eu.europa.ec.fisheries.schema.exchange.module.v1.LogIdByTypeExistsResponse;
-import eu.europa.ec.fisheries.schema.exchange.module.v1.LogRefIdByTypeExistsRequest;
-import eu.europa.ec.fisheries.schema.exchange.module.v1.LogRefIdByTypeExistsResponse;
-import eu.europa.ec.fisheries.schema.exchange.module.v1.PingResponse;
-import eu.europa.ec.fisheries.schema.exchange.module.v1.ProcessedMovementResponse;
-import eu.europa.ec.fisheries.schema.exchange.module.v1.QueryAssetInformationRequest;
-import eu.europa.ec.fisheries.schema.exchange.module.v1.RcvFLUXFaResponseMessageRequest;
-import eu.europa.ec.fisheries.schema.exchange.module.v1.ReceiveAssetInformationRequest;
-import eu.europa.ec.fisheries.schema.exchange.module.v1.ReceiveInvalidSalesMessage;
-import eu.europa.ec.fisheries.schema.exchange.module.v1.ReceiveSalesQueryRequest;
-import eu.europa.ec.fisheries.schema.exchange.module.v1.ReceiveSalesReportRequest;
-import eu.europa.ec.fisheries.schema.exchange.module.v1.ReceiveSalesResponseRequest;
-import eu.europa.ec.fisheries.schema.exchange.module.v1.SendAssetInformationRequest;
-import eu.europa.ec.fisheries.schema.exchange.module.v1.SendSalesReportRequest;
-import eu.europa.ec.fisheries.schema.exchange.module.v1.SendSalesResponseRequest;
-import eu.europa.ec.fisheries.schema.exchange.module.v1.SetFAQueryMessageRequest;
-import eu.europa.ec.fisheries.schema.exchange.module.v1.SetFLUXFAReportMessageRequest;
-import eu.europa.ec.fisheries.schema.exchange.module.v1.SetFLUXMDRSyncMessageExchangeResponse;
-import eu.europa.ec.fisheries.schema.exchange.module.v1.SetMovementReportRequest;
-import eu.europa.ec.fisheries.schema.exchange.module.v1.UpdateLogStatusRequest;
+import eu.europa.ec.fisheries.schema.exchange.module.v1.*;
 import eu.europa.ec.fisheries.schema.exchange.movement.v1.MovementBaseType;
 import eu.europa.ec.fisheries.schema.exchange.movement.v1.MovementRefType;
 import eu.europa.ec.fisheries.schema.exchange.movement.v1.MovementSourceType;
@@ -168,7 +146,7 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
             SetFLUXFAReportMessageRequest request = JAXBMarshaller.unmarshallTextMessage(message.getJmsMessage(), SetFLUXFAReportMessageRequest.class);
             log.debug("Got FLUXFAReportMessage in exchange :" + request.getRequest());
             ExchangeLogType exchangeLogType = exchangeLog.log(request, LogType.RCV_FLUX_FA_REPORT_MSG, ExchangeLogStatusTypeType.ISSUED
-                    , TypeRefType.FA_REPORT, request.getRequest(), true);
+                    , extractFaType(request.getMethod()), request.getRequest(), true);
             String msg = RulesModuleRequestMapper.createSetFLUXFAReportMessageRequest(extractPluginType(request), request.getRequest()
                     , request.getUsername(), extractLogId(message, exchangeLogType), request.getFluxDataFlow()
                     , request.getSenderOrReceiver(), request.getOnValue());
@@ -179,7 +157,6 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
             log.error("Couldn't log FAReportMessage received from plugin into database", e);
         }
     }
-
 
     @Override
     public void processFAQueryMessage(@Observes @SetFaQueryMessageEvent ExchangeMessageEvent message) {
@@ -498,18 +475,13 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
             LogRefIdByTypeExistsRequest request = unMarshallMessage(event.getJmsMessage().getText(), LogRefIdByTypeExistsRequest.class);
             String refGuid = request.getRefGuid();
             List<TypeRefType> refTypes = request.getRefTypes();
-
             List<ExchangeLogStatusType> exchangeStatusHistoryList = exchangeLogModel.getExchangeLogsStatusHistories(refGuid, refTypes);
-
             LogRefIdByTypeExistsResponse response = new LogRefIdByTypeExistsResponse();
-
             if (CollectionUtils.isNotEmpty(exchangeStatusHistoryList)) {
                 response.setRefGuid(exchangeStatusHistoryList.get(0).getTypeRef().getRefGuid());
             }
-
             String responseAsString = JAXBUtils.marshallJaxBObjectToString(response);
             producer.sendModuleResponseMessage(event.getJmsMessage(), responseAsString);
-
         } catch (ExchangeModelException | MessageException | JAXBException | JMSException e) {
             fireExchangeFault(event, "Could not un-marshall " + LogRefIdByTypeExistsRequest.class, e);
         }
@@ -517,15 +489,12 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
 
     @Override
     public void logIdByTypeExists(@Observes @LogIdByTypeExists ExchangeMessageEvent event) {
-
         try {
-
             LogIdByTypeExistsRequest request = unMarshallMessage(event.getJmsMessage().getText(), LogIdByTypeExistsRequest.class);
             String messageGuid = request.getMessageGuid();
             TypeRefType refType = request.getRefType();
             ExchangeLogType exchangeLogByGuid = exchangeLogModel.getExchangeLogByGuidAndType(messageGuid, refType);
             LogIdByTypeExistsResponse response = new LogIdByTypeExistsResponse();
-
             if (exchangeLogByGuid != null) {
                 response.setMessageGuid(exchangeLogByGuid.getGuid());
             }
@@ -850,6 +819,21 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
         NotificationMessage msg = new NotificationMessage("serviceClassName", serviceClassName);
         msg.setProperty("started", started);
         return msg;
+    }
+
+    private TypeRefType extractFaType(ExchangeModuleMethod method) {
+        TypeRefType faType = null;
+        switch (method){
+            case SET_FLUX_FA_REPORT_MESSAGE:
+                faType = TypeRefType.FA_REPORT;
+                break;
+            case UNKNOWN:
+                faType = TypeRefType.UNKNOWN;
+                break;
+            default:
+                log.error("[FATAL] FA Type could not be determined!!");
+        }
+        return faType;
     }
 
 }

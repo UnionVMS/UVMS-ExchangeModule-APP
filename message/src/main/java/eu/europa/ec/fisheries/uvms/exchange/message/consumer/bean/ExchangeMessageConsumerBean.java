@@ -156,6 +156,7 @@ public class ExchangeMessageConsumerBean implements MessageListener {
     @LogIdByTypeExists
     private Event<ExchangeMessageEvent> logIdByTyeExists;
 
+
     @Override
     @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
     public void onMessage(Message message) {
@@ -232,6 +233,7 @@ public class ExchangeMessageConsumerBean implements MessageListener {
                     mdrSyncResponseMessageEvent.fire(messageEventWrapper);
                     break;
                 case SET_FLUX_FA_REPORT_MESSAGE:
+                case UNKNOWN :
                     processFLUXFAReportMessageEvent.fire(messageEventWrapper);
                     break;
                 case SEND_FLUX_FA_REPORT_MESSAGE:
