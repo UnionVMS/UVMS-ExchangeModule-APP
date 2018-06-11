@@ -128,8 +128,9 @@ public class ExchangeLogDaoBean extends Dao implements ExchangeLogDao {
             query.setParameter("typeRefType", typeRefType);
             query.setParameter("guid", logGuid);
             return query.getSingleResult();
-        } catch (NoResultException e) {
-            LOG.error("[ERROR] when getting entity by ID. ] {}", e.getMessage());
+        } catch (NoResultException ignored) {
+            // Don't need to actually do anything when no entity was found!
+            // LOG.error("[ERROR] when getting entity by ID. {}", e.getMessage());
         }
         return null;
     }
@@ -154,7 +155,8 @@ public class ExchangeLogDaoBean extends Dao implements ExchangeLogDao {
             namedQuery.setParameter("duplicate", false);
             return namedQuery.getResultList();
         } catch (NoResultException e) {
-            LOG.error("[ERROR] when getting entity by type ref ID. ] {}", e.getMessage());
+            // Don't need to actually do anything when no entity was found!
+            // LOG.error("[ERROR] when getting entity by ID. {}", e.getMessage());
         }
         return null;
     }

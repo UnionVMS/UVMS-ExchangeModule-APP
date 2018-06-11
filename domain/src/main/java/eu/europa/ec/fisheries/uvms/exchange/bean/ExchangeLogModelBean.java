@@ -68,7 +68,7 @@ public class ExchangeLogModelBean implements ExchangeLogModel {
             // Enriches the "first level logs" with info related to the related logs.
             enrichDtosWithRelatedLogsInfo(Collections.singletonList(exchangeLogType));
         } catch (Exception e) {
-            log.error("[ERROR] when getting exchange log by GUID. {}] {}", guid, e.getMessage());
+            log.error("[ERROR] when getting exchange log by GUID. {} {}", guid, e.getMessage());
             exchangeLogType = null;
         }
         return exchangeLogType;
