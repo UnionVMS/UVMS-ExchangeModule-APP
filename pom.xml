@@ -41,7 +41,7 @@
 
         <!-- Uvms models -->
         <asset.model.version>4.0.12</asset.model.version>
-        <exchange.model.version>4.0.17</exchange.model.version>
+        <exchange.model.version>4.0.18-SNAPSHOT</exchange.model.version>
         <audit.model.version>4.0.8</audit.model.version>
         <movement.model.version>4.0.14</movement.model.version>
         <rules.model.version>3.0.32</rules.model.version>
@@ -221,6 +221,15 @@
                 <configuration>
                     <goalPrefix>plugin</goalPrefix>
                     <outputDirectory>target/dir</outputDirectory>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.7.0</version>
+                <configuration>
+                    <source>1.7</source>
+                    <target>1.7</target>
                 </configuration>
             </plugin>
         </plugins>

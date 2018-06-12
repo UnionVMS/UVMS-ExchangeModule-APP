@@ -66,12 +66,8 @@ public class ExchangeLogDaoBean extends Dao implements ExchangeLogDao {
                 query.setParameter("to", to);
             }
             return query.getResultList();
-        } catch (IllegalArgumentException e) {
-            LOG.error("[ Error getting exchangelog status list ] " + e.getMessage());
-            throw new ExchangeDaoException("[ Error when getting search list ] ");
         } catch (Exception e) {
-            LOG.error("[ Error getting exchangelog status list " + e.getMessage());
-            throw new ExchangeDaoException("[ Error when getting search list ] ");
+            throw new ExchangeDaoException("[ERROR] when getting search list ] ");
         }
     }
 
@@ -80,21 +76,13 @@ public class ExchangeLogDaoBean extends Dao implements ExchangeLogDao {
         try {
             LOG.debug("SQL QUERY IN LIST PAGINATED: " + sql);
             TypedQuery<ExchangeLog> query = em.createQuery(sql, ExchangeLog.class);
-
             HashMap<ExchangeSearchField, List<SearchValue>> orderedValues = SearchFieldMapper.combineSearchFields(searchKeyValues);
-
             setQueryParameters(query, orderedValues);
-
             query.setFirstResult(listSize * (page - 1));
             query.setMaxResults(listSize);
-
             return query.getResultList();
-        } catch (IllegalArgumentException e) {
-            LOG.error("[ Error getting exchangelog list paginated ] {}", e.getMessage());
-            throw new ExchangeDaoException("[ Error when getting list ] ");
         } catch (Exception e) {
-            LOG.error("[ Error getting exchangelog list paginated ]  {}", e.getMessage());
-            throw new ExchangeDaoException("[ Error when getting list ] ");
+            throw new ExchangeDaoException("[ERROR] when getting list.");
         }
     }
 
@@ -102,15 +90,13 @@ public class ExchangeLogDaoBean extends Dao implements ExchangeLogDao {
     public Long getExchangeLogListSearchCount(String countSql, List<SearchValue> searchKeyValues) throws ExchangeDaoException {
         LOG.debug("SQL QUERY IN LIST COUNT: " + countSql);
         TypedQuery<Long> query = em.createQuery(countSql, Long.class);
-
         HashMap<ExchangeSearchField, List<SearchValue>> orderedValues = SearchFieldMapper.combineSearchFields(searchKeyValues);
-
         setQueryParameters(query, orderedValues);
-
         return query.getSingleResult();
     }
 
-    @Override public ExchangeLog getExchangeLogByGuid(String logGuid) throws ExchangeDaoException {
+    @Override
+    public ExchangeLog getExchangeLogByGuid(String logGuid) throws ExchangeDaoException {
         return getExchangeLogByGuid(logGuid, null);
     }
 
@@ -131,8 +117,7 @@ public class ExchangeLogDaoBean extends Dao implements ExchangeLogDao {
             em.persist(log);
             return log;
         } catch (PersistenceException e) {
-            LOG.error("[ Error creating log ]", e);
-            throw new ExchangeDaoException("[ Error creating log ] ", e);
+            throw new ExchangeDaoException("[ERROR] creating log.", e);
         }
     }
 
@@ -143,13 +128,11 @@ public class ExchangeLogDaoBean extends Dao implements ExchangeLogDao {
             query.setParameter("typeRefType", typeRefType);
             query.setParameter("guid", logGuid);
             return query.getSingleResult();
-        } catch (NoResultException e) {
-            LOG.error("[ Error when getting entity by ID. ] {}", e.getMessage());
-            throw new NoEntityFoundException("[ Error when getting entity by ID. ]");
-        } catch (Exception e) {
-            LOG.error("[ Error when getting entity by ID. ] {}", e.getMessage());
-            throw new ExchangeDaoException("[ Error when getting entity by ID. ] ");
+        } catch (NoResultException ignored) {
+            // Don't need to actually do anything when no entity was found!
+            // LOG.error("[ERROR] when getting entity by ID. {}", e.getMessage());
         }
+        return null;
     }
 
     @Override
@@ -172,12 +155,10 @@ public class ExchangeLogDaoBean extends Dao implements ExchangeLogDao {
             namedQuery.setParameter("duplicate", false);
             return namedQuery.getResultList();
         } catch (NoResultException e) {
-            LOG.error("[ Error when getting entity by type ref ID. ] {}", e.getMessage());
-            throw new NoEntityFoundException("[ Error when getting entity by type ref ID. ]");
-        } catch (Exception e) {
-            LOG.error("[ Error when getting entity by type ref ID. ] {}", e.getMessage());
-            throw new ExchangeDaoException("[ Error when getting entity by type ref ID. ] ");
+            // Don't need to actually do anything when no entity was found!
+            // LOG.error("[ERROR] when getting entity by ID. {}", e.getMessage());
         }
+        return null;
     }
 
     @Override
@@ -187,8 +168,7 @@ public class ExchangeLogDaoBean extends Dao implements ExchangeLogDao {
             em.flush();
             return entity;
         } catch (Exception e) {
-            LOG.error("[ Error when updating entity ] {}", e.getMessage());
-            throw new ExchangeDaoException("[ Error when updating entity ]", e);
+            throw new ExchangeDaoException("[ERROR] when updating entity ]", e);
         }
     }
 
