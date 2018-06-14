@@ -35,6 +35,8 @@ public interface ExchangeMessageProducer {
     String sendRulesMessage(String text) throws ConfigMessageException;
 
     String sendRulesMessage(String text, String messageSelector) throws ExchangeMessageException;
+    
+    String sendMovementRulesMessage(String text) throws ExchangeMessageException;
 
     void sendModuleErrorResponseMessage(@Observes @ErrorEvent ExchangeMessageEvent event);
 

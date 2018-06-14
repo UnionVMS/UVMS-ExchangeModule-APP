@@ -64,6 +64,10 @@
             <artifactId>rules-model</artifactId>
         </dependency>
         <dependency>
+            <groupId>eu.europa.ec.fisheries.uvms.movement-rules</groupId>
+            <artifactId>movement-rules-model</artifactId>
+        </dependency>
+        <dependency>
             <groupId>eu.europa.ec.fisheries.uvms.asset</groupId>
             <artifactId>asset-model</artifactId>
         </dependency>

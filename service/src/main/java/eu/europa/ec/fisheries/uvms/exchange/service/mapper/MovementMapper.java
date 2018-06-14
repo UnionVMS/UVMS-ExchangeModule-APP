@@ -16,8 +16,8 @@ import java.util.List;
 
 import org.dozer.DozerBeanMapper;
 
-import eu.europa.ec.fisheries.schema.rules.asset.v1.AssetIdType;
-import eu.europa.ec.fisheries.schema.rules.mobileterminal.v1.IdType;
+import eu.europa.ec.fisheries.schema.movementrules.asset.v1.AssetIdType;
+import eu.europa.ec.fisheries.schema.movementrules.mobileterminal.v1.IdType;
 
 public class MovementMapper {
 
@@ -42,11 +42,11 @@ public class MovementMapper {
         return mapper;
     }
 
-    public static List<eu.europa.ec.fisheries.schema.rules.asset.v1.AssetIdList> mapAssetIdList(
+    public static List<eu.europa.ec.fisheries.schema.movementrules.asset.v1.AssetIdList> mapAssetIdList(
             List<eu.europa.ec.fisheries.schema.exchange.movement.asset.v1.AssetIdList> inList) {
-        List<eu.europa.ec.fisheries.schema.rules.asset.v1.AssetIdList> outList = new ArrayList<>();
+        List<eu.europa.ec.fisheries.schema.movementrules.asset.v1.AssetIdList> outList = new ArrayList<>();
         for (eu.europa.ec.fisheries.schema.exchange.movement.asset.v1.AssetIdList inAssetId : inList) {
-            eu.europa.ec.fisheries.schema.rules.asset.v1.AssetIdList outAssetId = new eu.europa.ec.fisheries.schema.rules.asset.v1.AssetIdList();
+            eu.europa.ec.fisheries.schema.movementrules.asset.v1.AssetIdList outAssetId = new eu.europa.ec.fisheries.schema.movementrules.asset.v1.AssetIdList();
             AssetIdType idType = null;
             switch (inAssetId.getIdType()) {
                 case CFR:
@@ -75,11 +75,11 @@ public class MovementMapper {
         return outList;
     }
 
-    public static List<eu.europa.ec.fisheries.schema.rules.mobileterminal.v1.IdList> mapMobileTerminalIdList(
+    public static List<eu.europa.ec.fisheries.schema.movementrules.mobileterminal.v1.IdList> mapMobileTerminalIdList(
             List<eu.europa.ec.fisheries.schema.exchange.movement.mobileterminal.v1.IdList> inList) {
-        List<eu.europa.ec.fisheries.schema.rules.mobileterminal.v1.IdList> outList = new ArrayList<>();
+        List<eu.europa.ec.fisheries.schema.movementrules.mobileterminal.v1.IdList> outList = new ArrayList<>();
         for (eu.europa.ec.fisheries.schema.exchange.movement.mobileterminal.v1.IdList inId : inList) {
-            eu.europa.ec.fisheries.schema.rules.mobileterminal.v1.IdList outId = new eu.europa.ec.fisheries.schema.rules.mobileterminal.v1.IdList();
+            eu.europa.ec.fisheries.schema.movementrules.mobileterminal.v1.IdList outId = new eu.europa.ec.fisheries.schema.movementrules.mobileterminal.v1.IdList();
             IdType idType = null;
 
             switch (inId.getType()) {

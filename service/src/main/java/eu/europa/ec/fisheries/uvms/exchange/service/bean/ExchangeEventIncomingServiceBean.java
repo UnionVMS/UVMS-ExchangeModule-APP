@@ -12,7 +12,7 @@
 package eu.europa.ec.fisheries.uvms.exchange.service.bean;
 
 import static eu.europa.ec.fisheries.uvms.commons.message.impl.JAXBUtils.unMarshallMessage;
-
+import java.util.List;
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
 import javax.enterprise.event.Event;
@@ -21,10 +21,32 @@ import javax.inject.Inject;
 import javax.jms.JMSException;
 import javax.jms.TextMessage;
 import javax.xml.bind.JAXBException;
-import java.util.List;
-
+import org.apache.commons.collections.CollectionUtils;
 import eu.europa.ec.fisheries.schema.exchange.common.v1.AcknowledgeType;
-import eu.europa.ec.fisheries.schema.exchange.module.v1.*;
+import eu.europa.ec.fisheries.schema.exchange.module.v1.ExchangeBaseRequest;
+import eu.europa.ec.fisheries.schema.exchange.module.v1.ExchangeModuleMethod;
+import eu.europa.ec.fisheries.schema.exchange.module.v1.GetServiceListRequest;
+import eu.europa.ec.fisheries.schema.exchange.module.v1.LogIdByTypeExistsRequest;
+import eu.europa.ec.fisheries.schema.exchange.module.v1.LogIdByTypeExistsResponse;
+import eu.europa.ec.fisheries.schema.exchange.module.v1.LogRefIdByTypeExistsRequest;
+import eu.europa.ec.fisheries.schema.exchange.module.v1.LogRefIdByTypeExistsResponse;
+import eu.europa.ec.fisheries.schema.exchange.module.v1.PingResponse;
+import eu.europa.ec.fisheries.schema.exchange.module.v1.ProcessedMovementResponse;
+import eu.europa.ec.fisheries.schema.exchange.module.v1.QueryAssetInformationRequest;
+import eu.europa.ec.fisheries.schema.exchange.module.v1.RcvFLUXFaResponseMessageRequest;
+import eu.europa.ec.fisheries.schema.exchange.module.v1.ReceiveAssetInformationRequest;
+import eu.europa.ec.fisheries.schema.exchange.module.v1.ReceiveInvalidSalesMessage;
+import eu.europa.ec.fisheries.schema.exchange.module.v1.ReceiveSalesQueryRequest;
+import eu.europa.ec.fisheries.schema.exchange.module.v1.ReceiveSalesReportRequest;
+import eu.europa.ec.fisheries.schema.exchange.module.v1.ReceiveSalesResponseRequest;
+import eu.europa.ec.fisheries.schema.exchange.module.v1.SendAssetInformationRequest;
+import eu.europa.ec.fisheries.schema.exchange.module.v1.SendSalesReportRequest;
+import eu.europa.ec.fisheries.schema.exchange.module.v1.SendSalesResponseRequest;
+import eu.europa.ec.fisheries.schema.exchange.module.v1.SetFAQueryMessageRequest;
+import eu.europa.ec.fisheries.schema.exchange.module.v1.SetFLUXFAReportMessageRequest;
+import eu.europa.ec.fisheries.schema.exchange.module.v1.SetFLUXMDRSyncMessageExchangeResponse;
+import eu.europa.ec.fisheries.schema.exchange.module.v1.SetMovementReportRequest;
+import eu.europa.ec.fisheries.schema.exchange.module.v1.UpdateLogStatusRequest;
 import eu.europa.ec.fisheries.schema.exchange.movement.v1.MovementBaseType;
 import eu.europa.ec.fisheries.schema.exchange.movement.v1.MovementRefType;
 import eu.europa.ec.fisheries.schema.exchange.movement.v1.MovementSourceType;
@@ -43,12 +65,13 @@ import eu.europa.ec.fisheries.schema.exchange.v1.LogType;
 import eu.europa.ec.fisheries.schema.exchange.v1.PollStatus;
 import eu.europa.ec.fisheries.schema.exchange.v1.TypeRefType;
 import eu.europa.ec.fisheries.schema.movement.module.v1.ProcessedMovementAck;
-import eu.europa.ec.fisheries.schema.rules.asset.v1.AssetId;
+import eu.europa.ec.fisheries.schema.movementrules.asset.v1.AssetId;
+import eu.europa.ec.fisheries.schema.movementrules.movement.v1.RawMovementType;
 import eu.europa.ec.fisheries.schema.rules.module.v1.RulesModuleMethod;
 import eu.europa.ec.fisheries.schema.rules.module.v1.SetFLUXMDRSyncMessageRulesResponse;
-import eu.europa.ec.fisheries.schema.rules.movement.v1.RawMovementType;
 import eu.europa.ec.fisheries.uvms.commons.message.api.MessageException;
 import eu.europa.ec.fisheries.uvms.commons.message.impl.JAXBUtils;
+import eu.europa.ec.fisheries.uvms.exchange.ExchangeLogModel;
 import eu.europa.ec.fisheries.uvms.exchange.message.constants.MessageQueue;
 import eu.europa.ec.fisheries.uvms.exchange.message.event.ErrorEvent;
 import eu.europa.ec.fisheries.uvms.exchange.message.event.ExchangeLogEvent;
@@ -85,7 +108,6 @@ import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelMarshal
 import eu.europa.ec.fisheries.uvms.exchange.model.mapper.ExchangeModuleResponseMapper;
 import eu.europa.ec.fisheries.uvms.exchange.model.mapper.ExchangePluginResponseMapper;
 import eu.europa.ec.fisheries.uvms.exchange.model.mapper.JAXBMarshaller;
-import eu.europa.ec.fisheries.uvms.exchange.ExchangeLogModel;
 import eu.europa.ec.fisheries.uvms.exchange.service.ExchangeEventIncomingService;
 import eu.europa.ec.fisheries.uvms.exchange.service.ExchangeEventOutgoingService;
 import eu.europa.ec.fisheries.uvms.exchange.service.ExchangeLogService;
@@ -102,8 +124,9 @@ import eu.europa.ec.fisheries.uvms.movement.model.mapper.MovementModuleResponseM
 import eu.europa.ec.fisheries.uvms.rules.model.exception.RulesModelMapperException;
 import eu.europa.ec.fisheries.uvms.rules.model.exception.RulesModelMarshallException;
 import eu.europa.ec.fisheries.uvms.rules.model.mapper.RulesModuleRequestMapper;
+import eu.europa.ec.fisheries.uvms.movementrules.model.exception.MovementRulesModelMapperException;
+import eu.europa.ec.fisheries.uvms.movementrules.model.mapper.MovementRulesModuleRequestMapper;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections.CollectionUtils;
 
 @Stateless
 @Slf4j
@@ -298,8 +321,8 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
                 log.info("[INFO] Logging received movement.");
                 exchangeLog.log(request, LogType.RECEIVE_MOVEMENT, ExchangeLogStatusTypeType.ISSUED, TypeRefType.MOVEMENT,
                         JAXBMarshaller.marshallJaxBObjectToString(request), true);
-                forwardToRules(RulesModuleRequestMapper.createSetMovementReportRequest(PluginTypeMapper.map(pluginType), rawMovement, username),
-                        message, service);
+                String movementReport = MovementRulesModuleRequestMapper.createSetMovementReportRequest(PluginTypeMapper.map(pluginType), rawMovement, username);
+                producer.sendMovementRulesMessage(movementReport);
                 log.info("[INFO] Finished forwarding received movement to rules module.");
             } else {
                 log.debug("[ERROR] Validation error. Event sent to plugin {}", message);
@@ -310,10 +333,12 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
             log.error("[ERROR] Couldn't map to SetMovementReportRequest when processing movement from plugin:{} {}", message, e);
         } catch (JMSException e) {
             log.error("[ERROR] Failed to get response queue:{} {}", message, e);
-        } catch (RulesModelMapperException e) {
+        } catch (MovementRulesModelMapperException e) {
             log.error("[ERROR] Failed to build Rules momvent request:{} {}", message, e);
         } catch (ExchangeLogException e) {
             log.error("[ERROR] Failed to log momvent request : {} {}", message, e);
+        } catch (ExchangeMessageException e) {
+            log.error("[ERROR] Failed to forward message to MovementRules", e);
         }
     }
 

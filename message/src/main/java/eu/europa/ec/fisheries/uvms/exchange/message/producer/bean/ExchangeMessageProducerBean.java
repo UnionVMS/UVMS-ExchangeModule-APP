@@ -11,6 +11,20 @@ copy of the GNU General Public License along with the IFDM Suite. If not, see <h
  */
 package eu.europa.ec.fisheries.uvms.exchange.message.producer.bean;
 
+import java.util.HashMap;
+import java.util.Map;
+import javax.annotation.PostConstruct;
+import javax.ejb.EJB;
+import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
+import javax.enterprise.event.Observes;
+import javax.inject.Inject;
+import javax.jms.JMSException;
+import javax.jms.Queue;
+import javax.jms.Topic;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import eu.europa.ec.fisheries.uvms.commons.message.api.MessageConstants;
 import eu.europa.ec.fisheries.uvms.commons.message.api.MessageException;
 import eu.europa.ec.fisheries.uvms.commons.message.impl.AbstractProducer;
@@ -26,20 +40,6 @@ import eu.europa.ec.fisheries.uvms.exchange.message.exception.ExchangeMessageExc
 import eu.europa.ec.fisheries.uvms.exchange.message.producer.ExchangeMessageProducer;
 import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelMapperException;
 import eu.europa.ec.fisheries.uvms.exchange.model.mapper.JAXBMarshaller;
-import javax.annotation.PostConstruct;
-import javax.ejb.EJB;
-import javax.ejb.Stateless;
-import javax.ejb.TransactionAttribute;
-import javax.ejb.TransactionAttributeType;
-import javax.enterprise.event.Observes;
-import javax.jms.JMSException;
-import javax.jms.Queue;
-import javax.jms.Topic;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.util.HashMap;
-import java.util.Map;
 
 @Stateless
 public class ExchangeMessageProducerBean extends AbstractProducer implements ExchangeMessageProducer, ConfigMessageProducer {
@@ -54,6 +54,9 @@ public class ExchangeMessageProducerBean extends AbstractProducer implements Exc
 
     @EJB
     private ExchangeRulesProducer rulesProducer;
+    
+    @Inject
+    private ExchangeMovementRulesProducer movementRulesProducer;
 
     private Queue exchangeResponseQueue;
     private Queue exchangeEventQueue;
@@ -143,6 +146,17 @@ public class ExchangeMessageProducerBean extends AbstractProducer implements Exc
             }
             return rulesProducer.sendModuleMessageWithProps(text, exchangeResponseQueue, messageProperties);
 
+        } catch (MessageException e) {
+            LOG.error("[ Error when sending rules message. ] {}", e.getMessage());
+            throw new ExchangeMessageException("Error when sending rules message.");
+        }
+    }
+    
+    @Override
+    @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
+    public String sendMovementRulesMessage(String text) throws ExchangeMessageException {
+        try {
+            return movementRulesProducer.sendModuleMessage(text, exchangeResponseQueue);
         } catch (MessageException e) {
             LOG.error("[ Error when sending rules message. ] {}", e.getMessage());
             throw new ExchangeMessageException("Error when sending rules message.");

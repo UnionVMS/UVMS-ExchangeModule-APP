@@ -10,27 +10,27 @@ public class PluginTypeMapperTest {
 
     @Test
     public void mapWhenEmail() throws Exception {
-        assertMapping(PluginType.EMAIL, eu.europa.ec.fisheries.schema.rules.exchange.v1.PluginType.EMAIL);
+        assertMapping(PluginType.EMAIL, eu.europa.ec.fisheries.schema.movementrules.exchange.v1.PluginType.EMAIL);
     }
 
     @Test
     public void mapWhenFLUX() throws Exception {
-        assertMapping(PluginType.FLUX, eu.europa.ec.fisheries.schema.rules.exchange.v1.PluginType.FLUX);
+        assertMapping(PluginType.FLUX, eu.europa.ec.fisheries.schema.movementrules.exchange.v1.PluginType.FLUX);
     }
 
     @Test
     public void mapWhenSatelliteReceiver() throws Exception {
-        assertMapping(PluginType.SATELLITE_RECEIVER, eu.europa.ec.fisheries.schema.rules.exchange.v1.PluginType.SATELLITE_RECEIVER);
+        assertMapping(PluginType.SATELLITE_RECEIVER, eu.europa.ec.fisheries.schema.movementrules.exchange.v1.PluginType.SATELLITE_RECEIVER);
     }
 
     @Test
     public void mapWhenNAF() throws Exception {
-        assertMapping(PluginType.NAF, eu.europa.ec.fisheries.schema.rules.exchange.v1.PluginType.NAF);
+        assertMapping(PluginType.NAF, eu.europa.ec.fisheries.schema.movementrules.exchange.v1.PluginType.NAF);
     }
 
     @Test
     public void mapWhenOther() throws Exception {
-        assertMapping(PluginType.OTHER, eu.europa.ec.fisheries.schema.rules.exchange.v1.PluginType.OTHER);
+        assertMapping(PluginType.OTHER, eu.europa.ec.fisheries.schema.movementrules.exchange.v1.PluginType.OTHER);
     }
 
     @Test(expected = NullPointerException.class)
@@ -38,7 +38,7 @@ public class PluginTypeMapperTest {
         PluginTypeMapper.map(null);
     }
 
-    private void assertMapping(PluginType input, eu.europa.ec.fisheries.schema.rules.exchange.v1.PluginType expectedOutput) {
+    private void assertMapping(PluginType input, eu.europa.ec.fisheries.schema.movementrules.exchange.v1.PluginType expectedOutput) {
         assertEquals(expectedOutput, PluginTypeMapper.map(input));
     }
 
