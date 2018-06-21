@@ -9,7 +9,7 @@
 
     <groupId>eu.europa.ec.fisheries.uvms.exchange</groupId>
     <artifactId>exchange</artifactId>
-    <version>4.0.24-SNAPSHOT</version>
+    <version>4.0.26-SNAPSHOT</version>
     <packaging>pom</packaging>
     
     <scm>
@@ -41,7 +41,7 @@
 
         <!-- Uvms models -->
         <asset.model.version>4.0.12</asset.model.version>
-        <exchange.model.version>4.0.18-SNAPSHOT</exchange.model.version>
+        <exchange.model.version>4.0.18</exchange.model.version>
         <audit.model.version>4.0.8</audit.model.version>
         <movement.model.version>4.0.14</movement.model.version>
         <rules.model.version>3.0.32</rules.model.version>
@@ -226,15 +226,6 @@
                 <configuration>
                     <goalPrefix>plugin</goalPrefix>
                     <outputDirectory>target/dir</outputDirectory>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.7.0</version>
-                <configuration>
-                    <source>1.7</source>
-                    <target>1.7</target>
                 </configuration>
             </plugin>
         </plugins>
