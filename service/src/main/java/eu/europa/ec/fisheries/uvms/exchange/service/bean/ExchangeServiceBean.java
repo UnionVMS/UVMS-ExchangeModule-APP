@@ -11,7 +11,11 @@ copy of the GNU General Public License along with the IFDM Suite. If not, see <h
  */
 package eu.europa.ec.fisheries.uvms.exchange.service.bean;
 
-import static eu.europa.ec.fisheries.uvms.exchange.service.util.StringUtil.compressServiceClassName;
+import javax.ejb.EJB;
+import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
+import java.util.List;
 
 import eu.europa.ec.fisheries.schema.exchange.plugin.types.v1.PluginType;
 import eu.europa.ec.fisheries.schema.exchange.service.v1.CapabilityListType;
@@ -20,18 +24,15 @@ import eu.europa.ec.fisheries.schema.exchange.service.v1.ServiceType;
 import eu.europa.ec.fisheries.schema.exchange.service.v1.SettingListType;
 import eu.europa.ec.fisheries.schema.exchange.service.v1.StatusType;
 import eu.europa.ec.fisheries.uvms.audit.model.exception.AuditModelMarshallException;
+import eu.europa.ec.fisheries.uvms.exchange.ServiceRegistryModel;
 import eu.europa.ec.fisheries.uvms.exchange.message.constants.MessageQueue;
 import eu.europa.ec.fisheries.uvms.exchange.message.consumer.ExchangeConsumer;
 import eu.europa.ec.fisheries.uvms.exchange.message.exception.ExchangeMessageException;
 import eu.europa.ec.fisheries.uvms.exchange.message.producer.ExchangeMessageProducer;
 import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelException;
-import eu.europa.ec.fisheries.uvms.exchange.ServiceRegistryModel;
 import eu.europa.ec.fisheries.uvms.exchange.service.ExchangeService;
 import eu.europa.ec.fisheries.uvms.exchange.service.exception.ExchangeServiceException;
 import eu.europa.ec.fisheries.uvms.exchange.service.mapper.ExchangeAuditRequestMapper;
-import java.util.List;
-import javax.ejb.*;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -61,7 +62,7 @@ public class ExchangeServiceBean implements ExchangeService {
         LOG.info("Register service invoked in service layer: {} {}",data,username);
         try {
             ServiceResponseType serviceResponseType = serviceRegistryModel.registerService(data, capabilityList, settingList, username);
-            sendAuditLogMessageForRegisterService(compressServiceClassName(serviceResponseType.getServiceClassName()), username);
+            //sendAuditLogMessageForRegisterService(compressServiceClassName(serviceResponseType.getServiceClassName()), username);
             return serviceResponseType;
         } catch (ExchangeModelException e) {
             throw new ExchangeServiceException(e.getMessage());
@@ -79,7 +80,7 @@ public class ExchangeServiceBean implements ExchangeService {
         LOG.info("Unregister service invoked in service layer: {} {}",data,username);
         try {
             ServiceResponseType serviceResponseType = serviceRegistryModel.unregisterService(data, username);
-            sendAuditLogMessageForUnregisterService(compressServiceClassName(serviceResponseType.getServiceClassName()), username);
+            //sendAuditLogMessageForUnregisterService(compressServiceClassName(serviceResponseType.getServiceClassName()), username);
             return serviceResponseType;
         } catch (ExchangeModelException ex) {
             throw new ExchangeServiceException(ex.getMessage());
@@ -108,7 +109,7 @@ public class ExchangeServiceBean implements ExchangeService {
         LOG.info("Upsert settings in service layer: {} {} {}",serviceClassName,settingListType,username);
         try {
             ServiceResponseType updatedSettings = serviceRegistryModel.updatePluginSettings(serviceClassName, settingListType, username);
-            sendAuditLogMessageForUpdateService(compressServiceClassName(serviceClassName), username);
+            //sendAuditLogMessageForUpdateService(compressServiceClassName(serviceClassName), username);
             return updatedSettings;
         } catch (ExchangeModelException  e) {
             throw new ExchangeServiceException(e.getMessage());
@@ -144,7 +145,7 @@ public class ExchangeServiceBean implements ExchangeService {
         LOG.info("Update service status invoked in service layer: {} {} {}",serviceClassName,status,username);
         try {
             ServiceResponseType updatedServiceStatus = serviceRegistryModel.updatePluginStatus(serviceClassName, status, username);
-            sendAuditLogMessageForUpdateServiceStatus(serviceClassName, status, username);
+            //sendAuditLogMessageForUpdateServiceStatus(serviceClassName, status, username);
             return updatedServiceStatus;
         } catch (ExchangeModelException e) {
             throw new ExchangeServiceException(e.getMessage());
@@ -208,13 +209,13 @@ public class ExchangeServiceBean implements ExchangeService {
     private void sendAuditLogMessageForUpdateServiceStatus(String serviceName, StatusType status, String username){
         switch (status){
             case STARTED:
-                sendAuditLogMessageForServiceStatusStarted(compressServiceClassName(serviceName), username);
+                //sendAuditLogMessageForServiceStatusStarted(compressServiceClassName(serviceName), username);
                 break;
             case STOPPED:
-                sendAuditLogMessageForServiceStatusStopped(compressServiceClassName(serviceName), username);
+                //sendAuditLogMessageForServiceStatusStopped(compressServiceClassName(serviceName), username);
                 break;
             default:
-                sendAuditLogMessageForServiceStatusUnknown(compressServiceClassName(serviceName), username);
+                //sendAuditLogMessageForServiceStatusUnknown(compressServiceClassName(serviceName), username);
                 break;
         }
     }

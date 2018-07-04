@@ -99,7 +99,7 @@ public class ExchangeLogServiceBean implements ExchangeLogService {
         try {
             ExchangeLogType exchangeLog = exchangeLogModel.createExchangeLog(log, username);
             String guid = exchangeLog.getGuid();
-            sendAuditLogMessageForCreateExchangeLog(guid, username);
+            //sendAuditLogMessageForCreateExchangeLog(guid, username);
             exchangeLogEvent.fire(new NotificationMessage("guid", guid));
             LOG.debug("[INFO] Logging message with guid : [ "+guid+" ]..");
             return exchangeLog;
@@ -226,7 +226,7 @@ public class ExchangeLogServiceBean implements ExchangeLogService {
             String createdUnsentMessageId = unsentModel.createMessage(unsentMessage, username);
 
             List<String> unsentMessageIds = Collections.singletonList(createdUnsentMessageId);
-            sendAuditLogMessageForCreateUnsentMessage(createdUnsentMessageId, username);
+            //sendAuditLogMessageForCreateUnsentMessage(createdUnsentMessageId, username);
             sendingQueueEvent.fire(new NotificationMessage("messageIds", unsentMessageIds));
             return createdUnsentMessageId;
         } catch (ExchangeModelException e) {
@@ -241,7 +241,7 @@ public class ExchangeLogServiceBean implements ExchangeLogService {
         try {
             String removeMessageId = unsentModel.removeMessage(unsentMessageId);
             List<String> removedMessageIds = Collections.singletonList(removeMessageId);
-            sendAuditLogMessageForRemoveUnsentMessage(removeMessageId, username);
+            //sendAuditLogMessageForRemoveUnsentMessage(removeMessageId, username);
             sendingQueueEvent.fire(new NotificationMessage("messageIds", removedMessageIds));
         } catch (ExchangeModelException e) {
             log.error("Couldn't add message to unsent list {} {}",unsentMessageId,e);
@@ -262,7 +262,7 @@ public class ExchangeLogServiceBean implements ExchangeLogService {
         List<UnsentMessageType> unsentMessageList;
         try {
             unsentMessageList = unsentModel.resend(messageIdList);
-            sendAuditLogMessageForResendUnsentMessage(messageIdList.toString(), username);
+            //sendAuditLogMessageForResendUnsentMessage(messageIdList.toString(), username);
         } catch (ExchangeModelException e) {
             log.error("Couldn't read unsent messages", e);
             throw new ExchangeLogException("Couldn't read unsent messages");
@@ -274,7 +274,7 @@ public class ExchangeLogServiceBean implements ExchangeLogService {
                 try {
                     String unsentMessageId = producer.sendMessageOnQueue(unsentMessage.getMessage(), MessageQueue.EVENT);
                     //TextMessage unsentResponse = consumer.getMessage(unsentMessageId, TextMessage.class);
-                    sendAuditLogMessageForCreateUnsentMessage(unsentMessageId, username);
+                    //sendAuditLogMessageForCreateUnsentMessage(unsentMessageId, username);
                     //ExchangeModuleResponseMapper.validateResponse(unsentResponse, unsentMessageId);
                 } catch (ExchangeMessageException e) {
                     log.error("Error when sending/receiving message {} {}",messageIdList, e);
@@ -294,7 +294,7 @@ public class ExchangeLogServiceBean implements ExchangeLogService {
 
             ExchangeLogType exchangeLogType = exchangeLogModel.setPollStatus(pollStatus, username);
             pollStatus.setExchangeLogGuid(exchangeLogType.getGuid());
-            sendAuditLogMessageForUpdatePollStatus(pollId, username);
+            //sendAuditLogMessageForUpdatePollStatus(pollId, username);
             // For long polling
             exchangeLogEvent.fire(new NotificationMessage("guid", pollStatus.getExchangeLogGuid()));
             return pollStatus;
