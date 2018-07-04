@@ -133,7 +133,7 @@ public class ExchangeLogServiceBean implements ExchangeLogService {
             String logGuid = logCache.acknowledged(pluginMessageId);
             ExchangeLogStatusType exchangeLogStatusType = createExchangeLogStatusType(logStatus, logGuid);
             ExchangeLogType updatedLog = exchangeLogModel.updateExchangeLogStatus(exchangeLogStatusType, username);
-            sendAuditLogMessageForUpdateExchangeLog(updatedLog.getGuid(), username);
+            //sendAuditLogMessageForUpdateExchangeLog(updatedLog.getGuid(), username);
             // For long polling
             exchangeLogEvent.fire(new NotificationMessage("guid", updatedLog.getGuid()));
             return updatedLog;
