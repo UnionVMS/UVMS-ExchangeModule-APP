@@ -34,19 +34,17 @@ import eu.europa.ec.fisheries.schema.exchange.v1.PollStatus;
 import eu.europa.ec.fisheries.schema.exchange.v1.TypeRefType;
 import eu.europa.ec.fisheries.schema.exchange.v1.UnsentMessageType;
 import eu.europa.ec.fisheries.schema.exchange.v1.UnsentMessageTypeProperty;
-import eu.europa.ec.fisheries.uvms.audit.model.exception.AuditModelMarshallException;
+import eu.europa.ec.fisheries.uvms.exchange.ExchangeLogModel;
+import eu.europa.ec.fisheries.uvms.exchange.UnsentModel;
 import eu.europa.ec.fisheries.uvms.exchange.message.constants.MessageQueue;
 import eu.europa.ec.fisheries.uvms.exchange.message.consumer.ExchangeConsumer;
 import eu.europa.ec.fisheries.uvms.exchange.message.exception.ExchangeMessageException;
 import eu.europa.ec.fisheries.uvms.exchange.message.producer.ExchangeMessageProducer;
 import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelException;
-import eu.europa.ec.fisheries.uvms.exchange.ExchangeLogModel;
-import eu.europa.ec.fisheries.uvms.exchange.UnsentModel;
 import eu.europa.ec.fisheries.uvms.exchange.service.ExchangeLogService;
 import eu.europa.ec.fisheries.uvms.exchange.service.event.ExchangeLogEvent;
 import eu.europa.ec.fisheries.uvms.exchange.service.event.ExchangeSendingQueueEvent;
 import eu.europa.ec.fisheries.uvms.exchange.service.exception.ExchangeLogException;
-import eu.europa.ec.fisheries.uvms.exchange.service.mapper.ExchangeAuditRequestMapper;
 import eu.europa.ec.fisheries.uvms.longpolling.notifications.NotificationMessage;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -99,7 +97,6 @@ public class ExchangeLogServiceBean implements ExchangeLogService {
         try {
             ExchangeLogType exchangeLog = exchangeLogModel.createExchangeLog(log, username);
             String guid = exchangeLog.getGuid();
-            sendAuditLogMessageForCreateExchangeLog(guid, username);
             exchangeLogEvent.fire(new NotificationMessage("guid", guid));
             LOG.debug("[INFO] Logging message with guid : [ "+guid+" ]..");
             return exchangeLog;
@@ -133,7 +130,6 @@ public class ExchangeLogServiceBean implements ExchangeLogService {
             String logGuid = logCache.acknowledged(pluginMessageId);
             ExchangeLogStatusType exchangeLogStatusType = createExchangeLogStatusType(logStatus, logGuid);
             ExchangeLogType updatedLog = exchangeLogModel.updateExchangeLogStatus(exchangeLogStatusType, username);
-            sendAuditLogMessageForUpdateExchangeLog(updatedLog.getGuid(), username);
             // For long polling
             exchangeLogEvent.fire(new NotificationMessage("guid", updatedLog.getGuid()));
             return updatedLog;
@@ -226,7 +222,6 @@ public class ExchangeLogServiceBean implements ExchangeLogService {
             String createdUnsentMessageId = unsentModel.createMessage(unsentMessage, username);
 
             List<String> unsentMessageIds = Collections.singletonList(createdUnsentMessageId);
-            sendAuditLogMessageForCreateUnsentMessage(createdUnsentMessageId, username);
             sendingQueueEvent.fire(new NotificationMessage("messageIds", unsentMessageIds));
             return createdUnsentMessageId;
         } catch (ExchangeModelException e) {
@@ -241,7 +236,6 @@ public class ExchangeLogServiceBean implements ExchangeLogService {
         try {
             String removeMessageId = unsentModel.removeMessage(unsentMessageId);
             List<String> removedMessageIds = Collections.singletonList(removeMessageId);
-            sendAuditLogMessageForRemoveUnsentMessage(removeMessageId, username);
             sendingQueueEvent.fire(new NotificationMessage("messageIds", removedMessageIds));
         } catch (ExchangeModelException e) {
             log.error("Couldn't add message to unsent list {} {}",unsentMessageId,e);
@@ -262,7 +256,6 @@ public class ExchangeLogServiceBean implements ExchangeLogService {
         List<UnsentMessageType> unsentMessageList;
         try {
             unsentMessageList = unsentModel.resend(messageIdList);
-            sendAuditLogMessageForResendUnsentMessage(messageIdList.toString(), username);
         } catch (ExchangeModelException e) {
             log.error("Couldn't read unsent messages", e);
             throw new ExchangeLogException("Couldn't read unsent messages");
@@ -274,7 +267,6 @@ public class ExchangeLogServiceBean implements ExchangeLogService {
                 try {
                     String unsentMessageId = producer.sendMessageOnQueue(unsentMessage.getMessage(), MessageQueue.EVENT);
                     //TextMessage unsentResponse = consumer.getMessage(unsentMessageId, TextMessage.class);
-                    sendAuditLogMessageForCreateUnsentMessage(unsentMessageId, username);
                     //ExchangeModuleResponseMapper.validateResponse(unsentResponse, unsentMessageId);
                 } catch (ExchangeMessageException e) {
                     log.error("Error when sending/receiving message {} {}",messageIdList, e);
@@ -294,66 +286,11 @@ public class ExchangeLogServiceBean implements ExchangeLogService {
 
             ExchangeLogType exchangeLogType = exchangeLogModel.setPollStatus(pollStatus, username);
             pollStatus.setExchangeLogGuid(exchangeLogType.getGuid());
-            sendAuditLogMessageForUpdatePollStatus(pollId, username);
             // For long polling
             exchangeLogEvent.fire(new NotificationMessage("guid", pollStatus.getExchangeLogGuid()));
             return pollStatus;
         } catch (ExchangeModelException e) {
             throw new ExchangeLogException("Couldn't update status of exchange log");
-        }
-    }
-
-    private void sendAuditLogMessageForCreateUnsentMessage(String guid, String username) {
-        try {
-            String request = ExchangeAuditRequestMapper.mapCreateUnsentMessage(guid, username);
-            producer.sendMessageOnQueue(request, MessageQueue.AUDIT);
-        } catch (AuditModelMarshallException | ExchangeMessageException e) {
-            log.error("Could not send audit log message. Unsent message was created with guid: " + guid);
-        }
-    }
-
-    private void sendAuditLogMessageForRemoveUnsentMessage(String guid, String username) {
-        try {
-            String request = ExchangeAuditRequestMapper.mapRemoveUnsentMessage(guid, username);
-            producer.sendMessageOnQueue(request, MessageQueue.AUDIT);
-        } catch (AuditModelMarshallException | ExchangeMessageException e) {
-            log.error("Could not send audit log message. Unsent message was created with guid: " + guid);
-        }
-    }
-
-    private void sendAuditLogMessageForUpdateExchangeLog(String guid, String username) {
-        try {
-            String request = ExchangeAuditRequestMapper.mapUpdateExchangeLog(guid, username);
-            producer.sendMessageOnQueue(request, MessageQueue.AUDIT);
-        } catch (AuditModelMarshallException | ExchangeMessageException e) {
-            log.error("Could not send audit log message. Exchange log with guid: " + guid + " is updated");
-        }
-    }
-
-    private void sendAuditLogMessageForResendUnsentMessage(String guid, String username) {
-        try {
-            String request = ExchangeAuditRequestMapper.mapResendSendingQueue(guid, username);
-            producer.sendMessageOnQueue(request, MessageQueue.AUDIT);
-        } catch (AuditModelMarshallException | ExchangeMessageException e) {
-            log.error("Could not send audit log message. Resend sending queue with guid: " + guid);
-        }
-    }
-
-    private void sendAuditLogMessageForCreateExchangeLog(String guid, String username) {
-        try {
-            String request = ExchangeAuditRequestMapper.mapCreateExchangeLog(guid, username);
-            producer.sendMessageOnQueue(request, MessageQueue.AUDIT);
-        } catch (AuditModelMarshallException | ExchangeMessageException e) {
-            log.error("Could not send audit log message. Exchange log was created with guid: " + guid);
-        }
-    }
-
-    private void sendAuditLogMessageForUpdatePollStatus(String guid, String username) {
-        try {
-            String request = ExchangeAuditRequestMapper.mapUpdatePoll(guid, username);
-            producer.sendMessageOnQueue(request, MessageQueue.AUDIT);
-        } catch (AuditModelMarshallException | ExchangeMessageException e) {
-            log.error("Could not send audit log message. Exchange poll with guid: " + guid + " is updated");
         }
     }
 }
