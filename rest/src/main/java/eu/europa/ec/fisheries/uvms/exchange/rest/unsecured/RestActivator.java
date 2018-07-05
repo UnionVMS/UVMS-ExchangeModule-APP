@@ -9,23 +9,18 @@ the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the impl
 FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details. You should have received a
 copy of the GNU General Public License along with the IFDM Suite. If not, see <http://www.gnu.org/licenses/>.
  */
-package eu.europa.ec.fisheries.uvms.exchange.rest;
+package eu.europa.ec.fisheries.uvms.exchange.rest.unsecured;
 
-import java.util.HashSet;
-import java.util.Set;
-
-import javax.ws.rs.ApplicationPath;
-import javax.ws.rs.core.Application;
-
-import eu.europa.ec.fisheries.uvms.exchange.rest.service.*;
-import eu.europa.ec.fisheries.uvms.exchange.rest.unsecured.ExchangeAPIResource;
+import eu.europa.ec.fisheries.uvms.exchange.rest.constants.RestConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import eu.europa.ec.fisheries.uvms.exchange.rest.constants.RestConstants;
-import eu.europa.ec.fisheries.uvms.rest.security.UnionVMSFeatureFilter;
+import javax.ws.rs.ApplicationPath;
+import javax.ws.rs.core.Application;
+import java.util.HashSet;
+import java.util.Set;
 
-@ApplicationPath(RestConstants.MODULE_REST)
+@ApplicationPath(RestConstants.MODULE_UNSECURED_REST)
 public class RestActivator extends Application {
 
     final static Logger LOG = LoggerFactory.getLogger(RestActivator.class);
@@ -34,13 +29,8 @@ public class RestActivator extends Application {
     private final Set<Class<?>> set = new HashSet<>();
 
     public RestActivator() {
-        set.add(ExchangeLogRestResource.class);
-        set.add(ExchangeRegistryResource.class);
-        set.add(ExchangeSendingQueueResource.class);
-        set.add(ConfigResource.class);
-        set.add(UnionVMSFeatureFilter.class);
         set.add(ExchangeAPIResource.class);
-        LOG.info(RestConstants.MODULE_NAME + " module starting up");
+        LOG.info(RestConstants.MODULE_NAME + " unsecured rest API starting up");
     }
 
     @Override
