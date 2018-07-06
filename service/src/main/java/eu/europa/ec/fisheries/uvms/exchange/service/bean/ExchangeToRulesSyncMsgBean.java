@@ -10,7 +10,15 @@ details. You should have received a copy of the GNU General Public License along
 */
 package eu.europa.ec.fisheries.uvms.exchange.service.bean;
 
-import eu.europa.ec.fisheries.schema.exchange.v1.*;
+import javax.ejb.EJB;
+import javax.jms.TextMessage;
+import java.util.List;
+
+import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogWithValidationResults;
+import eu.europa.ec.fisheries.schema.exchange.v1.LogValidationResult;
+import eu.europa.ec.fisheries.schema.exchange.v1.RuleValidationLevel;
+import eu.europa.ec.fisheries.schema.exchange.v1.RuleValidationStatus;
+import eu.europa.ec.fisheries.schema.exchange.v1.TypeRefType;
 import eu.europa.ec.fisheries.schema.rules.rule.v1.ValidationMessageType;
 import eu.europa.ec.fisheries.schema.rules.rule.v1.ValidationMessageTypeResponse;
 import eu.europa.ec.fisheries.uvms.commons.message.api.MessageException;
@@ -26,15 +34,6 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.EnumUtils;
 import org.apache.commons.lang3.StringUtils;
 
-import javax.ejb.EJB;
-import javax.ejb.Singleton;
-import javax.jms.TextMessage;
-import java.util.List;
-
-/**
- * Created by kovian on 14/12/2017.
- */
-@Singleton
 @Slf4j
 public class ExchangeToRulesSyncMsgBean {
 
