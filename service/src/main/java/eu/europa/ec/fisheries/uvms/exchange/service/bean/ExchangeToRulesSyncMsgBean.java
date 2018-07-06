@@ -10,21 +10,12 @@ details. You should have received a copy of the GNU General Public License along
 */
 package eu.europa.ec.fisheries.uvms.exchange.service.bean;
 
-import javax.ejb.EJB;
-import javax.ejb.Singleton;
-import javax.jms.TextMessage;
-import java.util.List;
-
-import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogWithValidationResults;
-import eu.europa.ec.fisheries.schema.exchange.v1.LogValidationResult;
-import eu.europa.ec.fisheries.schema.exchange.v1.RuleValidationLevel;
-import eu.europa.ec.fisheries.schema.exchange.v1.RuleValidationStatus;
-import eu.europa.ec.fisheries.schema.exchange.v1.TypeRefType;
+import eu.europa.ec.fisheries.schema.exchange.v1.*;
 import eu.europa.ec.fisheries.schema.rules.rule.v1.ValidationMessageType;
 import eu.europa.ec.fisheries.schema.rules.rule.v1.ValidationMessageTypeResponse;
 import eu.europa.ec.fisheries.uvms.commons.message.api.MessageException;
-import eu.europa.ec.fisheries.uvms.config.exception.ConfigMessageException;
 import eu.europa.ec.fisheries.uvms.exchange.message.consumer.ExchangeConsumer;
+import eu.europa.ec.fisheries.uvms.exchange.message.exception.ExchangeMessageException;
 import eu.europa.ec.fisheries.uvms.exchange.message.producer.ExchangeMessageProducer;
 import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelMarshallException;
 import eu.europa.ec.fisheries.uvms.exchange.model.mapper.JAXBMarshaller;
@@ -34,6 +25,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.EnumUtils;
 import org.apache.commons.lang3.StringUtils;
+
+import javax.ejb.EJB;
+import javax.ejb.Singleton;
+import javax.jms.TextMessage;
+import java.util.List;
 
 /**
  * Created by kovian on 14/12/2017.
@@ -55,7 +51,7 @@ public class ExchangeToRulesSyncMsgBean {
         ExchangeLogWithValidationResults resp = new ExchangeLogWithValidationResults();
         try {
             String getValidationsByGuidRequest = RulesModuleRequestMapper.createGetValidationsByGuidRequest(guid, type == null ? null : type.name());
-            String correlationId = exchangeProducerBean.sendRulesMessage(getValidationsByGuidRequest);
+            String correlationId = exchangeProducerBean.sendRulesMessage(getValidationsByGuidRequest, "ValidationResultsByRawGuid");
             TextMessage validationRespMsg = exchangeConsumerBean.getMessage(correlationId, TextMessage.class);
             ValidationMessageTypeResponse validTypeRespFromRules = JAXBMarshaller.unmarshallTextMessage(validationRespMsg, ValidationMessageTypeResponse.class);
             List<ValidationMessageType> validationsListResponse = validTypeRespFromRules.getValidationsListResponse();
@@ -64,7 +60,7 @@ public class ExchangeToRulesSyncMsgBean {
                     resp.getValidationList().add(mapToLogValidationResult(validMsgFromRules));
                 }
             }
-        } catch (ConfigMessageException | MessageException | RulesModelMarshallException | ExchangeModelMarshallException e) {
+        } catch (ExchangeMessageException | MessageException | RulesModelMarshallException | ExchangeModelMarshallException e) {
             log.error("Error while trying to get Validation Results for RawMessage GUID from Rules!", e);
         }
         return resp;
