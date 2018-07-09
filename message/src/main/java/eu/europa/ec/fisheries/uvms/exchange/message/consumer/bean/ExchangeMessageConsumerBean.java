@@ -70,7 +70,7 @@ import org.slf4j.LoggerFactory;
         @ActivationConfigProperty(propertyName = MessageConstants.CONNECTION_FACTORY_JNDI_NAME, propertyValue = MessageConstants.CONNECTION_FACTORY),
         @ActivationConfigProperty(propertyName = "maxMessagesPerSessions", propertyValue = "1000"),
         @ActivationConfigProperty(propertyName = "initialRedeliveryDelay", propertyValue = "60000"),
-        @ActivationConfigProperty(propertyName = "maximumRedeliveries", propertyValue = "0"),
+        @ActivationConfigProperty(propertyName = "maximumRedeliveries", propertyValue = "3"),
         @ActivationConfigProperty(propertyName = "maxSessions", propertyValue = "10")
 })
 //@formatter:on
