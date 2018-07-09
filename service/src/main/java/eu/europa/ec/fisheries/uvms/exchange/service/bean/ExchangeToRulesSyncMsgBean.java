@@ -11,6 +11,8 @@ details. You should have received a copy of the GNU General Public License along
 package eu.europa.ec.fisheries.uvms.exchange.service.bean;
 
 import javax.ejb.EJB;
+import javax.ejb.LocalBean;
+import javax.ejb.Stateless;
 import javax.jms.TextMessage;
 import java.util.List;
 
@@ -35,6 +37,8 @@ import org.apache.commons.lang3.EnumUtils;
 import org.apache.commons.lang3.StringUtils;
 
 @Slf4j
+@Stateless
+@LocalBean
 public class ExchangeToRulesSyncMsgBean {
 
     @EJB
