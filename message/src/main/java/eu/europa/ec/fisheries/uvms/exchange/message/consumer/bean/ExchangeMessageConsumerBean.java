@@ -68,7 +68,7 @@ import org.slf4j.LoggerFactory;
         @ActivationConfigProperty(propertyName = MessageConstants.DESTINATION_STR, propertyValue = MessageConstants.QUEUE_EXCHANGE_EVENT_NAME),
         @ActivationConfigProperty(propertyName = MessageConstants.DESTINATION_JNDI_NAME, propertyValue = MessageConstants.QUEUE_EXCHANGE_EVENT),
         @ActivationConfigProperty(propertyName = MessageConstants.CONNECTION_FACTORY_JNDI_NAME, propertyValue = MessageConstants.CONNECTION_FACTORY),
-        @ActivationConfigProperty(propertyName = "maxMessagesPerSessions", propertyValue = "1000"),
+        @ActivationConfigProperty(propertyName = "maxMessagesPerSessions", propertyValue = "100"),
         @ActivationConfigProperty(propertyName = "initialRedeliveryDelay", propertyValue = "60000"),
         @ActivationConfigProperty(propertyName = "maximumRedeliveries", propertyValue = "3"),
         @ActivationConfigProperty(propertyName = "maxSessions", propertyValue = "10")
