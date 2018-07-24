@@ -11,29 +11,8 @@ copy of the GNU General Public License along with the IFDM Suite. If not, see <h
  */
 package eu.europa.ec.fisheries.uvms.exchange.service.bean;
 
-import javax.ejb.EJB;
-import javax.ejb.Stateless;
-import javax.enterprise.event.Event;
-import javax.inject.Inject;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
-
 import eu.europa.ec.fisheries.schema.exchange.module.v1.ExchangeBaseRequest;
-import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeHistoryListQuery;
-import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogStatusHistoryType;
-import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogStatusType;
-import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogStatusTypeType;
-import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogType;
-import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogWithValidationResults;
-import eu.europa.ec.fisheries.schema.exchange.v1.LogRefType;
-import eu.europa.ec.fisheries.schema.exchange.v1.LogType;
-import eu.europa.ec.fisheries.schema.exchange.v1.LogWithRawMsgAndType;
-import eu.europa.ec.fisheries.schema.exchange.v1.PollStatus;
-import eu.europa.ec.fisheries.schema.exchange.v1.TypeRefType;
-import eu.europa.ec.fisheries.schema.exchange.v1.UnsentMessageType;
-import eu.europa.ec.fisheries.schema.exchange.v1.UnsentMessageTypeProperty;
+import eu.europa.ec.fisheries.schema.exchange.v1.*;
 import eu.europa.ec.fisheries.uvms.exchange.ExchangeLogModel;
 import eu.europa.ec.fisheries.uvms.exchange.UnsentModel;
 import eu.europa.ec.fisheries.uvms.exchange.message.constants.MessageQueue;
@@ -48,14 +27,19 @@ import eu.europa.ec.fisheries.uvms.exchange.service.exception.ExchangeLogExcepti
 import eu.europa.ec.fisheries.uvms.longpolling.notifications.NotificationMessage;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
+import javax.ejb.EJB;
+import javax.ejb.Stateless;
+import javax.enterprise.event.Event;
+import javax.inject.Inject;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
+import java.util.List;
 
 @Stateless
 @Slf4j
 public class ExchangeLogServiceBean implements ExchangeLogService {
-
-    final static Logger LOG = LoggerFactory.getLogger(ExchangeLogServiceBean.class);
 
     @EJB
     private ExchangeMessageProducer producer;
@@ -83,7 +67,6 @@ public class ExchangeLogServiceBean implements ExchangeLogService {
     @EJB
     private UnsentModel unsentModel;
 
-
     @Override
     public ExchangeLogType logAndCache(ExchangeLogType log, String pluginMessageId, String username) throws ExchangeLogException {
         ExchangeLogType createdLog = log(log, username);
@@ -93,12 +76,12 @@ public class ExchangeLogServiceBean implements ExchangeLogService {
     }
 
     @Override
-    public ExchangeLogType log(ExchangeLogType log, String username) throws ExchangeLogException {
+    public ExchangeLogType log(ExchangeLogType logType, String username) throws ExchangeLogException {
         try {
-            ExchangeLogType exchangeLog = exchangeLogModel.createExchangeLog(log, username);
+            ExchangeLogType exchangeLog = exchangeLogModel.createExchangeLog(logType, username);
             String guid = exchangeLog.getGuid();
             exchangeLogEvent.fire(new NotificationMessage("guid", guid));
-            LOG.debug("[INFO] Logging message with guid : [ "+guid+" ]..");
+            log.debug("[INFO] Logging message with guid : [ "+guid+" ]..");
             return exchangeLog;
         } catch (ExchangeModelException e) {
             throw new ExchangeLogException("Couldn't create log exchange log.");
@@ -120,6 +103,7 @@ public class ExchangeLogServiceBean implements ExchangeLogService {
         log.setIncoming(incoming);
         log.setTypeRef(ref);
         log.setDestination(request.getDestination());
+        log.setSource(request.getPluginType().toString());
 
         return log(log, request.getUsername());
     }
@@ -164,8 +148,7 @@ public class ExchangeLogServiceBean implements ExchangeLogService {
     public List<UnsentMessageType> getUnsentMessageList() throws ExchangeLogException {
         log.info("Get unsent message list in service layer");
         try {
-            List<UnsentMessageType> unsentMessageList = unsentModel.getMessageList();
-            return unsentMessageList;
+            return unsentModel.getMessageList();
         } catch (ExchangeModelException e) {
             throw new ExchangeLogException("Couldn't get unsent message list.");
         }
@@ -188,8 +171,7 @@ public class ExchangeLogServiceBean implements ExchangeLogService {
             query.setTypeRefDateTo(to);
             query.getStatus().addAll(statusList);
             query.getType().addAll(typeList);
-            List<ExchangeLogStatusType> pollStatusList = exchangeLogModel.getExchangeLogStatusHistoryByQuery(query);
-            return pollStatusList;
+            return  exchangeLogModel.getExchangeLogStatusHistoryByQuery(query);
         } catch (ExchangeModelException e) {
             throw new ExchangeLogException("Couldn't get exchange status history list.");
         }
@@ -202,8 +184,7 @@ public class ExchangeLogServiceBean implements ExchangeLogService {
             throw new ExchangeLogException("Invalid id");
         }
         try {
-            ExchangeLogStatusType pollStatus = exchangeLogModel.getExchangeLogStatusHistory(typeRefGuid, type);
-            return pollStatus;
+            return exchangeLogModel.getExchangeLogStatusHistory(typeRefGuid, type);
         } catch (ExchangeModelException e) {
             throw new ExchangeLogException("Couldn't get exchange status history list.");
         }
