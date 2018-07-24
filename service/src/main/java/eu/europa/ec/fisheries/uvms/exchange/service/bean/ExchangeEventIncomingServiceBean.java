@@ -11,18 +11,6 @@
  */
 package eu.europa.ec.fisheries.uvms.exchange.service.bean;
 
-import static eu.europa.ec.fisheries.uvms.commons.message.impl.JAXBUtils.unMarshallMessage;
-
-import javax.ejb.EJB;
-import javax.ejb.Stateless;
-import javax.enterprise.event.Event;
-import javax.enterprise.event.Observes;
-import javax.inject.Inject;
-import javax.jms.JMSException;
-import javax.jms.TextMessage;
-import javax.xml.bind.JAXBException;
-import java.util.List;
-
 import eu.europa.ec.fisheries.schema.exchange.common.v1.AcknowledgeType;
 import eu.europa.ec.fisheries.schema.exchange.module.v1.*;
 import eu.europa.ec.fisheries.schema.exchange.movement.v1.MovementBaseType;
@@ -35,13 +23,7 @@ import eu.europa.ec.fisheries.schema.exchange.plugin.v1.AcknowledgeResponse;
 import eu.europa.ec.fisheries.schema.exchange.plugin.v1.ExchangePluginMethod;
 import eu.europa.ec.fisheries.schema.exchange.service.v1.ServiceResponseType;
 import eu.europa.ec.fisheries.schema.exchange.service.v1.StatusType;
-import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogStatusType;
-import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogStatusTypeType;
-import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogType;
-import eu.europa.ec.fisheries.schema.exchange.v1.LogRefType;
-import eu.europa.ec.fisheries.schema.exchange.v1.LogType;
-import eu.europa.ec.fisheries.schema.exchange.v1.PollStatus;
-import eu.europa.ec.fisheries.schema.exchange.v1.TypeRefType;
+import eu.europa.ec.fisheries.schema.exchange.v1.*;
 import eu.europa.ec.fisheries.schema.movement.module.v1.ProcessedMovementAck;
 import eu.europa.ec.fisheries.schema.rules.asset.v1.AssetId;
 import eu.europa.ec.fisheries.schema.rules.module.v1.RulesModuleMethod;
@@ -49,30 +31,9 @@ import eu.europa.ec.fisheries.schema.rules.module.v1.SetFLUXMDRSyncMessageRulesR
 import eu.europa.ec.fisheries.schema.rules.movement.v1.RawMovementType;
 import eu.europa.ec.fisheries.uvms.commons.message.api.MessageException;
 import eu.europa.ec.fisheries.uvms.commons.message.impl.JAXBUtils;
+import eu.europa.ec.fisheries.uvms.exchange.ExchangeLogModel;
 import eu.europa.ec.fisheries.uvms.exchange.message.constants.MessageQueue;
-import eu.europa.ec.fisheries.uvms.exchange.message.event.ErrorEvent;
-import eu.europa.ec.fisheries.uvms.exchange.message.event.ExchangeLogEvent;
-import eu.europa.ec.fisheries.uvms.exchange.message.event.HandleProcessedMovementEvent;
-import eu.europa.ec.fisheries.uvms.exchange.message.event.LogIdByTypeExists;
-import eu.europa.ec.fisheries.uvms.exchange.message.event.LogRefIdByTypeExists;
-import eu.europa.ec.fisheries.uvms.exchange.message.event.MdrSyncResponseMessageEvent;
-import eu.europa.ec.fisheries.uvms.exchange.message.event.PingEvent;
-import eu.europa.ec.fisheries.uvms.exchange.message.event.PluginConfigEvent;
-import eu.europa.ec.fisheries.uvms.exchange.message.event.PluginPingEvent;
-import eu.europa.ec.fisheries.uvms.exchange.message.event.QueryAssetInformationEvent;
-import eu.europa.ec.fisheries.uvms.exchange.message.event.ReceiveAssetInformationEvent;
-import eu.europa.ec.fisheries.uvms.exchange.message.event.ReceiveInvalidSalesMessageEvent;
-import eu.europa.ec.fisheries.uvms.exchange.message.event.ReceiveSalesQueryEvent;
-import eu.europa.ec.fisheries.uvms.exchange.message.event.ReceiveSalesReportEvent;
-import eu.europa.ec.fisheries.uvms.exchange.message.event.ReceiveSalesResponseEvent;
-import eu.europa.ec.fisheries.uvms.exchange.message.event.ReceivedFluxFaResponseMessageEvent;
-import eu.europa.ec.fisheries.uvms.exchange.message.event.SendAssetInformationEvent;
-import eu.europa.ec.fisheries.uvms.exchange.message.event.SendSalesReportEvent;
-import eu.europa.ec.fisheries.uvms.exchange.message.event.SendSalesResponseEvent;
-import eu.europa.ec.fisheries.uvms.exchange.message.event.SetFaQueryMessageEvent;
-import eu.europa.ec.fisheries.uvms.exchange.message.event.SetFluxFAReportMessageEvent;
-import eu.europa.ec.fisheries.uvms.exchange.message.event.SetMovementEvent;
-import eu.europa.ec.fisheries.uvms.exchange.message.event.UpdateLogStatusEvent;
+import eu.europa.ec.fisheries.uvms.exchange.message.event.*;
 import eu.europa.ec.fisheries.uvms.exchange.message.event.carrier.ExchangeMessageEvent;
 import eu.europa.ec.fisheries.uvms.exchange.message.event.carrier.PluginMessageEvent;
 import eu.europa.ec.fisheries.uvms.exchange.message.event.registry.PluginErrorEvent;
@@ -85,7 +46,6 @@ import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelMarshal
 import eu.europa.ec.fisheries.uvms.exchange.model.mapper.ExchangeModuleResponseMapper;
 import eu.europa.ec.fisheries.uvms.exchange.model.mapper.ExchangePluginResponseMapper;
 import eu.europa.ec.fisheries.uvms.exchange.model.mapper.JAXBMarshaller;
-import eu.europa.ec.fisheries.uvms.exchange.ExchangeLogModel;
 import eu.europa.ec.fisheries.uvms.exchange.service.ExchangeEventIncomingService;
 import eu.europa.ec.fisheries.uvms.exchange.service.ExchangeEventOutgoingService;
 import eu.europa.ec.fisheries.uvms.exchange.service.ExchangeLogService;
@@ -104,6 +64,18 @@ import eu.europa.ec.fisheries.uvms.rules.model.exception.RulesModelMarshallExcep
 import eu.europa.ec.fisheries.uvms.rules.model.mapper.RulesModuleRequestMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
+
+import javax.ejb.EJB;
+import javax.ejb.Stateless;
+import javax.enterprise.event.Event;
+import javax.enterprise.event.Observes;
+import javax.inject.Inject;
+import javax.jms.JMSException;
+import javax.jms.TextMessage;
+import javax.xml.bind.JAXBException;
+import java.util.List;
+
+import static eu.europa.ec.fisheries.uvms.commons.message.impl.JAXBUtils.unMarshallMessage;
 
 @Stateless
 @Slf4j
@@ -387,7 +359,7 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
             String messageGuid = request.getMessageGuid();
             ExchangeLogType log = exchangeLog.log(request, LogType.RECEIVE_SALES_REPORT, ExchangeLogStatusTypeType.ISSUED, TypeRefType.SALES_REPORT, report, true);
 
-            String receiveSalesReportRequest =RulesModuleRequestMapper.createReceiveSalesReportRequest(report, messageGuid, plugin.name(), log.getGuid(), sender, request.getOnValue());
+            String receiveSalesReportRequest = RulesModuleRequestMapper.createReceiveSalesReportRequest(report, messageGuid, plugin.name(), log.getGuid(), sender, request.getOnValue());
             String messageSelector = "ReceiveSalesReportRequest";
             forwardToRules(receiveSalesReportRequest, messageSelector);
         } catch (ExchangeModelMarshallException e) {
