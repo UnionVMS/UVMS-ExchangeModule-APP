@@ -56,6 +56,7 @@ public class ExchangeLog {
 	
 	@Column(name="log_type")
 	@Enumerated(EnumType.STRING)
+	@Size(max=100)
 	private LogType type;
 	
 	@Column(name="log_type_ref_guid")
@@ -63,13 +64,14 @@ public class ExchangeLog {
 	
 	@Enumerated(EnumType.STRING)
 	@Column(name="log_type_ref_type")
+	@Size(max=100)
 	private TypeRefType typeRefType;
 
 	@Column(name = "log_type_ref_message")
 	private String typeRefMessage;
 	
-	@NotNull
-	@Size(max=36)
+	@NotNull(message = "The Guid for the log cannot be empty!")
+	@Size(max=100)
 	@Column(name = "log_guid", unique=true)
 	private String guid;
 	
@@ -77,51 +79,54 @@ public class ExchangeLog {
 	private Boolean transferIncoming;
 
 	private Boolean duplicate;
-	
-	@NotNull
+
+	@NotNull(message = "The log_senderreceiver for the log cannot be empty!")
 	@Column(name = "log_senderreceiver")
+	@Size(max=100)
 	private String senderReceiver;
-	
-	@NotNull
+
+	@NotNull(message = "The dateReceived for the log cannot be empty!")
 	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name = "log_daterecieved")
 	private Date dateReceived;
-	
-	@NotNull
+
+	@NotNull(message = "The log_status field for the log cannot be empty!")
 	@Enumerated(EnumType.STRING)
 	@Column(name = "log_status")
+	@Size(max=100)
 	private ExchangeLogStatusTypeType status;
-	
-	@NotNull
+
+	@NotNull(message = "The log_updattim field for the log cannot be empty!")
 	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name = "log_updattim")
 	private Date updateTime;
-	
-	@NotNull
-	@Size(max=60)
+
+	@NotNull(message = "The updatedBy field for the log cannot be empty!")
+	@Size(max=100)
 	@Column(name = "log_upuser")
 	private String updatedBy;
 
 	@OneToMany(mappedBy="log", fetch=FetchType.EAGER, cascade=CascadeType.ALL)
 	private List<ExchangeLogStatus> statusHistory;
 
-	@Size(max=50)
+	@Size(max=100)
 	@Column(name="log_recipient")
 	private String recipient;
 
 	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name="log_fwddate")
+	@Size(max=100)
 	private Date fwdDate;
 
-	@Size(max=50)
+	@Size(max=100)
 	@Column(name="log_fwdrule")
 	private String fwdRule;
 
-	@Size(max=50)
+	@Size(max=100)
 	@Column(name="log_source")
 	private String source;
 
-	@Size(max=50)
+	@Size(max=100)
 	@Column(name="log_destination")
 	private String destination;
 
@@ -137,7 +142,7 @@ public class ExchangeLog {
             setDuplicate(false);
         }
     }
-	
+
 	public Long getId() {
 		return id;
 	}
@@ -282,10 +287,6 @@ public class ExchangeLog {
 		this.destination = destination;
 	}
 
-	public void setMDCRequestId(String mdcRequestId) {
-		this.mdcRequestId = mdcRequestId;
-	}
-
     public Boolean getDuplicate() {
         return duplicate;
     }
@@ -293,4 +294,12 @@ public class ExchangeLog {
     public void setDuplicate(Boolean duplicate) {
         this.duplicate = duplicate;
     }
+
+	public String getMdcRequestId() {
+		return mdcRequestId;
+	}
+
+	public void setMdcRequestId(String mdcRequestId) {
+		this.mdcRequestId = mdcRequestId;
+	}
 }

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.3.xsd">
+
+    <changeSet author="stihft" id="Add column containing the MDC request id">
+        <modifyDataType tableName="log" columnName="log_guid" newDataType="VARCHAR(100)" />
+        <modifyDataType tableName="log" columnName="log_type_ref_type" newDataType="VARCHAR(100)" />
+        <modifyDataType tableName="log" columnName="log_senderreceiver" newDataType="VARCHAR(100)" />
+        <modifyDataType tableName="log" columnName="log_status" newDataType="VARCHAR(100)" />
+        <modifyDataType tableName="log" columnName="log_type" newDataType="VARCHAR(100)" />
+        <modifyDataType tableName="log" columnName="log_source" newDataType="VARCHAR(100)" />
+        <modifyDataType tableName="log" columnName="log_fwdrule" newDataType="VARCHAR(100)" />
+        <modifyDataType tableName="log" columnName="log_recipient" newDataType="VARCHAR(100)" />
+        <modifyDataType tableName="log" columnName="log_fwddate" newDataType="VARCHAR(100)" />
+    </changeSet>
+
+</databaseChangeLog>
