@@ -11,29 +11,18 @@ copy of the GNU General Public License along with the IFDM Suite. If not, see <h
  */
 package eu.europa.ec.fisheries.uvms.exchange.mapper;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogStatusHistoryType;
-import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogStatusType;
-import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogStatusTypeType;
-import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogType;
-import eu.europa.ec.fisheries.schema.exchange.v1.LogRefType;
-import eu.europa.ec.fisheries.schema.exchange.v1.LogType;
-import eu.europa.ec.fisheries.schema.exchange.v1.ReceiveMovementType;
-import eu.europa.ec.fisheries.schema.exchange.v1.SendEmailType;
-import eu.europa.ec.fisheries.schema.exchange.v1.SendMovementType;
-import eu.europa.ec.fisheries.schema.exchange.v1.SendPollType;
+import eu.europa.ec.fisheries.schema.exchange.v1.*;
 import eu.europa.ec.fisheries.uvms.exchange.entity.exchangelog.ExchangeLog;
 import eu.europa.ec.fisheries.uvms.exchange.entity.exchangelog.ExchangeLogStatus;
 import org.slf4j.MDC;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class LogMapper {
 
-    private static final String FLUX = "FLUX";
-
     private LogMapper(){
-
+        // hide implicit constructor
     }
 
     public static ExchangeLog toNewEntity(ExchangeLogType log, String username) {
@@ -53,28 +42,19 @@ public class LogMapper {
                 entity = toSendEmailEntity(log);
                 break;
             case RECEIVE_SALES_REPORT:
-                break;
             case RECEIVE_SALES_QUERY:
-                break;
             case RECEIVE_SALES_RESPONSE:
-                break;
-            case SEND_SALES_RESPONSE:
-                break;
-            case SEND_SALES_REPORT:
-                break;
             case RECEIVE_FLUX_RESPONSE_MSG:
+            case SEND_SALES_REPORT:
+            case SEND_SALES_RESPONSE:
             case RCV_FLUX_FA_REPORT_MSG:
             case RECEIVE_FA_QUERY_MSG:
             case SEND_FA_QUERY_MSG:
             case SEND_FLUX_FA_REPORT_MSG:
             case SEND_FLUX_RESPONSE_MSG:
-                entity.setSource(FLUX);
+                entity.setSource(log.getSource());
                 break;
-            case RECEIVE_ASSET_INFORMATION:
-                break;
-            case SEND_ASSET_INFORMATION:
-                break;
-            case QUERY_ASSET_INFORMATION:
+            default:
                 break;
         }
 
