@@ -5,14 +5,10 @@
 
     <changeSet author="stihft" id="Add column containing the MDC request id">
         <modifyDataType tableName="log" columnName="log_guid" newDataType="VARCHAR(100)" />
-        <modifyDataType tableName="log" columnName="log_type_ref_type" newDataType="VARCHAR(100)" />
         <modifyDataType tableName="log" columnName="log_senderreceiver" newDataType="VARCHAR(100)" />
-        <modifyDataType tableName="log" columnName="log_status" newDataType="VARCHAR(100)" />
-        <modifyDataType tableName="log" columnName="log_type" newDataType="VARCHAR(100)" />
         <modifyDataType tableName="log" columnName="log_source" newDataType="VARCHAR(100)" />
         <modifyDataType tableName="log" columnName="log_fwdrule" newDataType="VARCHAR(100)" />
         <modifyDataType tableName="log" columnName="log_recipient" newDataType="VARCHAR(100)" />
-        <modifyDataType tableName="log" columnName="log_fwddate" newDataType="VARCHAR(100)" />
     </changeSet>
 
 </databaseChangeLog>

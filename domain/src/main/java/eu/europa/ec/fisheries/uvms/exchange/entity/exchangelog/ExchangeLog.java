@@ -56,7 +56,6 @@ public class ExchangeLog {
 	
 	@Column(name="log_type")
 	@Enumerated(EnumType.STRING)
-	@Size(max=100)
 	private LogType type;
 	
 	@Column(name="log_type_ref_guid")
@@ -64,7 +63,6 @@ public class ExchangeLog {
 	
 	@Enumerated(EnumType.STRING)
 	@Column(name="log_type_ref_type")
-	@Size(max=100)
 	private TypeRefType typeRefType;
 
 	@Column(name = "log_type_ref_message")
@@ -78,6 +76,7 @@ public class ExchangeLog {
 	@Column(name = "log_transfer_incoming")
 	private Boolean transferIncoming;
 
+	@Column(name = "duplicate")
 	private Boolean duplicate;
 
 	@NotNull(message = "The log_senderreceiver for the log cannot be empty!")
@@ -93,7 +92,6 @@ public class ExchangeLog {
 	@NotNull(message = "The log_status field for the log cannot be empty!")
 	@Enumerated(EnumType.STRING)
 	@Column(name = "log_status")
-	@Size(max=100)
 	private ExchangeLogStatusTypeType status;
 
 	@NotNull(message = "The log_updattim field for the log cannot be empty!")
@@ -115,7 +113,6 @@ public class ExchangeLog {
 
 	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name="log_fwddate")
-	@Size(max=100)
 	private Date fwdDate;
 
 	@Size(max=100)
