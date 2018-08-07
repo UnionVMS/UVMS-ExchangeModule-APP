@@ -110,7 +110,7 @@ public class ExchangeLogMapper {
     	Date dateReceived = log.getDateRecieved();
     	dto.setDateRecieved(DateUtils.dateToString(dateReceived));
     	dto.setId(log.getGuid());
-        dto.setId(log.getDf());
+        dto.setDf(log.getDf());
 
         dto.setIncoming(log.isIncoming());
         if(log.getTypeRefType()!=null) {
