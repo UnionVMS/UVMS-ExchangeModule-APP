@@ -110,7 +110,7 @@ public class LogMapper {
         entity.setUpdateTime(eu.europa.ec.fisheries.uvms.commons.date.DateUtils.nowUTC().toDate());
         entity.setType(log.getType());
         entity.setDestination(log.getDestination());
-        entity.setMDCRequestId(MDC.get("requestId"));
+        entity.setMdcRequestId(MDC.get("requestId"));
         return entity;
     }
 

@@ -80,8 +80,8 @@ public class ExchangeLog {
 	@Column(name = "log_on")
 	private String on;
 
-	@NotNull
-	@Size(max=36)
+	@NotNull(message = "The Guid for the log cannot be empty!")
+	@Size(max=100)
 	@Column(name = "log_guid", unique=true)
 	private String guid;
 	
@@ -90,32 +90,33 @@ public class ExchangeLog {
 
 	@NotNull
 	@Column(name = "log_senderreceiver")
+	@Size(max=100)
 	private String senderReceiver;
-	
-	@NotNull
+
+	@NotNull(message = "The dateReceived for the log cannot be empty!")
 	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name = "log_daterecieved")
 	private Date dateReceived;
-	
-	@NotNull
+
+	@NotNull(message = "The log_status field for the log cannot be empty!")
 	@Enumerated(EnumType.STRING)
 	@Column(name = "log_status")
 	private ExchangeLogStatusTypeType status;
-	
-	@NotNull
+
+	@NotNull(message = "The log_updattim field for the log cannot be empty!")
 	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name = "log_updattim")
 	private Date updateTime;
-	
-	@NotNull
-	@Size(max=60)
+
+	@NotNull(message = "The updatedBy field for the log cannot be empty!")
+	@Size(max=100)
 	@Column(name = "log_upuser")
 	private String updatedBy;
 
 	@OneToMany(mappedBy="log", fetch=FetchType.EAGER, cascade=CascadeType.ALL)
 	private List<ExchangeLogStatus> statusHistory;
 
-	@Size(max=50)
+	@Size(max=100)
 	@Column(name="log_recipient")
 	private String recipient;
 
@@ -123,15 +124,15 @@ public class ExchangeLog {
 	@Column(name="log_fwddate")
 	private Date fwdDate;
 
-	@Size(max=50)
+	@Size(max=100)
 	@Column(name="log_fwdrule")
 	private String fwdRule;
 
-	@Size(max=50)
+	@Size(max=100)
 	@Column(name="log_source")
 	private String source;
 
-	@Size(max=50)
+	@Size(max=100)
 	@Column(name="log_destination")
 	private String destination;
 
@@ -143,7 +144,7 @@ public class ExchangeLog {
 	public void prepersist() {
 		setGuid(UUID.randomUUID().toString());
     }
-	
+
 	public Long getId() {
 		return id;
 	}
@@ -288,13 +289,9 @@ public class ExchangeLog {
 		this.destination = destination;
 	}
 
-	public void setMDCRequestId(String mdcRequestId) {
-		this.mdcRequestId = mdcRequestId;
-	}
-
-	public String getTo() {
-		return to;
-	}
+    public String getTo() {
+        return to;
+    }
 
 	public void setTo(String to) {
 		this.to = to;
@@ -323,4 +320,12 @@ public class ExchangeLog {
     public void setDf(String df) {
         this.df = df;
     }
+
+	public String getMdcRequestId() {
+		return mdcRequestId;
+	}
+
+	public void setMdcRequestId(String mdcRequestId) {
+		this.mdcRequestId = mdcRequestId;
+	}
 }
