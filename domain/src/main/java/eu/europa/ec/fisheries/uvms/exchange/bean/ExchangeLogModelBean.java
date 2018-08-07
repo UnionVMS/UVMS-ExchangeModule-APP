@@ -32,6 +32,7 @@ import eu.europa.ec.fisheries.schema.exchange.v1.LogWithRawMsgAndType;
 import eu.europa.ec.fisheries.schema.exchange.v1.PollStatus;
 import eu.europa.ec.fisheries.schema.exchange.v1.RelatedLogInfo;
 import eu.europa.ec.fisheries.schema.exchange.v1.TypeRefType;
+import eu.europa.ec.fisheries.uvms.exchange.ExchangeLogModel;
 import eu.europa.ec.fisheries.uvms.exchange.dao.ExchangeLogDao;
 import eu.europa.ec.fisheries.uvms.exchange.entity.exchangelog.ExchangeLog;
 import eu.europa.ec.fisheries.uvms.exchange.entity.exchangelog.ExchangeLogStatus;
@@ -41,14 +42,11 @@ import eu.europa.ec.fisheries.uvms.exchange.model.dto.ListResponseDto;
 import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelException;
 import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeSearchMapperException;
 import eu.europa.ec.fisheries.uvms.exchange.model.exception.InputArgumentException;
-import eu.europa.ec.fisheries.uvms.exchange.ExchangeLogModel;
 import eu.europa.ec.fisheries.uvms.exchange.search.SearchFieldMapper;
 import eu.europa.ec.fisheries.uvms.exchange.search.SearchValue;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  **/
@@ -236,7 +234,6 @@ public class ExchangeLogModelBean implements ExchangeLogModel {
             List<ExchangeLogStatus> statusList = exchangeLog.getStatusHistory();
             statusList.add(LogMapper.toNewStatusEntity(exchangeLog, updateStatus.getStatus(), username));
             exchangeLog.setStatus(updateStatus.getStatus());
-            exchangeLog.setDuplicate(status.isDuplicate());
             ExchangeLog retEntity = logDao.updateLog(exchangeLog);
             return LogMapper.toModel(retEntity);
         } catch (ExchangeDaoException ex) {

@@ -8,9 +8,9 @@
     
     <include file="changelog\v0.1\db-changelog-createTables_0.1.xml" />
     <include file="changelog\v0.2\db-changelog-createTables_0.2.xml" />
-
     <include file="changelog\v0.1\db-changelog-insertInitdata_0.1.xml" />
     <include file="changelog\v0.1\db-changelog-insertTestdata_0.1.xml" />
+    <include file="changelog\v0.27\db-changelog_0.27.xml" />
 
     <include file="changelog\v0.3\db-changelog-modify_log_table_0.3.xml" />
 

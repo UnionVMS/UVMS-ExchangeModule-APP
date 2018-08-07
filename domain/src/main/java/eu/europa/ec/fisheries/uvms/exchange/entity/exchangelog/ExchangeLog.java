@@ -67,7 +67,19 @@ public class ExchangeLog {
 
 	@Column(name = "log_type_ref_message")
 	private String typeRefMessage;
-	
+
+	@Column(name = "log_to")
+	private String to;
+
+    @Column(name = "log_df")
+    private String df;
+
+    @Column(name = "log_todt")
+	private String todt;
+
+	@Column(name = "log_on")
+	private String on;
+
 	@NotNull(message = "The Guid for the log cannot be empty!")
 	@Size(max=100)
 	@Column(name = "log_guid", unique=true)
@@ -76,10 +88,7 @@ public class ExchangeLog {
 	@Column(name = "log_transfer_incoming")
 	private Boolean transferIncoming;
 
-	@Column(name = "duplicate")
-	private Boolean duplicate;
-
-	@NotNull(message = "The log_senderreceiver for the log cannot be empty!")
+	@NotNull
 	@Column(name = "log_senderreceiver")
 	@Size(max=100)
 	private String senderReceiver;
@@ -134,10 +143,6 @@ public class ExchangeLog {
 	@PrePersist
 	public void prepersist() {
 		setGuid(UUID.randomUUID().toString());
-        Boolean dup = getDuplicate();
-        if (dup == null){
-            setDuplicate(false);
-        }
     }
 
 	public Long getId() {
@@ -284,12 +289,36 @@ public class ExchangeLog {
 		this.destination = destination;
 	}
 
-    public Boolean getDuplicate() {
-        return duplicate;
+    public String getTo() {
+        return to;
     }
 
-    public void setDuplicate(Boolean duplicate) {
-        this.duplicate = duplicate;
+	public void setTo(String to) {
+		this.to = to;
+	}
+
+	public String getOn() {
+		return on;
+	}
+
+	public void setOn(String on) {
+		this.on = on;
+	}
+
+	public String getTodt() {
+		return todt;
+	}
+
+	public void setTodt(String todt) {
+		this.todt = todt;
+	}
+
+    public String getDf() {
+        return df;
+    }
+
+    public void setDf(String df) {
+        this.df = df;
     }
 
 	public String getMdcRequestId() {

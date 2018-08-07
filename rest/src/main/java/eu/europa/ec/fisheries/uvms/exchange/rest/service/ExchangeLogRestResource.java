@@ -150,7 +150,7 @@ public class ExchangeLogRestResource {
 
             LogType type = exchangeLogByUUID.getType();
 
-            if (type == LogType.RCV_FLUX_FA_REPORT_MSG && exchangeLogByUUID.isDuplicate()) {
+            if (type == LogType.RCV_FLUX_FA_REPORT_MSG) {
                 refUUID = exchangeLogByUUID.getTypeRef().getRefGuid();
                 Set<ExchangeLogType> exchangeLogsByRefUUID = logRestServiceBean.getExchangeLogsByRefUUID(refUUID, exchangeLogByUUID.getTypeRefType());
                 if (CollectionUtils.isNotEmpty(exchangeLogsByRefUUID)){
