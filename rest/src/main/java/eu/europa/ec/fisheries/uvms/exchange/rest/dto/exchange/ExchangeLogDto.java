@@ -11,11 +11,12 @@ copy of the GNU General Public License along with the IFDM Suite. If not, see <h
  */
 package eu.europa.ec.fisheries.uvms.exchange.rest.dto.exchange;
 
-import eu.europa.ec.fisheries.schema.exchange.v1.RelatedLogInfo;
-import java.util.List;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
+import java.util.List;
+
+import eu.europa.ec.fisheries.schema.exchange.v1.RelatedLogInfo;
 
 @XmlAccessorType(XmlAccessType.FIELD)
 public class ExchangeLogDto {
@@ -38,6 +39,10 @@ public class ExchangeLogDto {
 	private String dateFwd;
 	@XmlElement(required = true)
 	private String status;
+	private String to;
+	private String todt;
+	private String on;
+	private String df;
 	@XmlElement(required = true)
 	private String type;
 	@XmlElement(required = true)
@@ -124,5 +129,37 @@ public class ExchangeLogDto {
 	}
 	public void setRelatedLogData(List<RelatedLogInfo> relatedLogData) {
 		this.relatedLogData = relatedLogData;
+	}
+
+	public String getTo() {
+		return to;
+	}
+
+	public void setTo(String to) {
+		this.to = to;
+	}
+
+	public String getTodt() {
+		return todt;
+	}
+
+	public void setTodt(String todt) {
+		this.todt = todt;
+	}
+
+	public String getOn() {
+		return on;
+	}
+
+	public void setOn(String on) {
+		this.on = on;
+	}
+
+	public String getDf() {
+		return df;
+	}
+
+	public void setDf(String df) {
+		this.df = df;
 	}
 }
