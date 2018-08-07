@@ -307,11 +307,13 @@ public class ExchangeLogModelBean implements ExchangeLogModel {
         LogWithRawMsgAndType logWrapper = new LogWithRawMsgAndType();
         try {
             ExchangeLog exchangeLog = logDao.getExchangeLogByGuid(guid);
-            String rawMsg = exchangeLog.getTypeRefMessage();
-            TypeRefType type = exchangeLog.getTypeRefType();
-            logWrapper.setRawMsg(rawMsg);
-            logWrapper.setType(type);
-            logWrapper.setRefGuid(exchangeLog.getTypeRefGuid());
+            if (exchangeLog != null){
+                String rawMsg = exchangeLog.getTypeRefMessage();
+                TypeRefType type = exchangeLog.getTypeRefType();
+                logWrapper.setRawMsg(rawMsg);
+                logWrapper.setType(type);
+                logWrapper.setRefGuid(exchangeLog.getTypeRefGuid());
+            }
         } catch (ExchangeDaoException e) {
             log.error("[ERROR] Couldn't find Log with the following GUID : [[" + guid + "]]", e);
         }
