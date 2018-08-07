@@ -11,8 +11,44 @@
  */
 package eu.europa.ec.fisheries.uvms.exchange.service.bean;
 
+import static eu.europa.ec.fisheries.uvms.commons.message.impl.JAXBUtils.unMarshallMessage;
+
+import javax.ejb.EJB;
+import javax.ejb.Stateless;
+import javax.enterprise.event.Event;
+import javax.enterprise.event.Observes;
+import javax.inject.Inject;
+import javax.jms.JMSException;
+import javax.jms.TextMessage;
+import javax.xml.bind.JAXBException;
+import java.math.BigInteger;
+import java.util.List;
+
 import eu.europa.ec.fisheries.schema.exchange.common.v1.AcknowledgeType;
-import eu.europa.ec.fisheries.schema.exchange.module.v1.*;
+import eu.europa.ec.fisheries.schema.exchange.module.v1.ExchangeBaseRequest;
+import eu.europa.ec.fisheries.schema.exchange.module.v1.ExchangeModuleMethod;
+import eu.europa.ec.fisheries.schema.exchange.module.v1.GetServiceListRequest;
+import eu.europa.ec.fisheries.schema.exchange.module.v1.LogIdByTypeExistsRequest;
+import eu.europa.ec.fisheries.schema.exchange.module.v1.LogIdByTypeExistsResponse;
+import eu.europa.ec.fisheries.schema.exchange.module.v1.LogRefIdByTypeExistsRequest;
+import eu.europa.ec.fisheries.schema.exchange.module.v1.LogRefIdByTypeExistsResponse;
+import eu.europa.ec.fisheries.schema.exchange.module.v1.PingResponse;
+import eu.europa.ec.fisheries.schema.exchange.module.v1.ProcessedMovementResponse;
+import eu.europa.ec.fisheries.schema.exchange.module.v1.QueryAssetInformationRequest;
+import eu.europa.ec.fisheries.schema.exchange.module.v1.RcvFLUXFaResponseMessageRequest;
+import eu.europa.ec.fisheries.schema.exchange.module.v1.ReceiveAssetInformationRequest;
+import eu.europa.ec.fisheries.schema.exchange.module.v1.ReceiveInvalidSalesMessage;
+import eu.europa.ec.fisheries.schema.exchange.module.v1.ReceiveSalesQueryRequest;
+import eu.europa.ec.fisheries.schema.exchange.module.v1.ReceiveSalesReportRequest;
+import eu.europa.ec.fisheries.schema.exchange.module.v1.ReceiveSalesResponseRequest;
+import eu.europa.ec.fisheries.schema.exchange.module.v1.SendAssetInformationRequest;
+import eu.europa.ec.fisheries.schema.exchange.module.v1.SendSalesReportRequest;
+import eu.europa.ec.fisheries.schema.exchange.module.v1.SendSalesResponseRequest;
+import eu.europa.ec.fisheries.schema.exchange.module.v1.SetFAQueryMessageRequest;
+import eu.europa.ec.fisheries.schema.exchange.module.v1.SetFLUXFAReportMessageRequest;
+import eu.europa.ec.fisheries.schema.exchange.module.v1.SetFLUXMDRSyncMessageExchangeResponse;
+import eu.europa.ec.fisheries.schema.exchange.module.v1.SetMovementReportRequest;
+import eu.europa.ec.fisheries.schema.exchange.module.v1.UpdateLogStatusRequest;
 import eu.europa.ec.fisheries.schema.exchange.movement.v1.MovementBaseType;
 import eu.europa.ec.fisheries.schema.exchange.movement.v1.MovementRefType;
 import eu.europa.ec.fisheries.schema.exchange.movement.v1.MovementSourceType;
@@ -23,7 +59,13 @@ import eu.europa.ec.fisheries.schema.exchange.plugin.v1.AcknowledgeResponse;
 import eu.europa.ec.fisheries.schema.exchange.plugin.v1.ExchangePluginMethod;
 import eu.europa.ec.fisheries.schema.exchange.service.v1.ServiceResponseType;
 import eu.europa.ec.fisheries.schema.exchange.service.v1.StatusType;
-import eu.europa.ec.fisheries.schema.exchange.v1.*;
+import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogStatusType;
+import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogStatusTypeType;
+import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogType;
+import eu.europa.ec.fisheries.schema.exchange.v1.LogRefType;
+import eu.europa.ec.fisheries.schema.exchange.v1.LogType;
+import eu.europa.ec.fisheries.schema.exchange.v1.PollStatus;
+import eu.europa.ec.fisheries.schema.exchange.v1.TypeRefType;
 import eu.europa.ec.fisheries.schema.movement.module.v1.ProcessedMovementAck;
 import eu.europa.ec.fisheries.schema.rules.asset.v1.AssetId;
 import eu.europa.ec.fisheries.schema.rules.module.v1.RulesModuleMethod;
@@ -33,7 +75,29 @@ import eu.europa.ec.fisheries.uvms.commons.message.api.MessageException;
 import eu.europa.ec.fisheries.uvms.commons.message.impl.JAXBUtils;
 import eu.europa.ec.fisheries.uvms.exchange.ExchangeLogModel;
 import eu.europa.ec.fisheries.uvms.exchange.message.constants.MessageQueue;
-import eu.europa.ec.fisheries.uvms.exchange.message.event.*;
+import eu.europa.ec.fisheries.uvms.exchange.message.event.ErrorEvent;
+import eu.europa.ec.fisheries.uvms.exchange.message.event.ExchangeLogEvent;
+import eu.europa.ec.fisheries.uvms.exchange.message.event.HandleProcessedMovementEvent;
+import eu.europa.ec.fisheries.uvms.exchange.message.event.LogIdByTypeExists;
+import eu.europa.ec.fisheries.uvms.exchange.message.event.LogRefIdByTypeExists;
+import eu.europa.ec.fisheries.uvms.exchange.message.event.MdrSyncResponseMessageEvent;
+import eu.europa.ec.fisheries.uvms.exchange.message.event.PingEvent;
+import eu.europa.ec.fisheries.uvms.exchange.message.event.PluginConfigEvent;
+import eu.europa.ec.fisheries.uvms.exchange.message.event.PluginPingEvent;
+import eu.europa.ec.fisheries.uvms.exchange.message.event.QueryAssetInformationEvent;
+import eu.europa.ec.fisheries.uvms.exchange.message.event.ReceiveAssetInformationEvent;
+import eu.europa.ec.fisheries.uvms.exchange.message.event.ReceiveInvalidSalesMessageEvent;
+import eu.europa.ec.fisheries.uvms.exchange.message.event.ReceiveSalesQueryEvent;
+import eu.europa.ec.fisheries.uvms.exchange.message.event.ReceiveSalesReportEvent;
+import eu.europa.ec.fisheries.uvms.exchange.message.event.ReceiveSalesResponseEvent;
+import eu.europa.ec.fisheries.uvms.exchange.message.event.ReceivedFluxFaResponseMessageEvent;
+import eu.europa.ec.fisheries.uvms.exchange.message.event.SendAssetInformationEvent;
+import eu.europa.ec.fisheries.uvms.exchange.message.event.SendSalesReportEvent;
+import eu.europa.ec.fisheries.uvms.exchange.message.event.SendSalesResponseEvent;
+import eu.europa.ec.fisheries.uvms.exchange.message.event.SetFaQueryMessageEvent;
+import eu.europa.ec.fisheries.uvms.exchange.message.event.SetFluxFAReportMessageEvent;
+import eu.europa.ec.fisheries.uvms.exchange.message.event.SetMovementEvent;
+import eu.europa.ec.fisheries.uvms.exchange.message.event.UpdateLogStatusEvent;
 import eu.europa.ec.fisheries.uvms.exchange.message.event.carrier.ExchangeMessageEvent;
 import eu.europa.ec.fisheries.uvms.exchange.message.event.carrier.PluginMessageEvent;
 import eu.europa.ec.fisheries.uvms.exchange.message.event.registry.PluginErrorEvent;
@@ -64,18 +128,6 @@ import eu.europa.ec.fisheries.uvms.rules.model.exception.RulesModelMarshallExcep
 import eu.europa.ec.fisheries.uvms.rules.model.mapper.RulesModuleRequestMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
-
-import javax.ejb.EJB;
-import javax.ejb.Stateless;
-import javax.enterprise.event.Event;
-import javax.enterprise.event.Observes;
-import javax.inject.Inject;
-import javax.jms.JMSException;
-import javax.jms.TextMessage;
-import javax.xml.bind.JAXBException;
-import java.util.List;
-
-import static eu.europa.ec.fisheries.uvms.commons.message.impl.JAXBUtils.unMarshallMessage;
 
 @Stateless
 @Slf4j
@@ -116,12 +168,18 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
     public void processFLUXFAReportMessage(@Observes @SetFluxFAReportMessageEvent ExchangeMessageEvent message) {
         try {
             SetFLUXFAReportMessageRequest request = JAXBMarshaller.unmarshallTextMessage(message.getJmsMessage(), SetFLUXFAReportMessageRequest.class);
+            String todt = request.getTodt();
+            String onValue = request.getOnValue();
+            BigInteger to = request.getTo();
+            String username = request.getUsername();
+            String fluxDataFlow = request.getFluxDataFlow();
+            String senderOrReceiver = request.getSenderOrReceiver();
             log.debug("Got FLUXFAReportMessage in exchange :" + request.getRequest());
             ExchangeLogType exchangeLogType = exchangeLog.log(request, LogType.RCV_FLUX_FA_REPORT_MSG, ExchangeLogStatusTypeType.ISSUED
-                    , extractFaType(request.getMethod()), request.getRequest(), true);
+                    , extractFaType(request.getMethod()), request.getRequest(), true, onValue, todt, to == null ? null : to.toString(), fluxDataFlow);
             String msg = RulesModuleRequestMapper.createSetFLUXFAReportMessageRequest(extractPluginType(request), request.getRequest()
-                    , request.getUsername(), extractLogId(message, exchangeLogType), request.getFluxDataFlow()
-                    , request.getSenderOrReceiver(), request.getOnValue());
+                    , username, extractLogId(message, exchangeLogType), fluxDataFlow
+                    , senderOrReceiver, onValue);
             forwardToRules(msg, message, null);
         } catch (RulesModelMapperException | ExchangeModelMarshallException e) {
             log.error("Couldn't map to SetFLUXFAReportMessageRequest when processing FLUXFAReportMessage coming from fa-plugin!", e);
@@ -134,9 +192,13 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
     public void processFAQueryMessage(@Observes @SetFaQueryMessageEvent ExchangeMessageEvent message) {
         try {
             SetFAQueryMessageRequest request = JAXBMarshaller.unmarshallTextMessage(message.getJmsMessage(), SetFAQueryMessageRequest.class);
+            String todt = request.getTodt();
+            String onValue = request.getOnValue();
+            String fluxDataFlow = request.getFluxDataFlow();
+            BigInteger to = request.getTo();
             log.debug("Got FAQueryMessage in exchange :" + request.getRequest());
             ExchangeLogType exchangeLogType = exchangeLog.log(request, LogType.RECEIVE_FA_QUERY_MSG, ExchangeLogStatusTypeType.ISSUED
-                    , TypeRefType.FA_QUERY, request.getRequest(), true);
+                    , TypeRefType.FA_QUERY, request.getRequest(), true, onValue, todt, to == null ? null : to.toString(), fluxDataFlow);
             String msg = RulesModuleRequestMapper.createSetFaQueryMessageRequest(extractPluginType(request)
                     , request.getRequest(), request.getUsername(), extractLogId(message, exchangeLogType), request.getFluxDataFlow()
                     , request.getSenderOrReceiver(), request.getOnValue());
@@ -152,9 +214,13 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
     public void processFluxFAResponseMessage(@Observes @ReceivedFluxFaResponseMessageEvent ExchangeMessageEvent message) {
         try {
             RcvFLUXFaResponseMessageRequest request = JAXBMarshaller.unmarshallTextMessage(message.getJmsMessage(), RcvFLUXFaResponseMessageRequest.class);
+            String todt = request.getTodt();
+            String onValue = request.getOnValue();
+            String dataFlow = request.getFluxDataFlow();
+            BigInteger to = request.getTo();
             log.debug("Got FLUXResponseMessage in exchange :" + request.getRequest());
             ExchangeLogType exchangeLogType = exchangeLog.log(request, LogType.RECEIVE_FLUX_RESPONSE_MSG, ExchangeLogStatusTypeType.ISSUED
-                    , TypeRefType.FA_RESPONSE, request.getRequest(), true);
+                    , TypeRefType.FA_RESPONSE, request.getRequest(), true, onValue, todt, to == null ? null : to.toString(), dataFlow);
             String msg = RulesModuleRequestMapper.createRcvFluxFaResponseMessageRequest(extractPluginType(request)
                     , request.getRequest(), request.getUsername(), extractLogId(message, exchangeLogType), request.getFluxDataFlow()
                     , request.getSenderOrReceiver(), request.getOnValue());
