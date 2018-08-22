@@ -304,14 +304,7 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
             PluginType pluginType = setRepMovType.getPluginType();
             if (validate(setRepMovType, service, jmsMessage)) {
                 MovementBaseType baseMovement = setRepMovType.getMovement();
-                RawMovementType rawMovement = MovementMapper.getInstance().getMapper().map(baseMovement, RawMovementType.class);
-                final AssetId assetId = rawMovement.getAssetId();
-                if (assetId != null && assetId.getAssetIdList() != null) {
-                    assetId.getAssetIdList().addAll(MovementMapper.mapAssetIdList(baseMovement.getAssetId().getAssetIdList()));
-                }
-                if (baseMovement.getMobileTerminalId() != null && baseMovement.getMobileTerminalId().getMobileTerminalIdList() != null) {
-                    rawMovement.getMobileTerminal().getMobileTerminalIdList().addAll(MovementMapper.mapMobileTerminalIdList(baseMovement.getMobileTerminalId().getMobileTerminalIdList()));
-                }
+                RawMovementType rawMovement = MovementMapper.mapMovementBaseTypeToRawMovementType(baseMovement);
                 rawMovement.setPluginType(pluginType.value());
                 rawMovement.setPluginName(pluginName);
                 rawMovement.setDateRecieved(setRepMovType.getTimestamp());

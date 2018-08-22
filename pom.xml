@@ -9,7 +9,7 @@
 
     <groupId>eu.europa.ec.fisheries.uvms.exchange</groupId>
     <artifactId>exchange</artifactId>
-    <version>4.0.27-MR</version>
+    <version>4.0.28-MR</version>
     <packaging>pom</packaging>
     
     <scm>
@@ -26,7 +26,6 @@
         <mockito.version>1.10.19</mockito.version>
         <junit.version>4.12</junit.version>
         <swagger.version>1.3.1</swagger.version>
-        <dozer.version>5.5.1</dozer.version>
         <lombok.version>1.16.18</lombok.version>
         <ehcache.version>2.10.4</ehcache.version>
 
