@@ -1,18 +1,10 @@
 package eu.europa.ec.fisheries.uvms.exchange.service.bean;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertSame;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Matchers.isA;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.verify;
-
 import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogStatusType;
 import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogStatusTypeType;
 import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogType;
-import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelException;
 import eu.europa.ec.fisheries.uvms.exchange.ExchangeLogModel;
+import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelException;
 import eu.europa.ec.fisheries.uvms.exchange.service.exception.ExchangeLogException;
 import org.junit.Rule;
 import org.junit.Test;
@@ -23,11 +15,16 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
-//@RunWith(MockitoJUnitRunner.class)
-// TODO :  AuditModelMarshallException is compiled with java 8!!!!!! FIX this so that this tests can work!!!
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertSame;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Matchers.isA;
+import static org.mockito.Mockito.*;
+
+@RunWith(MockitoJUnitRunner.class)
 public class ExchangeLogServiceBeanTest {
 
- /*   @InjectMocks
+    @InjectMocks
     private ExchangeLogServiceBean exchangeLogService;
 
     @Mock
@@ -69,6 +66,6 @@ public class ExchangeLogServiceBeanTest {
         doThrow(new ExchangeModelException("noooooooooooooooooooo!!!")).when(exchangeLogModel).updateExchangeLogStatus(isA(ExchangeLogStatusType.class), eq("SYSTEM"));
 
         exchangeLogService.updateStatus("12345", ExchangeLogStatusTypeType.FAILED, false);
-    }*/
+    }
 
 }

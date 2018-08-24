@@ -17,7 +17,6 @@ Beside the plugin for communication between a vessel and the UVMS, there are oth
 
 |Name |Description                                                    |Repository                                  |
 |-----|---------------------------------------------------------------|--------------------------------------------|
-|Audit|Log all operations which have been executed in all UVMS-modules|https://github.com/UnionVMS/UVMS-AuditModule|
 |User |Authentication operations and access management                |https://github.com/UnionVMS/UVMS-User       |
 |Asset|Module to manage a aircraft, watercraft or vehicle             |https://github.com/UnionVMS/UVMS-AssetModule|
 |Rules|Module for validation of position report                       |https://github.com/UnionVMS/UVMS-RulesModule|
@@ -29,10 +28,8 @@ The jndi name example is taken from wildfly8.2 application server
 |-----------------------|---------------------------|----------------------------------------|
 |UVMSExchangeEvent|java:/jms/queue/UVMSExchangeEvent|Request queue to Exchange service module|
 |UVMSExchange     |java:/jms/queue/UVMSExchange     |Response queue to Exchange module       |
-|UVMSAssetEvent   |java:/jms/queue/UVMSAuditEvent   |Request queue to Audit service module   |
 |UVMSUserEvent    |java:/jms/queue/UVMSUserEvent    |Request queue to User service module    |
 |UVMSRulesEvent   |java:/jms/queue/UVMSRulesEvent   |Request queue to Rules service module   |
-|UVMSAuditEvent   |java:/jms/queue/UVMSAuditEvent   |Request queue to Audit service module   |
 
 ## Datasources
 The jndi name example is taken from wildfly8.2 application server

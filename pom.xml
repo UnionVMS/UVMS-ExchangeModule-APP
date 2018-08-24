@@ -42,7 +42,6 @@
         <!-- Uvms models -->
         <asset.model.version>4.0.12</asset.model.version>
         <exchange.model.version>4.0.20-SNAPSHOT</exchange.model.version>
-        <audit.model.version>4.0.8</audit.model.version>
         <movement.model.version>4.0.14</movement.model.version>
         <rules.model.version>3.0.32</rules.model.version>
 
@@ -146,11 +145,6 @@
                 <groupId>${project.groupId}</groupId>
                 <artifactId>exchange-model</artifactId>
                 <version>${exchange.model.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>eu.europa.ec.fisheries.uvms.audit</groupId>
-                <artifactId>audit-model</artifactId>
-                <version>${audit.model.version}</version>
             </dependency>
             <dependency>
                 <groupId>eu.europa.ec.fisheries.uvms.movement</groupId>

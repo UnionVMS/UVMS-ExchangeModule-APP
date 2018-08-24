@@ -26,6 +26,9 @@ import eu.europa.ec.fisheries.uvms.exchange.message.exception.ExchangeMessageExc
 import eu.europa.ec.fisheries.uvms.exchange.message.producer.ExchangeMessageProducer;
 import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelMapperException;
 import eu.europa.ec.fisheries.uvms.exchange.model.mapper.JAXBMarshaller;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import javax.annotation.PostConstruct;
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
@@ -35,9 +38,6 @@ import javax.enterprise.event.Observes;
 import javax.jms.JMSException;
 import javax.jms.Queue;
 import javax.jms.Topic;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.util.HashMap;
 import java.util.Map;
 
@@ -61,7 +61,6 @@ public class ExchangeMessageProducerBean extends AbstractProducer implements Exc
     private Queue rulesQueue;
     private Queue configQueue;
     private Queue vesselQueue;
-    private Queue auditQueue;
     private Queue movementResponseQueue;
     private Queue activityQueue;
     private Queue mdrQueue;
@@ -75,7 +74,6 @@ public class ExchangeMessageProducerBean extends AbstractProducer implements Exc
         rulesQueue = JMSUtils.lookupQueue(MessageConstants.QUEUE_MODULE_RULES);
         configQueue = JMSUtils.lookupQueue(MessageConstants.QUEUE_CONFIG);
         vesselQueue = JMSUtils.lookupQueue(MessageConstants.QUEUE_ASSET_EVENT);
-        auditQueue = JMSUtils.lookupQueue(MessageConstants.QUEUE_AUDIT_EVENT);
         movementResponseQueue = JMSUtils.lookupQueue(MessageConstants.QUEUE_MOVEMENT);
         eventBus = JMSUtils.lookupTopic(MessageConstants.EVENT_BUS_TOPIC);
         activityQueue = JMSUtils.lookupQueue(MessageConstants.QUEUE_MODULE_ACTIVITY);
@@ -207,9 +205,6 @@ public class ExchangeMessageProducerBean extends AbstractProducer implements Exc
                 break;
             case SALES:
                 destination = salesQueue;
-                break;
-            case AUDIT:
-                destination = auditQueue;
                 break;
             case ACTIVITY_EVENT:
                 destination = activityQueue;
