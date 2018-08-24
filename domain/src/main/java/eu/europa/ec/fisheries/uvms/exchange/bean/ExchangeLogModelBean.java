@@ -23,15 +23,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeHistoryListQuery;
-import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeListQuery;
-import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogStatusHistoryType;
-import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogStatusType;
-import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogType;
-import eu.europa.ec.fisheries.schema.exchange.v1.LogWithRawMsgAndType;
-import eu.europa.ec.fisheries.schema.exchange.v1.PollStatus;
-import eu.europa.ec.fisheries.schema.exchange.v1.RelatedLogInfo;
-import eu.europa.ec.fisheries.schema.exchange.v1.TypeRefType;
+import eu.europa.ec.fisheries.schema.exchange.v1.*;
 import eu.europa.ec.fisheries.uvms.exchange.ExchangeLogModel;
 import eu.europa.ec.fisheries.uvms.exchange.dao.ExchangeLogDao;
 import eu.europa.ec.fisheries.uvms.exchange.entity.exchangelog.ExchangeLog;
@@ -309,9 +301,8 @@ public class ExchangeLogModelBean implements ExchangeLogModel {
             ExchangeLog exchangeLog = logDao.getExchangeLogByGuid(guid);
             if (exchangeLog != null){
                 String rawMsg = exchangeLog.getTypeRefMessage();
-                TypeRefType type = exchangeLog.getTypeRefType();
                 logWrapper.setRawMsg(rawMsg);
-                logWrapper.setType(type);
+                logWrapper.setType(exchangeLog.getTypeRefType());
                 logWrapper.setRefGuid(exchangeLog.getTypeRefGuid());
             }
         } catch (ExchangeDaoException e) {

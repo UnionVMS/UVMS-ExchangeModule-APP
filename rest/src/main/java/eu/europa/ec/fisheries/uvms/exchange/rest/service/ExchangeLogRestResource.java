@@ -65,12 +65,9 @@ public class ExchangeLogRestResource {
     private HttpServletRequest request;
 
     /**
-     *
      * @responseMessage 200 [Success]
      * @responseMessage 500 [Error]
-     *
      * @summary Get a list of all exchangeLogs by search criterias
-     *
      */
     @POST
     @Consumes(value = {MediaType.APPLICATION_JSON})
@@ -78,14 +75,14 @@ public class ExchangeLogRestResource {
     @Path("/list")
     @RequiresFeature(UnionVMSFeature.viewExchange)
     public ResponseDto getLogListByCriteria(final ExchangeListQuery query) {
-        log.info("Get list invoked in rest layer:{}",query);
+        log.info("Get list invoked in rest layer:{}", query);
         try {
             //TODO query in swagger
             GetLogListByQueryResponse response = logRestServiceBean.getExchangeLogList(query);
             ListQueryResponse exchangeLogList = ExchangeLogMapper.mapToQueryResponse(response);
             return new ResponseDto(exchangeLogList, RestResponseCode.OK);
         } catch (Exception ex) {
-            log.error("[ Error when geting log list. {} ] {} ",query, ex.getMessage());
+            log.error("[ Error when geting log list. {} ] {} ", query, ex.getMessage());
             return ErrorHandler.getFault(ex);
         }
     }
@@ -97,13 +94,13 @@ public class ExchangeLogRestResource {
     @RequiresFeature(UnionVMSFeature.viewExchange)
     public ResponseDto getPollStatus(PollQuery query) {
         try {
-            log.info("Get ExchangeLog status for Poll in rest layer:{}",query);
+            log.info("Get ExchangeLog status for Poll in rest layer:{}", query);
             Date from = DateUtils.stringToDate(query.getStatusFromDate());
             Date to = DateUtils.stringToDate(query.getStatusToDate());
             List<ExchangeLogStatusType> response = serviceLayer.getExchangeStatusHistoryList(query.getStatus(), TypeRefType.POLL, from, to);
             return new ResponseDto(response, RestResponseCode.OK);
         } catch (Exception e) {
-            log.error("[ Error when getting config search fields. {}] {}",query, e.getMessage());
+            log.error("[ Error when getting config search fields. {}] {}", query, e.getMessage());
             return ErrorHandler.getFault(e);
         }
     }
@@ -115,11 +112,11 @@ public class ExchangeLogRestResource {
     @RequiresFeature(UnionVMSFeature.viewExchange)
     public ResponseDto getPollStatus(@PathParam("typeRefGuid") String typeRefGuid) {
         try {
-            log.info("Get ExchangeLog status for Poll by typeRefGuid:{}",typeRefGuid);
+            log.info("Get ExchangeLog status for Poll by typeRefGuid:{}", typeRefGuid);
             ExchangeLogStatusType response = serviceLayer.getExchangeStatusHistory(TypeRefType.POLL, typeRefGuid, request.getRemoteUser());
             return new ResponseDto(response, RestResponseCode.OK);
         } catch (Exception e) {
-            log.error("[ Error when getting config search fields. {} ] {}",typeRefGuid, e.getMessage());
+            log.error("[ Error when getting config search fields. {} ] {}", typeRefGuid, e.getMessage());
             return ErrorHandler.getFault(e);
         }
     }
@@ -144,37 +141,11 @@ public class ExchangeLogRestResource {
     @RequiresFeature(UnionVMSFeature.viewExchange)
     public ResponseDto getExchangeLogRawXMLAndValidationByGuid(@PathParam("guid") String guid) {
         try {
-            String refUUID;
-            ExchangeLogType exchangeLogByUUID = logRestServiceBean.getExchangeLogByGuid(guid);
-            ExchangeLogWithValidationResults results = null;
-
-            LogType type = exchangeLogByUUID.getType();
-
-            if (type == LogType.RCV_FLUX_FA_REPORT_MSG) {
-                refUUID = exchangeLogByUUID.getTypeRef().getRefGuid();
-                Set<ExchangeLogType> exchangeLogsByRefUUID = logRestServiceBean.getExchangeLogsByRefUUID(refUUID, exchangeLogByUUID.getTypeRefType());
-                if (CollectionUtils.isNotEmpty(exchangeLogsByRefUUID)){
-                    ExchangeLogType next = exchangeLogsByRefUUID.iterator().next();
-                    LogWithRawMsgAndType rawMsg = logRestServiceBean.getExchangeLogRawMessage(guid);
-                    results = serviceLayer.getExchangeLogRawMessageAndValidationByGuid(next.getGuid(), rawMsg);
-                }
-            }
-
-            else if (type == LogType.SEND_FLUX_RESPONSE_MSG ){
-                LogWithRawMsgAndType rawMsg = logRestServiceBean.getExchangeLogRawMessage(guid);
-                results = serviceLayer.getExchangeLogRawMessageAndValidationByGuid(rawMsg.getRefGuid(), rawMsg);
-            }
-
-            else {
-                LogWithRawMsgAndType rawMsg = logRestServiceBean.getExchangeLogRawMessage(guid);
-                results = serviceLayer.getExchangeLogRawMessageAndValidationByGuid(guid, rawMsg);
-            }
-
-            if (results != null && CollectionUtils.isNotEmpty(results.getValidationList())){
+            ExchangeLogWithValidationResults results = serviceLayer.getExchangeLogRawMessageAndValidationByGuid(guid);
+            if (results != null && CollectionUtils.isNotEmpty(results.getValidationList())) {
                 Collections.sort(results.getValidationList(), new BusinessRuleComparator());
             }
             return new ResponseDto(results, RestResponseCode.OK);
-
         } catch (Exception e) {
             log.error("[ Error when getting exchange log by GUID. ] {}", e.getMessage());
             return ErrorHandler.getFault(e);
