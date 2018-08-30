@@ -81,7 +81,7 @@ public class ExchangeLogServiceBean implements ExchangeLogService {
             ExchangeLogType exchangeLog = exchangeLogModel.createExchangeLog(logType, username);
             String guid = exchangeLog.getGuid();
             exchangeLogEvent.fire(new NotificationMessage("guid", guid));
-            log.debug("[INFO] Logging message with guid : [ "+guid+" ]..");
+            log.debug("[INFO] Logging message with guid : [ "+guid+" ] was successful.");
             return exchangeLog;
         } catch (ExchangeModelException e) {
             throw new ExchangeLogException("Couldn't create log exchange log.");
@@ -105,7 +105,7 @@ public class ExchangeLogServiceBean implements ExchangeLogService {
         log.setDestination(request.getDestination());
         log.setSource(request.getPluginType().toString());
         log.setOn(request.getOnValue());
-        log.setTo(request.getTo() != null ? request.getTo().toString() : null);
+        log.setTo(request.getTo());
         log.setTodt(request.getTodt());
         log.setDf(request.getFluxDataFlow());
 

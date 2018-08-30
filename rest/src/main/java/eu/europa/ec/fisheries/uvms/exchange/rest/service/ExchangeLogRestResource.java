@@ -11,30 +11,8 @@ copy of the GNU General Public License along with the IFDM Suite. If not, see <h
  */
 package eu.europa.ec.fisheries.uvms.exchange.rest.service;
 
-import javax.ejb.EJB;
-import javax.ejb.Stateless;
-import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MediaType;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
-import java.util.Set;
-
 import eu.europa.ec.fisheries.schema.exchange.source.v1.GetLogListByQueryResponse;
-import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeListQuery;
-import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogStatusType;
-import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogType;
-import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogWithValidationResults;
-import eu.europa.ec.fisheries.schema.exchange.v1.LogType;
-import eu.europa.ec.fisheries.schema.exchange.v1.LogWithRawMsgAndType;
-import eu.europa.ec.fisheries.schema.exchange.v1.TypeRefType;
+import eu.europa.ec.fisheries.schema.exchange.v1.*;
 import eu.europa.ec.fisheries.uvms.commons.date.DateUtils;
 import eu.europa.ec.fisheries.uvms.exchange.rest.dto.PollQuery;
 import eu.europa.ec.fisheries.uvms.exchange.rest.dto.ResponseDto;
@@ -49,6 +27,16 @@ import eu.europa.ec.fisheries.uvms.rest.security.RequiresFeature;
 import eu.europa.ec.fisheries.uvms.rest.security.UnionVMSFeature;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
+
+import javax.ejb.EJB;
+import javax.ejb.Stateless;
+import javax.servlet.http.HttpServletRequest;
+import javax.ws.rs.*;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.MediaType;
+import java.util.Collections;
+import java.util.Date;
+import java.util.List;
 
 @Path("/exchange")
 @Stateless
@@ -75,7 +63,7 @@ public class ExchangeLogRestResource {
     @Path("/list")
     @RequiresFeature(UnionVMSFeature.viewExchange)
     public ResponseDto getLogListByCriteria(final ExchangeListQuery query) {
-        log.info("Get list invoked in rest layer:{}", query);
+        log.info("Get list invoked in rest layer.");
         try {
             //TODO query in swagger
             GetLogListByQueryResponse response = logRestServiceBean.getExchangeLogList(query);
@@ -112,7 +100,7 @@ public class ExchangeLogRestResource {
     @RequiresFeature(UnionVMSFeature.viewExchange)
     public ResponseDto getPollStatus(@PathParam("typeRefGuid") String typeRefGuid) {
         try {
-            log.info("Get ExchangeLog status for Poll by typeRefGuid:{}", typeRefGuid);
+            log.info("Get ExchangeLog status for Poll by typeRefGuid : {}", typeRefGuid);
             ExchangeLogStatusType response = serviceLayer.getExchangeStatusHistory(TypeRefType.POLL, typeRefGuid, request.getRemoteUser());
             return new ResponseDto(response, RestResponseCode.OK);
         } catch (Exception e) {
