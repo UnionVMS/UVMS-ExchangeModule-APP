@@ -42,7 +42,7 @@ import eu.europa.ec.fisheries.uvms.exchange.constant.ExchangeConstants;
 @Table(name="log")
 //@formatter:off
 @NamedQueries({
-  @NamedQuery(name = ExchangeConstants.LOG_BY_GUID, query = "SELECT log FROM ExchangeLog log WHERE log.guid = :guid AND ((:typeRefType = null) OR log.typeRefType = :typeRefType))"),
+  @NamedQuery(name = ExchangeConstants.LOG_BY_GUID, query = "SELECT log FROM ExchangeLog log WHERE log.guid = :guid AND ((:typeRefType = null) OR (log.typeRefType = :typeRefType))"),
   @NamedQuery(name = ExchangeConstants.LOG_BY_TYPE_RANGE_OF_REF_GUIDS, query = "SELECT DISTINCT log FROM ExchangeLog log WHERE log.typeRefGuid IN (:refGuids)"),
   @NamedQuery(name = ExchangeConstants.LOG_BY_TYPE_REF_AND_GUID, query = "SELECT log FROM ExchangeLog log WHERE log.typeRefGuid = :typeRefGuid AND ((:duplicate IS null) OR (duplicate = :duplicate)) AND log.typeRefType in (:typeRefTypes)")
 })
