@@ -21,13 +21,6 @@ import eu.europa.ec.fisheries.uvms.exchange.message.event.carrier.ExchangeMessag
 public interface ExchangeEventIncomingService {
 
     /**
-     * Async response handler for processed movements
-     *
-     * @param message
-     */
-    void handleProcessedMovement(@Observes @HandleProcessedMovementEvent ExchangeMessageEvent message);
-
-    /**
      * Ping Exchange APP module
      *
      * @param message
@@ -40,6 +33,8 @@ public interface ExchangeEventIncomingService {
      * @param message
      */
     void getPluginListByTypes(@Observes @PluginConfigEvent ExchangeMessageEvent message);
+
+    void processReceivedMovementBatch(@Observes @ReceivedMovementBatchEvent ExchangeMessageEvent message);
 
     /**
      * Process a received Movement
@@ -54,13 +49,6 @@ public interface ExchangeEventIncomingService {
      * @param message received asset information message
      */
     void receiveAssetInformation(@Observes @ReceiveAssetInformationEvent ExchangeMessageEvent message);
-
-    /**
-     * Logs and sends a send asset information to FLUX fleet plugin
-     *
-     * @param message send asset information message
-     */
-    void sendAssetInformation(@Observes @SendAssetInformationEvent ExchangeMessageEvent message);
 
     /**
      * Logs and sends a query asset information to FLUX fleet plugin
@@ -88,18 +76,6 @@ public interface ExchangeEventIncomingService {
      * @param message
      */
     void receiveSalesResponse(@Observes @ReceiveSalesResponseEvent ExchangeMessageEvent message);
-
-    /**
-     * Logs and sends a sales report to FLUX
-     * @param message
-     */
-    void sendSalesReport(@Observes @SendSalesReportEvent ExchangeMessageEvent message);
-
-    /**
-     * Logs and sends a sales response to FLUX
-     * @param message
-     */
-    void sendSalesResponse(@Observes @SendSalesResponseEvent ExchangeMessageEvent message);
 
     /**
      * Process answer of commands sent to plugins
@@ -130,12 +106,6 @@ public interface ExchangeEventIncomingService {
      * @param message
      */
     void sendResponseToRulesModule(@Observes @MdrSyncResponseMessageEvent ExchangeMessageEvent message);
-
-    /**
-     * Updates the status of a message log.
-     * @param message
-     */
-    void updateLogStatus(@Observes @UpdateLogStatusEvent ExchangeMessageEvent message);
 
     void receiveInvalidSalesMessage(@Observes @ReceiveInvalidSalesMessageEvent ExchangeMessageEvent event);
 

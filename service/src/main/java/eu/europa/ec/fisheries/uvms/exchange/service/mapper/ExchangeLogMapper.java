@@ -51,22 +51,18 @@ public class ExchangeLogMapper {
         }
         ReceiveMovementType log = new ReceiveMovementType();
         log.setDateRecieved(request.getTimestamp());
-        log.setType(LogType.RECEIVE_MOVEMENT);
-
+        log.setType(LogType.PROCESSED_MOVEMENT);
         LogRefType logRefType = new LogRefType();
         logRefType.setRefGuid(typeRefGuid);
-        TypeRefType refType = TypeRefType.UNKNOWN;
+/*        TypeRefType refType = TypeRefType.UNKNOWN;
         try {
             refType = TypeRefType.fromValue(typeRefType);
         } catch (IllegalArgumentException e) {
             LOG.error("Non existing typeRefType: " + typeRefType);
-
-        }
-        logRefType.setType(refType);
+        }*/
+        logRefType.setType(TypeRefType.MOVEMENT_RESPONSE);
         log.setTypeRef(logRefType);
-
         log.setStatus(ExchangeLogStatusTypeType.SUCCESSFUL);
-
         log.setSenderReceiver(getSenderReceiver(request.getMovement(), request.getPluginType(), request.getPluginName(), username));
         if (request.getMovement().getSource() != null) {
             log.setSource(request.getMovement().getSource().name());
@@ -74,7 +70,6 @@ public class ExchangeLogMapper {
             log.setSource(request.getPluginType().name());
         }
         log.setRecipient(getRecipient(request.getMovement(), request.getPluginType()));
-
         return log;
     }
 
@@ -85,9 +80,7 @@ public class ExchangeLogMapper {
         if (pluginType == null) {
             throw new ExchangeLogException("No plugin type");
         }
-
         String senderReceiver = null;
-
         switch (pluginType) {
             case MANUAL:
                 senderReceiver = username!=null ? username : "Unknown";
@@ -141,7 +134,6 @@ public class ExchangeLogMapper {
         String memberNumber = null;
         String satelliteNumber = null;
         String les = null;
-
         for (KeyValueType pollReceiver : pollReceiverList) {
             if (IdType.DNID.name().equalsIgnoreCase(pollReceiver.getKey())) {
                 dnid = pollReceiver.getValue();
@@ -246,8 +238,6 @@ public class ExchangeLogMapper {
         SendPollType log = new SendPollType();
         log.setType(LogType.SEND_POLL);
         log.setDateRecieved(command.getTimestamp());
-
-
         log.setRecipient(getRecipientOfPoll(command.getPoll().getPollReceiver()));
         log.setSenderReceiver("System");
         LogRefType logRefType = new LogRefType();
@@ -325,8 +315,7 @@ public class ExchangeLogMapper {
         if(pluginType == null){
             throw new ExchangeLogException("PluginType is empty");
         }
-
-        String recipient = null;
+        String recipient;
         switch (pluginType){
             case MANUAL:
             case FLUX:
