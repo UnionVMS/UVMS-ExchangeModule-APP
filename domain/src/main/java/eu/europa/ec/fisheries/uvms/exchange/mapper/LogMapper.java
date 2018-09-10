@@ -196,7 +196,7 @@ public class LogMapper {
         model.setTodt(entity.getTodt());
         model.setTo(entity.getTo());
         model.setOn(entity.getOn());
-        model.setBusinessError(entity.getBusinessError());
+        model.setBusinessModuleExceptionMessage(entity.getBusinessError());
 
         if (entity.getTypeRefType() != null) {
             LogRefType logRefType = new LogRefType();
