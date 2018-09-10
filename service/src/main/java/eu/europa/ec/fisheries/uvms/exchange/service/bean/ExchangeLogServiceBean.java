@@ -152,7 +152,7 @@ public class ExchangeLogServiceBean implements ExchangeLogService {
     private ExchangeLogStatusType createExchangeLogBusinessError(String logGuid,String businessMessageError) {
         ExchangeLogStatusType exchangeLogStatusType = new ExchangeLogStatusType();
         exchangeLogStatusType.setGuid(logGuid);
-        exchangeLogStatusType.setBusinessErrorMessage(businessMessageError);
+        exchangeLogStatusType.setBusinessModuleExceptionMessage(businessMessageError);
         return exchangeLogStatusType;
     }
 
