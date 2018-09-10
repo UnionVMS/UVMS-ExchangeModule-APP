@@ -162,6 +162,10 @@ public class ExchangeMessageConsumerBean implements MessageListener {
     private Event<ExchangeMessageEvent> updateLogStatusEvent;
 
     @Inject
+    @UpdateLogBusinessErrorEvent
+    private Event<ExchangeMessageEvent> updateLogBusinessErrorEvent;
+
+    @Inject
     @LogRefIdByTypeExists
     private Event<ExchangeMessageEvent> logRefIdByTyeExists;
 
@@ -273,6 +277,9 @@ public class ExchangeMessageConsumerBean implements MessageListener {
                     break;
                 case UPDATE_LOG_STATUS:
                     updateLogStatusEvent.fire(messageEventWrapper);
+                    break;
+                case UPDATE_LOG_BUSINESS_ERROR:
+                    updateLogBusinessErrorEvent.fire(messageEventWrapper);
                     break;
                 case LOG_REF_ID_BY_TYPE_EXISTS:
                     logRefIdByTyeExists.fire(messageEventWrapper);

@@ -140,6 +140,9 @@ public class ExchangeLog {
 	@Column(name="log_mdc_request_id")
 	private String mdcRequestId;
 
+	@Column(name = "log_business_error")
+	private String businessError;
+
 	@PrePersist
 	public void prepersist() {
 		setGuid(UUID.randomUUID().toString());
@@ -328,4 +331,12 @@ public class ExchangeLog {
 	public void setMdcRequestId(String mdcRequestId) {
 		this.mdcRequestId = mdcRequestId;
 	}
+
+    public String getBusinessError() {
+        return businessError;
+    }
+
+    public void setBusinessError(String businessError) {
+        this.businessError = businessError;
+    }
 }
