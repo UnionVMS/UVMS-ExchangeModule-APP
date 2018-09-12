@@ -81,7 +81,7 @@ public class ExchangeLogServiceBean implements ExchangeLogService {
             ExchangeLogType exchangeLog = exchangeLogModel.createExchangeLog(logType, username);
             String guid = exchangeLog.getGuid();
             exchangeLogEvent.fire(new NotificationMessage("guid", guid));
-            log.debug("[INFO] Logging message with guid : [ "+guid+" ]..");
+            log.debug("[INFO] Logging message with guid : [ "+guid+" ] was successful.");
             return exchangeLog;
         } catch (ExchangeModelException e) {
             throw new ExchangeLogException("Couldn't create log exchange log.");
@@ -105,9 +105,10 @@ public class ExchangeLogServiceBean implements ExchangeLogService {
         log.setDestination(request.getDestination());
         log.setSource(request.getPluginType().toString());
         log.setOn(request.getOnValue());
-        log.setTo(request.getTo() != null ? request.getTo().toString() : null);
+        log.setTo(request.getTo());
         log.setTodt(request.getTodt());
         log.setDf(request.getFluxDataFlow());
+        log.setGuid(request.getResponseMessageGuid());
 
         return log(log, request.getUsername());
     }
@@ -137,13 +138,30 @@ public class ExchangeLogServiceBean implements ExchangeLogService {
         return exchangeLogStatusType;
     }
 
+    private ExchangeLogStatusType createExchangeLogBusinessError(String logGuid,String businessMessageError) {
+        ExchangeLogStatusType exchangeLogStatusType = new ExchangeLogStatusType();
+        exchangeLogStatusType.setGuid(logGuid);
+        exchangeLogStatusType.setBusinessModuleExceptionMessage(businessMessageError);
+        return exchangeLogStatusType;
+    }
+
     @Override
-    public ExchangeLogType updateStatus(String logGuid, ExchangeLogStatusTypeType logStatus, Boolean duplicate) throws ExchangeLogException {
+    public ExchangeLogType updateStatus(String logGuid, ExchangeLogStatusTypeType logStatus) throws ExchangeLogException {
         try {
             ExchangeLogStatusType exchangeLogStatusType = createExchangeLogStatusType(logStatus, logGuid);
             return exchangeLogModel.updateExchangeLogStatus(exchangeLogStatusType, "SYSTEM");
         } catch (ExchangeModelException e) {
             throw new ExchangeLogException("Couldn't update the status of the exchange log with guid " + logGuid + ". The new status should be " + logStatus, e);
+        }
+    }
+
+    @Override
+    public ExchangeLogType updateExchangeLogBusinessError(String logGuid, String errorMessage) throws ExchangeLogException {
+        try {
+            ExchangeLogStatusType exchangeLogStatusType = createExchangeLogBusinessError(logGuid, errorMessage);
+        return exchangeLogModel.updateExchangeLogBusinessError(exchangeLogStatusType, errorMessage);
+        } catch (ExchangeModelException e) {
+            throw new ExchangeLogException("Couldn't update the status of the exchange log with guid " + logGuid, e);
         }
     }
 

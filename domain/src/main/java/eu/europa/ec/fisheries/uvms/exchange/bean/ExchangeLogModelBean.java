@@ -235,6 +235,22 @@ public class ExchangeLogModelBean implements ExchangeLogModel {
     }
 
     @Override
+    public ExchangeLogType updateExchangeLogBusinessError(ExchangeLogStatusType status, String businessError) throws ExchangeModelException {
+        if (status == null || status.getGuid() == null || status.getGuid().isEmpty()) {
+            throw new InputArgumentException("No exchange log to update status");
+        }
+        try {
+            ExchangeLog exchangeLog = logDao.getExchangeLogByGuid(status.getGuid());
+            exchangeLog.setBusinessError(businessError);
+            ExchangeLog retEntity = logDao.updateLog(exchangeLog);
+            return LogMapper.toModel(retEntity);
+        } catch (ExchangeDaoException ex) {
+            log.error("[ERROR] when update status of Exchange log {}] {}", status, ex.getMessage());
+            throw new ExchangeModelException("Error when update status of Exchange log", ex);
+        }
+    }
+
+    @Override
     public ExchangeLogStatusType getExchangeLogStatusHistory(String guid, TypeRefType typeRefType) throws ExchangeModelException {
         if (guid == null || guid.isEmpty())
             throw new InputArgumentException("Non valid guid to fetch log status history");

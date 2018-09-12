@@ -11,38 +11,24 @@ copy of the GNU General Public License along with the IFDM Suite. If not, see <h
  */
 package eu.europa.ec.fisheries.uvms.exchange.entity.exchangelog;
 
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.NamedQueries;
-import javax.persistence.NamedQuery;
-import javax.persistence.OneToMany;
-import javax.persistence.PrePersist;
-import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
+import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogStatusTypeType;
+import eu.europa.ec.fisheries.schema.exchange.v1.LogType;
+import eu.europa.ec.fisheries.schema.exchange.v1.TypeRefType;
+import eu.europa.ec.fisheries.uvms.exchange.constant.ExchangeConstants;
+import org.apache.commons.lang3.StringUtils;
+
+import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
-import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogStatusTypeType;
-import eu.europa.ec.fisheries.schema.exchange.v1.LogType;
-import eu.europa.ec.fisheries.schema.exchange.v1.TypeRefType;
-import eu.europa.ec.fisheries.uvms.exchange.constant.ExchangeConstants;
-
 @Entity
 @Table(name="log")
 //@formatter:off
 @NamedQueries({
-  @NamedQuery(name = ExchangeConstants.LOG_BY_GUID, query = "SELECT log FROM ExchangeLog log WHERE log.guid = :guid AND ((:typeRefType = null) OR log.typeRefType = :typeRefType))"),
+  @NamedQuery(name = ExchangeConstants.LOG_BY_GUID, query = "SELECT log FROM ExchangeLog log WHERE log.guid = :guid AND ((:typeRefType = null) OR (log.typeRefType = :typeRefType))"),
   @NamedQuery(name = ExchangeConstants.LOG_BY_TYPE_RANGE_OF_REF_GUIDS, query = "SELECT DISTINCT log FROM ExchangeLog log WHERE log.typeRefGuid IN (:refGuids)"),
   @NamedQuery(name = ExchangeConstants.LOG_BY_TYPE_REF_AND_GUID, query = "SELECT log FROM ExchangeLog log WHERE log.typeRefGuid = :typeRefGuid AND log.typeRefType in (:typeRefTypes)")
 })
@@ -140,9 +126,14 @@ public class ExchangeLog {
 	@Column(name="log_mdc_request_id")
 	private String mdcRequestId;
 
+	@Column(name = "log_business_error")
+	private String businessError;
+
 	@PrePersist
 	public void prepersist() {
-		setGuid(UUID.randomUUID().toString());
+		if(StringUtils.isEmpty(guid)){
+			setGuid(UUID.randomUUID().toString());
+		}
     }
 
 	public Long getId() {
@@ -328,4 +319,12 @@ public class ExchangeLog {
 	public void setMdcRequestId(String mdcRequestId) {
 		this.mdcRequestId = mdcRequestId;
 	}
+
+    public String getBusinessError() {
+        return businessError;
+    }
+
+    public void setBusinessError(String businessError) {
+        this.businessError = businessError;
+    }
 }

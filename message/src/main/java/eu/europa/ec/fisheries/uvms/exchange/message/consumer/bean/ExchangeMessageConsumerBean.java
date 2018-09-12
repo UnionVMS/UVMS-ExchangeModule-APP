@@ -22,37 +22,12 @@ import javax.jms.MessageListener;
 import javax.jms.TextMessage;
 
 import eu.europa.ec.fisheries.schema.exchange.module.v1.ExchangeBaseRequest;
+import eu.europa.ec.fisheries.schema.exchange.module.v1.ExchangeModuleMethod;
 import eu.europa.ec.fisheries.schema.exchange.plugin.v1.AcknowledgeResponse;
 import eu.europa.ec.fisheries.schema.exchange.plugin.v1.PingResponse;
 import eu.europa.ec.fisheries.uvms.commons.message.api.MessageConstants;
 import eu.europa.ec.fisheries.uvms.commons.message.context.MappedDiagnosticContext;
-import eu.europa.ec.fisheries.uvms.exchange.message.event.ErrorEvent;
-import eu.europa.ec.fisheries.uvms.exchange.message.event.ExchangeLogEvent;
-import eu.europa.ec.fisheries.uvms.exchange.message.event.HandleProcessedMovementEvent;
-import eu.europa.ec.fisheries.uvms.exchange.message.event.LogIdByTypeExists;
-import eu.europa.ec.fisheries.uvms.exchange.message.event.LogRefIdByTypeExists;
-import eu.europa.ec.fisheries.uvms.exchange.message.event.MdrSyncRequestMessageEvent;
-import eu.europa.ec.fisheries.uvms.exchange.message.event.MdrSyncResponseMessageEvent;
-import eu.europa.ec.fisheries.uvms.exchange.message.event.PingEvent;
-import eu.europa.ec.fisheries.uvms.exchange.message.event.PluginConfigEvent;
-import eu.europa.ec.fisheries.uvms.exchange.message.event.PluginPingEvent;
-import eu.europa.ec.fisheries.uvms.exchange.message.event.ReceiveInvalidSalesMessageEvent;
-import eu.europa.ec.fisheries.uvms.exchange.message.event.ReceiveSalesQueryEvent;
-import eu.europa.ec.fisheries.uvms.exchange.message.event.ReceiveSalesReportEvent;
-import eu.europa.ec.fisheries.uvms.exchange.message.event.ReceiveSalesResponseEvent;
-import eu.europa.ec.fisheries.uvms.exchange.message.event.ReceivedFluxFaResponseMessageEvent;
-import eu.europa.ec.fisheries.uvms.exchange.message.event.SendCommandToPluginEvent;
-import eu.europa.ec.fisheries.uvms.exchange.message.event.SendFLUXFAResponseToPluginEvent;
-import eu.europa.ec.fisheries.uvms.exchange.message.event.SendFaQueryToPluginEvent;
-import eu.europa.ec.fisheries.uvms.exchange.message.event.SendFaReportToPluginEvent;
-import eu.europa.ec.fisheries.uvms.exchange.message.event.SendReportToPluginEvent;
-import eu.europa.ec.fisheries.uvms.exchange.message.event.SendSalesReportEvent;
-import eu.europa.ec.fisheries.uvms.exchange.message.event.SendSalesResponseEvent;
-import eu.europa.ec.fisheries.uvms.exchange.message.event.SetFaQueryMessageEvent;
-import eu.europa.ec.fisheries.uvms.exchange.message.event.SetFluxFAReportMessageEvent;
-import eu.europa.ec.fisheries.uvms.exchange.message.event.SetMovementEvent;
-import eu.europa.ec.fisheries.uvms.exchange.message.event.UpdateLogStatusEvent;
-import eu.europa.ec.fisheries.uvms.exchange.message.event.UpdatePluginSettingEvent;
+import eu.europa.ec.fisheries.uvms.exchange.message.event.*;
 import eu.europa.ec.fisheries.uvms.exchange.message.event.carrier.ExchangeMessageEvent;
 import eu.europa.ec.fisheries.uvms.exchange.model.constant.FaultCode;
 import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelMarshallException;
@@ -85,6 +60,10 @@ public class ExchangeMessageConsumerBean implements MessageListener {
     @Inject
     @SetMovementEvent
     private Event<ExchangeMessageEvent> processMovementEvent;
+
+    @Inject
+    @ReceivedMovementBatchEvent
+    private Event<ExchangeMessageEvent> receiveMovementBatchEvent;
 
     @Inject
     @ReceiveSalesReportEvent
@@ -143,6 +122,10 @@ public class ExchangeMessageConsumerBean implements MessageListener {
     private Event<ExchangeMessageEvent> processedMovementEvent;
 
     @Inject
+    @ProcessedMovementBatch
+    private Event<ExchangeMessageEvent> processedMovementBatch;
+
+    @Inject
     @MdrSyncRequestMessageEvent
     private Event<ExchangeMessageEvent> mdrSyncRequestMessageEvent;
 
@@ -177,6 +160,10 @@ public class ExchangeMessageConsumerBean implements MessageListener {
     @Inject
     @UpdateLogStatusEvent
     private Event<ExchangeMessageEvent> updateLogStatusEvent;
+
+    @Inject
+    @UpdateLogBusinessErrorEvent
+    private Event<ExchangeMessageEvent> updateLogBusinessErrorEvent;
 
     @Inject
     @LogRefIdByTypeExists
@@ -215,8 +202,9 @@ public class ExchangeMessageConsumerBean implements MessageListener {
             LOG.error("[ Error when receiving message in exchange, username must be set in the request: ]");
             errorEvent.fire(new ExchangeMessageEvent(textMessage, ExchangeModuleResponseMapper.createFaultMessage(FaultCode.EXCHANGE_MESSAGE, "Username in the request must be set")));
         } else {
-            LOG.info("[INFO] Going to process following message type (aka Exchange Method) : " + request.getMethod());
-            switch (request.getMethod()) {
+            ExchangeModuleMethod exchangeMethod = request.getMethod();
+            LOG.info("[INFO] Going to process following message type [ {} ] : ", exchangeMethod);
+            switch (exchangeMethod) {
                 case LIST_SERVICES:
                     pluginConfigEvent.fire(messageEventWrapper);
                     break;
@@ -226,8 +214,11 @@ public class ExchangeMessageConsumerBean implements MessageListener {
                 case SEND_REPORT_TO_PLUGIN:
                     sendMessageToPluginEvent.fire(messageEventWrapper);
                     break;
-                case SET_MOVEMENT_REPORT:
+                case SET_MOVEMENT_REPORT: // @Deprecated TODO To be removed when ready..
                     processMovementEvent.fire(messageEventWrapper);
+                    break;
+                case RECEIVE_MOVEMENT_REPORT_BATCH:
+                    receiveMovementBatchEvent.fire(messageEventWrapper);
                     break;
                 case RECEIVE_SALES_REPORT:
                     receiveSalesReportEvent.fire(messageEventWrapper);
@@ -255,6 +246,9 @@ public class ExchangeMessageConsumerBean implements MessageListener {
                     break;
                 case PROCESSED_MOVEMENT:
                     processedMovementEvent.fire(messageEventWrapper);
+                    break;
+                case PROCESSED_MOVEMENT_BATCH:
+                    processedMovementBatch.fire(messageEventWrapper);
                     break;
                 case SET_MDR_SYNC_MESSAGE_REQUEST:
                     mdrSyncRequestMessageEvent.fire(messageEventWrapper);
@@ -284,6 +278,9 @@ public class ExchangeMessageConsumerBean implements MessageListener {
                 case UPDATE_LOG_STATUS:
                     updateLogStatusEvent.fire(messageEventWrapper);
                     break;
+                case UPDATE_LOG_BUSINESS_ERROR:
+                    updateLogBusinessErrorEvent.fire(messageEventWrapper);
+                    break;
                 case LOG_REF_ID_BY_TYPE_EXISTS:
                     logRefIdByTyeExists.fire(messageEventWrapper);
                     break;
@@ -291,7 +288,7 @@ public class ExchangeMessageConsumerBean implements MessageListener {
                     logIdByTyeExists.fire(messageEventWrapper);
                     break;
                 default:
-                    LOG.error("[ Not implemented method consumed: {} ] ", request.getMethod());
+                    LOG.error("[ Not implemented method consumed: {} ] ", exchangeMethod);
                     errorEvent.fire(new ExchangeMessageEvent(textMessage, ExchangeModuleResponseMapper.createFaultMessage(FaultCode.EXCHANGE_MESSAGE, "Method not implemented")));
             }
         }

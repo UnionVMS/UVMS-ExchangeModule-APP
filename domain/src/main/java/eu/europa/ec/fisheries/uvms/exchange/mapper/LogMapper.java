@@ -11,22 +11,13 @@ copy of the GNU General Public License along with the IFDM Suite. If not, see <h
  */
 package eu.europa.ec.fisheries.uvms.exchange.mapper;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogStatusHistoryType;
-import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogStatusType;
-import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogStatusTypeType;
-import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogType;
-import eu.europa.ec.fisheries.schema.exchange.v1.LogRefType;
-import eu.europa.ec.fisheries.schema.exchange.v1.LogType;
-import eu.europa.ec.fisheries.schema.exchange.v1.ReceiveMovementType;
-import eu.europa.ec.fisheries.schema.exchange.v1.SendEmailType;
-import eu.europa.ec.fisheries.schema.exchange.v1.SendMovementType;
-import eu.europa.ec.fisheries.schema.exchange.v1.SendPollType;
+import eu.europa.ec.fisheries.schema.exchange.v1.*;
 import eu.europa.ec.fisheries.uvms.exchange.entity.exchangelog.ExchangeLog;
 import eu.europa.ec.fisheries.uvms.exchange.entity.exchangelog.ExchangeLogStatus;
 import org.slf4j.MDC;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class LogMapper {
 
@@ -75,6 +66,7 @@ public class LogMapper {
         entity.setTodt(log.getTodt());
         entity.setTo(log.getTo());
         entity.setDf(log.getDf());
+        entity.setGuid(log.getGuid());
 
         if (log.getTypeRef() != null) {
             entity.setTypeRefGuid(log.getTypeRef().getRefGuid());
@@ -196,6 +188,7 @@ public class LogMapper {
         model.setTodt(entity.getTodt());
         model.setTo(entity.getTo());
         model.setOn(entity.getOn());
+        model.setBusinessModuleExceptionMessage(entity.getBusinessError());
 
         if (entity.getTypeRefType() != null) {
             LogRefType logRefType = new LogRefType();

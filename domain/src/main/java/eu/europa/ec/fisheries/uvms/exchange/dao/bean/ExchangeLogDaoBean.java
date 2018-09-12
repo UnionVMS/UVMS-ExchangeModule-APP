@@ -120,7 +120,7 @@ public class ExchangeLogDaoBean extends Dao implements ExchangeLogDao {
     }
 
     @Override
-    public ExchangeLog getExchangeLogByGuid(String logGuid, TypeRefType typeRefType) throws ExchangeDaoException {
+    public ExchangeLog getExchangeLogByGuid(String logGuid, TypeRefType typeRefType) {
         try {
             TypedQuery<ExchangeLog> query = em.createNamedQuery(ExchangeConstants.LOG_BY_GUID, ExchangeLog.class);
             query.setParameter("typeRefType", typeRefType);
