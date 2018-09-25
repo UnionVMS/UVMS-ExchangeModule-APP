@@ -21,4 +21,33 @@
         </addColumn>
     </changeSet>
 
+    <changeSet author="emrinalgr" id="logView">
+        <sql>
+            CREATE OR REPLACE VIEW exchange.v_logjoin AS
+            SELECT req.log_id AS req_id,
+            req.log_type_ref_guid AS req_msg_uuid,
+            req.log_type_ref_type AS req_type,
+            req.log_daterecieved AS req_date,
+            req.log_status AS req_status,
+            resp.log_id AS resp_id,
+            resp.log_guid AS resp_msg_uuid,
+            resp.log_type_ref_type AS resp_type,
+            resp.log_daterecieved AS resp_date,
+            resp.log_status AS resp_status,
+            resp.log_daterecieved - req.log_daterecieved AS delay,
+            req.log_senderreceiver AS req_from,
+            req.log_on AS req_on,
+            req.log_df AS req_df,
+            req.log_type_ref_message AS req_msg,
+            resp.log_type_ref_message AS resp_msg
+            FROM exchange.log req
+            LEFT JOIN exchange.log resp ON req.log_guid::text = resp.log_type_ref_guid::text
+            WHERE req.log_transfer_incoming IS TRUE
+            ORDER BY req.log_id DESC;
+
+            ALTER TABLE exchange.v_logjoin
+            OWNER TO exchange;
+        </sql>
+    </changeSet>
+
 </databaseChangeLog>
