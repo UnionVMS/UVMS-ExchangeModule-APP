@@ -156,7 +156,9 @@ public class ExchangeMessageProducerBean extends AbstractProducer implements Exc
     @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
     public String sendMovementRulesMessage(String text) throws ExchangeMessageException {
         try {
-            return movementRulesProducer.sendModuleMessage(text, exchangeResponseQueue);
+            Map<String, String> properties = new HashMap<>();
+            properties.put(MessageConstants.JMS_FUNCTION_PROPERTY, "SET_MOVEMENT_REPORT" /*RulesModuleMethod.SET_MOVEMENT_REPORT.value()*/);
+            return movementRulesProducer.sendModuleMessageWithProps(text, exchangeResponseQueue, properties);
         } catch (MessageException e) {
             LOG.error("[ Error when sending rules message. ] {}", e.getMessage());
             throw new ExchangeMessageException("Error when sending rules message.");

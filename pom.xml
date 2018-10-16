@@ -33,7 +33,7 @@
         <longpolling.version>2.0.13</longpolling.version>
         <uvms.commons.version>3.0.17</uvms.commons.version>
         <uvms.config.version>4.0.1</uvms.config.version>
-        <uvms.commons.version>3.0.22</uvms.commons.version>
+        <uvms.commons.version>3.0.28</uvms.commons.version>
         <uvms.config.version>4.0.1</uvms.config.version>
         <usm4uvms.version>4.0.8</usm4uvms.version>
         <uvms-pom-deps.version>1.18</uvms-pom-deps.version>
@@ -59,11 +59,6 @@
             </dependency>
 
             <!-- Third party libs -->
-            <dependency>
-                <groupId>net.sf.dozer</groupId>
-                <artifactId>dozer</artifactId>
-                <version>${dozer.version}</version>
-            </dependency>
             <dependency>
                 <groupId>org.projectlombok</groupId>
                 <artifactId>lombok</artifactId>
