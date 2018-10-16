@@ -21,7 +21,6 @@ import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogStatusTypeType;
 import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogType;
 import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogWithValidationResults;
 import eu.europa.ec.fisheries.schema.exchange.v1.LogType;
-import eu.europa.ec.fisheries.schema.exchange.v1.LogWithRawMsgAndType;
 import eu.europa.ec.fisheries.schema.exchange.v1.PollStatus;
 import eu.europa.ec.fisheries.schema.exchange.v1.TypeRefType;
 import eu.europa.ec.fisheries.schema.exchange.v1.UnsentMessageType;
@@ -60,13 +59,17 @@ public interface ExchangeLogService {
      * @return the updated log
      * @throws ExchangeLogException when something goes wrong
      */
-    ExchangeLogType updateStatus(String logGuid, ExchangeLogStatusTypeType logStatus, Boolean duplicate) throws ExchangeLogException;
+    ExchangeLogType updateStatus(String logGuid, ExchangeLogStatusTypeType logStatus) throws ExchangeLogException;
+
+    ExchangeLogType updateExchangeLogBusinessError(String logGuid, String errorMessage) throws ExchangeLogException;
 
     List<UnsentMessageType> getUnsentMessageList() throws ExchangeLogException;
 
     List<ExchangeLogStatusType> getExchangeStatusHistoryList(ExchangeLogStatusTypeType status, TypeRefType type, Date from, Date to) throws ExchangeLogException;
 
     String createUnsentMessage(String senderReceiver, Date timestamp, String recipient, String message, List<UnsentMessageTypeProperty> properties, String username) throws ExchangeLogException;
+
+    ExchangeLogWithValidationResults getExchangeLogRawMessageAndValidationByGuid(String guid);
 
     void resend(List<String> messageIdList, String username) throws ExchangeLogException;
 
@@ -75,7 +78,5 @@ public interface ExchangeLogService {
     PollStatus setPollStatus(String messageId, String pluginMessageId, ExchangeLogStatusTypeType logStatus, String username) throws ExchangeLogException;
 
     void removeUnsentMessage(String messageId, String username) throws ExchangeLogException;
-
-    ExchangeLogWithValidationResults getExchangeLogRawMessageAndValidationByGuid(String guid, LogWithRawMsgAndType rawMsg) throws ExchangeLogException;
 
 }

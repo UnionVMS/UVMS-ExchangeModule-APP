@@ -23,15 +23,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeHistoryListQuery;
-import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeListQuery;
-import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogStatusHistoryType;
-import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogStatusType;
-import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogType;
-import eu.europa.ec.fisheries.schema.exchange.v1.LogWithRawMsgAndType;
-import eu.europa.ec.fisheries.schema.exchange.v1.PollStatus;
-import eu.europa.ec.fisheries.schema.exchange.v1.RelatedLogInfo;
-import eu.europa.ec.fisheries.schema.exchange.v1.TypeRefType;
+import eu.europa.ec.fisheries.schema.exchange.v1.*;
+import eu.europa.ec.fisheries.uvms.exchange.ExchangeLogModel;
 import eu.europa.ec.fisheries.uvms.exchange.dao.ExchangeLogDao;
 import eu.europa.ec.fisheries.uvms.exchange.entity.exchangelog.ExchangeLog;
 import eu.europa.ec.fisheries.uvms.exchange.entity.exchangelog.ExchangeLogStatus;
@@ -41,14 +34,11 @@ import eu.europa.ec.fisheries.uvms.exchange.model.dto.ListResponseDto;
 import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelException;
 import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeSearchMapperException;
 import eu.europa.ec.fisheries.uvms.exchange.model.exception.InputArgumentException;
-import eu.europa.ec.fisheries.uvms.exchange.ExchangeLogModel;
 import eu.europa.ec.fisheries.uvms.exchange.search.SearchFieldMapper;
 import eu.europa.ec.fisheries.uvms.exchange.search.SearchValue;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  **/
@@ -236,11 +226,26 @@ public class ExchangeLogModelBean implements ExchangeLogModel {
             List<ExchangeLogStatus> statusList = exchangeLog.getStatusHistory();
             statusList.add(LogMapper.toNewStatusEntity(exchangeLog, updateStatus.getStatus(), username));
             exchangeLog.setStatus(updateStatus.getStatus());
-            exchangeLog.setDuplicate(status.isDuplicate());
             ExchangeLog retEntity = logDao.updateLog(exchangeLog);
             return LogMapper.toModel(retEntity);
         } catch (ExchangeDaoException ex) {
             log.error("[ERROR] when update status of Exchange log {} {}] {}", status, username, ex.getMessage());
+            throw new ExchangeModelException("Error when update status of Exchange log", ex);
+        }
+    }
+
+    @Override
+    public ExchangeLogType updateExchangeLogBusinessError(ExchangeLogStatusType status, String businessError) throws ExchangeModelException {
+        if (status == null || status.getGuid() == null || status.getGuid().isEmpty()) {
+            throw new InputArgumentException("No exchange log to update status");
+        }
+        try {
+            ExchangeLog exchangeLog = logDao.getExchangeLogByGuid(status.getGuid());
+            exchangeLog.setBusinessError(businessError);
+            ExchangeLog retEntity = logDao.updateLog(exchangeLog);
+            return LogMapper.toModel(retEntity);
+        } catch (ExchangeDaoException ex) {
+            log.error("[ERROR] when update status of Exchange log {}] {}", status, ex.getMessage());
             throw new ExchangeModelException("Error when update status of Exchange log", ex);
         }
     }
@@ -310,11 +315,12 @@ public class ExchangeLogModelBean implements ExchangeLogModel {
         LogWithRawMsgAndType logWrapper = new LogWithRawMsgAndType();
         try {
             ExchangeLog exchangeLog = logDao.getExchangeLogByGuid(guid);
-            String rawMsg = exchangeLog.getTypeRefMessage();
-            TypeRefType type = exchangeLog.getTypeRefType();
-            logWrapper.setRawMsg(rawMsg);
-            logWrapper.setType(type);
-            logWrapper.setRefGuid(exchangeLog.getTypeRefGuid());
+            if (exchangeLog != null){
+                String rawMsg = exchangeLog.getTypeRefMessage();
+                logWrapper.setRawMsg(rawMsg);
+                logWrapper.setType(exchangeLog.getTypeRefType());
+                logWrapper.setRefGuid(exchangeLog.getTypeRefGuid());
+            }
         } catch (ExchangeDaoException e) {
             log.error("[ERROR] Couldn't find Log with the following GUID : [[" + guid + "]]", e);
         }

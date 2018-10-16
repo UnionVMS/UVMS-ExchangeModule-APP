@@ -1,22 +1,12 @@
 package eu.europa.ec.fisheries.uvms.exchange.mapper;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-
-import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogStatusTypeType;
-import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogType;
-import eu.europa.ec.fisheries.schema.exchange.v1.LogRefType;
-import eu.europa.ec.fisheries.schema.exchange.v1.LogType;
-import eu.europa.ec.fisheries.schema.exchange.v1.ReceiveMovementType;
-import eu.europa.ec.fisheries.schema.exchange.v1.SendEmailType;
-import eu.europa.ec.fisheries.schema.exchange.v1.SendMovementType;
-import eu.europa.ec.fisheries.schema.exchange.v1.SendPollType;
-import eu.europa.ec.fisheries.schema.exchange.v1.TypeRefType;
+import eu.europa.ec.fisheries.schema.exchange.v1.*;
 import eu.europa.ec.fisheries.uvms.exchange.entity.exchangelog.ExchangeLog;
-import java.util.Date;
 import org.junit.Test;
+
+import java.util.Date;
+
+import static org.junit.Assert.*;
 
 public class LogMapperTest {
 
@@ -241,6 +231,7 @@ public class LogMapperTest {
         ExchangeLogStatusTypeType status = ExchangeLogStatusTypeType.SUCCESSFUL;
         String message = "<xml></xml>";
         String destination = "destination";
+        String source = "FLUX";
 
         LogRefType logRefType = new LogRefType();
         logRefType.setRefGuid(typeRefGuid);
@@ -255,6 +246,7 @@ public class LogMapperTest {
         input.setStatus(status);
         input.setIncoming(true);
         input.setDestination(destination);
+        input.setSource(source);
 
         String username = "stainii";
 
@@ -278,6 +270,7 @@ public class LogMapperTest {
         assertTrue(result.getTransferIncoming());
         assertEquals(LogType.RECEIVE_SALES_REPORT, result.getType());
         assertEquals(destination, result.getDestination());
+        assertEquals(source, result.getSource());
     }
 
     @Test
@@ -287,6 +280,7 @@ public class LogMapperTest {
         String senderOrReceiver = "BEL";
         ExchangeLogStatusTypeType status = ExchangeLogStatusTypeType.SUCCESSFUL;
         String destination = "destination";
+        String source = "FLUX";
 
         ExchangeLogType input = new ExchangeLogType();
         input.setType(LogType.RECEIVE_SALES_REPORT);
@@ -295,6 +289,7 @@ public class LogMapperTest {
         input.setStatus(status);
         input.setIncoming(true);
         input.setDestination(destination);
+        input.setSource(source);
 
         String username = "stainii";
 
@@ -316,6 +311,7 @@ public class LogMapperTest {
         assertTrue(result.getTransferIncoming());
         assertEquals(LogType.RECEIVE_SALES_REPORT, result.getType());
         assertEquals(destination, result.getDestination());
+        assertEquals(source, result.getSource());
     }
 
     @Test
@@ -327,6 +323,7 @@ public class LogMapperTest {
         String senderOrReceiver = "BEL";
         String message = "<xml></xml>";
         String destination = "destination";
+        String source = "BELGIAN_AUCTION_PLUGIN";
 
         LogRefType logRefType = new LogRefType();
         logRefType.setRefGuid(typeRefGuid);
@@ -340,6 +337,7 @@ public class LogMapperTest {
         input.setSenderReceiver(senderOrReceiver);
         input.setIncoming(true);
         input.setDestination(destination);
+        input.setSource(source);
 
         String username = "stainii";
 
@@ -363,6 +361,7 @@ public class LogMapperTest {
         assertTrue(result.getTransferIncoming());
         assertEquals(LogType.RECEIVE_SALES_REPORT, result.getType());
         assertEquals(destination, result.getDestination());
+        assertEquals(source, result.getSource());
     }
 
 
@@ -373,6 +372,7 @@ public class LogMapperTest {
         String senderOrReceiver = "BEL";
         ExchangeLogStatusTypeType status = ExchangeLogStatusTypeType.SUCCESSFUL;
         String destination = "destination";
+        String source = "yo mama";
 
         ExchangeLogType input = new ExchangeLogType();
         input.setType(LogType.RECEIVE_SALES_REPORT);
@@ -381,6 +381,7 @@ public class LogMapperTest {
         input.setStatus(status);
         input.setIncoming(true);
         input.setDestination(destination);
+        input.setSource(source);
 
         //execute
         ExchangeLog result = LogMapper.toNewEntity(input, null);
@@ -400,6 +401,7 @@ public class LogMapperTest {
         assertTrue(result.getTransferIncoming());
         assertEquals(LogType.RECEIVE_SALES_REPORT, result.getType());
         assertEquals(destination, result.getDestination());
+        assertEquals(source, result.getSource());
     }
 
     @Test
@@ -412,6 +414,7 @@ public class LogMapperTest {
         ExchangeLogStatusTypeType status = ExchangeLogStatusTypeType.SUCCESSFUL;
         String message = "<xml></xml>";
         String destination = "destination";
+        String source = "test";
 
         LogRefType logRefType = new LogRefType();
         logRefType.setRefGuid(typeRefGuid);
@@ -426,6 +429,7 @@ public class LogMapperTest {
         input.setStatus(status);
         input.setIncoming(true);
         input.setDestination(destination);
+        input.setSource(source);
 
         String username = "stainii";
 
@@ -449,6 +453,7 @@ public class LogMapperTest {
         assertTrue(result.getTransferIncoming());
         assertEquals(LogType.RECEIVE_SALES_RESPONSE, result.getType());
         assertEquals(destination, result.getDestination());
+        assertEquals(source, result.getSource());
     }
 
     @Test
@@ -461,6 +466,7 @@ public class LogMapperTest {
         ExchangeLogStatusTypeType status = ExchangeLogStatusTypeType.SUCCESSFUL;
         String message = "<xml></xml>";
         String destination = "destination";
+        String source = "FLUX";
 
         LogRefType logRefType = new LogRefType();
         logRefType.setRefGuid(typeRefGuid);
@@ -475,6 +481,7 @@ public class LogMapperTest {
         input.setStatus(status);
         input.setIncoming(true);
         input.setDestination(destination);
+        input.setSource(source);
 
         String username = "stainii";
 
@@ -498,6 +505,7 @@ public class LogMapperTest {
         assertTrue(result.getTransferIncoming());
         assertEquals(LogType.RECEIVE_SALES_QUERY, result.getType());
         assertEquals(destination, result.getDestination());
+        assertEquals(source, result.getSource());
     }
 
     @Test
@@ -510,6 +518,7 @@ public class LogMapperTest {
         ExchangeLogStatusTypeType status = ExchangeLogStatusTypeType.SUCCESSFUL;
         String message = "<xml></xml>";
         String destination = "destination";
+        String source = "FLUX";
 
         LogRefType logRefType = new LogRefType();
         logRefType.setRefGuid(typeRefGuid);
@@ -524,6 +533,7 @@ public class LogMapperTest {
         input.setStatus(status);
         input.setIncoming(false);
         input.setDestination(destination);
+        input.setSource(source);
 
         String username = "stainii";
 
@@ -547,6 +557,7 @@ public class LogMapperTest {
         assertFalse(result.getTransferIncoming());
         assertEquals(LogType.SEND_SALES_REPORT, result.getType());
         assertEquals(destination, result.getDestination());
+        assertEquals(source, result.getSource());
     }
 
     @Test
@@ -559,6 +570,7 @@ public class LogMapperTest {
         ExchangeLogStatusTypeType status = ExchangeLogStatusTypeType.SUCCESSFUL;
         String message = "<xml></xml>";
         String destination = "destination";
+        String source = "BELGIAN_AUCTION_PLUGIN";
 
         LogRefType logRefType = new LogRefType();
         logRefType.setRefGuid(typeRefGuid);
@@ -573,6 +585,7 @@ public class LogMapperTest {
         input.setStatus(status);
         input.setIncoming(false);
         input.setDestination(destination);
+        input.setSource(source);
 
         String username = "stainii";
 
@@ -596,6 +609,7 @@ public class LogMapperTest {
         assertFalse(result.getTransferIncoming());
         assertEquals(LogType.SEND_SALES_RESPONSE, result.getType());
         assertEquals(destination, result.getDestination());
+        assertEquals(source, result.getSource());
     }
 
     @Test
@@ -740,7 +754,6 @@ public class LogMapperTest {
         boolean incoming = true;
         ExchangeLogStatusTypeType status = ExchangeLogStatusTypeType.PROBABLY_TRANSMITTED;
         String destination = "destination";
-
         ExchangeLog entity = new ExchangeLog();
         entity.setDateReceived(dateReceived);
         entity.setGuid(guid);
@@ -877,4 +890,263 @@ public class LogMapperTest {
         assertEquals(destination, model.getDestination());
     }
 
+    @Test
+    public void toNewEntityWhenLogTypeIsRcvFluxFAReportMsg() throws Exception {
+        //data set
+        String typeRefGuid = "trg";
+        TypeRefType typeRefType = TypeRefType.FA_REPORT;
+        Date dateReceived = new Date();
+        String senderOrReceiver = "BEL";
+        ExchangeLogStatusTypeType status = ExchangeLogStatusTypeType.SUCCESSFUL;
+        String message = "<xml></xml>";
+        String destination = "destination";
+        String source = "FLUX";
+
+        LogRefType logRefType = new LogRefType();
+        logRefType.setRefGuid(typeRefGuid);
+        logRefType.setType(typeRefType);
+        logRefType.setMessage(message);
+
+        ExchangeLogType input = new ExchangeLogType();
+        input.setType(LogType.RCV_FLUX_FA_REPORT_MSG);
+        input.setTypeRef(logRefType);
+        input.setDateRecieved(dateReceived);
+        input.setSenderReceiver(senderOrReceiver);
+        input.setStatus(status);
+        input.setIncoming(false);
+        input.setDestination(destination);
+        input.setSource(source);
+
+        String username = "stainii";
+
+        //execute
+        ExchangeLog result = LogMapper.toNewEntity(input, username);
+
+        //assert
+        assertEquals(typeRefGuid, result.getTypeRefGuid());
+        assertEquals(typeRefType, result.getTypeRefType());
+        assertEquals(dateReceived, result.getDateReceived());
+        assertEquals(senderOrReceiver, result.getSenderReceiver());
+        assertEquals(status, result.getStatus());
+        assertEquals(1, result.getStatusHistory().size());
+        assertEquals(result, result.getStatusHistory().get(0).getLog());
+        assertEquals(status, result.getStatusHistory().get(0).getStatus());
+        assertNotNull(result.getStatusHistory().get(0).getStatusTimestamp());
+        assertEquals(username, result.getStatusHistory().get(0).getUpdatedBy());
+        assertNotNull(result.getStatusHistory().get(0).getUpdateTime());
+        assertEquals(username, result.getUpdatedBy());
+        assertNotNull(result.getUpdateTime());
+        assertFalse(result.getTransferIncoming());
+        assertEquals(LogType.RCV_FLUX_FA_REPORT_MSG, result.getType());
+        assertEquals(destination, result.getDestination());
+        assertEquals(source, result.getSource());
+    }
+
+    @Test
+    public void toNewEntityWhenLogTypeIsReceiveFAQueryMsg() throws Exception {
+        //data set
+        String typeRefGuid = "trg";
+        TypeRefType typeRefType = TypeRefType.FA_QUERY;
+        Date dateReceived = new Date();
+        String senderOrReceiver = "BEL";
+        ExchangeLogStatusTypeType status = ExchangeLogStatusTypeType.SUCCESSFUL;
+        String message = "<xml></xml>";
+        String destination = "destination";
+        String source = "FLUX";
+
+        LogRefType logRefType = new LogRefType();
+        logRefType.setRefGuid(typeRefGuid);
+        logRefType.setType(typeRefType);
+        logRefType.setMessage(message);
+
+        ExchangeLogType input = new ExchangeLogType();
+        input.setType(LogType.RECEIVE_FA_QUERY_MSG);
+        input.setTypeRef(logRefType);
+        input.setDateRecieved(dateReceived);
+        input.setSenderReceiver(senderOrReceiver);
+        input.setStatus(status);
+        input.setIncoming(false);
+        input.setDestination(destination);
+        input.setSource(source);
+
+        String username = "stainii";
+
+        //execute
+        ExchangeLog result = LogMapper.toNewEntity(input, username);
+
+        //assert
+        assertEquals(typeRefGuid, result.getTypeRefGuid());
+        assertEquals(typeRefType, result.getTypeRefType());
+        assertEquals(dateReceived, result.getDateReceived());
+        assertEquals(senderOrReceiver, result.getSenderReceiver());
+        assertEquals(status, result.getStatus());
+        assertEquals(1, result.getStatusHistory().size());
+        assertEquals(result, result.getStatusHistory().get(0).getLog());
+        assertEquals(status, result.getStatusHistory().get(0).getStatus());
+        assertNotNull(result.getStatusHistory().get(0).getStatusTimestamp());
+        assertEquals(username, result.getStatusHistory().get(0).getUpdatedBy());
+        assertNotNull(result.getStatusHistory().get(0).getUpdateTime());
+        assertEquals(username, result.getUpdatedBy());
+        assertNotNull(result.getUpdateTime());
+        assertFalse(result.getTransferIncoming());
+        assertEquals(LogType.RECEIVE_FA_QUERY_MSG, result.getType());
+        assertEquals(destination, result.getDestination());
+        assertEquals(source, result.getSource());
+    }
+
+    @Test
+    public void toNewEntityWhenLogTypeIsSendFAQueryMsg() throws Exception {
+        //data set
+        String typeRefGuid = "trg";
+        TypeRefType typeRefType = TypeRefType.FA_QUERY;
+        Date dateReceived = new Date();
+        String senderOrReceiver = "BEL";
+        ExchangeLogStatusTypeType status = ExchangeLogStatusTypeType.SUCCESSFUL;
+        String message = "<xml></xml>";
+        String destination = "destination";
+        String source = "FLUX";
+
+        LogRefType logRefType = new LogRefType();
+        logRefType.setRefGuid(typeRefGuid);
+        logRefType.setType(typeRefType);
+        logRefType.setMessage(message);
+
+        ExchangeLogType input = new ExchangeLogType();
+        input.setType(LogType.SEND_FA_QUERY_MSG);
+        input.setTypeRef(logRefType);
+        input.setDateRecieved(dateReceived);
+        input.setSenderReceiver(senderOrReceiver);
+        input.setStatus(status);
+        input.setIncoming(false);
+        input.setDestination(destination);
+        input.setSource(source);
+
+        String username = "stainii";
+
+        //execute
+        ExchangeLog result = LogMapper.toNewEntity(input, username);
+
+        //assert
+        assertEquals(typeRefGuid, result.getTypeRefGuid());
+        assertEquals(typeRefType, result.getTypeRefType());
+        assertEquals(dateReceived, result.getDateReceived());
+        assertEquals(senderOrReceiver, result.getSenderReceiver());
+        assertEquals(status, result.getStatus());
+        assertEquals(1, result.getStatusHistory().size());
+        assertEquals(result, result.getStatusHistory().get(0).getLog());
+        assertEquals(status, result.getStatusHistory().get(0).getStatus());
+        assertNotNull(result.getStatusHistory().get(0).getStatusTimestamp());
+        assertEquals(username, result.getStatusHistory().get(0).getUpdatedBy());
+        assertNotNull(result.getStatusHistory().get(0).getUpdateTime());
+        assertEquals(username, result.getUpdatedBy());
+        assertNotNull(result.getUpdateTime());
+        assertFalse(result.getTransferIncoming());
+        assertEquals(LogType.SEND_FA_QUERY_MSG, result.getType());
+        assertEquals(destination, result.getDestination());
+        assertEquals(source, result.getSource());
+    }
+
+    @Test
+    public void toNewEntityWhenLogTypeIsSendFluxFAReportMsg() throws Exception {
+        //data set
+        String typeRefGuid = "trg";
+        TypeRefType typeRefType = TypeRefType.FA_REPORT;
+        Date dateReceived = new Date();
+        String senderOrReceiver = "BEL";
+        ExchangeLogStatusTypeType status = ExchangeLogStatusTypeType.SUCCESSFUL;
+        String message = "<xml></xml>";
+        String destination = "destination";
+        String source = "FLUX";
+
+        LogRefType logRefType = new LogRefType();
+        logRefType.setRefGuid(typeRefGuid);
+        logRefType.setType(typeRefType);
+        logRefType.setMessage(message);
+
+        ExchangeLogType input = new ExchangeLogType();
+        input.setType(LogType.SEND_FLUX_FA_REPORT_MSG);
+        input.setTypeRef(logRefType);
+        input.setDateRecieved(dateReceived);
+        input.setSenderReceiver(senderOrReceiver);
+        input.setStatus(status);
+        input.setIncoming(false);
+        input.setDestination(destination);
+        input.setSource(source);
+
+        String username = "stainii";
+
+        //execute
+        ExchangeLog result = LogMapper.toNewEntity(input, username);
+
+        //assert
+        assertEquals(typeRefGuid, result.getTypeRefGuid());
+        assertEquals(typeRefType, result.getTypeRefType());
+        assertEquals(dateReceived, result.getDateReceived());
+        assertEquals(senderOrReceiver, result.getSenderReceiver());
+        assertEquals(status, result.getStatus());
+        assertEquals(1, result.getStatusHistory().size());
+        assertEquals(result, result.getStatusHistory().get(0).getLog());
+        assertEquals(status, result.getStatusHistory().get(0).getStatus());
+        assertNotNull(result.getStatusHistory().get(0).getStatusTimestamp());
+        assertEquals(username, result.getStatusHistory().get(0).getUpdatedBy());
+        assertNotNull(result.getStatusHistory().get(0).getUpdateTime());
+        assertEquals(username, result.getUpdatedBy());
+        assertNotNull(result.getUpdateTime());
+        assertFalse(result.getTransferIncoming());
+        assertEquals(LogType.SEND_FLUX_FA_REPORT_MSG, result.getType());
+        assertEquals(destination, result.getDestination());
+        assertEquals(source, result.getSource());
+    }
+
+    @Test
+    public void toNewEntityWhenLogTypeIsSendFluxResponseMsg() throws Exception {
+        //data set
+        String typeRefGuid = "trg";
+        TypeRefType typeRefType = TypeRefType.FA_RESPONSE;
+        Date dateReceived = new Date();
+        String senderOrReceiver = "BEL";
+        ExchangeLogStatusTypeType status = ExchangeLogStatusTypeType.SUCCESSFUL;
+        String message = "<xml></xml>";
+        String destination = "destination";
+        String source = "FLUX";
+
+        LogRefType logRefType = new LogRefType();
+        logRefType.setRefGuid(typeRefGuid);
+        logRefType.setType(typeRefType);
+        logRefType.setMessage(message);
+
+        ExchangeLogType input = new ExchangeLogType();
+        input.setType(LogType.SEND_FLUX_RESPONSE_MSG);
+        input.setTypeRef(logRefType);
+        input.setDateRecieved(dateReceived);
+        input.setSenderReceiver(senderOrReceiver);
+        input.setStatus(status);
+        input.setIncoming(false);
+        input.setDestination(destination);
+        input.setSource(source);
+
+        String username = "stainii";
+
+        //execute
+        ExchangeLog result = LogMapper.toNewEntity(input, username);
+
+        //assert
+        assertEquals(typeRefGuid, result.getTypeRefGuid());
+        assertEquals(typeRefType, result.getTypeRefType());
+        assertEquals(dateReceived, result.getDateReceived());
+        assertEquals(senderOrReceiver, result.getSenderReceiver());
+        assertEquals(status, result.getStatus());
+        assertEquals(1, result.getStatusHistory().size());
+        assertEquals(result, result.getStatusHistory().get(0).getLog());
+        assertEquals(status, result.getStatusHistory().get(0).getStatus());
+        assertNotNull(result.getStatusHistory().get(0).getStatusTimestamp());
+        assertEquals(username, result.getStatusHistory().get(0).getUpdatedBy());
+        assertNotNull(result.getStatusHistory().get(0).getUpdateTime());
+        assertEquals(username, result.getUpdatedBy());
+        assertNotNull(result.getUpdateTime());
+        assertFalse(result.getTransferIncoming());
+        assertEquals(LogType.SEND_FLUX_RESPONSE_MSG, result.getType());
+        assertEquals(destination, result.getDestination());
+        assertEquals(source, result.getSource());
+    }
 }

@@ -16,12 +16,7 @@ import javax.enterprise.event.Observes;
 
 import eu.europa.ec.fisheries.schema.exchange.plugin.types.v1.PluginType;
 import eu.europa.ec.fisheries.schema.exchange.plugin.v1.PluginBaseRequest;
-import eu.europa.ec.fisheries.uvms.exchange.message.event.MdrSyncRequestMessageEvent;
-import eu.europa.ec.fisheries.uvms.exchange.message.event.SendCommandToPluginEvent;
-import eu.europa.ec.fisheries.uvms.exchange.message.event.SendFLUXFAResponseToPluginEvent;
-import eu.europa.ec.fisheries.uvms.exchange.message.event.SendFaQueryToPluginEvent;
-import eu.europa.ec.fisheries.uvms.exchange.message.event.SendFaReportToPluginEvent;
-import eu.europa.ec.fisheries.uvms.exchange.message.event.SendReportToPluginEvent;
+import eu.europa.ec.fisheries.uvms.exchange.message.event.*;
 import eu.europa.ec.fisheries.uvms.exchange.message.event.carrier.ExchangeMessageEvent;
 import eu.europa.ec.fisheries.uvms.exchange.message.exception.ExchangeMessageException;
 import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelMarshallException;
@@ -78,4 +73,36 @@ public interface ExchangeEventOutgoingService {
     void sendFLUXFAReportToPlugin(@Observes @SendFaReportToPluginEvent ExchangeMessageEvent message);
 
     void sendAssetInformationToFLUX(PluginBaseRequest request) throws ExchangeModelMarshallException, ExchangeMessageException;
+
+    /**
+     * Logs and sends a sales response to FLUX
+     * @param message
+     */
+    void sendSalesResponse(@Observes @SendSalesResponseEvent ExchangeMessageEvent message);
+
+    /**
+     * Logs and sends a sales report to FLUX
+     * @param message
+     */
+    void sendSalesReport(@Observes @SendSalesReportEvent ExchangeMessageEvent message);
+
+    /**
+     * Logs and sends a send asset information to FLUX fleet plugin
+     *
+     * @param event send asset information message
+     */
+    void sendAssetInformation(@Observes @SendAssetInformationEvent ExchangeMessageEvent event);
+
+    void updateLogStatus(@Observes @UpdateLogStatusEvent ExchangeMessageEvent message);
+
+    void updateLogBusinessError(@Observes @UpdateLogBusinessErrorEvent ExchangeMessageEvent message);
+
+    /**
+     * Async response handler for processed movements
+     *
+     * @param message
+     */
+    void handleProcessedMovement(@Observes @HandleProcessedMovementEvent ExchangeMessageEvent message);
+
+    void handleProcessedMovementBatch(@Observes @ProcessedMovementBatch ExchangeMessageEvent message);
 }

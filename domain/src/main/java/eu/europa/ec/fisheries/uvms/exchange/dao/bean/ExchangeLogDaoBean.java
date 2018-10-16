@@ -30,12 +30,10 @@ import eu.europa.ec.fisheries.uvms.exchange.dao.ExchangeLogDao;
 import eu.europa.ec.fisheries.uvms.exchange.entity.exchangelog.ExchangeLog;
 import eu.europa.ec.fisheries.uvms.exchange.entity.exchangelog.ExchangeLogStatus;
 import eu.europa.ec.fisheries.uvms.exchange.exception.ExchangeDaoException;
-import eu.europa.ec.fisheries.uvms.exchange.exception.NoEntityFoundException;
 import eu.europa.ec.fisheries.uvms.exchange.search.ExchangeSearchField;
 import eu.europa.ec.fisheries.uvms.exchange.search.SearchFieldMapper;
 import eu.europa.ec.fisheries.uvms.exchange.search.SearchValue;
 import org.apache.commons.collections.CollectionUtils;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -122,7 +120,7 @@ public class ExchangeLogDaoBean extends Dao implements ExchangeLogDao {
     }
 
     @Override
-    public ExchangeLog getExchangeLogByGuid(String logGuid, TypeRefType typeRefType) throws ExchangeDaoException {
+    public ExchangeLog getExchangeLogByGuid(String logGuid, TypeRefType typeRefType) {
         try {
             TypedQuery<ExchangeLog> query = em.createNamedQuery(ExchangeConstants.LOG_BY_GUID, ExchangeLog.class);
             query.setParameter("typeRefType", typeRefType);
@@ -147,12 +145,11 @@ public class ExchangeLogDaoBean extends Dao implements ExchangeLogDao {
 
 
     @Override
-    public List<ExchangeLog> getExchangeLogByTypesRefAndGuid(String typeRefGuid, List<TypeRefType> types) throws ExchangeDaoException {
+    public List<ExchangeLog> getExchangeLogByTypesRefAndGuid(String typeRefGuid, List<TypeRefType> types) {
         try {
 			TypedQuery<ExchangeLog> namedQuery = em.createNamedQuery(ExchangeConstants.LOG_BY_TYPE_REF_AND_GUID, ExchangeLog.class);
             namedQuery.setParameter("typeRefGuid", typeRefGuid);
             namedQuery.setParameter("typeRefTypes", types);
-            namedQuery.setParameter("duplicate", false);
             return namedQuery.getResultList();
         } catch (NoResultException e) {
             // Don't need to actually do anything when no entity was found!

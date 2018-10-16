@@ -11,13 +11,29 @@ copy of the GNU General Public License along with the IFDM Suite. If not, see <h
  */
 package eu.europa.ec.fisheries.uvms.exchange.rest.mapper;
 
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+
 import eu.europa.ec.fisheries.schema.exchange.source.v1.GetLogListByQueryResponse;
-import eu.europa.ec.fisheries.schema.exchange.v1.*;
+import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogType;
+import eu.europa.ec.fisheries.schema.exchange.v1.ReceiveMovementType;
+import eu.europa.ec.fisheries.schema.exchange.v1.SendEmailType;
+import eu.europa.ec.fisheries.schema.exchange.v1.SendMovementType;
+import eu.europa.ec.fisheries.schema.exchange.v1.SendPollType;
+import eu.europa.ec.fisheries.schema.exchange.v1.UnsentMessageType;
+import eu.europa.ec.fisheries.schema.exchange.v1.UnsentMessageTypeProperty;
 import eu.europa.ec.fisheries.uvms.commons.date.DateUtils;
 import eu.europa.ec.fisheries.uvms.exchange.rest.dto.LogTypeLabel;
-import eu.europa.ec.fisheries.uvms.exchange.rest.dto.exchange.*;
-
-import java.util.*;
+import eu.europa.ec.fisheries.uvms.exchange.rest.dto.exchange.ExchangeLogData;
+import eu.europa.ec.fisheries.uvms.exchange.rest.dto.exchange.ExchangeLogDto;
+import eu.europa.ec.fisheries.uvms.exchange.rest.dto.exchange.ListQueryResponse;
+import eu.europa.ec.fisheries.uvms.exchange.rest.dto.exchange.PluginType;
+import eu.europa.ec.fisheries.uvms.exchange.rest.dto.exchange.SendingGroupLog;
+import eu.europa.ec.fisheries.uvms.exchange.rest.dto.exchange.SendingLog;
 
 /**
  **/
@@ -94,7 +110,9 @@ public class ExchangeLogMapper {
     	Date dateReceived = log.getDateRecieved();
     	dto.setDateRecieved(DateUtils.dateToString(dateReceived));
     	dto.setId(log.getGuid());
-    	dto.setIncoming(log.isIncoming());
+        dto.setDf(log.getDf());
+
+        dto.setIncoming(log.isIncoming());
         if(log.getTypeRefType()!=null) {
             dto.setTypeRefType(log.getTypeRefType().toString());
         }
@@ -112,6 +130,10 @@ public class ExchangeLogMapper {
     	dto.setSenderRecipient(log.getSenderReceiver());
     	dto.setStatus(log.getStatus().name());
         dto.setRelatedLogData(log.getRelatedLogData());
+        dto.setDf(log.getDf());
+        dto.setTo(log.getTo());
+        dto.setOn(log.getOn());
+        dto.setTodt(log.getTodt());
         return dto;
     }
 

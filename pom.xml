@@ -14,7 +14,7 @@
     
     <scm>
         <connection>${scm.connection}</connection>
-        <tag>HEAD</tag>
+        <tag>exchange-4.0.32</tag>
     </scm>
 
     <properties>
@@ -40,10 +40,10 @@
 
         <!-- Uvms models -->
         <asset.model.version>4.0.12</asset.model.version>
-        <exchange.model.version>4.0.18</exchange.model.version>
+        <exchange.model.version>4.0.22</exchange.model.version>
         <audit.model.version>4.0.8</audit.model.version>
         <movement.model.version>4.0.14</movement.model.version>
-        <rules.model.version>3.0.32</rules.model.version>
+        <rules.model.version>3.0.42</rules.model.version>
 
         <asset.version>4.0.9</asset.version>
 

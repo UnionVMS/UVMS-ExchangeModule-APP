@@ -11,32 +11,18 @@ copy of the GNU General Public License along with the IFDM Suite. If not, see <h
  */
 package eu.europa.ec.fisheries.uvms.exchange.entity.exchangelog;
 
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.NamedQueries;
-import javax.persistence.NamedQuery;
-import javax.persistence.OneToMany;
-import javax.persistence.PrePersist;
-import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
+import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogStatusTypeType;
+import eu.europa.ec.fisheries.schema.exchange.v1.LogType;
+import eu.europa.ec.fisheries.schema.exchange.v1.TypeRefType;
+import eu.europa.ec.fisheries.uvms.exchange.constant.ExchangeConstants;
+import org.apache.commons.lang3.StringUtils;
+
+import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
-
-import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogStatusTypeType;
-import eu.europa.ec.fisheries.schema.exchange.v1.LogType;
-import eu.europa.ec.fisheries.schema.exchange.v1.TypeRefType;
-import eu.europa.ec.fisheries.uvms.exchange.constant.ExchangeConstants;
 
 @Entity
 @Table(name="log")
@@ -44,7 +30,7 @@ import eu.europa.ec.fisheries.uvms.exchange.constant.ExchangeConstants;
 @NamedQueries({
   @NamedQuery(name = ExchangeConstants.LOG_BY_GUID, query = "SELECT log FROM ExchangeLog log WHERE log.guid = :guid AND ((:typeRefType = null) OR (log.typeRefType = :typeRefType))"),
   @NamedQuery(name = ExchangeConstants.LOG_BY_TYPE_RANGE_OF_REF_GUIDS, query = "SELECT DISTINCT log FROM ExchangeLog log WHERE log.typeRefGuid IN (:refGuids)"),
-  @NamedQuery(name = ExchangeConstants.LOG_BY_TYPE_REF_AND_GUID, query = "SELECT log FROM ExchangeLog log WHERE log.typeRefGuid = :typeRefGuid AND ((:duplicate IS null) OR (duplicate = :duplicate)) AND log.typeRefType in (:typeRefTypes)")
+  @NamedQuery(name = ExchangeConstants.LOG_BY_TYPE_REF_AND_GUID, query = "SELECT log FROM ExchangeLog log WHERE log.typeRefGuid = :typeRefGuid AND log.typeRefType in (:typeRefTypes)")
 })
 //@formatter:on
 public class ExchangeLog {
@@ -67,45 +53,56 @@ public class ExchangeLog {
 
 	@Column(name = "log_type_ref_message")
 	private String typeRefMessage;
-	
-	@NotNull
-	@Size(max=36)
+
+	@Column(name = "log_to")
+	private String to;
+
+    @Column(name = "log_df")
+    private String df;
+
+    @Column(name = "log_todt")
+	private String todt;
+
+	@Column(name = "log_on")
+	private String on;
+
+	@NotNull(message = "The Guid for the log cannot be empty!")
+	@Size(max=100)
 	@Column(name = "log_guid", unique=true)
 	private String guid;
 	
 	@Column(name = "log_transfer_incoming")
 	private Boolean transferIncoming;
 
-	private Boolean duplicate;
-	
 	@NotNull
 	@Column(name = "log_senderreceiver")
+	@Size(max=100)
 	private String senderReceiver;
-	
-	@NotNull
+
+	@NotNull(message = "The dateReceived for the log cannot be empty!")
 	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name = "log_daterecieved")
 	private Date dateReceived;
-	
-	@NotNull
+
+	@NotNull(message = "The log_status field for the log cannot be empty!")
 	@Enumerated(EnumType.STRING)
 	@Column(name = "log_status")
 	private ExchangeLogStatusTypeType status;
-	
-	@NotNull
+
+	@NotNull(message = "The log_updattim field for the log cannot be empty!")
 	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name = "log_updattim")
 	private Date updateTime;
-	
-	@NotNull
-	@Size(max=60)
+
+	@NotNull(message = "The updatedBy field for the log cannot be empty!")
+	@Size(max=100)
 	@Column(name = "log_upuser")
 	private String updatedBy;
 
 	@OneToMany(mappedBy="log", fetch=FetchType.EAGER, cascade=CascadeType.ALL)
 	private List<ExchangeLogStatus> statusHistory;
 
-	@Size(max=50)
+	@Size(max=100)
 	@Column(name="log_recipient")
 	private String recipient;
 
@@ -113,15 +110,15 @@ public class ExchangeLog {
 	@Column(name="log_fwddate")
 	private Date fwdDate;
 
-	@Size(max=50)
+	@Size(max=100)
 	@Column(name="log_fwdrule")
 	private String fwdRule;
 
-	@Size(max=50)
+	@Size(max=100)
 	@Column(name="log_source")
 	private String source;
 
-	@Size(max=50)
+	@Size(max=100)
 	@Column(name="log_destination")
 	private String destination;
 
@@ -129,15 +126,16 @@ public class ExchangeLog {
 	@Column(name="log_mdc_request_id")
 	private String mdcRequestId;
 
+	@Column(name = "log_business_error")
+	private String businessError;
+
 	@PrePersist
 	public void prepersist() {
-		setGuid(UUID.randomUUID().toString());
-        Boolean dup = getDuplicate();
-        if (dup == null){
-            setDuplicate(false);
-        }
+		if(StringUtils.isEmpty(guid)){
+			setGuid(UUID.randomUUID().toString());
+		}
     }
-	
+
 	public Long getId() {
 		return id;
 	}
@@ -282,15 +280,51 @@ public class ExchangeLog {
 		this.destination = destination;
 	}
 
-	public void setMDCRequestId(String mdcRequestId) {
+    public String getTo() {
+        return to;
+    }
+
+	public void setTo(String to) {
+		this.to = to;
+	}
+
+	public String getOn() {
+		return on;
+	}
+
+	public void setOn(String on) {
+		this.on = on;
+	}
+
+	public String getTodt() {
+		return todt;
+	}
+
+	public void setTodt(String todt) {
+		this.todt = todt;
+	}
+
+    public String getDf() {
+        return df;
+    }
+
+    public void setDf(String df) {
+        this.df = df;
+    }
+
+	public String getMdcRequestId() {
+		return mdcRequestId;
+	}
+
+	public void setMdcRequestId(String mdcRequestId) {
 		this.mdcRequestId = mdcRequestId;
 	}
 
-    public Boolean getDuplicate() {
-        return duplicate;
+    public String getBusinessError() {
+        return businessError;
     }
 
-    public void setDuplicate(Boolean duplicate) {
-        this.duplicate = duplicate;
+    public void setBusinessError(String businessError) {
+        this.businessError = businessError;
     }
 }
