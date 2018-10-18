@@ -67,6 +67,7 @@ public class LogMapper {
         entity.setTo(log.getTo());
         entity.setDf(log.getDf());
         entity.setGuid(log.getGuid());
+        entity.setAd(log.getAd());
 
         if (log.getTypeRef() != null) {
             entity.setTypeRefGuid(log.getTypeRef().getRefGuid());

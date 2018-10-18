@@ -70,6 +70,9 @@ public class ExchangeLog {
 	@Size(max=100)
 	@Column(name = "log_guid", unique=true)
 	private String guid;
+
+	@Column(name = "log_ad")
+	private String ad;
 	
 	@Column(name = "log_transfer_incoming")
 	private Boolean transferIncoming;
@@ -129,6 +132,7 @@ public class ExchangeLog {
 	@Column(name = "log_business_error")
 	private String businessError;
 
+
 	@PrePersist
 	public void prepersist() {
 		if(StringUtils.isEmpty(guid)){
@@ -139,192 +143,151 @@ public class ExchangeLog {
 	public Long getId() {
 		return id;
 	}
-
 	public void setId(Long id) {
 		this.id = id;
 	}
-
 	public LogType getType() {
 		return type;
 	}
-
 	public void setType(LogType type) {
 		this.type = type;
 	}
-
 	public String getGuid() {
 		return guid;
 	}
-
 	public void setGuid(String guid) {
 		this.guid = guid;
 	}
-
 	public String getSenderReceiver() {
 		return senderReceiver;
 	}
-
 	public void setSenderReceiver(String senderReceiver) {
 		this.senderReceiver = senderReceiver;
 	}
-
 	public Date getDateReceived() {
 		return dateReceived;
 	}
-
 	public void setDateReceived(Date dateReceived) {
 		this.dateReceived = dateReceived;
 	}
-
 	public ExchangeLogStatusTypeType getStatus() {
 		return status;
 	}
-
 	public void setStatus(ExchangeLogStatusTypeType status) {
 		this.status = status;
 	}
-
 	public Date getUpdateTime() {
 		return updateTime;
 	}
-
 	public void setUpdateTime(Date updateTime) {
 		this.updateTime = updateTime;
 	}
-
 	public String getUpdatedBy() {
 		return updatedBy;
 	}
-
 	public void setUpdatedBy(String updatedBy) {
 		this.updatedBy = updatedBy;
 	}
-
 	public Boolean getTransferIncoming() {
 		return transferIncoming;
 	}
-
 	public void setTransferIncoming(Boolean transferIncoming) {
 		this.transferIncoming = transferIncoming;
 	}
-
 	public List<ExchangeLogStatus> getStatusHistory() {
 		return statusHistory;
 	}
-
 	public void setStatusHistory(List<ExchangeLogStatus> statusHistory) {
 		this.statusHistory = statusHistory;
 	}
-
 	public String getTypeRefGuid() {
 		return typeRefGuid;
 	}
-
 	public void setTypeRefGuid(String typeRefGuid) {
 		this.typeRefGuid = typeRefGuid;
 	}
-
 	public TypeRefType getTypeRefType() {
 		return typeRefType;
 	}
-
 	public void setTypeRefType(TypeRefType typeRefType) {
 		this.typeRefType = typeRefType;
 	}
-
 	public String getTypeRefMessage() {
 		return typeRefMessage;
 	}
-
 	public void setTypeRefMessage(String typeRefMessage) {
 		this.typeRefMessage = typeRefMessage;
 	}
-
 	public String getRecipient() {
 		return recipient;
 	}
-
 	public void setRecipient(String recipient) {
 		this.recipient = recipient;
 	}
-
 	public Date getFwdDate() {
 		return fwdDate;
 	}
-
 	public void setFwdDate(Date fwdDate) {
 		this.fwdDate = fwdDate;
 	}
-
 	public String getFwdRule() {
 		return fwdRule;
 	}
-
 	public void setFwdRule(String fwdRule) {
 		this.fwdRule = fwdRule;
 	}
-
 	public String getSource() {
 		return source;
 	}
-
 	public void setSource(String source) {
 		this.source = source;
 	}
-
 	public String getDestination() {
 		return destination;
 	}
-
 	public void setDestination(String destination) {
 		this.destination = destination;
 	}
-
     public String getTo() {
         return to;
     }
-
 	public void setTo(String to) {
 		this.to = to;
 	}
-
 	public String getOn() {
 		return on;
 	}
-
 	public void setOn(String on) {
 		this.on = on;
 	}
-
 	public String getTodt() {
 		return todt;
 	}
-
 	public void setTodt(String todt) {
 		this.todt = todt;
 	}
-
     public String getDf() {
         return df;
     }
-
     public void setDf(String df) {
         this.df = df;
     }
-
 	public String getMdcRequestId() {
 		return mdcRequestId;
 	}
-
 	public void setMdcRequestId(String mdcRequestId) {
 		this.mdcRequestId = mdcRequestId;
 	}
-
     public String getBusinessError() {
         return businessError;
     }
-
     public void setBusinessError(String businessError) {
         this.businessError = businessError;
     }
+	public String getAd() {
+		return ad;
+	}
+	public void setAd(String ad) {
+		this.ad = ad;
+	}
 }
