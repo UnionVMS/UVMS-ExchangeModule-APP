@@ -4,7 +4,7 @@
     <parent>
         <groupId>fish.focus.uvms.maven</groupId>
         <artifactId>uvms-pom</artifactId>
-        <version>1.18</version>
+        <version>1.21</version>
     </parent>
 
     <groupId>eu.europa.ec.fisheries.uvms.exchange</groupId>
@@ -36,7 +36,7 @@
         <uvms.commons.version>3.0.28</uvms.commons.version>
         <uvms.config.version>4.0.1</uvms.config.version>
         <usm4uvms.version>4.0.8</usm4uvms.version>
-        <uvms-pom-deps.version>1.18</uvms-pom-deps.version>
+        <uvms-pom-deps.version>1.21</uvms-pom-deps.version>
 
         <!-- Uvms models -->
         <asset.model.version>4.0.12</asset.model.version>
