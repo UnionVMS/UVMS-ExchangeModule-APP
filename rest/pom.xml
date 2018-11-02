@@ -61,7 +61,14 @@
             <groupId>fish.focus.uvms.maven</groupId>
             <artifactId>uvms-pom-monitoring-deps</artifactId>
             <type>pom</type>
-        </dependency>  
+        </dependency>
+
+        <!-- RestEasy Dependency for new Servlet api v.4.0 -->
+        <dependency>
+            <groupId>org.jboss.resteasy</groupId>
+            <artifactId>resteasy-servlet-initializer</artifactId>
+            <version>3.6.1.Final</version>
+        </dependency>
     </dependencies>
         
     <build>
