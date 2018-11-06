@@ -11,16 +11,6 @@
  */
 package eu.europa.ec.fisheries.uvms.exchange.message.consumer.bean;
 
-import javax.ejb.ActivationConfigProperty;
-import javax.ejb.MessageDriven;
-import javax.ejb.TransactionAttribute;
-import javax.ejb.TransactionAttributeType;
-import javax.enterprise.event.Event;
-import javax.inject.Inject;
-import javax.jms.Message;
-import javax.jms.MessageListener;
-import javax.jms.TextMessage;
-
 import eu.europa.ec.fisheries.schema.exchange.module.v1.ExchangeBaseRequest;
 import eu.europa.ec.fisheries.schema.exchange.module.v1.ExchangeModuleMethod;
 import eu.europa.ec.fisheries.schema.exchange.plugin.v1.AcknowledgeResponse;
@@ -35,6 +25,14 @@ import eu.europa.ec.fisheries.uvms.exchange.model.mapper.ExchangeModuleResponseM
 import eu.europa.ec.fisheries.uvms.exchange.model.mapper.JAXBMarshaller;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import javax.ejb.ActivationConfigProperty;
+import javax.ejb.MessageDriven;
+import javax.enterprise.event.Event;
+import javax.inject.Inject;
+import javax.jms.Message;
+import javax.jms.MessageListener;
+import javax.jms.TextMessage;
 
 //@formatter:off
 @MessageDriven(mappedName = MessageConstants.QUEUE_EXCHANGE_EVENT, activationConfig = {
@@ -51,7 +49,7 @@ import org.slf4j.LoggerFactory;
 //@formatter:on
 public class ExchangeMessageConsumerBean implements MessageListener {
 
-    final static Logger LOG = LoggerFactory.getLogger(ExchangeMessageConsumerBean.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ExchangeMessageConsumerBean.class);
 
     @Inject
     @PluginConfigEvent
@@ -175,13 +173,12 @@ public class ExchangeMessageConsumerBean implements MessageListener {
 
 
     @Override
-    @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
     public void onMessage(Message message) {
         TextMessage textMessage = (TextMessage) message;
         MappedDiagnosticContext.addMessagePropertiesToThreadMappedDiagnosticContext(textMessage);
         ExchangeBaseRequest request = tryConsumeExchangeBaseRequest(textMessage);
-        LOG.debug("Message received in Exchange Message MDB. Times redelivered: " + getTimesRedelivered(message));
-        LOG.debug("Request body : ", request);
+        LOG.debug("Message received in Exchange Message MDB. Times redelivered: {}", getTimesRedelivered(message));
+        LOG.debug("Request body : {}", request);
         final ExchangeMessageEvent messageEventWrapper = new ExchangeMessageEvent(textMessage);
         if (request == null) {
             LOG.warn("[ERROR] ExchangeBaseRequest is null!! Check the message sent...");
