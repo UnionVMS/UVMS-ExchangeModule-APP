@@ -154,7 +154,7 @@ public class ExchangeMessageProducerBean extends AbstractProducer implements Exc
     public String sendMovementMessage(String text, String groupId) throws ExchangeMessageException {
         try {
             Map<String, String> properties = new HashMap<>();
-            properties.put(MessageConstants.JMS_FUNCTION_PROPERTY, "TODO");
+            properties.put(MessageConstants.JMS_FUNCTION_PROPERTY, "CREATE");
             properties.put(MessageConstants.JMS_MESSAGE_GROUP, groupId);
             return movementProducer.sendModuleMessageWithProps(text, exchangeResponseQueue, properties);
         } catch (MessageException e) {
