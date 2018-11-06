@@ -33,7 +33,7 @@
         <longpolling.version>2.0.13</longpolling.version>
         <uvms.commons.version>3.0.17</uvms.commons.version>
         <uvms.config.version>4.0.1</uvms.config.version>
-        <uvms.commons.version>3.0.28</uvms.commons.version>
+        <uvms.commons.version>3.0.29</uvms.commons.version>
         <uvms.config.version>4.0.1</uvms.config.version>
         <usm4uvms.version>4.0.8</usm4uvms.version>
         <uvms-pom-deps.version>1.18</uvms-pom-deps.version>
@@ -42,7 +42,7 @@
         <asset.model.version>4.0.12</asset.model.version>
         <exchange.model.version>4.0.22</exchange.model.version>
         <audit.model.version>4.0.8</audit.model.version>
-        <movement.model.version>4.0.14</movement.model.version>
+        <movement.model.version>5.0.2</movement.model.version>
         <rules.model.version>3.0.42</rules.model.version>
 
         <asset.version>4.0.9</asset.version>

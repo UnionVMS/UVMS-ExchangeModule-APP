@@ -22,6 +22,7 @@ import javax.jms.JMSException;
 import javax.jms.TextMessage;
 import javax.xml.bind.JAXBException;
 import org.apache.commons.collections.CollectionUtils;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.europa.ec.fisheries.schema.exchange.common.v1.AcknowledgeType;
 import eu.europa.ec.fisheries.schema.exchange.module.v1.ExchangeBaseRequest;
 import eu.europa.ec.fisheries.schema.exchange.module.v1.ExchangeModuleMethod;
@@ -108,6 +109,7 @@ import eu.europa.ec.fisheries.uvms.exchange.service.exception.ExchangeLogExcepti
 import eu.europa.ec.fisheries.uvms.exchange.service.exception.ExchangeServiceException;
 import eu.europa.ec.fisheries.uvms.exchange.service.mapper.MovementMapper;
 import eu.europa.ec.fisheries.uvms.exchange.service.mapper.PluginTypeMapper;
+import eu.europa.ec.fisheries.uvms.exchange.service.model.IncomingMovement;
 import eu.europa.ec.fisheries.uvms.longpolling.notifications.NotificationMessage;
 import eu.europa.ec.fisheries.uvms.movement.model.mapper.MovementModuleResponseMapper;
 import eu.europa.ec.fisheries.uvms.movementrules.model.exception.MovementRulesModelMapperException;
@@ -273,7 +275,6 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
     }
 
     @Override
-//    @Deprecated
     public void processMovement(@Observes @SetMovementEvent ExchangeMessageEvent message) {
         try {
             final TextMessage jmsMessage = message.getJmsMessage();
@@ -296,37 +297,26 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
             PluginType pluginType = setRepMovType.getPluginType();
             if (validate(setRepMovType, service, jmsMessage)) {
                 MovementBaseType baseMovement = setRepMovType.getMovement();
-                RawMovementType rawMovement = MovementMapper.mapMovementBaseTypeToRawMovementType(baseMovement);
-                rawMovement.setPluginType(pluginType.value());
-                rawMovement.setPluginName(pluginName);
-                rawMovement.setDateRecieved(setRepMovType.getTimestamp());
+                IncomingMovement incomingMovement = MovementMapper.mapMovementBaseTypeToRawMovementType(baseMovement);
+                incomingMovement.setPluginType(pluginType.value());
+//                incomingMovement.setPluginName(pluginName);
+                incomingMovement.setDateReceived(setRepMovType.getTimestamp());
+                incomingMovement.setUpdatedBy(username);
                 // TODO : Temporary - probably better to change corr id to have the same though the entire flow;
                 // TODO : then we can use this to send response to original caller from anywhere needed
-                rawMovement.setAckResponseMessageID(jmsMessageID);
+                incomingMovement.setAckResponseMessageId(jmsMessageID);
                 log.info("[INFO] Logging received movement.");
                 exchangeLog.log(request, LogType.RECEIVE_MOVEMENT, ExchangeLogStatusTypeType.ISSUED, TypeRefType.MOVEMENT,
                         JAXBMarshaller.marshallJaxBObjectToString(request), true);
-                String movementReport = MovementRulesModuleRequestMapper.createSetMovementReportRequest(PluginTypeMapper.map(pluginType), rawMovement, username);
-                producer.sendMovementRulesMessage(movementReport);
+                String json = new ObjectMapper().writeValueAsString(incomingMovement);
+                // TODO find a better group id
+                producer.sendMovementMessage(json, incomingMovement.getAssetCFR());
                 log.info("[INFO] Finished forwarding received movement to rules module.");
             } else {
                 log.debug("[ERROR] Validation error. Event sent to plugin {}", message);
             }
-        } catch (ExchangeServiceException e) {
-            log.error("[ERROR] Couldn't get the Service type for the received message : {} {}", message, e);
-        } catch (ExchangeModelMarshallException e) {
-            log.error("[ERROR] Couldn't map to SetMovementReportRequest when processing movement from plugin:{} {}", message, e);
-        } catch (JMSException e) {
-            log.error("[ERROR] Failed to get response queue:{} {}", message, e);
-        } catch (MovementRulesModelMapperException e) {
-            log.error("[ERROR] Failed to build Rules momvent request:{} {}", message, e);
-        } catch (ExchangeLogException e) {
-            log.error("[ERROR] Failed to log momvent request : {} {}", message, e);
-        } catch (ExchangeMessageException e) {
-            log.error("[ERROR] Failed to forward message to MovementRules", e);
         } catch (Exception e) {
-            log.error("Failed to process SetMovementReportRequest", e);
-            // TODO rollback message in all catch cases
+            throw new IllegalArgumentException("Could not process SetMovementReportRequest", e);
         } 
     }
 

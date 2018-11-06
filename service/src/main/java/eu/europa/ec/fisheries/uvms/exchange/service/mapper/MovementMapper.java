@@ -11,137 +11,102 @@ copy of the GNU General Public License along with the IFDM Suite. If not, see <h
  */
 package eu.europa.ec.fisheries.uvms.exchange.service.mapper;
 
-import java.util.ArrayList;
 import java.util.List;
+import eu.europa.ec.fisheries.schema.exchange.movement.asset.v1.AssetIdList;
+import eu.europa.ec.fisheries.schema.exchange.movement.mobileterminal.v1.IdList;
 import eu.europa.ec.fisheries.schema.exchange.movement.v1.MovementBaseType;
-import eu.europa.ec.fisheries.schema.movementrules.asset.v1.AssetId;
-import eu.europa.ec.fisheries.schema.movementrules.asset.v1.AssetIdType;
-import eu.europa.ec.fisheries.schema.movementrules.asset.v1.AssetType;
-import eu.europa.ec.fisheries.schema.movementrules.mobileterminal.v1.IdType;
-import eu.europa.ec.fisheries.schema.movementrules.mobileterminal.v1.MobileTerminalType;
-import eu.europa.ec.fisheries.schema.movementrules.movement.v1.MovementActivityType;
-import eu.europa.ec.fisheries.schema.movementrules.movement.v1.MovementActivityTypeType;
-import eu.europa.ec.fisheries.schema.movementrules.movement.v1.MovementComChannelType;
-import eu.europa.ec.fisheries.schema.movementrules.movement.v1.MovementPoint;
-import eu.europa.ec.fisheries.schema.movementrules.movement.v1.MovementSourceType;
-import eu.europa.ec.fisheries.schema.movementrules.movement.v1.MovementTypeType;
-import eu.europa.ec.fisheries.schema.movementrules.movement.v1.RawMovementType;
+import eu.europa.ec.fisheries.uvms.exchange.service.model.IncomingMovement;
 
 public class MovementMapper {
 
     private MovementMapper() {}
     
-    public static RawMovementType mapMovementBaseTypeToRawMovementType(MovementBaseType movementBaseType) {
-        RawMovementType rawMovementType = new RawMovementType();
+    public static IncomingMovement mapMovementBaseTypeToRawMovementType(MovementBaseType movementBaseType) {
+        IncomingMovement incomingMovement = new IncomingMovement();
         if (movementBaseType.getAssetId() != null) {
-            AssetId assetId = new AssetId();
             if (movementBaseType.getAssetId().getAssetType() != null) {
-                assetId.setAssetType(AssetType.fromValue(movementBaseType.getAssetId().getAssetType().value()));
+                incomingMovement.setAssetType(movementBaseType.getAssetId().getAssetType().value());
             }
-            assetId.getAssetIdList().addAll(mapAssetIdList(movementBaseType.getAssetId().getAssetIdList()));
-            rawMovementType.setAssetId(assetId);
+            mapAssetIdList(movementBaseType.getAssetId().getAssetIdList(), incomingMovement);
         }
         if (movementBaseType.getMobileTerminalId() != null) {
-            MobileTerminalType mobileTerminalType = new MobileTerminalType();
-            mobileTerminalType.setConnectId(movementBaseType.getMobileTerminalId().getConnectId());
-            mobileTerminalType.setGuid(movementBaseType.getMobileTerminalId().getGuid());
-            mobileTerminalType.getMobileTerminalIdList().addAll(mapMobileTerminalIdList(movementBaseType.getMobileTerminalId().getMobileTerminalIdList()));
-            rawMovementType.setMobileTerminal(mobileTerminalType);
+            incomingMovement.setMobileTerminalConnectId(movementBaseType.getMobileTerminalId().getConnectId());
+            incomingMovement.setMobileTerminalGuid(movementBaseType.getMobileTerminalId().getGuid());
+            mapMobileTerminalIdList(movementBaseType.getMobileTerminalId().getMobileTerminalIdList(), incomingMovement);
         }
         if (movementBaseType.getComChannelType() != null) {
-            rawMovementType.setComChannelType(MovementComChannelType.fromValue(movementBaseType.getComChannelType().value()));
+            incomingMovement.setComChannelType(movementBaseType.getComChannelType().value());
         }
         if (movementBaseType.getSource() != null) {
-            rawMovementType.setSource(MovementSourceType.fromValue(movementBaseType.getSource().value()));
+            incomingMovement.setMovementSourceType(movementBaseType.getSource().value());
         }
-        MovementPoint movementPoint = new MovementPoint();
-        movementPoint.setLongitude(movementBaseType.getPosition().getLongitude());
-        movementPoint.setLatitude(movementBaseType.getPosition().getLatitude());
-        movementPoint.setAltitude(movementBaseType.getPosition().getAltitude());
-        rawMovementType.setPosition(movementPoint);
-        rawMovementType.setPositionTime(movementBaseType.getPositionTime());
-        rawMovementType.setStatus(movementBaseType.getStatus());
-        rawMovementType.setReportedSpeed(movementBaseType.getReportedSpeed());
-        rawMovementType.setReportedCourse(movementBaseType.getReportedCourse());
+        incomingMovement.setLongitude(movementBaseType.getPosition().getLongitude());
+        incomingMovement.setLatitude(movementBaseType.getPosition().getLatitude());
+        incomingMovement.setAltitude(movementBaseType.getPosition().getAltitude());
+        incomingMovement.setPositionTime(movementBaseType.getPositionTime());
+        incomingMovement.setStatus(movementBaseType.getStatus());
+        incomingMovement.setReportedSpeed(movementBaseType.getReportedSpeed());
+        incomingMovement.setReportedCourse(movementBaseType.getReportedCourse());
         if (movementBaseType.getMovementType() != null) {
-            rawMovementType.setMovementType(MovementTypeType.fromValue(movementBaseType.getMovementType().value()));
+            incomingMovement.setMovementType(movementBaseType.getMovementType().value());
         }
         if (movementBaseType.getActivity() != null) {
-            MovementActivityType movementActivityType = new MovementActivityType();
-            movementActivityType.setCallback(movementBaseType.getActivity().getCallback());
-            movementActivityType.setMessageId(movementBaseType.getActivity().getMessageId());
+            incomingMovement.setActivityCallback(movementBaseType.getActivity().getCallback());
+            incomingMovement.setActivityMessageId(movementBaseType.getActivity().getMessageId());
             if (movementBaseType.getActivity().getMessageType() != null) {
-                movementActivityType.setMessageType(MovementActivityTypeType.fromValue(movementBaseType.getActivity().getMessageType().value()));
+                incomingMovement.setActivityMessageType(movementBaseType.getActivity().getMessageType().value());
             }
-            rawMovementType.setActivity(movementActivityType);
         }
-        rawMovementType.setAssetName(movementBaseType.getAssetName());
-        rawMovementType.setFlagState(movementBaseType.getFlagState());
-        rawMovementType.setExternalMarking(movementBaseType.getExternalMarking());
-        rawMovementType.setTripNumber(movementBaseType.getTripNumber());
-        rawMovementType.setInternalReferenceNumber(movementBaseType.getInternalReferenceNumber());
-        return rawMovementType;
+        incomingMovement.setAssetName(movementBaseType.getAssetName());
+        incomingMovement.setFlagState(movementBaseType.getFlagState());
+        incomingMovement.setExternalMarking(movementBaseType.getExternalMarking());
+        incomingMovement.setTripNumber(movementBaseType.getTripNumber());
+        incomingMovement.setInternalReferenceNumber(movementBaseType.getInternalReferenceNumber());
+        return incomingMovement;
     }
     
-    public static List<eu.europa.ec.fisheries.schema.movementrules.asset.v1.AssetIdList> mapAssetIdList(
-            List<eu.europa.ec.fisheries.schema.exchange.movement.asset.v1.AssetIdList> inList) {
-        List<eu.europa.ec.fisheries.schema.movementrules.asset.v1.AssetIdList> outList = new ArrayList<>();
-        for (eu.europa.ec.fisheries.schema.exchange.movement.asset.v1.AssetIdList inAssetId : inList) {
-            eu.europa.ec.fisheries.schema.movementrules.asset.v1.AssetIdList outAssetId = new eu.europa.ec.fisheries.schema.movementrules.asset.v1.AssetIdList();
-            AssetIdType idType = null;
+    public static void mapAssetIdList(List<AssetIdList> inList, IncomingMovement incomingMovement) {
+        for (AssetIdList inAssetId : inList) {
             switch (inAssetId.getIdType()) {
                 case CFR:
-                    idType = AssetIdType.CFR;
+                    incomingMovement.setAssetCFR(inAssetId.getValue());
                     break;
                 case ID:
-                    idType = AssetIdType.ID;
+                    incomingMovement.setAssetID(inAssetId.getValue());
                     break;
                 case IMO:
-                    idType = AssetIdType.IMO;
+                    incomingMovement.setAssetIMO(inAssetId.getValue());
                     break;
                 case IRCS:
-                    idType = AssetIdType.IRCS;
+                    incomingMovement.setAssetIRCS(inAssetId.getValue());
                     break;
                 case MMSI:
-                    idType = AssetIdType.MMSI;
+                    incomingMovement.setAssetMMSI(inAssetId.getValue());
                     break;
                 case GUID:
-                    idType = AssetIdType.GUID;
+                    incomingMovement.setAssetGuid(inAssetId.getValue());
                     break;
             }
-            outAssetId.setIdType(idType);
-            outAssetId.setValue(inAssetId.getValue());
-            outList.add(outAssetId);
         }
-        return outList;
     }
 
-    public static List<eu.europa.ec.fisheries.schema.movementrules.mobileterminal.v1.IdList> mapMobileTerminalIdList(
-            List<eu.europa.ec.fisheries.schema.exchange.movement.mobileterminal.v1.IdList> inList) {
-        List<eu.europa.ec.fisheries.schema.movementrules.mobileterminal.v1.IdList> outList = new ArrayList<>();
-        for (eu.europa.ec.fisheries.schema.exchange.movement.mobileterminal.v1.IdList inId : inList) {
-            eu.europa.ec.fisheries.schema.movementrules.mobileterminal.v1.IdList outId = new eu.europa.ec.fisheries.schema.movementrules.mobileterminal.v1.IdList();
-            IdType idType = null;
-
+    public static void mapMobileTerminalIdList(List<IdList> inList, IncomingMovement incomingMovement) {
+        for (IdList inId : inList) {
             switch (inId.getType()) {
                 case DNID:
-                    idType = IdType.DNID;
+                    incomingMovement.setMobileTerminalDNID(inId.getValue());
                     break;
                 case LES:
-                    idType = IdType.LES;
+                    incomingMovement.setMobileTerminalLES(inId.getValue());
                     break;
                 case MEMBER_NUMBER:
-                    idType = IdType.MEMBER_NUMBER;
+                    incomingMovement.setMobileTerminalMemberNumber(inId.getValue());
                     break;
                 case SERIAL_NUMBER:
-                    idType = IdType.SERIAL_NUMBER;
+                    incomingMovement.setMobileTerminalSerialNumber(inId.getValue());
                     break;
             }
-            outId.setType(idType);
-            outId.setValue(inId.getValue());
-            outList.add(outId);
         }
-        return outList;
     }
     
 }
