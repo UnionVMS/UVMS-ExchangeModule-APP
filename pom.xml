@@ -9,7 +9,7 @@
 
     <groupId>eu.europa.ec.fisheries.uvms.exchange</groupId>
     <artifactId>exchange</artifactId>
-    <version>4.0.34-SNAPSHOT</version>
+    <version>4.0.36-SNAPSHOT</version>
     <packaging>pom</packaging>
     
     <scm>
