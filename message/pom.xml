@@ -22,7 +22,7 @@
         <!-- Uvms libs -->
         <dependency>
             <groupId>eu.europa.ec.fisheries.uvms</groupId>
-            <artifactId>uvms-config</artifactId>
+            <artifactId>config-library</artifactId>
         </dependency>
         <dependency>
             <groupId>eu.europa.ec.fisheries.uvms.commons</groupId>
