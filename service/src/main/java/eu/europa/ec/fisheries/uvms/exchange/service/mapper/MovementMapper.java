@@ -43,7 +43,7 @@ public class MovementMapper {
         incomingMovement.setLongitude(movementBaseType.getPosition().getLongitude());
         incomingMovement.setLatitude(movementBaseType.getPosition().getLatitude());
         incomingMovement.setAltitude(movementBaseType.getPosition().getAltitude());
-        incomingMovement.setPositionTime(movementBaseType.getPositionTime());
+        incomingMovement.setPositionTime(movementBaseType.getPositionTime().toInstant());
         incomingMovement.setStatus(movementBaseType.getStatus());
         incomingMovement.setReportedSpeed(movementBaseType.getReportedSpeed());
         incomingMovement.setReportedCourse(movementBaseType.getReportedCourse());

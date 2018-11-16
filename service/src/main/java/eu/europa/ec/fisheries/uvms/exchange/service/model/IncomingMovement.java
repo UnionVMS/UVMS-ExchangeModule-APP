@@ -11,7 +11,7 @@ copy of the GNU General Public License along with the IFDM Suite. If not, see <h
  */
 package eu.europa.ec.fisheries.uvms.exchange.service.model;
 
-import java.util.Date;
+import java.time.Instant;
 
 public class IncomingMovement {
 
@@ -19,8 +19,8 @@ public class IncomingMovement {
     private String guid;
     private String connectId;
     private String ackResponseMessageId;
-    private Date dateReceived;
-    private Date positionTime;
+    private Instant dateReceived;
+    private Instant positionTime;
     private String status;
     private Double reportedSpeed;
     private Double reportedCourse;
@@ -62,7 +62,7 @@ public class IncomingMovement {
     private String pluginType;
     private boolean active;
 
-    private Date updated;
+    private Instant updated;
     private String updatedBy;
     public Long getId() {
         return id;
@@ -88,16 +88,16 @@ public class IncomingMovement {
     public void setAckResponseMessageId(String ackResponseMessageId) {
         this.ackResponseMessageId = ackResponseMessageId;
     }
-    public Date getDateReceived() {
+    public Instant getDateReceived() {
         return dateReceived;
     }
-    public void setDateReceived(Date dateReceived) {
+    public void setDateReceived(Instant dateReceived) {
         this.dateReceived = dateReceived;
     }
-    public Date getPositionTime() {
+    public Instant getPositionTime() {
         return positionTime;
     }
-    public void setPositionTime(Date positionTime) {
+    public void setPositionTime(Instant positionTime) {
         this.positionTime = positionTime;
     }
     public String getStatus() {
@@ -292,10 +292,10 @@ public class IncomingMovement {
     public void setActive(boolean active) {
         this.active = active;
     }
-    public Date getUpdated() {
+    public Instant getUpdated() {
         return updated;
     }
-    public void setUpdated(Date updated) {
+    public void setUpdated(Instant updated) {
         this.updated = updated;
     }
     public String getUpdatedBy() {

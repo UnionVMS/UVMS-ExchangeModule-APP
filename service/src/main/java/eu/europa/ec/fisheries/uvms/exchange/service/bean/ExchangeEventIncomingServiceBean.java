@@ -20,6 +20,8 @@ import javax.enterprise.event.Observes;
 import javax.inject.Inject;
 import javax.jms.JMSException;
 import javax.jms.TextMessage;
+import javax.json.bind.Jsonb;
+import javax.json.bind.JsonbBuilder;
 import javax.xml.bind.JAXBException;
 import org.apache.commons.collections.CollectionUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -154,6 +156,8 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
     @EJB
     private ExchangeEventOutgoingService exchangeEventOutgoingService;
 
+    private Jsonb jsonb = JsonbBuilder.create();
+    
     @Override
     public void processFLUXFAReportMessage(@Observes @SetFluxFAReportMessageEvent ExchangeMessageEvent message) {
         try {
@@ -300,7 +304,7 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
                 IncomingMovement incomingMovement = MovementMapper.mapMovementBaseTypeToRawMovementType(baseMovement);
                 incomingMovement.setPluginType(pluginType.value());
 //                incomingMovement.setPluginName(pluginName);
-                incomingMovement.setDateReceived(setRepMovType.getTimestamp());
+                incomingMovement.setDateReceived(setRepMovType.getTimestamp().toInstant());
                 incomingMovement.setUpdatedBy(username);
                 // TODO : Temporary - probably better to change corr id to have the same though the entire flow;
                 // TODO : then we can use this to send response to original caller from anywhere needed
@@ -308,7 +312,7 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
                 log.info("[INFO] Logging received movement.");
                 exchangeLog.log(request, LogType.RECEIVE_MOVEMENT, ExchangeLogStatusTypeType.ISSUED, TypeRefType.MOVEMENT,
                         JAXBMarshaller.marshallJaxBObjectToString(request), true);
-                String json = new ObjectMapper().writeValueAsString(incomingMovement);
+                String json = jsonb.toJson(incomingMovement);
                 // TODO find a better group id
                 producer.sendMovementMessage(json, incomingMovement.getAssetCFR());
                 log.info("[INFO] Finished forwarding received movement to rules module.");
