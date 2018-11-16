@@ -31,12 +31,12 @@
         <ehcache.version>2.10.4</ehcache.version>
 
         <!-- Uvms libs -->
-        <longpolling.version>2.0.13</longpolling.version>
         <uvms.config.version>4.0.2-W14-J8</uvms.config.version>
         <uvms.commons.version>3.0.29</uvms.commons.version>
         <usm4uvms.version>4.0.14-W14-J8</usm4uvms.version>
-        <uvms-pom-deps.version>1.21</uvms-pom-deps.version>
 
+        <uvms-pom-deps.version>1.21</uvms-pom-deps.version>
+        <longpolling.version>2.0.13</longpolling.version>
         <!-- Uvms models -->
         <asset.model.version>4.0.12</asset.model.version>
         <exchange.model.version>4.0.23</exchange.model.version>
