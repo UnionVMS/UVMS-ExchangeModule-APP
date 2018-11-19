@@ -5,7 +5,7 @@
     <parent>
         <groupId>eu.europa.ec.fisheries.uvms.exchange</groupId>
         <artifactId>exchange</artifactId>
-        <version>4.0.33-SNAPSHOT</version>
+        <version>4.0.36-SNAPSHOT</version>
     </parent>
 
     <artifactId>exchange-rest</artifactId>
@@ -61,7 +61,7 @@
             <groupId>fish.focus.uvms.maven</groupId>
             <artifactId>uvms-pom-monitoring-deps</artifactId>
             <type>pom</type>
-        </dependency>  
+        </dependency>
     </dependencies>
         
     <build>
@@ -80,6 +80,9 @@
     <profiles>
         <profile>
             <id>generate-rest-doc</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
             <build>
                 <plugins>
                     <plugin>
@@ -108,7 +111,7 @@
                             </execution>
                         </executions>
                     </plugin>
-                    <plugin>
+<!--                    <plugin>
                         <groupId>com.google.code.maven-replacer-plugin</groupId>
                         <artifactId>replacer</artifactId>
                         <version>1.5.3</version>
@@ -129,7 +132,7 @@
                                 </replacement>
                             </replacements>
                         </configuration>
-                    </plugin>
+                    </plugin>-->
                 </plugins>
             </build>
         </profile>
