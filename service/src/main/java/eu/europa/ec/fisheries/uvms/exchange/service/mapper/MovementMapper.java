@@ -40,10 +40,14 @@ public class MovementMapper {
         if (movementBaseType.getSource() != null) {
             incomingMovement.setMovementSourceType(movementBaseType.getSource().value());
         }
-        incomingMovement.setLongitude(movementBaseType.getPosition().getLongitude());
-        incomingMovement.setLatitude(movementBaseType.getPosition().getLatitude());
-        incomingMovement.setAltitude(movementBaseType.getPosition().getAltitude());
-        incomingMovement.setPositionTime(movementBaseType.getPositionTime().toInstant());
+        if (movementBaseType.getPosition() != null) {
+            incomingMovement.setLongitude(movementBaseType.getPosition().getLongitude());
+            incomingMovement.setLatitude(movementBaseType.getPosition().getLatitude());
+            incomingMovement.setAltitude(movementBaseType.getPosition().getAltitude());
+        }
+        if (movementBaseType.getPositionTime() != null) {
+            incomingMovement.setPositionTime(movementBaseType.getPositionTime().toInstant());
+        }
         incomingMovement.setStatus(movementBaseType.getStatus());
         incomingMovement.setReportedSpeed(movementBaseType.getReportedSpeed());
         incomingMovement.setReportedCourse(movementBaseType.getReportedCourse());
