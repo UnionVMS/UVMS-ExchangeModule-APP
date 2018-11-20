@@ -35,10 +35,10 @@ import java.util.List;
 @Stateless
 public class ServiceRegistryModelBean implements ServiceRegistryModel {
 
-    final static Logger LOG = LoggerFactory.getLogger(ServiceRegistryModelBean.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ServiceRegistryModelBean.class);
 
     @EJB
-    ServiceRegistryDao dao;
+    private ServiceRegistryDao dao;
 
     @Override
     public ServiceResponseType registerService(ServiceType serviceType, CapabilityListType capabilityList, SettingListType settingList, String username) throws ExchangeModelException {
