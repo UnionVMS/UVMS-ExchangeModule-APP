@@ -36,6 +36,7 @@ import eu.europa.ec.fisheries.schema.exchange.module.v1.SetFLUXFAReportMessageRe
 import eu.europa.ec.fisheries.schema.exchange.module.v1.SetFLUXFAResponseMessageRequest;
 import eu.europa.ec.fisheries.schema.exchange.module.v1.UpdateLogStatusRequest;
 import eu.europa.ec.fisheries.schema.exchange.movement.v1.MovementRefType;
+import eu.europa.ec.fisheries.schema.exchange.movement.v1.MovementRefTypeType;
 import eu.europa.ec.fisheries.schema.exchange.movement.v1.SendMovementToPluginType;
 import eu.europa.ec.fisheries.schema.exchange.movement.v1.SetReportMovementType;
 import eu.europa.ec.fisheries.schema.exchange.plugin.types.v1.PluginFault;
@@ -417,21 +418,17 @@ public class ExchangeEventOutgoingServiceBean implements ExchangeEventOutgoingSe
         try {
             ProcessedMovementResponse request = JAXBMarshaller.unmarshallTextMessage(message.getJmsMessage(), ProcessedMovementResponse.class);
             log.debug("Received processed movement from Rules:{}", request);
-            String username;
             MovementRefType movementRefType = request.getMovementRefType();
-            SetReportMovementType orgRequest = request.getOrgRequest();
-            if (PluginType.MANUAL.equals(orgRequest.getPluginType())) {
-                username = request.getUsername();
+            ExchangeLogStatusTypeType statusType;
+            if (movementRefType.getType().equals(MovementRefTypeType.ALARM)) { 
+                statusType = ExchangeLogStatusTypeType.FAILED;
             } else {
-                username = orgRequest.getPluginName();
+                statusType = ExchangeLogStatusTypeType.SUCCESSFUL;
             }
-            ExchangeLogType log = ExchangeLogMapper.getReceivedMovementExchangeLog(orgRequest, movementRefType.getMovementRefGuid(), movementRefType.getType().value(), username);
-            ExchangeLogType createdLog = exchangeLogService.log(log, username);
-            LogRefType logTypeRef = createdLog.getTypeRef();
-            if (logTypeRef != null && logTypeRef.getType() == TypeRefType.POLL) {
-                String pollGuid = logTypeRef.getRefGuid();
-                pollEvent.fire(new NotificationMessage("guid", pollGuid));
-            }
+            ExchangeLogType updatedLog = exchangeLogService.updateStatus(movementRefType.getAckResponseMessageID(), statusType);
+            updatedLog.getTypeRef().setRefGuid(movementRefType.getMovementRefGuid());
+            updatedLog.setTypeRefType(TypeRefType.valueOf(movementRefType.getType().value()));
+            
         } catch (ExchangeLogException | ExchangeModelMarshallException e) {
             log.error(e.getMessage());
         }

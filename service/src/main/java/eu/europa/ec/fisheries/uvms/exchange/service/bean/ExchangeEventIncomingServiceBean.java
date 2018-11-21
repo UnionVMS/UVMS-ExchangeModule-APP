@@ -306,12 +306,10 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
 //                incomingMovement.setPluginName(pluginName);
                 incomingMovement.setDateReceived(setRepMovType.getTimestamp().toInstant());
                 incomingMovement.setUpdatedBy(username);
-                // TODO : Temporary - probably better to change corr id to have the same though the entire flow;
-                // TODO : then we can use this to send response to original caller from anywhere needed
-                incomingMovement.setAckResponseMessageId(jmsMessageID);
                 log.info("[INFO] Logging received movement.");
-                exchangeLog.log(request, LogType.RECEIVE_MOVEMENT, ExchangeLogStatusTypeType.ISSUED, TypeRefType.MOVEMENT,
+                ExchangeLogType createdLog = exchangeLog.log(request, LogType.RECEIVE_MOVEMENT, ExchangeLogStatusTypeType.ISSUED, TypeRefType.MOVEMENT,
                         JAXBMarshaller.marshallJaxBObjectToString(request), true);
+                incomingMovement.setAckResponseMessageId(createdLog.getGuid());
                 String json = jsonb.toJson(incomingMovement);
                 // TODO find a better group id
                 producer.sendMovementMessage(json, incomingMovement.getAssetCFR());
@@ -320,6 +318,7 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
                 log.debug("[ERROR] Validation error. Event sent to plugin {}", message);
             }
         } catch (Exception e) {
+            log.error("Could not process SetMovementReportRequest", e);
             throw new IllegalArgumentException("Could not process SetMovementReportRequest", e);
         } 
     }
