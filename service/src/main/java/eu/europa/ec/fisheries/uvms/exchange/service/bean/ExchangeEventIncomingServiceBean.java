@@ -289,10 +289,6 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
             SetReportMovementType setRepMovType = request.getRequest();
             if (MovementSourceType.MANUAL.equals(setRepMovType.getMovement().getSource())) {// A person has created a position
                 username = request.getUsername();
-                // Send some response to Movement, if it originated from there (manual movement)
-                ProcessedMovementAck response = MovementModuleResponseMapper.mapProcessedMovementAck(eu.europa.ec.fisheries.schema.movement.common.v1.AcknowledgeTypeType.OK,
-                        jmsMessageID, "Movement successfully processed");
-                producer.sendModuleAckMessage(jmsMessageID, MessageQueue.MOVEMENT_RESPONSE, JAXBMarshaller.marshallJaxBObjectToString(response));
             } else {// A plugin has reported a position
                 username = setRepMovType.getPluginType().name();
             }
