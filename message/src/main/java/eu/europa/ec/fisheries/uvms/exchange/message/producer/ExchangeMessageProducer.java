@@ -36,7 +36,7 @@ public interface ExchangeMessageProducer {
 
     String sendRulesMessage(String text, String messageSelector) throws ExchangeMessageException;
     
-    String sendMovementRulesMessage(String text) throws ExchangeMessageException;
+    String sendMovementMessage(String text, String groupId) throws ExchangeMessageException;
 
     void sendModuleErrorResponseMessage(@Observes @ErrorEvent ExchangeMessageEvent event);
 

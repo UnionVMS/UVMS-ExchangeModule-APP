@@ -54,9 +54,6 @@ public class ExchangeMessageProducerBean extends AbstractProducer implements Exc
 
     @EJB
     private ExchangeRulesProducer rulesProducer;
-    
-    @Inject
-    private ExchangeMovementRulesProducer movementRulesProducer;
 
     private Queue exchangeResponseQueue;
     private Queue exchangeEventQueue;
@@ -154,11 +151,12 @@ public class ExchangeMessageProducerBean extends AbstractProducer implements Exc
     
     @Override
     @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
-    public String sendMovementRulesMessage(String text) throws ExchangeMessageException {
+    public String sendMovementMessage(String text, String groupId) throws ExchangeMessageException {
         try {
             Map<String, String> properties = new HashMap<>();
-            properties.put(MessageConstants.JMS_FUNCTION_PROPERTY, "SET_MOVEMENT_REPORT" /*RulesModuleMethod.SET_MOVEMENT_REPORT.value()*/);
-            return movementRulesProducer.sendModuleMessageWithProps(text, exchangeResponseQueue, properties);
+            properties.put(MessageConstants.JMS_FUNCTION_PROPERTY, "CREATE");
+            properties.put(MessageConstants.JMS_MESSAGE_GROUP, groupId);
+            return movementProducer.sendModuleMessageWithProps(text, exchangeResponseQueue, properties);
         } catch (MessageException e) {
             LOG.error("[ Error when sending rules message. ] {}", e.getMessage());
             throw new ExchangeMessageException("Error when sending rules message.");

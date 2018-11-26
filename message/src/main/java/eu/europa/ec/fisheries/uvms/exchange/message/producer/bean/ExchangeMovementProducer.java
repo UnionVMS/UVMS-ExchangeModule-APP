@@ -21,6 +21,6 @@ public class ExchangeMovementProducer extends AbstractProducer {
 
     @Override
     public String getDestinationName() {
-        return MessageConstants.QUEUE_MOVEMENT;
+        return MessageConstants.QUEUE_MODULE_MOVEMENT;
     }
 }
