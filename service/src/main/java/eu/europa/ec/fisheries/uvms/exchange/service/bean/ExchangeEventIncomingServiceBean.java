@@ -307,8 +307,10 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
                         JAXBMarshaller.marshallJaxBObjectToString(request), true);
                 incomingMovement.setAckResponseMessageId(createdLog.getGuid());
                 String json = jsonb.toJson(incomingMovement);
-                // TODO find a better group id
-                producer.sendMovementMessage(json, incomingMovement.getAssetCFR());
+
+                //combine all possible values into one big grouping string
+                String groupId = incomingMovement.getAssetCFR() + incomingMovement.getAssetIMO() + incomingMovement.getAssetIRCS() + incomingMovement.getAssetMMSI() + incomingMovement.getAssetID() + incomingMovement.getAssetGuid() + incomingMovement.getMobileTerminalDNID() + incomingMovement.getMobileTerminalConnectId() + incomingMovement.getMobileTerminalGuid() + incomingMovement.getMobileTerminalLES() + incomingMovement.getMobileTerminalMemberNumber() + incomingMovement.getMobileTerminalSerialNumber() + "AllOtherThings";
+                producer.sendMovementMessage(json, groupId);
                 log.info("[INFO] Finished forwarding received movement to rules module.");
             } else {
                 log.debug("[ERROR] Validation error. Event sent to plugin {}", message);
