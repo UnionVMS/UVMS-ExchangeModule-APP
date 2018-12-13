@@ -158,8 +158,8 @@ public class ExchangeMessageProducerBean extends AbstractProducer implements Exc
             properties.put(MessageConstants.JMS_MESSAGE_GROUP, groupId);
             return movementProducer.sendModuleMessageWithProps(text, exchangeResponseQueue, properties);
         } catch (MessageException e) {
-            LOG.error("[ Error when sending rules message. ] {}", e.getMessage());
-            throw new ExchangeMessageException("Error when sending rules message.");
+            LOG.error("[ Error when sending movement message. ] {}", e);
+            throw new ExchangeMessageException("Error when sending movement message.");
         }
     }
 

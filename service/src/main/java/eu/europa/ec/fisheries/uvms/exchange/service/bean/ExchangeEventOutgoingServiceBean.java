@@ -19,8 +19,10 @@ import javax.ejb.EJB;
 import javax.ejb.Stateless;
 import javax.enterprise.event.Event;
 import javax.enterprise.event.Observes;
+import javax.enterprise.event.TransactionPhase;
 import javax.inject.Inject;
 import javax.jms.JMSException;
+import javax.jms.Message;
 import javax.jms.TextMessage;
 import org.apache.commons.collections.CollectionUtils;
 import eu.europa.ec.fisheries.schema.exchange.common.v1.AcknowledgeType;
@@ -53,6 +55,7 @@ import eu.europa.ec.fisheries.schema.exchange.v1.LogRefType;
 import eu.europa.ec.fisheries.schema.exchange.v1.LogType;
 import eu.europa.ec.fisheries.schema.exchange.v1.TypeRefType;
 import eu.europa.ec.fisheries.schema.exchange.v1.UnsentMessageTypeProperty;
+import eu.europa.ec.fisheries.uvms.commons.message.api.MessageConstants;
 import eu.europa.ec.fisheries.uvms.commons.message.api.MessageException;
 import eu.europa.ec.fisheries.uvms.exchange.message.consumer.ExchangeConsumer;
 import eu.europa.ec.fisheries.uvms.exchange.message.event.ErrorEvent;
@@ -152,7 +155,7 @@ public class ExchangeEventOutgoingServiceBean implements ExchangeEventOutgoingSe
     }
 
     @Override
-    public void sendReportToPlugin(@Observes @SendReportToPluginEvent ExchangeMessageEvent message) {
+    public void sendReportToPlugin(@Observes(during=TransactionPhase.BEFORE_COMPLETION) @SendReportToPluginEvent ExchangeMessageEvent message) {
         try {
             SendMovementToPluginRequest request = JAXBMarshaller.unmarshallTextMessage(message.getJmsMessage(), SendMovementToPluginRequest.class);
             log.info("Send report to plugin: {}",request);
@@ -183,13 +186,14 @@ public class ExchangeEventOutgoingServiceBean implements ExchangeEventOutgoingSe
                     ExchangeLogType log = ExchangeLogMapper.getSendMovementExchangeLog(sendReport);
                     exchangeLogService.logAndCache(log, pluginMessageId, request.getUsername());
                 } catch (ExchangeLogException e) {
-                    log.error(e.getMessage());
+                    log.error("Could not create log", e);
                 }
             } else {
                 log.error("No report sent, no plugin of type " + sendReport.getPluginType() + " found");
             }
         } catch (ExchangeModelMarshallException | ExchangeServiceException | ExchangeMessageException e) {
             log.error("Could not send report to plugin", e);
+            throw new IllegalStateException("Could not send report to plugin", e);
         }
     }
 
@@ -213,7 +217,7 @@ public class ExchangeEventOutgoingServiceBean implements ExchangeEventOutgoingSe
     }
 
     @Override
-    public void sendCommandToPlugin(@Observes @SendCommandToPluginEvent ExchangeMessageEvent message) {
+    public void sendCommandToPlugin(@Observes(during=TransactionPhase.BEFORE_COMPLETION) @SendCommandToPluginEvent ExchangeMessageEvent message) {
         SetCommandRequest request = new SetCommandRequest();
         try {
             request = JAXBMarshaller.unmarshallTextMessage(message.getJmsMessage(), SetCommandRequest.class);
@@ -234,7 +238,7 @@ public class ExchangeEventOutgoingServiceBean implements ExchangeEventOutgoingSe
                     ExchangeLogType log = ExchangeLogMapper.getSendCommandExchangeLog(request.getCommand());
                     exchangeLogService.logAndCache(log, pluginMessageId, request.getUsername());
                 } catch (ExchangeLogException e) {
-                    log.error(e.getMessage());
+                    log.error("Could not create log", e);
                 }
                 CommandTypeType x = request.getCommand().getCommand();
 
@@ -250,11 +254,15 @@ public class ExchangeEventOutgoingServiceBean implements ExchangeEventOutgoingSe
 
         } catch (NullPointerException | ExchangeException | MessageException e) {
             if (request.getCommand().getCommand() != CommandTypeType.EMAIL) {
-                log.error("[ Error when sending command to plugin {} ]", e.getMessage());
-                exchangeErrorEvent.fire(new ExchangeMessageEvent(message.getJmsMessage(), ExchangeModuleResponseMapper.createFaultMessage(FaultCode.EXCHANGE_EVENT_SERVICE, "Exception when sending command to plugin")));
+                log.error("[ Error when sending command to plugin {} ]", e);
+                if (getTimesRedelivered(message.getJmsMessage()) > MessageConstants.JMS_MAX_REDELIVERIES) {
+                    exchangeErrorEvent.fire(new ExchangeMessageEvent(message.getJmsMessage(), ExchangeModuleResponseMapper.createFaultMessage(FaultCode.EXCHANGE_EVENT_SERVICE, "Exception when sending command to plugin")));
+                }
             }
+            throw new IllegalStateException("Error when sending command to plugin", e);
         } catch (JMSException ex) {
-            log.error("[ Error when creating unsent message {} ]", ex.getMessage());
+            log.error("[ Error when creating unsent message {} ]", ex);
+            throw new IllegalStateException("Error when sending command to plugin", ex);
         }
     }
 
@@ -414,7 +422,7 @@ public class ExchangeEventOutgoingServiceBean implements ExchangeEventOutgoingSe
     }
 
     @Override
-    public void handleProcessedMovement(@Observes @HandleProcessedMovementEvent ExchangeMessageEvent message) {
+    public void handleProcessedMovement(@Observes(during=TransactionPhase.BEFORE_COMPLETION) @HandleProcessedMovementEvent ExchangeMessageEvent message) {
         try {
             ProcessedMovementResponse request = JAXBMarshaller.unmarshallTextMessage(message.getJmsMessage(), ProcessedMovementResponse.class);
             log.debug("Received processed movement from Rules:{}", request);
@@ -430,7 +438,8 @@ public class ExchangeEventOutgoingServiceBean implements ExchangeEventOutgoingSe
             updatedLog.setTypeRefType(TypeRefType.valueOf(movementRefType.getType().value()));
             
         } catch (ExchangeLogException | ExchangeModelMarshallException e) {
-            log.error(e.getMessage());
+            log.error("Could not handle processed movement", e);
+            throw new IllegalArgumentException("Could not handle processed movement", e);
         }
     }
 
@@ -544,4 +553,12 @@ public class ExchangeEventOutgoingServiceBean implements ExchangeEventOutgoingSe
 
     }
 
+    private int getTimesRedelivered(TextMessage message) {
+        try {
+            return (message.getIntProperty("JMSXDeliveryCount") - 1);
+
+        } catch (Exception e) {
+            return 0;
+        }
+    }
 }

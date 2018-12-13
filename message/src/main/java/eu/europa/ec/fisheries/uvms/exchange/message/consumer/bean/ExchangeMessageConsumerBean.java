@@ -13,8 +13,6 @@ package eu.europa.ec.fisheries.uvms.exchange.message.consumer.bean;
 
 import javax.ejb.ActivationConfigProperty;
 import javax.ejb.MessageDriven;
-import javax.ejb.TransactionAttribute;
-import javax.ejb.TransactionAttributeType;
 import javax.enterprise.event.Event;
 import javax.inject.Inject;
 import javax.jms.Message;
@@ -44,9 +42,8 @@ import org.slf4j.LoggerFactory;
         @ActivationConfigProperty(propertyName = MessageConstants.DESTINATION_JNDI_NAME, propertyValue = MessageConstants.QUEUE_EXCHANGE_EVENT),
         @ActivationConfigProperty(propertyName = MessageConstants.CONNECTION_FACTORY_JNDI_NAME, propertyValue = MessageConstants.CONNECTION_FACTORY),
         @ActivationConfigProperty(propertyName = "maxMessagesPerSessions", propertyValue = "100"),
-        @ActivationConfigProperty(propertyName = "initialRedeliveryDelay", propertyValue = "60000"),
-        @ActivationConfigProperty(propertyName = "maximumRedeliveries", propertyValue = "3"),
-        @ActivationConfigProperty(propertyName = "maxSessions", propertyValue = "10")
+        @ActivationConfigProperty(propertyName = "maximumRedeliveries", propertyValue = MessageConstants.JMS_MAX_REDELIVERIES + ""),
+        @ActivationConfigProperty(propertyName = "maxSessions", propertyValue = "50")
 })
 //@formatter:on
 public class ExchangeMessageConsumerBean implements MessageListener {
@@ -175,8 +172,8 @@ public class ExchangeMessageConsumerBean implements MessageListener {
 
 
     @Override
-    @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
     public void onMessage(Message message) {
+        
         TextMessage textMessage = (TextMessage) message;
         MappedDiagnosticContext.addMessagePropertiesToThreadMappedDiagnosticContext(textMessage);
         ExchangeBaseRequest request = tryConsumeExchangeBaseRequest(textMessage);
