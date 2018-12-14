@@ -437,7 +437,9 @@ public class ExchangeEventOutgoingServiceBean implements ExchangeEventOutgoingSe
             updatedLog.getTypeRef().setRefGuid(movementRefType.getMovementRefGuid());
             updatedLog.setTypeRefType(TypeRefType.valueOf(movementRefType.getType().value()));
             
-        } catch (ExchangeLogException | ExchangeModelMarshallException e) {
+        } catch (ExchangeLogException e) {
+            log.error("Could not update log status", e);
+        } catch (ExchangeModelMarshallException e) {
             log.error("Could not handle processed movement", e);
             throw new IllegalArgumentException("Could not handle processed movement", e);
         }
