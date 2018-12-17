@@ -83,7 +83,7 @@ public class ExchangeLogServiceBean implements ExchangeLogService {
             log.debug("[INFO] Logging message with guid : [ "+guid+" ] was successful.");
             return exchangeLog;
         } catch (ExchangeModelException e) {
-            throw new ExchangeLogException("Couldn't create log exchange log.");
+            throw new ExchangeLogException("Couldn't create log exchange log.", e);
         }
     }
 

@@ -22,8 +22,9 @@ import javax.enterprise.event.Observes;
 import javax.enterprise.event.TransactionPhase;
 import javax.inject.Inject;
 import javax.jms.JMSException;
-import javax.jms.Message;
 import javax.jms.TextMessage;
+
+import eu.europa.ec.fisheries.uvms.exchange.constant.ExchangeConstants;
 import org.apache.commons.collections.CollectionUtils;
 import eu.europa.ec.fisheries.schema.exchange.common.v1.AcknowledgeType;
 import eu.europa.ec.fisheries.schema.exchange.common.v1.CommandType;
@@ -51,7 +52,6 @@ import eu.europa.ec.fisheries.schema.exchange.service.v1.ServiceResponseType;
 import eu.europa.ec.fisheries.schema.exchange.service.v1.StatusType;
 import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogStatusTypeType;
 import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogType;
-import eu.europa.ec.fisheries.schema.exchange.v1.LogRefType;
 import eu.europa.ec.fisheries.schema.exchange.v1.LogType;
 import eu.europa.ec.fisheries.schema.exchange.v1.TypeRefType;
 import eu.europa.ec.fisheries.schema.exchange.v1.UnsentMessageTypeProperty;
@@ -424,9 +424,12 @@ public class ExchangeEventOutgoingServiceBean implements ExchangeEventOutgoingSe
     @Override
     public void handleProcessedMovement(@Observes(during=TransactionPhase.BEFORE_COMPLETION) @HandleProcessedMovementEvent ExchangeMessageEvent message) {
         try {
-            ProcessedMovementResponse request = JAXBMarshaller.unmarshallTextMessage(message.getJmsMessage(), ProcessedMovementResponse.class);
-            log.debug("Received processed movement from Rules:{}", request);
-            MovementRefType movementRefType = request.getMovementRefType();
+            ProcessedMovementResponse response = JAXBMarshaller.unmarshallTextMessage(message.getJmsMessage(), ProcessedMovementResponse.class);
+            log.debug("Received processed movement from Rules:{}", response);
+            MovementRefType movementRefType = response.getMovementRefType();
+            if(movementRefType.getAckResponseMessageID().equals(ExchangeConstants.TEST_ACK_IGNORE_EXCHANGE_LOG)){
+                return;
+            }
             ExchangeLogStatusTypeType statusType;
             if (movementRefType.getType().equals(MovementRefTypeType.ALARM)) { 
                 statusType = ExchangeLogStatusTypeType.FAILED;
@@ -436,10 +439,9 @@ public class ExchangeEventOutgoingServiceBean implements ExchangeEventOutgoingSe
             ExchangeLogType updatedLog = exchangeLogService.updateStatus(movementRefType.getAckResponseMessageID(), statusType);
             updatedLog.getTypeRef().setRefGuid(movementRefType.getMovementRefGuid());
             updatedLog.setTypeRefType(TypeRefType.valueOf(movementRefType.getType().value()));
-            
-        } catch (ExchangeLogException e) {
-            log.error("Could not update log status", e);
-        } catch (ExchangeModelMarshallException e) {
+
+
+        } catch (ExchangeModelMarshallException | ExchangeLogException e) {
             log.error("Could not handle processed movement", e);
             throw new IllegalArgumentException("Could not handle processed movement", e);
         }
