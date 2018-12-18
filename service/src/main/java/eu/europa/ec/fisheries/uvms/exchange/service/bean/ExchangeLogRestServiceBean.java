@@ -81,10 +81,20 @@ public class ExchangeLogRestServiceBean {
         paramsMap.put("AD", null);
         paramsMap.put("DATE_RECEIVED_TO", DateUtils.END_OF_TIME.toDate());
         paramsMap.put("DATE_RECEIVED_FROM", DateUtils.START_OF_TIME.toDate());
+        paramsMap.put("INCOMING", false);
+        paramsMap.put("OUTGOING", true);
 
         for (ExchangeListCriteriaPair criteria : criterias) {
             if ("DATE_RECEIVED_FROM".equals(criteria.getKey().value())) {
                 paramsMap.put("DATE_RECEIVED_FROM", DateUtil.parseToUTCDate(criteria.getValue()));
+            }
+            else if ("MESSAGE_DIRECTION".equals(criteria.getKey().value())) {
+                if ("OUTGOING".equals(criteria.getValue())){
+                    paramsMap.put("OUTGOING", false);
+                }
+                else if ("INCOMING".equals(criteria.getValue())){
+                    paramsMap.put("INCOMING", true);
+                }
             }
             else if ("DATE_RECEIVED_TO".equals(criteria.getKey().value())) {
                 paramsMap.put("DATE_RECEIVED_FROM", DateUtil.parseToUTCDate(criteria.getValue()));
