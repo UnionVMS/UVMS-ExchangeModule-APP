@@ -13,13 +13,11 @@ package eu.europa.ec.fisheries.uvms.exchange.service;
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
 import javax.persistence.TypedQuery;
-import javax.validation.constraints.NotNull;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import eu.europa.ec.fisheries.uvms.commons.service.dao.AbstractDAO;
 import eu.europa.ec.fisheries.uvms.exchange.entity.exchangelog.ExchangeLog;
-import eu.europa.ec.fisheries.uvms.exchange.service.constants.ColumnType;
-import eu.europa.ec.fisheries.uvms.exchange.service.constants.DirectionType;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.MapUtils;
 
@@ -32,7 +30,7 @@ public class ExchangeLogDao extends AbstractDAO<ExchangeLog> {
         this.em = em;
     }
 
-    public Long count(@NotNull Map<String, Object> queryParameters) {
+    public Long count(Map<String, Object> queryParameters) {
         TypedQuery<Long> query = getEntityManager().createNamedQuery(ExchangeLog.COUNT_LIST_EXCHANGE, Long.class);
         for (Map.Entry<String, Object> entry : queryParameters.entrySet()){
             query.setParameter(entry.getKey(), entry.getValue());
@@ -41,20 +39,15 @@ public class ExchangeLogDao extends AbstractDAO<ExchangeLog> {
 
     }
 
-    public List<ExchangeLog> list(@NotNull Map<String, Object> queryParameters, @NotNull Map<ColumnType, DirectionType> orderBy, @NotNull Integer firstResult, @NotNull Integer maxResult) {
-        List resultList = null;
+    public List<ExchangeLog> list(Map<String, Object> queryParameters, String sortingColumn, boolean order, Integer firstResult, Integer maxResult) {
+        List resultList = new ArrayList();
+        if (MapUtils.isEmpty(queryParameters) || sortingColumn == null || firstResult == null || maxResult == null){
+            return  resultList;
+        }
         try {
             String queryString = em.createNamedQuery(ExchangeLog.LIST_EXCHANGE).unwrap(org.hibernate.Query.class).getQueryString();
-            log.info(queryString);
-            StringBuilder builder = new StringBuilder(queryString).append(" ORDER BY s.");
-            if (MapUtils.isNotEmpty(orderBy)){
-                Map.Entry<ColumnType, DirectionType> next = orderBy.entrySet().iterator().next();
-                builder.append(next.getKey().propertyName()).append(" ").append(next.getValue().name());
-            }
-            else {
-                builder.append("id ASC");
-            }
-            Query selectQuery = getEntityManager().createQuery(queryString);
+            StringBuilder builder = new StringBuilder(queryString).append(" ORDER BY e.").append(sortingColumn).append(order ? " ASC" : " DESC");
+            Query selectQuery = getEntityManager().createQuery(builder.toString());
             for (Map.Entry<String, Object> entry : queryParameters.entrySet()){
                 selectQuery.setParameter(entry.getKey(), entry.getValue());
             }
