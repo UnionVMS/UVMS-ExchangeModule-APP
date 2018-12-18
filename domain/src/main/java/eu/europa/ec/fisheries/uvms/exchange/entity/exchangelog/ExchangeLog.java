@@ -47,7 +47,8 @@ import static eu.europa.ec.fisheries.uvms.exchange.entity.exchangelog.ExchangeLo
                         "((:ON is NULL) OR (UPPER(cast(e.onValue as string)) LIKE CONCAT('%', UPPER(cast(:ON as string)), '%'))) AND " +
                         "((:DF is NULL) OR (UPPER(cast(e.df as string)) LIKE CONCAT('%', UPPER(cast(:DF as string)), '%'))) AND " +
                         "((:TODT is NULL) OR (UPPER(cast(e.todt as string)) LIKE CONCAT('%', UPPER(cast(:TODT as string)), '%'))) AND " +
-                        "((:AD is NULL) OR (UPPER(cast(e.ad as string)) LIKE CONCAT('%', UPPER(cast(:AD as string)), '%')))"
+                        "((:AD is NULL) OR (UPPER(cast(e.ad as string)) LIKE CONCAT('%', UPPER(cast(:AD as string)), '%'))) AND " +
+                        "(e.transferIncoming = :INCOMING OR e.transferIncoming = :OUTGOING)"
         ),
 		@NamedQuery(name = COUNT_LIST_EXCHANGE, query = "SELECT count(*) FROM ExchangeLog e WHERE (e.dateReceived BETWEEN :DATE_RECEIVED_FROM AND :DATE_RECEIVED_TO ) AND " +
 				"(((:GUID is NULL) OR (UPPER(cast(e.guid as string)) LIKE CONCAT('%', UPPER(cast(:GUID as string)), '%'))) OR " +
@@ -60,8 +61,9 @@ import static eu.europa.ec.fisheries.uvms.exchange.entity.exchangelog.ExchangeLo
 				"((:ON is NULL) OR (UPPER(cast(e.onValue as string)) LIKE CONCAT('%', UPPER(cast(:ON as string)), '%'))) AND " +
 				"((:DF is NULL) OR (UPPER(cast(e.df as string)) LIKE CONCAT('%', UPPER(cast(:DF as string)), '%'))) AND " +
 				"((:TODT is NULL) OR (UPPER(cast(e.todt as string)) LIKE CONCAT('%', UPPER(cast(:TODT as string)), '%'))) AND " +
-				"((:AD is NULL) OR (UPPER(cast(e.ad as string)) LIKE CONCAT('%', UPPER(cast(:AD as string)), '%')))"
-		)
+				"((:AD is NULL) OR (UPPER(cast(e.ad as string)) LIKE CONCAT('%', UPPER(cast(:AD as string)), '%'))) AND " +
+                "(e.transferIncoming = :INCOMING OR e.transferIncoming = :OUTGOING)"
+        )
 })
 @Data
 @EqualsAndHashCode(exclude = "statusHistory")

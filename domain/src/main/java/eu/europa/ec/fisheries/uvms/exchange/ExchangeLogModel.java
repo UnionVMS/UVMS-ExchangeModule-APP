@@ -14,23 +14,13 @@ package eu.europa.ec.fisheries.uvms.exchange;
 import javax.ejb.Local;
 import java.util.List;
 import java.util.Set;
-
-import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeHistoryListQuery;
-import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeListQuery;
-import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogStatusType;
-import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogType;
-import eu.europa.ec.fisheries.schema.exchange.v1.LogWithRawMsgAndType;
-import eu.europa.ec.fisheries.schema.exchange.v1.PollStatus;
-import eu.europa.ec.fisheries.schema.exchange.v1.TypeRefType;
-import eu.europa.ec.fisheries.uvms.exchange.model.dto.ListResponseDto;
+import eu.europa.ec.fisheries.schema.exchange.v1.*;
 import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelException;
 
 /**
  **/
 @Local
 public interface ExchangeLogModel {
-
-    ListResponseDto getExchangeLogListByQuery(ExchangeListQuery query) throws ExchangeModelException;
 
     ExchangeLogType createExchangeLog(ExchangeLogType log, String username) throws ExchangeModelException;
     

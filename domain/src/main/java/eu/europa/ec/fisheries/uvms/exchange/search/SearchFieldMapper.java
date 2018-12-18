@@ -11,27 +11,13 @@ copy of the GNU General Public License along with the IFDM Suite. If not, see <h
  */
 package eu.europa.ec.fisheries.uvms.exchange.search;
 
-import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeHistoryListQuery;
-import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeListCriteriaPair;
-import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogStatusTypeType;
-import eu.europa.ec.fisheries.schema.exchange.v1.MessageDirection;
-import eu.europa.ec.fisheries.schema.exchange.v1.SearchField;
-import eu.europa.ec.fisheries.schema.exchange.v1.SortField;
-import eu.europa.ec.fisheries.schema.exchange.v1.Sorting;
-import eu.europa.ec.fisheries.schema.exchange.v1.TypeRefType;
+import java.util.*;
+import eu.europa.ec.fisheries.schema.exchange.v1.*;
 import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeSearchMapperException;
 import eu.europa.ec.fisheries.uvms.exchange.model.util.DateUtils;
 import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.text.ParseException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 /**
  **/
@@ -39,164 +25,6 @@ public class SearchFieldMapper {
 
     private static final Logger LOG = LoggerFactory.getLogger(SearchFieldMapper.class);
 
-    /**
-     * Creates a search SQL based on the search fields
-     *
-     * @param searchFields
-     * @param isDynamic
-     * @return
-     * @throws ParseException
-     */
-    public static String createSelectSearchSql(List<SearchValue> searchFields, boolean isDynamic, Sorting sorting) throws ParseException, ExchangeSearchMapperException {
-        StringBuilder selectBuffer = new StringBuilder();
-        selectBuffer.append("SELECT DISTINCT ")
-                .append(SearchTable.LOG.getTableAlias())
-                .append(" FROM ")
-                .append(SearchTable.LOG.getTableName())
-                .append(" ")
-                .append(SearchTable.LOG.getTableAlias())
-                .append(" ");
-        if (searchFields != null) {
-            selectBuffer.append(createSearchSql(searchFields, isDynamic));
-        }
-        getSortingString(sorting, selectBuffer);
-        LOG.debug("[ SQL: ] " + selectBuffer.toString());
-        return selectBuffer.toString();
-    }
-
-    private static void getSortingString(Sorting sorting, StringBuilder selectBuffer) throws ExchangeSearchMapperException {
-        if(sorting !=null && sorting.getSortBy()!=null ){
-            SortField sortField= sorting.getSortBy();
-            SortFieldMapper sortFieldMapper =null;
-            if(sortField!=null){
-                try {
-                    sortFieldMapper=  mapSortField(sortField);
-                } catch (ExchangeSearchMapperException e) {
-                    LOG.error("Error while mapping criteria",e);
-                    throw e;
-                }
-            }
-            String fieldName= sortFieldMapper.getFieldName();
-            String sortingDirection= "ASC";
-            if(sorting.isReversed()){
-                sortingDirection="DESC";
-            }
-            selectBuffer.append(" order by " + SearchTable.LOG.getTableAlias() + ".").append(fieldName).append(" ").append(sortingDirection);
-        }else {
-            selectBuffer.append(" order by " + SearchTable.LOG.getTableAlias() + ".updateTime desc ");
-        }
-    }
-
-    /**
-     * Creates a JPQL count query based on the search fields. This is used for
-     * when paginating lists
-     *
-     * @param searchFields
-     * @param isDynamic
-     * @return
-     * @throws ParseException
-     */
-    public static String createCountSearchSql(List<SearchValue> searchFields, boolean isDynamic) throws ParseException {
-        StringBuilder countBuffer = new StringBuilder();
-        countBuffer.append("SELECT COUNT(").append(SearchTable.LOG.getTableAlias()).append(") FROM ")
-                .append(SearchTable.LOG.getTableName())
-                .append(" ")
-                .append(SearchTable.LOG.getTableAlias())
-                .append(" ");
-        if (searchFields != null) {
-            countBuffer.append(createSearchSql(searchFields, isDynamic));
-        }
-        LOG.debug("[ COUNT SQL: ]" + countBuffer.toString());
-        return countBuffer.toString();
-    }
-
-    /**
-     * Created the complete search SQL with joins and sets the values based on
-     * the criterias
-     *
-     * @param criterias
-     * @param dynamic
-     * @return
-     * @throws ParseException
-     */
-    private static String createSearchSql(List<SearchValue> criterias, boolean dynamic) throws ParseException {
-
-        String OPERATOR = " OR ";
-        if (dynamic) {
-            OPERATOR = " AND ";
-        }
-
-        StringBuilder builder = new StringBuilder();
-        HashMap<ExchangeSearchField, List<SearchValue>> orderedValues = combineSearchFields(criterias);
-
-        if (!orderedValues.isEmpty()) {
-
-            builder.append("WHERE ");
-
-            boolean first = true;
-            for (Map.Entry<ExchangeSearchField, List<SearchValue>> criteria : orderedValues.entrySet()) {
-
-                if (first) {
-                    first = false;
-                } else {
-                    builder.append(OPERATOR);
-                }
-
-                if (criteria.getValue().size() == 1) {
-                    SearchValue searchValue = criteria.getValue().get(0);
-                    builder
-                            .append(" ( ")
-                            .append(buildTableAliasname(searchValue.getField()))
-                            .append(setParameter(searchValue))
-                         //   .append(" OR ").append(buildTableAliasname(searchValue.getField())).append(" IS NULL ")
-                            .append(" ) ");
-                } else if (criteria.getValue().size() > 1) {
-                    builder
-                            .append(" ( ")
-                            .append(buildTableAliasname(criteria.getKey())).append(" IN (:").append(criteria.getKey().getSQLReplacementToken()).append(") ")
-                           // .append(" OR ").append(buildTableAliasname(criteria.getKey())).append(" IS NULL ")
-                            .append(" ) ");
-                }
-            }
-        }
-
-        return builder.toString();
-    }
-
-    private static String setParameter(SearchValue entry) throws ParseException {
-        StringBuilder builder = new StringBuilder();
-        if (entry.getField().getClazz().isAssignableFrom(Date.class)) {
-            switch (entry.getField()) {
-                case FROM_DATE:
-                    builder.append(" >= ").append(":").append(entry.getField().getSQLReplacementToken());
-                    break;
-                case TO_DATE:
-                    builder.append(" <= ").append(":").append(entry.getField().getSQLReplacementToken());
-                    break;
-                default:
-                    builder.append(" = ").append(":").append(entry.getField().getSQLReplacementToken());
-                    break;
-            }
-        } else {
-            builder.append(" = ").append(":").append(entry.getField().getSQLReplacementToken());
-        }
-
-        return builder.toString();
-    }
-
-    /**
-     * Builds a table alias for the query based on the search field
-     * <p>
-     * EG [ theTableAlias.theColumnName ]
-     *
-     * @param field
-     * @return
-     */
-    private static String buildTableAliasname(ExchangeSearchField field) {
-        StringBuilder builder = new StringBuilder();
-        builder.append(field.getSearchTables().getTableAlias()).append(".").append(field.getFieldName());
-        return builder.toString();
-    }
 
     public static <T> T buildValueFromClassType(SearchValue entry, Class<T> valueType) {
         StringBuilder builder = new StringBuilder();

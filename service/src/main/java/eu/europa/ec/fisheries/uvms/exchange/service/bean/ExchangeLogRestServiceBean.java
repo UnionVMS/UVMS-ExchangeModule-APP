@@ -81,10 +81,20 @@ public class ExchangeLogRestServiceBean {
         paramsMap.put("AD", null);
         paramsMap.put("DATE_RECEIVED_TO", DateUtils.END_OF_TIME.toDate());
         paramsMap.put("DATE_RECEIVED_FROM", DateUtils.START_OF_TIME.toDate());
+        paramsMap.put("INCOMING", false);
+        paramsMap.put("OUTGOING", true);
 
         for (ExchangeListCriteriaPair criteria : criterias) {
             if ("DATE_RECEIVED_FROM".equals(criteria.getKey().value())) {
                 paramsMap.put("DATE_RECEIVED_FROM", DateUtil.parseToUTCDate(criteria.getValue()));
+            }
+            else if ("MESSAGE_DIRECTION".equals(criteria.getKey().value())) {
+                if ("OUTGOING".equals(criteria.getValue())){
+                    paramsMap.put("OUTGOING", false);
+                }
+                else if ("INCOMING".equals(criteria.getValue())){
+                    paramsMap.put("INCOMING", true);
+                }
             }
             else if ("DATE_RECEIVED_TO".equals(criteria.getKey().value())) {
                 paramsMap.put("DATE_RECEIVED_FROM", DateUtil.parseToUTCDate(criteria.getValue()));
@@ -133,24 +143,34 @@ public class ExchangeLogRestServiceBean {
     }
 
     private static String mapSortField(SortField key) {
-        switch (key) {
-            case SOURCE:
-                return "source";
-            case TYPE:
-                return "typeRefType";
-            case SENDER_RECEIVER:
-                return "senderReceiver";
-            case RULE:
-                return "fwdRule";
-            case RECEPIENT:
-                return "recipient";
-            case STATUS:
-                return "status";
-            case DATE_FORWARDED:
-                return "status";
-            default:
-                return "dateReceived";
+        String sortFields = "dateReceived";
+        if (key != null){
+            switch (key) {
+                case SOURCE:
+                    sortFields = "source";
+                    break;
+                case TYPE:
+                    sortFields = "typeRefType";
+                    break;
+                case SENDER_RECEIVER:
+                    sortFields = "senderReceiver";
+                    break;
+                case RULE:
+                    sortFields = "fwdRule";
+                    break;
+                case RECEPIENT:
+                    sortFields = "recipient";
+                    break;
+                case STATUS:
+                    sortFields = "status";
+                    break;
+                case DATE_FORWARDED:
+                    sortFields = "status";
+                    break;
+                default:
+                    sortFields = "dateReceived";
+            }
         }
-
+        return sortFields;
     }
 }

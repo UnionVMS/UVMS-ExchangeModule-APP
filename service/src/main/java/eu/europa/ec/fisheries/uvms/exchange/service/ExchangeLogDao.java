@@ -47,6 +47,7 @@ public class ExchangeLogDao extends AbstractDAO<ExchangeLog> {
         try {
             String queryString = em.createNamedQuery(ExchangeLog.LIST_EXCHANGE).unwrap(org.hibernate.Query.class).getQueryString();
             StringBuilder builder = new StringBuilder(queryString).append(" ORDER BY e.").append(sortingColumn).append(order ? " ASC" : " DESC");
+            log.debug(builder.toString());
             Query selectQuery = getEntityManager().createQuery(builder.toString());
             for (Map.Entry<String, Object> entry : queryParameters.entrySet()){
                 selectQuery.setParameter(entry.getKey(), entry.getValue());
