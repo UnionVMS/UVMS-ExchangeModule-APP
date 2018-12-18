@@ -14,14 +14,10 @@ package eu.europa.ec.fisheries.uvms.exchange.dao.bean;
 import javax.ejb.Stateless;
 import javax.persistence.NoResultException;
 import javax.persistence.PersistenceException;
-import javax.persistence.Query;
 import javax.persistence.TypedQuery;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-
 import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeHistoryListQuery;
 import eu.europa.ec.fisheries.schema.exchange.v1.TypeRefType;
 import eu.europa.ec.fisheries.uvms.exchange.constant.ExchangeConstants;
@@ -30,9 +26,6 @@ import eu.europa.ec.fisheries.uvms.exchange.dao.ExchangeLogDao;
 import eu.europa.ec.fisheries.uvms.exchange.entity.exchangelog.ExchangeLog;
 import eu.europa.ec.fisheries.uvms.exchange.entity.exchangelog.ExchangeLogStatus;
 import eu.europa.ec.fisheries.uvms.exchange.exception.ExchangeDaoException;
-import eu.europa.ec.fisheries.uvms.exchange.search.ExchangeSearchField;
-import eu.europa.ec.fisheries.uvms.exchange.search.SearchFieldMapper;
-import eu.europa.ec.fisheries.uvms.exchange.search.SearchValue;
 import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -70,44 +63,9 @@ public class ExchangeLogDaoBean extends Dao implements ExchangeLogDao {
     }
 
     @Override
-    public List<ExchangeLog> getExchangeLogListPaginated(Integer page, Integer listSize, String sql, List<SearchValue> searchKeyValues) throws ExchangeDaoException {
-        try {
-            LOG.debug("SQL QUERY IN LIST PAGINATED: " + sql);
-            TypedQuery<ExchangeLog> query = em.createQuery(sql, ExchangeLog.class);
-            HashMap<ExchangeSearchField, List<SearchValue>> orderedValues = SearchFieldMapper.combineSearchFields(searchKeyValues);
-            setQueryParameters(query, orderedValues);
-            query.setFirstResult(listSize * (page - 1));
-            query.setMaxResults(listSize);
-            return query.getResultList();
-        } catch (Exception e) {
-            throw new ExchangeDaoException("[ERROR] when getting list.");
-        }
-    }
-
-    @Override
-    public Long getExchangeLogListSearchCount(String countSql, List<SearchValue> searchKeyValues) throws ExchangeDaoException {
-        LOG.debug("SQL QUERY IN LIST COUNT: " + countSql);
-        TypedQuery<Long> query = em.createQuery(countSql, Long.class);
-        HashMap<ExchangeSearchField, List<SearchValue>> orderedValues = SearchFieldMapper.combineSearchFields(searchKeyValues);
-        setQueryParameters(query, orderedValues);
-        return query.getSingleResult();
-    }
-
-    @Override
-    public ExchangeLog getExchangeLogByGuid(String logGuid) throws ExchangeDaoException {
+    public ExchangeLog getExchangeLogByGuid(String logGuid) {
         return getExchangeLogByGuid(logGuid, null);
     }
-
-    private void setQueryParameters(Query query, HashMap<ExchangeSearchField, List<SearchValue>> orderedValues) {
-        for (Map.Entry<ExchangeSearchField, List<SearchValue>> criteria : orderedValues.entrySet()) {
-            if (criteria.getValue().size() > 1) {
-                query.setParameter(criteria.getKey().getSQLReplacementToken(), criteria.getValue());
-            } else {
-               query.setParameter(criteria.getKey().getSQLReplacementToken(), SearchFieldMapper.buildValueFromClassType(criteria.getValue().get(0), criteria.getKey().getClazz()));
-            }
-        }
-    }
-
 
     @Override
     public ExchangeLog createLog(ExchangeLog log) throws ExchangeDaoException {

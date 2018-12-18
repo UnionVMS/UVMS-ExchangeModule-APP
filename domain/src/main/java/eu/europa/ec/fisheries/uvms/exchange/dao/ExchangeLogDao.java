@@ -9,17 +9,16 @@ the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the impl
 FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details. You should have received a
 copy of the GNU General Public License along with the IFDM Suite. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package eu.europa.ec.fisheries.uvms.exchange.dao;
 
 import javax.ejb.Local;
 import java.util.List;
-
 import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeHistoryListQuery;
 import eu.europa.ec.fisheries.schema.exchange.v1.TypeRefType;
 import eu.europa.ec.fisheries.uvms.exchange.entity.exchangelog.ExchangeLog;
 import eu.europa.ec.fisheries.uvms.exchange.entity.exchangelog.ExchangeLogStatus;
 import eu.europa.ec.fisheries.uvms.exchange.exception.ExchangeDaoException;
-import eu.europa.ec.fisheries.uvms.exchange.search.SearchValue;
 
 /**
  **/
@@ -27,20 +26,10 @@ import eu.europa.ec.fisheries.uvms.exchange.search.SearchValue;
 public interface ExchangeLogDao {
 
     ExchangeLog createLog(ExchangeLog log) throws ExchangeDaoException;
-
-    List<ExchangeLog> getExchangeLogListPaginated(Integer page, Integer listSize, String sql, List<SearchValue> searchKeyValues) throws ExchangeDaoException;
-
-    Long getExchangeLogListSearchCount(String countSql, List<SearchValue> searchKeyValues) throws ExchangeDaoException;
-
     ExchangeLog getExchangeLogByGuid(String logGuid) throws ExchangeDaoException;
-
     ExchangeLog getExchangeLogByGuid(String logGuid, TypeRefType type) throws ExchangeDaoException;
-
 	List<ExchangeLog> getExchangeLogByTypesRefAndGuid(String typeRefGuid, List<TypeRefType> types) throws ExchangeDaoException;
-	
 	ExchangeLog updateLog(ExchangeLog exchangeLog) throws ExchangeDaoException;
-	
 	List<ExchangeLogStatus> getExchangeLogStatusHistory(String sql, ExchangeHistoryListQuery query) throws ExchangeDaoException;
-
 	List<ExchangeLog> getExchangeLogByRangeOfRefGuids(List<String> guids);
 }

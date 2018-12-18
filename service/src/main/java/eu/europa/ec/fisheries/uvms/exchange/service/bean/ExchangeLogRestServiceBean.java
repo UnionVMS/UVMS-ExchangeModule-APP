@@ -133,24 +133,34 @@ public class ExchangeLogRestServiceBean {
     }
 
     private static String mapSortField(SortField key) {
-        switch (key) {
-            case SOURCE:
-                return "source";
-            case TYPE:
-                return "typeRefType";
-            case SENDER_RECEIVER:
-                return "senderReceiver";
-            case RULE:
-                return "fwdRule";
-            case RECEPIENT:
-                return "recipient";
-            case STATUS:
-                return "status";
-            case DATE_FORWARDED:
-                return "status";
-            default:
-                return "dateReceived";
+        String sortFields = "dateReceived";
+        if (key != null){
+            switch (key) {
+                case SOURCE:
+                    sortFields = "source";
+                    break;
+                case TYPE:
+                    sortFields = "typeRefType";
+                    break;
+                case SENDER_RECEIVER:
+                    sortFields = "senderReceiver";
+                    break;
+                case RULE:
+                    sortFields = "fwdRule";
+                    break;
+                case RECEPIENT:
+                    sortFields = "recipient";
+                    break;
+                case STATUS:
+                    sortFields = "status";
+                    break;
+                case DATE_FORWARDED:
+                    sortFields = "status";
+                    break;
+                default:
+                    sortFields = "dateReceived";
+            }
         }
-
+        return sortFields;
     }
 }
