@@ -9,15 +9,15 @@ the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the impl
 FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details. You should have received a
 copy of the GNU General Public License along with the IFDM Suite. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package eu.europa.ec.fisheries.uvms.exchange.mapper;
 
+import java.util.ArrayList;
+import java.util.List;
 import eu.europa.ec.fisheries.schema.exchange.v1.*;
 import eu.europa.ec.fisheries.uvms.exchange.entity.exchangelog.ExchangeLog;
 import eu.europa.ec.fisheries.uvms.exchange.entity.exchangelog.ExchangeLogStatus;
 import org.slf4j.MDC;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class LogMapper {
 
@@ -62,7 +62,7 @@ public class LogMapper {
             username = "SYSTEM";
         }
 
-        entity.setOn(log.getOn());
+        entity.setOnValue(log.getOn());
         entity.setTodt(log.getTodt());
         entity.setTo(log.getTo());
         entity.setDf(log.getDf());
@@ -188,7 +188,7 @@ public class LogMapper {
         model.setDf(entity.getDf());
         model.setTodt(entity.getTodt());
         model.setTo(entity.getTo());
-        model.setOn(entity.getOn());
+        model.setOn(entity.getOnValue());
         model.setBusinessModuleExceptionMessage(entity.getBusinessError());
 
         if (entity.getTypeRefType() != null) {
