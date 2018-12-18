@@ -10,22 +10,27 @@
 
 package eu.europa.ec.fisheries.uvms.exchange.service.bean;
 
+import javax.annotation.PostConstruct;
 import javax.ejb.EJB;
 import javax.ejb.LocalBean;
 import javax.ejb.Stateless;
-
-import java.util.Set;
-
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 import eu.europa.ec.fisheries.schema.exchange.source.v1.GetLogListByQueryResponse;
-import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeListQuery;
-import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogType;
-import eu.europa.ec.fisheries.schema.exchange.v1.LogWithRawMsgAndType;
-import eu.europa.ec.fisheries.schema.exchange.v1.TypeRefType;
-import eu.europa.ec.fisheries.uvms.exchange.model.dto.ListResponseDto;
-import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelException;
+import eu.europa.ec.fisheries.schema.exchange.v1.*;
+import eu.europa.ec.fisheries.uvms.commons.date.DateUtils;
 import eu.europa.ec.fisheries.uvms.exchange.ExchangeLogModel;
+import eu.europa.ec.fisheries.uvms.exchange.entity.exchangelog.ExchangeLog;
+import eu.europa.ec.fisheries.uvms.exchange.mapper.LogMapper;
+import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelException;
+import eu.europa.ec.fisheries.uvms.exchange.service.ExchangeLogDao;
 import eu.europa.ec.fisheries.uvms.exchange.service.exception.ExchangeLogException;
+import eu.europa.ec.fisheries.uvms.movement.model.util.DateUtil;
 import lombok.extern.slf4j.Slf4j;
+import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 
 @Stateless
 @LocalBean
@@ -34,6 +39,16 @@ public class ExchangeLogRestServiceBean {
 
     @EJB
     private ExchangeLogModel exchangeLogModel;
+
+    @PersistenceContext(unitName = "exchangePU")
+    protected EntityManager em;
+
+    private ExchangeLogDao exchangeLogDao;
+
+    @PostConstruct
+    public void init(){
+        exchangeLogDao = new ExchangeLogDao(em);
+    }
 
     public ExchangeLogType getExchangeLogByGuid(String guid) throws ExchangeLogException {
         try {
@@ -44,29 +59,98 @@ public class ExchangeLogRestServiceBean {
         }
     }
 
-    public GetLogListByQueryResponse getExchangeLogList(ExchangeListQuery query) throws ExchangeLogException {
+    public GetLogListByQueryResponse getExchangeLogList(ExchangeListQuery query) {
         GetLogListByQueryResponse response = new GetLogListByQueryResponse();
-        try {
-            ListResponseDto exchangeLogList = exchangeLogModel.getExchangeLogListByQuery(query);
-            response.setCurrentPage(exchangeLogList.getCurrentPage());
-            response.setTotalNumberOfPages(exchangeLogList.getTotalNumberOfPages());
-            response.getExchangeLog().addAll(exchangeLogList.getExchangeLogList());
-            return response;
-        } catch (ExchangeModelException e) {
-            throw new ExchangeLogException("Couldn't get exchange log list.");
+
+
+        ExchangeListCriteria exchangeSearchCriteria = query.getExchangeSearchCriteria();
+
+        List<ExchangeListCriteriaPair> criterias = exchangeSearchCriteria.getCriterias();
+        HashMap<String, Object> paramsMap = new HashMap<>();
+
+        paramsMap.put("TYPEREFTYPE", null);
+        paramsMap.put("GUID", null);
+        paramsMap.put("TYPEREFGUID", null);
+        paramsMap.put("SENDER_RECEIVER", null);
+        paramsMap.put("STATUS", null);
+        paramsMap.put("SOURCE", null);
+        paramsMap.put("RECIPIENT", null);
+        paramsMap.put("DF", null);
+        paramsMap.put("ON", null);
+        paramsMap.put("TODT", null);
+        paramsMap.put("AD", null);
+        paramsMap.put("DATE_RECEIVED_TO", DateUtils.END_OF_TIME.toDate());
+        paramsMap.put("DATE_RECEIVED_FROM", DateUtils.START_OF_TIME.toDate());
+
+        for (ExchangeListCriteriaPair criteria : criterias) {
+            if ("DATE_RECEIVED_FROM".equals(criteria.getKey().value())) {
+                paramsMap.put("DATE_RECEIVED_FROM", DateUtil.parseToUTCDate(criteria.getValue()));
+            }
+            else if ("DATE_RECEIVED_TO".equals(criteria.getKey().value())) {
+                paramsMap.put("DATE_RECEIVED_FROM", DateUtil.parseToUTCDate(criteria.getValue()));
+            }
+            else if ("SOURCE".equals(criteria.getKey().value())){
+                paramsMap.put("SOURCE", criteria.getValue());
+            }
+            else if ("RECIPIENT".equals(criteria.getKey().value())){
+                paramsMap.put("RECIPIENT", criteria.getValue());
+            }
+            else if ("STATUS".equals(criteria.getKey().value())){
+                paramsMap.put("STATUS", criteria.getValue());
+            }
+            else if ("SENDER_RECEIVER".equals(criteria.getKey().value())){
+                paramsMap.put("GUID", criteria.getValue());
+                paramsMap.put("TYPEREFGUID", criteria.getValue());
+                paramsMap.put("SENDER_RECEIVER", criteria.getValue());
+            }
+            else if ("TYPE".equals(criteria.getKey().value())){
+                paramsMap.put("TYPEREFTYPE", criteria.getValue());
+            }
         }
+        ExchangeListPagination pagination = query.getPagination();
+        int page = pagination.getPage();
+        int listSize = pagination.getListSize();
+        Long count = exchangeLogDao.count(paramsMap);
+
+        String sortingField = mapSortField(query.getSorting().getSortBy());
+
+        List<ExchangeLog> list = exchangeLogDao.list(paramsMap, sortingField, query.getSorting().isReversed(),(page * listSize) - listSize, listSize -1);
+        List<ExchangeLogType> exchangeLogEntityList = new ArrayList<>();
+        if (isNotEmpty(list)){
+            for (ExchangeLog entity : list) {
+                exchangeLogEntityList.add(LogMapper.toModel(entity));
+            }
+        }
+        response.setCurrentPage(page);
+        int totalNumberOfPages = (count.intValue() / listSize);
+        response.setTotalNumberOfPages(totalNumberOfPages);
+        response.getExchangeLog().addAll(exchangeLogEntityList);
+        return response;
     }
 
     public LogWithRawMsgAndType getExchangeLogRawMessage(String guid) {
         return exchangeLogModel.getExchangeLogRawXmlByGuid(guid);
     }
 
-    public Set<ExchangeLogType> getExchangeLogsByRefUUID(String guid, TypeRefType type) throws ExchangeLogException {
-        try {
-            return exchangeLogModel.getExchangeLogByRefUUIDAndType(guid, type);
-        } catch (ExchangeModelException e) {
-            log.error("[ Error when getting exchange log by refUUID. {}] {}",guid, e.getMessage());
-            throw new ExchangeLogException("Error when getting exchange log by refUUID.");
+    private static String mapSortField(SortField key) {
+        switch (key) {
+            case SOURCE:
+                return "source";
+            case TYPE:
+                return "typeRefType";
+            case SENDER_RECEIVER:
+                return "senderReceiver";
+            case RULE:
+                return "fwdRule";
+            case RECEPIENT:
+                return "recipient";
+            case STATUS:
+                return "status";
+            case DATE_FORWARDED:
+                return "status";
+            default:
+                return "dateReceived";
         }
+
     }
 }
