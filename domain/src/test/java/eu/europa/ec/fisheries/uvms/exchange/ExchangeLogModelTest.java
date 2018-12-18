@@ -10,23 +10,14 @@ details. You should have received a copy of the GNU General Public License along
 */
 package eu.europa.ec.fisheries.uvms.exchange;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-
 import java.util.List;
 import java.util.Set;
-
-import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeListCriteria;
-import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeListPagination;
-import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeListQuery;
 import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogType;
 import eu.europa.ec.fisheries.schema.exchange.v1.TypeRefType;
 import eu.europa.ec.fisheries.uvms.exchange.bean.ExchangeLogModelBean;
 import eu.europa.ec.fisheries.uvms.exchange.dao.ExchangeLogDao;
 import eu.europa.ec.fisheries.uvms.exchange.entity.exchangelog.ExchangeLog;
-import eu.europa.ec.fisheries.uvms.exchange.model.dto.ListResponseDto;
 import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelException;
-import lombok.SneakyThrows;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -34,6 +25,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.runners.MockitoJUnitRunner;
+import static org.junit.Assert.assertFalse;
 
 /**
  * Created by kovian on 11/12/2017.
@@ -66,36 +58,6 @@ public class ExchangeLogModelTest {
                 .thenReturn(logs);
         Set<ExchangeLogType> exchangeLogByRefUUIDAndType = exchangeLogModel.getExchangeLogByRefUUIDAndType("refUUID", TypeRefType.FA_QUERY);
         assertFalse(exchangeLogByRefUUIDAndType.isEmpty());
-    }
-
-    @Test
-    @SneakyThrows
-    public void testDataEnrichment(){
-
-        Mockito.when(logDao.getExchangeLogListSearchCount(Mockito.anyString(), Mockito.anyList()))
-                .thenReturn(100L);
-        Mockito.when(logDao.getExchangeLogListPaginated(Mockito.any(Integer.class), Mockito.any(Integer.class), Mockito.anyString(),Mockito.anyList()))
-                .thenReturn(logs);
-        Mockito.when(logDao.getExchangeLogByRangeOfRefGuids(Mockito.anyList()))
-                .thenReturn(refLogs);
-
-        ExchangeListQuery query = new ExchangeListQuery();
-        ExchangeListPagination pagin = new ExchangeListPagination();
-        ExchangeListCriteria exchCrit = new ExchangeListCriteria();
-        query.setPagination(pagin);
-        pagin.setListSize(10);
-        query.setExchangeSearchCriteria(exchCrit);
-
-        ListResponseDto exchangeLogListByQuery = exchangeLogModel.getExchangeLogListByQuery(query);
-
-        List<ExchangeLogType> exchangeLogList = exchangeLogListByQuery.getExchangeLogList();
-        ExchangeLogType exchangeLogType1 = exchangeLogList.get(0);
-        ExchangeLogType exchangeLogType2 = exchangeLogList.get(1);
-
-        assertTrue(exchangeLogType1.getRelatedLogData().isEmpty());
-        assertTrue(!exchangeLogType2.getRelatedLogData().isEmpty());
-
-        System.out.println("Done");
     }
 
 }
