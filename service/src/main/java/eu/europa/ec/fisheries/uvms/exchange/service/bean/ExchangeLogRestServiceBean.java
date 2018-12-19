@@ -133,7 +133,7 @@ public class ExchangeLogRestServiceBean {
         }
         response.setCurrentPage(page);
         int totalNumberOfPages = (count.intValue() / listSize);
-        response.setTotalNumberOfPages(totalNumberOfPages);
+        response.setTotalNumberOfPages(totalNumberOfPages + 1);
         response.getExchangeLog().addAll(exchangeLogEntityList);
         return response;
     }
