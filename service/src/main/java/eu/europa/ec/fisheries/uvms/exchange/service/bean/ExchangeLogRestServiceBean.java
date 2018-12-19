@@ -30,6 +30,7 @@ import eu.europa.ec.fisheries.uvms.exchange.service.ExchangeLogDao;
 import eu.europa.ec.fisheries.uvms.exchange.service.exception.ExchangeLogException;
 import eu.europa.ec.fisheries.uvms.movement.model.util.DateUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections.CollectionUtils;
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 
 @Stateless
@@ -133,7 +134,13 @@ public class ExchangeLogRestServiceBean {
         }
         response.setCurrentPage(page);
         int totalNumberOfPages = (count.intValue() / listSize);
-        response.setTotalNumberOfPages(totalNumberOfPages + 1);
+        if (CollectionUtils.isNotEmpty(exchangeLogEntityList)){
+            response.setTotalNumberOfPages(totalNumberOfPages + 1);
+        }
+        else {
+            response.setTotalNumberOfPages(totalNumberOfPages);
+        }
+
         response.getExchangeLog().addAll(exchangeLogEntityList);
         return response;
     }
