@@ -70,7 +70,8 @@ import static eu.europa.ec.fisheries.uvms.exchange.entity.exchangelog.ExchangeLo
 @ToString(exclude = "statusHistory")
 public class ExchangeLog implements Serializable {
 
-	public static final String LIST_EXCHANGE = "exchange.list";
+    public static final String LOG_BY_TYPE_RANGE_OF_REF_GUIDS = "Log.findByRangeOfRefGuids";
+    public static final String LIST_EXCHANGE = "exchange.list";
 	public static final String COUNT_LIST_EXCHANGE = "exchange.countlist";
 
     @Id

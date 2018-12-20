@@ -60,7 +60,7 @@ public class ExchangeLogMapper {
     	switch(log.getType()) {
             case RECEIVE_MOVEMENT:
                 dto.setType(LogTypeLabel.RECEIVED_MOVEMENT.toString());
-                dto.setSource(((ReceiveMovementType)log).getSource());
+                dto.setSource(log.getSource());
                 dto.setRecipient(((ReceiveMovementType)log).getRecipient());
                 break;
             case SEND_MOVEMENT:
