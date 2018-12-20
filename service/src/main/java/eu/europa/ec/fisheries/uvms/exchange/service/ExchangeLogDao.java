@@ -55,6 +55,7 @@ public class ExchangeLogDao extends AbstractDAO<ExchangeLog> {
             selectQuery.setFirstResult(firstResult);
             selectQuery.setMaxResults(maxResult);
             resultList = selectQuery.getResultList();
+
         }
         catch (Exception e){
             log.error(e.getLocalizedMessage(),e);

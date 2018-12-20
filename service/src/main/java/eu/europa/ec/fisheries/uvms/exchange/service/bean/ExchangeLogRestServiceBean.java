@@ -16,6 +16,7 @@ import javax.ejb.LocalBean;
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
+import javax.persistence.TypedQuery;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -31,6 +32,7 @@ import eu.europa.ec.fisheries.uvms.exchange.service.exception.ExchangeLogExcepti
 import eu.europa.ec.fisheries.uvms.movement.model.util.DateUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 
 @Stateless
@@ -127,11 +129,18 @@ public class ExchangeLogRestServiceBean {
 
         List<ExchangeLog> list = exchangeLogDao.list(paramsMap, sortingField, query.getSorting().isReversed(),(page * listSize) - listSize, listSize -1);
         List<ExchangeLogType> exchangeLogEntityList = new ArrayList<>();
+
+        enrichDtosWithRelatedLogsInfo(exchangeLogEntityList);
+
         if (isNotEmpty(list)){
             for (ExchangeLog entity : list) {
                 exchangeLogEntityList.add(LogMapper.toModel(entity));
             }
         }
+
+        // FIXME UGLY
+        enrichDtosWithRelatedLogsInfo(exchangeLogEntityList);
+
         response.setCurrentPage(page);
         int totalNumberOfPages = (count.intValue() / listSize);
         if (CollectionUtils.isNotEmpty(exchangeLogEntityList)){
@@ -179,5 +188,34 @@ public class ExchangeLogRestServiceBean {
             }
         }
         return sortFields;
+    }
+
+    private void enrichDtosWithRelatedLogsInfo(List< ExchangeLogType > exchangeLogList) {
+        List<String> guids = new ArrayList<>();
+        for (ExchangeLogType log : exchangeLogList) {
+            guids.add(log.getGuid());
+        }
+        List<ExchangeLog> relatedLogs = getExchangeLogByRangeOfRefGuids(guids);
+        if (CollectionUtils.isNotEmpty(relatedLogs)) {
+            for (ExchangeLog logEntity : relatedLogs) {
+                RelatedLogInfo refLogInfo = new RelatedLogInfo();
+                refLogInfo.setGuid(logEntity.getGuid());
+                refLogInfo.setType(logEntity.getTypeRefType().toString());
+                for (ExchangeLogType logType : exchangeLogList) {
+                    if (StringUtils.equals(logEntity.getTypeRefGuid(), logType.getGuid())) {
+                        logType.getRelatedLogData().add(refLogInfo);
+                    }
+                }
+            }
+        }
+    }
+
+    private List<ExchangeLog> getExchangeLogByRangeOfRefGuids(List<String> logGuids) {
+        if(CollectionUtils.isEmpty(logGuids)){
+            return new ArrayList<>();
+        }
+        TypedQuery<ExchangeLog> query = em.createNamedQuery(ExchangeLog.LOG_BY_TYPE_RANGE_OF_REF_GUIDS, ExchangeLog.class);
+        query.setParameter("refGuids", logGuids);
+        return query.getResultList();
     }
 }
