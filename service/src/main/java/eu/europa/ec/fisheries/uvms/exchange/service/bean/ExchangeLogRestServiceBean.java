@@ -82,8 +82,8 @@ public class ExchangeLogRestServiceBean {
         paramsMap.put("ON", null);
         paramsMap.put("TODT", null);
         paramsMap.put("AD", null);
-        paramsMap.put("DATE_RECEIVED_TO", DateUtils.END_OF_TIME.toDate());
         paramsMap.put("DATE_RECEIVED_FROM", DateUtils.START_OF_TIME.toDate());
+        paramsMap.put("DATE_RECEIVED_TO", DateUtils.END_OF_TIME.toDate());
         paramsMap.put("INCOMING", false);
         paramsMap.put("OUTGOING", true);
 
@@ -100,7 +100,7 @@ public class ExchangeLogRestServiceBean {
                 }
             }
             else if ("DATE_RECEIVED_TO".equals(criteria.getKey().value())) {
-                paramsMap.put("DATE_RECEIVED_FROM", DateUtil.parseToUTCDate(criteria.getValue()));
+                paramsMap.put("DATE_RECEIVED_TO", DateUtil.parseToUTCDate(criteria.getValue()));
             }
             else if ("SOURCE".equals(criteria.getKey().value())){
                 paramsMap.put("SOURCE", criteria.getValue());
