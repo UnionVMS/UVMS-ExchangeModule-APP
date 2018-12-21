@@ -9,12 +9,12 @@
 
     <groupId>eu.europa.ec.fisheries.uvms.exchange</groupId>
     <artifactId>exchange</artifactId>
-    <version>4.0.37-UVMS</version>
+    <version>4.0.38-UVMS-SNAPSHOT</version>
     <packaging>pom</packaging>
     
     <scm>
         <connection>${scm.connection}</connection>
-        <tag>exchange-4.0.37-UVMS</tag>
+        <tag>exchange-4.0.32</tag>
     </scm>
 
     <properties>
