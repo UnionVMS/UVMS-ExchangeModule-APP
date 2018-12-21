@@ -20,9 +20,12 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import eu.europa.ec.fisheries.schema.exchange.module.v1.ExchangeBaseRequest;
+import eu.europa.ec.fisheries.schema.exchange.movement.v1.MovementRefType;
 import eu.europa.ec.fisheries.schema.exchange.v1.*;
 import eu.europa.ec.fisheries.uvms.exchange.ExchangeLogModel;
 import eu.europa.ec.fisheries.uvms.exchange.UnsentModel;
+import eu.europa.ec.fisheries.uvms.exchange.dao.ExchangeLogDao;
+import eu.europa.ec.fisheries.uvms.exchange.entity.exchangelog.ExchangeLog;
 import eu.europa.ec.fisheries.uvms.exchange.message.constants.MessageQueue;
 import eu.europa.ec.fisheries.uvms.exchange.message.consumer.ExchangeConsumer;
 import eu.europa.ec.fisheries.uvms.exchange.message.exception.ExchangeMessageException;
@@ -44,9 +47,6 @@ public class ExchangeLogServiceBean implements ExchangeLogService {
     private ExchangeMessageProducer producer;
 
     @EJB
-    private ExchangeConsumer consumer;
-
-    @EJB
     private ExchangeEventLogCache logCache;
 
     @EJB
@@ -65,6 +65,9 @@ public class ExchangeLogServiceBean implements ExchangeLogService {
 
     @EJB
     private UnsentModel unsentModel;
+
+    @EJB
+    private ExchangeLogDao exchangeLogDao;
 
     @Override
     public ExchangeLogType logAndCache(ExchangeLogType log, String pluginMessageId, String username) throws ExchangeLogException {
@@ -242,6 +245,13 @@ public class ExchangeLogServiceBean implements ExchangeLogService {
             log.error("Couldn't add message to unsent list {} {}",unsentMessageId,e);
             throw new ExchangeLogException("Couldn't add message to unsent list");
         }
+    }
+
+    @Override
+    public void updateTypeRef(ExchangeLogType exchangeLogStatusType, MovementRefType movementRefType) throws ExchangeModelException {
+        ExchangeLog exchangeLog = exchangeLogDao.getExchangeLogByGuid(exchangeLogStatusType.getGuid());
+        exchangeLog.setTypeRefType(TypeRefType.valueOf(movementRefType.getType().value()));
+        exchangeLog.setTypeRefGuid(movementRefType.getMovementRefGuid());
     }
 
     @Override

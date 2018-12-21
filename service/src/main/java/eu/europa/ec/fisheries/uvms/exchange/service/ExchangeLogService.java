@@ -16,6 +16,7 @@ import java.util.Date;
 import java.util.List;
 
 import eu.europa.ec.fisheries.schema.exchange.module.v1.ExchangeBaseRequest;
+import eu.europa.ec.fisheries.schema.exchange.movement.v1.MovementRefType;
 import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogStatusType;
 import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogStatusTypeType;
 import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogType;
@@ -25,6 +26,7 @@ import eu.europa.ec.fisheries.schema.exchange.v1.PollStatus;
 import eu.europa.ec.fisheries.schema.exchange.v1.TypeRefType;
 import eu.europa.ec.fisheries.schema.exchange.v1.UnsentMessageType;
 import eu.europa.ec.fisheries.schema.exchange.v1.UnsentMessageTypeProperty;
+import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelException;
 import eu.europa.ec.fisheries.uvms.exchange.service.exception.ExchangeLogException;
 
 @Local
@@ -79,4 +81,5 @@ public interface ExchangeLogService {
 
     void removeUnsentMessage(String messageId, String username) throws ExchangeLogException;
 
+    void updateTypeRef(ExchangeLogType updatedLog, MovementRefType movementRefType) throws ExchangeModelException;
 }
