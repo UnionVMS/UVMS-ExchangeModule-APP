@@ -25,6 +25,7 @@ import javax.jms.JMSException;
 import javax.jms.TextMessage;
 
 import eu.europa.ec.fisheries.uvms.exchange.constant.ExchangeConstants;
+import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelException;
 import org.apache.commons.collections.CollectionUtils;
 import eu.europa.ec.fisheries.schema.exchange.common.v1.AcknowledgeType;
 import eu.europa.ec.fisheries.schema.exchange.common.v1.CommandType;
@@ -437,11 +438,9 @@ public class ExchangeEventOutgoingServiceBean implements ExchangeEventOutgoingSe
                 statusType = ExchangeLogStatusTypeType.SUCCESSFUL;
             }
             ExchangeLogType updatedLog = exchangeLogService.updateStatus(movementRefType.getAckResponseMessageID(), statusType);
-            updatedLog.getTypeRef().setRefGuid(movementRefType.getMovementRefGuid());
-            updatedLog.setTypeRefType(TypeRefType.valueOf(movementRefType.getType().value()));
+            exchangeLogService.updateTypeRef(updatedLog, movementRefType);
 
-
-        } catch (ExchangeModelMarshallException | ExchangeLogException e) {
+        } catch (ExchangeLogException | ExchangeModelException e) {
             log.error("Could not handle processed movement", e);
             throw new IllegalArgumentException("Could not handle processed movement", e);
         }
