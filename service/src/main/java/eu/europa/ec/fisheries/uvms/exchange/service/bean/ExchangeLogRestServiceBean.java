@@ -126,9 +126,15 @@ public class ExchangeLogRestServiceBean {
         int listSize = pagination.getListSize();
         Long count = exchangeLogDao.count(paramsMap);
 
-        String sortingField = mapSortField(query.getSorting().getSortBy());
+        String sortingField = "dateReceived";
+        boolean isReversed = false;
+        Sorting sorting = query.getSorting();
+        if (sorting != null){
+            sortingField = mapSortField(query.getSorting().getSortBy());
+            isReversed = sorting.isReversed();
+        }
 
-        List<ExchangeLog> list = exchangeLogDao.list(paramsMap, sortingField, query.getSorting().isReversed(),(page * listSize) - listSize, listSize -1);
+        List<ExchangeLog> list = exchangeLogDao.list(paramsMap, sortingField, isReversed,(page * listSize) - listSize, listSize -1);
         List<ExchangeLogType> exchangeLogEntityList = new ArrayList<>();
         if (isNotEmpty(list)){
             for (ExchangeLog entity : list) {
