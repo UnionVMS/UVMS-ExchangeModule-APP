@@ -16,7 +16,6 @@ import javax.ejb.LocalBean;
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
-import javax.persistence.TypedQuery;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -32,7 +31,6 @@ import eu.europa.ec.fisheries.uvms.exchange.service.exception.ExchangeLogExcepti
 import eu.europa.ec.fisheries.uvms.movement.model.util.DateUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 
 @Stateless
@@ -82,44 +80,47 @@ public class ExchangeLogRestServiceBean {
         paramsMap.put("ON", null);
         paramsMap.put("TODT", null);
         paramsMap.put("AD", null);
-        paramsMap.put("DATE_RECEIVED_FROM", DateUtils.START_OF_TIME.toDate());
         paramsMap.put("DATE_RECEIVED_TO", DateUtils.END_OF_TIME.toDate());
+        paramsMap.put("DATE_RECEIVED_FROM", DateUtils.START_OF_TIME.toDate());
         paramsMap.put("INCOMING", false);
         paramsMap.put("OUTGOING", true);
 
-        for (ExchangeListCriteriaPair criteria : criterias) {
-            if ("DATE_RECEIVED_FROM".equals(criteria.getKey().value())) {
-                paramsMap.put("DATE_RECEIVED_FROM", DateUtil.parseToUTCDate(criteria.getValue()));
-            }
-            else if ("MESSAGE_DIRECTION".equals(criteria.getKey().value())) {
-                if ("OUTGOING".equals(criteria.getValue())){
-                    paramsMap.put("OUTGOING", false);
+        if (CollectionUtils.isNotEmpty(criterias)){
+            for (ExchangeListCriteriaPair criteria : criterias) {
+                if ("DATE_RECEIVED_FROM".equals(criteria.getKey().value())) {
+                    paramsMap.put("DATE_RECEIVED_FROM", DateUtil.parseToUTCDate(criteria.getValue()));
                 }
-                else if ("INCOMING".equals(criteria.getValue())){
-                    paramsMap.put("INCOMING", true);
+                else if ("MESSAGE_DIRECTION".equals(criteria.getKey().value())) {
+                    if ("OUTGOING".equals(criteria.getValue())){
+                        paramsMap.put("OUTGOING", false);
+                    }
+                    else if ("INCOMING".equals(criteria.getValue())){
+                        paramsMap.put("INCOMING", true);
+                    }
                 }
-            }
-            else if ("DATE_RECEIVED_TO".equals(criteria.getKey().value())) {
-                paramsMap.put("DATE_RECEIVED_TO", DateUtil.parseToUTCDate(criteria.getValue()));
-            }
-            else if ("SOURCE".equals(criteria.getKey().value())){
-                paramsMap.put("SOURCE", criteria.getValue());
-            }
-            else if ("RECIPIENT".equals(criteria.getKey().value())){
-                paramsMap.put("RECIPIENT", criteria.getValue());
-            }
-            else if ("STATUS".equals(criteria.getKey().value())){
-                paramsMap.put("STATUS", criteria.getValue());
-            }
-            else if ("SENDER_RECEIVER".equals(criteria.getKey().value())){
-                paramsMap.put("GUID", criteria.getValue());
-                paramsMap.put("TYPEREFGUID", criteria.getValue());
-                paramsMap.put("SENDER_RECEIVER", criteria.getValue());
-            }
-            else if ("TYPE".equals(criteria.getKey().value())){
-                paramsMap.put("TYPEREFTYPE", criteria.getValue());
+                else if ("DATE_RECEIVED_TO".equals(criteria.getKey().value())) {
+                    paramsMap.put("DATE_RECEIVED_FROM", DateUtil.parseToUTCDate(criteria.getValue()));
+                }
+                else if ("SOURCE".equals(criteria.getKey().value())){
+                    paramsMap.put("SOURCE", criteria.getValue());
+                }
+                else if ("RECIPIENT".equals(criteria.getKey().value())){
+                    paramsMap.put("RECIPIENT", criteria.getValue());
+                }
+                else if ("STATUS".equals(criteria.getKey().value())){
+                    paramsMap.put("STATUS", criteria.getValue());
+                }
+                else if ("SENDER_RECEIVER".equals(criteria.getKey().value())){
+                    paramsMap.put("GUID", criteria.getValue());
+                    paramsMap.put("TYPEREFGUID", criteria.getValue());
+                    paramsMap.put("SENDER_RECEIVER", criteria.getValue());
+                }
+                else if ("TYPE".equals(criteria.getKey().value())){
+                    paramsMap.put("TYPEREFTYPE", criteria.getValue());
+                }
             }
         }
+
         ExchangeListPagination pagination = query.getPagination();
         int page = pagination.getPage();
         int listSize = pagination.getListSize();
@@ -129,27 +130,14 @@ public class ExchangeLogRestServiceBean {
 
         List<ExchangeLog> list = exchangeLogDao.list(paramsMap, sortingField, query.getSorting().isReversed(),(page * listSize) - listSize, listSize -1);
         List<ExchangeLogType> exchangeLogEntityList = new ArrayList<>();
-
-        enrichDtosWithRelatedLogsInfo(exchangeLogEntityList);
-
         if (isNotEmpty(list)){
             for (ExchangeLog entity : list) {
                 exchangeLogEntityList.add(LogMapper.toModel(entity));
             }
         }
-
-        // FIXME UGLY
-        enrichDtosWithRelatedLogsInfo(exchangeLogEntityList);
-
         response.setCurrentPage(page);
         int totalNumberOfPages = (count.intValue() / listSize);
-        if (CollectionUtils.isNotEmpty(exchangeLogEntityList)){
-            response.setTotalNumberOfPages(totalNumberOfPages + 1);
-        }
-        else {
-            response.setTotalNumberOfPages(totalNumberOfPages);
-        }
-
+        response.setTotalNumberOfPages(totalNumberOfPages);
         response.getExchangeLog().addAll(exchangeLogEntityList);
         return response;
     }
@@ -188,34 +176,5 @@ public class ExchangeLogRestServiceBean {
             }
         }
         return sortFields;
-    }
-
-    private void enrichDtosWithRelatedLogsInfo(List< ExchangeLogType > exchangeLogList) {
-        List<String> guids = new ArrayList<>();
-        for (ExchangeLogType log : exchangeLogList) {
-            guids.add(log.getGuid());
-        }
-        List<ExchangeLog> relatedLogs = getExchangeLogByRangeOfRefGuids(guids);
-        if (CollectionUtils.isNotEmpty(relatedLogs)) {
-            for (ExchangeLog logEntity : relatedLogs) {
-                RelatedLogInfo refLogInfo = new RelatedLogInfo();
-                refLogInfo.setGuid(logEntity.getGuid());
-                refLogInfo.setType(logEntity.getTypeRefType().toString());
-                for (ExchangeLogType logType : exchangeLogList) {
-                    if (StringUtils.equals(logEntity.getTypeRefGuid(), logType.getGuid())) {
-                        logType.getRelatedLogData().add(refLogInfo);
-                    }
-                }
-            }
-        }
-    }
-
-    private List<ExchangeLog> getExchangeLogByRangeOfRefGuids(List<String> logGuids) {
-        if(CollectionUtils.isEmpty(logGuids)){
-            return new ArrayList<>();
-        }
-        TypedQuery<ExchangeLog> query = em.createNamedQuery(ExchangeLog.LOG_BY_TYPE_RANGE_OF_REF_GUIDS, ExchangeLog.class);
-        query.setParameter("refGuids", logGuids);
-        return query.getResultList();
     }
 }
