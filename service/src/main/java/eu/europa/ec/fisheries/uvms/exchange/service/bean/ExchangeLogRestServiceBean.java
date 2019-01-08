@@ -67,8 +67,8 @@ public class ExchangeLogRestServiceBean {
     public GetLogListByQueryResponse getExchangeLogList(ExchangeListQuery query) {
         GetLogListByQueryResponse response = new GetLogListByQueryResponse();
         ExchangeListCriteria exchangeSearchCriteria = query.getExchangeSearchCriteria();
-        List<ExchangeListCriteriaPair> criterias = exchangeSearchCriteria.getCriterias();
-        HashMap<String, Object> paramsMap = initParamsMap(criterias);
+        List<ExchangeListCriteriaPair> criteria = exchangeSearchCriteria.getCriterias();
+        HashMap<String, Object> paramsMap = initParamsMap(criteria);
         ExchangeListPagination pagination = query.getPagination();
         int page = pagination.getPage();
         int listSize = pagination.getListSize();
