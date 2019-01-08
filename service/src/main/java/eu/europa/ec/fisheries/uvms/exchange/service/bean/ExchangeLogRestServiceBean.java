@@ -62,8 +62,6 @@ public class ExchangeLogRestServiceBean {
 
     public GetLogListByQueryResponse getExchangeLogList(ExchangeListQuery query) {
         GetLogListByQueryResponse response = new GetLogListByQueryResponse();
-
-
         ExchangeListCriteria exchangeSearchCriteria = query.getExchangeSearchCriteria();
 
         List<ExchangeListCriteriaPair> criterias = exchangeSearchCriteria.getCriterias();
@@ -99,7 +97,7 @@ public class ExchangeLogRestServiceBean {
                     }
                 }
                 else if ("DATE_RECEIVED_TO".equals(criteria.getKey().value())) {
-                    paramsMap.put("DATE_RECEIVED_FROM", DateUtil.parseToUTCDate(criteria.getValue()));
+                    paramsMap.put("DATE_RECEIVED_TO", DateUtil.parseToUTCDate(criteria.getValue()));
                 }
                 else if ("SOURCE".equals(criteria.getKey().value())){
                     paramsMap.put("SOURCE", criteria.getValue());
@@ -126,15 +124,16 @@ public class ExchangeLogRestServiceBean {
         int listSize = pagination.getListSize();
         Long count = exchangeLogDao.count(paramsMap);
 
-        String sortingField = "dateReceived";
-        boolean isReversed = false;
         Sorting sorting = query.getSorting();
+        boolean reversed = false;
+        SortField sortBy = SortField.DATE_RECEIVED;
         if (sorting != null){
-            sortingField = mapSortField(query.getSorting().getSortBy());
-            isReversed = sorting.isReversed();
+            reversed = sorting.isReversed();
+            sortBy = sorting.getSortBy();
         }
+        String sortingField = mapSortField(sortBy);
 
-        List<ExchangeLog> list = exchangeLogDao.list(paramsMap, sortingField, isReversed,(page * listSize) - listSize, listSize -1);
+        List<ExchangeLog> list = exchangeLogDao.list(paramsMap, sortingField, reversed,(page * listSize) - listSize, listSize);
         List<ExchangeLogType> exchangeLogEntityList = new ArrayList<>();
         if (isNotEmpty(list)){
             for (ExchangeLog entity : list) {
@@ -143,6 +142,9 @@ public class ExchangeLogRestServiceBean {
         }
         response.setCurrentPage(page);
         int totalNumberOfPages = (count.intValue() / listSize);
+        if (totalNumberOfPages == 0 && CollectionUtils.isNotEmpty(exchangeLogEntityList)){
+            totalNumberOfPages = 1;
+        }
         response.setTotalNumberOfPages(totalNumberOfPages);
         response.getExchangeLog().addAll(exchangeLogEntityList);
         return response;
