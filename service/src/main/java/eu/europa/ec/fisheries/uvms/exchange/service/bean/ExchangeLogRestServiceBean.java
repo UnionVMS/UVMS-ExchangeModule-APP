@@ -60,13 +60,48 @@ public class ExchangeLogRestServiceBean {
         }
     }
 
+    public LogWithRawMsgAndType getExchangeLogRawMessage(String guid) {
+        return exchangeLogModel.getExchangeLogRawXmlByGuid(guid);
+    }
+
     public GetLogListByQueryResponse getExchangeLogList(ExchangeListQuery query) {
         GetLogListByQueryResponse response = new GetLogListByQueryResponse();
-
-
         ExchangeListCriteria exchangeSearchCriteria = query.getExchangeSearchCriteria();
+        List<ExchangeListCriteriaPair> criteria = exchangeSearchCriteria.getCriterias();
+        HashMap<String, Object> paramsMap = initParamsMap(criteria);
+        ExchangeListPagination pagination = query.getPagination();
+        int page = pagination.getPage();
+        int listSize = pagination.getListSize();
+        Long count = exchangeLogDao.count(paramsMap);
+        String sortingField = mapSortField(query);
+        boolean isReversed = mapReversedField(query);
+        List<ExchangeLog> list = exchangeLogDao.list(paramsMap, sortingField, isReversed,(page * listSize) - listSize, listSize);
+        List<ExchangeLogType> exchangeLogEntityList = new ArrayList<>();
+        if (isNotEmpty(list)){
+            for (ExchangeLog entity : list) {
+                exchangeLogEntityList.add(LogMapper.toModel(entity));
+            }
+        }
+        response.setCurrentPage(page);
+        int totalNumberOfPages = (count.intValue() / listSize);
+        if (totalNumberOfPages == 0 && CollectionUtils.isNotEmpty(exchangeLogEntityList)){
+            totalNumberOfPages = 1;
+        }
+        response.setTotalNumberOfPages(totalNumberOfPages);
+        response.getExchangeLog().addAll(exchangeLogEntityList);
+        return response;
+    }
 
-        List<ExchangeListCriteriaPair> criterias = exchangeSearchCriteria.getCriterias();
+    private boolean mapReversedField(ExchangeListQuery query) {
+        boolean isReversed = false;
+        Sorting sorting = query.getSorting();
+        if (sorting != null){
+            isReversed = sorting.isReversed();
+        }
+        return isReversed;
+    }
+
+    private HashMap<String, Object> initParamsMap(List<ExchangeListCriteriaPair> criteria) {
         HashMap<String, Object> paramsMap = new HashMap<>();
 
         paramsMap.put("TYPEREFTYPE", null);
@@ -85,76 +120,52 @@ public class ExchangeLogRestServiceBean {
         paramsMap.put("INCOMING", false);
         paramsMap.put("OUTGOING", true);
 
-        if (CollectionUtils.isNotEmpty(criterias)){
-            for (ExchangeListCriteriaPair criteria : criterias) {
-                if ("DATE_RECEIVED_FROM".equals(criteria.getKey().value())) {
-                    paramsMap.put("DATE_RECEIVED_FROM", DateUtil.parseToUTCDate(criteria.getValue()));
+        if (CollectionUtils.isNotEmpty(criteria)){
+            for (ExchangeListCriteriaPair criterion : criteria) {
+                if ("DATE_RECEIVED_FROM".equals(criterion.getKey().value())) {
+                    paramsMap.put("DATE_RECEIVED_FROM", DateUtil.parseToUTCDate(criterion.getValue()));
                 }
-                else if ("MESSAGE_DIRECTION".equals(criteria.getKey().value())) {
-                    if ("OUTGOING".equals(criteria.getValue())){
+                else if ("MESSAGE_DIRECTION".equals(criterion.getKey().value())) {
+                    if ("OUTGOING".equals(criterion.getValue())){
                         paramsMap.put("OUTGOING", false);
                     }
-                    else if ("INCOMING".equals(criteria.getValue())){
+                    else if ("INCOMING".equals(criterion.getValue())){
                         paramsMap.put("INCOMING", true);
                     }
                 }
-                else if ("DATE_RECEIVED_TO".equals(criteria.getKey().value())) {
-                    paramsMap.put("DATE_RECEIVED_FROM", DateUtil.parseToUTCDate(criteria.getValue()));
+                else if ("DATE_RECEIVED_TO".equals(criterion.getKey().value())) {
+                    paramsMap.put("DATE_RECEIVED_TO", DateUtil.parseToUTCDate(criterion.getValue()));
                 }
-                else if ("SOURCE".equals(criteria.getKey().value())){
-                    paramsMap.put("SOURCE", criteria.getValue());
+                else if ("SOURCE".equals(criterion.getKey().value())){
+                    paramsMap.put("SOURCE", criterion.getValue());
                 }
-                else if ("RECIPIENT".equals(criteria.getKey().value())){
-                    paramsMap.put("RECIPIENT", criteria.getValue());
+                else if ("RECIPIENT".equals(criterion.getKey().value())){
+                    paramsMap.put("RECIPIENT", criterion.getValue());
                 }
-                else if ("STATUS".equals(criteria.getKey().value())){
-                    paramsMap.put("STATUS", criteria.getValue());
+                else if ("STATUS".equals(criterion.getKey().value())){
+                    paramsMap.put("STATUS", criterion.getValue());
                 }
-                else if ("SENDER_RECEIVER".equals(criteria.getKey().value())){
-                    paramsMap.put("GUID", criteria.getValue());
-                    paramsMap.put("TYPEREFGUID", criteria.getValue());
-                    paramsMap.put("SENDER_RECEIVER", criteria.getValue());
+                else if ("SENDER_RECEIVER".equals(criterion.getKey().value())){
+                    paramsMap.put("GUID", criterion.getValue());
+                    paramsMap.put("TYPEREFGUID", criterion.getValue());
+                    paramsMap.put("SENDER_RECEIVER", criterion.getValue());
                 }
-                else if ("TYPE".equals(criteria.getKey().value())){
-                    paramsMap.put("TYPEREFTYPE", criteria.getValue());
+                else if ("TYPE".equals(criterion.getKey().value())){
+                    paramsMap.put("TYPEREFTYPE", criterion.getValue());
                 }
             }
         }
-
-        ExchangeListPagination pagination = query.getPagination();
-        int page = pagination.getPage();
-        int listSize = pagination.getListSize();
-        Long count = exchangeLogDao.count(paramsMap);
-
-        String sortingField = "dateReceived";
-        boolean isReversed = false;
-        Sorting sorting = query.getSorting();
-        if (sorting != null){
-            sortingField = mapSortField(query.getSorting().getSortBy());
-            isReversed = sorting.isReversed();
-        }
-
-        List<ExchangeLog> list = exchangeLogDao.list(paramsMap, sortingField, isReversed,(page * listSize) - listSize, listSize -1);
-        List<ExchangeLogType> exchangeLogEntityList = new ArrayList<>();
-        if (isNotEmpty(list)){
-            for (ExchangeLog entity : list) {
-                exchangeLogEntityList.add(LogMapper.toModel(entity));
-            }
-        }
-        response.setCurrentPage(page);
-        int totalNumberOfPages = (count.intValue() / listSize);
-        response.setTotalNumberOfPages(totalNumberOfPages);
-        response.getExchangeLog().addAll(exchangeLogEntityList);
-        return response;
+        return paramsMap;
     }
 
-    public LogWithRawMsgAndType getExchangeLogRawMessage(String guid) {
-        return exchangeLogModel.getExchangeLogRawXmlByGuid(guid);
-    }
-
-    private static String mapSortField(SortField key) {
+    private static String mapSortField(ExchangeListQuery query) {
         String sortFields = "dateReceived";
-        if (key != null){
+        Sorting sorting = query.getSorting();
+        if (sorting != null && sorting.getSortBy() != null){
+            SortField key = sorting.getSortBy();
+            if (key == null){
+                return sortFields;
+            }
             switch (key) {
                 case SOURCE:
                     sortFields = "source";
