@@ -14,12 +14,15 @@ package eu.europa.ec.fisheries.uvms.exchange.service;
 import javax.ejb.Local;
 import javax.enterprise.event.Observes;
 
+import eu.europa.ec.fisheries.schema.exchange.module.v1.SetCommandRequest;
 import eu.europa.ec.fisheries.schema.exchange.plugin.types.v1.PluginType;
 import eu.europa.ec.fisheries.schema.exchange.plugin.v1.PluginBaseRequest;
 import eu.europa.ec.fisheries.uvms.exchange.message.event.*;
 import eu.europa.ec.fisheries.uvms.exchange.message.event.carrier.ExchangeMessageEvent;
 import eu.europa.ec.fisheries.uvms.exchange.message.exception.ExchangeMessageException;
 import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelMarshallException;
+import eu.europa.ec.fisheries.uvms.exchange.service.exception.ExchangeLogException;
+import eu.europa.ec.fisheries.uvms.exchange.service.exception.ExchangeServiceException;
 
 @Local
 public interface ExchangeEventOutgoingService {
@@ -43,6 +46,8 @@ public interface ExchangeEventOutgoingService {
      * @param message
      */
     void forwardMdrSyncMessageToPlugin(@Observes @MdrSyncRequestMessageEvent ExchangeMessageEvent message);
+
+    String sendCommandToPluginFromRest(SetCommandRequest request);
 
     /**
      * Sends FLUX FA response message to ERS/Activity plugin
@@ -105,4 +110,5 @@ public interface ExchangeEventOutgoingService {
     void handleProcessedMovement(@Observes @HandleProcessedMovementEvent ExchangeMessageEvent message);
 
     void handleProcessedMovementBatch(@Observes @ProcessedMovementBatch ExchangeMessageEvent message);
+
 }
