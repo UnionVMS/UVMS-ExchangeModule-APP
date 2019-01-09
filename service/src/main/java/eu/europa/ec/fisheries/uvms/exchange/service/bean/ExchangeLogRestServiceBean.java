@@ -147,6 +147,7 @@ public class ExchangeLogRestServiceBean {
                 }
                 else if ("SENDER_RECEIVER".equals(criterion.getKey().value())){
                     paramsMap.put("GUID", criterion.getValue());
+                    paramsMap.put("ON", criterion.getValue());
                     paramsMap.put("TYPEREFGUID", criterion.getValue());
                     paramsMap.put("SENDER_RECEIVER", criterion.getValue());
                 }
