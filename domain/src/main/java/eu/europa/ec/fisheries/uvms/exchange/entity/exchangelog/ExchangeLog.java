@@ -45,7 +45,6 @@ import static eu.europa.ec.fisheries.uvms.exchange.entity.exchangelog.ExchangeLo
                         "((:STATUS is NULL) OR (UPPER(cast(e.status as string)) LIKE CONCAT('%', UPPER(cast(:STATUS as string)), '%'))) AND " +
                         "((:SOURCE is NULL) OR (UPPER(cast(e.source as string)) LIKE CONCAT('%', UPPER(cast(:SOURCE as string)), '%'))) AND " +
                         "((:RECIPIENT is NULL) OR (UPPER(cast(e.recipient as string)) LIKE CONCAT('%', UPPER(cast(:RECIPIENT as string)), '%'))) AND " +
-                        "((:ON is NULL) OR (UPPER(cast(e.onValue as string)) LIKE CONCAT('%', UPPER(cast(:ON as string)), '%'))) AND " +
                         "((:DF is NULL) OR (UPPER(cast(e.df as string)) LIKE CONCAT('%', UPPER(cast(:DF as string)), '%'))) AND " +
                         "((:TODT is NULL) OR (UPPER(cast(e.todt as string)) LIKE CONCAT('%', UPPER(cast(:TODT as string)), '%'))) AND " +
                         "((:AD is NULL) OR (UPPER(cast(e.ad as string)) LIKE CONCAT('%', UPPER(cast(:AD as string)), '%'))) AND " +
