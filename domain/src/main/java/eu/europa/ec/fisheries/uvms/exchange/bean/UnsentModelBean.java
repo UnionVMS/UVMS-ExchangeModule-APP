@@ -45,8 +45,8 @@ public class UnsentModelBean implements UnsentModel {
         try {
             UnsentMessage entity = UnsentMessageMapper.toEntity(message, username);
             UnsentMessage persistedEntity = dao.create(entity);
-            UnsentMessageType model = UnsentMessageMapper.toModel(persistedEntity);
-            return model.getMessageId();
+
+            return persistedEntity.getGuid();
         } catch (ExchangeDaoException ex) {
             LOG.error("[ Error when creating unsent message ] {}", ex.getMessage());
             throw new ExchangeModelException("Error when creating unsent message ");
