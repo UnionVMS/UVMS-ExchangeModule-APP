@@ -81,7 +81,7 @@
         <profile>
             <id>generate-rest-doc</id>
             <activation>
-                <activeByDefault>true</activeByDefault>
+                <activeByDefault>false</activeByDefault>
             </activation>
             <build>
                 <plugins>
