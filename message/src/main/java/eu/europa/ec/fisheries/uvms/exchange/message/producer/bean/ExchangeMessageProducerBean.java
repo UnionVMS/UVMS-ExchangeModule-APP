@@ -38,11 +38,12 @@ import javax.enterprise.event.Observes;
 import javax.jms.DeliveryMode;
 import javax.jms.JMSException;
 import javax.jms.Queue;
+import javax.jms.TextMessage;
 import java.util.HashMap;
 import java.util.Map;
 
 @Stateless
-public class ExchangeMessageProducerBean extends AbstractProducer implements ExchangeMessageProducer, ConfigMessageProducer {
+public class ExchangeMessageProducerBean extends AbstractProducer implements ExchangeMessageProducer {
 
     private static final Logger LOG = LoggerFactory.getLogger(ExchangeMessageProducerBean.class);
 
@@ -91,7 +92,7 @@ public class ExchangeMessageProducerBean extends AbstractProducer implements Exc
             return null;
         } catch (MessageException e) {
             LOG.error("[ Error when sending message. ]");
-            throw new ExchangeMessageException("[ Error when sending message. ]");
+            throw new ExchangeMessageException("[ Error when sending message. ]", e);
         }
     }
 
@@ -103,29 +104,23 @@ public class ExchangeMessageProducerBean extends AbstractProducer implements Exc
             return eventBusProducer.sendEventBusMessage(text, serviceName, exchangeEventQueue);
         } catch (MessageException e) {
             LOG.error("[ Error when sending message. ] ", e);
-            throw new ExchangeMessageException("[ Error when sending message. ]");
+            throw new ExchangeMessageException("[ Error when sending message. ]", e);
         }
     }
 
     @Override
-    @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
-    public String sendConfigMessage(String text) throws ConfigMessageException {
-        try {
-            return sendMessageOnQueue(text, MessageQueue.CONFIG);
-        } catch (ExchangeMessageException e) {
-            LOG.error("[ Error when sending config message. ] {}", e.getMessage());
-            throw new ConfigMessageException("Error when sending config message.");
-        }
+    public void sendModuleResponseMessage(TextMessage message, String text) throws MessageException {
+        sendResponseMessageToSender(message, text);
     }
 
     @Override
     @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
-    public String sendRulesMessage(String text) throws ConfigMessageException {
+    public String sendRulesMessage(String text) throws ExchangeMessageException {
         try {
             return sendMessageOnQueue(text, MessageQueue.RULES);
         } catch (ExchangeMessageException e) {
             LOG.error("[ Error when sending config message. ] {}", e.getMessage());
-            throw new ConfigMessageException("Error when sending config message.");
+            throw e;
         }
     }
 
@@ -141,7 +136,7 @@ public class ExchangeMessageProducerBean extends AbstractProducer implements Exc
 
         } catch (MessageException e) {
             LOG.error("[ Error when sending rules message. ] {}", e.getMessage());
-            throw new ExchangeMessageException("Error when sending rules message.");
+            throw new ExchangeMessageException("Error when sending rules message.", e);
         }
     }
 

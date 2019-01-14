@@ -322,7 +322,7 @@ public class ExchangeEventOutgoingServiceBean implements ExchangeEventOutgoingSe
                 log.info("[WARN] FLUXFAResponse is FAILED so won't be sent to Flux Activity Plugin..");
             }
         } catch (ExchangeModelMarshallException | ExchangeMessageException | ExchangeLogException e) {
-            log.error("Unable to send FLUX FA Report to plugin.", e);
+            log.error("Unable to send FLUXFAResponse to plugin.", e);
         }
     }
 
@@ -339,7 +339,7 @@ public class ExchangeEventOutgoingServiceBean implements ExchangeEventOutgoingSe
             log.info("Message sent to Flux ERS Plugin :" + pluginMessageId);
             exchangeLogService.log(request, LogType.SEND_FA_QUERY_MSG, ExchangeLogStatusTypeType.SENT, TypeRefType.FA_QUERY, request.getRequest(), false);
         } catch (ExchangeModelMarshallException | ExchangeMessageException | ExchangeLogException e) {
-            log.error("Unable to send FLUX FA Report to plugin.", e);
+            log.error("Unable to send FLUXFAQuery to plugin.", e);
         }
     }
 

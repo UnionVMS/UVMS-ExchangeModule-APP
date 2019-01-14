@@ -19,4 +19,8 @@ public class ExchangeMessageException extends ExchangeException {
     public ExchangeMessageException(String message) {
         super(message);
     }
+
+    public ExchangeMessageException(String message, Throwable thr) {
+        super(message, thr);
+    }
 }

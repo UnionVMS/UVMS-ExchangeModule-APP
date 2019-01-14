@@ -20,7 +20,7 @@ import javax.ejb.Stateless;
 public class ExchangeEventBusTopicProducer extends AbstractTopicProducer {
 
     @Override
-    protected String getDestinationName() {
+    public String getDestinationName() {
         return MessageConstants.EVENT_BUS_TOPIC;
     }
 }

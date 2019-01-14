@@ -31,8 +31,8 @@
         <ehcache.version>2.10.4</ehcache.version>
 
         <!-- Uvms libs -->
-        <uvms.config.version>4.0.2-W14-J8</uvms.config.version>
-        <uvms.commons.version>3.0.29</uvms.commons.version>
+        <uvms.config.version>4.0.3-W14J8</uvms.config.version>
+        <uvms.commons.version>3.0.31-W14J8</uvms.commons.version>
         <usm4uvms.version>4.0.14-W14-J8</usm4uvms.version>
 
         <uvms-pom-deps.version>1.21</uvms-pom-deps.version>
@@ -44,6 +44,8 @@
         <movement.model.version>4.0.14</movement.model.version>
         <rules.model.version>3.0.42</rules.model.version>
         <javaee.version>8.0</javaee.version>
+
+        <hibernate.version>5.1.9.Final</hibernate.version>
     </properties>
 
     <dependencyManagement>
@@ -127,8 +129,28 @@
             <dependency>
                 <groupId>fish.focus.uvms.maven</groupId>
                 <artifactId>uvms-pom-gis-deps</artifactId>
-                <version>${uvms-pom-deps.version}</version>
+                <version>${uvms.poms.version}</version>
                 <type>pom</type>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.hibernate</groupId>
+                        <artifactId>hibernate-core</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.hibernate</groupId>
+                        <artifactId>hibernate-entitymanager</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+            <dependency>
+                <groupId>org.hibernate</groupId>
+                <artifactId>hibernate-core</artifactId>
+                <version>${hibernate.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.hibernate</groupId>
+                <artifactId>hibernate-entitymanager</artifactId>
+                <version>${hibernate.version}</version>
             </dependency>
             <dependency>
                 <groupId>fish.focus.uvms.maven</groupId>

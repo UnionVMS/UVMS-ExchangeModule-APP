@@ -32,7 +32,7 @@ public interface ExchangeMessageProducer {
     
     void sendModuleResponseMessage(TextMessage message, String text) throws MessageException;
 
-    String sendRulesMessage(String text) throws ConfigMessageException;
+    String sendRulesMessage(String text) throws ConfigMessageException, ExchangeMessageException;
 
     String sendRulesMessage(String text, String messageSelector) throws ExchangeMessageException;
 
