@@ -32,8 +32,8 @@ import eu.europa.ec.fisheries.uvms.exchange.message.event.carrier.PluginMessageE
 import eu.europa.ec.fisheries.uvms.exchange.message.event.registry.PluginErrorEvent;
 import eu.europa.ec.fisheries.uvms.exchange.message.event.registry.RegisterServiceEvent;
 import eu.europa.ec.fisheries.uvms.exchange.message.event.registry.UnRegisterServiceEvent;
-import eu.europa.ec.fisheries.uvms.exchange.message.exception.ExchangeMessageException;
-import eu.europa.ec.fisheries.uvms.exchange.message.producer.ExchangeMessageProducer;
+import eu.europa.ec.fisheries.uvms.exchange.message.producer.bean.ExchangeEventBusTopicProducerBean;
+import eu.europa.ec.fisheries.uvms.exchange.message.producer.bean.ExchangeMessageProducerBean;
 import eu.europa.ec.fisheries.uvms.exchange.model.constant.FaultCode;
 import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelMapperException;
 import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelMarshallException;
@@ -50,6 +50,8 @@ import lombok.extern.slf4j.Slf4j;
 
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 import javax.enterprise.event.Event;
 import javax.enterprise.event.Observes;
 import javax.inject.Inject;
@@ -74,10 +76,13 @@ public class PluginServiceBean implements PluginService {
     private ExchangeService exchangeService;
 
     @EJB
-    private ExchangeMessageProducer producer;
+    private ExchangeMessageProducerBean exchangeProducer;
 
     @EJB
-    private ExchangeConsumer consumer;
+    private ExchangeEventBusTopicProducerBean eventBusProducer;
+
+    @EJB
+    private ExchangeConsumer exchangeConsumer;
 
     @EJB
     private ParameterService parameterService;
@@ -85,7 +90,7 @@ public class PluginServiceBean implements PluginService {
     @EJB
     private UVMSConfigService configService;
 
-    private boolean checkPluginType(PluginType pluginType, String responseTopicMessageSelector, String messageId) throws ExchangeModelMarshallException, ExchangeMessageException {
+    private boolean checkPluginType(PluginType pluginType, String responseTopicMessageSelector, String messageId) throws ExchangeModelMarshallException, MessageException {
         log.debug("[INFO] CheckPluginType " + pluginType.name());
         if (PluginType.EMAIL == pluginType || PluginType.NAF == pluginType) {
             //Check if type already exists
@@ -98,21 +103,22 @@ public class PluginServiceBean implements PluginService {
                         if(service.isActive()){
                             //TODO log to audit log
                             String response = ExchangePluginResponseMapper.mapToRegisterServiceResponseNOK(messageId, "Plugin of " + pluginType + " already registered. Only one is allowed.");
-                            producer.sendEventBusMessage(response, responseTopicMessageSelector);
+                            sendEventBusMessage(responseTopicMessageSelector, response);
                             return false;
                         }
                     }
                 }
             } catch (ExchangeServiceException e) {
                 String response = ExchangePluginResponseMapper.mapToRegisterServiceResponseNOK(messageId, "Exchange service exception when registering plugin [ " + e.getMessage() + " ]");
-                producer.sendEventBusMessage(response, responseTopicMessageSelector);
+                sendEventBusMessage(responseTopicMessageSelector, response);
                 return false;
             }
         }
         return true;
     }
 
-    private void registerService(RegisterServiceRequest register, String messageId) throws ExchangeModelMarshallException, ExchangeMessageException {
+    @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
+    private void registerService(RegisterServiceRequest register, String messageId) throws ExchangeModelMarshallException, MessageException {
         try {
             overrideSettingsFromConfig(register);
             ServiceResponseType service = exchangeService.registerService(register.getService(), register.getCapabilityList(), register.getSettingList(), register.getService().getName());
@@ -129,16 +135,16 @@ public class PluginServiceBean implements PluginService {
             }
             //TODO log to exchange log
             String response = ExchangePluginResponseMapper.mapToRegisterServiceResponseOK(messageId, service);
-            producer.sendEventBusMessage(response, register.getService().getServiceResponseMessageName());
+            sendEventBusMessage(register.getService().getServiceResponseMessageName(), response);
             setServiceStatusOnRegister(register.getService().getServiceClassName());
 
         } catch (ExchangeServiceException | ExchangeModelMapperException e) {
             String response = ExchangePluginResponseMapper.mapToRegisterServiceResponseNOK(messageId, "Exchange service exception when registering plugin [ " + e.getMessage() + " ]");
-            producer.sendEventBusMessage(response, register.getService().getServiceResponseMessageName());
+            sendEventBusMessage(register.getService().getServiceResponseMessageName(), response);
         }
     }
 
-    private void setServiceStatusOnRegister(String serviceClassName) throws ExchangeModelMapperException, ExchangeMessageException, ExchangeServiceException {
+    private void setServiceStatusOnRegister(String serviceClassName) throws ExchangeServiceException {
         ServiceResponseType service = exchangeService.getService(serviceClassName);
         if (service != null) {
             StatusType status = service.getStatus();
@@ -169,7 +175,7 @@ public class PluginServiceBean implements PluginService {
                     registerService(register, messageId);
                 }
             }
-        } catch (ExchangeModelMarshallException | ExchangeMessageException | JMSException e) {
+        } catch (ExchangeModelMarshallException | MessageException | JMSException e) {
             log.error("[ERROR] Register service exception {} {}",event, e.getMessage());
             errorEvent.fire(new PluginMessageEvent(textMessage, register.getService(), ExchangePluginResponseMapper.mapToPluginFaultResponse(FaultCode.EXCHANGE_PLUGIN_EVENT.getCode(), "Exception when register service")));
         }
@@ -225,13 +231,13 @@ public class PluginServiceBean implements PluginService {
         }
     }
     
-    private void updatePluginSetting(String serviceClassName, SettingType updatedSetting, String username) throws ExchangeServiceException, ExchangeModelMarshallException, ExchangeMessageException {
+    private void updatePluginSetting(String serviceClassName, SettingType updatedSetting, String username) throws ExchangeServiceException, ExchangeModelMarshallException, MessageException {
     	SettingListType settingListType = new SettingListType();
     	settingListType.getSetting().add(updatedSetting);
     	ServiceResponseType service = exchangeService.upsertSettings(serviceClassName, settingListType, username);
         // Send the plugin settings to the topic where all plugins should listen to
     	String text = ExchangePluginRequestMapper.createSetConfigRequest(service.getSettingList());
-    	producer.sendEventBusMessage(text, serviceClassName);
+        sendEventBusMessage(serviceClassName, text);
     }
     
     @Override
@@ -268,7 +274,7 @@ public class PluginServiceBean implements PluginService {
                     log.error("Couldn't upsert settings in exchange");
                 } catch (ExchangeModelMarshallException e) {
                     log.error("Couldn't create plugin set config request");
-                } catch (ExchangeMessageException e) {
+                } catch (MessageException e) {
                     log.error("Couldn't send message to plugin");
                 }
                 break;
@@ -279,6 +285,7 @@ public class PluginServiceBean implements PluginService {
     }
 
     @Override
+    @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
 	public void updatePluginSetting(@Observes @UpdatePluginSettingEvent ExchangeMessageEvent settingEvent) {
 		try {
 			TextMessage jmsMessage = settingEvent.getJmsMessage();
@@ -286,14 +293,12 @@ public class PluginServiceBean implements PluginService {
             log.info("Received @UpdatePluginSettingEvent from module queue:{}" , request.toString());
 			updatePluginSetting(request.getServiceClassName(), request.getSetting(), request.getUsername());
 			String text = ExchangeModuleResponseMapper.mapUpdateSettingResponse(ExchangeModuleResponseMapper.mapAcknowledgeTypeOK());
-			producer.sendModuleResponseMessage(settingEvent.getJmsMessage(), text);
-		} catch (ExchangeModelMarshallException | ExchangeServiceException | ExchangeMessageException | MessageException e) {
+            exchangeProducer.sendResponseMessageToSender(settingEvent.getJmsMessage(), text);
+		} catch (ExchangeModelMarshallException | ExchangeServiceException | MessageException e) {
 			log.error("Couldn't unmarshall update setting request");
 			settingEvent.setErrorFault(ExchangeModuleResponseMapper.createFaultMessage(FaultCode.EXCHANGE_EVENT_SERVICE, "Couldn't update plugin setting"));
-			producer.sendModuleErrorResponseMessage(settingEvent);
+			exchangeProducer.sendModuleErrorResponseMessage(settingEvent);
 		}
-		
-		
 	}
     
     @Override
@@ -304,14 +309,14 @@ public class PluginServiceBean implements PluginService {
         try {
             if (isServiceRegistered(serviceClassName)){
                 String text = ExchangePluginRequestMapper.createStartRequest();
-                producer.sendEventBusMessage(text, serviceClassName);
+                sendEventBusMessage(serviceClassName, text);
                 return true;
             }else{
                 throw new ExchangeServiceException("Service with service class name: "+ serviceClassName + " does not exist");
             }
         } catch (ExchangeModelMarshallException e) {
             throw new ExchangeServiceException("[ Couldn't map start request for " + serviceClassName + " ]");
-        } catch (ExchangeMessageException e) {
+        } catch (MessageException e) {
             throw new ExchangeServiceException("[ Couldn't send start request for " + serviceClassName + " ]");
         }
     }
@@ -334,14 +339,14 @@ public class PluginServiceBean implements PluginService {
         try {
             if(isServiceRegistered(serviceClassName)) {
                 String text = ExchangePluginRequestMapper.createStopRequest();
-                producer.sendEventBusMessage(text, serviceClassName);
+                sendEventBusMessage(serviceClassName, text);
                 return true;
             }else{
                 throw new ExchangeServiceException("Service with service class name: "+ serviceClassName + " does not exist");
             }
         } catch (ExchangeModelMarshallException e) {
             throw new ExchangeServiceException("[ Couldn't map stop request for " + serviceClassName + " ]");
-        } catch (ExchangeMessageException e) {
+        } catch (MessageException e) {
             throw new ExchangeServiceException("[ Couldn't send stop request for " + serviceClassName + " ]");
         }
     }
@@ -353,13 +358,17 @@ public class PluginServiceBean implements PluginService {
         }
         try {
             String text = ExchangePluginRequestMapper.createPingRequest();
-            producer.sendEventBusMessage(text, serviceClassName);
+            sendEventBusMessage(serviceClassName, text);
             return true;
         } catch (ExchangeModelMarshallException e) {
             throw new ExchangeServiceException("[ Couldn't map ping request for " + serviceClassName + " ]");
-        } catch (ExchangeMessageException e) {
+        } catch (MessageException e) {
             throw new ExchangeServiceException("[ Couldn't send ping request for " + serviceClassName + " ]");
         }
+    }
 
+    @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
+    private void sendEventBusMessage(String responseTopicMessageSelector, String response) throws MessageException {
+        eventBusProducer.sendEventBusMessage(response, responseTopicMessageSelector);
     }
 }

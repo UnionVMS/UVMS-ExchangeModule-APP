@@ -18,6 +18,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.ejb.Stateless;
+import javax.jms.Destination;
 
 @Stateless
 public class ExchangeConsumerBean extends AbstractConsumer implements ExchangeConsumer {
@@ -29,4 +30,8 @@ public class ExchangeConsumerBean extends AbstractConsumer implements ExchangeCo
         return MessageConstants.QUEUE_EXCHANGE;
     }
 
+    @Override
+    public Destination getDestination() {
+        return super.getDestination();
+    }
 }

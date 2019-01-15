@@ -11,22 +11,13 @@ copy of the GNU General Public License along with the IFDM Suite. If not, see <h
  */
 package eu.europa.ec.fisheries.uvms.exchange.service.bean;
 
-import javax.ejb.EJB;
-import javax.ejb.Stateless;
-import javax.enterprise.event.Event;
-import javax.inject.Inject;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
 import eu.europa.ec.fisheries.schema.exchange.module.v1.ExchangeBaseRequest;
 import eu.europa.ec.fisheries.schema.exchange.v1.*;
+import eu.europa.ec.fisheries.uvms.commons.message.api.MessageException;
 import eu.europa.ec.fisheries.uvms.exchange.ExchangeLogModel;
 import eu.europa.ec.fisheries.uvms.exchange.UnsentModel;
-import eu.europa.ec.fisheries.uvms.exchange.message.constants.MessageQueue;
 import eu.europa.ec.fisheries.uvms.exchange.message.consumer.ExchangeConsumer;
-import eu.europa.ec.fisheries.uvms.exchange.message.exception.ExchangeMessageException;
-import eu.europa.ec.fisheries.uvms.exchange.message.producer.ExchangeMessageProducer;
+import eu.europa.ec.fisheries.uvms.exchange.message.producer.bean.ExchangeToExchangeProducerBean;
 import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelException;
 import eu.europa.ec.fisheries.uvms.exchange.service.ExchangeLogService;
 import eu.europa.ec.fisheries.uvms.exchange.service.event.ExchangeLogEvent;
@@ -36,21 +27,32 @@ import eu.europa.ec.fisheries.uvms.longpolling.notifications.NotificationMessage
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
+import javax.ejb.EJB;
+import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
+import javax.enterprise.event.Event;
+import javax.inject.Inject;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
+import java.util.List;
+
 @Stateless
 @Slf4j
 public class ExchangeLogServiceBean implements ExchangeLogService {
 
     @EJB
-    private ExchangeMessageProducer producer;
-
-    @EJB
-    private ExchangeConsumer consumer;
+    private ExchangeConsumer exchangeConsumer;
 
     @EJB
     private ExchangeEventLogCache logCache;
 
     @EJB
     private ExchangeToRulesSyncMsgBean exchangeToRulesSyncMsgBean;
+
+    @EJB
+    private ExchangeToExchangeProducerBean internalQueueProducer;
 
     @Inject
     @ExchangeLogEvent
@@ -70,7 +72,6 @@ public class ExchangeLogServiceBean implements ExchangeLogService {
     public ExchangeLogType logAndCache(ExchangeLogType log, String pluginMessageId, String username) throws ExchangeLogException {
         ExchangeLogType createdLog = log(log, username);
         logCache.put(pluginMessageId, createdLog.getGuid());
-
         return createdLog;
     }
 
@@ -260,6 +261,7 @@ public class ExchangeLogServiceBean implements ExchangeLogService {
     }
 
     @Override
+    @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
     public void resend(List<String> messageIdList, String username) throws ExchangeLogException {
         log.debug("resend in service layer:{} {}",messageIdList,username);
         List<UnsentMessageType> unsentMessageList;
@@ -274,10 +276,10 @@ public class ExchangeLogServiceBean implements ExchangeLogService {
 
             for (UnsentMessageType unsentMessage : unsentMessageList) {
                 try {
-                    String unsentMessageId = producer.sendMessageOnQueue(unsentMessage.getMessage(), MessageQueue.EVENT);
-                    //TextMessage unsentResponse = consumer.getMessage(unsentMessageId, TextMessage.class);
+                    String unsentMessageId = internalQueueProducer.sendModuleMessage(unsentMessage.getMessage(), exchangeConsumer.getDestination());
+                    //TextMessage unsentResponse = exchangeConsumer.getMessage(unsentMessageId, TextMessage.class);
                     //ExchangeModuleResponseMapper.validateResponse(unsentResponse, unsentMessageId);
-                } catch (ExchangeMessageException e) {
+                } catch (MessageException e) {
                     log.error("Error when sending/receiving message {} {}",messageIdList, e);
                 }
             }

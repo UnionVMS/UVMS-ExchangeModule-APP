@@ -17,7 +17,7 @@ import javax.ejb.Stateless;
 
 @Stateless
 @LocalBean
-public class ExchangeMovementProducer extends AbstractProducer {
+public class ExchangeMovementProducerBean extends AbstractProducer {
 
     @Override
     public String getDestinationName() {

@@ -14,16 +14,15 @@ package eu.europa.ec.fisheries.uvms.exchange.service.bean;
 import eu.europa.ec.fisheries.schema.exchange.plugin.types.v1.PluginType;
 import eu.europa.ec.fisheries.schema.exchange.service.v1.*;
 import eu.europa.ec.fisheries.uvms.audit.model.exception.AuditModelMarshallException;
+import eu.europa.ec.fisheries.uvms.commons.message.api.MessageException;
 import eu.europa.ec.fisheries.uvms.exchange.ServiceRegistryModel;
-import eu.europa.ec.fisheries.uvms.exchange.message.constants.MessageQueue;
-import eu.europa.ec.fisheries.uvms.exchange.message.exception.ExchangeMessageException;
-import eu.europa.ec.fisheries.uvms.exchange.message.producer.ExchangeMessageProducer;
+import eu.europa.ec.fisheries.uvms.exchange.message.consumer.ExchangeConsumer;
+import eu.europa.ec.fisheries.uvms.exchange.message.producer.bean.ExchangeAuditProducerBean;
 import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelException;
 import eu.europa.ec.fisheries.uvms.exchange.service.ExchangeService;
 import eu.europa.ec.fisheries.uvms.exchange.service.exception.ExchangeServiceException;
 import eu.europa.ec.fisheries.uvms.exchange.service.mapper.ExchangeAuditRequestMapper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
@@ -32,15 +31,17 @@ import javax.ejb.TransactionAttributeType;
 import java.util.List;
 
 @Stateless
+@Slf4j
 public class ExchangeServiceBean implements ExchangeService {
-
-    private static final Logger LOG = LoggerFactory.getLogger(ExchangeServiceBean.class);
-
-    @EJB
-    private ExchangeMessageProducer producer;
 
     @EJB
     private ServiceRegistryModel serviceRegistryModel;
+
+    @EJB
+    private ExchangeAuditProducerBean auditProducer;
+
+    @EJB
+    private ExchangeConsumer exchangeConsumer;
 
     /**
      * {@inheritDoc}
@@ -51,10 +52,10 @@ public class ExchangeServiceBean implements ExchangeService {
     @Override
     @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
     public ServiceResponseType registerService(ServiceType data, CapabilityListType capabilityList, SettingListType settingList, String username) throws ExchangeServiceException {
-        LOG.info("Register service invoked in service layer: {} {}",data,username);
+        log.info("Register service invoked in service layer: {} {}",data,username);
         try {
             ServiceResponseType serviceResponseType = serviceRegistryModel.registerService(data, capabilityList, settingList, username);
-            //sendAuditLogMessageForRegisterService(compressServiceClassName(serviceResponseType.getServiceClassName()), username);
+            //sendAuditlogMessageForRegisterService(compressServiceClassName(serviceResponseType.getServiceClassName()), username);
             return serviceResponseType;
         } catch (ExchangeModelException e) {
             throw new ExchangeServiceException(e.getMessage());
@@ -69,10 +70,10 @@ public class ExchangeServiceBean implements ExchangeService {
      */
     @Override
     public ServiceResponseType unregisterService(ServiceType data, String username) throws ExchangeServiceException {
-        LOG.info("Unregister service invoked in service layer: {} {}",data,username);
+        log.info("Unregister service invoked in service layer: {} {}",data,username);
         try {
             ServiceResponseType serviceResponseType = serviceRegistryModel.unregisterService(data, username);
-            //sendAuditLogMessageForUnregisterService(compressServiceClassName(serviceResponseType.getServiceClassName()), username);
+            //sendAuditlogMessageForUnregisterService(compressServiceClassName(serviceResponseType.getServiceClassName()), username);
             return serviceResponseType;
         } catch (ExchangeModelException ex) {
             throw new ExchangeServiceException(ex.getMessage());
@@ -87,7 +88,7 @@ public class ExchangeServiceBean implements ExchangeService {
      */
     @Override
     public List<ServiceResponseType> getServiceList(List<PluginType> pluginTypes) throws ExchangeServiceException {
-        LOG.info("Get list invoked in service layer:{}",pluginTypes);
+        log.info("Get list invoked in service layer:{}",pluginTypes);
         try {
             List<ServiceResponseType> plugins = serviceRegistryModel.getPlugins(pluginTypes);
             return plugins;
@@ -98,10 +99,10 @@ public class ExchangeServiceBean implements ExchangeService {
 
     @Override
     public ServiceResponseType upsertSettings(String serviceClassName, SettingListType settingListType, String username) throws ExchangeServiceException {
-        LOG.info("Upsert settings in service layer: {} {} {}",serviceClassName,settingListType,username);
+        log.info("Upsert settings in service layer: {} {} {}",serviceClassName,settingListType,username);
         try {
             ServiceResponseType updatedSettings = serviceRegistryModel.updatePluginSettings(serviceClassName, settingListType, username);
-            //sendAuditLogMessageForUpdateService(compressServiceClassName(serviceClassName), username);
+            //sendAuditlogMessageForUpdateService(compressServiceClassName(serviceClassName), username);
             return updatedSettings;
         } catch (ExchangeModelException  e) {
             throw new ExchangeServiceException(e.getMessage());
@@ -117,7 +118,7 @@ public class ExchangeServiceBean implements ExchangeService {
      */
     @Override
     public ServiceType getById(Long id) throws ExchangeServiceException {
-        LOG.info("Get by id invoked in service layer:{}",id);
+        log.info("Get by id invoked in service layer:{}",id);
         throw new ExchangeServiceException("Get by id not implemented in service layer");
     }
 
@@ -134,80 +135,86 @@ public class ExchangeServiceBean implements ExchangeService {
 
     @Override
     public ServiceResponseType updateServiceStatus(String serviceClassName, StatusType status, String username) throws ExchangeServiceException {
-        LOG.info("Update service status invoked in service layer: {} {} {}",serviceClassName,status,username);
+        log.info("Update service status invoked in service layer: {} {} {}",serviceClassName,status,username);
         try {
             ServiceResponseType updatedServiceStatus = serviceRegistryModel.updatePluginStatus(serviceClassName, status, username);
-            //sendAuditLogMessageForUpdateServiceStatus(serviceClassName, status, username);
+            //sendAuditlogMessageForUpdateServiceStatus(serviceClassName, status, username);
             return updatedServiceStatus;
         } catch (ExchangeModelException e) {
             throw new ExchangeServiceException(e.getMessage());
         }
     }
 
-    private void sendAuditLogMessageForRegisterService(String serviceName, String username){
+    @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
+    private void sendAuditlogMessageForRegisterService(String serviceName, String username){
         try {
             String request = ExchangeAuditRequestMapper.mapRegisterService(serviceName, username);
-            producer.sendMessageOnQueue(request, MessageQueue.AUDIT);
-        } catch (AuditModelMarshallException | ExchangeMessageException e) {
-            LOG.error("Could not send audit log message. Exchange registered service: " + serviceName );
+            auditProducer.sendModuleMessage(request, exchangeConsumer.getDestination());
+        } catch (AuditModelMarshallException | MessageException e) {
+            log.error("Could not send audit log message. Exchange registered service: " + serviceName );
         }
     }
 
-    private void sendAuditLogMessageForUnregisterService(String serviceName, String username){
+    @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
+    private void sendAuditlogMessageForUnregisterService(String serviceName, String username){
         try {
             String request = ExchangeAuditRequestMapper.mapUnregisterService(serviceName, username);
-            producer.sendMessageOnQueue(request, MessageQueue.AUDIT);
-        } catch (AuditModelMarshallException | ExchangeMessageException e) {
-            LOG.error("Could not send audit log message. Exchange unregistered service: " + serviceName );
+            auditProducer.sendModuleMessage(request, exchangeConsumer.getDestination());
+        } catch (AuditModelMarshallException | MessageException e) {
+            log.error("Could not send audit log message. Exchange unregistered service: " + serviceName );
         }
     }
 
-    private void sendAuditLogMessageForServiceStatusStopped(String serviceName, String username){
+    @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
+    private void sendAuditlogMessageForServiceStatusStopped(String serviceName, String username){
         try {
             String request = ExchangeAuditRequestMapper.mapServiceStatusStopped(serviceName, username);
-            producer.sendMessageOnQueue(request, MessageQueue.AUDIT);
-        } catch (AuditModelMarshallException | ExchangeMessageException e) {
-            LOG.error("Could not send audit log message. Exchange stopped service: " + serviceName );
+            auditProducer.sendModuleMessage(request, exchangeConsumer.getDestination());
+        } catch (AuditModelMarshallException | MessageException e) {
+            log.error("Could not send audit log message. Exchange stopped service: " + serviceName );
         }
     }
 
-    private void sendAuditLogMessageForServiceStatusUnknown(String serviceName, String username){
+    @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
+    private void sendAuditlogMessageForServiceStatusUnknown(String serviceName, String username){
         try {
             String request = ExchangeAuditRequestMapper.mapServiceStatusUnknown(serviceName, username);
-            producer.sendMessageOnQueue(request, MessageQueue.AUDIT);
-        } catch (AuditModelMarshallException | ExchangeMessageException e) {
-            LOG.error("Could not send audit log message. Exchange set service: " + serviceName +"status to unknown" );
+            auditProducer.sendModuleMessage(request, exchangeConsumer.getDestination());
+        } catch (AuditModelMarshallException | MessageException e) {
+            log.error("Could not send audit log message. Exchange set service: " + serviceName +"status to unknown" );
         }
     }
 
-    private void sendAuditLogMessageForServiceStatusStarted(String serviceName, String username){
+    @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
+    private void sendAuditlogMessageForServiceStatusStarted(String serviceName, String username){
         try {
             String request = ExchangeAuditRequestMapper.mapServiceStatusStarted(serviceName, username);
-            producer.sendMessageOnQueue(request, MessageQueue.AUDIT);
-        } catch (AuditModelMarshallException | ExchangeMessageException e) {
-            LOG.error("Could not send audit log message. Exchange started service: " + serviceName );
+            auditProducer.sendModuleMessage(request, exchangeConsumer.getDestination());
+        } catch (AuditModelMarshallException | MessageException e) {
+            log.error("Could not send audit log message. Exchange started service: " + serviceName );
         }
     }
 
-    private void sendAuditLogMessageForUpdateService(String serviceName, String username){
+    @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
+    private void sendAuditlogMessageForUpdateService(String serviceName, String username){
         try {
             String request = ExchangeAuditRequestMapper.mapUpdateService(serviceName, username);
-            producer.sendMessageOnQueue(request, MessageQueue.AUDIT);
-        } catch (AuditModelMarshallException | ExchangeMessageException e) {
-            LOG.error("Could not send audit log message. Exchange started service: " + serviceName );
+            auditProducer.sendModuleMessage(request, exchangeConsumer.getDestination());
+        } catch (AuditModelMarshallException | MessageException e) {
+            log.error("Could not send audit log message. Exchange started service: " + serviceName );
         }
     }
 
-    private void sendAuditLogMessageForUpdateServiceStatus(String serviceName, StatusType status, String username){
+    private void sendAuditlogMessageForUpdateServiceStatus(String serviceName, StatusType status, String username){
         switch (status){
             case STARTED:
-                //sendAuditLogMessageForServiceStatusStarted(compressServiceClassName(serviceName), username);
+                //sendAuditlogMessageForServiceStatusStarted(compressServiceClassName(serviceName), username);
                 break;
             case STOPPED:
-                //sendAuditLogMessageForServiceStatusStopped(compressServiceClassName(serviceName), username);
+                //sendAuditlogMessageForServiceStatusStopped(compressServiceClassName(serviceName), username);
                 break;
             default:
-                //sendAuditLogMessageForServiceStatusUnknown(compressServiceClassName(serviceName), username);
+                //sendAuditlogMessageForServiceStatusUnknown(compressServiceClassName(serviceName), username);
                 break;
         }
     }

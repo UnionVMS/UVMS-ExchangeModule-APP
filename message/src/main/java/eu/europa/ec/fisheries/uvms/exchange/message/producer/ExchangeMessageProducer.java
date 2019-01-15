@@ -32,13 +32,10 @@ public interface ExchangeMessageProducer {
     
     void sendModuleResponseMessage(TextMessage message, String text) throws MessageException;
 
-    String sendRulesMessage(String text) throws ConfigMessageException, ExchangeMessageException;
-
     String sendRulesMessage(String text, String messageSelector) throws ExchangeMessageException;
 
     void sendModuleErrorResponseMessage(@Observes @ErrorEvent ExchangeMessageEvent event);
 
     void sendPluginErrorResponseMessage(@Observes @PluginErrorEvent PluginMessageEvent event);
 
-    void sendModuleAckMessage(String messageId, MessageQueue queue, String text);
 }
