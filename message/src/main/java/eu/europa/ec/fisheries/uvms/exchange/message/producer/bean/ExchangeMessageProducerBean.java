@@ -40,11 +40,25 @@ import eu.europa.ec.fisheries.uvms.exchange.message.exception.ExchangeMessageExc
 import eu.europa.ec.fisheries.uvms.exchange.message.producer.ExchangeMessageProducer;
 import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelMapperException;
 import eu.europa.ec.fisheries.uvms.exchange.model.mapper.JAXBMarshaller;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.annotation.PostConstruct;
+import javax.ejb.EJB;
+import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
+import javax.enterprise.event.Observes;
+import javax.jms.DeliveryMode;
+import javax.jms.JMSException;
+import javax.jms.Queue;
+import java.util.HashMap;
+import java.util.Map;
 
 @Stateless
 public class ExchangeMessageProducerBean extends AbstractProducer implements ExchangeMessageProducer, ConfigMessageProducer {
 
-    final static Logger LOG = LoggerFactory.getLogger(ExchangeMessageProducerBean.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ExchangeMessageProducerBean.class);
 
     @EJB
     private ExchangeEventBusTopicProducer eventBusProducer;
@@ -57,12 +71,10 @@ public class ExchangeMessageProducerBean extends AbstractProducer implements Exc
 
     private Queue exchangeResponseQueue;
     private Queue exchangeEventQueue;
-    private Topic eventBus;
     private Queue rulesQueue;
     private Queue configQueue;
     private Queue vesselQueue;
     private Queue auditQueue;
-    private Queue movementResponseQueue;
     private Queue activityQueue;
     private Queue mdrQueue;
     private Queue salesQueue;
@@ -76,8 +88,6 @@ public class ExchangeMessageProducerBean extends AbstractProducer implements Exc
         configQueue = JMSUtils.lookupQueue(MessageConstants.QUEUE_CONFIG);
         vesselQueue = JMSUtils.lookupQueue(MessageConstants.QUEUE_ASSET_EVENT);
         auditQueue = JMSUtils.lookupQueue(MessageConstants.QUEUE_AUDIT_EVENT);
-        movementResponseQueue = JMSUtils.lookupQueue(MessageConstants.QUEUE_MOVEMENT);
-        eventBus = JMSUtils.lookupTopic(MessageConstants.EVENT_BUS_TOPIC);
         activityQueue = JMSUtils.lookupQueue(MessageConstants.QUEUE_MODULE_ACTIVITY);
         mdrQueue = JMSUtils.lookupQueue(MessageConstants.QUEUE_MDR_EVENT);
         salesQueue = JMSUtils.lookupQueue(MessageConstants.QUEUE_SALES_EVENT);
@@ -168,7 +178,7 @@ public class ExchangeMessageProducerBean extends AbstractProducer implements Exc
         try {
             LOG.debug("Sending error message back from Exchange module to recipient om JMS Queue with correlationID: {} ", message.getJmsMessage().getJMSMessageID());
             String data = JAXBMarshaller.marshallJaxBObjectToString(message.getErrorFault());
-            this.sendResponseMessageToSender(message.getJmsMessage(), data);
+            this.sendResponseMessageToSender(message.getJmsMessage(), data, 600000, DeliveryMode.NON_PERSISTENT);
         } catch (ExchangeModelMapperException | JMSException | MessageException e) {
             LOG.error("Error when returning Error message to recipient");
         }
@@ -180,7 +190,7 @@ public class ExchangeMessageProducerBean extends AbstractProducer implements Exc
             String data = JAXBMarshaller.marshallJaxBObjectToString(message.getErrorFault());
             final String jmsMessageID = message.getJmsMessage().getJMSMessageID();
             final String serviceName = message.getServiceType() != null ? message.getServiceType().getServiceResponseMessageName() : "unknown";
-            eventBusProducer.sendEventBusMessageWithSpecificIds(data, serviceName, null, null, jmsMessageID);
+            eventBusProducer.sendEventBusMessageWithSpecificIds(data, serviceName, null, null, jmsMessageID, 60000, DeliveryMode.NON_PERSISTENT);
             LOG.debug("Sending error message back from Exchange module to recipient om JMS Topic with correlationID: {} ", jmsMessageID);
         } catch (ExchangeModelMapperException | JMSException | MessageException e) {
             LOG.error("Error when returning Error message to recipient", e);

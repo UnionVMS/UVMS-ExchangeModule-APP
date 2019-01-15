@@ -60,7 +60,7 @@ public class ExchangeLogMapper {
     	switch(log.getType()) {
             case RECEIVE_MOVEMENT:
                 dto.setType(LogTypeLabel.RECEIVED_MOVEMENT.toString());
-                dto.setSource(((ReceiveMovementType)log).getSource());
+                dto.setSource(log.getSource());
                 dto.setRecipient(((ReceiveMovementType)log).getRecipient());
                 break;
             case SEND_MOVEMENT:
@@ -132,7 +132,11 @@ public class ExchangeLogMapper {
         dto.setRelatedLogData(log.getRelatedLogData());
         dto.setDf(log.getDf());
         dto.setTo(log.getTo());
-        dto.setOn(log.getOn());
+
+        if (!"SEND_FLUX_RESPONSE_MSG".equals(log.getType().value())){
+            dto.setOn(log.getOn());
+        }
+
         dto.setTodt(log.getTodt());
         return dto;
     }

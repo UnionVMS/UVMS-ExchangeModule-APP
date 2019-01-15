@@ -80,6 +80,9 @@
     <profiles>
         <profile>
             <id>generate-rest-doc</id>
+            <activation>
+                <activeByDefault>false</activeByDefault>
+            </activation>
             <build>
                 <plugins>
                     <plugin>

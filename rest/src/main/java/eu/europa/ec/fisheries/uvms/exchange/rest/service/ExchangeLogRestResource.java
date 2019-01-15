@@ -65,7 +65,6 @@ public class ExchangeLogRestResource {
     public ResponseDto getLogListByCriteria(final ExchangeListQuery query) {
         log.info("Get list invoked in rest layer.");
         try {
-            //TODO query in swagger
             GetLogListByQueryResponse response = logRestServiceBean.getExchangeLogList(query);
             ListQueryResponse exchangeLogList = ExchangeLogMapper.mapToQueryResponse(response);
             return new ResponseDto(exchangeLogList, RestResponseCode.OK);

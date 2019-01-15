@@ -111,6 +111,7 @@ public class ExchangeLogServiceBean implements ExchangeLogService {
         log.setTodt(request.getTodt());
         log.setDf(request.getFluxDataFlow());
         log.setGuid(request.getResponseMessageGuid());
+        log.setAd(request.getAd());
 
         return log(log, request.getUsername());
     }
