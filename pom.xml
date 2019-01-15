@@ -9,7 +9,7 @@
 
     <groupId>eu.europa.ec.fisheries.uvms.exchange</groupId>
     <artifactId>exchange</artifactId>
-    <version>4.0.36-SNAPSHOT</version>
+    <version>4.0.37-SNAPSHOT</version>
     <packaging>pom</packaging>
     
     <scm>
@@ -121,6 +121,11 @@
             <dependency>
                 <groupId>eu.europa.ec.fisheries.uvms.commons</groupId>
                 <artifactId>uvms-commons-message</artifactId>
+                <version>${uvms.commons.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>eu.europa.ec.fisheries.uvms.commons</groupId>
+                <artifactId>uvms-commons-dao</artifactId>
                 <version>${uvms.commons.version}</version>
             </dependency>
 

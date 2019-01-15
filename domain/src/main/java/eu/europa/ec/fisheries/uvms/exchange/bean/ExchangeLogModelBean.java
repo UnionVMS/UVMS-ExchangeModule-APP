@@ -92,55 +92,6 @@ public class ExchangeLogModelBean implements ExchangeLogModel {
         return exchangeLogTypeSet;
     }
 
-    @Override
-    public ListResponseDto getExchangeLogListByQuery(ExchangeListQuery query) throws ExchangeModelException {
-        if (query == null) {
-            throw new InputArgumentException("Exchange list query is null");
-        }
-        if (query.getPagination() == null) {
-            throw new InputArgumentException("Pagination in Exchange query is null");
-        }
-        if (query.getExchangeSearchCriteria() == null) {
-            throw new InputArgumentException("No search criterias in Exchange query");
-        }
-        try {
-            ListResponseDto response = new ListResponseDto();
-            List<ExchangeLogType> exchLogTypes = new ArrayList<>();
-
-            Integer page = query.getPagination().getPage();
-            Integer listSize = query.getPagination().getListSize();
-
-            List<SearchValue> searchKeyValues = SearchFieldMapper.mapSearchField(query.getExchangeSearchCriteria().getCriterias());
-
-            String sql = SearchFieldMapper.createSelectSearchSql(searchKeyValues, true, query.getSorting());
-            log.debug("sql:" + sql);
-            String countSql = SearchFieldMapper.createCountSearchSql(searchKeyValues, true);
-            log.debug("countSql:" + countSql);
-            Long numberMatches = logDao.getExchangeLogListSearchCount(countSql, searchKeyValues);
-
-            List<ExchangeLog> exchangeLogEntityList = logDao.getExchangeLogListPaginated(page, listSize, sql, searchKeyValues);
-            for (ExchangeLog entity : exchangeLogEntityList) {
-                exchLogTypes.add(LogMapper.toModel(entity));
-            }
-
-            // Enriches the "first level logs" with info related to the related logs.
-            enrichDtosWithRelatedLogsInfo(exchLogTypes);
-
-            int numberOfPages = (int) (numberMatches / listSize);
-            if (numberMatches % listSize != 0) {
-                numberOfPages += 1;
-            }
-
-            response.setTotalNumberOfPages(numberOfPages);
-            response.setCurrentPage(query.getPagination().getPage());
-            response.setExchangeLogList(exchLogTypes);
-            return response;
-        } catch (ExchangeSearchMapperException | ExchangeDaoException | ParseException ex) {
-            log.error("[ERROR] when getting ExchangeLogs by query {}] {} ", query, ex.getMessage());
-            throw new ExchangeModelException(ex.getMessage());
-        }
-    }
-
     private void enrichDtosWithRelatedLogsInfo(List<ExchangeLogType> exchangeLogList) {
         List<String> guids = new ArrayList<>();
         for (ExchangeLogType log : exchangeLogList) {

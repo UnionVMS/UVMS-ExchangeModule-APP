@@ -9,33 +9,72 @@ the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the impl
 FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details. You should have received a
 copy of the GNU General Public License along with the IFDM Suite. If not, see <http://www.gnu.org/licenses/>.
  */
-package eu.europa.ec.fisheries.uvms.exchange.entity.exchangelog;
 
-import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogStatusTypeType;
-import eu.europa.ec.fisheries.schema.exchange.v1.LogType;
-import eu.europa.ec.fisheries.schema.exchange.v1.TypeRefType;
-import eu.europa.ec.fisheries.uvms.exchange.constant.ExchangeConstants;
-import org.apache.commons.lang3.StringUtils;
+package eu.europa.ec.fisheries.uvms.exchange.entity.exchangelog;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
+import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
+import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogStatusTypeType;
+import eu.europa.ec.fisheries.schema.exchange.v1.LogType;
+import eu.europa.ec.fisheries.schema.exchange.v1.TypeRefType;
+import eu.europa.ec.fisheries.uvms.exchange.constant.ExchangeConstants;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
+import org.apache.commons.lang3.StringUtils;
+import static eu.europa.ec.fisheries.uvms.exchange.entity.exchangelog.ExchangeLog.*;
+import static eu.europa.ec.fisheries.uvms.exchange.entity.exchangelog.ExchangeLog.LIST_EXCHANGE;
 
 @Entity
 @Table(name="log")
-//@formatter:off
 @NamedQueries({
   @NamedQuery(name = ExchangeConstants.LOG_BY_GUID, query = "SELECT log FROM ExchangeLog log WHERE log.guid = :guid AND ((:typeRefType = null) OR (log.typeRefType = :typeRefType))"),
   @NamedQuery(name = ExchangeConstants.LOG_BY_TYPE_RANGE_OF_REF_GUIDS, query = "SELECT DISTINCT log FROM ExchangeLog log WHERE log.typeRefGuid IN (:refGuids)"),
-  @NamedQuery(name = ExchangeConstants.LOG_BY_TYPE_REF_AND_GUID, query = "SELECT log FROM ExchangeLog log WHERE log.typeRefGuid = :typeRefGuid AND log.typeRefType in (:typeRefTypes)")
+  @NamedQuery(name = ExchangeConstants.LOG_BY_TYPE_REF_AND_GUID, query = "SELECT log FROM ExchangeLog log WHERE log.typeRefGuid = :typeRefGuid AND log.typeRefType in (:typeRefTypes)"),
+        @NamedQuery(name = LIST_EXCHANGE, query = "SELECT e FROM ExchangeLog e WHERE (e.dateReceived BETWEEN :DATE_RECEIVED_FROM AND :DATE_RECEIVED_TO ) AND " +
+                        "(((:GUID is NULL) OR (UPPER(cast(e.guid as string)) LIKE CONCAT('%', UPPER(cast(:GUID as string)), '%'))) OR " +
+                        "((:TYPEREFGUID is NULL) OR (UPPER(cast(e.typeRefGuid as string)) LIKE CONCAT('%', UPPER(cast(:TYPEREFGUID as string)), '%'))) OR " +
+						"((:ON is NULL) OR (UPPER(cast(e.onValue as string)) LIKE CONCAT('%', UPPER(cast(:ON as string)), '%'))) OR " +
+						"((:SENDER_RECEIVER is NULL) OR (UPPER(cast(e.senderReceiver as string)) LIKE CONCAT('%', UPPER(cast(:SENDER_RECEIVER as string)), '%')))) AND " +
+                        "((:TYPEREFTYPE is NULL) OR (UPPER(cast(e.typeRefType as string)) LIKE CONCAT('%', UPPER(cast(:TYPEREFTYPE as string)), '%'))) AND " +
+                        "((:STATUS is NULL) OR (UPPER(cast(e.status as string)) LIKE CONCAT('%', UPPER(cast(:STATUS as string)), '%'))) AND " +
+                        "((:SOURCE is NULL) OR (UPPER(cast(e.source as string)) LIKE CONCAT('%', UPPER(cast(:SOURCE as string)), '%'))) AND " +
+                        "((:RECIPIENT is NULL) OR (UPPER(cast(e.recipient as string)) LIKE CONCAT('%', UPPER(cast(:RECIPIENT as string)), '%'))) AND " +
+                        "((:DF is NULL) OR (UPPER(cast(e.df as string)) LIKE CONCAT('%', UPPER(cast(:DF as string)), '%'))) AND " +
+                        "((:TODT is NULL) OR (UPPER(cast(e.todt as string)) LIKE CONCAT('%', UPPER(cast(:TODT as string)), '%'))) AND " +
+                        "((:AD is NULL) OR (UPPER(cast(e.ad as string)) LIKE CONCAT('%', UPPER(cast(:AD as string)), '%'))) AND " +
+                        "(e.transferIncoming = :INCOMING OR e.transferIncoming = :OUTGOING)"
+        ),
+		@NamedQuery(name = COUNT_LIST_EXCHANGE, query = "SELECT count(*) FROM ExchangeLog e WHERE (e.dateReceived BETWEEN :DATE_RECEIVED_FROM AND :DATE_RECEIVED_TO ) AND " +
+				"(((:GUID is NULL) OR (UPPER(cast(e.guid as string)) LIKE CONCAT('%', UPPER(cast(:GUID as string)), '%'))) OR " +
+				"((:TYPEREFGUID is NULL) OR (UPPER(cast(e.typeRefGuid as string)) LIKE CONCAT('%', UPPER(cast(:TYPEREFGUID as string)), '%'))) OR " +
+				"((:ON is NULL) OR (UPPER(cast(e.onValue as string)) LIKE CONCAT('%', UPPER(cast(:ON as string)), '%'))) OR " +
+				"((:SENDER_RECEIVER is NULL) OR (UPPER(cast(e.senderReceiver as string)) LIKE CONCAT('%', UPPER(cast(:SENDER_RECEIVER as string)), '%')))) AND " +
+				"((:TYPEREFTYPE is NULL) OR (UPPER(cast(e.typeRefType as string)) LIKE CONCAT('%', UPPER(cast(:TYPEREFTYPE as string)), '%'))) AND " +
+				"((:STATUS is NULL) OR (UPPER(cast(e.status as string)) LIKE CONCAT('%', UPPER(cast(:STATUS as string)), '%'))) AND " +
+				"((:SOURCE is NULL) OR (UPPER(cast(e.source as string)) LIKE CONCAT('%', UPPER(cast(:SOURCE as string)), '%'))) AND " +
+				"((:RECIPIENT is NULL) OR (UPPER(cast(e.recipient as string)) LIKE CONCAT('%', UPPER(cast(:RECIPIENT as string)), '%'))) AND " +
+				"((:DF is NULL) OR (UPPER(cast(e.df as string)) LIKE CONCAT('%', UPPER(cast(:DF as string)), '%'))) AND " +
+				"((:TODT is NULL) OR (UPPER(cast(e.todt as string)) LIKE CONCAT('%', UPPER(cast(:TODT as string)), '%'))) AND " +
+				"((:AD is NULL) OR (UPPER(cast(e.ad as string)) LIKE CONCAT('%', UPPER(cast(:AD as string)), '%'))) AND " +
+                "(e.transferIncoming = :INCOMING OR e.transferIncoming = :OUTGOING)"
+        )
 })
-//@formatter:on
-public class ExchangeLog {
+@Data
+@EqualsAndHashCode(exclude = "statusHistory")
+@ToString(exclude = "statusHistory")
+public class ExchangeLog implements Serializable {
 
-	@Id
+    public static final String LOG_BY_TYPE_RANGE_OF_REF_GUIDS = "Log.findByRangeOfRefGuids";
+    public static final String LIST_EXCHANGE = "exchange.list";
+	public static final String COUNT_LIST_EXCHANGE = "exchange.countlist";
+
+    @Id
 	@Column(name="log_id")
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	private Long id;
@@ -64,7 +103,7 @@ public class ExchangeLog {
 	private String todt;
 
 	@Column(name = "log_on")
-	private String on;
+	private String onValue;
 
 	@NotNull(message = "The Guid for the log cannot be empty!")
 	@Size(max=100)
@@ -132,7 +171,6 @@ public class ExchangeLog {
 	@Column(name = "log_business_error")
 	private String businessError;
 
-
 	@PrePersist
 	public void prepersist() {
 		if(StringUtils.isEmpty(guid)){
@@ -140,154 +178,4 @@ public class ExchangeLog {
 		}
     }
 
-	public Long getId() {
-		return id;
-	}
-	public void setId(Long id) {
-		this.id = id;
-	}
-	public LogType getType() {
-		return type;
-	}
-	public void setType(LogType type) {
-		this.type = type;
-	}
-	public String getGuid() {
-		return guid;
-	}
-	public void setGuid(String guid) {
-		this.guid = guid;
-	}
-	public String getSenderReceiver() {
-		return senderReceiver;
-	}
-	public void setSenderReceiver(String senderReceiver) {
-		this.senderReceiver = senderReceiver;
-	}
-	public Date getDateReceived() {
-		return dateReceived;
-	}
-	public void setDateReceived(Date dateReceived) {
-		this.dateReceived = dateReceived;
-	}
-	public ExchangeLogStatusTypeType getStatus() {
-		return status;
-	}
-	public void setStatus(ExchangeLogStatusTypeType status) {
-		this.status = status;
-	}
-	public Date getUpdateTime() {
-		return updateTime;
-	}
-	public void setUpdateTime(Date updateTime) {
-		this.updateTime = updateTime;
-	}
-	public String getUpdatedBy() {
-		return updatedBy;
-	}
-	public void setUpdatedBy(String updatedBy) {
-		this.updatedBy = updatedBy;
-	}
-	public Boolean getTransferIncoming() {
-		return transferIncoming;
-	}
-	public void setTransferIncoming(Boolean transferIncoming) {
-		this.transferIncoming = transferIncoming;
-	}
-	public List<ExchangeLogStatus> getStatusHistory() {
-		return statusHistory;
-	}
-	public void setStatusHistory(List<ExchangeLogStatus> statusHistory) {
-		this.statusHistory = statusHistory;
-	}
-	public String getTypeRefGuid() {
-		return typeRefGuid;
-	}
-	public void setTypeRefGuid(String typeRefGuid) {
-		this.typeRefGuid = typeRefGuid;
-	}
-	public TypeRefType getTypeRefType() {
-		return typeRefType;
-	}
-	public void setTypeRefType(TypeRefType typeRefType) {
-		this.typeRefType = typeRefType;
-	}
-	public String getTypeRefMessage() {
-		return typeRefMessage;
-	}
-	public void setTypeRefMessage(String typeRefMessage) {
-		this.typeRefMessage = typeRefMessage;
-	}
-	public String getRecipient() {
-		return recipient;
-	}
-	public void setRecipient(String recipient) {
-		this.recipient = recipient;
-	}
-	public Date getFwdDate() {
-		return fwdDate;
-	}
-	public void setFwdDate(Date fwdDate) {
-		this.fwdDate = fwdDate;
-	}
-	public String getFwdRule() {
-		return fwdRule;
-	}
-	public void setFwdRule(String fwdRule) {
-		this.fwdRule = fwdRule;
-	}
-	public String getSource() {
-		return source;
-	}
-	public void setSource(String source) {
-		this.source = source;
-	}
-	public String getDestination() {
-		return destination;
-	}
-	public void setDestination(String destination) {
-		this.destination = destination;
-	}
-    public String getTo() {
-        return to;
-    }
-	public void setTo(String to) {
-		this.to = to;
-	}
-	public String getOn() {
-		return on;
-	}
-	public void setOn(String on) {
-		this.on = on;
-	}
-	public String getTodt() {
-		return todt;
-	}
-	public void setTodt(String todt) {
-		this.todt = todt;
-	}
-    public String getDf() {
-        return df;
-    }
-    public void setDf(String df) {
-        this.df = df;
-    }
-	public String getMdcRequestId() {
-		return mdcRequestId;
-	}
-	public void setMdcRequestId(String mdcRequestId) {
-		this.mdcRequestId = mdcRequestId;
-	}
-    public String getBusinessError() {
-        return businessError;
-    }
-    public void setBusinessError(String businessError) {
-        this.businessError = businessError;
-    }
-	public String getAd() {
-		return ad;
-	}
-	public void setAd(String ad) {
-		this.ad = ad;
-	}
 }
