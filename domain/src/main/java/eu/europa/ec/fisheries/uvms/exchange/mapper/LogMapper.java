@@ -147,7 +147,6 @@ public class LogMapper {
         ExchangeLogType model = new ExchangeLogType();
         LogType logType = entity.getType();
 
-
         if (logType.equals(LogType.RECEIVE_MOVEMENT)) {
             ReceiveMovementType type = new ReceiveMovementType();
             type.setSource(entity.getSource());
@@ -190,15 +189,14 @@ public class LogMapper {
         model.setTo(entity.getTo());
         model.setOn(entity.getOnValue());
         model.setBusinessModuleExceptionMessage(entity.getBusinessError());
-
         if (entity.getTypeRefType() != null) {
+            String typeRefGuid = entity.getTypeRefGuid();
             LogRefType logRefType = new LogRefType();
-            logRefType.setRefGuid(entity.getTypeRefGuid());
+            logRefType.setRefGuid(typeRefGuid);
             logRefType.setType(entity.getTypeRefType());
             logRefType.setMessage(entity.getTypeRefMessage());
             model.setTypeRef(logRefType);
         }
-
         return model;
     }
 

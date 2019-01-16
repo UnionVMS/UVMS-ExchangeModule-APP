@@ -26,6 +26,8 @@ public class ExchangeLogData {
 	@XmlElement(required = true)
 	private TypeRefType type;
 
+	private String refMessage;
+
 	public String getGuid() {
 		return guid;
 	}
@@ -40,5 +42,13 @@ public class ExchangeLogData {
 
 	public void setType(TypeRefType type) {
 		this.type = type;
+	}
+
+	public String getRefMessage() {
+		return refMessage;
+	}
+
+	public void setRefMessage(String refMessage) {
+		this.refMessage = refMessage;
 	}
 }
