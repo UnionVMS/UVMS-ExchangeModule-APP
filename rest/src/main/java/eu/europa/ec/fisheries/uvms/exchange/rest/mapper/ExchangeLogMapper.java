@@ -125,7 +125,8 @@ public class ExchangeLogMapper {
     		ExchangeLogData logData = new ExchangeLogData();
     		logData.setGuid(log.getTypeRef().getRefGuid());
     		logData.setType(log.getTypeRef().getType());
-    		dto.setLogData(logData);
+            logData.setRefMessage(log.getTypeRef().getMessage());
+            dto.setLogData(logData);
     	}
     	dto.setSenderRecipient(log.getSenderReceiver());
     	dto.setStatus(log.getStatus().name());

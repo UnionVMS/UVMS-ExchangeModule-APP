@@ -13,16 +13,7 @@ package eu.europa.ec.fisheries.uvms.exchange.bean;
 
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
-import java.text.ParseException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
+import java.util.*;
 import eu.europa.ec.fisheries.schema.exchange.v1.*;
 import eu.europa.ec.fisheries.uvms.exchange.ExchangeLogModel;
 import eu.europa.ec.fisheries.uvms.exchange.dao.ExchangeLogDao;
@@ -30,15 +21,11 @@ import eu.europa.ec.fisheries.uvms.exchange.entity.exchangelog.ExchangeLog;
 import eu.europa.ec.fisheries.uvms.exchange.entity.exchangelog.ExchangeLogStatus;
 import eu.europa.ec.fisheries.uvms.exchange.exception.ExchangeDaoException;
 import eu.europa.ec.fisheries.uvms.exchange.mapper.LogMapper;
-import eu.europa.ec.fisheries.uvms.exchange.model.dto.ListResponseDto;
 import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelException;
-import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeSearchMapperException;
 import eu.europa.ec.fisheries.uvms.exchange.model.exception.InputArgumentException;
 import eu.europa.ec.fisheries.uvms.exchange.search.SearchFieldMapper;
-import eu.europa.ec.fisheries.uvms.exchange.search.SearchValue;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
 
 /**
  **/
@@ -55,8 +42,6 @@ public class ExchangeLogModelBean implements ExchangeLogModel {
         try {
             ExchangeLog exchangeLog = logDao.getExchangeLogByGuid(guid, null);
             exchangeLogType = LogMapper.toModel(exchangeLog);
-            // Enriches the "first level logs" with info related to the related logs.
-            enrichDtosWithRelatedLogsInfo(Collections.singletonList(exchangeLogType));
         } catch (Exception e) {
             log.error("[ERROR] when getting exchange log by GUID. {} {}", guid, e.getMessage());
             exchangeLogType = null;
@@ -90,26 +75,6 @@ public class ExchangeLogModelBean implements ExchangeLogModel {
             exchangeLogTypeSet = null;
         }
         return exchangeLogTypeSet;
-    }
-
-    private void enrichDtosWithRelatedLogsInfo(List<ExchangeLogType> exchangeLogList) {
-        List<String> guids = new ArrayList<>();
-        for (ExchangeLogType log : exchangeLogList) {
-            guids.add(log.getGuid());
-        }
-        List<ExchangeLog> relatedLogs = logDao.getExchangeLogByRangeOfRefGuids(guids);
-        if (CollectionUtils.isNotEmpty(relatedLogs)) {
-            for (ExchangeLog logEntity : relatedLogs) {
-                RelatedLogInfo refLogInfo = new RelatedLogInfo();
-                refLogInfo.setGuid(logEntity.getGuid());
-                refLogInfo.setType(logEntity.getTypeRefType().toString());
-                for (ExchangeLogType logType : exchangeLogList) {
-                    if (StringUtils.equals(logEntity.getTypeRefGuid(), logType.getGuid())) {
-                        logType.getRelatedLogData().add(refLogInfo);
-                    }
-                }
-            }
-        }
     }
 
     @Override

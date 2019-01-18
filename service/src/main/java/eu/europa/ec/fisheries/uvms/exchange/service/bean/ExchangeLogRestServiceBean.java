@@ -31,6 +31,7 @@ import eu.europa.ec.fisheries.uvms.exchange.service.exception.ExchangeLogExcepti
 import eu.europa.ec.fisheries.uvms.movement.model.util.DateUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 
 @Stateless
@@ -60,8 +61,13 @@ public class ExchangeLogRestServiceBean {
         }
     }
 
-    public LogWithRawMsgAndType getExchangeLogRawMessage(String guid) {
-        return exchangeLogModel.getExchangeLogRawXmlByGuid(guid);
+    public String getExchangeLogRawMessage(String guid) {
+        String rawXml = null;
+        ExchangeLog exchangeLogByGuid = exchangeLogDao.getExchangeLogByGuid(guid);
+        if (exchangeLogByGuid != null){
+            rawXml = exchangeLogByGuid.getTypeRefMessage();
+        }
+        return rawXml;
     }
 
     public GetLogListByQueryResponse getExchangeLogList(ExchangeListQuery query) {
@@ -82,6 +88,7 @@ public class ExchangeLogRestServiceBean {
                 exchangeLogEntityList.add(LogMapper.toModel(entity));
             }
         }
+        enrichDtosWithRelatedLogsInfo(exchangeLogEntityList);
         response.setCurrentPage(page);
         int totalNumberOfPages = (count.intValue() / listSize);
         if (totalNumberOfPages == 0 && CollectionUtils.isNotEmpty(exchangeLogEntityList)){
@@ -90,6 +97,26 @@ public class ExchangeLogRestServiceBean {
         response.setTotalNumberOfPages(totalNumberOfPages);
         response.getExchangeLog().addAll(exchangeLogEntityList);
         return response;
+    }
+
+    private void enrichDtosWithRelatedLogsInfo(List<ExchangeLogType> exchangeLogList) {
+        List<String> guids = new ArrayList<>();
+        for (ExchangeLogType log : exchangeLogList) {
+            guids.add(log.getGuid());
+        }
+        List<ExchangeLog> relatedLogs = exchangeLogDao.getExchangeLogByRangeOfRefGuids(guids);
+        if (CollectionUtils.isNotEmpty(relatedLogs)) {
+            for (ExchangeLog logEntity : relatedLogs) {
+                RelatedLogInfo refLogInfo = new RelatedLogInfo();
+                refLogInfo.setGuid(logEntity.getGuid());
+                refLogInfo.setType(logEntity.getTypeRefType().toString());
+                for (ExchangeLogType logType : exchangeLogList) {
+                    if (StringUtils.equals(logEntity.getTypeRefGuid(), logType.getGuid())) {
+                        logType.getRelatedLogData().add(refLogInfo);
+                    }
+                }
+            }
+        }
     }
 
     private boolean mapReversedField(ExchangeListQuery query) {
