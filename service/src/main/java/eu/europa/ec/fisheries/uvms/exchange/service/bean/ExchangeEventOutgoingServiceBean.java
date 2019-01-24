@@ -423,7 +423,7 @@ public class ExchangeEventOutgoingServiceBean implements ExchangeEventOutgoingSe
             ProcessedMovementResponse response = JAXBMarshaller.unmarshallTextMessage(message.getJmsMessage(), ProcessedMovementResponse.class);
             log.debug("Received processed movement from Rules:{}", response);
             MovementRefType movementRefType = response.getMovementRefType();
-            if(movementRefType.getAckResponseMessageID().equals(ExchangeConstants.TEST_ACK_IGNORE_EXCHANGE_LOG)){
+            if (movementRefType.getAckResponseMessageID() == null) {
                 return;
             }
             ExchangeLogStatusTypeType statusType;
