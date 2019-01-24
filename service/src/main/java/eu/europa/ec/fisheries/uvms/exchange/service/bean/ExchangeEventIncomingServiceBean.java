@@ -286,7 +286,7 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
             final TextMessage jmsMessage = message.getJmsMessage();
             final String jmsMessageID = jmsMessage.getJMSMessageID();
             SetMovementReportRequest request = JAXBMarshaller.unmarshallTextMessage(jmsMessage, SetMovementReportRequest.class);
-            log.info("Processing Movement : {}", request.getRefGuid());
+            log.debug("Processing Movement : {}", request.getRefGuid());
             String username;
             SetReportMovementType setRepMovType = request.getRequest();
             if (MovementSourceType.MANUAL.equals(setRepMovType.getMovement().getSource())) {// A person has created a position
@@ -304,16 +304,18 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
 //                incomingMovement.setPluginName(pluginName);
                 incomingMovement.setDateReceived(setRepMovType.getTimestamp().toInstant());
                 incomingMovement.setUpdatedBy(username);
-                log.info("Logging received movement.");
-                ExchangeLogType createdLog = exchangeLog.log(request, LogType.RECEIVE_MOVEMENT, ExchangeLogStatusTypeType.ISSUED, TypeRefType.MOVEMENT,
-                        JAXBMarshaller.marshallJaxBObjectToString(request), true);
-                incomingMovement.setAckResponseMessageId(createdLog.getGuid());
+                if (!baseMovement.getSource().equals(MovementSourceType.AIS)) {
+                    log.debug("Logging received movement.");
+                    ExchangeLogType createdLog = exchangeLog.log(request, LogType.RECEIVE_MOVEMENT, ExchangeLogStatusTypeType.ISSUED, TypeRefType.MOVEMENT,
+                            JAXBMarshaller.marshallJaxBObjectToString(request), true);
+                    incomingMovement.setAckResponseMessageId(createdLog.getGuid());
+                }
                 String json = jsonb.toJson(incomingMovement);
 
                 //combine all possible values into one big grouping string
                 String groupId = incomingMovement.getAssetCFR() + incomingMovement.getAssetIMO() + incomingMovement.getAssetIRCS() + incomingMovement.getAssetMMSI() + incomingMovement.getAssetID() + incomingMovement.getAssetGuid() + incomingMovement.getMobileTerminalDNID() + incomingMovement.getMobileTerminalConnectId() + incomingMovement.getMobileTerminalGuid() + incomingMovement.getMobileTerminalLES() + incomingMovement.getMobileTerminalMemberNumber() + incomingMovement.getMobileTerminalSerialNumber() + "AllOtherThings";
                 producer.sendMovementMessage(json, groupId);
-                log.info("Finished forwarding received movement to movement module.");
+                log.debug("Finished forwarding received movement to movement module.");
             } else {
                 log.debug("Validation error. Event sent to plugin {}", message);
             }

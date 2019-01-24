@@ -29,6 +29,4 @@ public class ExchangeConstants {
     public static final String LOG_BY_TYPE_REF_AND_GUID = "Log.findByTypeRefGuid";
     public static final String LOG_BY_TYPE_RANGE_OF_REF_GUIDS = "Log.findByRangeOfRefGuids";
 
-    public static final String TEST_ACK_IGNORE_EXCHANGE_LOG = "Test";
-
 }
