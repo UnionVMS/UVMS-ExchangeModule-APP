@@ -32,7 +32,7 @@
 
         <!-- Uvms libs -->
         <uvms.config.version>4.0.3-W14J8</uvms.config.version>
-        <uvms.commons.version>3.0.33-W14J8</uvms.commons.version>
+        <uvms.commons.version>3.3-W14J8</uvms.commons.version>
         <usm4uvms.version>4.0.14-W14-J8</usm4uvms.version>
 
         <uvms-pom-deps.version>1.21</uvms-pom-deps.version>
