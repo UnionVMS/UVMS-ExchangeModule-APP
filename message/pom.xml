@@ -5,7 +5,7 @@
     <parent>
         <groupId>eu.europa.ec.fisheries.uvms.exchange</groupId>
         <artifactId>exchange</artifactId>
-        <version>4.0.40-SNAPSHOT</version>
+        <version>4.0.41-W14J8</version>
     </parent>
     
     <artifactId>exchange-message</artifactId>
