@@ -124,4 +124,6 @@ public class ServiceSetting implements Serializable {
 		this.setting = setting;
 	}
 
+
+
 }

@@ -13,6 +13,7 @@ package eu.europa.ec.fisheries.uvms.exchange.bean;
 
 import eu.europa.ec.fisheries.schema.exchange.plugin.types.v1.PluginType;
 import eu.europa.ec.fisheries.schema.exchange.service.v1.*;
+import eu.europa.ec.fisheries.uvms.exchange.ServiceRegistryModel;
 import eu.europa.ec.fisheries.uvms.exchange.dao.ServiceRegistryDao;
 import eu.europa.ec.fisheries.uvms.exchange.entity.serviceregistry.Service;
 import eu.europa.ec.fisheries.uvms.exchange.entity.serviceregistry.ServiceCapability;
@@ -20,7 +21,8 @@ import eu.europa.ec.fisheries.uvms.exchange.entity.serviceregistry.ServiceSettin
 import eu.europa.ec.fisheries.uvms.exchange.exception.ExchangeDaoException;
 import eu.europa.ec.fisheries.uvms.exchange.mapper.ServiceMapper;
 import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelException;
-import eu.europa.ec.fisheries.uvms.exchange.ServiceRegistryModel;
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.slf4j.Logger;
@@ -112,10 +114,18 @@ public class ServiceRegistryModelBean implements ServiceRegistryModel {
 	public ServiceResponseType updatePluginSettings(String serviceClassName, SettingListType settings, String username) throws ExchangeModelException {
     	LOG.info("\n\nUpdate plugin settings for " + serviceClassName);
     	Service service = dao.getServiceByServiceClassName(serviceClassName);
-    	if(service != null) {
+        if(service != null && CollectionUtils.isNotEmpty(service.getServiceSettingList())) {
+            List<ServiceSetting> serviceSettingList = service.getServiceSettingList();
     		List<ServiceSetting> newSettings = ServiceMapper.mapSettingsList(service, settings, username);
-    		service.getServiceSettingList().clear();
-    		service.getServiceSettingList().addAll(newSettings);
+            for (ServiceSetting newSetting : newSettings) {
+                String setting = newSetting.getSetting();
+                for (ServiceSetting serviceSetting : serviceSettingList) {
+                    if(StringUtils.equals(setting, serviceSetting.getSetting())){
+                        serviceSetting.setValue(newSetting.getValue());
+                    }
+                }
+            }
+            serviceSettingList.addAll(newSettings);
     		dao.updateService(service);
     		return ServiceMapper.toServiceModel(service);
     	}
