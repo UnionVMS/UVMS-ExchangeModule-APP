@@ -110,7 +110,7 @@ public class ServiceRegistryModelBean implements ServiceRegistryModel {
 
     @Override
 	public ServiceResponseType updatePluginSettings(String serviceClassName, SettingListType settings, String username) throws ExchangeModelException {
-    	LOG.info("Update plugin settings for " + serviceClassName);
+    	LOG.info("\n\nUpdate plugin settings for " + serviceClassName);
     	Service service = dao.getServiceByServiceClassName(serviceClassName);
     	if(service != null) {
     		List<ServiceSetting> newSettings = ServiceMapper.mapSettingsList(service, settings, username);

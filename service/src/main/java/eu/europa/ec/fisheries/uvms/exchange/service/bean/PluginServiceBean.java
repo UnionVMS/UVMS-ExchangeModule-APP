@@ -122,6 +122,7 @@ public class PluginServiceBean implements PluginService {
         try {
             overrideSettingsFromConfig(register);
             ServiceResponseType service = exchangeService.registerService(register.getService(), register.getCapabilityList(), register.getSettingList(), register.getService().getName());
+
             //push to config module
             try {
                 String serviceClassName = register.getService().getServiceClassName();
@@ -133,9 +134,9 @@ public class PluginServiceBean implements PluginService {
             } catch (ConfigServiceException e) {
                 log.error("Couldn't register plugin settings in config parameter table");
             }
-            //TODO log to exchange log
-            String response = ExchangePluginResponseMapper.mapToRegisterServiceResponseOK(messageId, service);
-            sendEventBusMessage(register.getService().getServiceResponseMessageName(), response);
+
+            // Return response to requester plugin
+            sendEventBusMessage(register.getService().getServiceResponseMessageName(), ExchangePluginResponseMapper.mapToRegisterServiceResponseOK(messageId, service));
             setServiceStatusOnRegister(register.getService().getServiceClassName());
 
         } catch (ExchangeServiceException | ExchangeModelMapperException e) {
@@ -190,7 +191,8 @@ public class PluginServiceBean implements PluginService {
                 for(SettingType type : currentRequestSettings){
                     SettingType configSettingType = configServiceSettingsMap.get(type.getKey());
                     if(configSettingType!=null && !configSettingType.getValue().equalsIgnoreCase(type.getValue())){
-                        type.setValue(configSettingType.getValue());
+                        // FIXME : Why Why Why??? This is overriding the settingsRequest from the plugin and setting it to the Settings values from config!!
+                        //type.setValue(configSettingType.getValue());
                     }
                 }
             }
@@ -216,15 +218,15 @@ public class PluginServiceBean implements PluginService {
 
     @Override
     public void unregisterService(@Observes @UnRegisterServiceEvent PluginMessageEvent event) {
-        log.info("[INFO] Received @UnRegisterServiceEvent request : {}", event);
+        log.info("[INFO] Received @UnRegisterServiceEvent request..");
         TextMessage textMessage = event.getJmsMessage();
         ServiceResponseType service = null;
         try {
             UnregisterServiceRequest unregister = JAXBMarshaller.unmarshallTextMessage(textMessage, UnregisterServiceRequest.class);
             service = exchangeService.unregisterService(unregister.getService(), unregister.getService().getName());
             String serviceClassName = service.getServiceClassName();
-            //NO ack back to plugin
-            //TODO log to exchange log
+            // Cannot send response ACK since the plugin is stopped/undeployed and won't receive it!
+            log.info("[UNREGISTRATION] Unregistered [{}] plugin succesfully!", serviceClassName);
         } catch (ExchangeModelMarshallException | ExchangeServiceException e) {
             log.error("Unregister service exception " + e.getMessage());
             errorEvent.fire(new PluginMessageEvent(textMessage, service, ExchangePluginResponseMapper.mapToPluginFaultResponse(FaultCode.EXCHANGE_PLUGIN_EVENT.getCode(), "Exception when unregister service")));
@@ -251,10 +253,8 @@ public class PluginServiceBean implements PluginService {
                 try {
                     String key = settingEvent.getKey();
                     String value = parameterService.getStringValue(key);
-                    String settingKey;
                     String[] splittedKey = key.split(PARAMETER_DELIMETER);
                     if (splittedKey.length > 2) {
-                        settingKey = key;
                         String serviceClassName = "";
                         for (int i = 0; i < splittedKey.length - 2; i++) {
                             serviceClassName += splittedKey[i] + ".";

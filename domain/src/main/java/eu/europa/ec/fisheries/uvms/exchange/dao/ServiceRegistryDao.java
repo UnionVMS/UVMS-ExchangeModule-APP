@@ -32,7 +32,7 @@ public interface ServiceRegistryDao {
      * @throws
      * eu.europa.ec.fisheries.uvms.exchange.exception.ExchangeDaoException
      */
-    public Service createEntity(Service service) throws ExchangeDaoException;
+    Service createEntity(Service service) throws ExchangeDaoException;
 
     /**
      * Get entity by internal entity id
@@ -42,7 +42,7 @@ public interface ServiceRegistryDao {
      * @throws
      * eu.europa.ec.fisheries.uvms.exchange.exception.ExchangeDaoException
      */
-    public Service getEntityById(String id) throws ExchangeDaoException;
+    Service getEntityById(String id) throws ExchangeDaoException;
 
     /**
      * Update entity in database
@@ -52,7 +52,7 @@ public interface ServiceRegistryDao {
      * @throws
      * eu.europa.ec.fisheries.uvms.exchange.exception.ExchangeDaoException
      */
-    public Service updateService(Service service) throws ExchangeDaoException;
+    Service updateService(Service service) throws ExchangeDaoException;
 
     /**
      * Delete entity from database
@@ -61,7 +61,7 @@ public interface ServiceRegistryDao {
      * @throws
      * eu.europa.ec.fisheries.uvms.exchange.exception.ExchangeDaoException
      */
-    public void deleteEntity(Long serviceId) throws ExchangeDaoException;
+    void deleteEntity(Long serviceId) throws ExchangeDaoException;
 
     /**
      * Get all services (FIND_ALL)
@@ -70,14 +70,14 @@ public interface ServiceRegistryDao {
      * @throws
      * eu.europa.ec.fisheries.uvms.exchange.exception.ExchangeDaoException
      */
-    public List<Service> getServices() throws ExchangeDaoException;
+    List<Service> getServices() throws ExchangeDaoException;
 
     /**
      * Get services depending on plugin types
      * @return
      * @throws ExchangeDaoException
      */
-    public List<Service> getServicesByTypes(List<PluginType> pluginTypes) throws ExchangeDaoException;
+    List<Service> getServicesByTypes(List<PluginType> pluginTypes) throws ExchangeDaoException;
     
     /**
      *
@@ -87,7 +87,7 @@ public interface ServiceRegistryDao {
      * @return
      * @throws ExchangeDaoException
      */
-    public List<ServiceCapability> getServiceCapabilities(String serviceClassName) throws ExchangeDaoException;
+    List<ServiceCapability> getServiceCapabilities(String serviceClassName) throws ExchangeDaoException;
 
     /**
      *
@@ -97,7 +97,7 @@ public interface ServiceRegistryDao {
      * @return
      * @throws ExchangeDaoException
      */
-    public List<ServiceSetting> getServiceSettings(String serviceClassName) throws ExchangeDaoException;
+    List<ServiceSetting> getServiceSettings(String serviceClassName) throws ExchangeDaoException;
 
     /**
      * Get service by Service Class Name
@@ -105,13 +105,13 @@ public interface ServiceRegistryDao {
      * @param serviceClassName
      * @return
      */
-    public Service getServiceByServiceClassName(String serviceClassName);
+    Service getServiceByServiceClassName(String serviceClassName);
 
     /**
      *
      * @param mappedServiceName
      * @return
      */
-    public Service getServiceByMappedServiceName(String mappedServiceName);
+    Service getServiceByMappedServiceName(String mappedServiceName);
 
 }

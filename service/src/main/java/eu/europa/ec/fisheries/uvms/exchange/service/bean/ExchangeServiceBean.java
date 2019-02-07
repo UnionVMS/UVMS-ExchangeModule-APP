@@ -70,7 +70,7 @@ public class ExchangeServiceBean implements ExchangeService {
      */
     @Override
     public ServiceResponseType unregisterService(ServiceType data, String username) throws ExchangeServiceException {
-        log.info("Unregister service invoked in service layer: {} {}",data,username);
+        log.info("Unregister service invoked in service layer: {} {}",data.getServiceClassName(),username);
         try {
             ServiceResponseType serviceResponseType = serviceRegistryModel.unregisterService(data, username);
             //sendAuditlogMessageForUnregisterService(compressServiceClassName(serviceResponseType.getServiceClassName()), username);
