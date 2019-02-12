@@ -21,10 +21,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import eu.europa.ec.fisheries.schema.exchange.source.v1.GetLogListByQueryResponse;
-import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeListQuery;
-import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogStatusType;
-import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogWithValidationResults;
-import eu.europa.ec.fisheries.schema.exchange.v1.TypeRefType;
+import eu.europa.ec.fisheries.schema.exchange.v1.*;
 import eu.europa.ec.fisheries.uvms.commons.date.DateUtils;
 import eu.europa.ec.fisheries.uvms.exchange.rest.dto.PollQuery;
 import eu.europa.ec.fisheries.uvms.exchange.rest.dto.ResponseDto;
@@ -85,6 +82,20 @@ public class ExchangeLogRestResource {
             return new ResponseDto(logRestServiceBean.getExchangeLogRawMessage(guid), RestResponseCode.OK);
         } catch (Exception e) {
             log.error("[ Error when getting exchange log by GUID. ] {}", e.getMessage());
+            return ErrorHandler.getFault(e);
+        }
+    }
+
+    @DELETE
+    @Produces(value = {MediaType.APPLICATION_JSON})
+    @Path("/{uuid}")
+    @RequiresFeature(UnionVMSFeature.viewExchange)
+    public ResponseDto deleteByMessageUuid(@PathParam("uuid") String messageUuid) {
+        try {
+            logRestServiceBean.remove(messageUuid);
+            return new ResponseDto(RestResponseCode.OK);
+        } catch (Exception e) {
+            log.error("[ Error when deleting exchange log by MessageUuid. ] {}", e.getMessage());
             return ErrorHandler.getFault(e);
         }
     }

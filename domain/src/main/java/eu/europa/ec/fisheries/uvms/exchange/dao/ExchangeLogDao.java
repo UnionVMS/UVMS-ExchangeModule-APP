@@ -13,6 +13,7 @@ copy of the GNU General Public License along with the IFDM Suite. If not, see <h
 package eu.europa.ec.fisheries.uvms.exchange.dao;
 
 import javax.ejb.Local;
+import javax.persistence.EntityManager;
 import java.util.List;
 import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeHistoryListQuery;
 import eu.europa.ec.fisheries.schema.exchange.v1.TypeRefType;
@@ -25,7 +26,8 @@ import eu.europa.ec.fisheries.uvms.exchange.exception.ExchangeDaoException;
 @Local
 public interface ExchangeLogDao {
 
-    ExchangeLog createLog(ExchangeLog log) throws ExchangeDaoException;
+	EntityManager getEm();
+	ExchangeLog createLog(ExchangeLog log) throws ExchangeDaoException;
     ExchangeLog getExchangeLogByGuid(String logGuid) throws ExchangeDaoException;
     ExchangeLog getExchangeLogByGuid(String logGuid, TypeRefType type) throws ExchangeDaoException;
 	List<ExchangeLog> getExchangeLogByTypesRefAndGuid(String typeRefGuid, List<TypeRefType> types) throws ExchangeDaoException;

@@ -16,9 +16,8 @@ import javax.ejb.LocalBean;
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
+import javax.transaction.Transactional;
+import java.util.*;
 import eu.europa.ec.fisheries.schema.exchange.source.v1.GetLogListByQueryResponse;
 import eu.europa.ec.fisheries.schema.exchange.v1.*;
 import eu.europa.ec.fisheries.uvms.commons.date.DateUtils;
@@ -221,5 +220,20 @@ public class ExchangeLogRestServiceBean {
             }
         }
         return sortFields;
+    }
+
+    @Transactional
+    public void remove(String messageUuid) {
+        ExchangeLog exchangeLogByGuid = exchangeLogDao.getExchangeLogByGuid(messageUuid);
+        if (exchangeLogByGuid == null){
+            List<ExchangeLog> exchangeLogByRangeOfRef = exchangeLogDao.getExchangeLogByRangeOfRefGuids(Collections.singletonList(messageUuid));
+            if (CollectionUtils.isNotEmpty(exchangeLogByRangeOfRef)){
+                for (ExchangeLog exchangeLog : exchangeLogByRangeOfRef) {
+                    exchangeLogDao.getEntityManager().remove(exchangeLog);
+                }
+            }
+        } else {
+            exchangeLogDao.getEntityManager().remove(exchangeLogByGuid);
+        }
     }
 }
