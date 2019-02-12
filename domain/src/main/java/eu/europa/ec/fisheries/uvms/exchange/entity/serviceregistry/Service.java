@@ -115,12 +115,12 @@ public class Service implements Serializable {
         return id;
     }
 
-    public void setId(Long id) {
-        this.id = id;
-    }
-
     public String getServiceClassName() {
         return serviceClassName;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
     }
 
     public void setServiceClassName(String serviceClassName) {
@@ -219,4 +219,22 @@ public class Service implements Serializable {
         this.serviceResponse = serviceResponse;
     }
 
+    @Override
+    public String toString() {
+        return "Service{" +
+                "id=" + id +
+                ", serviceClassName='" + serviceClassName + '\'' +
+                ", name='" + name + '\'' +
+                ", serviceResponse='" + serviceResponse + '\'' +
+                ", description='" + description + '\'' +
+                ", active=" + active +
+                ", type=" + type +
+                ", satelliteType='" + satelliteType + '\'' +
+                ", status='" + status + '\'' +
+                ", updated=" + updated +
+                ", updatedBy='" + updatedBy + '\'' +
+                ", serviceCapabilityList=" + serviceCapabilityList +
+                ", serviceSettingList=" + serviceSettingList +
+                '}';
+    }
 }

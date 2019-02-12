@@ -30,6 +30,8 @@ import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
 import java.util.List;
 
+import static eu.europa.ec.fisheries.uvms.exchange.service.util.StringUtil.compressServiceClassName;
+
 @Stateless
 @Slf4j
 public class ExchangeServiceBean implements ExchangeService {
@@ -52,10 +54,10 @@ public class ExchangeServiceBean implements ExchangeService {
     @Override
     @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
     public ServiceResponseType registerService(ServiceType data, CapabilityListType capabilityList, SettingListType settingList, String username) throws ExchangeServiceException {
-        log.info("Register service invoked in service layer: {} {}",data,username);
+        log.info("[INFO] Register service invoked in service layer for service : {} Plugin type {} by : {}",data.getServiceClassName(), data.getPluginType(), username);
         try {
             ServiceResponseType serviceResponseType = serviceRegistryModel.registerService(data, capabilityList, settingList, username);
-            //sendAuditlogMessageForRegisterService(compressServiceClassName(serviceResponseType.getServiceClassName()), username);
+            sendAuditlogMessageForRegisterService(compressServiceClassName(serviceResponseType.getServiceClassName()), username);
             return serviceResponseType;
         } catch (ExchangeModelException e) {
             throw new ExchangeServiceException(e.getMessage());
@@ -105,7 +107,7 @@ public class ExchangeServiceBean implements ExchangeService {
             //sendAuditlogMessageForUpdateService(compressServiceClassName(serviceClassName), username);
             return updatedSettings;
         } catch (ExchangeModelException  e) {
-            throw new ExchangeServiceException(e.getMessage());
+            throw new ExchangeServiceException(e.getMessage(), e);
         }
     }
 

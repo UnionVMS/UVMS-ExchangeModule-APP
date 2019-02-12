@@ -59,9 +59,10 @@ public class ServiceRegistryModelBean implements ServiceRegistryModel {
             List<ServiceCapability> serviceCapabilityList = ServiceMapper.upsetCapabilityList(service, capabilityList, username);
 
             service.getServiceCapabilityList().clear();
-            service.getServiceCapabilityList().addAll(serviceCapabilityList);
             service.getServiceSettingList().clear();
+            service.getServiceCapabilityList().addAll(serviceCapabilityList);
             service.getServiceSettingList().addAll(newSettings);
+
             service.setDescription(serviceType.getDescription());
             service.setName(serviceType.getName());
             service.setUpdated(new DateTime(DateTimeZone.UTC).toDate());
@@ -112,7 +113,7 @@ public class ServiceRegistryModelBean implements ServiceRegistryModel {
 
     @Override
 	public ServiceResponseType updatePluginSettings(String serviceClassName, SettingListType settings, String username) throws ExchangeModelException {
-    	LOG.info("\n\nUpdate plugin settings for " + serviceClassName);
+    	LOG.info("\n\nUpdate plugin settings for {}" ,serviceClassName);
     	Service service = dao.getServiceByServiceClassName(serviceClassName);
         if(service != null && CollectionUtils.isNotEmpty(service.getServiceSettingList())) {
             List<ServiceSetting> serviceSettingList = service.getServiceSettingList();

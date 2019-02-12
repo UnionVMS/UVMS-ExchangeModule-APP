@@ -252,7 +252,7 @@ public class PluginServiceBean implements PluginService {
                 log.info("ConfigModule updated parameter table with settings of plugins");
                 try {
                     String key = settingEvent.getKey();
-                    String value = parameterService.getStringValue(key);
+                    String value = parameterService.getParamValueById(key);
                     String[] splittedKey = key.split(PARAMETER_DELIMETER);
                     if (splittedKey.length > 2) {
                         String serviceClassName = "";

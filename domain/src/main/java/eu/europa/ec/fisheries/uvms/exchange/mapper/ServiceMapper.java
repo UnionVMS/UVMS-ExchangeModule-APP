@@ -11,26 +11,18 @@ copy of the GNU General Public License along with the IFDM Suite. If not, see <h
  */
 package eu.europa.ec.fisheries.uvms.exchange.mapper;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
+import eu.europa.ec.fisheries.schema.exchange.service.v1.*;
+import eu.europa.ec.fisheries.uvms.exchange.entity.serviceregistry.Service;
+import eu.europa.ec.fisheries.uvms.exchange.entity.serviceregistry.ServiceCapability;
+import eu.europa.ec.fisheries.uvms.exchange.entity.serviceregistry.ServiceSetting;
 import eu.europa.ec.fisheries.uvms.exchange.model.util.DateUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import eu.europa.ec.fisheries.schema.exchange.service.v1.CapabilityListType;
-import eu.europa.ec.fisheries.schema.exchange.service.v1.CapabilityType;
-import eu.europa.ec.fisheries.schema.exchange.service.v1.ServiceResponseType;
-import eu.europa.ec.fisheries.schema.exchange.service.v1.ServiceType;
-import eu.europa.ec.fisheries.schema.exchange.service.v1.SettingListType;
-import eu.europa.ec.fisheries.schema.exchange.service.v1.SettingType;
-import eu.europa.ec.fisheries.schema.exchange.service.v1.StatusType;
-import eu.europa.ec.fisheries.uvms.exchange.constant.ExchangeConstants;
-import eu.europa.ec.fisheries.uvms.exchange.entity.serviceregistry.Service;
-import eu.europa.ec.fisheries.uvms.exchange.entity.serviceregistry.ServiceCapability;
-import eu.europa.ec.fisheries.uvms.exchange.entity.serviceregistry.ServiceSetting;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class ServiceMapper {
     
@@ -158,6 +150,7 @@ public class ServiceMapper {
             ServiceSetting currentSetting = map.get(setting.getKey());
             if (currentSetting == null) {
                 ServiceSetting newSetting = toSettingEntity(parent, setting, username);
+                newSetting.setService(parent);
                 newSettings.add(newSetting);
             } else {
                 if (!currentSetting.getValue().equalsIgnoreCase(setting.getValue())) {
@@ -165,6 +158,7 @@ public class ServiceMapper {
                     currentSetting.setUpdatedTime(DateUtils.nowUTC().toDate());
                     currentSetting.setUser(username);
                 }
+                currentSetting.setService(parent);
                 newSettings.add(currentSetting);
             }
         }
