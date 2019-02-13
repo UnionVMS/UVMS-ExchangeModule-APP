@@ -295,12 +295,11 @@ public class ExchangeLogModelBean implements ExchangeLogModel {
         }
         try {
             List<ExchangeLog> exchangeLogByTypesRefAndGuid = logDao.getExchangeLogByTypesRefAndGuid(pollStatus.getPollGuid(), Collections.singletonList(TypeRefType.POLL));
-
-            if (CollectionUtils.isNotEmpty(exchangeLogByTypesRefAndGuid)) {
-                List<ExchangeLogStatus> statusList = exchangeLogByTypesRefAndGuid.get(0).getStatusHistory();
-                statusList.add(LogMapper.toNewStatusEntity(exchangeLogByTypesRefAndGuid.get(0), pollStatus.getStatus(), username));
-                exchangeLogByTypesRefAndGuid.get(0).setStatus(pollStatus.getStatus());
-                ExchangeLog retEntity = logDao.updateLog(exchangeLogByTypesRefAndGuid.get(0));
+            for(ExchangeLog log : exchangeLogByTypesRefAndGuid){
+                List<ExchangeLogStatus> statusList = log.getStatusHistory();
+                statusList.add(LogMapper.toNewStatusEntity(log, pollStatus.getStatus(), username));
+                log.setStatus(pollStatus.getStatus());
+                ExchangeLog retEntity = logDao.updateLog(log);
                 logType = LogMapper.toModel(retEntity);
             }
         } catch (ExchangeDaoException ex) {
