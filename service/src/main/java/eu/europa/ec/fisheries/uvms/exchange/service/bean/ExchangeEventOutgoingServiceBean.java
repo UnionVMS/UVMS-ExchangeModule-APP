@@ -254,7 +254,8 @@ public class ExchangeEventOutgoingServiceBean implements ExchangeEventOutgoingSe
             CommandType command = request.getCommand();
             String validationResult = validateRestCommand(request, service, command);
             if (validationResult.equals("OK")) {
-                sendCommandToPlugin(request, service.getName(), "Incoming Rest call about " + request.getCommand().getCommand());
+                String marshalled = JAXBMarshaller.marshallJaxBObjectToString(request);
+                sendCommandToPlugin(request, service.getName(), marshalled);
             }
             return validationResult;
         }catch (ExchangeMessageException | ExchangeModelMarshallException | ExchangeLogException | ExchangeServiceException e){

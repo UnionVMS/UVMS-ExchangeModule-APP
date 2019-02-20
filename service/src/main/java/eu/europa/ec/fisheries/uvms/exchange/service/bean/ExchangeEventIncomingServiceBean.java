@@ -640,11 +640,7 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
         ExchangeLogStatusTypeType logStatus = ExchangeLogStatusTypeType.FAILED;
         if (ack.getType() == eu.europa.ec.fisheries.schema.exchange.common.v1.AcknowledgeTypeType.OK) {//TODO if(poll probably transmitted)
             logStatus = ExchangeLogStatusTypeType.SUCCESSFUL;
-            try {
-                exchangeLog.removeUnsentMessage(ack.getUnsentMessageGuid(), serviceClassName);
-            } catch (ExchangeLogException ex) {
-                log.error(ex.getMessage());
-            }
+            removeUnsentMessage(serviceClassName, ack);
 
         } else if (ack.getType() == eu.europa.ec.fisheries.schema.exchange.common.v1.AcknowledgeTypeType.NOK) {
             log.debug(method + " was NOK: " + ack.getMessage());
@@ -667,12 +663,25 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
 
     private void handleSetPollStatusAcknowledge(ExchangePluginMethod method, String serviceClassName, AcknowledgeType ack) {
         log.debug(method + " was acknowledged in " + serviceClassName);
+        ExchangeLogStatusTypeType exchangeLogStatus = ack.getPollStatus().getStatus();
+        if (exchangeLogStatus.equals(ExchangeLogStatusTypeType.SUCCESSFUL) ||
+                exchangeLogStatus.equals(ExchangeLogStatusTypeType.FAILED)) {
+            removeUnsentMessage(serviceClassName, ack);
+        }
         try {
-            PollStatus updatedLog = exchangeLog.setPollStatus(ack.getMessageId(), ack.getPollStatus().getPollId(), ack.getPollStatus().getStatus(), serviceClassName);
+            PollStatus updatedLog = exchangeLog.setPollStatus(ack.getMessageId(), ack.getPollStatus().getPollId(), exchangeLogStatus, serviceClassName);
             // Long polling
             pollEvent.fire(new NotificationMessage("guid", updatedLog.getPollGuid()));
         } catch (ExchangeLogException e) {
             log.error(e.getMessage());
+        }
+    }
+
+    private void removeUnsentMessage(String serviceClassName, AcknowledgeType ack) {
+        try {
+            exchangeLog.removeUnsentMessage(ack.getUnsentMessageGuid(), serviceClassName);
+        } catch (ExchangeLogException ex) {
+            log.error(ex.getMessage());
         }
     }
 
