@@ -170,6 +170,10 @@ public class ExchangeMessageConsumerBean implements MessageListener {
     @LogIdByTypeExists
     private Event<ExchangeMessageEvent> logIdByTyeExists;
 
+    @Inject
+    @ReceiveAssetInformationEvent
+    private Event<ExchangeMessageEvent> assetInformationEvent;
+
 
     @Override
     public void onMessage(Message message) {
@@ -283,6 +287,9 @@ public class ExchangeMessageConsumerBean implements MessageListener {
                     break;
                 case LOG_ID_BY_TYPE_EXISTS:
                     logIdByTyeExists.fire(messageEventWrapper);
+                    break;
+                case SEND_ASSET_INFORMATION:
+                    assetInformationEvent.fire(messageEventWrapper);
                     break;
                 default:
                     LOG.error("[ Not implemented method consumed: {} ] ", exchangeMethod);
