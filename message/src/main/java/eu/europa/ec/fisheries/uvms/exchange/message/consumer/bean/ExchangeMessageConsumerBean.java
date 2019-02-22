@@ -288,7 +288,7 @@ public class ExchangeMessageConsumerBean implements MessageListener {
                 case LOG_ID_BY_TYPE_EXISTS:
                     logIdByTyeExists.fire(messageEventWrapper);
                     break;
-                case SEND_ASSET_INFORMATION:
+                case RECEIVE_ASSET_INFORMATION:
                     assetInformationEvent.fire(messageEventWrapper);
                     break;
                 default:
