@@ -11,14 +11,6 @@
  */
 package eu.europa.ec.fisheries.uvms.exchange.message.consumer.bean;
 
-import javax.ejb.ActivationConfigProperty;
-import javax.ejb.MessageDriven;
-import javax.enterprise.event.Event;
-import javax.inject.Inject;
-import javax.jms.Message;
-import javax.jms.MessageListener;
-import javax.jms.TextMessage;
-
 import eu.europa.ec.fisheries.schema.exchange.module.v1.ExchangeBaseRequest;
 import eu.europa.ec.fisheries.schema.exchange.module.v1.ExchangeModuleMethod;
 import eu.europa.ec.fisheries.schema.exchange.plugin.v1.AcknowledgeResponse;
@@ -33,6 +25,15 @@ import eu.europa.ec.fisheries.uvms.exchange.model.mapper.ExchangeModuleResponseM
 import eu.europa.ec.fisheries.uvms.exchange.model.mapper.JAXBMarshaller;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import javax.ejb.ActivationConfigProperty;
+import javax.ejb.MessageDriven;
+import javax.enterprise.event.Event;
+import javax.inject.Inject;
+import javax.jms.JMSException;
+import javax.jms.Message;
+import javax.jms.MessageListener;
+import javax.jms.TextMessage;
 
 //@formatter:off
 @MessageDriven(mappedName = MessageConstants.QUEUE_EXCHANGE_EVENT, activationConfig = {
@@ -177,7 +178,7 @@ public class ExchangeMessageConsumerBean implements MessageListener {
 
     @Override
     public void onMessage(Message message) {
-        
+
         TextMessage textMessage = (TextMessage) message;
         MappedDiagnosticContext.addMessagePropertiesToThreadMappedDiagnosticContext(textMessage);
         ExchangeBaseRequest request = tryConsumeExchangeBaseRequest(textMessage);
@@ -258,7 +259,7 @@ public class ExchangeMessageConsumerBean implements MessageListener {
                     mdrSyncResponseMessageEvent.fire(messageEventWrapper);
                     break;
                 case SET_FLUX_FA_REPORT_MESSAGE:
-                case UNKNOWN :
+                case UNKNOWN:
                     processFLUXFAReportMessageEvent.fire(messageEventWrapper);
                     break;
                 case SEND_FLUX_FA_REPORT_MESSAGE:
@@ -289,7 +290,12 @@ public class ExchangeMessageConsumerBean implements MessageListener {
                     logIdByTyeExists.fire(messageEventWrapper);
                     break;
                 case RECEIVE_ASSET_INFORMATION:
-                    assetInformationEvent.fire(messageEventWrapper);
+                    try {
+                        messageEventWrapper.getJmsMessage().setStringProperty("METHOD", "UPSERT_ASSET");
+                        assetInformationEvent.fire(messageEventWrapper);
+                    } catch (JMSException e) {
+                        LOG.error(e.toString(), e);
+                    }
                     break;
                 default:
                     LOG.error("[ Not implemented method consumed: {} ] ", exchangeMethod);
