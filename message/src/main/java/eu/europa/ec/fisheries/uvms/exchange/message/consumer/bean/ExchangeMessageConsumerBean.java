@@ -290,12 +290,7 @@ public class ExchangeMessageConsumerBean implements MessageListener {
                     logIdByTyeExists.fire(messageEventWrapper);
                     break;
                 case RECEIVE_ASSET_INFORMATION:
-                    try {
-                        messageEventWrapper.getJmsMessage().setStringProperty("METHOD", "ASSET_INFORMATION");
                         assetInformationEvent.fire(messageEventWrapper);
-                    } catch (JMSException e) {
-                        LOG.error(e.toString(), e);
-                    }
                     break;
                 default:
                     LOG.error("[ Not implemented method consumed: {} ] ", exchangeMethod);

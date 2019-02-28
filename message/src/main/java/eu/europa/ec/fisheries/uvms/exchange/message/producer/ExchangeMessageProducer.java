@@ -43,4 +43,6 @@ public interface ExchangeMessageProducer {
     void sendPluginErrorResponseMessage(@Observes @PluginErrorEvent PluginMessageEvent event);
 
     void sendModuleAckMessage(String messageId, MessageQueue queue, String text);
+
+    String forwardToAsset(String text) throws ExchangeMessageException;
 }
