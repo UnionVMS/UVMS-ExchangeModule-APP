@@ -164,6 +164,25 @@ public class ExchangeMessageProducerBean extends AbstractProducer implements Exc
     }
 
     @Override
+    public String forwardToAsset(String text) throws ExchangeMessageException {
+        try {
+            Queue destination = getDestinationQueue(MessageQueue.VESSEL);
+            Map<String, String> properties = new HashMap<>();
+            properties.put(MessageConstants.JMS_FUNCTION_PROPERTY, "ASSET_INFORMATION");
+            String s = "";
+            if(destination != null) {
+                s = this.sendModuleMessageWithProps(text, destination, properties);
+            }
+            return s;
+        } catch (MessageException e) {
+            LOG.error("[ Error when sending Asset info message. ] {}", e);
+            throw new ExchangeMessageException("Error when sending asset info message.", e);
+        }
+
+    }
+
+
+    @Override
     public void sendModuleErrorResponseMessage(@Observes @ErrorEvent ExchangeMessageEvent message) {
         try {
             LOG.debug("Sending error message back from Exchange module to recipient om JMS Queue with correlationID: {} ", message.getJmsMessage().getJMSMessageID());

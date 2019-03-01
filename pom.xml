@@ -38,7 +38,7 @@
 
         <!-- Uvms models -->
         <asset.model.version>4.0.12</asset.model.version>
-        <exchange.model.version>4.0.22</exchange.model.version>
+        <exchange.model.version>4.0.33</exchange.model.version>
         <audit.model.version>4.0.8</audit.model.version>
         <movement.model.version>5.0.2</movement.model.version>
         <rules.model.version>3.0.42</rules.model.version>
