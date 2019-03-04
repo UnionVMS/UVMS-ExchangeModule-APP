@@ -53,7 +53,7 @@
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>exchange-model</artifactId>
-            <version>${exchange.model.version}</version>
+            <version>${project.version}</version>
         </dependency>
 
         <!-- Deps -->

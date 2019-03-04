@@ -1,0 +1,154 @@
+<definitions name="ExchangeModuleService"
+             targetNamespace="urn:registry.exchange.schema.fisheries.ec.europa.eu:v1"
+             xmlns:registry="urn:registry.exchange.schema.fisheries.ec.europa.eu:v1"
+             xmlns:common="urn:common.exchange.schema.fisheries.ec.europa.eu:v1"
+             xmlns:service="urn:service.exchange.schema.fisheries.ec.europa.eu:v1"
+             xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+             xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+             xmlns="http://schemas.xmlsoap.org/wsdl/">
+
+    <types>
+        <xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema"  targetNamespace="urn:registry.exchange.schema.fisheries.ec.europa.eu:v1">
+            
+            <xsd:import namespace="urn:common.exchange.schema.fisheries.ec.europa.eu:v1" schemaLocation="ExchangeCommon.xsd"/>
+            <xsd:import namespace="urn:service.exchange.schema.fisheries.ec.europa.eu:v1" schemaLocation="Service.xsd"/>
+            
+            <xsd:simpleType name="ExchangeRegistryMethod">
+                <xsd:restriction base="xsd:string">
+                    <xsd:enumeration value="REGISTER_SERVICE"/>
+                    <xsd:enumeration value="UNREGISTER_SERVICE"/>
+                </xsd:restriction>
+            </xsd:simpleType>
+            
+            <xsd:complexType name="ExchangeRegistryBaseRequest" abstract="true">
+                <xsd:sequence>
+                    <xsd:element name="method" type="registry:ExchangeRegistryMethod"/>
+                   <xsd:element name="username" type="xsd:string"/>
+                </xsd:sequence>
+            </xsd:complexType>
+            
+            <xsd:element name="RegisterServiceRequest">
+                <xsd:complexType>
+                    <xsd:complexContent>
+                        <xsd:extension base="registry:ExchangeRegistryBaseRequest">
+                            <xsd:sequence>
+                                <xsd:element name="service" type="service:ServiceType"/>
+                                <xsd:element name="settingList" type="service:SettingListType" minOccurs="1" maxOccurs="1"/>
+                                <xsd:element name="capabilityList" type="service:CapabilityListType" minOccurs="1" maxOccurs="1"/>
+                            </xsd:sequence>
+                        </xsd:extension>
+                    </xsd:complexContent>
+                </xsd:complexType>
+            </xsd:element>
+            
+            <xsd:element name="RegisterServiceResponse">
+                <xsd:complexType>
+                    <xsd:complexContent>
+                        <xsd:extension base="registry:ExchangeRegistryBaseRequest">
+                            <xsd:sequence>
+                                <xsd:element name="ack" type="common:AcknowledgeType" minOccurs="1" maxOccurs="1"/>
+                                <xsd:element name="service" type="service:ServiceResponseType" minOccurs="0" maxOccurs="1"/>
+                            </xsd:sequence>
+                        </xsd:extension>
+                    </xsd:complexContent>
+                </xsd:complexType>
+            </xsd:element>
+            
+            <xsd:element name="UnregisterServiceRequest">
+                <xsd:complexType>
+                    <xsd:complexContent>
+                        <xsd:extension base="registry:ExchangeRegistryBaseRequest">
+                            <xsd:sequence>
+                                <xsd:element name="service" type="service:ServiceType"/>
+                            </xsd:sequence>
+                        </xsd:extension>
+                    </xsd:complexContent>
+                </xsd:complexType>
+            </xsd:element>
+
+            <xsd:element name="UnregisterServiceResponse">
+                <xsd:complexType>
+                    <xsd:complexContent>
+                        <xsd:extension base="registry:ExchangeRegistryBaseRequest">
+                            <xsd:sequence>
+                                <xsd:element name="ack" type="common:AcknowledgeType" minOccurs="1" maxOccurs="1"/>
+                                <xsd:element name="service" type="service:ServiceType" minOccurs="1" maxOccurs="1"/>
+                            </xsd:sequence>
+                        </xsd:extension>
+                    </xsd:complexContent>
+                </xsd:complexType>
+            </xsd:element>
+            
+        </xsd:schema>
+    </types>
+    
+    <message name="ExchangeException">
+        <part name="body" element="common:exchangeFault"/>
+    </message>
+    
+    <message name="RegisterServiceRequest">
+        <part name="body" element="registry:RegisterServiceRequest"/>
+    </message>
+    <message name="RegisterServiceResponse">
+        <part name="body" element="registry:RegisterServiceResponse"/>
+    </message>
+    
+    <message name="UnregisterServiceRequest">
+        <part name="body" element="registry:UnregisterServiceRequest"/>
+    </message>
+    <message name="UnregisterServiceResponse">
+        <part name="body" element="registry:UnregisterServiceResponse"/>
+    </message>
+    
+    <portType name="ExchangeRegistryServicePortType">
+
+        <operation name="RegisterService">
+            <input message="registry:RegisterServiceRequest"/>
+            <output message="registry:RegisterServiceResponse"/>
+            <fault name="ExchangeException" message="registry:ExchangeException"/>
+        </operation>
+        
+        <operation name="UnregisterService">
+            <input message="registry:UnregisterServiceRequest"/>
+            <output message="registry:UnregisterServiceResponse"/>
+            <fault name="ExchangeException" message="registry:ExchangeException"/>
+        </operation>
+        
+    </portType>
+
+    <binding name="ExchangeRegistryServiceSoapBinding" type="registry:ExchangeRegistryServicePortType">
+        <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+        
+        <operation name="RegisterService">
+            <input>
+                <soap:body use="literal"/>
+            </input>
+            <output>
+                <soap:body use="literal"/>
+            </output>
+            <fault name="ExchangeException">
+                <soap:fault name="ExchangeException" use="literal"/>
+            </fault>
+        </operation>
+        
+        <operation name="UnregisterService">
+            <input>
+                <soap:body use="literal"/>
+            </input>
+            <output>
+                <soap:body use="literal"/>
+            </output>
+            <fault name="ExchangeException">
+                <soap:fault name="ExchangeException" use="literal"/>
+            </fault>
+        </operation>
+        
+    </binding>
+
+    <service name="ExchangeRegistryService">
+        <port name="ExchangeRegistryServicePortType" binding="registry:ExchangeRegistryServiceSoapBinding">
+            <soap:address location="http://REPLACE_ME"/>
+        </port>
+    </service>
+
+</definitions>

@@ -43,7 +43,6 @@
 
         <!-- Uvms models -->
         <asset.model.version>4.0.12</asset.model.version>
-        <exchange.model.version>4.0.33</exchange.model.version>
         <audit.model.version>4.0.8</audit.model.version>
         <movement.model.version>5.0.2</movement.model.version>
         <rules.model.version>3.0.42</rules.model.version>
@@ -142,7 +141,7 @@
             <dependency>
                 <groupId>${project.groupId}</groupId>
                 <artifactId>exchange-model</artifactId>
-                <version>${exchange.model.version}</version>
+                <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>eu.europa.ec.fisheries.uvms.audit</groupId>
@@ -231,6 +230,7 @@
 
     <modules>
         <module>LIQUIBASE</module>
+        <module>model</module>
         <module>commons</module>
         <module>domain</module>
         <module>rest</module>
