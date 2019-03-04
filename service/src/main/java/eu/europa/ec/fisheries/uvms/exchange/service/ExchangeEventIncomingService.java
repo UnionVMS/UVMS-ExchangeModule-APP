@@ -14,8 +14,7 @@ package eu.europa.ec.fisheries.uvms.exchange.service;
 import javax.ejb.Local;
 import javax.enterprise.event.Observes;
 
-import eu.europa.ec.fisheries.uvms.exchange.message.event.*;
-import eu.europa.ec.fisheries.uvms.exchange.message.event.carrier.ExchangeMessageEvent;
+import eu.europa.ec.fisheries.uvms.exchange.service.message.event.carrier.ExchangeMessageEvent;
 
 @Local
 public interface ExchangeEventIncomingService {
@@ -25,100 +24,100 @@ public interface ExchangeEventIncomingService {
      *
      * @param message
      */
-    void ping(@Observes @PingEvent ExchangeMessageEvent message);
+    void ping(ExchangeMessageEvent message);
 
     /**
      * Get plugin list from APP module
      *
      * @param message
      */
-    void getPluginListByTypes(@Observes @PluginConfigEvent ExchangeMessageEvent message);
+    void getPluginListByTypes(ExchangeMessageEvent message);
 
-    void processReceivedMovementBatch(@Observes @ReceivedMovementBatchEvent ExchangeMessageEvent message);
+    void processReceivedMovementBatch(ExchangeMessageEvent message);
 
     /**
      * Process a received Movement
      *
      * @param message
      */
-    void processMovement(@Observes @SetMovementEvent ExchangeMessageEvent message);
+    void processMovement(ExchangeMessageEvent message);
 
     /**
      * Logs and sends a received asset information to Asset
      *
      * @param message received asset information message
      */
-    void receiveAssetInformation(@Observes @ReceiveAssetInformationEvent ExchangeMessageEvent message);
+    void receiveAssetInformation(ExchangeMessageEvent message);
 
     /**
      * Logs and sends a query asset information to FLUX fleet plugin
      *
      * @param message query asset information message
      */
-    void queryAssetInformation(@Observes @QueryAssetInformationEvent ExchangeMessageEvent message);
+    void queryAssetInformation(ExchangeMessageEvent message);
 
     /**
      * Logs and sends a received sales report through to Rules
      *
      * @param message received sales report
      */
-    void receiveSalesReport(@Observes @ReceiveSalesReportEvent ExchangeMessageEvent message);
+    void receiveSalesReport(ExchangeMessageEvent message);
 
     /**
      * Logs and sends a received sales query through to Rules
      *
      * @param message received sales query
      */
-    void receiveSalesQuery(@Observes @ReceiveSalesQueryEvent ExchangeMessageEvent message);
+    void receiveSalesQuery(ExchangeMessageEvent message);
 
     /**
      * Logs and sends a received sales response through to Rules
      * @param message
      */
-    void receiveSalesResponse(@Observes @ReceiveSalesResponseEvent ExchangeMessageEvent message);
+    void receiveSalesResponse(ExchangeMessageEvent message);
 
     /**
      * Process answer of commands sent to plugins
      *
      * @param message
      */
-    void processAcknowledge(@Observes @ExchangeLogEvent ExchangeMessageEvent message);
+    void processAcknowledge(ExchangeMessageEvent message);
 
     /**
      * Process answer of ping sent to plugins
      *
      * @param message
      */
-    void processPluginPing(@Observes @PluginPingEvent ExchangeMessageEvent message);
+    void processPluginPing(ExchangeMessageEvent message);
 
     /**
      * Process FLUXFAReportMessage coming from Flux Activity plugin
      * @param message
      */
-    void processFLUXFAReportMessage(@Observes @SetFluxFAReportMessageEvent ExchangeMessageEvent message);
+    void processFLUXFAReportMessage(ExchangeMessageEvent message);
 
-    void processFAQueryMessage(@Observes @SetFaQueryMessageEvent ExchangeMessageEvent message);
+    void processFAQueryMessage(ExchangeMessageEvent message);
 
-    void processFluxFAResponseMessage(@Observes @ReceivedFluxFaResponseMessageEvent ExchangeMessageEvent message);
+    void processFluxFAResponseMessage(ExchangeMessageEvent message);
 
     /**
      * Process MDR sync response message sent to Flux MDR plugin
      * @param message
      */
-    void sendResponseToRulesModule(@Observes @MdrSyncResponseMessageEvent ExchangeMessageEvent message);
+    void sendResponseToRulesModule(ExchangeMessageEvent message);
 
-    void receiveInvalidSalesMessage(@Observes @ReceiveInvalidSalesMessageEvent ExchangeMessageEvent event);
+    void receiveInvalidSalesMessage(ExchangeMessageEvent event);
 
     /**
      * Checks for a reference in log table for a certain type of message
      * @param event
      */
-    void logRefIdByTypeExists(@Observes @LogRefIdByTypeExists ExchangeMessageEvent event);
+    void logRefIdByTypeExists(ExchangeMessageEvent event);
 
     /**
      * Checks for a guid in log table for a certain type of message
      * @param event
      */
-    void logIdByTypeExists(@Observes @LogIdByTypeExists ExchangeMessageEvent event);
+    void logIdByTypeExists(ExchangeMessageEvent event);
 
 }

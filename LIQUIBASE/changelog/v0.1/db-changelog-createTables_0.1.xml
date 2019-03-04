@@ -5,17 +5,17 @@
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
          http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
    
-    <include file="\schema\tables\parameter.xml"/>
-    <!--<include file="\schema\tables\updatedparameter.xml"/>-->
-    <!--<include file="\schema\tables\servicemapping.xml"/>-->
-    <include file="\schema\tables\serviceregistry.xml"/>
-    <include file="\schema\tables\servicecapabilitiy.xml"/>
-    <include file="\schema\tables\servicesetting.xml"/>
+    <include file="..\..\schema\tables\parameter.xml" relativeToChangelogFile="true"/>
+    <!--<include file="\schema\tables\updatedparameter.xml" relativeToChangelogFile="true"/>-->
+    <!--<include file="\schema\tables\servicemapping.xml" relativeToChangelogFile="true"/>-->
+    <include file="..\..\schema\tables\serviceregistry.xml" relativeToChangelogFile="true"/>
+    <include file="..\..\schema\tables\servicecapabilitiy.xml" relativeToChangelogFile="true"/>
+    <include file="..\..\schema\tables\servicesetting.xml" relativeToChangelogFile="true"/>
     
-    <include file="\schema\tables\exchangelog.xml"/>
-    <include file="\schema\tables\exchangelogstatus.xml"/>
+    <include file="..\..\schema\tables\exchangelog.xml" relativeToChangelogFile="true"/>
+    <include file="..\..\schema\tables\exchangelogstatus.xml" relativeToChangelogFile="true"/>
     
-    <include file="\schema\tables\unsentmessage.xml"/>
-	<include file="\schema\tables\unsentmessageproperty.xml"/>
+    <include file="..\..\schema\tables\unsentmessage.xml" relativeToChangelogFile="true"/>
+	<include file="..\..\schema\tables\unsentmessageproperty.xml" relativeToChangelogFile="true"/>
    	
 </databaseChangeLog>
