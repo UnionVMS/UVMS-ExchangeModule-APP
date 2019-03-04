@@ -25,6 +25,8 @@ import javax.jms.TextMessage;
 import javax.json.bind.Jsonb;
 import javax.json.bind.JsonbBuilder;
 import javax.xml.bind.JAXBException;
+
+import net.bull.javamelody.internal.common.LOG;
 import org.apache.commons.collections.CollectionUtils;
 import eu.europa.ec.fisheries.schema.exchange.common.v1.AcknowledgeType;
 import eu.europa.ec.fisheries.schema.exchange.module.v1.ExchangeBaseRequest;
@@ -324,7 +326,7 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
             ReceiveAssetInformationRequest request = JAXBMarshaller.unmarshallTextMessage(event.getJmsMessage(), ReceiveAssetInformationRequest.class);
             String message = request.getAssets();
             forwardToAsset(message);
-            exchangeLog.log(request, LogType.RECEIVE_ASSET_INFORMATION, ExchangeLogStatusTypeType.SUCCESSFUL, TypeRefType.ASSETS, message, true);
+            //exchangeLog.log(request, LogType.RECEIVE_ASSET_INFORMATION, ExchangeLogStatusTypeType.SUCCESSFUL, TypeRefType.ASSETS, message, true);
         } catch (ExchangeModelMarshallException e) {
             try {
                 String errorMessage = "Couldn't map to ReceiveAssetInformationRequest when processing asset information from plugin. The event was " + event.getJmsMessage().getText();
@@ -332,8 +334,12 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
             } catch (JMSException e1) {
                 firePluginFault(event, "Couldn't map to ReceiveAssetInformationRequest when processing asset information from plugin.", e);
             }
-        } catch (ExchangeLogException e) {
-            firePluginFault(event, "Could not log the incoming asset information.", e);
+        //} catch (ExchangeLogException e) {
+        //    firePluginFault(event, "Could not log the incoming asset information.", e);
+        } catch (Throwable e) {
+            //firePluginFault(event, "Could not log the incoming asset information.", e);
+            LOG.warn(e.toString(), e);
+
         }
     }
 
@@ -583,8 +589,10 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
     private void forwardToAsset(String messageToForward) {
         try {
             log.info("Forwarding the message to Asset.");
-            producer.forwardToAsset(messageToForward);
+            String s = producer.forwardToAsset(messageToForward);
         } catch (ExchangeMessageException e) {
+            log.error("Failed to forward message to Asset: {} {}", messageToForward, e);
+        } catch (Throwable e) {
             log.error("Failed to forward message to Asset: {} {}", messageToForward, e);
         }
     }
