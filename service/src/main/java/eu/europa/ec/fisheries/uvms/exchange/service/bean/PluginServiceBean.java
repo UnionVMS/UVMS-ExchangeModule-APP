@@ -21,19 +21,15 @@ import eu.europa.ec.fisheries.schema.exchange.service.v1.SettingType;
 import eu.europa.ec.fisheries.schema.exchange.service.v1.StatusType;
 import eu.europa.ec.fisheries.uvms.commons.message.api.MessageException;
 import eu.europa.ec.fisheries.uvms.config.event.ConfigSettingEvent;
-import eu.europa.ec.fisheries.uvms.config.event.ConfigSettingUpdatedEvent;
 import eu.europa.ec.fisheries.uvms.config.exception.ConfigServiceException;
 import eu.europa.ec.fisheries.uvms.config.service.ParameterService;
 import eu.europa.ec.fisheries.uvms.config.service.UVMSConfigService;
-import eu.europa.ec.fisheries.uvms.exchange.message.consumer.ExchangeConsumer;
-import eu.europa.ec.fisheries.uvms.exchange.message.event.UpdatePluginSettingEvent;
-import eu.europa.ec.fisheries.uvms.exchange.message.event.carrier.ExchangeMessageEvent;
-import eu.europa.ec.fisheries.uvms.exchange.message.event.carrier.PluginMessageEvent;
-import eu.europa.ec.fisheries.uvms.exchange.message.event.registry.PluginErrorEvent;
-import eu.europa.ec.fisheries.uvms.exchange.message.event.registry.RegisterServiceEvent;
-import eu.europa.ec.fisheries.uvms.exchange.message.event.registry.UnRegisterServiceEvent;
-import eu.europa.ec.fisheries.uvms.exchange.message.exception.ExchangeMessageException;
-import eu.europa.ec.fisheries.uvms.exchange.message.producer.ExchangeMessageProducer;
+import eu.europa.ec.fisheries.uvms.exchange.service.message.consumer.ExchangeConsumer;
+import eu.europa.ec.fisheries.uvms.exchange.service.message.event.carrier.ExchangeMessageEvent;
+import eu.europa.ec.fisheries.uvms.exchange.service.message.event.carrier.PluginMessageEvent;
+import eu.europa.ec.fisheries.uvms.exchange.service.message.event.PluginErrorEvent;
+import eu.europa.ec.fisheries.uvms.exchange.service.message.exception.ExchangeMessageException;
+import eu.europa.ec.fisheries.uvms.exchange.service.message.producer.ExchangeMessageProducer;
 import eu.europa.ec.fisheries.uvms.exchange.model.constant.FaultCode;
 import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelMapperException;
 import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelMarshallException;
@@ -53,7 +49,6 @@ import java.util.Map;
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
 import javax.enterprise.event.Event;
-import javax.enterprise.event.Observes;
 import javax.inject.Inject;
 import javax.jms.JMSException;
 import javax.jms.TextMessage;
@@ -137,7 +132,7 @@ public class PluginServiceBean implements PluginService {
         }
     }
 
-    private void setServiceStatusOnRegister(String serviceClassName) throws ExchangeModelMapperException, ExchangeMessageException, ExchangeServiceException {
+    private void setServiceStatusOnRegister(String serviceClassName) throws ExchangeServiceException {
         ServiceResponseType service = exchangeService.getService(serviceClassName);
         if (service != null) {
             StatusType status = service.getStatus();
@@ -154,7 +149,7 @@ public class PluginServiceBean implements PluginService {
     }
 
     @Override
-    public void registerService(@Observes @RegisterServiceEvent PluginMessageEvent event) {
+    public void registerService(PluginMessageEvent event) {
         TextMessage textMessage = event.getJmsMessage();
         RegisterServiceRequest register = null;
         try {
@@ -208,7 +203,7 @@ public class PluginServiceBean implements PluginService {
     }
 
     @Override
-    public void unregisterService(@Observes @UnRegisterServiceEvent PluginMessageEvent event) {
+    public void unregisterService(PluginMessageEvent event) {
         log.info("[INFO] Received @UnRegisterServiceEvent request : {}", event);
         TextMessage textMessage = event.getJmsMessage();
         ServiceResponseType service = null;
@@ -234,7 +229,7 @@ public class PluginServiceBean implements PluginService {
     }
     
     @Override
-    public void setConfig(@Observes @ConfigSettingUpdatedEvent ConfigSettingEvent settingEvent) {
+    public void setConfig(ConfigSettingEvent settingEvent) {
         switch (settingEvent.getType()) {
             case STORE:
                 //ConfigModule and/or Exchange module deployed
@@ -278,7 +273,7 @@ public class PluginServiceBean implements PluginService {
     }
 
     @Override
-	public void updatePluginSetting(@Observes @UpdatePluginSettingEvent ExchangeMessageEvent settingEvent) {
+	public void updatePluginSetting(ExchangeMessageEvent settingEvent) {
 		try {
 			TextMessage jmsMessage = settingEvent.getJmsMessage();
 			UpdatePluginSettingRequest request = JAXBMarshaller.unmarshallTextMessage(jmsMessage, UpdatePluginSettingRequest.class);

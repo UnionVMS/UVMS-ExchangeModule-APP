@@ -13,11 +13,8 @@ package eu.europa.ec.fisheries.uvms.exchange.service;
 
 import eu.europa.ec.fisheries.uvms.config.event.ConfigSettingEvent;
 import eu.europa.ec.fisheries.uvms.config.event.ConfigSettingUpdatedEvent;
-import eu.europa.ec.fisheries.uvms.exchange.message.event.UpdatePluginSettingEvent;
-import eu.europa.ec.fisheries.uvms.exchange.message.event.carrier.ExchangeMessageEvent;
-import eu.europa.ec.fisheries.uvms.exchange.message.event.carrier.PluginMessageEvent;
-import eu.europa.ec.fisheries.uvms.exchange.message.event.registry.RegisterServiceEvent;
-import eu.europa.ec.fisheries.uvms.exchange.message.event.registry.UnRegisterServiceEvent;
+import eu.europa.ec.fisheries.uvms.exchange.service.message.event.carrier.ExchangeMessageEvent;
+import eu.europa.ec.fisheries.uvms.exchange.service.message.event.carrier.PluginMessageEvent;
 import eu.europa.ec.fisheries.uvms.exchange.service.exception.ExchangeServiceException;
 import javax.ejb.Local;
 import javax.enterprise.event.Observes;
@@ -25,10 +22,10 @@ import javax.enterprise.event.Observes;
 @Local
 public interface PluginService {
 
-    void registerService(@Observes @RegisterServiceEvent PluginMessageEvent message);
-    void unregisterService(@Observes @UnRegisterServiceEvent PluginMessageEvent message);
-    void setConfig(@Observes @ConfigSettingUpdatedEvent ConfigSettingEvent settingEvent);
-    void updatePluginSetting(@Observes @UpdatePluginSettingEvent ExchangeMessageEvent settingEvent);
+    void registerService(PluginMessageEvent message);
+    void unregisterService(PluginMessageEvent message);
+    void setConfig(ConfigSettingEvent settingEvent);
+    void updatePluginSetting(ExchangeMessageEvent settingEvent);
     boolean ping(String serviceClassName) throws ExchangeServiceException;
 	boolean start(String serviceClassName) throws ExchangeServiceException;
 	boolean stop(String serviceClassName) throws ExchangeServiceException;

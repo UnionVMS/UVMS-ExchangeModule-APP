@@ -18,13 +18,10 @@ import java.util.List;
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
 import javax.enterprise.event.Event;
-import javax.enterprise.event.Observes;
-import javax.enterprise.event.TransactionPhase;
 import javax.inject.Inject;
 import javax.jms.JMSException;
 import javax.jms.TextMessage;
 
-import eu.europa.ec.fisheries.uvms.exchange.constant.ExchangeConstants;
 import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelException;
 import org.apache.commons.collections.CollectionUtils;
 import eu.europa.ec.fisheries.schema.exchange.common.v1.AcknowledgeType;
@@ -58,26 +55,13 @@ import eu.europa.ec.fisheries.schema.exchange.v1.TypeRefType;
 import eu.europa.ec.fisheries.schema.exchange.v1.UnsentMessageTypeProperty;
 import eu.europa.ec.fisheries.uvms.commons.message.api.MessageConstants;
 import eu.europa.ec.fisheries.uvms.commons.message.api.MessageException;
-import eu.europa.ec.fisheries.uvms.exchange.message.consumer.ExchangeConsumer;
-import eu.europa.ec.fisheries.uvms.exchange.message.event.ErrorEvent;
-import eu.europa.ec.fisheries.uvms.exchange.message.event.HandleProcessedMovementEvent;
-import eu.europa.ec.fisheries.uvms.exchange.message.event.MdrSyncRequestMessageEvent;
-import eu.europa.ec.fisheries.uvms.exchange.message.event.ProcessedMovementBatch;
-import eu.europa.ec.fisheries.uvms.exchange.message.event.SendAssetInformationEvent;
-import eu.europa.ec.fisheries.uvms.exchange.message.event.SendCommandToPluginEvent;
-import eu.europa.ec.fisheries.uvms.exchange.message.event.SendFLUXFAResponseToPluginEvent;
-import eu.europa.ec.fisheries.uvms.exchange.message.event.SendFaQueryToPluginEvent;
-import eu.europa.ec.fisheries.uvms.exchange.message.event.SendFaReportToPluginEvent;
-import eu.europa.ec.fisheries.uvms.exchange.message.event.SendReportToPluginEvent;
-import eu.europa.ec.fisheries.uvms.exchange.message.event.SendSalesReportEvent;
-import eu.europa.ec.fisheries.uvms.exchange.message.event.SendSalesResponseEvent;
-import eu.europa.ec.fisheries.uvms.exchange.message.event.UpdateLogBusinessErrorEvent;
-import eu.europa.ec.fisheries.uvms.exchange.message.event.UpdateLogStatusEvent;
-import eu.europa.ec.fisheries.uvms.exchange.message.event.carrier.ExchangeMessageEvent;
-import eu.europa.ec.fisheries.uvms.exchange.message.event.carrier.PluginMessageEvent;
-import eu.europa.ec.fisheries.uvms.exchange.message.event.registry.PluginErrorEvent;
-import eu.europa.ec.fisheries.uvms.exchange.message.exception.ExchangeMessageException;
-import eu.europa.ec.fisheries.uvms.exchange.message.producer.ExchangeMessageProducer;
+import eu.europa.ec.fisheries.uvms.exchange.service.message.consumer.ExchangeConsumer;
+import eu.europa.ec.fisheries.uvms.exchange.service.message.event.ErrorEvent;
+import eu.europa.ec.fisheries.uvms.exchange.service.message.event.carrier.ExchangeMessageEvent;
+import eu.europa.ec.fisheries.uvms.exchange.service.message.event.carrier.PluginMessageEvent;
+import eu.europa.ec.fisheries.uvms.exchange.service.message.event.PluginErrorEvent;
+import eu.europa.ec.fisheries.uvms.exchange.service.message.exception.ExchangeMessageException;
+import eu.europa.ec.fisheries.uvms.exchange.service.message.producer.ExchangeMessageProducer;
 import eu.europa.ec.fisheries.uvms.exchange.model.constant.FaultCode;
 import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeException;
 import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelMarshallException;
@@ -156,7 +140,7 @@ public class ExchangeEventOutgoingServiceBean implements ExchangeEventOutgoingSe
     }
 
     @Override
-    public void sendReportToPlugin(@Observes(during=TransactionPhase.BEFORE_COMPLETION) @SendReportToPluginEvent ExchangeMessageEvent message) {
+    public void sendReportToPlugin(ExchangeMessageEvent message) {
         try {
             SendMovementToPluginRequest request = JAXBMarshaller.unmarshallTextMessage(message.getJmsMessage(), SendMovementToPluginRequest.class);
             log.info("Send report to plugin: {}",request);
@@ -206,7 +190,7 @@ public class ExchangeEventOutgoingServiceBean implements ExchangeEventOutgoingSe
 	 *
 	 */
     @Override
-    public void forwardMdrSyncMessageToPlugin(@Observes @MdrSyncRequestMessageEvent ExchangeMessageEvent message) {
+    public void forwardMdrSyncMessageToPlugin(ExchangeMessageEvent message) {
         TextMessage requestMessage = message.getJmsMessage();
         try {
             log.info("[INFO] Received MdrSyncMessageEvent. Going to send to the Plugin now..");
@@ -218,7 +202,7 @@ public class ExchangeEventOutgoingServiceBean implements ExchangeEventOutgoingSe
     }
 
     @Override
-    public void sendCommandToPlugin(@Observes(during=TransactionPhase.BEFORE_COMPLETION) @SendCommandToPluginEvent ExchangeMessageEvent message) {
+    public void sendCommandToPlugin(ExchangeMessageEvent message) {
         SetCommandRequest request = new SetCommandRequest();
         try {
             request = JAXBMarshaller.unmarshallTextMessage(message.getJmsMessage(), SetCommandRequest.class);
@@ -265,7 +249,7 @@ public class ExchangeEventOutgoingServiceBean implements ExchangeEventOutgoingSe
 
 
     @Override
-    public void sendFLUXFAResponseToPlugin(@Observes @SendFLUXFAResponseToPluginEvent ExchangeMessageEvent message) {
+    public void sendFLUXFAResponseToPlugin(ExchangeMessageEvent message) {
         try {
             SetFLUXFAResponseMessageRequest request = JAXBMarshaller.unmarshallTextMessage(message.getJmsMessage(), SetFLUXFAResponseMessageRequest.class);
             log.debug("[INFO] Got FLUXFAResponse in exchange with destination :" + request.getDestination());
@@ -286,7 +270,7 @@ public class ExchangeEventOutgoingServiceBean implements ExchangeEventOutgoingSe
     }
 
     @Override
-    public void sendFLUXFAQueryToPlugin(@Observes @SendFaQueryToPluginEvent ExchangeMessageEvent message) {
+    public void sendFLUXFAQueryToPlugin(ExchangeMessageEvent message) {
         try {
             SetFAQueryMessageRequest request = JAXBMarshaller.unmarshallTextMessage(message.getJmsMessage(), SetFAQueryMessageRequest.class);
             log.debug("Got SetFAQueryMessageRequest in exchange : " + request.getRequest());
@@ -304,7 +288,7 @@ public class ExchangeEventOutgoingServiceBean implements ExchangeEventOutgoingSe
 
 
     @Override
-    public void sendFLUXFAReportToPlugin(@Observes @SendFaReportToPluginEvent ExchangeMessageEvent message) {
+    public void sendFLUXFAReportToPlugin(ExchangeMessageEvent message) {
         try {
             SetFLUXFAReportMessageRequest request = JAXBMarshaller.unmarshallTextMessage(message.getJmsMessage(), SetFLUXFAReportMessageRequest.class);
             log.debug("Got SetFAQueryMessageRequest in exchange : " + request.getRequest());
@@ -321,7 +305,7 @@ public class ExchangeEventOutgoingServiceBean implements ExchangeEventOutgoingSe
     }
 
     @Override
-    public void sendSalesResponse(@Observes @SendSalesResponseEvent ExchangeMessageEvent message) {
+    public void sendSalesResponse(ExchangeMessageEvent message) {
         try {
             eu.europa.ec.fisheries.schema.exchange.module.v1.SendSalesResponseRequest request = JAXBMarshaller.unmarshallTextMessage(message.getJmsMessage(), eu.europa.ec.fisheries.schema.exchange.module.v1.SendSalesResponseRequest.class);
             ExchangeLogStatusTypeType validationStatus = request.getValidationStatus();
@@ -343,7 +327,7 @@ public class ExchangeEventOutgoingServiceBean implements ExchangeEventOutgoingSe
     }
 
     @Override
-    public void sendSalesReport(@Observes @SendSalesReportEvent ExchangeMessageEvent message) {
+    public void sendSalesReport(ExchangeMessageEvent message) {
         try {
             eu.europa.ec.fisheries.schema.exchange.module.v1.SendSalesReportRequest request = JAXBMarshaller.unmarshallTextMessage(message.getJmsMessage(), eu.europa.ec.fisheries.schema.exchange.module.v1.SendSalesReportRequest.class);
             ExchangeLogStatusTypeType validationStatus = request.getValidationStatus();
@@ -370,7 +354,7 @@ public class ExchangeEventOutgoingServiceBean implements ExchangeEventOutgoingSe
     }
 
     @Override
-    public void sendAssetInformation(@Observes @SendAssetInformationEvent ExchangeMessageEvent event) {
+    public void sendAssetInformation(ExchangeMessageEvent event) {
         try {
             SendAssetInformationRequest incomingRequest = JAXBMarshaller.unmarshallTextMessage(event.getJmsMessage(), SendAssetInformationRequest.class);
             String message = incomingRequest.getAssets();
@@ -393,7 +377,7 @@ public class ExchangeEventOutgoingServiceBean implements ExchangeEventOutgoingSe
     }
 
     @Override
-    public void updateLogStatus(@Observes @UpdateLogStatusEvent ExchangeMessageEvent message) {
+    public void updateLogStatus(ExchangeMessageEvent message) {
         try {
             UpdateLogStatusRequest request = JAXBMarshaller.unmarshallTextMessage(message.getJmsMessage(), UpdateLogStatusRequest.class);
             String logGuid = request.getLogGuid();
@@ -407,7 +391,7 @@ public class ExchangeEventOutgoingServiceBean implements ExchangeEventOutgoingSe
     }
 
     @Override
-    public void updateLogBusinessError(@Observes @UpdateLogBusinessErrorEvent ExchangeMessageEvent message) {
+    public void updateLogBusinessError(ExchangeMessageEvent message) {
         try {
             UpdateLogStatusRequest request = JAXBMarshaller.unmarshallTextMessage(message.getJmsMessage(), UpdateLogStatusRequest.class);
             String exchangeLogGuid = request.getLogGuid();
@@ -419,7 +403,7 @@ public class ExchangeEventOutgoingServiceBean implements ExchangeEventOutgoingSe
     }
 
     @Override
-    public void handleProcessedMovement(@Observes(during=TransactionPhase.BEFORE_COMPLETION) @HandleProcessedMovementEvent ExchangeMessageEvent message) {
+    public void handleProcessedMovement(ExchangeMessageEvent message) {
         try {
             ProcessedMovementResponse response = JAXBMarshaller.unmarshallTextMessage(message.getJmsMessage(), ProcessedMovementResponse.class);
             log.debug("Received processed movement from Rules:{}", response);
@@ -443,7 +427,7 @@ public class ExchangeEventOutgoingServiceBean implements ExchangeEventOutgoingSe
     }
 
     @Override
-    public void handleProcessedMovementBatch(@Observes @ProcessedMovementBatch ExchangeMessageEvent message) {
+    public void handleProcessedMovementBatch(ExchangeMessageEvent message) {
         try {
             ProcessedMovementResponseBatch request = JAXBMarshaller.unmarshallTextMessage(message.getJmsMessage(), ProcessedMovementResponseBatch.class);
             log.debug("Received processed movement from Rules:{}", request);
