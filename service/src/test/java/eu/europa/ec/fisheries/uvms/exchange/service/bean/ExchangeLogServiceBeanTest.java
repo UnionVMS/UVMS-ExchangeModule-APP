@@ -2,6 +2,7 @@ package eu.europa.ec.fisheries.uvms.exchange.service.bean;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertSame;
+import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Matchers.isA;
 import static org.mockito.Mockito.doReturn;
@@ -14,6 +15,7 @@ import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogType;
 import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelException;
 import eu.europa.ec.fisheries.uvms.exchange.ExchangeLogModel;
 import eu.europa.ec.fisheries.uvms.exchange.service.exception.ExchangeLogException;
+import eu.europa.ec.fisheries.uvms.longpolling.notifications.NotificationMessage;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -23,15 +25,22 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
-//@RunWith(MockitoJUnitRunner.class)
-// TODO :  AuditModelMarshallException is compiled with java 8!!!!!! FIX this so that this tests can work!!!
+import javax.enterprise.event.Event;
+
+@RunWith(MockitoJUnitRunner.class)
 public class ExchangeLogServiceBeanTest {
 
- /*   @InjectMocks
+    @InjectMocks
     private ExchangeLogServiceBean exchangeLogService;
 
     @Mock
     private ExchangeLogModel exchangeLogModel;
+
+    @Mock
+    private ExchangeEventLogCache logCache;
+
+    @Mock
+    private Event<NotificationMessage> exchangeLogEvent; //yes this is used
 
     @Rule
     public ExpectedException expectedException = ExpectedException.none();
@@ -42,13 +51,15 @@ public class ExchangeLogServiceBeanTest {
         ArgumentCaptor<ExchangeLogStatusType> captorForExchangeLogStatusType = ArgumentCaptor.forClass(ExchangeLogStatusType.class);
         ExchangeLogType expectedUpdatedLog = new ExchangeLogType();
         String logGuid = "123456";
+        expectedUpdatedLog.setGuid(logGuid);
         ExchangeLogStatusTypeType status = ExchangeLogStatusTypeType.SUCCESSFUL;
 
         //mock
+        doReturn("123456").when(logCache).acknowledged(anyString());
         doReturn(expectedUpdatedLog).when(exchangeLogModel).updateExchangeLogStatus(isA(ExchangeLogStatusType.class), eq("SYSTEM"));
 
         //execute
-        ExchangeLogType actualUpdatedLog = exchangeLogService.updateStatus(logGuid, status, false);
+        ExchangeLogType actualUpdatedLog = exchangeLogService.updateStatus(logGuid, status, "SYSTEM");
 
         //verify and assert
         verify(exchangeLogModel).updateExchangeLogStatus(captorForExchangeLogStatusType.capture(), eq("SYSTEM"));
@@ -64,11 +75,13 @@ public class ExchangeLogServiceBeanTest {
     @Test
     public void updateStatusByLogGuidWhenFailure() throws Exception {
         expectedException.expect(ExchangeLogException.class);
-        expectedException.expectMessage("Couldn't update the status of the exchange log with guid 12345. The new status should be FAILED");
+        expectedException.expectMessage("Couldn't update status of exchange log");
 
+        //mock
+        doReturn("12345").when(logCache).acknowledged(anyString());
         doThrow(new ExchangeModelException("noooooooooooooooooooo!!!")).when(exchangeLogModel).updateExchangeLogStatus(isA(ExchangeLogStatusType.class), eq("SYSTEM"));
 
-        exchangeLogService.updateStatus("12345", ExchangeLogStatusTypeType.FAILED, false);
-    }*/
+        exchangeLogService.updateStatus("12345", ExchangeLogStatusTypeType.FAILED, "SYSTEM");
+    }
 
 }

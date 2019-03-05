@@ -50,7 +50,7 @@ public class MapperTest {
     // }
 
     @Test
-    public void testEntityToModel() throws ExchangeDaoException, ExchangeDaoMappingException {
+    public void testEntityToModel() {
         Integer id = 1;
         Service entity = MockData.getEntity(id);
         List<ServiceCapability> capabilityList = new ArrayList<>();
@@ -65,7 +65,7 @@ public class MapperTest {
     }
 
     @Test
-    public void testModelToEntity() throws ExchangeDaoException, ExchangeDaoMappingException {
+    public void testModelToEntity()  {
         Integer id = 1;
         ServiceType model = MockData.getModel(id);
         CapabilityListType capabilityListType = MockData.getCapabilityList();
@@ -79,7 +79,7 @@ public class MapperTest {
     }
 
     @Test
-    public void testEntityAndModelToEntity() throws ExchangeDaoException, ExchangeDaoMappingException {
+    public void testEntityAndModelToEntity() {
         Integer id = 1;
         Service entity = MockData.getEntity(id);
         ServiceType service = MockData.getModel(1);
@@ -94,7 +94,7 @@ public class MapperTest {
     }
 
     @Test
-    public void testEntityAndModelToModel() throws ExchangeDaoException, ExchangeDaoMappingException {
+    public void testEntityAndModelToModel() {
         Service entity = MockData.getEntity(1);
         List<ServiceCapability> capabilityList = new ArrayList<>();
 		entity.setServiceCapabilityList(capabilityList);
