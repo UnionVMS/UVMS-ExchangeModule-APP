@@ -16,8 +16,8 @@ import javax.persistence.NoResultException;
 import javax.persistence.PersistenceException;
 import javax.persistence.Query;
 import javax.persistence.TypedQuery;
+import java.time.Instant;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -56,11 +56,11 @@ public class ExchangeLogDaoBean extends Dao implements ExchangeLogDao {
                 query.setParameter("type", searchQuery.getType());
             }
             if (searchQuery.getTypeRefDateFrom() != null) {
-                Date from = searchQuery.getTypeRefDateFrom();
+                Instant from = searchQuery.getTypeRefDateFrom().toInstant();
                 query.setParameter("from", from);
             }
             if (searchQuery.getTypeRefDateTo() != null) {
-                Date to = searchQuery.getTypeRefDateTo();
+                Instant to = searchQuery.getTypeRefDateTo().toInstant();
                 query.setParameter("to", to);
             }
             return query.getResultList();

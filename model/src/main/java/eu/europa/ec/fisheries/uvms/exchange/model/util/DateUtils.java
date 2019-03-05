@@ -11,56 +11,39 @@ copy of the GNU General Public License along with the IFDM Suite. If not, see <h
  */
 package eu.europa.ec.fisheries.uvms.exchange.model.util;
 
-import java.util.Date;
-import java.util.GregorianCalendar;
+import java.time.Instant;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 
-import javax.xml.datatype.DatatypeConfigurationException;
-import javax.xml.datatype.DatatypeFactory;
-import javax.xml.datatype.XMLGregorianCalendar;
 
-import org.joda.time.DateTime;
-import org.joda.time.DateTimeZone;
-import org.joda.time.format.DateTimeFormat;
-import org.joda.time.format.DateTimeFormatter;
 /**
  *
-* @deprecated As of release 4.0.5 replaced by uvms-commons-date#DateUtils
+*   @Notdeprecated --As of release 4.0.5 replaced by uvms-commons-date#DateUtils--
+ * Back into action until we have had a chance to fix commons. Not to mention that we dont use commons in any of the other modules....
  */
-@Deprecated
+
 public class DateUtils {
     final static String DATE_TIME_FORMAT = "yyyy-MM-dd HH:mm:ss Z";
     final static String DATE_FORMAT = "yyyy-MM-dd";
 	
-    public static XMLGregorianCalendar dateToXmlGregorian(Date timestamp) {
-        GregorianCalendar cal = new GregorianCalendar();
-        cal.setTime(timestamp);
-        XMLGregorianCalendar xmlCalendar = null;
-        try {
-            xmlCalendar = DatatypeFactory.newInstance().newXMLGregorianCalendar(cal);
-        } catch (DatatypeConfigurationException ex) {
-        }
-        return xmlCalendar;
+
+
+    public static Instant nowUTC() {
+        return Instant.now();
     }
 
-    public static DateTime nowUTC() throws IllegalArgumentException {
-        return new DateTime(DateTimeZone.UTC);
+    public static String parseInstantToString(Instant time){
+        return time.atOffset(ZoneOffset.UTC).format(DateTimeFormatter.ofPattern(DATE_TIME_FORMAT));
     }
 
-    public static Date parseTimestamp(XMLGregorianCalendar timestamp) {
-        if (timestamp != null) {
-            return timestamp.toGregorianCalendar().getTime();
-        }
-        return null;
-    }
 
-    private static Date parseToUTC(String format, String dateString) {
-    	DateTimeFormatter formatter = DateTimeFormat.forPattern(format).withOffsetParsed();
-    	DateTime dateTime = formatter.withZoneUTC().parseDateTime(dateString);
-    	GregorianCalendar cal = dateTime.toGregorianCalendar();
-    	return cal.getTime();
+    private static Instant parseToUTC(String format, String dateString) {
+        ZonedDateTime zdt = ZonedDateTime.parse(dateString, java.time.format.DateTimeFormatter.ofPattern(format));
+    	return zdt.toInstant();
     }
     
-    public static Date parseToUTCDateTime(String dateString) {
+    public static Instant parseToUTCDateTime(String dateString) {
         return parseToUTC(DATE_TIME_FORMAT, dateString);
     }
 }

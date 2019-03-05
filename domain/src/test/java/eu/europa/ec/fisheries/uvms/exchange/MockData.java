@@ -14,6 +14,8 @@ package eu.europa.ec.fisheries.uvms.exchange;
 import eu.europa.ec.fisheries.schema.exchange.v1.LogType;
 import eu.europa.ec.fisheries.schema.exchange.v1.TypeRefType;
 import eu.europa.ec.fisheries.uvms.exchange.entity.exchangelog.ExchangeLog;
+
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -89,12 +91,14 @@ public class MockData {
 
 	public static List<ExchangeLog> getLogEntities(){
 		ExchangeLog log1 = new ExchangeLog();
+		log1.setDateReceived(Instant.now().minusSeconds(30));
 		log1.setType(LogType.RECEIVE_FA_QUERY_MSG);
 		log1.setTypeRefGuid("SomeRefGuid_1AAA");
 		log1.setTransferIncoming(false);
 		log1.setGuid("AAA-BBB-CCC");
 		log1.setTypeRefType(TypeRefType.FA_QUERY);
 		ExchangeLog log2 = new ExchangeLog();
+		log2.setDateReceived(Instant.now());
 		log2.setType(LogType.RECEIVE_FA_QUERY_MSG);
 		log2.setTypeRefGuid("SomeRefGuid_2BBB");
 		log2.setTransferIncoming(true);

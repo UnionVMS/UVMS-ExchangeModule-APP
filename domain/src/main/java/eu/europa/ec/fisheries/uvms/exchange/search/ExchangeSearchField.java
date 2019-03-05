@@ -14,15 +14,16 @@ package eu.europa.ec.fisheries.uvms.exchange.search;
 import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogStatusTypeType;
 import eu.europa.ec.fisheries.schema.exchange.v1.TypeRefType;
 
-import java.util.Date;
+import java.time.Instant;
+
 
 /**
  **/
 public enum ExchangeSearchField {
 
 	TRANSFER_INCOMING("transferIncoming", "transferIncoming", SearchTable.LOG, Boolean.class),
-    FROM_DATE("dateReceived", "fromDate", SearchTable.LOG, Date.class),
-    TO_DATE("dateReceived", "toDate", SearchTable.LOG, Date.class),
+    FROM_DATE("dateReceived", "fromDate", SearchTable.LOG, Instant.class),
+    TO_DATE("dateReceived", "toDate", SearchTable.LOG, Instant.class),
     SENDER_RECEIVER("senderReceiver", "senderReceiver", SearchTable.LOG, String.class),
     RECIPIENT("recipient", "recipient", SearchTable.LOG, String.class),
     STATUS("status", "status", SearchTable.LOG, ExchangeLogStatusTypeType.class),

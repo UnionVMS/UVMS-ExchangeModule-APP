@@ -48,7 +48,7 @@ public class ServiceMapper {
         entity.setDescription(model.getDescription());
         entity.setType(model.getPluginType());
         entity.setSatelliteType(model.getSatelliteType());
-        entity.setUpdated(DateUtils.nowUTC().toDate());
+        entity.setUpdated(DateUtils.nowUTC());
         entity.setUpdatedBy(username);
         entity.setServiceCapabilityList(toCapabilitiesEntities(entity, capabilityList, username));
         entity.setServiceSettingList(toSettingsEntities(entity, settingList, username));
@@ -131,7 +131,7 @@ public class ServiceMapper {
         entity.setService(parent);
         entity.setCapability(capability.getType());
         entity.setUpdatedBy(username);
-        entity.setUpdatedTime(DateUtils.nowUTC().toDate());
+        entity.setUpdatedTime(DateUtils.nowUTC());
         entity.setValue(capability.getValue());
         return entity;
     }
@@ -162,7 +162,7 @@ public class ServiceMapper {
             } else {
                 if (!currentSetting.getValue().equalsIgnoreCase(setting.getValue())) {
                     currentSetting.setValue(setting.getValue());
-                    currentSetting.setUpdatedTime(DateUtils.nowUTC().toDate());
+                    currentSetting.setUpdatedTime(DateUtils.nowUTC());
                     currentSetting.setUser(username);
                 }
                 newSettings.add(currentSetting);
@@ -193,7 +193,7 @@ public class ServiceMapper {
         ServiceSetting entity = new ServiceSetting();
         entity.setService(parent);
         entity.setSetting(setting.getKey());
-        entity.setUpdatedTime(DateUtils.nowUTC().toDate());
+        entity.setUpdatedTime(DateUtils.nowUTC());
         entity.setUser(username);
         entity.setValue(setting.getValue());
         return entity;

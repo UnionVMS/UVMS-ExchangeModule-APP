@@ -14,8 +14,9 @@ Det här är en licenstext
  */
 package eu.europa.ec.fisheries.uvms.exchange.model.mapper;
 
+import java.time.Instant;
 import java.util.ArrayList;
-import java.util.Date;
+import java.util.Date;  //leave be
 import java.util.List;
 
 import eu.europa.ec.fisheries.schema.exchange.source.v1.*;
@@ -215,11 +216,11 @@ public class ExchangeDataSourceRequestMapper {
         return JAXBMarshaller.marshallJaxBObjectToString(request);
     }
 
-    public static String mapCreateUnsentMessage(Date dateReceived, String senderReceiver, String recipient, String messageText, List<UnsentMessageTypeProperty> properties, String username) throws ExchangeModelMarshallException {
+    public static String mapCreateUnsentMessage(Instant dateReceived, String senderReceiver, String recipient, String messageText, List<UnsentMessageTypeProperty> properties, String username) throws ExchangeModelMarshallException {
         CreateUnsentMessageRequest request = new CreateUnsentMessageRequest();
         request.setMethod(ExchangeDataSourceMethod.CREATE_UNSENT_MESSAGE);
         UnsentMessageType unsentMessage = new UnsentMessageType();
-        unsentMessage.setDateReceived(dateReceived);
+        unsentMessage.setDateReceived(Date.from(dateReceived));
         unsentMessage.setSenderReceiver(senderReceiver);
         unsentMessage.setRecipient(recipient);
         unsentMessage.setMessage(messageText);
@@ -237,12 +238,12 @@ public class ExchangeDataSourceRequestMapper {
         return JAXBMarshaller.marshallJaxBObjectToString(request);
     }
 
-    public static String mapGetLogStatusHistoryByQueryRequest(Date fromDate, Date toDate, List<ExchangeLogStatusTypeType> statusList, List<TypeRefType> typeList) throws ExchangeModelMarshallException {
+    public static String mapGetLogStatusHistoryByQueryRequest(Instant fromDate, Instant toDate, List<ExchangeLogStatusTypeType> statusList, List<TypeRefType> typeList) throws ExchangeModelMarshallException {
         GetLogStatusHistoryByQueryRequest request = new GetLogStatusHistoryByQueryRequest();
         request.setMethod(ExchangeDataSourceMethod.GET_LOG_STATUS_HISTORY_BY_QUERY);
         ExchangeHistoryListQuery query = new ExchangeHistoryListQuery();
-        query.setTypeRefDateFrom(fromDate);
-        query.setTypeRefDateTo(toDate);
+        query.setTypeRefDateFrom(Date.from(fromDate));
+        query.setTypeRefDateTo(Date.from(toDate));
         query.getStatus().addAll(statusList);
         query.getType().addAll(typeList);
         request.setQuery(query);

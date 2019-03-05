@@ -15,9 +15,10 @@ import javax.ejb.EJB;
 import javax.ejb.Stateless;
 import javax.enterprise.event.Event;
 import javax.inject.Inject;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Date;
+import java.util.Date;  //leave be
 import java.util.List;
 import eu.europa.ec.fisheries.schema.exchange.module.v1.ExchangeBaseRequest;
 import eu.europa.ec.fisheries.schema.exchange.movement.v1.MovementRefType;
@@ -177,7 +178,7 @@ public class ExchangeLogServiceBean implements ExchangeLogService {
     }
 
     @Override
-    public List<ExchangeLogStatusType> getExchangeStatusHistoryList(ExchangeLogStatusTypeType status, TypeRefType type, Date from, Date to) throws ExchangeLogException {
+    public List<ExchangeLogStatusType> getExchangeStatusHistoryList(ExchangeLogStatusTypeType status, TypeRefType type, Instant from, Instant to) throws ExchangeLogException {
         log.info("Get pollstatus list in service layer:{}",status);
         try {
             List<ExchangeLogStatusTypeType> statusList = new ArrayList<>();
@@ -189,8 +190,8 @@ public class ExchangeLogServiceBean implements ExchangeLogService {
                 typeList.add(type);
             }
             ExchangeHistoryListQuery query = new ExchangeHistoryListQuery();
-            query.setTypeRefDateFrom(from);
-            query.setTypeRefDateTo(to);
+            query.setTypeRefDateFrom(Date.from(from));
+            query.setTypeRefDateTo(Date.from(to));
             query.getStatus().addAll(statusList);
             query.getType().addAll(typeList);
             return  exchangeLogModel.getExchangeLogStatusHistoryByQuery(query);
@@ -213,11 +214,11 @@ public class ExchangeLogServiceBean implements ExchangeLogService {
     }
 
     @Override
-    public String createUnsentMessage(String senderReceiver, Date timestamp, String recipient, String message, List<UnsentMessageTypeProperty> properties, String username) throws ExchangeLogException {
+    public String createUnsentMessage(String senderReceiver, Instant timestamp, String recipient, String message, List<UnsentMessageTypeProperty> properties, String username) throws ExchangeLogException {
         log.debug("[INFO] CreateUnsentMessage in service layer:{}",message);
         try {
             UnsentMessageType unsentMessage = new UnsentMessageType();
-            unsentMessage.setDateReceived(timestamp);
+            unsentMessage.setDateReceived(Date.from(timestamp));
             unsentMessage.setSenderReceiver(senderReceiver);
             unsentMessage.setRecipient(recipient);
             unsentMessage.setMessage(message);

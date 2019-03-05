@@ -20,7 +20,7 @@ import org.apache.commons.lang3.StringUtils;
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
-import java.util.Date;
+import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
@@ -80,9 +80,8 @@ public class ExchangeLog {
 	private String senderReceiver;
 
 	@NotNull(message = "The dateReceived for the log cannot be empty!")
-	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name = "log_daterecieved")
-	private Date dateReceived;
+	private Instant dateReceived;
 
 	@NotNull(message = "The log_status field for the log cannot be empty!")
 	@Enumerated(EnumType.STRING)
@@ -90,9 +89,8 @@ public class ExchangeLog {
 	private ExchangeLogStatusTypeType status;
 
 	@NotNull(message = "The log_updattim field for the log cannot be empty!")
-	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name = "log_updattim")
-	private Date updateTime;
+	private Instant updateTime;
 
 	@NotNull(message = "The updatedBy field for the log cannot be empty!")
 	@Size(max=100)
@@ -106,9 +104,8 @@ public class ExchangeLog {
 	@Column(name="log_recipient")
 	private String recipient;
 
-	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name="log_fwddate")
-	private Date fwdDate;
+	private Instant fwdDate;
 
 	@Size(max=100)
 	@Column(name="log_fwdrule")
@@ -168,11 +165,11 @@ public class ExchangeLog {
 		this.senderReceiver = senderReceiver;
 	}
 
-	public Date getDateReceived() {
+	public Instant getDateReceived() {
 		return dateReceived;
 	}
 
-	public void setDateReceived(Date dateReceived) {
+	public void setDateReceived(Instant dateReceived) {
 		this.dateReceived = dateReceived;
 	}
 
@@ -184,11 +181,11 @@ public class ExchangeLog {
 		this.status = status;
 	}
 
-	public Date getUpdateTime() {
+	public Instant getUpdateTime() {
 		return updateTime;
 	}
 
-	public void setUpdateTime(Date updateTime) {
+	public void setUpdateTime(Instant updateTime) {
 		this.updateTime = updateTime;
 	}
 
@@ -248,11 +245,11 @@ public class ExchangeLog {
 		this.recipient = recipient;
 	}
 
-	public Date getFwdDate() {
+	public Instant getFwdDate() {
 		return fwdDate;
 	}
 
-	public void setFwdDate(Date fwdDate) {
+	public void setFwdDate(Instant fwdDate) {
 		this.fwdDate = fwdDate;
 	}
 

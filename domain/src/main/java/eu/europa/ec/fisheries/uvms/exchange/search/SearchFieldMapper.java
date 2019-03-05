@@ -26,9 +26,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.text.ParseException;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -165,7 +165,7 @@ public class SearchFieldMapper {
 
     private static String setParameter(SearchValue entry) throws ParseException {
         StringBuilder builder = new StringBuilder();
-        if (entry.getField().getClazz().isAssignableFrom(Date.class)) {
+        if (entry.getField().getClazz().isAssignableFrom(Instant.class)) {
             switch (entry.getField()) {
                 case FROM_DATE:
                     builder.append(" >= ").append(":").append(entry.getField().getSQLReplacementToken());
@@ -218,7 +218,7 @@ public class SearchFieldMapper {
                 } else {
                     return valueType.cast(Boolean.FALSE);
                 }
-            } else if (valueType.isAssignableFrom(Date.class)) {
+            } else if (valueType.isAssignableFrom(Instant.class)) {
                 return valueType.cast(DateUtils.parseToUTCDateTime(entry.getValue()));
             } else if (valueType.isAssignableFrom(Integer.class)) {
                 return valueType.cast(Integer.valueOf(entry.getValue()));
