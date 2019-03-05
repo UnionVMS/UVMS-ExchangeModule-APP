@@ -549,8 +549,6 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
             String s = producer.forwardToAsset(messageToForward);
         } catch (ExchangeMessageException e) {
             log.error("Failed to forward message to Asset: {} {}", messageToForward, e);
-        } catch (Throwable e) {
-            log.error("Failed to forward message to Asset: {} {}", messageToForward, e);
         }
     }
 
