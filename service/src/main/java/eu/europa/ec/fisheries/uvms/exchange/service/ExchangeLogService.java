@@ -12,7 +12,7 @@ copy of the GNU General Public License along with the IFDM Suite. If not, see <h
 package eu.europa.ec.fisheries.uvms.exchange.service;
 
 import javax.ejb.Local;
-import java.util.Date;
+import java.time.Instant;
 import java.util.List;
 
 import eu.europa.ec.fisheries.schema.exchange.module.v1.ExchangeBaseRequest;
@@ -67,9 +67,9 @@ public interface ExchangeLogService {
 
     List<UnsentMessageType> getUnsentMessageList() throws ExchangeLogException;
 
-    List<ExchangeLogStatusType> getExchangeStatusHistoryList(ExchangeLogStatusTypeType status, TypeRefType type, Date from, Date to) throws ExchangeLogException;
+    List<ExchangeLogStatusType> getExchangeStatusHistoryList(ExchangeLogStatusTypeType status, TypeRefType type, Instant from, Instant to) throws ExchangeLogException;
 
-    String createUnsentMessage(String senderReceiver, Date timestamp, String recipient, String message, List<UnsentMessageTypeProperty> properties, String username) throws ExchangeLogException;
+    String createUnsentMessage(String senderReceiver, Instant timestamp, String recipient, String message, List<UnsentMessageTypeProperty> properties, String username) throws ExchangeLogException;
 
     ExchangeLogWithValidationResults getExchangeLogRawMessageAndValidationByGuid(String guid);
 

@@ -14,20 +14,21 @@ package eu.europa.ec.fisheries.uvms.exchange.search;
 import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogStatusTypeType;
 import eu.europa.ec.fisheries.schema.exchange.v1.TypeRefType;
 
-import java.util.Date;
+import java.time.Instant;
+
 
 /**
  * Created by sanera on 30/11/2017.
  */
 public enum SortFieldMapper {
-    DATE_RECEIVED("dateReceived", SearchTable.LOG, Date.class),
+    DATE_RECEIVED("dateReceived", SearchTable.LOG, Instant.class),
     SOURCE("source",  SearchTable.LOG, String.class),
     TYPE("typeRefType", SearchTable.LOG, TypeRefType.class),
     SENDER_RECEIVER("senderReceiver",  SearchTable.LOG, String.class),
     RULE("fwdRule",  SearchTable.LOG, String.class),
     RECEPIENT("recipient",  SearchTable.LOG, String.class),
     STATUS("status",SearchTable.LOG, ExchangeLogStatusTypeType.class),
-    DATE_FORWARDED("fwdDate",SearchTable.LOG, Date.class);
+    DATE_FORWARDED("fwdDate",SearchTable.LOG, Instant.class);
 
     private final String fieldName;
     private final SearchTable searchTables;

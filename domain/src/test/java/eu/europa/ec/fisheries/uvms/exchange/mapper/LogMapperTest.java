@@ -4,7 +4,9 @@ import eu.europa.ec.fisheries.schema.exchange.v1.*;
 import eu.europa.ec.fisheries.uvms.exchange.entity.exchangelog.ExchangeLog;
 import org.junit.Test;
 
-import java.util.Date;
+
+import java.util.Date;  //leave be
+import java.time.Instant;
 
 import static org.junit.Assert.*;
 
@@ -15,7 +17,7 @@ public class LogMapperTest {
         //data set
         String typeRefGuid = "trg";
         TypeRefType typeRefType = TypeRefType.MOVEMENT;
-        Date dateReceived = new Date();
+        Instant dateReceived = Instant.now();
         String senderOrReceiver = "BEL";
         ExchangeLogStatusTypeType status = ExchangeLogStatusTypeType.SUCCESSFUL;
 
@@ -30,7 +32,7 @@ public class LogMapperTest {
         ReceiveMovementType input = new ReceiveMovementType();
         input.setType(LogType.RECEIVE_MOVEMENT);
         input.setTypeRef(logRefType);
-        input.setDateRecieved(dateReceived);
+        input.setDateRecieved(Date.from(dateReceived));
         input.setSenderReceiver(senderOrReceiver);
         input.setStatus(status);
         input.setSource(source);
@@ -64,7 +66,7 @@ public class LogMapperTest {
         //data set
         String typeRefGuid = "trg";
         TypeRefType typeRefType = TypeRefType.MOVEMENT;
-        Date dateReceived = new Date();
+        Instant dateReceived = Instant.now();
         String senderOrReceiver = "BEL";
         ExchangeLogStatusTypeType status = ExchangeLogStatusTypeType.SUCCESSFUL;
         String message = "<xml></xml>";
@@ -74,17 +76,17 @@ public class LogMapperTest {
         logRefType.setType(typeRefType);
         logRefType.setMessage(message);
 
-        Date fwdDate = new Date();
+        Instant fwdDate = Instant.now();
         String fwdRule = "fantastic rules and where to find them";
         String recipient = "potter@wb.com";
 
         SendMovementType input = new SendMovementType();
         input.setType(LogType.SEND_MOVEMENT);
         input.setTypeRef(logRefType);
-        input.setDateRecieved(dateReceived);
+        input.setDateRecieved(Date.from(dateReceived));
         input.setSenderReceiver(senderOrReceiver);
         input.setStatus(status);
-        input.setFwdDate(fwdDate);
+        input.setFwdDate(Date.from(fwdDate));
         input.setFwdRule(fwdRule);
         input.setRecipient(recipient);
 
@@ -119,7 +121,7 @@ public class LogMapperTest {
         //data set
         String typeRefGuid = "trg";
         TypeRefType typeRefType = TypeRefType.POLL;
-        Date dateReceived = new Date();
+        Instant dateReceived = Instant.now();
         String senderOrReceiver = "BEL";
         ExchangeLogStatusTypeType status = ExchangeLogStatusTypeType.SUCCESSFUL;
         String message = "<xml></xml>";
@@ -129,16 +131,16 @@ public class LogMapperTest {
         logRefType.setType(typeRefType);
         logRefType.setMessage(message);
 
-        Date fwdDate = new Date();
+        Instant fwdDate = Instant.now();
         String recipient = "potter@wb.com";
 
         SendPollType input = new SendPollType();
         input.setType(LogType.SEND_POLL);
         input.setTypeRef(logRefType);
-        input.setDateRecieved(dateReceived);
+        input.setDateRecieved(Date.from(dateReceived));
         input.setSenderReceiver(senderOrReceiver);
         input.setStatus(status);
-        input.setFwdDate(fwdDate);
+        input.setFwdDate(Date.from(fwdDate));
         input.setRecipient(recipient);
 
         String username = "stainii";
@@ -171,7 +173,7 @@ public class LogMapperTest {
         //data set
         String typeRefGuid = "trg";
         TypeRefType typeRefType = TypeRefType.UNKNOWN;
-        Date dateReceived = new Date();
+        Instant dateReceived = Instant.now();
         String senderOrReceiver = "BEL";
         ExchangeLogStatusTypeType status = ExchangeLogStatusTypeType.SUCCESSFUL;
         String message = "<xml></xml>";
@@ -181,17 +183,17 @@ public class LogMapperTest {
         logRefType.setType(typeRefType);
         logRefType.setMessage(message);
 
-        Date fwdDate = new Date();
+        Instant fwdDate = Instant.now();
         String fwdRule = "fantastic rules and where to find them";
         String recipient = "potter@wb.com";
 
         SendEmailType input = new SendEmailType();
         input.setType(LogType.SEND_EMAIL);
         input.setTypeRef(logRefType);
-        input.setDateRecieved(dateReceived);
+        input.setDateRecieved(Date.from(dateReceived));
         input.setSenderReceiver(senderOrReceiver);
         input.setStatus(status);
-        input.setFwdDate(fwdDate);
+        input.setFwdDate(Date.from(fwdDate));
         input.setFwdRule(fwdRule);
         input.setRecipient(recipient);
 
@@ -226,7 +228,7 @@ public class LogMapperTest {
         //data set
         String typeRefGuid = "trg";
         TypeRefType typeRefType = TypeRefType.SALES_REPORT;
-        Date dateReceived = new Date();
+        Instant dateReceived = Instant.now();
         String senderOrReceiver = "BEL";
         ExchangeLogStatusTypeType status = ExchangeLogStatusTypeType.SUCCESSFUL;
         String message = "<xml></xml>";
@@ -241,7 +243,7 @@ public class LogMapperTest {
         ExchangeLogType input = new ExchangeLogType();
         input.setType(LogType.RECEIVE_SALES_REPORT);
         input.setTypeRef(logRefType);
-        input.setDateRecieved(dateReceived);
+        input.setDateRecieved(Date.from(dateReceived));
         input.setSenderReceiver(senderOrReceiver);
         input.setStatus(status);
         input.setIncoming(true);
@@ -276,7 +278,7 @@ public class LogMapperTest {
     @Test
     public void toNewEntityWhenLogTypeIsReceiveSalesReportAndTypeRefIsNotFilledIn() throws Exception {
         //data set
-        Date dateReceived = new Date();
+        Instant dateReceived = Instant.now();
         String senderOrReceiver = "BEL";
         ExchangeLogStatusTypeType status = ExchangeLogStatusTypeType.SUCCESSFUL;
         String destination = "destination";
@@ -284,7 +286,7 @@ public class LogMapperTest {
 
         ExchangeLogType input = new ExchangeLogType();
         input.setType(LogType.RECEIVE_SALES_REPORT);
-        input.setDateRecieved(dateReceived);
+        input.setDateRecieved(Date.from(dateReceived));
         input.setSenderReceiver(senderOrReceiver);
         input.setStatus(status);
         input.setIncoming(true);
@@ -319,7 +321,7 @@ public class LogMapperTest {
         //data set
         String typeRefGuid = "trg";
         TypeRefType typeRefType = TypeRefType.SALES_REPORT;
-        Date dateReceived = new Date();
+        Instant dateReceived = Instant.now();
         String senderOrReceiver = "BEL";
         String message = "<xml></xml>";
         String destination = "destination";
@@ -333,7 +335,7 @@ public class LogMapperTest {
         ExchangeLogType input = new ExchangeLogType();
         input.setType(LogType.RECEIVE_SALES_REPORT);
         input.setTypeRef(logRefType);
-        input.setDateRecieved(dateReceived);
+        input.setDateRecieved(Date.from(dateReceived));
         input.setSenderReceiver(senderOrReceiver);
         input.setIncoming(true);
         input.setDestination(destination);
@@ -368,7 +370,7 @@ public class LogMapperTest {
     @Test
     public void toNewEntityWhenLogTypeIsReceiveSalesReportAndUsernameIsNull() throws Exception {
         //data set
-        Date dateReceived = new Date();
+        Instant dateReceived = Instant.now();
         String senderOrReceiver = "BEL";
         ExchangeLogStatusTypeType status = ExchangeLogStatusTypeType.SUCCESSFUL;
         String destination = "destination";
@@ -376,7 +378,7 @@ public class LogMapperTest {
 
         ExchangeLogType input = new ExchangeLogType();
         input.setType(LogType.RECEIVE_SALES_REPORT);
-        input.setDateRecieved(dateReceived);
+        input.setDateRecieved(Date.from(dateReceived));
         input.setSenderReceiver(senderOrReceiver);
         input.setStatus(status);
         input.setIncoming(true);
@@ -409,7 +411,7 @@ public class LogMapperTest {
         //data set
         String typeRefGuid = "trg";
         TypeRefType typeRefType = TypeRefType.SALES_RESPONSE;
-        Date dateReceived = new Date();
+        Instant dateReceived = Instant.now();
         String senderOrReceiver = "BEL";
         ExchangeLogStatusTypeType status = ExchangeLogStatusTypeType.SUCCESSFUL;
         String message = "<xml></xml>";
@@ -424,7 +426,7 @@ public class LogMapperTest {
         ExchangeLogType input = new ExchangeLogType();
         input.setType(LogType.RECEIVE_SALES_RESPONSE);
         input.setTypeRef(logRefType);
-        input.setDateRecieved(dateReceived);
+        input.setDateRecieved(Date.from(dateReceived));
         input.setSenderReceiver(senderOrReceiver);
         input.setStatus(status);
         input.setIncoming(true);
@@ -461,7 +463,7 @@ public class LogMapperTest {
         //data set
         String typeRefGuid = "trg";
         TypeRefType typeRefType = TypeRefType.SALES_QUERY;
-        Date dateReceived = new Date();
+        Instant dateReceived = Instant.now();
         String senderOrReceiver = "BEL";
         ExchangeLogStatusTypeType status = ExchangeLogStatusTypeType.SUCCESSFUL;
         String message = "<xml></xml>";
@@ -476,7 +478,7 @@ public class LogMapperTest {
         ExchangeLogType input = new ExchangeLogType();
         input.setType(LogType.RECEIVE_SALES_QUERY);
         input.setTypeRef(logRefType);
-        input.setDateRecieved(dateReceived);
+        input.setDateRecieved(Date.from(dateReceived));
         input.setSenderReceiver(senderOrReceiver);
         input.setStatus(status);
         input.setIncoming(true);
@@ -513,7 +515,7 @@ public class LogMapperTest {
         //data set
         String typeRefGuid = "trg";
         TypeRefType typeRefType = TypeRefType.SALES_REPORT;
-        Date dateReceived = new Date();
+        Instant dateReceived = Instant.now();
         String senderOrReceiver = "BEL";
         ExchangeLogStatusTypeType status = ExchangeLogStatusTypeType.SUCCESSFUL;
         String message = "<xml></xml>";
@@ -528,7 +530,7 @@ public class LogMapperTest {
         ExchangeLogType input = new ExchangeLogType();
         input.setType(LogType.SEND_SALES_REPORT);
         input.setTypeRef(logRefType);
-        input.setDateRecieved(dateReceived);
+        input.setDateRecieved(Date.from(dateReceived));
         input.setSenderReceiver(senderOrReceiver);
         input.setStatus(status);
         input.setIncoming(false);
@@ -565,7 +567,7 @@ public class LogMapperTest {
         //data set
         String typeRefGuid = "trg";
         TypeRefType typeRefType = TypeRefType.SALES_RESPONSE;
-        Date dateReceived = new Date();
+        Instant dateReceived = Instant.now();
         String senderOrReceiver = "BEL";
         ExchangeLogStatusTypeType status = ExchangeLogStatusTypeType.SUCCESSFUL;
         String message = "<xml></xml>";
@@ -580,7 +582,7 @@ public class LogMapperTest {
         ExchangeLogType input = new ExchangeLogType();
         input.setType(LogType.SEND_SALES_RESPONSE);
         input.setTypeRef(logRefType);
-        input.setDateRecieved(dateReceived);
+        input.setDateRecieved(Date.from(dateReceived));
         input.setSenderReceiver(senderOrReceiver);
         input.setStatus(status);
         input.setIncoming(false);
@@ -614,7 +616,7 @@ public class LogMapperTest {
 
     @Test
     public void toModelWhenEntityIsReceiveMovementLog() {
-        Date dateReceived = new Date();
+        Instant dateReceived = Instant.now();
         String guid = "Paradise";
         String senderReceiver = "Chris Martin";
         boolean incoming = true;
@@ -646,13 +648,13 @@ public class LogMapperTest {
 
     @Test
     public void toModelWhenEntityIsSendMovementLog() {
-        Date dateReceived = new Date();
+        Instant dateReceived = Instant.now();
         String guid = "Paradise";
         String senderReceiver = "Chris Martin";
         boolean incoming = true;
         ExchangeLogStatusTypeType status = ExchangeLogStatusTypeType.PROBABLY_TRANSMITTED;
         String fwdRule = "Coldplay";
-        Date fwdDate = new Date();
+        Instant fwdDate = Instant.now();
         String recipient = "Viva la vida";
 
         ExchangeLog entity = new ExchangeLog();
@@ -681,12 +683,12 @@ public class LogMapperTest {
 
     @Test
     public void toModelWhenEntityIsPollLog() {
-        Date dateReceived = new Date();
+        Instant dateReceived = Instant.now();
         String guid = "Paradise";
         String senderReceiver = "Chris Martin";
         boolean incoming = true;
         ExchangeLogStatusTypeType status = ExchangeLogStatusTypeType.PROBABLY_TRANSMITTED;
-        Date fwdDate = new Date();
+        Instant fwdDate = Instant.now();
         String recipient = "Viva la vida";
 
         ExchangeLog entity = new ExchangeLog();
@@ -713,13 +715,13 @@ public class LogMapperTest {
 
     @Test
     public void toModelWhenEntityIsEmailLog() {
-        Date dateReceived = new Date();
+        Instant dateReceived = Instant.now();
         String guid = "Paradise";
         String senderReceiver = "Chris Martin";
         boolean incoming = true;
         ExchangeLogStatusTypeType status = ExchangeLogStatusTypeType.PROBABLY_TRANSMITTED;
         String fwdRule = "Coldplay";
-        Date fwdDate = new Date();
+        Instant fwdDate = Instant.now();
         String recipient = "Viva la vida";
 
         ExchangeLog entity = new ExchangeLog();
@@ -748,7 +750,7 @@ public class LogMapperTest {
 
     @Test
     public void toModelWhenEntityIsReceiveSalesQuery() {
-        Date dateReceived = new Date();
+        Instant dateReceived = Instant.now();
         String guid = "Paradise";
         String senderReceiver = "Chris Martin";
         boolean incoming = true;
@@ -776,7 +778,7 @@ public class LogMapperTest {
 
     @Test
     public void toModelWhenEntityIsReceiveSalesReport() {
-        Date dateReceived = new Date();
+        Instant dateReceived = Instant.now();
         String guid = "Paradise";
         String senderReceiver = "Chris Martin";
         boolean incoming = true;
@@ -805,7 +807,7 @@ public class LogMapperTest {
 
     @Test
     public void toModelWhenEntityIsReceiveSalesResponse() {
-        Date dateReceived = new Date();
+        Instant dateReceived = Instant.now();
         String guid = "Paradise";
         String senderReceiver = "Chris Martin";
         boolean incoming = true;
@@ -834,7 +836,7 @@ public class LogMapperTest {
 
     @Test
     public void toModelWhenEntityIsSendSalesReport() {
-        Date dateReceived = new Date();
+        Instant dateReceived = Instant.now();
         String guid = "Paradise";
         String senderReceiver = "Chris Martin";
         boolean incoming = true;
@@ -863,7 +865,7 @@ public class LogMapperTest {
 
     @Test
     public void toModelWhenEntityIsSendSalesResponse() {
-        Date dateReceived = new Date();
+        Instant dateReceived = Instant.now();
         String guid = "Paradise";
         String senderReceiver = "Chris Martin";
         boolean incoming = true;
@@ -895,7 +897,7 @@ public class LogMapperTest {
         //data set
         String typeRefGuid = "trg";
         TypeRefType typeRefType = TypeRefType.FA_REPORT;
-        Date dateReceived = new Date();
+        Instant dateReceived = Instant.now();
         String senderOrReceiver = "BEL";
         ExchangeLogStatusTypeType status = ExchangeLogStatusTypeType.SUCCESSFUL;
         String message = "<xml></xml>";
@@ -910,7 +912,7 @@ public class LogMapperTest {
         ExchangeLogType input = new ExchangeLogType();
         input.setType(LogType.RCV_FLUX_FA_REPORT_MSG);
         input.setTypeRef(logRefType);
-        input.setDateRecieved(dateReceived);
+        input.setDateRecieved(Date.from(dateReceived));
         input.setSenderReceiver(senderOrReceiver);
         input.setStatus(status);
         input.setIncoming(false);
@@ -947,7 +949,7 @@ public class LogMapperTest {
         //data set
         String typeRefGuid = "trg";
         TypeRefType typeRefType = TypeRefType.FA_QUERY;
-        Date dateReceived = new Date();
+        Instant dateReceived = Instant.now();
         String senderOrReceiver = "BEL";
         ExchangeLogStatusTypeType status = ExchangeLogStatusTypeType.SUCCESSFUL;
         String message = "<xml></xml>";
@@ -962,7 +964,7 @@ public class LogMapperTest {
         ExchangeLogType input = new ExchangeLogType();
         input.setType(LogType.RECEIVE_FA_QUERY_MSG);
         input.setTypeRef(logRefType);
-        input.setDateRecieved(dateReceived);
+        input.setDateRecieved(Date.from(dateReceived));
         input.setSenderReceiver(senderOrReceiver);
         input.setStatus(status);
         input.setIncoming(false);
@@ -999,7 +1001,7 @@ public class LogMapperTest {
         //data set
         String typeRefGuid = "trg";
         TypeRefType typeRefType = TypeRefType.FA_QUERY;
-        Date dateReceived = new Date();
+        Instant dateReceived = Instant.now();
         String senderOrReceiver = "BEL";
         ExchangeLogStatusTypeType status = ExchangeLogStatusTypeType.SUCCESSFUL;
         String message = "<xml></xml>";
@@ -1014,7 +1016,7 @@ public class LogMapperTest {
         ExchangeLogType input = new ExchangeLogType();
         input.setType(LogType.SEND_FA_QUERY_MSG);
         input.setTypeRef(logRefType);
-        input.setDateRecieved(dateReceived);
+        input.setDateRecieved(Date.from(dateReceived));
         input.setSenderReceiver(senderOrReceiver);
         input.setStatus(status);
         input.setIncoming(false);
@@ -1051,7 +1053,7 @@ public class LogMapperTest {
         //data set
         String typeRefGuid = "trg";
         TypeRefType typeRefType = TypeRefType.FA_REPORT;
-        Date dateReceived = new Date();
+        Instant dateReceived = Instant.now();
         String senderOrReceiver = "BEL";
         ExchangeLogStatusTypeType status = ExchangeLogStatusTypeType.SUCCESSFUL;
         String message = "<xml></xml>";
@@ -1066,7 +1068,7 @@ public class LogMapperTest {
         ExchangeLogType input = new ExchangeLogType();
         input.setType(LogType.SEND_FLUX_FA_REPORT_MSG);
         input.setTypeRef(logRefType);
-        input.setDateRecieved(dateReceived);
+        input.setDateRecieved(Date.from(dateReceived));
         input.setSenderReceiver(senderOrReceiver);
         input.setStatus(status);
         input.setIncoming(false);
@@ -1103,7 +1105,7 @@ public class LogMapperTest {
         //data set
         String typeRefGuid = "trg";
         TypeRefType typeRefType = TypeRefType.FA_RESPONSE;
-        Date dateReceived = new Date();
+        Instant dateReceived = Instant.now();
         String senderOrReceiver = "BEL";
         ExchangeLogStatusTypeType status = ExchangeLogStatusTypeType.SUCCESSFUL;
         String message = "<xml></xml>";
@@ -1118,7 +1120,7 @@ public class LogMapperTest {
         ExchangeLogType input = new ExchangeLogType();
         input.setType(LogType.SEND_FLUX_RESPONSE_MSG);
         input.setTypeRef(logRefType);
-        input.setDateRecieved(dateReceived);
+        input.setDateRecieved(Date.from(dateReceived));
         input.setSenderReceiver(senderOrReceiver);
         input.setStatus(status);
         input.setIncoming(false);

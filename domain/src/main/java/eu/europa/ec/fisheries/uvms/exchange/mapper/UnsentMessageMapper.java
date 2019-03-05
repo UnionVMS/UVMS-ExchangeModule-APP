@@ -19,18 +19,19 @@ import eu.europa.ec.fisheries.uvms.exchange.entity.unsent.UnsentMessageProperty;
 import eu.europa.ec.fisheries.uvms.exchange.model.util.DateUtils;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 public class UnsentMessageMapper {
 
 	public static UnsentMessage toEntity(UnsentMessageType message, String username) {
 		UnsentMessage entity = new UnsentMessage();
-		entity.setDateReceived(message.getDateReceived());
+		entity.setDateReceived(message.getDateReceived().toInstant());
 		entity.setRecipient(message.getRecipient());
 		entity.setSenderReceiver(message.getSenderReceiver());
 		entity.setMessage(message.getMessage());
 		entity.setUpdatedBy(username);
-		entity.setUpdateTime(DateUtils.nowUTC().toDate());
+		entity.setUpdateTime(DateUtils.nowUTC());
         List<UnsentMessageProperty> unsentMessageProperties = mapToUnsentMessagePropertyEntities(message, entity);
         entity.setProperties(unsentMessageProperties);
 		return entity;
@@ -52,7 +53,7 @@ public class UnsentMessageMapper {
 
     public static UnsentMessageType toModel(UnsentMessage entity) {
 		UnsentMessageType model = new UnsentMessageType();
-		model.setDateReceived(entity.getDateReceived());
+		model.setDateReceived(Date.from(entity.getDateReceived()));
 		model.setSenderReceiver(entity.getSenderReceiver());
 		model.setMessageId(entity.getGuid());
 		model.setRecipient(entity.getRecipient());

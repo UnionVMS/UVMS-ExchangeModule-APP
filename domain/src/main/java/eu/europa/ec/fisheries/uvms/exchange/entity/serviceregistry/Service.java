@@ -12,7 +12,7 @@ copy of the GNU General Public License along with the IFDM Suite. If not, see <h
 package eu.europa.ec.fisheries.uvms.exchange.entity.serviceregistry;
 
 import java.io.Serializable;
-import java.util.Date;
+import java.time.Instant;
 import java.util.List;
 
 import javax.persistence.Basic;
@@ -29,8 +29,6 @@ import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import javax.xml.bind.annotation.XmlRootElement;
@@ -93,8 +91,7 @@ public class Service implements Serializable {
     @Basic(optional = false)
     @NotNull
     @Column(name = "serv_updattim")
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date updated;
+    private Instant updated;
 
     @Basic(optional = false)
     @NotNull
@@ -151,11 +148,11 @@ public class Service implements Serializable {
         this.active = active;
     }
 
-    public Date getUpdated() {
+    public Instant getUpdated() {
         return updated;
     }
 
-    public void setUpdated(Date updated) {
+    public void setUpdated(Instant updated) {
         this.updated = updated;
     }
 

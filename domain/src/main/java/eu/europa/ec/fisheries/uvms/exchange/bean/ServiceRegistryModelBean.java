@@ -21,15 +21,13 @@ import eu.europa.ec.fisheries.uvms.exchange.exception.ExchangeDaoException;
 import eu.europa.ec.fisheries.uvms.exchange.mapper.ServiceMapper;
 import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelException;
 import eu.europa.ec.fisheries.uvms.exchange.ServiceRegistryModel;
-import org.joda.time.DateTime;
-import org.joda.time.DateTimeZone;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
+import java.time.Instant;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 @Stateless
@@ -62,7 +60,7 @@ public class ServiceRegistryModelBean implements ServiceRegistryModel {
             service.getServiceSettingList().addAll(newSettings);
             service.setDescription(serviceType.getDescription());
             service.setName(serviceType.getName());
-            service.setUpdated(new DateTime(DateTimeZone.UTC).toDate());
+            service.setUpdated(Instant.now());
             service.setUpdatedBy(username);
             dao.updateService(service);
         }
@@ -180,7 +178,7 @@ public class ServiceRegistryModelBean implements ServiceRegistryModel {
 		if(service != null) {
 			service.setStatus(status.name());
             service.setUpdatedBy(username);
-            service.setUpdated(new Date());
+            service.setUpdated(Instant.now());
 			return ServiceMapper.toServiceModel(dao.updateService(service));
 		}
 		throw new ExchangeModelException("[ Error when update plugin " + serviceName + " with status " + status.name());

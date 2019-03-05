@@ -11,7 +11,7 @@ copy of the GNU General Public License along with the IFDM Suite. If not, see <h
  */
 package eu.europa.ec.fisheries.uvms.exchange.entity.unsent;
 
-import java.util.Date;
+import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
@@ -51,18 +51,16 @@ public class UnsentMessage {
 	private String recipient;
 	
 	@NotNull
-	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name="unsent_datereceived")
-	private Date dateReceived;
+	private Instant dateReceived;
 	
 	@NotNull
 	@Size(max=8192)
 	@Column(name="unsent_message")
 	private String message;
 	
-	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name="unsent_updattim")
-	private Date updateTime;
+	private Instant updateTime;
 	
 	@Size(max=60)
 	@Column(name="unsent_upuser")
@@ -100,11 +98,11 @@ public class UnsentMessage {
 		this.recipient = recipient;
 	}
 
-	public Date getDateReceived() {
+	public Instant getDateReceived() {
 		return dateReceived;
 	}
 
-	public void setDateReceived(Date dateReceived) {
+	public void setDateReceived(Instant dateReceived) {
 		this.dateReceived = dateReceived;
 	}
 
@@ -116,11 +114,11 @@ public class UnsentMessage {
 		this.message = message;
 	}
 
-	public Date getUpdateTime() {
+	public Instant getUpdateTime() {
 		return updateTime;
 	}
 
-	public void setUpdateTime(Date updateTime) {
+	public void setUpdateTime(Instant updateTime) {
 		this.updateTime = updateTime;
 	}
 

@@ -11,7 +11,6 @@ copy of the GNU General Public License along with the IFDM Suite. If not, see <h
  */
 package eu.europa.ec.fisheries.uvms.exchange.entity.exchangelog;
 
-import java.util.Date;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -25,12 +24,12 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
 import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogStatusTypeType;
+
+import java.time.Instant;
 
 @Entity
 @Table(name="log_status")
@@ -46,17 +45,15 @@ public class ExchangeLogStatus {
 	@Column(name="logstatus_status")
 	private ExchangeLogStatusTypeType status;
 	
-	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name="logstatus_timestamp")
-	private Date statusTimestamp;
+	private Instant statusTimestamp;
 	
 	@ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
 	@JoinColumn(name="logstatus_log_id")
 	private ExchangeLog log;
 
-	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name="logstatus_updattim")
-	private Date updateTime;
+	private Instant updateTime;
 	
 	@Size(max=60)
 	@Column(name="logstatus_upuser")
@@ -78,11 +75,11 @@ public class ExchangeLogStatus {
 		this.status = status;
 	}
 
-	public Date getStatusTimestamp() {
+	public Instant getStatusTimestamp() {
 		return statusTimestamp;
 	}
 
-	public void setStatusTimestamp(Date statusTimestamp) {
+	public void setStatusTimestamp(Instant statusTimestamp) {
 		this.statusTimestamp = statusTimestamp;
 	}
 
@@ -94,11 +91,11 @@ public class ExchangeLogStatus {
 		this.log = log;
 	}
 
-	public Date getUpdateTime() {
+	public Instant getUpdateTime() {
 		return updateTime;
 	}
 
-	public void setUpdateTime(Date updateTime) {
+	public void setUpdateTime(Instant updateTime) {
 		this.updateTime = updateTime;
 	}
 

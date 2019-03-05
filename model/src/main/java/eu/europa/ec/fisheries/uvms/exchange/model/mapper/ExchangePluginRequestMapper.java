@@ -19,20 +19,22 @@ import eu.europa.ec.fisheries.schema.exchange.plugin.v1.*;
 import eu.europa.ec.fisheries.schema.exchange.service.v1.SettingListType;
 import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelMarshallException;
 
-import java.util.Date;
+import java.time.Instant;
+import java.util.Date;  //leave be
+
 
 /**
  **/
 public class ExchangePluginRequestMapper {
 
-    public static String createSetReportRequest(Date dateReceived, SendMovementToPluginType movement, String unsentMessageGuid) throws ExchangeModelMarshallException {
+    public static String createSetReportRequest(Instant dateReceived, SendMovementToPluginType movement, String unsentMessageGuid) throws ExchangeModelMarshallException {
         SetReportRequest request = new SetReportRequest();
         request.setMethod(ExchangePluginMethod.SET_REPORT);
         ReportType reportType = new ReportType();
         reportType.setRecipient(movement.getRecipient());
         reportType.getRecipientInfo().addAll(movement.getRecipientInfo());
         reportType.setMovement(movement.getMovement());
-        reportType.setTimestamp(dateReceived);
+        reportType.setTimestamp(Date.from(dateReceived));
         reportType.setType(ReportTypeType.MOVEMENT);
         reportType.setUnsentMessageGuid(unsentMessageGuid);
         request.setReport(reportType);

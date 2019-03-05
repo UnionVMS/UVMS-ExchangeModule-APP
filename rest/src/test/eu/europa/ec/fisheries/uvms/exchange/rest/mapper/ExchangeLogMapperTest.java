@@ -5,9 +5,6 @@ import eu.europa.ec.fisheries.uvms.exchange.rest.dto.LogTypeLabel;
 import eu.europa.ec.fisheries.uvms.exchange.rest.dto.exchange.ExchangeLog;
 import org.junit.Test;
 
-import java.util.Calendar;
-import java.util.Date;
-import java.util.GregorianCalendar;
 
 import static org.junit.Assert.*;
 
@@ -24,7 +21,8 @@ public class ExchangeLogMapperTest {
         String senderReceiver = "FRA";
 
         Calendar calendar = new GregorianCalendar(2017,5,10,13,24,56);
-        Date dateReceived = calendar.getTime();
+        Instant dateReceived = calendar.getTime();
+
 
         LogRefType ref = new LogRefType();
         ref.setType(refType);
