@@ -637,7 +637,7 @@ public class LogMapperTest {
         ExchangeLogType model = LogMapper.toModel(entity);
 
         assertEquals(LogType.RECEIVE_MOVEMENT, model.getType());
-        assertEquals(dateReceived, model.getDateRecieved());
+        assertEquals(dateReceived, model.getDateRecieved().toInstant());
         assertEquals(guid, model.getGuid());
         assertEquals(senderReceiver, model.getSenderReceiver());
         assertEquals(incoming, model.isIncoming());
@@ -671,13 +671,13 @@ public class LogMapperTest {
         ExchangeLogType model = LogMapper.toModel(entity);
 
         assertEquals(LogType.SEND_MOVEMENT, model.getType());
-        assertEquals(dateReceived, model.getDateRecieved());
+        assertEquals(dateReceived, model.getDateRecieved().toInstant());
         assertEquals(guid, model.getGuid());
         assertEquals(senderReceiver, model.getSenderReceiver());
         assertEquals(incoming, model.isIncoming());
         assertEquals(status, model.getStatus());
         assertEquals(fwdRule, ((SendMovementType) model).getFwdRule());
-        assertEquals(fwdDate, ((SendMovementType) model).getFwdDate());
+        assertEquals(fwdDate, ((SendMovementType) model).getFwdDate().toInstant());
         assertEquals(recipient, ((SendMovementType) model).getRecipient());
     }
 
@@ -704,12 +704,12 @@ public class LogMapperTest {
         ExchangeLogType model = LogMapper.toModel(entity);
 
         assertEquals(LogType.SEND_POLL, model.getType());
-        assertEquals(dateReceived, model.getDateRecieved());
+        assertEquals(dateReceived, model.getDateRecieved().toInstant());
         assertEquals(guid, model.getGuid());
         assertEquals(senderReceiver, model.getSenderReceiver());
         assertEquals(incoming, model.isIncoming());
         assertEquals(status, model.getStatus());
-        assertEquals(fwdDate, ((SendPollType) model).getFwdDate());
+        assertEquals(fwdDate, ((SendPollType) model).getFwdDate().toInstant());
         assertEquals(recipient, ((SendPollType) model).getRecipient());
     }
 
@@ -738,13 +738,13 @@ public class LogMapperTest {
         ExchangeLogType model = LogMapper.toModel(entity);
 
         assertEquals(LogType.SEND_EMAIL, model.getType());
-        assertEquals(dateReceived, model.getDateRecieved());
+        assertEquals(dateReceived, model.getDateRecieved().toInstant());
         assertEquals(guid, model.getGuid());
         assertEquals(senderReceiver, model.getSenderReceiver());
         assertEquals(incoming, model.isIncoming());
         assertEquals(status, model.getStatus());
         assertEquals(fwdRule, ((SendEmailType) model).getFwdRule());
-        assertEquals(fwdDate, ((SendEmailType) model).getFwdDate());
+        assertEquals(fwdDate, ((SendEmailType) model).getFwdDate().toInstant());
         assertEquals(recipient, ((SendEmailType) model).getRecipient());
     }
 
@@ -768,7 +768,7 @@ public class LogMapperTest {
         ExchangeLogType model = LogMapper.toModel(entity);
 
         assertEquals(LogType.RECEIVE_SALES_QUERY, model.getType());
-        assertEquals(dateReceived, model.getDateRecieved());
+        assertEquals(dateReceived, model.getDateRecieved().toInstant());
         assertEquals(guid, model.getGuid());
         assertEquals(senderReceiver, model.getSenderReceiver());
         assertEquals(incoming, model.isIncoming());
@@ -797,7 +797,7 @@ public class LogMapperTest {
         ExchangeLogType model = LogMapper.toModel(entity);
 
         assertEquals(LogType.RECEIVE_SALES_REPORT, model.getType());
-        assertEquals(dateReceived, model.getDateRecieved());
+        assertEquals(dateReceived, model.getDateRecieved().toInstant());
         assertEquals(guid, model.getGuid());
         assertEquals(senderReceiver, model.getSenderReceiver());
         assertEquals(incoming, model.isIncoming());
@@ -826,7 +826,7 @@ public class LogMapperTest {
         ExchangeLogType model = LogMapper.toModel(entity);
 
         assertEquals(LogType.RECEIVE_SALES_RESPONSE, model.getType());
-        assertEquals(dateReceived, model.getDateRecieved());
+        assertEquals(dateReceived, model.getDateRecieved().toInstant());
         assertEquals(guid, model.getGuid());
         assertEquals(senderReceiver, model.getSenderReceiver());
         assertEquals(incoming, model.isIncoming());
@@ -855,7 +855,7 @@ public class LogMapperTest {
         ExchangeLogType model = LogMapper.toModel(entity);
 
         assertEquals(LogType.SEND_SALES_REPORT, model.getType());
-        assertEquals(dateReceived, model.getDateRecieved());
+        assertEquals(dateReceived, model.getDateRecieved().toInstant());
         assertEquals(guid, model.getGuid());
         assertEquals(senderReceiver, model.getSenderReceiver());
         assertEquals(incoming, model.isIncoming());
@@ -884,7 +884,7 @@ public class LogMapperTest {
         ExchangeLogType model = LogMapper.toModel(entity);
 
         assertEquals(LogType.SEND_SALES_RESPONSE, model.getType());
-        assertEquals(dateReceived, model.getDateRecieved());
+        assertEquals(dateReceived, model.getDateRecieved().toInstant());
         assertEquals(guid, model.getGuid());
         assertEquals(senderReceiver, model.getSenderReceiver());
         assertEquals(incoming, model.isIncoming());
