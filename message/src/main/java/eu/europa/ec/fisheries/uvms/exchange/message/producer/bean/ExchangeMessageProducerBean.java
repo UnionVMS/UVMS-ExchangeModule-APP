@@ -171,7 +171,7 @@ public class ExchangeMessageProducerBean extends AbstractProducer implements Exc
             properties.put(MessageConstants.JMS_FUNCTION_PROPERTY, "ASSET_INFORMATION");
             String s = "";
             if(destination != null) {
-                s = this.sendModuleMessageWithProps(text, destination, properties);
+                s = this.sendMessageToSpecificQueueWithFunction(text, destination, null,"ASSET_INFORMATION",null);
             }
             return s;
         } catch (MessageException e) {
