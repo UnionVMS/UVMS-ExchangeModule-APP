@@ -177,9 +177,6 @@ public class ExchangeMessageProducerBean extends AbstractProducer implements Exc
         } catch (MessageException e) {
             LOG.error("[ Error when sending Asset info message. ] {}", e);
             throw new ExchangeMessageException("Error when sending asset info message.", e);
-        } catch (Throwable e) {
-            LOG.error("[ Error when sending Asset info message. ] {}", e);
-            throw new ExchangeMessageException("Error when sending asset info message.", e);
         }
 
     }

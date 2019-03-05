@@ -57,7 +57,6 @@ import eu.europa.ec.fisheries.uvms.rules.model.exception.RulesModelMapperExcepti
 import eu.europa.ec.fisheries.uvms.rules.model.exception.RulesModelMarshallException;
 import eu.europa.ec.fisheries.uvms.rules.model.mapper.RulesModuleRequestMapper;
 import lombok.extern.slf4j.Slf4j;
-import net.bull.javamelody.internal.common.LOG;
 import org.apache.commons.collections.CollectionUtils;
 
 import javax.ejb.EJB;
@@ -295,7 +294,7 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
         //    firePluginFault(event, "Could not log the incoming asset information.", e);
         } catch (Exception e) {
             //firePluginFault(event, "Could not log the incoming asset information.", e);
-            LOG.warn(e.toString(), e);
+            log.warn(e.toString(), e);
 
         }
     }
