@@ -10,6 +10,12 @@
 
     <artifactId>exchange-service</artifactId>
     <packaging>ejb</packaging>
+
+    <properties>
+        <docker.dev.start.phase>test-compile</docker.dev.start.phase>
+        <docker.liquibase.phase>test-compile</docker.liquibase.phase>
+        <docker.dev.prestop.phase>validate</docker.dev.prestop.phase>
+    </properties>
  
     <dependencies>
         <!-- Project modules-->
@@ -22,7 +28,6 @@
             <groupId>${project.groupId}</groupId>
             <artifactId>exchange-dbaccess-domain</artifactId>
             <version>${project.version}</version>
-            <scope>provided</scope>
         </dependency>
 
         <!-- Third party libs -->
@@ -76,7 +81,16 @@
             <groupId>eu.europa.ec.fisheries.uvms.asset</groupId>
             <artifactId>asset-model</artifactId>
         </dependency>
-        
+
+        <!-- Test -->
+
+        <dependency>
+            <groupId>fish.focus.uvms.maven</groupId>
+            <artifactId>uvms-pom-arquillian-deps</artifactId>
+            <type>pom</type>
+            <scope>test</scope>
+        </dependency>
+
     </dependencies>
 
 

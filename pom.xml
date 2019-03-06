@@ -137,6 +137,15 @@
                 <type>pom</type>
             </dependency>
 
+            <!-- Test Deps -->
+
+            <dependency>
+                <groupId>fish.focus.uvms.maven</groupId>
+                <artifactId>uvms-pom-arquillian-deps</artifactId>
+                <version>1.23</version>
+                <type>pom</type>
+            </dependency>
+
             <!-- Models -->
             <dependency>
                 <groupId>${project.groupId}</groupId>

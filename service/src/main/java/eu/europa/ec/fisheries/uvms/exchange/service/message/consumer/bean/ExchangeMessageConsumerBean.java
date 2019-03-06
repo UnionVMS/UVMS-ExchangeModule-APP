@@ -17,9 +17,9 @@ import eu.europa.ec.fisheries.schema.exchange.plugin.v1.AcknowledgeResponse;
 import eu.europa.ec.fisheries.schema.exchange.plugin.v1.PingResponse;
 import eu.europa.ec.fisheries.uvms.commons.message.api.MessageConstants;
 import eu.europa.ec.fisheries.uvms.commons.message.context.MappedDiagnosticContext;
-import eu.europa.ec.fisheries.uvms.exchange.service.bean.ExchangeEventIncomingServiceBean;
-import eu.europa.ec.fisheries.uvms.exchange.service.bean.ExchangeEventOutgoingServiceBean;
-import eu.europa.ec.fisheries.uvms.exchange.service.bean.PluginServiceBean;
+import eu.europa.ec.fisheries.uvms.exchange.service.ExchangeEventIncomingService;
+import eu.europa.ec.fisheries.uvms.exchange.service.ExchangeEventOutgoingService;
+import eu.europa.ec.fisheries.uvms.exchange.service.PluginService;
 import eu.europa.ec.fisheries.uvms.exchange.service.message.event.*;
 import eu.europa.ec.fisheries.uvms.exchange.service.message.event.carrier.ExchangeMessageEvent;
 import eu.europa.ec.fisheries.uvms.exchange.model.constant.FaultCode;
@@ -54,13 +54,13 @@ public class ExchangeMessageConsumerBean implements MessageListener {
     final static Logger LOG = LoggerFactory.getLogger(ExchangeMessageConsumerBean.class);
 
     @Inject
-    private ExchangeEventIncomingServiceBean incomingServiceBean;
+    private ExchangeEventIncomingService incomingServiceBean;
 
     @Inject
-    private ExchangeEventOutgoingServiceBean outgoingServiceBean;
+    private ExchangeEventOutgoingService outgoingServiceBean;
 
     @Inject
-    private PluginServiceBean pluginServiceBean;
+    private PluginService pluginServiceBean;
 
     @Inject
     @ErrorEvent
