@@ -85,15 +85,16 @@ public class ServiceRegistryDaoBean extends Dao implements ServiceRegistryDao {
             throw new ExchangeDaoException("[ Error when updating entity ]");
         } catch (Exception e) {
             LOG.error("[ Error when updating entity ] {}", e.getMessage());
-            throw new ExchangeDaoException("[ Error when updating entity ]");
+            throw new ExchangeDaoException("[ Error when updating entity ]", e);
         }
     }
 
     // deactivateService
     @Override
-    public void deleteEntity(Long id) throws ExchangeDaoException {
-        LOG.info("Delete Entity not implemented yet.");
-        throw new ExchangeDaoException("Not implemented yet");
+    public void deleteEntity(Long id ) {
+        Service s = em.find(Service.class, id);
+        em.remove(s);
+
     }
 
     @Override

@@ -16,6 +16,9 @@ public class JMSHelper {
     public static final String RESPONSE_QUEUE = "IntegrationTestsResponseQueue";
 
     private final ConnectionFactory connectionFactory;
+    MessageConsumer subscriber;
+    Topic eventBus;
+    Session session;
 
     public JMSHelper(ConnectionFactory connectionFactory) {
         this.connectionFactory = connectionFactory;
@@ -30,6 +33,13 @@ public class JMSHelper {
         return JAXBMarshaller.unmarshallTextMessage((TextMessage) response, PingResponse.class);
     }
 
+    public void registerSubscriber(String selector) throws Exception {
+        Connection connection = connectionFactory.createConnection();
+        connection.start();
+        session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
+        eventBus = session.createTopic("EventBus");
+        subscriber = session.createConsumer(eventBus, selector, true);
+    }
 
     public String sendExchangeMessage(String text, String groupId, String function) throws Exception {
         Connection connection = connectionFactory.createConnection();
@@ -66,7 +76,14 @@ public class JMSHelper {
         }
     }
 
+    public Message listenOnEventBus(String selector, Long timeoutInMillis) throws Exception {
 
+        try {
+            return subscriber.receive(timeoutInMillis);
+        } finally {
+            subscriber.close();
+        }
+    }
 
     public Message listenOnQueue(String queue) throws Exception {
         Connection connection = connectionFactory.createConnection();

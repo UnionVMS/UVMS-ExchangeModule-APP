@@ -474,7 +474,7 @@ public class ExchangeEventOutgoingServiceBean implements ExchangeEventOutgoingSe
             String faultMessage = "No plugin to send to";
             exchangeErrorEvent.fire(new ExchangeMessageEvent(origin, ExchangeModuleResponseMapper.createFaultMessage(FaultCode.EXCHANGE_COMMAND_INVALID, faultMessage)));
             return false;
-        } else if (service == null || service.getServiceClassName() == null || !service.getServiceClassName().equalsIgnoreCase(command.getPluginName())) {
+        } else if (service == null || service.getServiceClassName() == null || !service.getServiceClassName().equalsIgnoreCase(command.getPluginName())) {                  //this can never happen since a nullpointer is thrown in the remapping process
             String faultMessage = "No plugin receiver available";
             exchangeErrorEvent.fire(new ExchangeMessageEvent(origin, ExchangeModuleResponseMapper.createFaultMessage(FaultCode.EXCHANGE_COMMAND_INVALID, faultMessage)));
             try {

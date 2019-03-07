@@ -57,11 +57,11 @@ public interface ServiceRegistryDao {
     /**
      * Delete entity from database
      *
-     * @param serviceId
+     * @param o
      * @throws
      * eu.europa.ec.fisheries.uvms.exchange.exception.ExchangeDaoException
      */
-    public void deleteEntity(Long serviceId) throws ExchangeDaoException;
+    public void deleteEntity(Long id) throws ExchangeDaoException;
 
     /**
      * Get all services (FIND_ALL)

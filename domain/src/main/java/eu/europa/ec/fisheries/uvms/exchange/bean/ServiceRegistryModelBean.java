@@ -168,7 +168,7 @@ public class ServiceRegistryModelBean implements ServiceRegistryModel {
 
         } catch (NullPointerException e) {
             LOG.error("[ Error when getting Service. {} ] {}",serviceClassName,  e.getMessage());
-            throw new ExchangeModelException("[ Error when getting service. ]");
+            throw new ExchangeModelException("[ Error when getting service. ]", e);
         }
     }
 
