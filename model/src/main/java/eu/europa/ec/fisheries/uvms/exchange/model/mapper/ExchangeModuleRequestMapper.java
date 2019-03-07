@@ -329,10 +329,11 @@ public class ExchangeModuleRequestMapper {
         return JAXBMarshaller.marshallJaxBObjectToString(request);
     }
 
-    public static String createUpdatePluginSettingRequest(String serviceClassName, String settingKey, String settingValue) throws ExchangeModelMarshallException {
+    public static String createUpdatePluginSettingRequest(String serviceClassName, String settingKey, String settingValue, String username) throws ExchangeModelMarshallException {
         UpdatePluginSettingRequest request = new UpdatePluginSettingRequest();
         request.setMethod(ExchangeModuleMethod.UPDATE_PLUGIN_SETTING);
         request.setServiceClassName(serviceClassName);
+        request.setUsername(username);
         SettingType setting = new SettingType();
         setting.setKey(settingKey);
         setting.setValue(settingValue);
@@ -569,7 +570,7 @@ public class ExchangeModuleRequestMapper {
      */
     private static <T> T checkNotNull(T reference) {
         if (reference == null) {
-            throw new NullPointerException();
+            throw new NullPointerException("Object " + reference + " is null");
         }
         return reference;
     }

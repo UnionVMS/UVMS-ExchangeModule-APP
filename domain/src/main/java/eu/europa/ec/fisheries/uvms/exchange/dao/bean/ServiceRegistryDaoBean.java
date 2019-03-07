@@ -63,7 +63,7 @@ public class ServiceRegistryDaoBean extends Dao implements ServiceRegistryDao {
     @Override
     public Service getEntityById(String id) throws NoEntityFoundException, ExchangeDaoException {
         try {
-            return em.find(Service.class, new Long(id));
+            return em.find(Service.class, new Long(id));                //SRSLY!?!?!?!?!?!?!?!?!?!?!? WHY??????????
         } catch (NoResultException e) {
             LOG.error("[ Error when getting entity by ID. ] {}", e.getMessage());
             throw new NoEntityFoundException("[ Error when getting entity by ID. ]");
