@@ -14,12 +14,15 @@ import eu.europa.ec.fisheries.schema.exchange.plugin.types.v1.EmailType;
 import eu.europa.ec.fisheries.schema.exchange.plugin.types.v1.PluginType;
 import eu.europa.ec.fisheries.schema.exchange.plugin.types.v1.PollType;
 import eu.europa.ec.fisheries.schema.exchange.plugin.types.v1.PollTypeType;
-import eu.europa.ec.fisheries.schema.exchange.plugin.v1.SetCommandRequest;
-import eu.europa.ec.fisheries.schema.exchange.plugin.v1.SetConfigRequest;
-import eu.europa.ec.fisheries.schema.exchange.plugin.v1.SetReportRequest;
+import eu.europa.ec.fisheries.schema.exchange.plugin.v1.*;
 import eu.europa.ec.fisheries.schema.exchange.service.v1.CapabilityTypeType;
 import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogStatusTypeType;
+import eu.europa.ec.fisheries.schema.exchange.v1.LogType;
 import eu.europa.ec.fisheries.schema.exchange.v1.TypeRefType;
+import eu.europa.ec.fisheries.schema.rules.module.v1.ReceiveSalesQueryRequest;
+import eu.europa.ec.fisheries.schema.rules.module.v1.ReceiveSalesReportRequest;
+import eu.europa.ec.fisheries.schema.rules.module.v1.ReceiveSalesResponseRequest;
+import eu.europa.ec.fisheries.schema.rules.module.v1.RulesModuleMethod;
 import eu.europa.ec.fisheries.uvms.commons.message.api.MessageConstants;
 import eu.europa.ec.fisheries.uvms.exchange.dao.ExchangeLogDao;
 import eu.europa.ec.fisheries.uvms.exchange.dao.ServiceRegistryDao;
@@ -31,6 +34,7 @@ import eu.europa.ec.fisheries.uvms.exchange.entity.serviceregistry.ServiceSettin
 import eu.europa.ec.fisheries.uvms.exchange.model.mapper.ExchangeModuleRequestMapper;
 import eu.europa.ec.fisheries.uvms.exchange.model.mapper.JAXBMarshaller;
 import eu.europa.ec.fisheries.uvms.exchange.service.bean.ExchangeEventLogCache;
+import eu.europa.ec.fisheries.uvms.exchange.service.constants.ExchangeServiceConstants;
 import eu.europa.ec.fisheries.uvms.exchange.service.model.IncomingMovement;
 import org.jboss.arquillian.container.test.api.OperateOnDeployment;
 import org.jboss.arquillian.junit.Arquillian;
@@ -433,6 +437,137 @@ public class ExchangeMessageConsumerBeanTest extends BuildExchangeServiceTestDep
         //Not part of swe uvms flow (since it sends stuff to rules instead of movement), ignoring
     }
 
+    /* -- SALES -- */
+
+    @Test
+    @OperateOnDeployment("exchangeservice")
+    public void  reciveSalesReportTest() throws Exception{
+        String request = ExchangeModuleRequestMapper.createReceiveSalesReportRequest("Report", "Report guid", "Sales Person", "Sales username", PluginType.BELGIAN_SALES, Instant.now(), "on");
+        String corrID = jmsHelper.sendExchangeMessage(request, null, "RECEIVE_SALES_REPORT");
+        TextMessage message = (TextMessage)jmsHelper.listenOnQueue(MessageConstants.RULES_MESSAGE_IN_QUEUE_NAME);
+
+        ReceiveSalesReportRequest output = JAXBMarshaller.unmarshallTextMessage(message, ReceiveSalesReportRequest.class);
+        assertEquals(PluginType.BELGIAN_SALES.value(), output.getPluginType());
+        assertEquals("Sales Person", output.getSender());
+        assertEquals("Report guid", output.getMessageGuid());
+        assertEquals(RulesModuleMethod.RECEIVE_SALES_REPORT, output.getMethod());
+        assertEquals("Report", output.getRequest());
+
+        String logGuid = output.getLogGuid();
+        ExchangeLog exchangeLog = exchangeLogDao.getExchangeLogByGuid(logGuid);
+        assertNotNull(exchangeLog);
+        assertEquals(TypeRefType.SALES_REPORT, exchangeLog.getTypeRefType());
+        assertEquals(LogType.RECEIVE_SALES_REPORT, exchangeLog.getType());
+        assertEquals(ExchangeLogStatusTypeType.ISSUED, exchangeLog.getStatus());
+
+    }
+
+    @Test
+    @OperateOnDeployment("exchangeservice")
+    public void  reciveSalesQueryTest() throws Exception{
+        String request = ExchangeModuleRequestMapper.createReceiveSalesQueryRequest("Query", "Query guid", "Query Person", Instant.now(), "Query username", PluginType.BELGIAN_SALES, "on?");       //WTF is on?
+        String corrID = jmsHelper.sendExchangeMessage(request, null, "RECEIVE_SALES_QUERY");
+        TextMessage message = (TextMessage)jmsHelper.listenOnQueue(MessageConstants.RULES_MESSAGE_IN_QUEUE_NAME);
+
+        ReceiveSalesQueryRequest output = JAXBMarshaller.unmarshallTextMessage(message,ReceiveSalesQueryRequest.class);
+        assertEquals(PluginType.BELGIAN_SALES.value(), output.getPluginType());
+        assertEquals("Query Person", output.getSender());
+        assertEquals("Query guid", output.getMessageGuid());
+        assertEquals(RulesModuleMethod.RECEIVE_SALES_QUERY, output.getMethod());
+        assertEquals("Query", output.getRequest());
+
+        String logGuid = output.getLogGuid();
+        ExchangeLog exchangeLog = exchangeLogDao.getExchangeLogByGuid(logGuid);
+        assertNotNull(exchangeLog);
+        assertEquals(TypeRefType.SALES_QUERY, exchangeLog.getTypeRefType());
+        assertEquals(LogType.RECEIVE_SALES_QUERY, exchangeLog.getType());
+        assertEquals(ExchangeLogStatusTypeType.ISSUED, exchangeLog.getStatus());
+    }
+
+    @Test
+    @OperateOnDeployment("exchangeservice")
+    public void  reciveSalesResponseTest() throws Exception{
+        String request = ExchangeModuleRequestMapper.createReceiveSalesResponseRequest("Response", "Response Guid", "Sales responder", Instant.now(), "Sales responder username", PluginType.BELGIAN_SALES, "on?");
+        String corrID = jmsHelper.sendExchangeMessage(request, null, "RECEIVE_SALES_RESPONSE");
+        TextMessage message = (TextMessage)jmsHelper.listenOnQueue(MessageConstants.RULES_MESSAGE_IN_QUEUE_NAME);
+
+        ReceiveSalesResponseRequest output = JAXBMarshaller.unmarshallTextMessage(message,ReceiveSalesResponseRequest.class);
+        assertEquals("Sales responder", output.getSenderOrReceiver());
+        assertEquals(RulesModuleMethod.RECEIVE_SALES_RESPONSE, output.getMethod());
+        assertEquals("Response", output.getRequest());
+
+        String logGuid = output.getLogGuid();
+        ExchangeLog exchangeLog = exchangeLogDao.getExchangeLogByGuid(logGuid);
+        assertNotNull(exchangeLog);
+        assertEquals(TypeRefType.SALES_RESPONSE, exchangeLog.getTypeRefType());
+        assertEquals(LogType.RECEIVE_SALES_RESPONSE, exchangeLog.getType());
+        assertEquals(ExchangeLogStatusTypeType.ISSUED, exchangeLog.getStatus());
+    }
+
+    @Test
+    @OperateOnDeployment("exchangeservice")
+    public void  reciveInvalidSalesMessageTest() throws Exception{
+        List<TypeRefType> list = new ArrayList<>();
+        list.add(TypeRefType.SALES_REPORT);
+        int salesLogB4 = exchangeLogDao.getExchangeLogByTypesRefAndGuid("Invalid Guid", list).size();
+
+        String request = ExchangeModuleRequestMapper.createReceiveInvalidSalesMessage("Response invalid message", "Invalid Guid", "Invalid sender", Instant.now(), "Invalid username", PluginType.BELGIAN_SALES, "Invalid original message");
+        String corrID = jmsHelper.sendExchangeMessage(request, null, "RECEIVE_INVALID_SALES_RESPONSE");
+        TextMessage message = (TextMessage)jmsHelper.listenOnQueue("UVMSSalesEvent");
+        assertEquals("Response invalid message", message.getText());                //Kinda wondering how the hell this works on the sales side......
+
+        Thread.sleep(1000);
+        assertEquals(salesLogB4 + 1, exchangeLogDao.getExchangeLogByTypesRefAndGuid("Invalid Guid", list).size());
+    }
+
+    @Test
+    @OperateOnDeployment("exchangeservice")
+    public void  sendSalesResponseTest() throws Exception{
+        List<TypeRefType> list = new ArrayList<>();
+        list.add(TypeRefType.SALES_RESPONSE);
+        int salesLogB4 = exchangeLogDao.getExchangeLogByTypesRefAndGuid("Send response guid", list).size();
+        String serviceClassName = ExchangeServiceConstants.BELGIAN_AUCTION_SALES_PLUGIN_SERVICE_NAME;
+        String request = ExchangeModuleRequestMapper.createSendSalesResponseRequest("Send sales response", "Send response guid", "Send sales response dataFlow", "Send sales response receiver", Instant.now(), ExchangeLogStatusTypeType.SUCCESSFUL_WITH_WARNINGS, PluginType.BELGIAN_SALES);
+
+        jmsHelper.registerSubscriber("ServiceName = '" + serviceClassName + "'");
+        String corrID = jmsHelper.sendExchangeMessage(request, null, "SEND_SALES_RESPONSE");
+        TextMessage message = (TextMessage)jmsHelper.listenOnEventBus("ServiceName = '" + serviceClassName + "'", 5000l);
+
+        SendSalesResponseRequest output = JAXBMarshaller.unmarshallTextMessage(message,SendSalesResponseRequest.class);
+
+        assertEquals(ExchangePluginMethod.SEND_SALES_RESPONSE, output.getMethod());
+        assertEquals("Send sales response", output.getResponse());
+        assertEquals("Send sales response receiver", output.getRecipient());
+
+        Thread.sleep(1000);
+        assertEquals(salesLogB4 + 1, exchangeLogDao.getExchangeLogByTypesRefAndGuid("Send response guid", list).size());
+
+    }
+
+    @Test
+    @OperateOnDeployment("exchangeservice")
+    public void  sendSalesReportTest() throws Exception{
+        List<TypeRefType> list = new ArrayList<>();
+        list.add(TypeRefType.SALES_REPORT);
+        int salesLogB4 = exchangeLogDao.getExchangeLogByTypesRefAndGuid("Sales report guid", list).size();
+        String serviceClassName = ExchangeServiceConstants.FLUX_SALES_PLUGIN_SERVICE_NAME;
+        String request = ExchangeModuleRequestMapper.createSendSalesReportRequest("Sales report", "Sales report guid", "Sales report dataFlow", "Send sales report receiver", Instant.now(), ExchangeLogStatusTypeType.SUCCESSFUL, PluginType.FLUX);
+
+        jmsHelper.registerSubscriber("ServiceName = '" + serviceClassName + "'");
+        String corrID = jmsHelper.sendExchangeMessage(request, null, "SEND_SALES_REPORT");
+        TextMessage message = (TextMessage)jmsHelper.listenOnEventBus("ServiceName = '" + serviceClassName + "'", 5000l);
+
+        SendSalesReportRequest output = JAXBMarshaller.unmarshallTextMessage(message,SendSalesReportRequest.class);
+
+        assertEquals(ExchangePluginMethod.SEND_SALES_REPORT, output.getMethod());
+        assertEquals("Sales report", output.getReport());
+        assertEquals("Send sales report receiver", output.getRecipient());
+
+        Thread.sleep(1000);
+        assertEquals(salesLogB4 + 1, exchangeLogDao.getExchangeLogByTypesRefAndGuid("Sales report guid", list).size());
+    }
+
+    /* -- MDR -- */
 
     private Service createAndPersistBasicService(String name, String serviceClassName, PluginType pluginType) throws Exception{
         Service s = serviceRegistryDao.getServiceByServiceClassName(serviceClassName);
