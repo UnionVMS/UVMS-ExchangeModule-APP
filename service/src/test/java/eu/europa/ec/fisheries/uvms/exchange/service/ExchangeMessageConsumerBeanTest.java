@@ -18,18 +18,24 @@ import eu.europa.ec.fisheries.schema.exchange.plugin.v1.SetCommandRequest;
 import eu.europa.ec.fisheries.schema.exchange.plugin.v1.SetConfigRequest;
 import eu.europa.ec.fisheries.schema.exchange.plugin.v1.SetReportRequest;
 import eu.europa.ec.fisheries.schema.exchange.service.v1.CapabilityTypeType;
+import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogStatusTypeType;
+import eu.europa.ec.fisheries.schema.exchange.v1.TypeRefType;
+import eu.europa.ec.fisheries.uvms.commons.message.api.MessageConstants;
 import eu.europa.ec.fisheries.uvms.exchange.dao.ExchangeLogDao;
 import eu.europa.ec.fisheries.uvms.exchange.dao.ServiceRegistryDao;
 import eu.europa.ec.fisheries.uvms.exchange.dao.UnsentMessageDao;
+import eu.europa.ec.fisheries.uvms.exchange.entity.exchangelog.ExchangeLog;
 import eu.europa.ec.fisheries.uvms.exchange.entity.serviceregistry.Service;
 import eu.europa.ec.fisheries.uvms.exchange.entity.serviceregistry.ServiceCapability;
 import eu.europa.ec.fisheries.uvms.exchange.entity.serviceregistry.ServiceSetting;
 import eu.europa.ec.fisheries.uvms.exchange.model.mapper.ExchangeModuleRequestMapper;
 import eu.europa.ec.fisheries.uvms.exchange.model.mapper.JAXBMarshaller;
 import eu.europa.ec.fisheries.uvms.exchange.service.bean.ExchangeEventLogCache;
+import eu.europa.ec.fisheries.uvms.exchange.service.model.IncomingMovement;
 import org.jboss.arquillian.container.test.api.OperateOnDeployment;
 import org.jboss.arquillian.junit.Arquillian;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -37,6 +43,8 @@ import javax.annotation.Resource;
 import javax.inject.Inject;
 import javax.jms.ConnectionFactory;
 import javax.jms.TextMessage;
+import javax.json.bind.Jsonb;
+import javax.json.bind.JsonbBuilder;
 
 import java.time.Instant;
 import java.util.ArrayList;
@@ -64,9 +72,15 @@ public class ExchangeMessageConsumerBeanTest extends BuildExchangeServiceTestDep
     @Inject
     ExchangeEventLogCache exchangeEventLogCache;
 
+    @Inject
+    ExchangeLogDao exchangeLogDao;
+
+    private Jsonb jsonb;
+
     @Before
-    public void cleanJMS() throws Exception {
+    public void initialize() throws Exception {
         jmsHelper = new JMSHelper(connectionFactory);
+        jsonb = JsonbBuilder.create();
     }
 
     @Test
@@ -82,6 +96,8 @@ public class ExchangeMessageConsumerBeanTest extends BuildExchangeServiceTestDep
         assertNotNull(response);
         assertEquals("pong", response.getResponse());
     }
+
+    /* -- PLUGINS/SERVICES -- */
 
     @Test
     @OperateOnDeployment("exchangeservice")
@@ -130,7 +146,7 @@ public class ExchangeMessageConsumerBeanTest extends BuildExchangeServiceTestDep
         String request = ExchangeModuleRequestMapper.createSetCommandSendEmailRequest(serviceClassName, email, null);
 
         jmsHelper.registerSubscriber("ServiceName = '" + serviceClassName + "'");
-        String corrID = jmsHelper.sendExchangeMessage(request, null, "LIST_SERVICES");
+        String corrID = jmsHelper.sendExchangeMessage(request, null, "SET_COMMAND");
         TextMessage message = (TextMessage)jmsHelper.listenOnEventBus("ServiceName = '" + serviceClassName + "'", 5000l);
         SetCommandRequest response = JAXBMarshaller.unmarshallTextMessage(message, SetCommandRequest.class);
 
@@ -164,7 +180,7 @@ public class ExchangeMessageConsumerBeanTest extends BuildExchangeServiceTestDep
 
         String request = ExchangeModuleRequestMapper.createSetCommandSendEmailRequest(serviceClassName, email, null);
 
-        String corrID = jmsHelper.sendExchangeMessage(request, null, "LIST_SERVICES");
+        String corrID = jmsHelper.sendExchangeMessage(request, null, "SET_COMMAND");
         TextMessage message = (TextMessage)jmsHelper.listenForResponseOnStandardQueue(corrID);
         SetCommandResponse response = JAXBMarshaller.unmarshallTextMessage(message, SetCommandResponse.class);
 
@@ -206,7 +222,7 @@ public class ExchangeMessageConsumerBeanTest extends BuildExchangeServiceTestDep
         String request = ExchangeModuleRequestMapper.createSetCommandSendPollRequest(serviceClassName, pollType, "Test User",null);
 
         jmsHelper.registerSubscriber("ServiceName = '" + serviceClassName + "'");
-        String corrID = jmsHelper.sendExchangeMessage(request, null, "LIST_SERVICES");
+        String corrID = jmsHelper.sendExchangeMessage(request, null, "SET_COMMAND");
         TextMessage message = (TextMessage)jmsHelper.listenOnEventBus("ServiceName = '" + serviceClassName + "'", 5000l);
         SetCommandRequest response = JAXBMarshaller.unmarshallTextMessage(message, SetCommandRequest.class);
 
@@ -238,7 +254,7 @@ public class ExchangeMessageConsumerBeanTest extends BuildExchangeServiceTestDep
         String request = ExchangeModuleRequestMapper.createSendReportToPlugin(serviceClassName, PluginType.FLUX, Instant.now(), null, recipient, movementType, recipientInfoTypeList, movementType.getAssetName(),movementType.getIrcs(), movementType.getMmsi(), movementType.getExternalMarking(), movementType.getFlagState());
 
         jmsHelper.registerSubscriber("ServiceName = '" + serviceClassName + "'");
-        String corrID = jmsHelper.sendExchangeMessage(request, null, "LIST_SERVICES");
+        String corrID = jmsHelper.sendExchangeMessage(request, null, "SEND_REPORT_TO_PLUGIN");
         TextMessage message = (TextMessage)jmsHelper.listenOnEventBus("ServiceName = '" + serviceClassName + "'", 5000l);
         SetReportRequest response = JAXBMarshaller.unmarshallTextMessage(message, SetReportRequest.class);
 
@@ -274,7 +290,7 @@ public class ExchangeMessageConsumerBeanTest extends BuildExchangeServiceTestDep
         String request = ExchangeModuleRequestMapper.createUpdatePluginSettingRequest(serviceClassName, settingName,"Belgium", "Test User");
 
         jmsHelper.registerSubscriber("ServiceName = '" + serviceClassName + "'");
-        String corrID = jmsHelper.sendExchangeMessage(request, null, "LIST_SERVICES");
+        String corrID = jmsHelper.sendExchangeMessage(request, null, "UPDATE_PLUGIN_SETTING");
         TextMessage topicMessage = (TextMessage)jmsHelper.listenOnEventBus("ServiceName = '" + serviceClassName + "'", 5000l);
         SetConfigRequest response = JAXBMarshaller.unmarshallTextMessage(topicMessage, SetConfigRequest.class);
 
@@ -293,6 +309,129 @@ public class ExchangeMessageConsumerBeanTest extends BuildExchangeServiceTestDep
 
     }
 
+    /* -- MOVEMENT -- */
+
+    @Test
+    @OperateOnDeployment("exchangeservice")
+    public void setMovementReportTest() throws Exception{
+        String serviceName = "Iridium Test Service";
+        String serviceClassName = "eu.europa.ec.fisheries.uvms.plugins.Iridium";
+
+
+        Service service = createAndPersistBasicService(serviceName, serviceClassName, PluginType.SATELLITE_RECEIVER);
+
+        MovementType movementType = createMovementType();
+        SetReportMovementType setReportMovementType = new SetReportMovementType();
+        setReportMovementType.setMovement(movementType);
+        setReportMovementType.setTimestamp(Date.from(Instant.now()));
+        setReportMovementType.setPluginType(PluginType.SATELLITE_RECEIVER);
+        setReportMovementType.setPluginName(serviceClassName);
+        String request = ExchangeModuleRequestMapper.createSetMovementReportRequest(setReportMovementType, "Test User", null, Instant.now(), null, PluginType.OTHER, "IRIDIUM", "OnValue?");
+
+        String corrID = jmsHelper.sendExchangeMessage(request, null, "SET_MOVEMENT_REPORT");
+        TextMessage message = (TextMessage)jmsHelper.listenOnQueue(MessageConstants.COMPONENT_MESSAGE_IN_QUEUE_NAME);
+
+        assertEquals("CREATE",message.getStringProperty(MessageConstants.JMS_FUNCTION_PROPERTY));
+        assertTrue(message.getStringProperty(MessageConstants.JMS_MESSAGE_GROUP).contains(movementType.getMmsi()));
+        IncomingMovement output = jsonb.fromJson(message.getText(), IncomingMovement.class);
+        assertEquals(movementType.getMmsi(), output.getAssetMMSI());
+        assertEquals(movementType.getPosition().getLongitude(), output.getLongitude(),0);
+        assertEquals(movementType.getFlagState(),output.getFlagState());
+
+
+        Thread.sleep(1000);     //to allow the db to sync up
+        ExchangeLog exchangeLog = exchangeLogDao.getExchangeLogByGuid(output.getAckResponseMessageId());
+        assertNotNull(exchangeLog);
+        assertEquals(ExchangeLogStatusTypeType.ISSUED, exchangeLog.getStatus());
+        assertEquals(TypeRefType.MOVEMENT,exchangeLog.getTypeRefType());
+        serviceRegistryDao.deleteEntity(service.getId());
+    }
+
+    @Test
+    @OperateOnDeployment("exchangeservice")
+    @Ignore
+    public void receiveMovementReportBatchTest(){
+        //Not part of swe uvms flow (since it sends stuff to rules instead of movement), ignoring
+    }
+
+    @Test
+    @OperateOnDeployment("exchangeservice")
+    public void processedMovementAlarmTest() throws Exception{
+        String serviceName = "Iridium Test Service";
+        String serviceClassName = "eu.europa.ec.fisheries.uvms.plugins.Iridium";
+
+
+        Service service = createAndPersistBasicService(serviceName, serviceClassName, PluginType.SATELLITE_RECEIVER);
+
+        MovementType movementType = createMovementType();
+        SetReportMovementType setReportMovementType = new SetReportMovementType();
+        setReportMovementType.setMovement(movementType);
+        setReportMovementType.setTimestamp(Date.from(Instant.now()));
+        setReportMovementType.setPluginType(PluginType.SATELLITE_RECEIVER);
+        setReportMovementType.setPluginName(serviceClassName);
+        String setupRequest = ExchangeModuleRequestMapper.createSetMovementReportRequest(setReportMovementType, "Test User", null, Instant.now(), null, PluginType.OTHER, "IRIDIUM", "OnValue?");
+
+        String corrID = jmsHelper.sendExchangeMessage(setupRequest, null, "SET_MOVEMENT_REPORT");
+        TextMessage message = (TextMessage)jmsHelper.listenOnQueue(MessageConstants.COMPONENT_MESSAGE_IN_QUEUE_NAME);
+        IncomingMovement output = jsonb.fromJson(message.getText(), IncomingMovement.class);
+
+        MovementRefType movementRefType = new MovementRefType();
+        movementRefType.setAckResponseMessageID(output.getAckResponseMessageId());
+        movementRefType.setType(MovementRefTypeType.ALARM);
+        String request = ExchangeModuleRequestMapper.mapToProcessedMovementResponse("Test username", movementRefType);
+
+        corrID = jmsHelper.sendExchangeMessage(request, null, "PROCESSED_MOVEMENT");
+        Thread.sleep(1000); //to let it work
+
+        ExchangeLog exchangeLog = exchangeLogDao.getExchangeLogByGuid(output.getAckResponseMessageId());
+        assertEquals(ExchangeLogStatusTypeType.FAILED, exchangeLog.getStatus());
+
+        serviceRegistryDao.deleteEntity(service.getId());
+
+    }
+
+    @Test
+    @OperateOnDeployment("exchangeservice")
+    public void processedMovementSuccessTest() throws Exception{
+        String serviceName = "Iridium Test Service";
+        String serviceClassName = "eu.europa.ec.fisheries.uvms.plugins.Iridium";
+
+
+        Service service = createAndPersistBasicService(serviceName, serviceClassName, PluginType.SATELLITE_RECEIVER);
+
+        MovementType movementType = createMovementType();
+        SetReportMovementType setReportMovementType = new SetReportMovementType();
+        setReportMovementType.setMovement(movementType);
+        setReportMovementType.setTimestamp(Date.from(Instant.now()));
+        setReportMovementType.setPluginType(PluginType.SATELLITE_RECEIVER);
+        setReportMovementType.setPluginName(serviceClassName);
+        String setupRequest = ExchangeModuleRequestMapper.createSetMovementReportRequest(setReportMovementType, "Test User", null, Instant.now(), null, PluginType.OTHER, "IRIDIUM", "OnValue?");
+
+        String corrID = jmsHelper.sendExchangeMessage(setupRequest, null, "SET_MOVEMENT_REPORT");
+        TextMessage message = (TextMessage)jmsHelper.listenOnQueue(MessageConstants.COMPONENT_MESSAGE_IN_QUEUE_NAME);
+        IncomingMovement output = jsonb.fromJson(message.getText(), IncomingMovement.class);
+
+        MovementRefType movementRefType = new MovementRefType();
+        movementRefType.setAckResponseMessageID(output.getAckResponseMessageId());
+        movementRefType.setType(MovementRefTypeType.MOVEMENT);
+        String request = ExchangeModuleRequestMapper.mapToProcessedMovementResponse("Test username", movementRefType);
+
+        corrID = jmsHelper.sendExchangeMessage(request, null, "PROCESSED_MOVEMENT");
+        Thread.sleep(1000); //to let it work
+
+        ExchangeLog exchangeLog = exchangeLogDao.getExchangeLogByGuid(output.getAckResponseMessageId());
+        assertEquals(ExchangeLogStatusTypeType.SUCCESSFUL, exchangeLog.getStatus());
+
+        serviceRegistryDao.deleteEntity(service.getId());
+
+    }
+
+    @Test
+    @OperateOnDeployment("exchangeservice")
+    @Ignore
+    public void processedMovementBatchTest() {
+        //Not part of swe uvms flow (since it sends stuff to rules instead of movement), ignoring
+    }
 
 
     private Service createAndPersistBasicService(String name, String serviceClassName, PluginType pluginType) throws Exception{
@@ -352,20 +491,29 @@ public class ExchangeMessageConsumerBeanTest extends BuildExchangeServiceTestDep
         movementMetaData.getAreas();    //makes it an empty area
         movementType.setMetaData(movementMetaData);
 
-        AssetId assetId = new AssetId();
-        assetId.setAssetType(AssetType.AIR);
-        AssetIdList assetIdList = new AssetIdList();
-        assetIdList.setIdType(AssetIdType.GUID);
-        assetIdList.setValue("AssetGuid");
-        assetId.getAssetIdList().add(assetIdList);
-        movementType.setAssetId(assetId);
-
         movementType.setAssetName("AssetName");
         movementType.setFlagState("Flagstate");
         movementType.setMovementType(MovementTypeType.EXI);
         movementType.setExternalMarking("ExternalMarking");
         movementType.setMmsi("TestMMSI");
         movementType.setIrcs("TestIRCS");
+
+        AssetId assetId = new AssetId();
+        assetId.setAssetType(AssetType.AIR);
+        AssetIdList assetIdList = new AssetIdList();
+        assetIdList.setIdType(AssetIdType.GUID);
+        assetIdList.setValue("AssetGuid");
+        assetId.getAssetIdList().add(assetIdList);
+
+        assetIdList = new AssetIdList();
+        assetIdList.setIdType(AssetIdType.MMSI);
+        assetIdList.setValue(movementType.getMmsi());
+        assetId.getAssetIdList().add(assetIdList);
+        movementType.setAssetId(assetId);
+
+
+
+        movementType.setSource(MovementSourceType.IRIDIUM);
 
 
         return movementType;

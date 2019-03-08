@@ -342,11 +342,11 @@ public class ExchangeModuleRequestMapper {
     }
 
     // Asynch processed movement response
-    public static String mapToProcessedMovementResponse(SetReportMovementType orgRequest, MovementRefType movementRef) throws ExchangeModelMapperException {
+    public static String mapToProcessedMovementResponse(String username, MovementRefType movementRef) throws ExchangeModelMapperException {
         ProcessedMovementResponse response = new ProcessedMovementResponse();
         response.setMethod(ExchangeModuleMethod.PROCESSED_MOVEMENT);
-        response.setOrgRequest(orgRequest);
         response.setMovementRefType(movementRef);
+        response.setUsername(username);
         return JAXBMarshaller.marshallJaxBObjectToString(response);
     }
 

@@ -279,7 +279,7 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
                 if (!baseMovement.getSource().equals(MovementSourceType.AIS)) {
                     log.debug("Logging received movement.");
                     ExchangeLogType createdLog = exchangeLog.log(request, LogType.RECEIVE_MOVEMENT, ExchangeLogStatusTypeType.ISSUED, TypeRefType.MOVEMENT,
-                            JAXBMarshaller.marshallJaxBObjectToString(request), true);
+                            JAXBMarshaller.marshallJaxBObjectToString(request), true);                      //why do we marshal things again here?
                     incomingMovement.setAckResponseMessageId(createdLog.getGuid());
                 }
                 String json = jsonb.toJson(incomingMovement);
