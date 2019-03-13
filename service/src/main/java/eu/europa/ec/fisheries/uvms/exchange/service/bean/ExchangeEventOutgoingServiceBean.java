@@ -190,14 +190,14 @@ public class ExchangeEventOutgoingServiceBean implements ExchangeEventOutgoingSe
 	 *
 	 */
     @Override
-    public void forwardMdrSyncMessageToPlugin(ExchangeMessageEvent message) {
+    public void forwardMdrSyncMessageToPlugin(ExchangeMessageEvent message) {               //not adding anything to the exchange log????
         TextMessage requestMessage = message.getJmsMessage();
         try {
             log.info("[INFO] Received MdrSyncMessageEvent. Going to send to the Plugin now..");
             String marshalledReq = ExchangeToMdrRulesMapper.mapExchangeToMdrPluginRequest(requestMessage);
             producer.sendEventBusMessage(marshalledReq, ExchangeServiceConstants.MDR_PLUGIN_SERVICE_NAME);
         } catch (Exception e) {
-            log.error("[ERROR] Something strange happend during message conversion {} {}",message,e);
+            log.error("[ERROR] Something strange happend during message conversion {} {}",message,e);       //so, if we dont update the mdr plugin bc of an exception, we just ignore the entire message?
         }
     }
 
@@ -281,7 +281,7 @@ public class ExchangeEventOutgoingServiceBean implements ExchangeEventOutgoingSe
                     ? ExchangeServiceConstants.BELGIAN_ACTIVITY_PLUGIN_SERVICE_NAME : ExchangeServiceConstants.FLUX_ACTIVITY_PLUGIN_SERVICE_NAME));
             log.info("Message sent to Flux ERS Plugin :" + pluginMessageId);
             exchangeLogService.log(request, LogType.SEND_FA_QUERY_MSG, ExchangeLogStatusTypeType.SENT, TypeRefType.FA_QUERY, request.getRequest(), false);
-        } catch (ExchangeModelMarshallException | ExchangeMessageException | ExchangeLogException e) {
+        } catch (Exception e /*ExchangeModelMarshallException | ExchangeMessageException | ExchangeLogException e*/) {
             log.error("Unable to send FLUX FA Report to plugin.", e);
         }
     }
@@ -300,7 +300,7 @@ public class ExchangeEventOutgoingServiceBean implements ExchangeEventOutgoingSe
             log.info("Message sent to Flux ERS Plugin :" + pluginMessageId);
             exchangeLogService.log(request, LogType.SEND_FLUX_FA_REPORT_MSG, ExchangeLogStatusTypeType.SENT, TypeRefType.FA_REPORT, request.getRequest(), false);
         } catch (ExchangeModelMarshallException | ExchangeMessageException | ExchangeLogException e) {
-            log.error("Unable to send FLUX FA Report to plugin.", e);
+            log.error("Unable to send FLUX FA Report to plugin.", e);   //well you might have, since you first send and then log so if something goes wrong on the log it is already sent......
         }
     }
 
@@ -391,7 +391,7 @@ public class ExchangeEventOutgoingServiceBean implements ExchangeEventOutgoingSe
     }
 
     @Override
-    public void updateLogBusinessError(ExchangeMessageEvent message) {
+    public void updateLogBusinessError(ExchangeMessageEvent message) {  //should this chain not set a log status or something?
         try {
             UpdateLogStatusRequest request = JAXBMarshaller.unmarshallTextMessage(message.getJmsMessage(), UpdateLogStatusRequest.class);
             String exchangeLogGuid = request.getLogGuid();

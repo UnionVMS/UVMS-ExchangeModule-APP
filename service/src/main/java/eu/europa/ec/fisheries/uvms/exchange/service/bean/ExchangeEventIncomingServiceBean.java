@@ -194,7 +194,7 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
      *
      */
     @Override
-    public void sendResponseToRulesModule(ExchangeMessageEvent message) {
+    public void sendResponseToRulesModule(ExchangeMessageEvent message) {           //and nothing to the exchange log?
         TextMessage requestMessage = message.getJmsMessage();
         try {
             SetFLUXMDRSyncMessageExchangeResponse exchangeResponse = JAXBMarshaller.unmarshallTextMessage(requestMessage, SetFLUXMDRSyncMessageExchangeResponse.class);
@@ -206,7 +206,7 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
             String mdrStrReq = JAXBMarshaller.marshallJaxBObjectToString(mdrResponse);
             forwardToRules(mdrStrReq, null, null);
         } catch (Exception e) {
-            log.error("[ERROR] Something strange happend during message conversion {} {}", message, e);
+            log.error("[ERROR] Something strange happend during message conversion {} {}", message, e);         //if something happens, just log it and move on?????
         }
     }
 
@@ -311,7 +311,7 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
             } catch (JMSException e1) {
                 firePluginFault(event, "Couldn't map to ReceiveAssetInformationRequest when processing asset information from plugin.", e);
             }
-        } catch (ExchangeLogException e) {
+        } catch (Exception e/*ExchangeLogException e*/) {
             firePluginFault(event, "Could not log the incoming asset information.", e);
         }
     }
@@ -402,7 +402,7 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
     }
 
     @Override
-    public void logRefIdByTypeExists(ExchangeMessageEvent event) {
+    public void logRefIdByTypeExists(ExchangeMessageEvent event) {      //this one has the wierd behavour that it both returns the correct answer AND puts the initial message in DLQ for causing an exception AT THE SAME TIME if the input is an empty list..........
         try {
             LogRefIdByTypeExistsRequest request = unMarshallMessage(event.getJmsMessage().getText(), LogRefIdByTypeExistsRequest.class);
             String refGuid = request.getRefGuid();

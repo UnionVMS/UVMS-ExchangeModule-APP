@@ -22,31 +22,7 @@ import java.util.List;
 
 import eu.europa.ec.fisheries.schema.exchange.common.v1.CommandType;
 import eu.europa.ec.fisheries.schema.exchange.common.v1.CommandTypeType;
-import eu.europa.ec.fisheries.schema.exchange.module.v1.ExchangeBaseRequest;
-import eu.europa.ec.fisheries.schema.exchange.module.v1.ExchangeModuleMethod;
-import eu.europa.ec.fisheries.schema.exchange.module.v1.GetServiceListRequest;
-import eu.europa.ec.fisheries.schema.exchange.module.v1.ProcessedMovementResponse;
-import eu.europa.ec.fisheries.schema.exchange.module.v1.QueryAssetInformationRequest;
-import eu.europa.ec.fisheries.schema.exchange.module.v1.RcvFLUXFaResponseMessageRequest;
-import eu.europa.ec.fisheries.schema.exchange.module.v1.ReceiveAssetInformationRequest;
-import eu.europa.ec.fisheries.schema.exchange.module.v1.ReceiveInvalidSalesMessage;
-import eu.europa.ec.fisheries.schema.exchange.module.v1.ReceiveSalesQueryRequest;
-import eu.europa.ec.fisheries.schema.exchange.module.v1.ReceiveSalesReportRequest;
-import eu.europa.ec.fisheries.schema.exchange.module.v1.ReceiveSalesResponseRequest;
-import eu.europa.ec.fisheries.schema.exchange.module.v1.SendAssetInformationRequest;
-import eu.europa.ec.fisheries.schema.exchange.module.v1.SendMovementToPluginRequest;
-import eu.europa.ec.fisheries.schema.exchange.module.v1.SendSalesReportRequest;
-import eu.europa.ec.fisheries.schema.exchange.module.v1.SendSalesResponseRequest;
-import eu.europa.ec.fisheries.schema.exchange.module.v1.SetCommandRequest;
-import eu.europa.ec.fisheries.schema.exchange.module.v1.SetFAQueryMessageRequest;
-import eu.europa.ec.fisheries.schema.exchange.module.v1.SetFLUXFAReportMessageRequest;
-import eu.europa.ec.fisheries.schema.exchange.module.v1.SetFLUXFAResponseMessageRequest;
-import eu.europa.ec.fisheries.schema.exchange.module.v1.SetFLUXMDRSyncMessageExchangeRequest;
-import eu.europa.ec.fisheries.schema.exchange.module.v1.SetFLUXMDRSyncMessageExchangeResponse;
-import eu.europa.ec.fisheries.schema.exchange.module.v1.SetFLUXMovementReportRequest;
-import eu.europa.ec.fisheries.schema.exchange.module.v1.SetMovementReportRequest;
-import eu.europa.ec.fisheries.schema.exchange.module.v1.UpdateLogStatusRequest;
-import eu.europa.ec.fisheries.schema.exchange.module.v1.UpdatePluginSettingRequest;
+import eu.europa.ec.fisheries.schema.exchange.module.v1.*;
 import eu.europa.ec.fisheries.schema.exchange.movement.v1.MovementRefType;
 import eu.europa.ec.fisheries.schema.exchange.movement.v1.MovementType;
 import eu.europa.ec.fisheries.schema.exchange.movement.v1.RecipientInfoType;
@@ -63,6 +39,7 @@ import eu.europa.ec.fisheries.schema.exchange.service.v1.ServiceType;
 import eu.europa.ec.fisheries.schema.exchange.service.v1.SettingListType;
 import eu.europa.ec.fisheries.schema.exchange.service.v1.SettingType;
 import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogStatusTypeType;
+import eu.europa.ec.fisheries.schema.exchange.v1.TypeRefType;
 import eu.europa.ec.fisheries.uvms.commons.date.DateUtils;
 import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelMapperException;
 import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelMarshallException;
@@ -427,20 +404,20 @@ public class ExchangeModuleRequestMapper {
     }
 
     public static String createSendFaQueryMessageRequest(String faQueryMessageStr, String username, String logId, String fluxDataFlow,
-                                                         String senderOrReceiver, String todt, String to, String ad) throws ExchangeModelMarshallException {
+                                                         String senderOrReceiver, String todt, String to, String ad, PluginType pluginType) throws ExchangeModelMarshallException {
         SetFAQueryMessageRequest request = new SetFAQueryMessageRequest();
         request.setMethod(ExchangeModuleMethod.SEND_FA_QUERY_MESSAGE);
         request.setRequest(faQueryMessageStr);
-        populateBaseProperties(request, fluxDataFlow, Instant.now(), logId, null, senderOrReceiver, null, username, todt, to, ad);
+        populateBaseProperties(request, fluxDataFlow, Instant.now(), logId, pluginType, senderOrReceiver, null, username, todt, to, ad);
         return JAXBMarshaller.marshallJaxBObjectToString(request);
     }
 
     public static String createSendFaReportMessageRequest(String faReportMessageStr, String username, String logId, String fluxDataFlow,
-                                                         String senderOrReceiver, String onValue, String todt, String to, String ad) throws ExchangeModelMarshallException {
+                                                         String senderOrReceiver, String onValue, String todt, String to, String ad, PluginType pluginType) throws ExchangeModelMarshallException {
         SetFLUXFAReportMessageRequest request = new SetFLUXFAReportMessageRequest();
         request.setMethod(ExchangeModuleMethod.SEND_FLUX_FA_REPORT_MESSAGE);
         request.setRequest(faReportMessageStr);
-        populateBaseProperties(request, fluxDataFlow, Instant.now(), logId, null, senderOrReceiver, onValue, username, todt, to, ad);
+        populateBaseProperties(request, fluxDataFlow, Instant.now(), logId, pluginType, senderOrReceiver, onValue, username, todt, to, ad);
         return JAXBMarshaller.marshallJaxBObjectToString(request);
     }
 
@@ -549,6 +526,22 @@ public class ExchangeModuleRequestMapper {
         return JAXBMarshaller.marshallJaxBObjectToString(request);
     }
 
+    public static String createLogRefIdByTypeExistsRequest(String refGuid, List<TypeRefType> refTypes) throws ExchangeModelMarshallException {
+        LogRefIdByTypeExistsRequest request = new LogRefIdByTypeExistsRequest();
+        request.setMethod(ExchangeModuleMethod.LOG_REF_ID_BY_TYPE_EXISTS);
+        request.setRefGuid(refGuid);
+        request.getRefTypes().addAll(refTypes);
+        return JAXBMarshaller.marshallJaxBObjectToString(request);
+    }
+
+    public static String createLogIdByTypeExistsRequest(String id, TypeRefType refType) throws ExchangeModelMarshallException {
+        LogIdByTypeExistsRequest request = new LogIdByTypeExistsRequest();
+        request.setMethod(ExchangeModuleMethod.LOG_ID_BY_TYPE_EXISTS);
+        request.setMessageGuid(id);
+        request.setRefType(refType);
+        return JAXBMarshaller.marshallJaxBObjectToString(request);
+    }
+
     private static void enrichBaseRequest(ExchangeBaseRequest exchangeBaseRequest, ExchangeModuleMethod method, String guid, String dataFlow,
                                           String senderOrReceiver, Instant date, String username, PluginType pluginType, String on) {
         exchangeBaseRequest.setMethod(checkNotNull(method));
@@ -603,4 +596,6 @@ public class ExchangeModuleRequestMapper {
         request.setTodt(todt);
         request.setAd(ad);
     }
+
+
 }

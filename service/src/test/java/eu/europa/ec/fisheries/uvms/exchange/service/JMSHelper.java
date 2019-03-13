@@ -12,7 +12,7 @@ import java.util.Enumeration;
 public class JMSHelper {
 
     private static final long TIMEOUT = 20000;
-    private static final String EXCHANGE_QUEUE = "UVMSExchangeEvent";
+    public static final String EXCHANGE_QUEUE = "UVMSExchangeEvent";
     public static final String RESPONSE_QUEUE = "IntegrationTestsResponseQueue";
 
     private final ConnectionFactory connectionFactory;

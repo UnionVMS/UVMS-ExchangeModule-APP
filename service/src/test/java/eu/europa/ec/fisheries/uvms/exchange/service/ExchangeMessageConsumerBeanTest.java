@@ -1,10 +1,8 @@
 package eu.europa.ec.fisheries.uvms.exchange.service;
 
 import eu.europa.ec.fisheries.schema.exchange.common.v1.*;
-import eu.europa.ec.fisheries.schema.exchange.module.v1.GetServiceListResponse;
+import eu.europa.ec.fisheries.schema.exchange.module.v1.*;
 import eu.europa.ec.fisheries.schema.exchange.module.v1.PingResponse;
-import eu.europa.ec.fisheries.schema.exchange.module.v1.SetCommandResponse;
-import eu.europa.ec.fisheries.schema.exchange.module.v1.UpdatePluginSettingResponse;
 import eu.europa.ec.fisheries.schema.exchange.movement.asset.v1.AssetId;
 import eu.europa.ec.fisheries.schema.exchange.movement.asset.v1.AssetIdList;
 import eu.europa.ec.fisheries.schema.exchange.movement.asset.v1.AssetIdType;
@@ -15,14 +13,18 @@ import eu.europa.ec.fisheries.schema.exchange.plugin.types.v1.PluginType;
 import eu.europa.ec.fisheries.schema.exchange.plugin.types.v1.PollType;
 import eu.europa.ec.fisheries.schema.exchange.plugin.types.v1.PollTypeType;
 import eu.europa.ec.fisheries.schema.exchange.plugin.v1.*;
+import eu.europa.ec.fisheries.schema.exchange.plugin.v1.SendSalesReportRequest;
+import eu.europa.ec.fisheries.schema.exchange.plugin.v1.SendSalesResponseRequest;
+import eu.europa.ec.fisheries.schema.exchange.plugin.v1.SetCommandRequest;
 import eu.europa.ec.fisheries.schema.exchange.service.v1.CapabilityTypeType;
 import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogStatusTypeType;
 import eu.europa.ec.fisheries.schema.exchange.v1.LogType;
 import eu.europa.ec.fisheries.schema.exchange.v1.TypeRefType;
+import eu.europa.ec.fisheries.schema.rules.module.v1.*;
 import eu.europa.ec.fisheries.schema.rules.module.v1.ReceiveSalesQueryRequest;
 import eu.europa.ec.fisheries.schema.rules.module.v1.ReceiveSalesReportRequest;
 import eu.europa.ec.fisheries.schema.rules.module.v1.ReceiveSalesResponseRequest;
-import eu.europa.ec.fisheries.schema.rules.module.v1.RulesModuleMethod;
+import eu.europa.ec.fisheries.schema.rules.module.v1.SetFLUXFAReportMessageRequest;
 import eu.europa.ec.fisheries.uvms.commons.message.api.MessageConstants;
 import eu.europa.ec.fisheries.uvms.exchange.dao.ExchangeLogDao;
 import eu.europa.ec.fisheries.uvms.exchange.dao.ServiceRegistryDao;
@@ -35,7 +37,9 @@ import eu.europa.ec.fisheries.uvms.exchange.model.mapper.ExchangeModuleRequestMa
 import eu.europa.ec.fisheries.uvms.exchange.model.mapper.JAXBMarshaller;
 import eu.europa.ec.fisheries.uvms.exchange.service.bean.ExchangeEventLogCache;
 import eu.europa.ec.fisheries.uvms.exchange.service.constants.ExchangeServiceConstants;
+import eu.europa.ec.fisheries.uvms.exchange.service.message.constants.MessageQueue;
 import eu.europa.ec.fisheries.uvms.exchange.service.model.IncomingMovement;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.jboss.arquillian.container.test.api.OperateOnDeployment;
 import org.jboss.arquillian.junit.Arquillian;
 import org.junit.Before;
@@ -54,10 +58,9 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.UUID;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 @RunWith(Arquillian.class)
 public class ExchangeMessageConsumerBeanTest extends BuildExchangeServiceTestDeployment {
@@ -84,6 +87,10 @@ public class ExchangeMessageConsumerBeanTest extends BuildExchangeServiceTestDep
     @Before
     public void initialize() throws Exception {
         jmsHelper = new JMSHelper(connectionFactory);
+        jmsHelper.clearQueue(MessageConstants.RULES_MESSAGE_IN_QUEUE_NAME);
+        jmsHelper.clearQueue("UVMSAssetEvent");
+        jmsHelper.clearQueue(JMSHelper.RESPONSE_QUEUE);
+        jmsHelper.clearQueue(JMSHelper.EXCHANGE_QUEUE);
         jsonb = JsonbBuilder.create();
     }
 
@@ -453,6 +460,7 @@ public class ExchangeMessageConsumerBeanTest extends BuildExchangeServiceTestDep
         assertEquals(RulesModuleMethod.RECEIVE_SALES_REPORT, output.getMethod());
         assertEquals("Report", output.getRequest());
 
+        Thread.sleep(1000);
         String logGuid = output.getLogGuid();
         ExchangeLog exchangeLog = exchangeLogDao.getExchangeLogByGuid(logGuid);
         assertNotNull(exchangeLog);
@@ -496,6 +504,7 @@ public class ExchangeMessageConsumerBeanTest extends BuildExchangeServiceTestDep
         assertEquals(RulesModuleMethod.RECEIVE_SALES_RESPONSE, output.getMethod());
         assertEquals("Response", output.getRequest());
 
+        Thread.sleep(1000);
         String logGuid = output.getLogGuid();
         ExchangeLog exchangeLog = exchangeLogDao.getExchangeLogByGuid(logGuid);
         assertNotNull(exchangeLog);
@@ -568,6 +577,279 @@ public class ExchangeMessageConsumerBeanTest extends BuildExchangeServiceTestDep
     }
 
     /* -- MDR -- */
+
+    @Test
+    @OperateOnDeployment("exchangeservice")
+    public void  setMDRSyncMessageRequestTest() throws Exception{    //SET_MDR_SYNC_MESSAGE_REQUEST
+        String request = ExchangeModuleRequestMapper.createFluxMdrSyncEntityRequest("MDR ReportType", "MDR username", "MDR from?");
+
+        jmsHelper.registerSubscriber("ServiceName = '" + ExchangeServiceConstants.MDR_PLUGIN_SERVICE_NAME + "'");
+        String corrID = jmsHelper.sendExchangeMessage(request, null, "SET_MDR_SYNC_MESSAGE_REQUEST");
+        TextMessage message = (TextMessage)jmsHelper.listenOnEventBus("ServiceName = '" + ExchangeServiceConstants.MDR_PLUGIN_SERVICE_NAME + "'", 5000l);
+
+        SetMdrPluginRequest output = JAXBMarshaller.unmarshallTextMessage(message, SetMdrPluginRequest.class);
+        assertEquals("MDR ReportType", output.getRequest());
+        assertEquals(ExchangePluginMethod.SET_MDR_REQUEST, output.getMethod());
+    }
+
+    @Test
+    @OperateOnDeployment("exchangeservice")
+    public void  setMDRSyncMessageResponseTest() throws Exception{  //SET_MDR_SYNC_MESSAGE_RESPONSE
+        String request = ExchangeModuleRequestMapper.createFluxMdrSyncEntityResponse("MDR ReportType Response", "MDR response username");
+
+        String corrID = jmsHelper.sendExchangeMessage(request, null, "SET_MDR_SYNC_MESSAGE_RESPONSE");
+        TextMessage message = (TextMessage)jmsHelper.listenOnQueue(MessageConstants.RULES_MESSAGE_IN_QUEUE_NAME);
+
+        SetFLUXMDRSyncMessageRulesResponse output = JAXBMarshaller.unmarshallTextMessage(message, SetFLUXMDRSyncMessageRulesResponse.class);
+        assertEquals(RulesModuleMethod.GET_FLUX_MDR_SYNC_RESPONSE, output.getMethod());
+        assertEquals("MDR ReportType Response", output.getRequest());
+    }
+
+    /* -- FLUX -- */
+
+    @Test
+    @OperateOnDeployment("exchangeservice")
+    public void  setFluxFaReportMessageTest() throws Exception{  //SET_FLUX_FA_REPORT_MESSAGE //This is also UNKNOWN, for some reason.......
+        String fluxMessage = "Flux FA message";
+        String request = ExchangeModuleRequestMapper.createFluxFAReportRequest(fluxMessage, "Flux FA username", "Flux FA fluxDFValue", Instant.now(), "Flux FA guid", PluginType.FLUX, "Flux FA senderOrReciver", "Flux FA onValue?", "Flux FA todt", "Flux FA to", "Flux FA ad");
+
+        String corrID = jmsHelper.sendExchangeMessage(request, null, "SET_FLUX_FA_REPORT_MESSAGE");
+        TextMessage message = (TextMessage)jmsHelper.listenOnQueue(MessageConstants.RULES_MESSAGE_IN_QUEUE_NAME);
+
+        SetFLUXFAReportMessageRequest output = JAXBMarshaller.unmarshallTextMessage(message, SetFLUXFAReportMessageRequest.class);
+        assertEquals(eu.europa.ec.fisheries.schema.rules.exchange.v1.PluginType.FLUX, output.getType());
+        assertEquals(fluxMessage, output.getRequest());
+        assertEquals(RulesModuleMethod.SET_FLUX_FA_REPORT, output.getMethod());
+
+        String logID = output.getLogGuid();
+        ExchangeLog exchangeLog = exchangeLogDao.getExchangeLogByGuid(logID);
+        assertEquals(LogType.RCV_FLUX_FA_REPORT_MSG, exchangeLog.getType());
+        assertEquals(ExchangeLogStatusTypeType.ISSUED, exchangeLog.getStatus());
+        assertEquals(fluxMessage, exchangeLog.getTypeRefMessage());
+        assertEquals(TypeRefType.FA_REPORT, exchangeLog.getTypeRefType());
+    }
+
+    @Test
+    @OperateOnDeployment("exchangeservice")
+    public void  sendFluxFaReportMessageTest() throws Exception{     //SEND_FLUX_FA_REPORT_MESSAGE
+        String fluxMessage = "Send flux FA Report faReportMessageStr";
+        String request = ExchangeModuleRequestMapper.createSendFaReportMessageRequest(fluxMessage, "Send flux FA Report username", "Send flux FA Report logId(not used)", "Send flux FA Report fluxDataFlow", "Send flux FA Report senderOrReciver",
+                "Send flux FA Report onValue", "Send flux FA Report todt", "Send flux FA Report to", "Send flux FA Report ad", PluginType.BELGIAN_ACTIVITY);
+
+        jmsHelper.registerSubscriber("ServiceName = '" + ExchangeServiceConstants.BELGIAN_ACTIVITY_PLUGIN_SERVICE_NAME + "'");
+        String corrID = jmsHelper.sendExchangeMessage(request, null, "SEND_FLUX_FA_REPORT_MESSAGE");
+        TextMessage message = (TextMessage)jmsHelper.listenOnEventBus("ServiceName = '" + ExchangeServiceConstants.BELGIAN_ACTIVITY_PLUGIN_SERVICE_NAME + "'", 5000l);
+
+        SetFLUXFAReportRequest output = JAXBMarshaller.unmarshallTextMessage(message, SetFLUXFAReportRequest.class);
+        assertEquals(fluxMessage, output.getResponse());
+        assertEquals(ExchangePluginMethod.SEND_FA_REPORT, output.getMethod());
+
+        Thread.sleep(1000);
+        ExchangeLog exchangeLog = exchangeLogDao.getLatestLog();
+        assertEquals(exchangeLog.getDateReceived().toString(), LogType.SEND_FLUX_FA_REPORT_MSG, exchangeLog.getType());
+        assertEquals(ExchangeLogStatusTypeType.SENT, exchangeLog.getStatus());
+        assertEquals(TypeRefType.FA_REPORT, exchangeLog.getTypeRefType());
+        assertEquals(fluxMessage, exchangeLog.getTypeRefMessage());
+    }
+
+    @Test
+    @OperateOnDeployment("exchangeservice")
+    public void  setFAQueryMessageTest() throws Exception{        //SET_FA_QUERY_MESSAGE
+        String queryMessage = "Set FA Query Message";
+        String request = ExchangeModuleRequestMapper.createFaQueryRequest(queryMessage, "Set FA Query Message username", "Set FA Query Message fluxDFValue", Instant.now(), "Set FA Query Message guid", PluginType.MANUAL, "Set FA Query Message senderReciver", "Set FA Query Message onValue", "Set FA Query Message todt",
+                "Set FA Query Message to", "Set FA Query Message ad");
+
+        String corrID = jmsHelper.sendExchangeMessage(request, null, "SET_FA_QUERY_MESSAGE");
+        TextMessage message = (TextMessage)jmsHelper.listenOnQueue(MessageConstants.RULES_MESSAGE_IN_QUEUE_NAME);
+
+        SetFaQueryMessageRequest output = JAXBMarshaller.unmarshallTextMessage(message, SetFaQueryMessageRequest.class);
+        assertEquals(queryMessage, output.getRequest());
+        assertEquals(RulesModuleMethod.SET_FLUX_FA_QUERY, output.getMethod());
+        assertEquals(eu.europa.ec.fisheries.schema.rules.exchange.v1.PluginType.MANUAL, output.getType());
+
+        Thread.sleep(1000);
+        String logID = output.getLogGuid();
+        ExchangeLog exchangeLog = exchangeLogDao.getExchangeLogByGuid(logID);
+        assertEquals(queryMessage, exchangeLog.getTypeRefMessage());
+        assertEquals(LogType.RECEIVE_FA_QUERY_MSG, exchangeLog.getType());
+        assertEquals(ExchangeLogStatusTypeType.ISSUED, exchangeLog.getStatus());
+        assertEquals(TypeRefType.FA_QUERY, exchangeLog.getTypeRefType());
+    }
+
+    @Test
+    @OperateOnDeployment("exchangeservice")
+    public void  sendFAQueryMessageTest() throws Exception{      //SEND_FA_QUERY_MESSAGE
+        String queryMessage = "Send FA Query Message12";
+        String request = ExchangeModuleRequestMapper.createSendFaQueryMessageRequest(queryMessage, "Send FA Query Message username", "Send FA Query Message logID", "Send FA Query Message fluxDataFlow", "Send FA Query Message senderOrReciver", "Send FA Query Message todt", "Send FA Query Message to", "Send FA Query Message ad", PluginType.FLUX);
+
+        jmsHelper.registerSubscriber("ServiceName = '" + ExchangeServiceConstants.FLUX_ACTIVITY_PLUGIN_SERVICE_NAME + "'");
+        String corrID = jmsHelper.sendExchangeMessage(request, null, "SEND_FA_QUERY_MESSAGE");
+        TextMessage message = (TextMessage)jmsHelper.listenOnEventBus("ServiceName = '" + ExchangeServiceConstants.FLUX_ACTIVITY_PLUGIN_SERVICE_NAME + "'", 5000l);
+
+        SetFLUXFAQueryRequest output = JAXBMarshaller.unmarshallTextMessage(message, SetFLUXFAQueryRequest.class);
+        assertEquals(queryMessage, output.getResponse());
+        assertEquals(ExchangePluginMethod.SEND_FA_QUERY, output.getMethod());
+        assertEquals("Send FA Query Message fluxDataFlow", output.getFluxDataFlow());
+
+        Thread.sleep(1000);
+        ExchangeLog exchangeLog = exchangeLogDao.getLatestLog();
+        assertEquals(exchangeLog.getDateReceived().toString(), LogType.SEND_FA_QUERY_MSG, exchangeLog.getType());
+        assertEquals(ExchangeLogStatusTypeType.SENT, exchangeLog.getStatus());
+        assertEquals(TypeRefType.FA_QUERY, exchangeLog.getTypeRefType());
+        assertEquals(queryMessage, exchangeLog.getTypeRefMessage());
+        assertFalse(exchangeLog.getTransferIncoming());
+    }
+
+    @Test
+    @OperateOnDeployment("exchangeservice")
+    public void  setFluxFAResponseMessageTest() throws Exception{     //SET_FLUX_FA_RESPONSE_MESSAGE
+        String responseMessage = "Set Flux FA Response Message";
+        String request = ExchangeModuleRequestMapper.createFluxFAResponseRequestWithOnValue(responseMessage, "Set Flux FA Response Message username", "Set Flux FA Response Message df", "Set Flux FA Response Message guid", "Set Flux FA Response Message fr", "Set Flux FA Response Message onVal", ExchangeLogStatusTypeType.PROBABLY_TRANSMITTED, "Set Flux FA Response Message destination",
+                PluginType.FLUX, "Set Flux FA Response Message responseGuid");
+
+        jmsHelper.registerSubscriber("ServiceName = '" + ExchangeServiceConstants.FLUX_ACTIVITY_PLUGIN_SERVICE_NAME + "'");
+        String corrID = jmsHelper.sendExchangeMessage(request, null, "SET_FLUX_FA_RESPONSE_MESSAGE");
+        TextMessage message = (TextMessage)jmsHelper.listenOnEventBus("ServiceName = '" + ExchangeServiceConstants.FLUX_ACTIVITY_PLUGIN_SERVICE_NAME + "'", 5000l);
+
+        SetFLUXFAResponseRequest output = JAXBMarshaller.unmarshallTextMessage(message, SetFLUXFAResponseRequest.class);
+        assertEquals(responseMessage, output.getResponse());
+        assertEquals(ExchangePluginMethod.SET_FLUX_RESPONSE, output.getMethod());
+        assertEquals("Set Flux FA Response Message onVal", output.getOnValue());
+
+        Thread.sleep(1000);
+        ExchangeLog exchangeLog = exchangeLogDao.getLatestLog();
+        assertEquals(exchangeLog.getTypeRefGuid(), LogType.SEND_FLUX_RESPONSE_MSG, exchangeLog.getType());
+        assertEquals(ExchangeLogStatusTypeType.PROBABLY_TRANSMITTED, exchangeLog.getStatus());
+        assertEquals(TypeRefType.FA_RESPONSE, exchangeLog.getTypeRefType());
+        assertEquals(responseMessage, exchangeLog.getTypeRefMessage());
+        assertFalse(exchangeLog.getTransferIncoming());
+    }
+
+    @Test
+    @OperateOnDeployment("exchangeservice")
+    public void  rcvFluxFAResponseMessageTest() throws Exception{   //RCV_FLUX_FA_RESPONSE_MESSAGE
+        String rcvMessage = "RCV Flux FA Response Message";
+        String request = ExchangeModuleRequestMapper.createFluxResponseRequest(rcvMessage, "RCV Flux FA Response Message username", "RCV Flux FA Response Message dfValue", Instant.now(), "RCV Flux FA Response Message messageGuid", PluginType.BELGIAN_ACTIVITY, "RCV Flux FA Response Message senderReceiver", "RCV Flux FA Response Message onValue",
+                "RCV Flux FA Response Message todt", "RCV Flux FA Response Message to", "RCV Flux FA Response Message ad");
+
+        String corrID = jmsHelper.sendExchangeMessage(request, null, "RCV_FLUX_FA_RESPONSE_MESSAGE");
+        TextMessage message = (TextMessage)jmsHelper.listenOnQueue(MessageConstants.RULES_MESSAGE_IN_QUEUE_NAME);
+
+        SetFluxFaResponseMessageRequest output = JAXBMarshaller.unmarshallTextMessage(message, SetFluxFaResponseMessageRequest.class);
+        assertEquals(rcvMessage, output.getRequest());
+        assertEquals(RulesModuleMethod.RCV_FLUX_RESPONSE, output.getMethod());
+        assertEquals("RCV Flux FA Response Message username", output.getUsername());
+
+        String logID = output.getLogGuid();
+        ExchangeLog exchangeLog = exchangeLogDao.getExchangeLogByGuid(logID);
+        assertEquals(rcvMessage, exchangeLog.getTypeRefMessage());
+        assertEquals(LogType.RECEIVE_FLUX_RESPONSE_MSG, exchangeLog.getType());
+        assertEquals(ExchangeLogStatusTypeType.ISSUED, exchangeLog.getStatus());
+        assertEquals(TypeRefType.FA_RESPONSE, exchangeLog.getTypeRefType());
+    }
+
+    /* -- LOG -- */
+
+    @Test
+    @OperateOnDeployment("exchangeservice")
+    public void  updateLogStatusTest() throws Exception{    //UPDATE_LOG_STATUS
+        ExchangeLog exchangeLog = createBasicLog();
+        exchangeLog = exchangeLogDao.createLog(exchangeLog);
+        String request = ExchangeModuleRequestMapper.createUpdateLogStatusRequest(exchangeLog.getGuid(), ExchangeLogStatusTypeType.PROBABLY_TRANSMITTED);
+        String corrID = jmsHelper.sendExchangeMessage(request, null, "UPDATE_LOG_STATUS");
+        Thread.sleep(1000); //to let it work
+
+        ExchangeLog latestLog = exchangeLogDao.getLatestLog();
+        assertEquals(exchangeLog.getGuid(), latestLog.getGuid());
+
+        ExchangeLog updatedLog = exchangeLogDao.getExchangeLogByGuid(exchangeLog.getGuid());
+        assertEquals(exchangeLog.getGuid(), updatedLog.getGuid());
+        assertEquals(ExchangeLogStatusTypeType.PROBABLY_TRANSMITTED, updatedLog.getStatus());
+    }
+
+    @Test
+    @OperateOnDeployment("exchangeservice")
+    public void  updateLogBusinessErrorTest() throws Exception{     //UPDATE_LOG_BUSINESS_ERROR
+        ExchangeLog exchangeLog = createBasicLog();
+        exchangeLog = exchangeLogDao.createLog(exchangeLog);
+        Exception e = new RuntimeException("Bankruptcy");
+        String request = ExchangeModuleRequestMapper.createUpdateLogStatusRequest(exchangeLog.getGuid(), e);
+        String corrID = jmsHelper.sendExchangeMessage(request, null, "UPDATE_LOG_BUSINESS_ERROR");
+        Thread.sleep(1000); //to let it work
+
+        ExchangeLog updatedLog = exchangeLogDao.getExchangeLogByGuid(exchangeLog.getGuid());
+        assertEquals(ExceptionUtils.getMessage(e) + ":" + ExceptionUtils.getStackTrace(e), updatedLog.getBusinessError());
+    }
+
+    @Test
+    @OperateOnDeployment("exchangeservice")
+    public void  logRefIdByTypeExistsTest() throws Exception {    //LOG_REF_ID_BY_TYPE_EXISTS
+        ExchangeLog exchangeLog = createBasicLog();
+        exchangeLog.setTypeRefGuid("GetRefGuidTest");
+        exchangeLog.setTypeRefType(TypeRefType.UNKNOWN);
+        exchangeLog = exchangeLogDao.createLog(exchangeLog);
+        String request = ExchangeModuleRequestMapper.createLogRefIdByTypeExistsRequest(exchangeLog.getTypeRefGuid(), new ArrayList<>());
+        String corrID = jmsHelper.sendExchangeMessage(request, null, "LOG_REF_ID_BY_TYPE_EXISTS");
+        TextMessage message = (TextMessage)jmsHelper.listenForResponseOnStandardQueue(corrID);
+        LogRefIdByTypeExistsResponse response = JAXBMarshaller.unmarshallTextMessage(message, LogRefIdByTypeExistsResponse.class);
+
+        assertNull(response.getRefGuid());
+
+        List<TypeRefType> inputList = new ArrayList<>();
+        inputList.add(exchangeLog.getTypeRefType());
+        request = ExchangeModuleRequestMapper.createLogRefIdByTypeExistsRequest(exchangeLog.getTypeRefGuid(), inputList);
+        corrID = jmsHelper.sendExchangeMessage(request, null, "LOG_REF_ID_BY_TYPE_EXISTS");
+        message = (TextMessage)jmsHelper.listenForResponseOnStandardQueue(corrID);
+        response = JAXBMarshaller.unmarshallTextMessage(message, LogRefIdByTypeExistsResponse.class);
+
+        assertNotNull(response.getRefGuid());
+        assertEquals(exchangeLog.getTypeRefGuid(), response.getRefGuid());
+    }
+
+    @Test
+    @OperateOnDeployment("exchangeservice")
+    public void  logIdByTypeExistsTest() throws Exception {      //LOG_ID_BY_TYPE_EXISTS
+        ExchangeLog exchangeLog = createBasicLog();
+        exchangeLog.setTypeRefType(TypeRefType.UNKNOWN);
+        exchangeLog = exchangeLogDao.createLog(exchangeLog);
+        String request = ExchangeModuleRequestMapper.createLogIdByTypeExistsRequest(exchangeLog.getGuid(), null);
+        String corrID = jmsHelper.sendExchangeMessage(request, null, "LOG_ID_BY_TYPE_EXISTS");
+        TextMessage message = (TextMessage)jmsHelper.listenForResponseOnStandardQueue(corrID);
+        LogIdByTypeExistsResponse response = JAXBMarshaller.unmarshallTextMessage(message, LogIdByTypeExistsResponse.class);
+
+        assertNotNull(response.getMessageGuid());  //this class is better written then the one above and can handle an empty refType as input....... Or something
+        assertEquals(exchangeLog.getGuid(), response.getMessageGuid());
+
+        request = ExchangeModuleRequestMapper.createLogIdByTypeExistsRequest(exchangeLog.getGuid(), exchangeLog.getTypeRefType());
+        corrID = jmsHelper.sendExchangeMessage(request, null, "LOG_ID_BY_TYPE_EXISTS");
+        message = (TextMessage)jmsHelper.listenForResponseOnStandardQueue(corrID);
+        response = JAXBMarshaller.unmarshallTextMessage(message, LogIdByTypeExistsResponse.class);
+
+        assertNotNull(response.getMessageGuid());
+        assertEquals(exchangeLog.getGuid(), response.getMessageGuid());
+    }
+
+    /* -- Assets -- */
+
+    @Test
+    @OperateOnDeployment("exchangeservice")
+    public void  receiveAssetInformationTest() throws Exception {     //RECEIVE_ASSET_INFORMATION
+        String assets = "ReceiveAssetInformation assets";
+        String request = ExchangeModuleRequestMapper.createReceiveAssetInformation(assets, "ReceiveAssetInformation assets username", PluginType.OTHER);
+        String corrID = jmsHelper.sendExchangeMessage(request, null, "RECEIVE_ASSET_INFORMATION");
+        TextMessage message = (TextMessage)jmsHelper.listenOnQueue("UVMSAssetEvent");
+        String response = message.getText();
+
+        assertEquals(assets, response);
+        assertEquals("ASSET_INFORMATION", message.getStringProperty(MessageConstants.JMS_FUNCTION_PROPERTY));
+
+        Thread.sleep(1000);
+        ExchangeLog exchangeLog = exchangeLogDao.getLatestLog();
+        assertEquals(assets, exchangeLog.getTypeRefMessage());
+        assertEquals(LogType.RECEIVE_ASSET_INFORMATION, exchangeLog.getType());
+        assertEquals(ExchangeLogStatusTypeType.SUCCESSFUL, exchangeLog.getStatus());
+        assertEquals(TypeRefType.ASSETS, exchangeLog.getTypeRefType());
+    }
 
     private Service createAndPersistBasicService(String name, String serviceClassName, PluginType pluginType) throws Exception{
         Service s = serviceRegistryDao.getServiceByServiceClassName(serviceClassName);
@@ -652,5 +934,19 @@ public class ExchangeMessageConsumerBeanTest extends BuildExchangeServiceTestDep
 
 
         return movementType;
+    }
+
+    private ExchangeLog createBasicLog(){
+        ExchangeLog exchangeLog = new ExchangeLog();
+        exchangeLog.setGuid("Basic Guid: " + UUID.randomUUID().toString());
+        exchangeLog.setType(LogType.PROCESSED_MOVEMENT);
+        exchangeLog.setStatus(ExchangeLogStatusTypeType.UNKNOWN);
+        exchangeLog.setUpdatedBy("Tester");
+        exchangeLog.setUpdateTime(Instant.now());
+        exchangeLog.setDateReceived(Instant.now());
+        exchangeLog.setSenderReceiver("Test sender/receiver");
+        exchangeLog.setTransferIncoming(false);
+
+        return exchangeLog;
     }
 }

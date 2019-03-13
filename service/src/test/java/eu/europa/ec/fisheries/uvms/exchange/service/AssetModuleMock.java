@@ -2,6 +2,7 @@ package eu.europa.ec.fisheries.uvms.exchange.service;
 
 import eu.europa.ec.fisheries.schema.config.types.v1.PullSettingsStatus;
 import eu.europa.ec.fisheries.schema.config.types.v1.SettingType;
+import eu.europa.ec.fisheries.uvms.commons.message.api.MessageConstants;
 import eu.europa.ec.fisheries.uvms.commons.message.api.MessageException;
 import eu.europa.ec.fisheries.uvms.config.model.exception.ModelMarshallException;
 import eu.europa.ec.fisheries.uvms.config.model.mapper.JAXBMarshaller;
@@ -25,7 +26,8 @@ import java.util.UUID;
 @MessageDriven(mappedName = "jms/queue/UVMSAssetEvent", activationConfig = {
         @ActivationConfigProperty(propertyName = "messagingType", propertyValue = "javax.jms.MessageListener"),
         @ActivationConfigProperty(propertyName = "destinationType", propertyValue = "javax.jms.Queue"),
-        @ActivationConfigProperty(propertyName = "destination", propertyValue = "UVMSAssetEvent")})
+        @ActivationConfigProperty(propertyName = "destination", propertyValue = "UVMSAssetEvent"),
+        /*@ActivationConfigProperty(propertyName = "messageSelector", propertyValue = MessageConstants.JMS_FUNCTION_PROPERTY + " NOT IN ( 'ASSET_INFORMATION' ) AND JMSCorrelationID IS NULL")*/})
 public class AssetModuleMock implements MessageListener {
 
     @Inject
