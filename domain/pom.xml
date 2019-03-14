@@ -5,7 +5,7 @@
     <parent>
         <groupId>eu.europa.ec.fisheries.uvms.exchange</groupId>
         <artifactId>exchange</artifactId>
-        <version>4.0.44-UVMS-SNAPSHOT</version>
+        <version>4.0.45-UVMS-SNAPSHOT</version>
     </parent>
     
     <artifactId>exchange-dbaccess-domain</artifactId>
