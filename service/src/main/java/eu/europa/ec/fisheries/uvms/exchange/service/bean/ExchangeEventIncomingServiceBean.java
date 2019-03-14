@@ -22,6 +22,7 @@ import javax.jms.TextMessage;
 import javax.json.bind.Jsonb;
 import javax.json.bind.JsonbBuilder;
 import javax.xml.bind.JAXBException;
+
 import org.apache.commons.collections.CollectionUtils;
 import eu.europa.ec.fisheries.schema.exchange.common.v1.AcknowledgeType;
 import eu.europa.ec.fisheries.schema.exchange.module.v1.*;
@@ -294,7 +295,7 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
             ReceiveAssetInformationRequest request = JAXBMarshaller.unmarshallTextMessage(event.getJmsMessage(), ReceiveAssetInformationRequest.class);
             String message = request.getAssets();
             forwardToAsset(message);
-            //exchangeLog.log(request, LogType.RECEIVE_ASSET_INFORMATION, ExchangeLogStatusTypeType.SUCCESSFUL, TypeRefType.ASSETS, message, true);
+            exchangeLog.log(request, LogType.RECEIVE_ASSET_INFORMATION, ExchangeLogStatusTypeType.SUCCESSFUL, TypeRefType.ASSETS, message, true);
         } catch (ExchangeModelMarshallException e) {
             try {
                 String errorMessage = "Couldn't map to ReceiveAssetInformationRequest when processing asset information from plugin. The event was " + event.getJmsMessage().getText();

@@ -27,7 +27,7 @@ import java.util.UUID;
         @ActivationConfigProperty(propertyName = "messagingType", propertyValue = "javax.jms.MessageListener"),
         @ActivationConfigProperty(propertyName = "destinationType", propertyValue = "javax.jms.Queue"),
         @ActivationConfigProperty(propertyName = "destination", propertyValue = "UVMSAssetEvent"),
-        /*@ActivationConfigProperty(propertyName = "messageSelector", propertyValue = MessageConstants.JMS_FUNCTION_PROPERTY + " NOT IN ( 'ASSET_INFORMATION' ) AND JMSCorrelationID IS NULL")*/})
+        @ActivationConfigProperty(propertyName = "messageSelector", propertyValue = MessageConstants.JMS_FUNCTION_PROPERTY + " NOT IN ( 'ASSET_INFORMATION' ) AND JMSCorrelationID IS NULL")})
 public class AssetModuleMock implements MessageListener {
 
     @Inject
