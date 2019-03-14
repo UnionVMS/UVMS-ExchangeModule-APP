@@ -37,7 +37,6 @@ import eu.europa.ec.fisheries.uvms.exchange.model.mapper.ExchangeModuleRequestMa
 import eu.europa.ec.fisheries.uvms.exchange.model.mapper.JAXBMarshaller;
 import eu.europa.ec.fisheries.uvms.exchange.service.bean.ExchangeEventLogCache;
 import eu.europa.ec.fisheries.uvms.exchange.service.constants.ExchangeServiceConstants;
-import eu.europa.ec.fisheries.uvms.exchange.service.message.constants.MessageQueue;
 import eu.europa.ec.fisheries.uvms.exchange.service.model.IncomingMovement;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.jboss.arquillian.container.test.api.OperateOnDeployment;
