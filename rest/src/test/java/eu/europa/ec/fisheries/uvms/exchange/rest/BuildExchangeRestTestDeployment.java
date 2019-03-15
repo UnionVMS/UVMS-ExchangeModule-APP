@@ -1,6 +1,7 @@
 package eu.europa.ec.fisheries.uvms.exchange.rest;
 
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.eu.ingwar.tools.arquillian.extension.suite.annotations.ArquillianSuiteDeployment;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.shrinkwrap.api.Archive;
@@ -10,6 +11,9 @@ import org.jboss.shrinkwrap.resolver.api.maven.Maven;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.ws.rs.client.Client;
+import javax.ws.rs.client.ClientBuilder;
+import javax.ws.rs.client.WebTarget;
 import java.io.File;
 
 
@@ -32,6 +36,9 @@ public abstract class BuildExchangeRestTestDeployment {
         testWar.addAsResource("META-INF/persistence.xml", "persistence.xml");
         testWar.addAsResource("META-INF/beans.xml", "beans.xml");
 
+        testWar.delete("/WEB-INF/web.xml");
+        testWar.addAsWebInfResource("mock-web.xml", "web.xml");
+
         return testWar;
     }
 
@@ -42,5 +49,14 @@ public abstract class BuildExchangeRestTestDeployment {
 
 
         return testWar;
+    }
+
+    protected WebTarget getWebTarget() {
+
+        //ObjectMapper objectMapper = new ObjectMapper();
+        Client client = ClientBuilder.newClient();
+        //client.register(new JacksonJaxbJsonProvider(objectMapper, JacksonJaxbJsonProvider.DEFAULT_ANNOTATIONS));
+        //return client.target("http://localhost:28080/test/rest");
+        return client.target("http://localhost:8080/exchangerest/rest");
     }
 }
