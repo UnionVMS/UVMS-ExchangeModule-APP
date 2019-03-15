@@ -1,10 +1,12 @@
-package eu.europa.ec.fisheries.uvms.exchange.rest;
+package eu.europa.ec.fisheries.uvms.exchange.rest.RestTests;
 
 import eu.europa.ec.fisheries.schema.exchange.v1.*;
 import eu.europa.ec.fisheries.uvms.exchange.dao.ExchangeLogDao;
 import eu.europa.ec.fisheries.uvms.exchange.entity.exchangelog.ExchangeLog;
 import eu.europa.ec.fisheries.uvms.exchange.entity.exchangelog.ExchangeLogStatus;
 import eu.europa.ec.fisheries.uvms.exchange.model.util.DateUtils;
+import eu.europa.ec.fisheries.uvms.exchange.rest.BuildExchangeRestTestDeployment;
+import eu.europa.ec.fisheries.uvms.exchange.rest.RestHelper;
 import eu.europa.ec.fisheries.uvms.exchange.rest.dto.PollQuery;
 import eu.europa.ec.fisheries.uvms.exchange.rest.dto.exchange.ListQueryResponse;
 import org.jboss.arquillian.container.test.api.OperateOnDeployment;
@@ -23,7 +25,7 @@ import java.util.UUID;
 import static org.junit.Assert.*;
 
 @RunWith(Arquillian.class)
-public class ExchangeLogRestResourceTest extends BuildExchangeRestTestDeployment{
+public class ExchangeLogRestResourceTest extends BuildExchangeRestTestDeployment {
 
     @Inject
     ExchangeLogDao exchangeLogDao;

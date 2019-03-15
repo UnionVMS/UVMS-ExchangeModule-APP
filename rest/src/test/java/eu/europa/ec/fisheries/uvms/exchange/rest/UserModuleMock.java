@@ -56,6 +56,7 @@ public class UserModuleMock implements MessageListener {
         Context context = new Context();
         context.setRole(new Role());
         addFeature(UnionVMSFeature.viewExchange, userContext, context);
+        addFeature(UnionVMSFeature.manageExchangeTransmissionStatuses, userContext, context);
         userContext.getContextSet().getContexts().add(context);
         return userContext;
     }

@@ -35,7 +35,7 @@ public class RestActivator extends Application {
 
     public RestActivator() {
         set.add(ExchangeLogRestResource.class);
-        set.add(ExchangeRegistryResource.class);
+        set.add(ExchangeRegistryRestResource.class);
         set.add(ExchangeSendingQueueResource.class);
         set.add(ConfigResource.class);
         set.add(UnionVMSFeatureFilter.class);
