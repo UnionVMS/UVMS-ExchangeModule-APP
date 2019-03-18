@@ -19,11 +19,7 @@
         </dependency>
         
         <!-- Third party libs -->
-        <dependency>
-            <groupId>org.projectlombok</groupId>
-            <artifactId>lombok</artifactId>
-        </dependency>
-        
+
         <!-- Models-->
         <dependency>
             <groupId>${project.groupId}</groupId>

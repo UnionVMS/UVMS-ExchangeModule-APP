@@ -36,12 +36,14 @@ import eu.europa.ec.fisheries.uvms.exchange.service.event.ExchangeLogEvent;
 import eu.europa.ec.fisheries.uvms.exchange.service.event.ExchangeSendingQueueEvent;
 import eu.europa.ec.fisheries.uvms.exchange.service.exception.ExchangeLogException;
 import eu.europa.ec.fisheries.uvms.longpolling.notifications.NotificationMessage;
-import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Stateless
-@Slf4j
 public class ExchangeLogServiceBean implements ExchangeLogService {
+
+    private final static Logger LOG = LoggerFactory.getLogger(ExchangeLogServiceBean.class);
 
     @EJB
     private ExchangeMessageProducer producer;
@@ -83,7 +85,7 @@ public class ExchangeLogServiceBean implements ExchangeLogService {
             ExchangeLogType exchangeLog = exchangeLogModel.createExchangeLog(logType, username);
             String guid = exchangeLog.getGuid();
             exchangeLogEvent.fire(new NotificationMessage("guid", guid));
-            log.debug("[INFO] Logging message with guid : [ "+guid+" ] was successful.");
+            LOG.debug("[INFO] Logging message with guid : [ "+guid+" ] was successful.");
             return exchangeLog;
         } catch (ExchangeModelException e) {
             throw new ExchangeLogException("Couldn't create log exchange log.", e);
@@ -169,7 +171,7 @@ public class ExchangeLogServiceBean implements ExchangeLogService {
 
     @Override
     public List<UnsentMessageType> getUnsentMessageList() throws ExchangeLogException {
-        log.info("Get unsent message list in service layer");
+        LOG.info("Get unsent message list in service layer");
         try {
             return unsentModel.getMessageList();
         } catch (ExchangeModelException e) {
@@ -179,7 +181,7 @@ public class ExchangeLogServiceBean implements ExchangeLogService {
 
     @Override
     public List<ExchangeLogStatusType> getExchangeStatusHistoryList(ExchangeLogStatusTypeType status, TypeRefType type, Instant from, Instant to) throws ExchangeLogException {
-        log.info("Get pollstatus list in service layer:{}",status);
+        LOG.info("Get pollstatus list in service layer:{}",status);
         try {
             List<ExchangeLogStatusTypeType> statusList = new ArrayList<>();
             if (status != null) {
@@ -202,7 +204,7 @@ public class ExchangeLogServiceBean implements ExchangeLogService {
 
     @Override
     public ExchangeLogStatusType getExchangeStatusHistory(TypeRefType type, String typeRefGuid, String userName) throws ExchangeLogException {
-        log.info("Get poll status history in service layer:{}",type);
+        LOG.info("Get poll status history in service layer:{}",type);
         if (typeRefGuid == null || typeRefGuid.isEmpty()) {
             throw new ExchangeLogException("Invalid id");
         }
@@ -215,7 +217,7 @@ public class ExchangeLogServiceBean implements ExchangeLogService {
 
     @Override
     public String createUnsentMessage(String senderReceiver, Instant timestamp, String recipient, String message, List<UnsentMessageTypeProperty> properties, String username) throws ExchangeLogException {
-        log.debug("[INFO] CreateUnsentMessage in service layer:{}",message);
+        LOG.debug("[INFO] CreateUnsentMessage in service layer:{}",message);
         try {
             UnsentMessageType unsentMessage = new UnsentMessageType();
             unsentMessage.setDateReceived(Date.from(timestamp));
@@ -229,20 +231,20 @@ public class ExchangeLogServiceBean implements ExchangeLogService {
             sendingQueueEvent.fire(new NotificationMessage("messageIds", unsentMessageIds));
             return createdUnsentMessageId;
         } catch (ExchangeModelException e) {
-            log.error("Couldn't add message to unsent list: {} {}",message,e);
+            LOG.error("Couldn't add message to unsent list: {} {}",message,e);
             throw new ExchangeLogException("Couldn't add message to unsent list", e);
         }
     }
 
     @Override
     public void removeUnsentMessage(String unsentMessageId, String username) throws ExchangeLogException {
-        log.debug("removeUnsentMessage in service layer:{}",unsentMessageId);
+        LOG.debug("removeUnsentMessage in service layer:{}",unsentMessageId);
         try {
             String removeMessageId = unsentModel.removeMessage(unsentMessageId);
             List<String> removedMessageIds = Collections.singletonList(removeMessageId);
             sendingQueueEvent.fire(new NotificationMessage("messageIds", removedMessageIds));
         } catch (ExchangeModelException e) {
-            log.error("Couldn't add message to unsent list {} {}",unsentMessageId,e);
+            LOG.error("Couldn't add message to unsent list {} {}",unsentMessageId,e);
             throw new ExchangeLogException("Couldn't add message to unsent list");
         }
     }
@@ -270,12 +272,12 @@ public class ExchangeLogServiceBean implements ExchangeLogService {
 
     @Override
     public void resend(List<String> messageIdList, String username) throws ExchangeLogException {
-        log.debug("resend in service layer:{} {}",messageIdList,username);
+        LOG.debug("resend in service layer:{} {}",messageIdList,username);
         List<UnsentMessageType> unsentMessageList;
         try {
             unsentMessageList = unsentModel.resend(messageIdList);
         } catch (ExchangeModelException e) {
-            log.error("Couldn't read unsent messages", e);
+            LOG.error("Couldn't read unsent messages", e);
             throw new ExchangeLogException("Couldn't read unsent messages");
         }
         if (unsentMessageList != null && !unsentMessageList.isEmpty()) {
@@ -287,7 +289,7 @@ public class ExchangeLogServiceBean implements ExchangeLogService {
                     //TextMessage unsentResponse = consumer.getMessage(unsentMessageId, TextMessage.class);
                     //ExchangeModuleResponseMapper.validateResponse(unsentResponse, unsentMessageId);
                 } catch (ExchangeMessageException e) {
-                    log.error("Error when sending/receiving message {} {}",messageIdList, e);
+                    LOG.error("Error when sending/receiving message {} {}",messageIdList, e);
                 }
             }
         }

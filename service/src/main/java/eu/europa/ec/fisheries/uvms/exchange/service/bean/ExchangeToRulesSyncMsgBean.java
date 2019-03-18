@@ -31,15 +31,17 @@ import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelMarshal
 import eu.europa.ec.fisheries.uvms.exchange.model.mapper.JAXBMarshaller;
 import eu.europa.ec.fisheries.uvms.rules.model.exception.RulesModelMarshallException;
 import eu.europa.ec.fisheries.uvms.rules.model.mapper.RulesModuleRequestMapper;
-import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.EnumUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-@Slf4j
 @Stateless
 @LocalBean
 public class ExchangeToRulesSyncMsgBean {
+
+    private final static Logger LOG = LoggerFactory.getLogger(ExchangeToRulesSyncMsgBean.class);
 
     @EJB
     private ExchangeConsumer exchangeConsumerBean;
@@ -64,7 +66,7 @@ public class ExchangeToRulesSyncMsgBean {
                 }
             }
         } catch (ExchangeMessageException | MessageException | RulesModelMarshallException | ExchangeModelMarshallException e) {
-            log.error("Error while trying to get Validation Results for RawMessage GUID from Rules!", e);
+            LOG.error("Error while trying to get Validation Results for RawMessage GUID from Rules!", e);
         }
         return resp;
     }
@@ -75,7 +77,7 @@ public class ExchangeToRulesSyncMsgBean {
         try {
             logResult.setLevel(RuleValidationLevel.fromValue(validMsgFromRules.getLevel()));
         } catch (IllegalArgumentException ex){
-            log.error("[ERROR] The validation level "+validMsgFromRules.getLevel()+" doesn't exist in RuleValidationLevel class..");
+            LOG.error("[ERROR] The validation level "+validMsgFromRules.getLevel()+" doesn't exist in RuleValidationLevel class..");
         }
         logResult.setStatus(EnumUtils.getEnum(RuleValidationStatus.class, validMsgFromRules.getErrorType().toString()));
         logResult.setXpaths(StringUtils.join(validMsgFromRules.getXpaths(), ','));

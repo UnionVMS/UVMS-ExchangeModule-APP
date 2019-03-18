@@ -38,10 +38,6 @@
 
         <!-- Third party libs -->
         <dependency>
-            <groupId>org.projectlombok</groupId>
-            <artifactId>lombok</artifactId>
-        </dependency>
-        <dependency>
             <groupId>eu.europa.ec.fisheries.uvms</groupId>
             <artifactId>uvms-longpolling</artifactId>
         </dependency>

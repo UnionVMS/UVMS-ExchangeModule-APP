@@ -52,11 +52,13 @@ import javax.enterprise.event.Event;
 import javax.inject.Inject;
 import javax.jms.JMSException;
 import javax.jms.TextMessage;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Stateless
-@Slf4j
 public class PluginServiceBean implements PluginService {
+
+    private final static Logger LOG = LoggerFactory.getLogger(PluginServiceBean.class);
 
     private static final String PARAMETER_DELIMETER = "\\.";
 
@@ -80,7 +82,7 @@ public class PluginServiceBean implements PluginService {
     private UVMSConfigService configService;
 
     private boolean checkPluginType(PluginType pluginType, String responseTopicMessageSelector, String messageId) throws ExchangeModelMarshallException, ExchangeMessageException {
-        log.debug("[INFO] CheckPluginType " + pluginType.name());
+        LOG.debug("[INFO] CheckPluginType " + pluginType.name());
         if (PluginType.EMAIL == pluginType || PluginType.NAF == pluginType) {
             //Check if type already exists
             List<PluginType> type = new ArrayList<>();
@@ -119,7 +121,7 @@ public class PluginServiceBean implements PluginService {
                     configService.pushSettingToConfig(SettingTypeMapper.map(setting.getKey(), setting.getValue(), description), false);
                 }
             } catch (ConfigServiceException e) {
-                log.error("Couldn't register plugin settings in config parameter table");
+                LOG.error("Couldn't register plugin settings in config parameter table");
             }
             //TODO log to exchange log
             String response = ExchangePluginResponseMapper.mapToRegisterServiceResponseOK(messageId, service);
@@ -137,13 +139,13 @@ public class PluginServiceBean implements PluginService {
         if (service != null) {
             StatusType status = service.getStatus();
             if (StatusType.STARTED.equals(status)) {
-                log.info("Starting service {}", serviceClassName);
+                LOG.info("Starting service {}", serviceClassName);
                 start(serviceClassName);
             } else if (StatusType.STOPPED.equals(status)) {
-                log.info("Stopping service {}", serviceClassName);
+                LOG.info("Stopping service {}", serviceClassName);
                 stop(serviceClassName);
             } else {
-                log.error("[ Status was null for service {} ]", serviceClassName);
+                LOG.error("[ Status was null for service {} ]", serviceClassName);
             }
         }
     }
@@ -154,7 +156,7 @@ public class PluginServiceBean implements PluginService {
         RegisterServiceRequest register = null;
         try {
             register = JAXBMarshaller.unmarshallTextMessage(textMessage, RegisterServiceRequest.class);
-            log.info("[INFO] Received @RegisterServiceEvent : {}" , register.getService());
+            LOG.info("[INFO] Received @RegisterServiceEvent : {}" , register.getService());
             String messageId = textMessage.getJMSMessageID();
             boolean sendMessage;
             if (register.getService() != null) {
@@ -164,7 +166,7 @@ public class PluginServiceBean implements PluginService {
                 }
             }
         } catch (ExchangeModelMarshallException | ExchangeMessageException | JMSException e) {
-            log.error("[ERROR] Register service exception {} {}",event, e.getMessage());
+            LOG.error("[ERROR] Register service exception {} {}",event, e.getMessage());
             errorEvent.fire(new PluginMessageEvent(textMessage, register.getService(), ExchangePluginResponseMapper.mapToPluginFaultResponse(FaultCode.EXCHANGE_PLUGIN_EVENT.getCode(), "Exception when register service")));
         }
     }
@@ -184,7 +186,7 @@ public class PluginServiceBean implements PluginService {
             }
 
         } catch (ConfigServiceException e) {
-            log.error("Register service exception, cannot read Exchange settings from Config {} {}",registerServiceRequest, e.getMessage());
+            LOG.error("Register service exception, cannot read Exchange settings from Config {} {}",registerServiceRequest, e.getMessage());
             // Ignore when we can't get the settings from Config. It is possible there is no Config module setup.
         }
     }
@@ -204,7 +206,7 @@ public class PluginServiceBean implements PluginService {
 
     @Override
     public void unregisterService(PluginMessageEvent event) {
-        log.info("[INFO] Received @UnRegisterServiceEvent request : {}", event);
+        LOG.info("[INFO] Received @UnRegisterServiceEvent request : {}", event);
         TextMessage textMessage = event.getJmsMessage();
         ServiceResponseType service = null;
         try {
@@ -214,7 +216,7 @@ public class PluginServiceBean implements PluginService {
             //NO ack back to plugin
             //TODO log to exchange log
         } catch (ExchangeModelMarshallException | ExchangeServiceException e) {
-            log.error("Unregister service exception " + e.getMessage());
+            LOG.error("Unregister service exception " + e.getMessage());
             errorEvent.fire(new PluginMessageEvent(textMessage, service, ExchangePluginResponseMapper.mapToPluginFaultResponse(FaultCode.EXCHANGE_PLUGIN_EVENT.getCode(), "Exception when unregister service")));
         }
     }
@@ -235,7 +237,7 @@ public class PluginServiceBean implements PluginService {
                 //ConfigModule and/or Exchange module deployed
                 break;
             case UPDATE:
-                log.info("ConfigModule updated parameter table with settings of plugins");
+                LOG.info("ConfigModule updated parameter table with settings of plugins");
                 try {
                     String key = settingEvent.getKey();
                     String value = parameterService.getStringValue(key);
@@ -254,20 +256,20 @@ public class PluginServiceBean implements PluginService {
                         settingType.setValue(value);
                         updatePluginSetting(serviceClassName, settingType, "UVMS");
                     } else {
-                        log.error("No key or malformed key sent in settingEvent: key: {}, value: {}", key, value);
+                        LOG.error("No key or malformed key sent in settingEvent: key: {}, value: {}", key, value);
                     }
                 } catch (ConfigServiceException e) {
-                    log.error("Couldn't get updated parameter table value");
+                    LOG.error("Couldn't get updated parameter table value");
                 } catch (ExchangeServiceException e) {
-                    log.error("Couldn't upsert settings in exchange");
+                    LOG.error("Couldn't upsert settings in exchange");
                 } catch (ExchangeModelMarshallException e) {
-                    log.error("Couldn't create plugin set config request");
+                    LOG.error("Couldn't create plugin set config request");
                 } catch (ExchangeMessageException e) {
-                    log.error("Couldn't send message to plugin");
+                    LOG.error("Couldn't send message to plugin");
                 }
                 break;
             case DELETE:
-                log.info("ConfigModule removed parameter setting");
+                LOG.info("ConfigModule removed parameter setting");
                 break;
         }
     }
@@ -277,12 +279,12 @@ public class PluginServiceBean implements PluginService {
 		try {
 			TextMessage jmsMessage = settingEvent.getJmsMessage();
 			UpdatePluginSettingRequest request = JAXBMarshaller.unmarshallTextMessage(jmsMessage, UpdatePluginSettingRequest.class);
-            log.info("Received @UpdatePluginSettingEvent from module queue:{}" , request.toString());
+            LOG.info("Received @UpdatePluginSettingEvent from module queue:{}" , request.toString());
 			updatePluginSetting(request.getServiceClassName(), request.getSetting(), request.getUsername());
 			String text = ExchangeModuleResponseMapper.mapUpdateSettingResponse(ExchangeModuleResponseMapper.mapAcknowledgeTypeOK());
 			producer.sendModuleResponseMessage(settingEvent.getJmsMessage(), text);
 		} catch (ExchangeModelMarshallException | ExchangeServiceException | ExchangeMessageException | MessageException e) {
-			log.error("Couldn't unmarshall update setting request");
+			LOG.error("Couldn't unmarshall update setting request");
 			settingEvent.setErrorFault(ExchangeModuleResponseMapper.createFaultMessage(FaultCode.EXCHANGE_EVENT_SERVICE, "Couldn't update plugin setting"));
 			producer.sendModuleErrorResponseMessage(settingEvent);
 		}

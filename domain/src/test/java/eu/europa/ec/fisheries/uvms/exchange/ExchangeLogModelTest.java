@@ -26,7 +26,6 @@ import eu.europa.ec.fisheries.uvms.exchange.dao.ExchangeLogDao;
 import eu.europa.ec.fisheries.uvms.exchange.entity.exchangelog.ExchangeLog;
 import eu.europa.ec.fisheries.uvms.exchange.model.dto.ListResponseDto;
 import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelException;
-import lombok.SneakyThrows;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -69,8 +68,7 @@ public class ExchangeLogModelTest {
     }
 
     @Test
-    @SneakyThrows
-    public void testDataEnrichment(){
+    public void testDataEnrichment() throws Exception{
 
         Mockito.when(logDao.getExchangeLogListSearchCount(Mockito.anyString(), Mockito.anyList()))
                 .thenReturn(100L);

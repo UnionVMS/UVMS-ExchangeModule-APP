@@ -25,12 +25,14 @@ import eu.europa.ec.fisheries.uvms.exchange.model.dto.ListResponseDto;
 import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelException;
 import eu.europa.ec.fisheries.uvms.exchange.ExchangeLogModel;
 import eu.europa.ec.fisheries.uvms.exchange.service.exception.ExchangeLogException;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Stateless
 @LocalBean
-@Slf4j
 public class ExchangeLogRestServiceBean {
+
+    private final static Logger LOG = LoggerFactory.getLogger(ExchangeLogRestServiceBean.class);
 
     @EJB
     private ExchangeLogModel exchangeLogModel;
@@ -39,7 +41,7 @@ public class ExchangeLogRestServiceBean {
         try {
             return exchangeLogModel.getExchangeLogByGuid(guid);
         } catch (ExchangeModelException e) {
-            log.error("[ Error when getting exchange log by GUID. {}] {}",guid, e.getMessage());
+            LOG.error("[ Error when getting exchange log by GUID. {}] {}",guid, e.getMessage());
             throw new ExchangeLogException("Error when getting exchange log by GUID.");
         }
     }
@@ -65,7 +67,7 @@ public class ExchangeLogRestServiceBean {
         try {
             return exchangeLogModel.getExchangeLogByRefUUIDAndType(guid, type);
         } catch (ExchangeModelException e) {
-            log.error("[ Error when getting exchange log by refUUID. {}] {}",guid, e.getMessage());
+            LOG.error("[ Error when getting exchange log by refUUID. {}] {}",guid, e.getMessage());
             throw new ExchangeLogException("Error when getting exchange log by refUUID.");
         }
     }
