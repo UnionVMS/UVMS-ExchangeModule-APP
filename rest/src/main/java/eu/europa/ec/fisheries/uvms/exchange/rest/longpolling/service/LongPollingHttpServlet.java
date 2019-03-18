@@ -9,14 +9,13 @@ the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the impl
 FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details. You should have received a
 copy of the GNU General Public License along with the IFDM Suite. If not, see <http://www.gnu.org/licenses/>.
  */
-package eu.europa.ec.fisheries.uvms.exchange.longpolling.service;
+package eu.europa.ec.fisheries.uvms.exchange.rest.longpolling.service;
 
 import java.io.IOException;
 import java.util.List;
 
 import javax.ejb.EJB;
 import javax.enterprise.event.Observes;
-import javax.inject.Inject;
 import javax.json.Json;
 import javax.json.JsonArrayBuilder;
 import javax.servlet.AsyncContext;
@@ -28,7 +27,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import eu.europa.ec.fisheries.uvms.exchange.longpolling.constants.LongPollingConstants;
+import eu.europa.ec.fisheries.uvms.exchange.rest.longpolling.constants.LongPollingConstants;
 import eu.europa.ec.fisheries.uvms.exchange.service.event.ExchangeLogEvent;
 import eu.europa.ec.fisheries.uvms.exchange.service.event.ExchangePluginStatusEvent;
 import eu.europa.ec.fisheries.uvms.exchange.service.event.ExchangeSendingQueueEvent;

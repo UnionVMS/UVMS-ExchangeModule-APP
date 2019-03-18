@@ -100,7 +100,7 @@ public class ExchangeServiceBean implements ExchangeService {
             List<ServiceResponseType> plugins = serviceRegistryModel.getPlugins(pluginTypes);
             return plugins;
         } catch (ExchangeModelException e) {
-            throw new ExchangeServiceException(e.getMessage());
+            throw new ExchangeServiceException(e.getMessage(), e);
         }
     }
 
@@ -135,7 +135,7 @@ public class ExchangeServiceBean implements ExchangeService {
             ServiceResponseType plugin = serviceRegistryModel.getPlugin(serviceId);
             return plugin;
         } catch (ExchangeModelException e) {
-            throw new ExchangeServiceException(e.getMessage());
+            throw new ExchangeServiceException(e.getMessage(),e);
         }
     }
 

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd" version="3.0"
+         xmlns="http://java.sun.com/xml/ns/javaee">
+	
+    <filter>
+        <filter-name>AuthenticationFilterMock</filter-name>
+        <filter-class>eu.europa.ec.fisheries.uvms.exchange.rest.AuthenticationFilterMock</filter-class>
+        <async-supported>true</async-supported>
+    </filter>
+    <filter-mapping>
+        <filter-name>AuthenticationFilterMock</filter-name>
+        <url-pattern>/rest/*</url-pattern>
+    </filter-mapping>
+
+</web-app>

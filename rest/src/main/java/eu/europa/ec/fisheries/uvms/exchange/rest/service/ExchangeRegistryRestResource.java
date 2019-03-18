@@ -36,10 +36,10 @@ import eu.europa.ec.fisheries.uvms.rest.security.UnionVMSFeature;
 
 @Path("/plugin")
 @Stateless
-public class ExchangeRegistryResource {
+public class ExchangeRegistryRestResource {
 
 	final static Logger LOG = LoggerFactory
-			.getLogger(ExchangeRegistryResource.class);
+			.getLogger(ExchangeRegistryRestResource.class);
 
 	@EJB
 	ExchangeService serviceLayer;
@@ -83,7 +83,7 @@ public class ExchangeRegistryResource {
 	@Produces(value = { MediaType.APPLICATION_JSON })
 	@Path("/start/{serviceClassName}")
 	@RequiresFeature(UnionVMSFeature.manageExchangeTransmissionStatuses)
-	public ResponseDto startService(@PathParam(value="serviceClassName") String serviceClassName) {
+	public ResponseDto startService(@PathParam(value="serviceClassName") String serviceClassName) {			//why is this a put????		And this returns true or an exception???
 		LOG.info("Start service invoked in rest layer:{}",serviceClassName);
 		try {
 			return new ResponseDto(pluginService.start(serviceClassName), RestResponseCode.OK);
@@ -106,7 +106,7 @@ public class ExchangeRegistryResource {
 	@Produces(value = { MediaType.APPLICATION_JSON })
 	@Path("/stop/{serviceClassName}")
 	@RequiresFeature(UnionVMSFeature.manageExchangeTransmissionStatuses)
-	public ResponseDto stopService(@PathParam(value="serviceClassName") String serviceClassName) {
+	public ResponseDto stopService(@PathParam(value="serviceClassName") String serviceClassName) {		//why is this a put????
 		LOG.info("Stop service invoked in rest layer:{}",serviceClassName);
 		try {
 			return new ResponseDto(pluginService.stop(serviceClassName), RestResponseCode.OK);

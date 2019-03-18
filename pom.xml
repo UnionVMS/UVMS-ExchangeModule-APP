@@ -9,7 +9,7 @@
 
     <groupId>eu.europa.ec.fisheries.uvms.exchange</groupId>
     <artifactId>exchange</artifactId>
-    <version>4.0.44-UVMS-SNAPSHOT</version>
+    <version>4.0.45-UVMS-SNAPSHOT</version>
     <packaging>pom</packaging>
     
     <scm>
@@ -22,7 +22,7 @@
 
         <scm.connection>scm:git:https://github.com/UnionVMS/UVMS-ExchangeModule-APP.git</scm.connection>
 
-        <docker.dev.version>3.31.16.w15</docker.dev.version>
+        <docker.dev.version>3.32.4.w16</docker.dev.version>
         <docker.liquibase.changeLogFile>LIQUIBASE/changelog/db-changelog-master.xml</docker.liquibase.changeLogFile>
         <docker.liquibase.db.user>exchange</docker.liquibase.db.user>
         <docker.liquibase.db.passwd>exchange</docker.liquibase.db.passwd>
@@ -134,6 +134,15 @@
                 <groupId>fish.focus.uvms.maven</groupId>
                 <artifactId>uvms-pom-monitoring-deps</artifactId>
                 <version>${uvms-pom-deps.version}</version>
+                <type>pom</type>
+            </dependency>
+
+            <!-- Test Deps -->
+
+            <dependency>
+                <groupId>fish.focus.uvms.maven</groupId>
+                <artifactId>uvms-pom-arquillian-deps</artifactId>
+                <version>1.23</version>
                 <type>pom</type>
             </dependency>
 

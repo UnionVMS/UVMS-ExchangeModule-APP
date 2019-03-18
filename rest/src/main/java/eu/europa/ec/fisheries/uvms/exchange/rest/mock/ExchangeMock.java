@@ -31,7 +31,7 @@ public class ExchangeMock {
 		ListQueryResponse response = new ListQueryResponse();
 		response.setCurrentPage(1);
 		response.setTotalNumberOfPages(1);
-		response.getLogs().addAll(mockExchangeLogList());
+		response.getLogList().addAll(mockExchangeLogList());
 		return response;
 	}
 

@@ -43,4 +43,6 @@ public interface ExchangeLogDao {
 	List<ExchangeLogStatus> getExchangeLogStatusHistory(String sql, ExchangeHistoryListQuery query) throws ExchangeDaoException;
 
 	List<ExchangeLog> getExchangeLogByRangeOfRefGuids(List<String> guids);
+
+    ExchangeLog getLatestLog();
 }

@@ -84,7 +84,7 @@ public class JAXBMarshaller {
             R object = (R) unmarshaller.unmarshal(source);
             return object;
         } catch (JMSException | JAXBException ex) {
-            throw new ExchangeModelMarshallException("[Error when unmarshalling response in ResponseMapper ]");
+            throw new ExchangeModelMarshallException("[Error when unmarshalling response in ResponseMapper ]", ex);
         }
     }
 

@@ -21,6 +21,7 @@ import eu.europa.ec.fisheries.uvms.exchange.service.message.event.PluginErrorEve
 import eu.europa.ec.fisheries.uvms.exchange.service.message.exception.ExchangeMessageException;
 import javax.ejb.Local;
 import javax.enterprise.event.Observes;
+import javax.jms.Destination;
 import javax.jms.TextMessage;
 
 @Local
@@ -44,5 +45,5 @@ public interface ExchangeMessageProducer {
 
     void sendModuleAckMessage(String messageId, MessageQueue queue, String text);
 
-    String forwardToAsset(String text) throws ExchangeMessageException;
+    String forwardToAsset(String text, String function) throws ExchangeMessageException;
 }

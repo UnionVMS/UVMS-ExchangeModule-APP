@@ -169,4 +169,11 @@ public class ExchangeLogDaoBean extends Dao implements ExchangeLogDao {
         }
     }
 
+    @Override
+    public ExchangeLog getLatestLog(){
+        TypedQuery<ExchangeLog> namedQuery = em.createNamedQuery(ExchangeConstants.LATEST_LOG, ExchangeLog.class);
+        namedQuery.setMaxResults(1);
+        return namedQuery.getResultList().get(0);
+    }
+
 }

@@ -230,7 +230,7 @@ public class ExchangeLogServiceBean implements ExchangeLogService {
             return createdUnsentMessageId;
         } catch (ExchangeModelException e) {
             log.error("Couldn't add message to unsent list: {} {}",message,e);
-            throw new ExchangeLogException("Couldn't add message to unsent list");
+            throw new ExchangeLogException("Couldn't add message to unsent list", e);
         }
     }
 

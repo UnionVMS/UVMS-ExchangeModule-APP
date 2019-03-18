@@ -19,6 +19,7 @@ import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
 import javax.enterprise.event.Observes;
+import javax.jms.Destination;
 import javax.jms.JMSException;
 import javax.jms.Queue;
 import javax.jms.Topic;
@@ -106,7 +107,7 @@ public class ExchangeMessageProducerBean extends AbstractProducer implements Exc
             return eventBusProducer.sendEventBusMessage(text, serviceName, exchangeEventQueue);
         } catch (MessageException e) {
             LOG.error("[ Error when sending message. ] ", e);
-            throw new ExchangeMessageException("[ Error when sending message. ]");
+            throw new ExchangeMessageException("[ Error when sending message. ]", e);
         }
     }
 
@@ -163,14 +164,12 @@ public class ExchangeMessageProducerBean extends AbstractProducer implements Exc
     }
 
     @Override
-    public String forwardToAsset(String text) throws ExchangeMessageException {
+    public String forwardToAsset(String text, String function) throws ExchangeMessageException {
         try {
             Queue destination = getDestinationQueue(MessageQueue.VESSEL);
-            Map<String, String> properties = new HashMap<>();
-            properties.put(MessageConstants.JMS_FUNCTION_PROPERTY, "ASSET_INFORMATION");
             String s = "";
             if(destination != null) {
-                s = this.sendModuleMessageWithProps(text, destination, properties);
+                s = this.sendMessageToSpecificQueueWithFunction(text, destination, exchangeResponseQueue, function, null);
             }
             return s;
         } catch (MessageException e) {

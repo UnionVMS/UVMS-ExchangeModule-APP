@@ -9,37 +9,18 @@ the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the impl
 FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details. You should have received a
 copy of the GNU General Public License along with the IFDM Suite. If not, see <http://www.gnu.org/licenses/>.
  */
-package eu.europa.fisheries.uvms.exchange.service;
+package eu.europa.ec.fisheries.uvms.exchange.rest.longpolling.constants;
 
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
+public class LongPollingConstants {
 
-public class ExchangeServiceTest {
+    public static final String EXCHANGE_LOG_PATH = "/activity/exchange";
 
-    public ExchangeServiceTest() {
-    }
+    public static final String PLUGIN_STATUS_PATH = "/activity/plugins";
+    
+    public static final String SENDING_QUEUE_PATH = "/activity/queue";
 
-    @BeforeClass
-    public static void setUpClass() {
-    }
+    public static final String POLL_PATH = "/activity/poll";
 
-    @AfterClass
-    public static void tearDownClass() {
-    }
+    public static final long ASYNC_TIMEOUT = 30000;
 
-    @Before
-    public void setUp() {
-    }
-
-    @After
-    public void tearDown() {
-    }
-
-    // TODO add test methods here.
-    // The methods must be annotated with annotation @Test. For example:
-    //
-    // @Test
-    // public void hello() {}
 }

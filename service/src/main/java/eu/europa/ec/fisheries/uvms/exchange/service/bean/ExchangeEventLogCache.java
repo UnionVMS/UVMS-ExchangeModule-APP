@@ -40,6 +40,10 @@ public class ExchangeEventLogCache {
 		LOG.info(".acknowledged( " + messageId + ")");
 		return cache.remove(messageId);
 	}
+
+	public int size(){
+		return cache.size();
+	}
 	
 
 }
