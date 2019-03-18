@@ -72,8 +72,6 @@ public class ExchangeAPIResourceTest extends BuildExchangeRestTestDeployment {
     @OperateOnDeployment("exchangeservice")
     public void insertServiceAndGetServiceListTest() throws Exception {
         String serviceClassName = "Service Class Name " + UUID.randomUUID().toString();
-        Service s = RestHelper.createBasicService("Test Service Name:" + UUID.randomUUID().toString(), serviceClassName, PluginType.BELGIAN_ACTIVITY);
-        s = serviceRegistryDao.createEntity(s);
         GetServiceListRequest request = new GetServiceListRequest();
         request.getType().add(PluginType.OTHER);
         request.getType().add(PluginType.BELGIAN_ACTIVITY);
@@ -85,9 +83,20 @@ public class ExchangeAPIResourceTest extends BuildExchangeRestTestDeployment {
                 .post(Entity.json(request), GetServiceListResponse.class);
 
         assertNotNull(response);
+        int nbrOfPlugins = response.getService().size();
+        Service s = RestHelper.createBasicService("Test Service Name:" + UUID.randomUUID().toString(), serviceClassName, PluginType.BELGIAN_ACTIVITY);
+        s = serviceRegistryDao.createEntity(s);
+
+        response = getWebTarget()
+                .path("api")
+                .path("serviceList")
+                .request(MediaType.APPLICATION_JSON)
+                .post(Entity.json(request), GetServiceListResponse.class);
+
+        assertNotNull(response);
         assertFalse(response.getService().isEmpty());
-        assertEquals(2, response.getService().size());
-        assertEquals(serviceClassName, response.getService().get(1).getServiceClassName());
+        assertEquals(nbrOfPlugins + 1, response.getService().size());
+        assertEquals(serviceClassName, response.getService().get(nbrOfPlugins).getServiceClassName());
 
 
         serviceRegistryDao.deleteEntity(s.getId());
