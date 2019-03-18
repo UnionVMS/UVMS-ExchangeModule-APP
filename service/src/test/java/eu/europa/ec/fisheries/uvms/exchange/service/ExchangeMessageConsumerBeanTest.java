@@ -121,7 +121,7 @@ public class ExchangeMessageConsumerBeanTest extends BuildExchangeServiceTestDep
         GetServiceListResponse response = JAXBMarshaller.unmarshallTextMessage(message, GetServiceListResponse.class);
 
         assertNotNull(response);
-        assertEquals(1,response.getService().size());
+        assertFalse(response.getService().isEmpty());
         assertEquals("ManualMovement", response.getService().get(0).getServiceClassName());
 
 

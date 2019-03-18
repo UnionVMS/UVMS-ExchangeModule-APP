@@ -16,6 +16,7 @@ import javax.ejb.EJB;
 import javax.ejb.Stateless;
 import javax.jms.TextMessage;
 
+import eu.europa.ec.fisheries.wsdl.asset.module.AssetModuleMethod;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,7 +46,7 @@ public class ExchangeAssetServiceBean implements ExchangeAssetService {
 	public Asset getAsset(String assetGuid) throws ExchangeServiceException {
 		try {
             String request = AssetModuleRequestMapper.createGetAssetModuleRequest(assetGuid, AssetIdType.GUID);
-            String messageId = producer.sendMessageOnQueue(request, MessageQueue.VESSEL);
+            String messageId = producer.forwardToAsset(request, AssetModuleMethod.GET_ASSET.value());
             TextMessage response = consumer.getMessage(messageId, TextMessage.class);
             return AssetModuleResponseMapper.mapToAssetFromResponse(response, messageId);
 		} catch (ExchangeMessageException | MessageException e) {
