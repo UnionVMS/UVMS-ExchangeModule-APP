@@ -566,7 +566,7 @@ public class ExchangeEventOutgoingServiceBean implements ExchangeEventOutgoingSe
             asset = exchangeAssetService.getAsset(connectId);
         } catch (ExchangeServiceException e) {
             log.error("Couldn't create unsentMessage " + e.getMessage());
-            throw new ExchangeLogException(e.getMessage());
+            throw new ExchangeLogException(e.getMessage(), e);
         }
         return asset;
     }

@@ -39,7 +39,7 @@ public class ExchangeRegistryRestResourceTest extends BuildExchangeRestTestDeplo
 
     @Test
     @OperateOnDeployment("exchangeservice")
-    public void getLogListByCriteriaTest() throws Exception {
+    public void getServiceListTest() throws Exception {
 
         String stringResponse = getWebTarget()
                 .path("plugin")
