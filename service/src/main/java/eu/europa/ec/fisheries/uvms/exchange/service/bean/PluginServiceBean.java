@@ -110,7 +110,7 @@ public class PluginServiceBean implements PluginService {
 
     private void registerService(RegisterServiceRequest register, String messageId) throws ExchangeModelMarshallException, ExchangeMessageException {
         try {
-            overrideSettingsFromConfig(register);
+            overrideSettingsFromConfig(register);       //aka if config has settings for xyz parameter, use configs version instead
             ServiceResponseType service = exchangeService.registerService(register.getService(), register.getCapabilityList(), register.getSettingList(), register.getService().getName());
             //push to config module
             try {
@@ -161,7 +161,7 @@ public class PluginServiceBean implements PluginService {
             boolean sendMessage;
             if (register.getService() != null) {
                 sendMessage = checkPluginType(register.getService().getPluginType(), register.getService().getServiceResponseMessageName(), messageId);
-                if (sendMessage) {
+                if (sendMessage) {      //aka if we should actually register. If it is an email or naf and we already have one of those active then no
                     registerService(register, messageId);
                 }
             }
