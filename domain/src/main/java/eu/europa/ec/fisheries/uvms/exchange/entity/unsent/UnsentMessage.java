@@ -33,14 +33,9 @@ public class UnsentMessage {
 
 
 	@Id
-	@Column(name="unsent_id")
 	@GeneratedValue(strategy = GenerationType.AUTO)
-	private Long id;
-	
-	@NotNull
-	@Size(max=36)
-	@Column(name="unsent_guid", unique=true)
-	private String guid;
+	@Column(name="unsent_guid")
+	private UUID guid;
 	
 	@Size(max=100)
 	@Column(name="unsent_senderreceiver")
@@ -69,24 +64,11 @@ public class UnsentMessage {
     @OneToMany(cascade = {CascadeType.PERSIST, CascadeType.REMOVE}, fetch = FetchType.LAZY, mappedBy = "unsentMessage")
     private List<UnsentMessageProperty> properties;
 
-	@PrePersist
-	public void prepersist() {
-		setGuid(UUID.randomUUID().toString());
-	}
-
-	public Long getId() {
-		return id;
-	}
-
-	public void setId(Long id) {
-		this.id = id;
-	}
-
-	public String getGuid() {
+	public UUID getGuid() {
 		return guid;
 	}
 
-	public void setGuid(String guid) {
+	public void setGuid(UUID guid) {
 		this.guid = guid;
 	}
 

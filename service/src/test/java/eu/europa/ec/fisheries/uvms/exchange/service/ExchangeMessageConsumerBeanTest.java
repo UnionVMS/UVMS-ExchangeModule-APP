@@ -703,8 +703,8 @@ public class ExchangeMessageConsumerBeanTest extends BuildExchangeServiceTestDep
     @OperateOnDeployment("exchangeservice")
     public void  setFluxFAResponseMessageTest() throws Exception{     //SET_FLUX_FA_RESPONSE_MESSAGE
         String responseMessage = "Set Flux FA Response Message";
-        String request = ExchangeModuleRequestMapper.createFluxFAResponseRequestWithOnValue(responseMessage, "Set Flux FA Response Message username", "Set Flux FA Response Message df", "Set Flux FA Response Message guid", "Set Flux FA Response Message fr", "Set Flux FA Response Message onVal", ExchangeLogStatusTypeType.PROBABLY_TRANSMITTED, "Set Flux FA Response Message destination",
-                PluginType.FLUX, "Set Flux FA Response Message responseGuid");
+        String request = ExchangeModuleRequestMapper.createFluxFAResponseRequestWithOnValue(responseMessage, "Set Flux FA Response Message username", "Set Flux FA Response Message df", "Set Flux FA Response Message guid" + UUID.randomUUID().toString(), "Set Flux FA Response Message fr", "Set Flux FA Response Message onVal", ExchangeLogStatusTypeType.PROBABLY_TRANSMITTED, "Set Flux FA Response Message destination",
+                PluginType.FLUX, "Set Flux FA Response Message responseGuid" + UUID.randomUUID().toString());
 
         jmsHelper.registerSubscriber("ServiceName = '" + ExchangeServiceConstants.FLUX_ACTIVITY_PLUGIN_SERVICE_NAME + "'");
         String corrID = jmsHelper.sendExchangeMessage(request, null, "SET_FLUX_FA_RESPONSE_MESSAGE");

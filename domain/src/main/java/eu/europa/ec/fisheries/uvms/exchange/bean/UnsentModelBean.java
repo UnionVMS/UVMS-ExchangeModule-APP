@@ -46,10 +46,10 @@ public class UnsentModelBean implements UnsentModel {
             UnsentMessage entity = UnsentMessageMapper.toEntity(message, username);
             UnsentMessage persistedEntity = dao.create(entity);
 
-            return persistedEntity.getGuid();
+            return persistedEntity.getGuid().toString();
         } catch (ExchangeDaoException ex) {
             LOG.error("[ Error when creating unsent message ] {}", ex.getMessage());
-            throw new ExchangeModelException("Error when creating unsent message ");
+            throw new ExchangeModelException("Error when creating unsent message ", ex);
         }
     }
 
@@ -62,7 +62,7 @@ public class UnsentModelBean implements UnsentModel {
         try {
             UnsentMessage entity = dao.getByGuid(unsentMessageId);
             if (entity != null) {
-                String guid = entity.getGuid();
+                String guid = entity.getGuid().toString();
                 dao.remove(entity);
                 return guid;
             } else {

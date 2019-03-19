@@ -36,7 +36,7 @@ public class UnsentMessageDaoBean extends Dao implements UnsentMessageDao {
 			return unsentMessage;
 		}  catch (Exception e) {
 			LOG.error("[ Error when creating unsent message ]" + e.getMessage());
-			throw new ExchangeDaoException("[ Error when creating unsent message ]");
+			throw new ExchangeDaoException("[ Error when creating unsent message ]", e);
 		}
 	}
 
@@ -47,7 +47,7 @@ public class UnsentMessageDaoBean extends Dao implements UnsentMessageDao {
 			return unsentMessage;
 		}  catch (Exception e) {
 			LOG.error("[ Error when removing unsent message ]" + e.getMessage());
-			throw new ExchangeDaoException("[ Error when removing unsent message ]");
+			throw new ExchangeDaoException("[ Error when removing unsent message ]", e);
 		}
 	}
 
@@ -58,7 +58,7 @@ public class UnsentMessageDaoBean extends Dao implements UnsentMessageDao {
             return query.getResultList();
         } catch (Exception e) {
             LOG.error("[ Error when getting entity list. ] {}", e.getMessage());
-            throw new ExchangeDaoException("[ Error when getting entity list. ]");
+            throw new ExchangeDaoException("[ Error when getting entity list. ]", e);
         }
 	}
 
@@ -70,7 +70,7 @@ public class UnsentMessageDaoBean extends Dao implements UnsentMessageDao {
             return query.getSingleResult();
         } catch (NoResultException e) {
             LOG.error("[ Error when getting entity by ID. ] {}", e.getMessage());
-            throw new NoEntityFoundException("[ Error when getting entity by ID. ]");
+            throw new NoEntityFoundException("[ Error when getting entity by ID. ]", e);
         }
 	}
 

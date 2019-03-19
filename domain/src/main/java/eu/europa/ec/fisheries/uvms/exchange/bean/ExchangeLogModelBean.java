@@ -209,7 +209,7 @@ public class ExchangeLogModelBean implements ExchangeLogModel {
             return LogMapper.toModel(persistedLog);
         } catch (ExchangeDaoException ex) {
             LOG.error("[ERROR] when creating Exchange logType {} {}] {}", logType, username, ex.getMessage());
-            throw new ExchangeModelException("Error when creating Exchange logType ");
+            throw new ExchangeModelException("Error when creating Exchange logType ", ex);
         }
     }
 

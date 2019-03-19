@@ -266,7 +266,7 @@ public class ExchangeEventOutgoingServiceBean implements ExchangeEventOutgoingSe
             } else {
                 LOG.info("[WARN] FLUXFAResponse is FAILED so won't be sent to Flux Activity Plugin..");
             }
-        } catch (ExchangeModelMarshallException | ExchangeMessageException | ExchangeLogException e) {
+        } catch (Exception e /*ExchangeModelMarshallException | ExchangeMessageException | ExchangeLogException e*/) {
             LOG.error("Unable to send FLUX FA Report to plugin.", e);
         }
     }
@@ -408,7 +408,7 @@ public class ExchangeEventOutgoingServiceBean implements ExchangeEventOutgoingSe
     public void handleProcessedMovement(ExchangeMessageEvent message) {
         try {
             ProcessedMovementResponse response = JAXBMarshaller.unmarshallTextMessage(message.getJmsMessage(), ProcessedMovementResponse.class);
-            LOG.debug("Received processed movement from Rules:{}", response);
+            LOG.debug("Received processed movement from Movement:{}", response);
             MovementRefType movementRefType = response.getMovementRefType();
             if (movementRefType.getAckResponseMessageID() == null) {
                 return;

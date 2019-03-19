@@ -101,7 +101,7 @@ public class ExchangeSendingQueueResourceTest extends BuildExchangeRestTestDeplo
 
         List<String> unsentMessagesIdList = new ArrayList<>();
         for (UnsentMessage u: unsentMessageList) {
-            unsentMessagesIdList.add(u.getGuid());
+            unsentMessagesIdList.add(u.getGuid().toString());
         }
 
 
