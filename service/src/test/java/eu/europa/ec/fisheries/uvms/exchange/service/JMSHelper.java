@@ -4,6 +4,8 @@ import eu.europa.ec.fisheries.schema.exchange.module.v1.ExchangeBaseRequest;
 import eu.europa.ec.fisheries.schema.exchange.module.v1.ExchangeModuleMethod;
 import eu.europa.ec.fisheries.schema.exchange.module.v1.PingRequest;
 import eu.europa.ec.fisheries.schema.exchange.module.v1.PingResponse;
+import eu.europa.ec.fisheries.uvms.commons.message.api.MessageConstants;
+import eu.europa.ec.fisheries.uvms.exchange.model.constant.ExchangeModelConstants;
 import eu.europa.ec.fisheries.uvms.movement.model.mapper.JAXBMarshaller;
 
 import javax.jms.*;
@@ -39,6 +41,25 @@ public class JMSHelper {
         session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
         eventBus = session.createTopic("EventBus");
         subscriber = session.createConsumer(eventBus, selector, true);
+    }
+
+    public String sendMessageOnEventQueue(String text) throws Exception{
+        Connection connection = connectionFactory.createConnection();
+        try {
+            Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
+            Topic eventTopic = session.createTopic(MessageConstants.EVENT_BUS_TOPIC_NAME);
+
+
+            TextMessage message = session.createTextMessage();
+            message.setStringProperty(ExchangeModelConstants.SERVICE_NAME, ExchangeModelConstants.EXCHANGE_REGISTER_SERVICE);
+            message.setText(text);
+
+            session.createProducer(eventTopic).send(message);
+
+            return message.getJMSMessageID();
+        } finally {
+            connection.close();
+        }
     }
 
     public String sendExchangeMessage(String text, String groupId, String function) throws Exception {
