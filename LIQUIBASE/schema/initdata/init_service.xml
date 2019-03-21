@@ -8,14 +8,14 @@
     <changeSet id="service-init01" author="andtho">	
         	
         <insert tableName="service">
-            <column name="serv_id" value="1"/>
+            <column name="serv_id" value="00000000-0000-0000-0000-000000000001"/>
             <column name="serv_serviceclassname" value="ManualMovement"/>
             <column name="serv_name" value="ManualMovement"/>
             <column name="serv_serviceresponse" value="ManualMovement"/>
             <column name="serv_desc" value="Handles manual movements"/>
             <column name="serv_active" value="1"/>
             <column name="serv_type" value="OTHER"/>
-            <column name="serv_status" value="STARTED"/>
+            <column name="serv_status" value="1"/>
             <column name="serv_updattim" valueDate="${now}"/>
             <column name="serv_upuser" value="UVMS"/>
 		</insert>

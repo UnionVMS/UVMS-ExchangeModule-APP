@@ -6,19 +6,19 @@
     <changeSet author="johlyn" id="table for linking a service with capabilities">
         
         <createTable remarks="Table for linking a plugin with capabilities" tableName="service_capability">
-            <column name="servcap_id" remarks="Id and code for table" type="BIGINT">
+            <column name="servcap_id" remarks="Id and code for table" type="UUID">
                 <constraints nullable="false" primaryKey="true" primaryKeyName="servcap_pk"/>
             </column>
-            <column name="servcap_serv_id" remarks="Foreign key to the plugin service." type="BIGINT">
+            <column name="servcap_serv_id" remarks="Foreign key to the plugin service." type="UUID">
                 <constraints nullable="false"/>
             </column>
             <column name="servcap_capability" remarks="Capability" type="VARCHAR(25)">
                 <constraints nullable="false"/>
             </column>
-            <column name="servcap_value" remarks="Value of capability" type="VARCHAR(25)">
+            <column name="servcap_value" remarks="Value of capability" type="BOOLEAN">
                 <constraints nullable="false"/>
             </column>
-             <column name="servcap_updattim" type="timestamp" remarks="Last updated date time.">
+             <column name="servcap_updattim" type="timestamp with time zone" remarks="Last updated date time.">
                 <constraints nullable="false"/>
             </column>
             <column name="servcap_upuser" type="varchar(60)" remarks="Last update userid.">

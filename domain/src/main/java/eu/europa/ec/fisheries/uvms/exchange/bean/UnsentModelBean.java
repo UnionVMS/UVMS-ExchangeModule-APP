@@ -27,6 +27,7 @@ import javax.ejb.EJB;
 import javax.ejb.Stateless;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 @Stateless
 public class UnsentModelBean implements UnsentModel {
@@ -60,7 +61,7 @@ public class UnsentModelBean implements UnsentModel {
         }
 
         try {
-            UnsentMessage entity = dao.getByGuid(unsentMessageId);
+            UnsentMessage entity = dao.getByGuid(UUID.fromString(unsentMessageId));
             if (entity != null) {
                 String guid = entity.getGuid().toString();
                 dao.remove(entity);
@@ -96,7 +97,7 @@ public class UnsentModelBean implements UnsentModel {
             List<UnsentMessageType> unsentMessageList = new ArrayList<>();
             for (String messageId : unsentMessageId) {
                 try {
-                    UnsentMessage message = dao.getByGuid(messageId);
+                    UnsentMessage message = dao.getByGuid(UUID.fromString(messageId));
                     UnsentMessage removedMessage = dao.remove(message);
                     unsentMessageList.add(UnsentMessageMapper.toModel(removedMessage));
                 } catch (NoEntityFoundException e) {

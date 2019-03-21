@@ -182,7 +182,7 @@ public class ExchangeMessageConsumerBeanTest extends BuildExchangeServiceTestDep
         String serviceClassName = "eu.europa.ec.fisheries.uvms.plugins.sweagencyemail";
         int sizeB4 = unsentMessageDao.getAll().size();
         Service service = createAndPersistBasicService(serviceName, serviceClassName, PluginType.EMAIL);
-        service.setStatus("STOPPED");
+        service.setStatus(false);
         service = serviceRegistryDao.updateService(service);
 
         EmailType email = new EmailType();
@@ -337,7 +337,7 @@ public class ExchangeMessageConsumerBeanTest extends BuildExchangeServiceTestDep
 
         Thread.sleep(1000);
         Service updatedService = serviceRegistryDao.getServiceByServiceClassName(serviceClassName);
-        assertEquals("STOPPED", updatedService.getStatus());
+        assertEquals(false, updatedService.getStatus());
 
         serviceRegistryDao.deleteEntity(updatedService.getId());
 
@@ -349,7 +349,7 @@ public class ExchangeMessageConsumerBeanTest extends BuildExchangeServiceTestDep
         String serviceName = "Start Ack Test Service";
         String serviceClassName = "Start Ack Test Service";
         Service service = createAndPersistBasicService(serviceName, serviceClassName, PluginType.MANUAL);
-        service.setStatus("STOPPED");
+        service.setStatus(false);
         serviceRegistryDao.updateService(service);
         AcknowledgeType ackType = new AcknowledgeType();
         ackType.setType(AcknowledgeTypeType.OK);
@@ -358,7 +358,7 @@ public class ExchangeMessageConsumerBeanTest extends BuildExchangeServiceTestDep
 
         Thread.sleep(1000);
         Service updatedService = serviceRegistryDao.getServiceByServiceClassName(serviceClassName);
-        assertEquals("STARTED", updatedService.getStatus());
+        assertEquals(serviceClassName, true, updatedService.getStatus());
 
         serviceRegistryDao.deleteEntity(updatedService.getId());
 
@@ -382,7 +382,7 @@ public class ExchangeMessageConsumerBeanTest extends BuildExchangeServiceTestDep
 
         AcknowledgeType ackType = new AcknowledgeType();
         ackType.setType(AcknowledgeTypeType.OK);
-        ackType.setUnsentMessageGuid(unsent.getGuid());
+        ackType.setUnsentMessageGuid(unsent.getGuid().toString());
         ackType.setMessageId(exchangeLog.getGuid());
         ackType.setMessage("processSetReportAcknowledgeTest message");
 
@@ -422,7 +422,7 @@ public class ExchangeMessageConsumerBeanTest extends BuildExchangeServiceTestDep
 
         AcknowledgeType ackType = new AcknowledgeType();
         ackType.setType(AcknowledgeTypeType.OK);
-        ackType.setUnsentMessageGuid(unsent.getGuid());
+        ackType.setUnsentMessageGuid(unsent.getGuid().toString());
         ackType.setMessageId(exchangeLog.getGuid());
         ackType.setMessage("processSetCommandAcknowledgeTest message");
 
@@ -464,7 +464,7 @@ public class ExchangeMessageConsumerBeanTest extends BuildExchangeServiceTestDep
 
         AcknowledgeType ackType = new AcknowledgeType();
         ackType.setType(AcknowledgeTypeType.OK);
-        ackType.setUnsentMessageGuid(unsent.getGuid());
+        ackType.setUnsentMessageGuid(unsent.getGuid().toString());
         ackType.setMessageId(exchangeLog.getGuid());
         ackType.setMessage("processSetCommandAcknowledgeTest message");
         PollStatusAcknowledgeType pollStatusAcknowledgeType = new PollStatusAcknowledgeType();
@@ -1035,7 +1035,7 @@ public class ExchangeMessageConsumerBeanTest extends BuildExchangeServiceTestDep
         s.setSatelliteType(null);
         s.setServiceClassName(serviceClassName);
         s.setServiceResponse(serviceClassName + "PLUGIN_RESPONSE");
-        s.setStatus("STARTED");
+        s.setStatus(true);
         s.setType(pluginType);
         s.setUpdated(Instant.now());
         s.setUpdatedBy("Exchange Tests");
@@ -1046,7 +1046,7 @@ public class ExchangeMessageConsumerBeanTest extends BuildExchangeServiceTestDep
         serviceCapability.setUpdatedBy("Exchange Tests");
         serviceCapability.setUpdatedTime(Instant.now());
         serviceCapability.setCapability(CapabilityTypeType.POLLABLE);
-        serviceCapability.setValue("TRUE");
+        serviceCapability.setValue(true);
         serviceCapabilityList.add(serviceCapability);
         s.setServiceCapabilityList(serviceCapabilityList);
 

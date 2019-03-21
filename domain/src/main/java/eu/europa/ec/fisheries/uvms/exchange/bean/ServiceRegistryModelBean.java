@@ -46,11 +46,11 @@ public class ServiceRegistryModelBean implements ServiceRegistryModel {
         	//create
         	service = ServiceMapper.toServiceEntity(serviceType, capabilityList, settingList, username);
         	service.setActive(true);
-        	service.setStatus(StatusType.STARTED.name());
+        	service.setStatus(true);
             dao.createEntity(service);
         } else {
             service.setActive(true);
-            service.setStatus(StatusType.STARTED.name());
+            service.setStatus(true);
             List<ServiceSetting> newSettings = ServiceMapper.mapSettingsList(service, settingList, username);
             List<ServiceCapability> serviceCapabilityList = ServiceMapper.upsetCapabilityList(service, capabilityList, username);
 
@@ -74,7 +74,7 @@ public class ServiceRegistryModelBean implements ServiceRegistryModel {
         ServiceResponseType response = null;
         if (service != null) {
             service.setActive(false);
-            service.setStatus(StatusType.STOPPED.name());
+            service.setStatus(false);
             service.getServiceCapabilityList().clear();
             service.getServiceSettingList().clear();
             service.setUpdatedBy(username);
@@ -176,7 +176,7 @@ public class ServiceRegistryModelBean implements ServiceRegistryModel {
 	public ServiceResponseType updatePluginStatus(String serviceName, StatusType status, String username) throws ExchangeModelException {
 		Service service = dao.getServiceByServiceClassName(serviceName);
 		if(service != null) {
-			service.setStatus(status.name());
+			service.setStatus(StatusType.STARTED.equals(status));
             service.setUpdatedBy(username);
             service.setUpdated(Instant.now());
 			return ServiceMapper.toServiceModel(dao.updateService(service));

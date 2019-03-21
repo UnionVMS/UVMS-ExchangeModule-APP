@@ -44,7 +44,7 @@ public class RestHelper {
         s.setSatelliteType(null);
         s.setServiceClassName(serviceClassName);
         s.setServiceResponse(serviceClassName + "PLUGIN_RESPONSE");
-        s.setStatus("STARTED");
+        s.setStatus(true);
         s.setType(pluginType);
         s.setUpdated(Instant.now());
         s.setUpdatedBy("Exchange Tests");
@@ -55,7 +55,7 @@ public class RestHelper {
         serviceCapability.setUpdatedBy("Exchange Tests");
         serviceCapability.setUpdatedTime(Instant.now());
         serviceCapability.setCapability(CapabilityTypeType.POLLABLE);
-        serviceCapability.setValue("TRUE");
+        serviceCapability.setValue(true);
         serviceCapabilityList.add(serviceCapability);
         s.setServiceCapabilityList(serviceCapabilityList);
 

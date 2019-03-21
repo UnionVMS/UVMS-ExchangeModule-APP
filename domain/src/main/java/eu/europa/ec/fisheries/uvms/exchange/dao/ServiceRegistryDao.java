@@ -12,6 +12,7 @@ copy of the GNU General Public License along with the IFDM Suite. If not, see <h
 package eu.europa.ec.fisheries.uvms.exchange.dao;
 
 import java.util.List;
+import java.util.UUID;
 
 import javax.ejb.Local;
 
@@ -61,7 +62,7 @@ public interface ServiceRegistryDao {
      * @throws
      * eu.europa.ec.fisheries.uvms.exchange.exception.ExchangeDaoException
      */
-    public void deleteEntity(Long id) throws ExchangeDaoException;
+    public void deleteEntity(UUID id) throws ExchangeDaoException;
 
     /**
      * Get all services (FIND_ALL)

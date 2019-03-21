@@ -19,6 +19,7 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.UUID;
 
 import eu.europa.ec.fisheries.schema.exchange.service.v1.CapabilityListType;
 import eu.europa.ec.fisheries.schema.exchange.service.v1.CapabilityType;
@@ -42,7 +43,7 @@ public class MockData {
         return dto;
     }
 
-    public static Service getEntity(long id) {
+    public static Service getEntity(UUID id) {
         Service entity = new Service();
         entity.setId(id);
         entity.setName("Plugin name");
@@ -65,7 +66,7 @@ public class MockData {
 		ServiceCapability capability = new ServiceCapability();
 		capability.setCapability(CapabilityTypeType.POLLABLE);
 		capability.setService(parent);
-		capability.setValue("TRUE");
+		capability.setValue(true);
 		list.add(capability);
 		return list;
 	}

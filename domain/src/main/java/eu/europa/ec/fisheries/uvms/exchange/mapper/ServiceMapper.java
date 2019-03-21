@@ -73,15 +73,8 @@ public class ServiceMapper {
         return model;
     }
     
-    private static StatusType mapStatus(String status) {
-        if (status != null) {
-            try {
-                return StatusType.valueOf(status);
-            } catch (Exception e) {
-                return StatusType.UNKNOWN;
-            }
-        }
-        return StatusType.UNKNOWN;
+    private static StatusType mapStatus(boolean status) {
+        return status ? StatusType.STARTED : StatusType.STOPPED;
     }
     
     private static CapabilityListType toCapabilityListModel(List<ServiceCapability> capabilityList) {
@@ -97,7 +90,7 @@ public class ServiceMapper {
     private static CapabilityType toCapabilityModel(ServiceCapability capability) {
         CapabilityType model = new CapabilityType();
         model.setType(capability.getCapability());
-        model.setValue(capability.getValue());
+        model.setValue(capability.getValue() ? "TRUE" : "FALSE");
         return model;
     }
     
@@ -132,14 +125,14 @@ public class ServiceMapper {
         entity.setCapability(capability.getType());
         entity.setUpdatedBy(username);
         entity.setUpdatedTime(DateUtils.nowUTC());
-        entity.setValue(capability.getValue());
+        entity.setValue("TRUE".equals(capability.getValue()));
         return entity;
     }
     
     public static CapabilityType toModel(ServiceCapability entity) {
         CapabilityType type = new CapabilityType();
         type.setType(entity.getCapability());
-        type.setValue(entity.getValue());
+        type.setValue(entity.getValue() ? "TRUE" : "FALSE");
         return type;
     }
     

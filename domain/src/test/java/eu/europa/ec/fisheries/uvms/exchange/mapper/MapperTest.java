@@ -13,6 +13,7 @@ package eu.europa.ec.fisheries.uvms.exchange.mapper;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -51,7 +52,7 @@ public class MapperTest {
 
     @Test
     public void testEntityToModel() {
-        Integer id = 1;
+        UUID id = UUID.randomUUID();
         Service entity = MockData.getEntity(id);
         List<ServiceCapability> capabilityList = new ArrayList<>();
 		entity.setServiceCapabilityList(capabilityList);
@@ -80,7 +81,7 @@ public class MapperTest {
 
     @Test
     public void testEntityAndModelToEntity() {
-        Integer id = 1;
+        UUID id = UUID.randomUUID();
         Service entity = MockData.getEntity(id);
         ServiceType service = MockData.getModel(1);
         CapabilityListType capabilityListType = MockData.getCapabilityList();
@@ -95,7 +96,7 @@ public class MapperTest {
 
     @Test
     public void testEntityAndModelToModel() {
-        Service entity = MockData.getEntity(1);
+        Service entity = MockData.getEntity(UUID.randomUUID());
         List<ServiceCapability> capabilityList = new ArrayList<>();
 		entity.setServiceCapabilityList(capabilityList);
         List<ServiceSetting> settingList = new ArrayList<>();
@@ -111,7 +112,7 @@ public class MapperTest {
     public void testUpsert() {
     	String newValue = "NEW_VALUE";
     	
-    	Service entity = MockData.getEntity(1);
+    	Service entity = MockData.getEntity(UUID.randomUUID());
     	entity.setServiceCapabilityList(MockData.getEntityCapabilities(entity));
     	entity.setServiceSettingList(MockData.getEntitySettings(entity));
 

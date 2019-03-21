@@ -25,12 +25,14 @@ import eu.europa.ec.fisheries.uvms.exchange.constant.ExchangeConstants;
 @Table(name="unsent_message")
 //@formatter:off
 @NamedQueries({
-	@NamedQuery(name = ExchangeConstants.UNSENT_FIND_ALL, query = "SELECT um FROM UnsentMessage um"),
-	@NamedQuery(name = ExchangeConstants.UNSENT_BY_GUID, query = "SELECT um FROM UnsentMessage um WHERE um.guid = :guid")
+	@NamedQuery(name = UnsentMessage.UNSENT_FIND_ALL, query = "SELECT um FROM UnsentMessage um"),
+	@NamedQuery(name = UnsentMessage.UNSENT_BY_GUID, query = "SELECT um FROM UnsentMessage um WHERE um.guid = :guid")
 })
 //@formatter:on
 public class UnsentMessage {
 
+	public static final String UNSENT_FIND_ALL = "UnsentMessage.findAll";
+	public static final String UNSENT_BY_GUID = "UnsentMessage.findByGuid";
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)

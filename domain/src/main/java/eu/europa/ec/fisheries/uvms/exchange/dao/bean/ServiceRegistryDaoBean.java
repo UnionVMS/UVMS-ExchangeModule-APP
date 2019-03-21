@@ -12,6 +12,7 @@ copy of the GNU General Public License along with the IFDM Suite. If not, see <h
 package eu.europa.ec.fisheries.uvms.exchange.dao.bean;
 
 import java.util.List;
+import java.util.UUID;
 
 import javax.ejb.Stateless;
 import javax.persistence.EntityExistsException;
@@ -63,7 +64,7 @@ public class ServiceRegistryDaoBean extends Dao implements ServiceRegistryDao {
     @Override
     public Service getEntityById(String id) throws NoEntityFoundException, ExchangeDaoException {
         try {
-            return em.find(Service.class, new Long(id));                //SRSLY!?!?!?!?!?!?!?!?!?!?!? WHY??????????
+            return em.find(Service.class, UUID.fromString(id));                //SRSLY!?!?!?!?!?!?!?!?!?!?!? WHY??????????
         } catch (NoResultException e) {
             LOG.error("[ Error when getting entity by ID. ] {}", e.getMessage());
             throw new NoEntityFoundException("[ Error when getting entity by ID. ]");
@@ -91,7 +92,7 @@ public class ServiceRegistryDaoBean extends Dao implements ServiceRegistryDao {
 
     // deactivateService
     @Override
-    public void deleteEntity(Long id ) {
+    public void deleteEntity(UUID id ) {
         Service s = em.find(Service.class, id);
         em.remove(s);
 
@@ -100,7 +101,7 @@ public class ServiceRegistryDaoBean extends Dao implements ServiceRegistryDao {
     @Override
     public List<Service> getServices() throws ExchangeDaoException {
         try {
-            TypedQuery<Service> query = em.createNamedQuery(ExchangeConstants.SERVICE_FIND_ALL, Service.class);
+            TypedQuery<Service> query = em.createNamedQuery(Service.SERVICE_FIND_ALL, Service.class);
             return query.getResultList();
         } catch (IllegalArgumentException e) {
             LOG.error("[ Error when getting service list ] {}", e.getMessage());
@@ -114,7 +115,7 @@ public class ServiceRegistryDaoBean extends Dao implements ServiceRegistryDao {
     @Override
 	public List<Service> getServicesByTypes(List<PluginType> pluginTypes) throws ExchangeDaoException {
         try {
-            TypedQuery<Service> query = em.createNamedQuery(ExchangeConstants.SERVICE_FIND_BY_TYPES, Service.class);
+            TypedQuery<Service> query = em.createNamedQuery(Service.SERVICE_FIND_BY_TYPES, Service.class);
             query.setParameter("types", pluginTypes);
             return query.getResultList();
         } catch (IllegalArgumentException e) {
@@ -129,7 +130,7 @@ public class ServiceRegistryDaoBean extends Dao implements ServiceRegistryDao {
     @Override
     public List<ServiceCapability> getServiceCapabilities(String serviceClassName) throws ExchangeDaoException {
         try {
-            TypedQuery<ServiceCapability> query = em.createNamedQuery(ExchangeConstants.CAPABILITY_FIND_BY_SERVICE, ServiceCapability.class);
+            TypedQuery<ServiceCapability> query = em.createNamedQuery(ServiceCapability.CAPABILITY_FIND_BY_SERVICE, ServiceCapability.class);
             query.setParameter(SERVICE_CLASS_NAME_PARAMETER, serviceClassName);
             return query.getResultList();
         } catch (IllegalArgumentException e) {
@@ -144,7 +145,7 @@ public class ServiceRegistryDaoBean extends Dao implements ServiceRegistryDao {
     @Override
     public List<ServiceSetting> getServiceSettings(String serviceClassName) throws ExchangeDaoException {
         try {
-            TypedQuery<ServiceSetting> query = em.createNamedQuery(ExchangeConstants.SETTING_FIND_BY_SERVICE, ServiceSetting.class);
+            TypedQuery<ServiceSetting> query = em.createNamedQuery(ServiceSetting.SETTING_FIND_BY_SERVICE, ServiceSetting.class);
             query.setParameter("serviceClassName", serviceClassName);
             return query.getResultList();
         } catch (IllegalArgumentException e) {
@@ -159,7 +160,7 @@ public class ServiceRegistryDaoBean extends Dao implements ServiceRegistryDao {
     @Override
     public Service getServiceByServiceClassName(String serviceClassName) {
         try {
-            TypedQuery<Service> query = em.createNamedQuery(ExchangeConstants.SERVICE_FIND_BY_SERVICE_CLASS_NAME, Service.class);
+            TypedQuery<Service> query = em.createNamedQuery(Service.SERVICE_FIND_BY_SERVICE_CLASS_NAME, Service.class);
             query.setParameter(SERVICE_CLASS_NAME_PARAMETER, serviceClassName);
             return query.getSingleResult();
         } catch (NoResultException e) {

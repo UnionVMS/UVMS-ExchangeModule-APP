@@ -13,6 +13,7 @@ package eu.europa.ec.fisheries.uvms.exchange.entity.serviceregistry;
 
 import java.io.Serializable;
 import java.time.Instant;
+import java.util.UUID;
 
 import javax.persistence.Basic;
 import javax.persistence.Column;
@@ -35,22 +36,22 @@ import eu.europa.ec.fisheries.uvms.exchange.constant.ExchangeConstants;
 @Table(name = "service_setting")
 @XmlRootElement
 @NamedQueries({
-        @NamedQuery(name = ExchangeConstants.SETTING_FIND_BY_SERVICE, query = "SELECT s FROM ServiceSetting s where s.service.serviceClassName =:serviceClassName ") })
+        @NamedQuery(name = ServiceSetting.SETTING_FIND_BY_SERVICE, query = "SELECT s FROM ServiceSetting s where s.service.serviceClassName =:serviceClassName ") })
+
 public class ServiceSetting implements Serializable {
     private static final long serialVersionUID = 1L;
 
+    public static final String SETTING_FIND_BY_SERVICE = "ServiceSetting.findByServiceId";
+
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    @Basic(optional = false)
     @Column(name = "servset_id")
-    private Long id;
+    private UUID id;
 
-    @Basic(optional = false)
     @NotNull
     @Column(name = "servset_updattim")
     private Instant updatedTime;
 
-    @Basic(optional = false)
     @NotNull
     @Size(min = 1, max = 60)
     @Column(name = "servset_upuser")
@@ -71,11 +72,11 @@ public class ServiceSetting implements Serializable {
     public ServiceSetting() {
     }
 
-    public Long getId() {
+    public UUID getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(UUID id) {
         this.id = id;
     }
 

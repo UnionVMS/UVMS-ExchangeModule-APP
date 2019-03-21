@@ -24,6 +24,7 @@ import javax.ejb.Stateless;
 import javax.persistence.NoResultException;
 import javax.persistence.TypedQuery;
 import java.util.List;
+import java.util.UUID;
 
 @Stateless
 public class UnsentMessageDaoBean extends Dao implements UnsentMessageDao {
@@ -54,7 +55,7 @@ public class UnsentMessageDaoBean extends Dao implements UnsentMessageDao {
 	@Override
 	public List<UnsentMessage> getAll() throws ExchangeDaoException {
 		try {
-            TypedQuery<UnsentMessage> query = em.createNamedQuery(ExchangeConstants.UNSENT_FIND_ALL, UnsentMessage.class);
+            TypedQuery<UnsentMessage> query = em.createNamedQuery(UnsentMessage.UNSENT_FIND_ALL, UnsentMessage.class);
             return query.getResultList();
         } catch (Exception e) {
             LOG.error("[ Error when getting entity list. ] {}", e.getMessage());
@@ -63,9 +64,9 @@ public class UnsentMessageDaoBean extends Dao implements UnsentMessageDao {
 	}
 
 	@Override
-	public UnsentMessage getByGuid(String guid) throws NoEntityFoundException {
+	public UnsentMessage getByGuid(UUID guid) throws NoEntityFoundException {
 		try {
-            TypedQuery<UnsentMessage> query = em.createNamedQuery(ExchangeConstants.UNSENT_BY_GUID, UnsentMessage.class);
+            TypedQuery<UnsentMessage> query = em.createNamedQuery(UnsentMessage.UNSENT_BY_GUID, UnsentMessage.class);
             query.setParameter("guid", guid);
             return query.getSingleResult();
         } catch (NoResultException e) {
