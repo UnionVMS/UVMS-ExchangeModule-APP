@@ -33,7 +33,10 @@ import eu.europa.ec.fisheries.uvms.exchange.entity.exchangelog.ExchangeLog;
 import eu.europa.ec.fisheries.uvms.exchange.entity.serviceregistry.Service;
 import eu.europa.ec.fisheries.uvms.exchange.entity.serviceregistry.ServiceCapability;
 import eu.europa.ec.fisheries.uvms.exchange.entity.serviceregistry.ServiceSetting;
+import eu.europa.ec.fisheries.uvms.exchange.entity.unsent.UnsentMessage;
+import eu.europa.ec.fisheries.uvms.exchange.exception.NoEntityFoundException;
 import eu.europa.ec.fisheries.uvms.exchange.model.mapper.ExchangeModuleRequestMapper;
+import eu.europa.ec.fisheries.uvms.exchange.model.mapper.ExchangePluginResponseMapper;
 import eu.europa.ec.fisheries.uvms.exchange.model.mapper.JAXBMarshaller;
 import eu.europa.ec.fisheries.uvms.exchange.service.bean.ExchangeEventLogCache;
 import eu.europa.ec.fisheries.uvms.exchange.service.constants.ExchangeServiceConstants;
@@ -317,6 +320,174 @@ public class ExchangeMessageConsumerBeanTest extends BuildExchangeServiceTestDep
 
         serviceRegistryDao.deleteEntity(service.getId());
 
+    }
+
+    /* -- Ack Messages -- */
+
+    @Test
+    @OperateOnDeployment("exchangeservice")
+    public void  processStopAcknowledgeTest() throws Exception {
+        String serviceName = "Stop Ack Test Service";
+        String serviceClassName = "Stop Ack Test Service";
+        Service service = createAndPersistBasicService(serviceName, serviceClassName, PluginType.MANUAL);
+        AcknowledgeType ackType = new AcknowledgeType();
+        ackType.setType(AcknowledgeTypeType.OK);
+        String request = ExchangePluginResponseMapper.mapToStopResponse(serviceClassName, ackType);
+        String corrID = jmsHelper.sendExchangeMessage(request, null, "STOP_ACK");
+
+        Thread.sleep(1000);
+        Service updatedService = serviceRegistryDao.getServiceByServiceClassName(serviceClassName);
+        assertEquals("STOPPED", updatedService.getStatus());
+
+        serviceRegistryDao.deleteEntity(updatedService.getId());
+
+    }
+
+    @Test
+    @OperateOnDeployment("exchangeservice")
+    public void  processStartAcknowledgeTest() throws Exception {
+        String serviceName = "Start Ack Test Service";
+        String serviceClassName = "Start Ack Test Service";
+        Service service = createAndPersistBasicService(serviceName, serviceClassName, PluginType.MANUAL);
+        service.setStatus("STOPPED");
+        serviceRegistryDao.updateService(service);
+        AcknowledgeType ackType = new AcknowledgeType();
+        ackType.setType(AcknowledgeTypeType.OK);
+        String request = ExchangePluginResponseMapper.mapToStartResponse(serviceClassName, ackType);
+        String corrID = jmsHelper.sendExchangeMessage(request, null, "START_ACK");
+
+        Thread.sleep(1000);
+        Service updatedService = serviceRegistryDao.getServiceByServiceClassName(serviceClassName);
+        assertEquals("STARTED", updatedService.getStatus());
+
+        serviceRegistryDao.deleteEntity(updatedService.getId());
+
+    }
+
+    @Test
+    @OperateOnDeployment("exchangeservice")
+    public void  processSetReportAcknowledgeTest() throws Exception {
+        UnsentMessage unsent = new UnsentMessage();
+        unsent.setDateReceived(Instant.now());
+        unsent.setMessage("processSetReportAcknowledgeTest");
+        unsent.setRecipient("processSetReportAcknowledgeTest recipient");
+        unsent.setSenderReceiver("processSetReportAcknowledgeTest senderReciever");
+        unsent.setUpdatedBy("processSetReportAcknowledgeTest tester");
+        unsent.setUpdateTime(Instant.now());
+        unsent = unsentMessageDao.create(unsent);
+
+        ExchangeLog exchangeLog = createBasicLog();
+        exchangeLog.setStatus(ExchangeLogStatusTypeType.PENDING);
+        exchangeLog = exchangeLogDao.createLog(exchangeLog);
+
+        AcknowledgeType ackType = new AcknowledgeType();
+        ackType.setType(AcknowledgeTypeType.OK);
+        ackType.setUnsentMessageGuid(unsent.getGuid());
+        ackType.setMessageId(exchangeLog.getGuid());
+        ackType.setMessage("processSetReportAcknowledgeTest message");
+
+        exchangeEventLogCache.put(exchangeLog.getGuid(),exchangeLog.getGuid());
+
+        String request = ExchangePluginResponseMapper.mapToSetReportResponse("Fake service class name", ackType);
+        String corrID = jmsHelper.sendExchangeMessage(request, null, "SET_REPORT_ACK");
+
+        Thread.sleep(1000);
+        try {
+            unsentMessageDao.getByGuid(unsent.getGuid());
+            fail("The guid on the line above should not exist in the db");
+        }catch (NoEntityFoundException e){
+            assertTrue(true);
+        }
+
+        ExchangeLog updatedExchangeLog = exchangeLogDao.getExchangeLogByGuid(exchangeLog.getGuid());
+        assertEquals(ExchangeLogStatusTypeType.SUCCESSFUL, updatedExchangeLog.getStatus());
+        assertEquals(1, updatedExchangeLog.getStatusHistory().size());
+    }
+
+    @Test
+    @OperateOnDeployment("exchangeservice")
+    public void  processSetCommandAcknowledgeNotPollTest() throws Exception {
+        UnsentMessage unsent = new UnsentMessage();
+        unsent.setDateReceived(Instant.now());
+        unsent.setMessage("processSetCommandAcknowledgeTest");
+        unsent.setRecipient("processSetCommandAcknowledgeTest recipient");
+        unsent.setSenderReceiver("processSetCommandAcknowledgeTest senderReciever");
+        unsent.setUpdatedBy("processSetCommandAcknowledgeTest tester");
+        unsent.setUpdateTime(Instant.now());
+        unsent = unsentMessageDao.create(unsent);
+
+        ExchangeLog exchangeLog = createBasicLog();
+        exchangeLog.setStatus(ExchangeLogStatusTypeType.PENDING);
+        exchangeLog = exchangeLogDao.createLog(exchangeLog);
+
+        AcknowledgeType ackType = new AcknowledgeType();
+        ackType.setType(AcknowledgeTypeType.OK);
+        ackType.setUnsentMessageGuid(unsent.getGuid());
+        ackType.setMessageId(exchangeLog.getGuid());
+        ackType.setMessage("processSetCommandAcknowledgeTest message");
+
+        exchangeEventLogCache.put(exchangeLog.getGuid(),exchangeLog.getGuid());
+
+        String request = ExchangePluginResponseMapper.mapToSetCommandResponse("Fake service class name", ackType);
+        String corrID = jmsHelper.sendExchangeMessage(request, null, "SET_COMMAND_ACK");
+
+        Thread.sleep(1000);
+        try {
+            unsentMessageDao.getByGuid(unsent.getGuid());
+            fail("The guid on the line above should not exist in the db");
+        }catch (NoEntityFoundException e){
+            assertTrue(true);
+        }
+
+        ExchangeLog updatedExchangeLog = exchangeLogDao.getExchangeLogByGuid(exchangeLog.getGuid());
+        assertEquals(ExchangeLogStatusTypeType.SUCCESSFUL, updatedExchangeLog.getStatus());
+        assertEquals(1, updatedExchangeLog.getStatusHistory().size());
+    }
+
+    @Test
+    @OperateOnDeployment("exchangeservice")
+    public void  processSetCommandAcknowledgePollTest() throws Exception {
+        UnsentMessage unsent = new UnsentMessage();
+        unsent.setDateReceived(Instant.now());
+        unsent.setMessage("processSetCommandAcknowledgeTest");
+        unsent.setRecipient("processSetCommandAcknowledgeTest recipient");
+        unsent.setSenderReceiver("processSetCommandAcknowledgeTest senderReciever");
+        unsent.setUpdatedBy("processSetCommandAcknowledgeTest tester");
+        unsent.setUpdateTime(Instant.now());
+        unsent = unsentMessageDao.create(unsent);
+
+        ExchangeLog exchangeLog = createBasicLog();
+        exchangeLog.setStatus(ExchangeLogStatusTypeType.PENDING);
+        exchangeLog.setTypeRefType(TypeRefType.POLL);
+        exchangeLog.setTypeRefGuid(UUID.randomUUID().toString());
+        exchangeLog = exchangeLogDao.createLog(exchangeLog);
+
+        AcknowledgeType ackType = new AcknowledgeType();
+        ackType.setType(AcknowledgeTypeType.OK);
+        ackType.setUnsentMessageGuid(unsent.getGuid());
+        ackType.setMessageId(exchangeLog.getGuid());
+        ackType.setMessage("processSetCommandAcknowledgeTest message");
+        PollStatusAcknowledgeType pollStatusAcknowledgeType = new PollStatusAcknowledgeType();
+        pollStatusAcknowledgeType.setStatus(ExchangeLogStatusTypeType.SUCCESSFUL);
+        pollStatusAcknowledgeType.setPollId(exchangeLog.getTypeRefGuid());
+        ackType.setPollStatus(pollStatusAcknowledgeType);
+
+        exchangeEventLogCache.put(exchangeLog.getGuid(),exchangeLog.getGuid());
+
+        String request = ExchangePluginResponseMapper.mapToSetCommandResponse("Fake service class name", ackType);
+        String corrID = jmsHelper.sendExchangeMessage(request, null, "SET_COMMAND_ACK");
+
+        Thread.sleep(1000);
+        try {
+            unsentMessageDao.getByGuid(unsent.getGuid());
+            fail("The guid on the line above should not exist in the db");
+        }catch (NoEntityFoundException e){
+            assertTrue(true);
+        }
+
+        ExchangeLog updatedExchangeLog = exchangeLogDao.getExchangeLogByGuid(exchangeLog.getGuid());
+        assertEquals(ExchangeLogStatusTypeType.SUCCESSFUL, updatedExchangeLog.getStatus());
+        assertEquals(1, updatedExchangeLog.getStatusHistory().size());
     }
 
     /* -- MOVEMENT -- */
