@@ -12,6 +12,7 @@ copy of the GNU General Public License along with the IFDM Suite. If not, see <h
 package eu.europa.ec.fisheries.uvms.exchange.dao;
 
 import java.util.List;
+import java.util.UUID;
 
 import javax.ejb.Local;
 
@@ -26,7 +27,7 @@ public interface UnsentMessageDao {
 	
 	public UnsentMessage remove(UnsentMessage unsentMessage) throws ExchangeDaoException;
 	
-	public UnsentMessage getByGuid(String guid) throws NoEntityFoundException;
+	public UnsentMessage getByGuid(UUID guid) throws NoEntityFoundException;
 	
 	public List<UnsentMessage> getAll() throws ExchangeDaoException;
 }

@@ -55,7 +55,7 @@ public class UnsentMessageMapper {
 		UnsentMessageType model = new UnsentMessageType();
 		model.setDateReceived(Date.from(entity.getDateReceived()));
 		model.setSenderReceiver(entity.getSenderReceiver());
-		model.setMessageId(entity.getGuid());
+		model.setMessageId(entity.getGuid().toString());
 		model.setRecipient(entity.getRecipient());
 		model.setMessage(entity.getMessage());
         model.getProperties().addAll(mapToUnsentMessagePropertyModel(entity));

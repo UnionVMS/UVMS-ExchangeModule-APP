@@ -15,6 +15,7 @@ import static eu.europa.ec.fisheries.schema.exchange.plugin.types.v1.PluginType.
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.UUID;
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
 import javax.enterprise.event.Event;
@@ -266,7 +267,7 @@ public class ExchangeEventOutgoingServiceBean implements ExchangeEventOutgoingSe
             } else {
                 LOG.info("[WARN] FLUXFAResponse is FAILED so won't be sent to Flux Activity Plugin..");
             }
-        } catch (ExchangeModelMarshallException | ExchangeMessageException | ExchangeLogException e) {
+        } catch (Exception e /*ExchangeModelMarshallException | ExchangeMessageException | ExchangeLogException e*/) {
             LOG.error("Unable to send FLUX FA Report to plugin.", e);
         }
     }
@@ -382,7 +383,7 @@ public class ExchangeEventOutgoingServiceBean implements ExchangeEventOutgoingSe
     public void updateLogStatus(ExchangeMessageEvent message) {
         try {
             UpdateLogStatusRequest request = JAXBMarshaller.unmarshallTextMessage(message.getJmsMessage(), UpdateLogStatusRequest.class);
-            String logGuid = request.getLogGuid();
+            UUID logGuid = UUID.fromString(request.getLogGuid());
             ExchangeLogStatusTypeType status = request.getNewStatus();
             exchangeLogService.updateStatus(logGuid, status);
         } catch (ExchangeLogException e) {
@@ -396,7 +397,7 @@ public class ExchangeEventOutgoingServiceBean implements ExchangeEventOutgoingSe
     public void updateLogBusinessError(ExchangeMessageEvent message) {  //should this chain not set a log status or something?
         try {
             UpdateLogStatusRequest request = JAXBMarshaller.unmarshallTextMessage(message.getJmsMessage(), UpdateLogStatusRequest.class);
-            String exchangeLogGuid = request.getLogGuid();
+            UUID exchangeLogGuid = UUID.fromString(request.getLogGuid());
             String businessModuleExceptionMessage = request.getBusinessModuleExceptionMessage();
             exchangeLogService.updateExchangeLogBusinessError(exchangeLogGuid, businessModuleExceptionMessage);
         } catch (ExchangeLogException | ExchangeModelMarshallException e) {
@@ -408,7 +409,7 @@ public class ExchangeEventOutgoingServiceBean implements ExchangeEventOutgoingSe
     public void handleProcessedMovement(ExchangeMessageEvent message) {
         try {
             ProcessedMovementResponse response = JAXBMarshaller.unmarshallTextMessage(message.getJmsMessage(), ProcessedMovementResponse.class);
-            LOG.debug("Received processed movement from Rules:{}", response);
+            LOG.debug("Received processed movement from Movement:{}", response);
             MovementRefType movementRefType = response.getMovementRefType();
             if (movementRefType.getAckResponseMessageID() == null) {
                 return;
@@ -419,7 +420,7 @@ public class ExchangeEventOutgoingServiceBean implements ExchangeEventOutgoingSe
             } else {
                 statusType = ExchangeLogStatusTypeType.SUCCESSFUL;
             }
-            ExchangeLogType updatedLog = exchangeLogService.updateStatus(movementRefType.getAckResponseMessageID(), statusType);
+            ExchangeLogType updatedLog = exchangeLogService.updateStatus(UUID.fromString(movementRefType.getAckResponseMessageID()), statusType);
             exchangeLogService.updateTypeRef(updatedLog, movementRefType);
 
         } catch (ExchangeLogException | ExchangeModelException e) {

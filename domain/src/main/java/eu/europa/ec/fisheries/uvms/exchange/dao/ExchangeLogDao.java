@@ -13,6 +13,7 @@ package eu.europa.ec.fisheries.uvms.exchange.dao;
 
 import javax.ejb.Local;
 import java.util.List;
+import java.util.UUID;
 
 import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeHistoryListQuery;
 import eu.europa.ec.fisheries.schema.exchange.v1.TypeRefType;
@@ -32,17 +33,17 @@ public interface ExchangeLogDao {
 
     Long getExchangeLogListSearchCount(String countSql, List<SearchValue> searchKeyValues) throws ExchangeDaoException;
 
-    ExchangeLog getExchangeLogByGuid(String logGuid) throws ExchangeDaoException;
+    ExchangeLog getExchangeLogByGuid(UUID logGuid) throws ExchangeDaoException;
 
-    ExchangeLog getExchangeLogByGuid(String logGuid, TypeRefType type) throws ExchangeDaoException;
+    ExchangeLog getExchangeLogByGuid(UUID logGuid, TypeRefType type) throws ExchangeDaoException;
 
-	List<ExchangeLog> getExchangeLogByTypesRefAndGuid(String typeRefGuid, List<TypeRefType> types) throws ExchangeDaoException;
-	
-	ExchangeLog updateLog(ExchangeLog exchangeLog) throws ExchangeDaoException;
+	List<ExchangeLog> getExchangeLogByTypesRefAndGuid(UUID typeRefGuid, List<TypeRefType> types) throws ExchangeDaoException;
+
+    ExchangeLog updateLog(ExchangeLog exchangeLog) throws ExchangeDaoException;
 	
 	List<ExchangeLogStatus> getExchangeLogStatusHistory(String sql, ExchangeHistoryListQuery query) throws ExchangeDaoException;
 
-	List<ExchangeLog> getExchangeLogByRangeOfRefGuids(List<String> guids);
+	List<ExchangeLog> getExchangeLogByRangeOfRefGuids(List<UUID> guids);
 
     ExchangeLog getLatestLog();
 }

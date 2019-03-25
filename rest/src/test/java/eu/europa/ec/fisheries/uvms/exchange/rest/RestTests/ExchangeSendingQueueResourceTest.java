@@ -101,7 +101,7 @@ public class ExchangeSendingQueueResourceTest extends BuildExchangeRestTestDeplo
 
         List<String> unsentMessagesIdList = new ArrayList<>();
         for (UnsentMessage u: unsentMessageList) {
-            unsentMessagesIdList.add(u.getGuid());
+            unsentMessagesIdList.add(u.getGuid().toString());
         }
 
 
@@ -139,7 +139,7 @@ public class ExchangeSendingQueueResourceTest extends BuildExchangeRestTestDeplo
         s.setSatelliteType(null);
         s.setServiceClassName(serviceClassName);
         s.setServiceResponse(serviceClassName + "PLUGIN_RESPONSE");
-        s.setStatus("STARTED");
+        s.setStatus(true);
         s.setType(pluginType);
         s.setUpdated(Instant.now());
         s.setUpdatedBy("Exchange Tests");
@@ -150,7 +150,7 @@ public class ExchangeSendingQueueResourceTest extends BuildExchangeRestTestDeplo
         serviceCapability.setUpdatedBy("Exchange Tests");
         serviceCapability.setUpdatedTime(Instant.now());
         serviceCapability.setCapability(CapabilityTypeType.POLLABLE);
-        serviceCapability.setValue("TRUE");
+        serviceCapability.setValue(true);
         serviceCapabilityList.add(serviceCapability);
         s.setServiceCapabilityList(serviceCapabilityList);
 

@@ -17,4 +17,8 @@ public class NoEntityFoundException extends ExchangeDaoException {
     public NoEntityFoundException(String message) {
         super(message);
     }
+
+    public NoEntityFoundException(String message, Throwable e){
+        super(message, e);
+    }
 }

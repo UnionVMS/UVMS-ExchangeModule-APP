@@ -14,8 +14,6 @@ package eu.europa.ec.fisheries.uvms.exchange.entity.exchangelog;
 import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogStatusTypeType;
 import eu.europa.ec.fisheries.schema.exchange.v1.LogType;
 import eu.europa.ec.fisheries.schema.exchange.v1.TypeRefType;
-import eu.europa.ec.fisheries.uvms.exchange.constant.ExchangeConstants;
-import org.apache.commons.lang3.StringUtils;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
@@ -28,25 +26,30 @@ import java.util.UUID;
 @Table(name="log")
 //@formatter:off
 @NamedQueries({
-  @NamedQuery(name = ExchangeConstants.LOG_BY_GUID, query = "SELECT log FROM ExchangeLog log WHERE log.guid = :guid AND ((:typeRefType = null) OR (log.typeRefType = :typeRefType))"),
-  @NamedQuery(name = ExchangeConstants.LOG_BY_TYPE_RANGE_OF_REF_GUIDS, query = "SELECT DISTINCT log FROM ExchangeLog log WHERE log.typeRefGuid IN (:refGuids)"),
-  @NamedQuery(name = ExchangeConstants.LOG_BY_TYPE_REF_AND_GUID, query = "SELECT log FROM ExchangeLog log WHERE log.typeRefGuid = :typeRefGuid AND log.typeRefType in (:typeRefTypes)"),
-	@NamedQuery(name = ExchangeConstants.LATEST_LOG, query = "SELECT log FROM ExchangeLog log ORDER BY log.updateTime DESC")
+  @NamedQuery(name = ExchangeLog.LOG_BY_GUID, query = "SELECT log FROM ExchangeLog log WHERE log.id = :guid AND ((:typeRefType = null) OR (log.typeRefType = :typeRefType))"),
+  @NamedQuery(name = ExchangeLog.LOG_BY_TYPE_RANGE_OF_REF_GUIDS, query = "SELECT DISTINCT log FROM ExchangeLog log WHERE log.typeRefGuid IN (:refGuids)"),
+  @NamedQuery(name = ExchangeLog.LOG_BY_TYPE_REF_AND_GUID, query = "SELECT log FROM ExchangeLog log WHERE log.typeRefGuid = :typeRefGuid AND log.typeRefType in (:typeRefTypes)"),
+	@NamedQuery(name = ExchangeLog.LATEST_LOG, query = "SELECT log FROM ExchangeLog log ORDER BY log.updateTime DESC")
 })
 //@formatter:on
 public class ExchangeLog {
 
+	public static final String LOG_BY_GUID = "Log.findByGuid";
+	public static final String LOG_BY_TYPE_RANGE_OF_REF_GUIDS = "Log.findByRangeOfRefGuids";
+	public static final String LOG_BY_TYPE_REF_AND_GUID = "Log.findByTypeRefGuid";
+	public static final String LATEST_LOG = "Log.latestLog";
+
 	@Id
 	@Column(name="log_id")
 	@GeneratedValue(strategy = GenerationType.AUTO)
-	private Long id;
+	private UUID id;
 	
 	@Column(name="log_type")
 	@Enumerated(EnumType.STRING)
 	private LogType type;
 	
 	@Column(name="log_type_ref_guid")
-	private String typeRefGuid;
+	private UUID typeRefGuid;
 	
 	@Enumerated(EnumType.STRING)
 	@Column(name="log_type_ref_type")
@@ -67,11 +70,6 @@ public class ExchangeLog {
 	@Column(name = "log_on")
 	private String on;
 
-	@NotNull(message = "The Guid for the log cannot be empty!")
-	@Size(max=100)
-	@Column(name = "log_guid", unique=true)
-	private String guid;
-	
 	@Column(name = "log_transfer_incoming")
 	private Boolean transferIncoming;
 
@@ -127,18 +125,12 @@ public class ExchangeLog {
 	@Column(name = "log_business_error")
 	private String businessError;
 
-	@PrePersist
-	public void prepersist() {
-		if(StringUtils.isEmpty(guid)){
-			setGuid(UUID.randomUUID().toString());
-		}
-    }
 
-	public Long getId() {
+	public UUID getId() {
 		return id;
 	}
 
-	public void setId(Long id) {
+	public void setId(UUID id) {
 		this.id = id;
 	}
 
@@ -150,13 +142,6 @@ public class ExchangeLog {
 		this.type = type;
 	}
 
-	public String getGuid() {
-		return guid;
-	}
-
-	public void setGuid(String guid) {
-		this.guid = guid;
-	}
 
 	public String getSenderReceiver() {
 		return senderReceiver;
@@ -214,11 +199,11 @@ public class ExchangeLog {
 		this.statusHistory = statusHistory;
 	}
 
-	public String getTypeRefGuid() {
+	public UUID getTypeRefGuid() {
 		return typeRefGuid;
 	}
 
-	public void setTypeRefGuid(String typeRefGuid) {
+	public void setTypeRefGuid(UUID typeRefGuid) {
 		this.typeRefGuid = typeRefGuid;
 	}
 

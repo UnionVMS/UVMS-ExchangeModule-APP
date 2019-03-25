@@ -105,7 +105,7 @@ public class ExchangeMessageProducerBean extends AbstractProducer implements Exc
         try {
             LOG.debug("Sending event bus message from Exchange module to recipient om JMS Topic to: {} ", serviceName);
             return eventBusProducer.sendEventBusMessage(text, serviceName, exchangeEventQueue);
-        } catch (MessageException e) {
+        } catch (/*Message*/Exception e) {
             LOG.error("[ Error when sending message. ] ", e);
             throw new ExchangeMessageException("[ Error when sending message. ]", e);
         }

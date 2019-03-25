@@ -13,6 +13,7 @@ package eu.europa.ec.fisheries.uvms.exchange.service.bean;
 
 import static eu.europa.ec.fisheries.uvms.commons.message.impl.JAXBUtils.unMarshallMessage;
 import java.util.List;
+import java.util.UUID;
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
 import javax.enterprise.event.Event;
@@ -388,7 +389,7 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
     public void logRefIdByTypeExists(ExchangeMessageEvent event) {      //this one has the wierd behavour that it both returns the correct answer AND puts the initial message in DLQ for causing an exception AT THE SAME TIME if the input is an empty list..........
         try {
             LogRefIdByTypeExistsRequest request = unMarshallMessage(event.getJmsMessage().getText(), LogRefIdByTypeExistsRequest.class);
-            String refGuid = request.getRefGuid();
+            UUID refGuid = UUID.fromString(request.getRefGuid());
             List<TypeRefType> refTypes = request.getRefTypes();
             List<ExchangeLogStatusType> exchangeStatusHistoryList = exchangeLogModel.getExchangeLogsStatusHistories(refGuid, refTypes);
             LogRefIdByTypeExistsResponse response = new LogRefIdByTypeExistsResponse();
@@ -406,7 +407,7 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
     public void logIdByTypeExists(ExchangeMessageEvent event) {
         try {
             LogIdByTypeExistsRequest request = unMarshallMessage(event.getJmsMessage().getText(), LogIdByTypeExistsRequest.class);
-            String messageGuid = request.getMessageGuid();
+            UUID messageGuid = UUID.fromString(request.getMessageGuid());
             TypeRefType refType = request.getRefType();
             ExchangeLogType exchangeLogByGuid = exchangeLogModel.getExchangeLogByGuidAndType(messageGuid, refType);
             LogIdByTypeExistsResponse response = new LogIdByTypeExistsResponse();
@@ -624,7 +625,7 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
             removeUnsentMessage(serviceClassName, ack);
         }
         try {
-            PollStatus updatedLog = exchangeLog.setPollStatus(ack.getMessageId(), ack.getPollStatus().getPollId(), exchangeLogStatus, serviceClassName);
+            PollStatus updatedLog = exchangeLog.setPollStatus(ack.getMessageId(), UUID.fromString(ack.getPollStatus().getPollId()), exchangeLogStatus, serviceClassName);
             // Long polling
             pollEvent.fire(new NotificationMessage("guid", updatedLog.getPollGuid()));
         } catch (ExchangeLogException e) {

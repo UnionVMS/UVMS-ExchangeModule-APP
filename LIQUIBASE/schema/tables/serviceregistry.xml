@@ -5,7 +5,7 @@
     
     <changeSet author="andtho" id="create service registry table">
         <createTable remarks="Table containing list of plugins" tableName="service">
-            <column name="serv_id" remarks="Id and code for parameter." type="BIGINT">
+            <column name="serv_id" remarks="Id and code for parameter." type="UUID">
                 <constraints nullable="false" primaryKey="true" primaryKeyName="servreg_pk"/>
             </column>
             <column name="serv_serviceclassname" remarks="Fully qualified name of service." type="VARCHAR(500)">
@@ -25,8 +25,8 @@
             <column name="serv_sat_type" remarks="Type of service satellite." type="VARCHAR(50)">
                 <constraints nullable="true"/>
             </column>
-            <column name="serv_status" remarks="Status of service." type="VARCHAR(20)"/>
-            <column name="serv_updattim" type="timestamp" remarks="Last updated date time.">
+            <column name="serv_status" remarks="Status of service. Stands for STARTED/STOPPED" type="BOOLEAN"/>
+            <column name="serv_updattim" type="timestamp with time zone" remarks="Last updated date time.">
                 <constraints nullable="false"/>
             </column>
             <column name="serv_upuser" type="varchar(60)" remarks="Last update userid.">

@@ -13,8 +13,8 @@ package eu.europa.ec.fisheries.uvms.exchange.entity.serviceregistry;
 
 import java.io.Serializable;
 import java.time.Instant;
+import java.util.UUID;
 
-import javax.persistence.Basic;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -33,37 +33,34 @@ import javax.validation.constraints.Size;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import eu.europa.ec.fisheries.schema.exchange.service.v1.CapabilityTypeType;
-import eu.europa.ec.fisheries.uvms.exchange.constant.ExchangeConstants;
 
 @Entity
 @Table(name = "service_capability")
 @XmlRootElement
 @NamedQueries({
-        @NamedQuery(name = ExchangeConstants.CAPABILITY_FIND_BY_SERVICE, query = "SELECT s FROM ServiceCapability s where s.service.serviceClassName =:serviceClassName") })
+        @NamedQuery(name = ServiceCapability.CAPABILITY_FIND_BY_SERVICE, query = "SELECT s FROM ServiceCapability s where s.service.serviceClassName =:serviceClassName") })
 public class ServiceCapability implements Serializable {
     private static final long serialVersionUID = 1L;
 
+    public static final String CAPABILITY_FIND_BY_SERVICE = "ServiceCapability.findByServiceId";
+
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    @Basic(optional = false)
     @Column(name = "servcap_id")
-    private Long id;
+    private UUID id;
 
-    @Basic(optional = false)
     @NotNull
     @Column(name = "servcap_updattim")
     private Instant updatedTime;
 
-    @Basic(optional = false)
     @NotNull
     @Size(min = 1, max = 60)
     @Column(name = "servcap_upuser")
     private String updatedBy;
 
     @NotNull
-    @Size(max=25)
     @Column(name = "servcap_value")
-    private String value;
+    private boolean value;
     
     @NotNull
     @Enumerated(EnumType.STRING)
@@ -77,11 +74,11 @@ public class ServiceCapability implements Serializable {
     public ServiceCapability() {
     }
 
-    public Long getId() {
+    public UUID getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(UUID id) {
         this.id = id;
     }
 
@@ -109,11 +106,11 @@ public class ServiceCapability implements Serializable {
         this.service = service;
     }
 
-	public String getValue() {
+	public boolean getValue() {
 		return value;
 	}
 
-	public void setValue(String value) {
+	public void setValue(boolean value) {
 		this.value = value;
 	}
 

@@ -14,6 +14,7 @@ package eu.europa.ec.fisheries.uvms.exchange.service;
 import javax.ejb.Local;
 import java.time.Instant;
 import java.util.List;
+import java.util.UUID;
 
 import eu.europa.ec.fisheries.schema.exchange.module.v1.ExchangeBaseRequest;
 import eu.europa.ec.fisheries.schema.exchange.movement.v1.MovementRefType;
@@ -61,9 +62,9 @@ public interface ExchangeLogService {
      * @return the updated log
      * @throws ExchangeLogException when something goes wrong
      */
-    ExchangeLogType updateStatus(String logGuid, ExchangeLogStatusTypeType logStatus) throws ExchangeLogException;
+    ExchangeLogType updateStatus(UUID logGuid, ExchangeLogStatusTypeType logStatus) throws ExchangeLogException;
 
-    ExchangeLogType updateExchangeLogBusinessError(String logGuid, String errorMessage) throws ExchangeLogException;
+    ExchangeLogType updateExchangeLogBusinessError(UUID logGuid, String errorMessage) throws ExchangeLogException;
 
     List<UnsentMessageType> getUnsentMessageList() throws ExchangeLogException;
 
@@ -71,13 +72,13 @@ public interface ExchangeLogService {
 
     String createUnsentMessage(String senderReceiver, Instant timestamp, String recipient, String message, List<UnsentMessageTypeProperty> properties, String username) throws ExchangeLogException;
 
-    ExchangeLogWithValidationResults getExchangeLogRawMessageAndValidationByGuid(String guid);
+    ExchangeLogWithValidationResults getExchangeLogRawMessageAndValidationByGuid(UUID guid);
 
     void resend(List<String> messageIdList, String username) throws ExchangeLogException;
 
-    ExchangeLogStatusType getExchangeStatusHistory(TypeRefType type, String typeRefGuid, String userName) throws ExchangeLogException;
+    ExchangeLogStatusType getExchangeStatusHistory(TypeRefType type, UUID typeRefGuid, String userName) throws ExchangeLogException;
 
-    PollStatus setPollStatus(String messageId, String pluginMessageId, ExchangeLogStatusTypeType logStatus, String username) throws ExchangeLogException;
+    PollStatus setPollStatus(String messageId, UUID pluginMessageId, ExchangeLogStatusTypeType logStatus, String username) throws ExchangeLogException;
 
     void removeUnsentMessage(String messageId, String username) throws ExchangeLogException;
 

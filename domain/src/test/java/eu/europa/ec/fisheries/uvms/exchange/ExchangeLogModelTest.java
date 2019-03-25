@@ -15,6 +15,7 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 
 import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeListCriteria;
 import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeListPagination;
@@ -55,15 +56,15 @@ public class ExchangeLogModelTest {
     public void prepare(){
         logs = MockData.getLogEntities();
         refLogs = MockData.getLogEntities();
-        refLogs.get(0).setTypeRefGuid(logs.get(0).getGuid());
-        refLogs.get(0).setTypeRefGuid(logs.get(1).getGuid());
+        refLogs.get(0).setTypeRefGuid(logs.get(0).getId());
+        refLogs.get(0).setTypeRefGuid(logs.get(1).getId());
     }
 
     @Test
     public void testGetExchangeLogByRefUUIDAndType() throws ExchangeModelException {
-        Mockito.when(logDao.getExchangeLogByTypesRefAndGuid(Mockito.anyString(), Mockito.anyList()))
+        Mockito.when(logDao.getExchangeLogByTypesRefAndGuid(Mockito.any(), Mockito.anyList()))
                 .thenReturn(logs);
-        Set<ExchangeLogType> exchangeLogByRefUUIDAndType = exchangeLogModel.getExchangeLogByRefUUIDAndType("refUUID", TypeRefType.FA_QUERY);
+        Set<ExchangeLogType> exchangeLogByRefUUIDAndType = exchangeLogModel.getExchangeLogByRefUUIDAndType(UUID.randomUUID(), TypeRefType.FA_QUERY);
         assertFalse(exchangeLogByRefUUIDAndType.isEmpty());
     }
 

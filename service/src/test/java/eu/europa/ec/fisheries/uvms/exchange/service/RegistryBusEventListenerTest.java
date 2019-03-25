@@ -59,7 +59,7 @@ public class RegistryBusEventListenerTest extends BuildExchangeServiceTestDeploy
         List<Service> serviceList = serviceRegistryDao.getServices();
         Service newService = serviceList.get(serviceList.size() - 1);
         assertTrue(newService.getActive());
-        assertEquals("STARTED", newService.getStatus());
+        assertEquals(true, newService.getStatus());
         assertEquals(PluginType.EMAIL.value(), newService.getType().value());
         assertEquals(service.getServiceClassName(), newService.getServiceClassName());
 
@@ -89,7 +89,7 @@ public class RegistryBusEventListenerTest extends BuildExchangeServiceTestDeploy
         List<Service> serviceList = serviceRegistryDao.getServices();
         Service newService = serviceList.get(serviceList.size() - 1);
         assertTrue(newService.getActive());
-        assertEquals("STARTED", newService.getStatus());
+        assertEquals(true, newService.getStatus());
         assertEquals(PluginType.MANUAL.value(), newService.getType().value());
         assertEquals(service.getServiceClassName(), newService.getServiceClassName());
 
@@ -120,7 +120,7 @@ public class RegistryBusEventListenerTest extends BuildExchangeServiceTestDeploy
         Service unregistredService = serviceRegistryDao.getServiceByServiceClassName(service.getServiceClassName());
         assertEquals(service.getServiceClassName(), unregistredService.getServiceClassName());
         assertFalse(unregistredService.getActive());
-        assertEquals("STOPPED", unregistredService.getStatus());
+        assertEquals(false, unregistredService.getStatus());
         assertEquals(PluginType.MANUAL.value(), unregistredService.getType().value());
 
     }

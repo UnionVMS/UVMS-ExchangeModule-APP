@@ -26,6 +26,7 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import javax.enterprise.event.Event;
+import java.util.UUID;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ExchangeLogServiceBeanTest {
@@ -50,16 +51,16 @@ public class ExchangeLogServiceBeanTest {
         //data set
         ArgumentCaptor<ExchangeLogStatusType> captorForExchangeLogStatusType = ArgumentCaptor.forClass(ExchangeLogStatusType.class);
         ExchangeLogType expectedUpdatedLog = new ExchangeLogType();
-        String logGuid = "123456";
-        expectedUpdatedLog.setGuid(logGuid);
+        UUID logGuid = UUID.randomUUID();
+        expectedUpdatedLog.setGuid(logGuid.toString());
         ExchangeLogStatusTypeType status = ExchangeLogStatusTypeType.SUCCESSFUL;
 
         //mock
-        doReturn("123456").when(logCache).acknowledged(anyString());
+        doReturn(logGuid).when(logCache).acknowledged(anyString());
         doReturn(expectedUpdatedLog).when(exchangeLogModel).updateExchangeLogStatus(isA(ExchangeLogStatusType.class), eq("SYSTEM"));
 
         //execute
-        ExchangeLogType actualUpdatedLog = exchangeLogService.updateStatus(logGuid, status, "SYSTEM");
+        ExchangeLogType actualUpdatedLog = exchangeLogService.updateStatus(logGuid.toString(), status, "SYSTEM");
 
         //verify and assert
         verify(exchangeLogModel).updateExchangeLogStatus(captorForExchangeLogStatusType.capture(), eq("SYSTEM"));
@@ -67,7 +68,7 @@ public class ExchangeLogServiceBeanTest {
         assertSame(expectedUpdatedLog, actualUpdatedLog);
 
         ExchangeLogStatusType capturedExchangeLogStatusType = captorForExchangeLogStatusType.getValue();
-        assertEquals(logGuid, capturedExchangeLogStatusType.getGuid());
+        assertEquals(logGuid.toString(), capturedExchangeLogStatusType.getGuid());
         assertEquals(1, capturedExchangeLogStatusType.getHistory().size());
         assertEquals(status, capturedExchangeLogStatusType.getHistory().get(0).getStatus());
     }
@@ -77,11 +78,13 @@ public class ExchangeLogServiceBeanTest {
         expectedException.expect(ExchangeLogException.class);
         expectedException.expectMessage("Couldn't update status of exchange log");
 
+        UUID id = UUID.randomUUID();
+
         //mock
-        doReturn("12345").when(logCache).acknowledged(anyString());
+        doReturn(id).when(logCache).acknowledged(anyString());
         doThrow(new ExchangeModelException("noooooooooooooooooooo!!!")).when(exchangeLogModel).updateExchangeLogStatus(isA(ExchangeLogStatusType.class), eq("SYSTEM"));
 
-        exchangeLogService.updateStatus("12345", ExchangeLogStatusTypeType.FAILED, "SYSTEM");
+        exchangeLogService.updateStatus(id.toString(), ExchangeLogStatusTypeType.FAILED, "SYSTEM");
     }
 
 }

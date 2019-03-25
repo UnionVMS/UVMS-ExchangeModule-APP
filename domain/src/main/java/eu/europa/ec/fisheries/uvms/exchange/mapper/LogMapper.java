@@ -20,6 +20,7 @@ import java.util.Date;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 public class LogMapper {
 
@@ -68,10 +69,10 @@ public class LogMapper {
         entity.setTodt(log.getTodt());
         entity.setTo(log.getTo());
         entity.setDf(log.getDf());
-        entity.setGuid(log.getGuid());
+        //entity.setGuid(log.getGuid());    //should you really set a primary id somewhere other then the db/entity class?
 
         if (log.getTypeRef() != null) {
-            entity.setTypeRefGuid(log.getTypeRef().getRefGuid());
+            entity.setTypeRefGuid( (log.getTypeRef().getRefGuid() == null) ? null : UUID.fromString(log.getTypeRef().getRefGuid()));
             entity.setTypeRefType(log.getTypeRef().getType());
             entity.setTypeRefMessage(log.getTypeRef().getMessage());
         }
@@ -178,7 +179,7 @@ public class LogMapper {
         }
 
         model.setDateRecieved(Date.from(entity.getDateReceived()));
-        model.setGuid(entity.getGuid());
+        model.setGuid(entity.getId().toString());
         model.setSenderReceiver(entity.getSenderReceiver());
         model.setIncoming(entity.getTransferIncoming());
         model.setStatus(entity.getStatus());
@@ -194,7 +195,7 @@ public class LogMapper {
 
         if (entity.getTypeRefType() != null) {
             LogRefType logRefType = new LogRefType();
-            logRefType.setRefGuid(entity.getTypeRefGuid());
+            logRefType.setRefGuid( (entity.getTypeRefGuid() == null ? null : entity.getTypeRefGuid().toString()) );
             logRefType.setType(entity.getTypeRefType());
             logRefType.setMessage(entity.getTypeRefMessage());
             model.setTypeRef(logRefType);
@@ -219,11 +220,11 @@ public class LogMapper {
         if (exchangeLog.getType().equals(LogType.SEND_POLL)) {
             model.setIdentifier(exchangeLog.getRecipient());
         }
-        model.setGuid(exchangeLog.getGuid());
+        model.setGuid(exchangeLog.getId().toString());
 
         if (exchangeLog.getTypeRefType() != null) {
             LogRefType logRefType = new LogRefType();
-            logRefType.setRefGuid(exchangeLog.getTypeRefGuid());
+            logRefType.setRefGuid( (exchangeLog.getTypeRefGuid() == null) ? null : exchangeLog.getTypeRefGuid().toString());
             logRefType.setType(exchangeLog.getTypeRefType());
             logRefType.setMessage(exchangeLog.getTypeRefMessage());
             model.setTypeRef(logRefType);

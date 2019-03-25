@@ -17,6 +17,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import eu.europa.ec.fisheries.schema.exchange.service.v1.CapabilityListType;
 import eu.europa.ec.fisheries.schema.exchange.service.v1.ServiceResponseType;
@@ -57,9 +58,9 @@ public class DomainModelBeanTest {
     @Ignore
     @Test
     public void testCreateModel() throws ExchangeModelException, ExchangeDaoException, ExchangeDaoMappingException {
-        Long id = 1L;
+        UUID id = UUID.randomUUID();
 
-        ServiceType serviceType = MockData.getModel(id.intValue());
+        ServiceType serviceType = MockData.getModel((int) id.getLeastSignificantBits());
         CapabilityListType capabilityListType = MockData.getCapabilityList();
         SettingListType settingListType = MockData.getSettingList();
         
@@ -79,14 +80,4 @@ public class DomainModelBeanTest {
         //assertEquals(id.toString(), result.getId());
     }
 
-    @Test
-    public void testSizeOfGuids(){
-        ExchangeLog exchangeLog = new ExchangeLog();
-        exchangeLog.setTypeRefGuid("367637676376376337863873683763873690282082822908298");
-        exchangeLog.prepersist();
-
-        assertTrue(exchangeLog.getTypeRefGuid().length() > 36);
-        assertTrue(exchangeLog.getGuid().length() == 36);
-
-    }
 }

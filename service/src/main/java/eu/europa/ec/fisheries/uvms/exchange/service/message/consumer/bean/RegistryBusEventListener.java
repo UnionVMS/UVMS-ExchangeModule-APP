@@ -81,7 +81,7 @@ public class RegistryBusEventListener implements MessageListener {
                     LOG.error("[ Not implemented method consumed: {} ]", request.getMethod());
                     throw new ExchangeMessageException("[ Not implemented method consumed: " + request.getMethod() + " ]");
             }
-        } catch (ExchangeMessageException | ExchangeModelMarshallException | NullPointerException e) {
+        } catch (Exception e /*ExchangeMessageException | ExchangeModelMarshallException | NullPointerException e*/) {
             LOG.error("[ Error when receiving message on topic in exchange: {}] {}",message,e);
             errorEvent.fire(new PluginMessageEvent(textMessage, settings, ExchangePluginResponseMapper.mapToPluginFaultResponse(FaultCode.EXCHANGE_TOPIC_MESSAGE.getCode(), "Error when receiving message in exchange " + e.getMessage())));
         }
