@@ -16,7 +16,7 @@ public class LogMapperTest {
     @Test
     public void toNewEntityWhenLogTypeIsReceiveMovement() throws Exception {
         //data set
-        String typeRefGuid = "trg";
+        String typeRefGuid = UUID.randomUUID().toString();;
         TypeRefType typeRefType = TypeRefType.MOVEMENT;
         Instant dateReceived = Instant.now();
         String senderOrReceiver = "BEL";
@@ -44,7 +44,7 @@ public class LogMapperTest {
         ExchangeLog result = LogMapper.toNewEntity(input, username);
 
         //assert
-        assertEquals(typeRefGuid, result.getTypeRefGuid());
+        assertEquals(typeRefGuid, result.getTypeRefGuid().toString());
         assertEquals(typeRefType, result.getTypeRefType());
         assertEquals(dateReceived, result.getDateReceived());
         assertEquals(senderOrReceiver, result.getSenderReceiver());
@@ -65,7 +65,7 @@ public class LogMapperTest {
     @Test
     public void toNewEntityWhenLogTypeIsSendMovement() throws Exception {
         //data set
-        String typeRefGuid = "trg";
+        String typeRefGuid = UUID.randomUUID().toString();;
         TypeRefType typeRefType = TypeRefType.MOVEMENT;
         Instant dateReceived = Instant.now();
         String senderOrReceiver = "BEL";
@@ -97,7 +97,7 @@ public class LogMapperTest {
         ExchangeLog result = LogMapper.toNewEntity(input, username);
 
         //assert
-        assertEquals(typeRefGuid, result.getTypeRefGuid());
+        assertEquals(typeRefGuid, result.getTypeRefGuid().toString());
         assertEquals(typeRefType, result.getTypeRefType());
         assertEquals(dateReceived, result.getDateReceived());
         assertEquals(senderOrReceiver, result.getSenderReceiver());
@@ -120,7 +120,7 @@ public class LogMapperTest {
     @Test
     public void toNewEntityWhenLogTypeIsSendPoll() throws Exception {
         //data set
-        String typeRefGuid = "trg";
+        String typeRefGuid = UUID.randomUUID().toString();;
         TypeRefType typeRefType = TypeRefType.POLL;
         Instant dateReceived = Instant.now();
         String senderOrReceiver = "BEL";
@@ -150,7 +150,7 @@ public class LogMapperTest {
         ExchangeLog result = LogMapper.toNewEntity(input, username);
 
         //assert
-        assertEquals(typeRefGuid, result.getTypeRefGuid());
+        assertEquals(typeRefGuid, result.getTypeRefGuid().toString());
         assertEquals(typeRefType, result.getTypeRefType());
         assertEquals(dateReceived, result.getDateReceived());
         assertEquals(senderOrReceiver, result.getSenderReceiver());
@@ -172,7 +172,7 @@ public class LogMapperTest {
     @Test
     public void toNewEntityWhenLogTypeIsSendEmail() throws Exception {
         //data set
-        String typeRefGuid = "trg";
+        String typeRefGuid = UUID.randomUUID().toString();;
         TypeRefType typeRefType = TypeRefType.UNKNOWN;
         Instant dateReceived = Instant.now();
         String senderOrReceiver = "BEL";
@@ -204,7 +204,7 @@ public class LogMapperTest {
         ExchangeLog result = LogMapper.toNewEntity(input, username);
 
         //assert
-        assertEquals(typeRefGuid, result.getTypeRefGuid());
+        assertEquals(typeRefGuid, result.getTypeRefGuid().toString());
         assertEquals(typeRefType, result.getTypeRefType());
         assertEquals(dateReceived, result.getDateReceived());
         assertEquals(senderOrReceiver, result.getSenderReceiver());
@@ -227,7 +227,7 @@ public class LogMapperTest {
     @Test
     public void toNewEntityWhenLogTypeIsReceiveSalesReportAndTypeRefAndStatusAreFilledIn() throws Exception {
         //data set
-        String typeRefGuid = "trg";
+        String typeRefGuid = UUID.randomUUID().toString();;
         TypeRefType typeRefType = TypeRefType.SALES_REPORT;
         Instant dateReceived = Instant.now();
         String senderOrReceiver = "BEL";
@@ -257,7 +257,7 @@ public class LogMapperTest {
         ExchangeLog result = LogMapper.toNewEntity(input, username);
 
         //assert
-        assertEquals(typeRefGuid, result.getTypeRefGuid());
+        assertEquals(typeRefGuid, result.getTypeRefGuid().toString());
         assertEquals(typeRefType, result.getTypeRefType());
         assertEquals(dateReceived, result.getDateReceived());
         assertEquals(senderOrReceiver, result.getSenderReceiver());
@@ -320,7 +320,7 @@ public class LogMapperTest {
     @Test
     public void toNewEntityWhenLogTypeIsReceiveSalesReportAndStatusIsNotFilledIn() throws Exception {
         //data set
-        String typeRefGuid = "trg";
+        String typeRefGuid = UUID.randomUUID().toString();;
         TypeRefType typeRefType = TypeRefType.SALES_REPORT;
         Instant dateReceived = Instant.now();
         String senderOrReceiver = "BEL";
@@ -348,7 +348,7 @@ public class LogMapperTest {
         ExchangeLog result = LogMapper.toNewEntity(input, username);
 
         //assert
-        assertEquals(typeRefGuid, result.getTypeRefGuid());
+        assertEquals(typeRefGuid, result.getTypeRefGuid().toString());
         assertEquals(typeRefType, result.getTypeRefType());
         assertEquals(dateReceived, result.getDateReceived());
         assertEquals(senderOrReceiver, result.getSenderReceiver());
@@ -410,7 +410,7 @@ public class LogMapperTest {
     @Test
     public void toNewEntityWhenLogTypeIsReceiveSalesResponse() throws Exception {
         //data set
-        String typeRefGuid = "trg";
+        String typeRefGuid = UUID.randomUUID().toString();;
         TypeRefType typeRefType = TypeRefType.SALES_RESPONSE;
         Instant dateReceived = Instant.now();
         String senderOrReceiver = "BEL";
@@ -440,7 +440,7 @@ public class LogMapperTest {
         ExchangeLog result = LogMapper.toNewEntity(input, username);
 
         //assert
-        assertEquals(typeRefGuid, result.getTypeRefGuid());
+        assertEquals(typeRefGuid, result.getTypeRefGuid().toString());
         assertEquals(typeRefType, result.getTypeRefType());
         assertEquals(dateReceived, result.getDateReceived());
         assertEquals(senderOrReceiver, result.getSenderReceiver());
@@ -462,7 +462,7 @@ public class LogMapperTest {
     @Test
     public void toNewEntityWhenLogTypeIsReceiveSalesQuery() throws Exception {
         //data set
-        String typeRefGuid = "trg";
+        String typeRefGuid = UUID.randomUUID().toString();;
         TypeRefType typeRefType = TypeRefType.SALES_QUERY;
         Instant dateReceived = Instant.now();
         String senderOrReceiver = "BEL";
@@ -492,7 +492,7 @@ public class LogMapperTest {
         ExchangeLog result = LogMapper.toNewEntity(input, username);
 
         //assert
-        assertEquals(typeRefGuid, result.getTypeRefGuid());
+        assertEquals(typeRefGuid, result.getTypeRefGuid().toString());
         assertEquals(typeRefType, result.getTypeRefType());
         assertEquals(dateReceived, result.getDateReceived());
         assertEquals(senderOrReceiver, result.getSenderReceiver());
@@ -514,7 +514,7 @@ public class LogMapperTest {
     @Test
     public void toNewEntityWhenLogTypeIsSendSalesReport() throws Exception {
         //data set
-        String typeRefGuid = "trg";
+        String typeRefGuid = UUID.randomUUID().toString();;
         TypeRefType typeRefType = TypeRefType.SALES_REPORT;
         Instant dateReceived = Instant.now();
         String senderOrReceiver = "BEL";
@@ -544,7 +544,7 @@ public class LogMapperTest {
         ExchangeLog result = LogMapper.toNewEntity(input, username);
 
         //assert
-        assertEquals(typeRefGuid, result.getTypeRefGuid());
+        assertEquals(typeRefGuid, result.getTypeRefGuid().toString());
         assertEquals(typeRefType, result.getTypeRefType());
         assertEquals(dateReceived, result.getDateReceived());
         assertEquals(senderOrReceiver, result.getSenderReceiver());
@@ -566,7 +566,7 @@ public class LogMapperTest {
     @Test
     public void toNewEntityWhenLogTypeIsSendSalesResponse() throws Exception {
         //data set
-        String typeRefGuid = "trg";
+        String typeRefGuid = UUID.randomUUID().toString();;
         TypeRefType typeRefType = TypeRefType.SALES_RESPONSE;
         Instant dateReceived = Instant.now();
         String senderOrReceiver = "BEL";
@@ -596,7 +596,7 @@ public class LogMapperTest {
         ExchangeLog result = LogMapper.toNewEntity(input, username);
 
         //assert
-        assertEquals(typeRefGuid, result.getTypeRefGuid());
+        assertEquals(typeRefGuid, result.getTypeRefGuid().toString());
         assertEquals(typeRefType, result.getTypeRefType());
         assertEquals(dateReceived, result.getDateReceived());
         assertEquals(senderOrReceiver, result.getSenderReceiver());
@@ -639,7 +639,7 @@ public class LogMapperTest {
 
         assertEquals(LogType.RECEIVE_MOVEMENT, model.getType());
         assertEquals(dateReceived, model.getDateRecieved().toInstant());
-        assertEquals(guid, model.getGuid());
+        assertEquals(guid.toString(), model.getGuid());
         assertEquals(senderReceiver, model.getSenderReceiver());
         assertEquals(incoming, model.isIncoming());
         assertEquals(status, model.getStatus());
@@ -673,7 +673,7 @@ public class LogMapperTest {
 
         assertEquals(LogType.SEND_MOVEMENT, model.getType());
         assertEquals(dateReceived, model.getDateRecieved().toInstant());
-        assertEquals(guid, model.getGuid());
+        assertEquals(guid.toString(), model.getGuid());
         assertEquals(senderReceiver, model.getSenderReceiver());
         assertEquals(incoming, model.isIncoming());
         assertEquals(status, model.getStatus());
@@ -706,7 +706,7 @@ public class LogMapperTest {
 
         assertEquals(LogType.SEND_POLL, model.getType());
         assertEquals(dateReceived, model.getDateRecieved().toInstant());
-        assertEquals(guid, model.getGuid());
+        assertEquals(guid.toString(), model.getGuid());
         assertEquals(senderReceiver, model.getSenderReceiver());
         assertEquals(incoming, model.isIncoming());
         assertEquals(status, model.getStatus());
@@ -740,7 +740,7 @@ public class LogMapperTest {
 
         assertEquals(LogType.SEND_EMAIL, model.getType());
         assertEquals(dateReceived, model.getDateRecieved().toInstant());
-        assertEquals(guid, model.getGuid());
+        assertEquals(guid.toString(), model.getGuid());
         assertEquals(senderReceiver, model.getSenderReceiver());
         assertEquals(incoming, model.isIncoming());
         assertEquals(status, model.getStatus());
@@ -770,7 +770,7 @@ public class LogMapperTest {
 
         assertEquals(LogType.RECEIVE_SALES_QUERY, model.getType());
         assertEquals(dateReceived, model.getDateRecieved().toInstant());
-        assertEquals(guid, model.getGuid());
+        assertEquals(guid.toString(), model.getGuid());
         assertEquals(senderReceiver, model.getSenderReceiver());
         assertEquals(incoming, model.isIncoming());
         assertEquals(status, model.getStatus());
@@ -799,7 +799,7 @@ public class LogMapperTest {
 
         assertEquals(LogType.RECEIVE_SALES_REPORT, model.getType());
         assertEquals(dateReceived, model.getDateRecieved().toInstant());
-        assertEquals(guid, model.getGuid());
+        assertEquals(guid.toString(), model.getGuid());
         assertEquals(senderReceiver, model.getSenderReceiver());
         assertEquals(incoming, model.isIncoming());
         assertEquals(status, model.getStatus());
@@ -828,7 +828,7 @@ public class LogMapperTest {
 
         assertEquals(LogType.RECEIVE_SALES_RESPONSE, model.getType());
         assertEquals(dateReceived, model.getDateRecieved().toInstant());
-        assertEquals(guid, model.getGuid());
+        assertEquals(guid.toString(), model.getGuid());
         assertEquals(senderReceiver, model.getSenderReceiver());
         assertEquals(incoming, model.isIncoming());
         assertEquals(status, model.getStatus());
@@ -857,7 +857,7 @@ public class LogMapperTest {
 
         assertEquals(LogType.SEND_SALES_REPORT, model.getType());
         assertEquals(dateReceived, model.getDateRecieved().toInstant());
-        assertEquals(guid, model.getGuid());
+        assertEquals(guid.toString(), model.getGuid());
         assertEquals(senderReceiver, model.getSenderReceiver());
         assertEquals(incoming, model.isIncoming());
         assertEquals(status, model.getStatus());
@@ -886,7 +886,7 @@ public class LogMapperTest {
 
         assertEquals(LogType.SEND_SALES_RESPONSE, model.getType());
         assertEquals(dateReceived, model.getDateRecieved().toInstant());
-        assertEquals(guid, model.getGuid());
+        assertEquals(guid.toString(), model.getGuid());
         assertEquals(senderReceiver, model.getSenderReceiver());
         assertEquals(incoming, model.isIncoming());
         assertEquals(status, model.getStatus());
@@ -896,7 +896,7 @@ public class LogMapperTest {
     @Test
     public void toNewEntityWhenLogTypeIsRcvFluxFAReportMsg() throws Exception {
         //data set
-        String typeRefGuid = "trg";
+        String typeRefGuid = UUID.randomUUID().toString();
         TypeRefType typeRefType = TypeRefType.FA_REPORT;
         Instant dateReceived = Instant.now();
         String senderOrReceiver = "BEL";
@@ -926,7 +926,7 @@ public class LogMapperTest {
         ExchangeLog result = LogMapper.toNewEntity(input, username);
 
         //assert
-        assertEquals(typeRefGuid, result.getTypeRefGuid());
+        assertEquals(typeRefGuid, result.getTypeRefGuid().toString());
         assertEquals(typeRefType, result.getTypeRefType());
         assertEquals(dateReceived, result.getDateReceived());
         assertEquals(senderOrReceiver, result.getSenderReceiver());
@@ -948,7 +948,7 @@ public class LogMapperTest {
     @Test
     public void toNewEntityWhenLogTypeIsReceiveFAQueryMsg() throws Exception {
         //data set
-        String typeRefGuid = "trg";
+        String typeRefGuid = UUID.randomUUID().toString();;
         TypeRefType typeRefType = TypeRefType.FA_QUERY;
         Instant dateReceived = Instant.now();
         String senderOrReceiver = "BEL";
@@ -978,7 +978,7 @@ public class LogMapperTest {
         ExchangeLog result = LogMapper.toNewEntity(input, username);
 
         //assert
-        assertEquals(typeRefGuid, result.getTypeRefGuid());
+        assertEquals(typeRefGuid, result.getTypeRefGuid().toString());
         assertEquals(typeRefType, result.getTypeRefType());
         assertEquals(dateReceived, result.getDateReceived());
         assertEquals(senderOrReceiver, result.getSenderReceiver());
@@ -1000,7 +1000,7 @@ public class LogMapperTest {
     @Test
     public void toNewEntityWhenLogTypeIsSendFAQueryMsg() throws Exception {
         //data set
-        String typeRefGuid = "trg";
+        String typeRefGuid = UUID.randomUUID().toString();
         TypeRefType typeRefType = TypeRefType.FA_QUERY;
         Instant dateReceived = Instant.now();
         String senderOrReceiver = "BEL";
@@ -1030,7 +1030,7 @@ public class LogMapperTest {
         ExchangeLog result = LogMapper.toNewEntity(input, username);
 
         //assert
-        assertEquals(typeRefGuid, result.getTypeRefGuid());
+        assertEquals(typeRefGuid, result.getTypeRefGuid().toString());
         assertEquals(typeRefType, result.getTypeRefType());
         assertEquals(dateReceived, result.getDateReceived());
         assertEquals(senderOrReceiver, result.getSenderReceiver());
@@ -1052,7 +1052,7 @@ public class LogMapperTest {
     @Test
     public void toNewEntityWhenLogTypeIsSendFluxFAReportMsg() throws Exception {
         //data set
-        String typeRefGuid = "trg";
+        String typeRefGuid = UUID.randomUUID().toString();
         TypeRefType typeRefType = TypeRefType.FA_REPORT;
         Instant dateReceived = Instant.now();
         String senderOrReceiver = "BEL";
@@ -1082,7 +1082,7 @@ public class LogMapperTest {
         ExchangeLog result = LogMapper.toNewEntity(input, username);
 
         //assert
-        assertEquals(typeRefGuid, result.getTypeRefGuid());
+        assertEquals(typeRefGuid, result.getTypeRefGuid().toString());
         assertEquals(typeRefType, result.getTypeRefType());
         assertEquals(dateReceived, result.getDateReceived());
         assertEquals(senderOrReceiver, result.getSenderReceiver());
@@ -1104,7 +1104,7 @@ public class LogMapperTest {
     @Test
     public void toNewEntityWhenLogTypeIsSendFluxResponseMsg() throws Exception {
         //data set
-        String typeRefGuid = "trg";
+        String typeRefGuid = UUID.randomUUID().toString();;
         TypeRefType typeRefType = TypeRefType.FA_RESPONSE;
         Instant dateReceived = Instant.now();
         String senderOrReceiver = "BEL";
@@ -1134,7 +1134,7 @@ public class LogMapperTest {
         ExchangeLog result = LogMapper.toNewEntity(input, username);
 
         //assert
-        assertEquals(typeRefGuid, result.getTypeRefGuid());
+        assertEquals(typeRefGuid, result.getTypeRefGuid().toString());
         assertEquals(typeRefType, result.getTypeRefType());
         assertEquals(dateReceived, result.getDateReceived());
         assertEquals(senderOrReceiver, result.getSenderReceiver());
