@@ -38,6 +38,7 @@ import javax.ws.rs.core.MediaType;
 import java.time.Instant;
 import java.util.Collections;
 import java.util.List;
+import java.util.UUID;
 
 @Path("/exchange")
 @Stateless
@@ -103,7 +104,7 @@ public class ExchangeLogRestResource {
     public ResponseDto getPollStatus(@PathParam("typeRefGuid") String typeRefGuid) {
         try {
             LOG.info("Get ExchangeLog status for Poll by typeRefGuid : {}", typeRefGuid);
-            ExchangeLogStatusType response = serviceLayer.getExchangeStatusHistory(TypeRefType.POLL, typeRefGuid, request.getRemoteUser());
+            ExchangeLogStatusType response = serviceLayer.getExchangeStatusHistory(TypeRefType.POLL, UUID.fromString(typeRefGuid), request.getRemoteUser());
             return new ResponseDto(response, RestResponseCode.OK);
         } catch (Exception e) {
             LOG.error("[ Error when getting config search fields. {} ] {}", typeRefGuid, e.getMessage());
@@ -117,7 +118,7 @@ public class ExchangeLogRestResource {
     @RequiresFeature(UnionVMSFeature.viewExchange)
     public ResponseDto getExchangeLogRawXMLByGuid(@PathParam("guid") String guid) {
         try {
-            LogWithRawMsgAndType exchangeLogRawMessageByGuid = logRestServiceBean.getExchangeLogRawMessage(guid);
+            LogWithRawMsgAndType exchangeLogRawMessageByGuid = logRestServiceBean.getExchangeLogRawMessage(UUID.fromString(guid));
             return new ResponseDto(exchangeLogRawMessageByGuid.getRawMsg(), RestResponseCode.OK);
         } catch (Exception e) {
             LOG.error("[ Error when getting exchange log by GUID. ] {}", e.getMessage());
@@ -131,7 +132,7 @@ public class ExchangeLogRestResource {
     @RequiresFeature(UnionVMSFeature.viewExchange)
     public ResponseDto getExchangeLogRawXMLAndValidationByGuid(@PathParam("guid") String guid) {
         try {
-            ExchangeLogWithValidationResults results = serviceLayer.getExchangeLogRawMessageAndValidationByGuid(guid);
+            ExchangeLogWithValidationResults results = serviceLayer.getExchangeLogRawMessageAndValidationByGuid(UUID.fromString(guid));
             if (results != null && CollectionUtils.isNotEmpty(results.getValidationList())) {
                 Collections.sort(results.getValidationList(), new BusinessRuleComparator());
             }
@@ -148,7 +149,7 @@ public class ExchangeLogRestResource {
     @RequiresFeature(UnionVMSFeature.viewExchange)
     public ResponseDto getExchangeLogByUUID(@PathParam("guid") String guid) {
         try {
-            return new ResponseDto(logRestServiceBean.getExchangeLogByGuid(guid), RestResponseCode.OK);
+            return new ResponseDto(logRestServiceBean.getExchangeLogByGuid(UUID.fromString(guid)), RestResponseCode.OK);
         } catch (Exception e) {
             LOG.error("[ Error when getting exchange log by GUID. ] {}", e.getMessage());
             return ErrorHandler.getFault(e);

@@ -7,6 +7,7 @@ import org.junit.Test;
 
 import java.util.Date;  //leave be
 import java.time.Instant;
+import java.util.UUID;
 
 import static org.junit.Assert.*;
 
@@ -617,7 +618,7 @@ public class LogMapperTest {
     @Test
     public void toModelWhenEntityIsReceiveMovementLog() {
         Instant dateReceived = Instant.now();
-        String guid = "Paradise";
+        UUID guid = UUID.randomUUID();
         String senderReceiver = "Chris Martin";
         boolean incoming = true;
         ExchangeLogStatusTypeType status = ExchangeLogStatusTypeType.PROBABLY_TRANSMITTED;
@@ -626,7 +627,7 @@ public class LogMapperTest {
 
         ExchangeLog entity = new ExchangeLog();
         entity.setDateReceived(dateReceived);
-        entity.setGuid(guid);
+        entity.setId(guid);
         entity.setSenderReceiver(senderReceiver);
         entity.setTransferIncoming(incoming);
         entity.setStatus(status);
@@ -649,7 +650,7 @@ public class LogMapperTest {
     @Test
     public void toModelWhenEntityIsSendMovementLog() {
         Instant dateReceived = Instant.now();
-        String guid = "Paradise";
+        UUID guid = UUID.randomUUID();
         String senderReceiver = "Chris Martin";
         boolean incoming = true;
         ExchangeLogStatusTypeType status = ExchangeLogStatusTypeType.PROBABLY_TRANSMITTED;
@@ -659,7 +660,7 @@ public class LogMapperTest {
 
         ExchangeLog entity = new ExchangeLog();
         entity.setDateReceived(dateReceived);
-        entity.setGuid(guid);
+        entity.setId(guid);
         entity.setSenderReceiver(senderReceiver);
         entity.setTransferIncoming(incoming);
         entity.setStatus(status);
@@ -684,7 +685,7 @@ public class LogMapperTest {
     @Test
     public void toModelWhenEntityIsPollLog() {
         Instant dateReceived = Instant.now();
-        String guid = "Paradise";
+        UUID guid = UUID.randomUUID();
         String senderReceiver = "Chris Martin";
         boolean incoming = true;
         ExchangeLogStatusTypeType status = ExchangeLogStatusTypeType.PROBABLY_TRANSMITTED;
@@ -693,7 +694,7 @@ public class LogMapperTest {
 
         ExchangeLog entity = new ExchangeLog();
         entity.setDateReceived(dateReceived);
-        entity.setGuid(guid);
+        entity.setId(guid);
         entity.setSenderReceiver(senderReceiver);
         entity.setTransferIncoming(incoming);
         entity.setStatus(status);
@@ -716,7 +717,7 @@ public class LogMapperTest {
     @Test
     public void toModelWhenEntityIsEmailLog() {
         Instant dateReceived = Instant.now();
-        String guid = "Paradise";
+        UUID guid = UUID.randomUUID();
         String senderReceiver = "Chris Martin";
         boolean incoming = true;
         ExchangeLogStatusTypeType status = ExchangeLogStatusTypeType.PROBABLY_TRANSMITTED;
@@ -726,7 +727,7 @@ public class LogMapperTest {
 
         ExchangeLog entity = new ExchangeLog();
         entity.setDateReceived(dateReceived);
-        entity.setGuid(guid);
+        entity.setId(guid);
         entity.setSenderReceiver(senderReceiver);
         entity.setTransferIncoming(incoming);
         entity.setStatus(status);
@@ -751,14 +752,14 @@ public class LogMapperTest {
     @Test
     public void toModelWhenEntityIsReceiveSalesQuery() {
         Instant dateReceived = Instant.now();
-        String guid = "Paradise";
+        UUID guid = UUID.randomUUID();
         String senderReceiver = "Chris Martin";
         boolean incoming = true;
         ExchangeLogStatusTypeType status = ExchangeLogStatusTypeType.PROBABLY_TRANSMITTED;
         String destination = "destination";
         ExchangeLog entity = new ExchangeLog();
         entity.setDateReceived(dateReceived);
-        entity.setGuid(guid);
+        entity.setId(guid);
         entity.setSenderReceiver(senderReceiver);
         entity.setTransferIncoming(incoming);
         entity.setStatus(status);
@@ -779,7 +780,7 @@ public class LogMapperTest {
     @Test
     public void toModelWhenEntityIsReceiveSalesReport() {
         Instant dateReceived = Instant.now();
-        String guid = "Paradise";
+        UUID guid = UUID.randomUUID();
         String senderReceiver = "Chris Martin";
         boolean incoming = true;
         ExchangeLogStatusTypeType status = ExchangeLogStatusTypeType.PROBABLY_TRANSMITTED;
@@ -787,7 +788,7 @@ public class LogMapperTest {
 
         ExchangeLog entity = new ExchangeLog();
         entity.setDateReceived(dateReceived);
-        entity.setGuid(guid);
+        entity.setId(guid);
         entity.setSenderReceiver(senderReceiver);
         entity.setTransferIncoming(incoming);
         entity.setStatus(status);
@@ -808,7 +809,7 @@ public class LogMapperTest {
     @Test
     public void toModelWhenEntityIsReceiveSalesResponse() {
         Instant dateReceived = Instant.now();
-        String guid = "Paradise";
+        UUID guid = UUID.randomUUID();
         String senderReceiver = "Chris Martin";
         boolean incoming = true;
         ExchangeLogStatusTypeType status = ExchangeLogStatusTypeType.PROBABLY_TRANSMITTED;
@@ -816,7 +817,7 @@ public class LogMapperTest {
 
         ExchangeLog entity = new ExchangeLog();
         entity.setDateReceived(dateReceived);
-        entity.setGuid(guid);
+        entity.setId(guid);
         entity.setSenderReceiver(senderReceiver);
         entity.setTransferIncoming(incoming);
         entity.setStatus(status);
@@ -837,7 +838,7 @@ public class LogMapperTest {
     @Test
     public void toModelWhenEntityIsSendSalesReport() {
         Instant dateReceived = Instant.now();
-        String guid = "Paradise";
+        UUID guid = UUID.randomUUID();
         String senderReceiver = "Chris Martin";
         boolean incoming = true;
         ExchangeLogStatusTypeType status = ExchangeLogStatusTypeType.PROBABLY_TRANSMITTED;
@@ -845,7 +846,7 @@ public class LogMapperTest {
 
         ExchangeLog entity = new ExchangeLog();
         entity.setDateReceived(dateReceived);
-        entity.setGuid(guid);
+        entity.setId(guid);
         entity.setSenderReceiver(senderReceiver);
         entity.setTransferIncoming(incoming);
         entity.setStatus(status);
@@ -866,7 +867,7 @@ public class LogMapperTest {
     @Test
     public void toModelWhenEntityIsSendSalesResponse() {
         Instant dateReceived = Instant.now();
-        String guid = "Paradise";
+        UUID guid = UUID.randomUUID();
         String senderReceiver = "Chris Martin";
         boolean incoming = true;
         ExchangeLogStatusTypeType status = ExchangeLogStatusTypeType.PROBABLY_TRANSMITTED;
@@ -874,7 +875,7 @@ public class LogMapperTest {
 
         ExchangeLog entity = new ExchangeLog();
         entity.setDateReceived(dateReceived);
-        entity.setGuid(guid);
+        entity.setId(guid);
         entity.setSenderReceiver(senderReceiver);
         entity.setTransferIncoming(incoming);
         entity.setStatus(status);

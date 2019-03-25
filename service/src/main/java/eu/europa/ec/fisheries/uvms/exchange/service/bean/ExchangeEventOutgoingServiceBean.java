@@ -15,6 +15,7 @@ import static eu.europa.ec.fisheries.schema.exchange.plugin.types.v1.PluginType.
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.UUID;
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
 import javax.enterprise.event.Event;
@@ -382,7 +383,7 @@ public class ExchangeEventOutgoingServiceBean implements ExchangeEventOutgoingSe
     public void updateLogStatus(ExchangeMessageEvent message) {
         try {
             UpdateLogStatusRequest request = JAXBMarshaller.unmarshallTextMessage(message.getJmsMessage(), UpdateLogStatusRequest.class);
-            String logGuid = request.getLogGuid();
+            UUID logGuid = UUID.fromString(request.getLogGuid());
             ExchangeLogStatusTypeType status = request.getNewStatus();
             exchangeLogService.updateStatus(logGuid, status);
         } catch (ExchangeLogException e) {
@@ -396,7 +397,7 @@ public class ExchangeEventOutgoingServiceBean implements ExchangeEventOutgoingSe
     public void updateLogBusinessError(ExchangeMessageEvent message) {  //should this chain not set a log status or something?
         try {
             UpdateLogStatusRequest request = JAXBMarshaller.unmarshallTextMessage(message.getJmsMessage(), UpdateLogStatusRequest.class);
-            String exchangeLogGuid = request.getLogGuid();
+            UUID exchangeLogGuid = UUID.fromString(request.getLogGuid());
             String businessModuleExceptionMessage = request.getBusinessModuleExceptionMessage();
             exchangeLogService.updateExchangeLogBusinessError(exchangeLogGuid, businessModuleExceptionMessage);
         } catch (ExchangeLogException | ExchangeModelMarshallException e) {
@@ -419,7 +420,7 @@ public class ExchangeEventOutgoingServiceBean implements ExchangeEventOutgoingSe
             } else {
                 statusType = ExchangeLogStatusTypeType.SUCCESSFUL;
             }
-            ExchangeLogType updatedLog = exchangeLogService.updateStatus(movementRefType.getAckResponseMessageID(), statusType);
+            ExchangeLogType updatedLog = exchangeLogService.updateStatus(UUID.fromString(movementRefType.getAckResponseMessageID()), statusType);
             exchangeLogService.updateTypeRef(updatedLog, movementRefType);
 
         } catch (ExchangeLogException | ExchangeModelException e) {

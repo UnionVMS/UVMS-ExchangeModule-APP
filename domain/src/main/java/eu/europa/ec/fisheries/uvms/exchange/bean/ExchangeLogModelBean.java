@@ -14,14 +14,7 @@ package eu.europa.ec.fisheries.uvms.exchange.bean;
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
 import java.text.ParseException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import eu.europa.ec.fisheries.schema.exchange.v1.*;
 import eu.europa.ec.fisheries.uvms.exchange.ExchangeLogModel;
@@ -52,7 +45,7 @@ public class ExchangeLogModelBean implements ExchangeLogModel {
     private ExchangeLogDao logDao;
 
     @Override
-    public ExchangeLogType getExchangeLogByGuid(String guid) {
+    public ExchangeLogType getExchangeLogByGuid(UUID guid) {
         ExchangeLogType exchangeLogType;
         try {
             ExchangeLog exchangeLog = logDao.getExchangeLogByGuid(guid, null);
@@ -67,7 +60,7 @@ public class ExchangeLogModelBean implements ExchangeLogModel {
     }
 
     @Override
-    public ExchangeLogType getExchangeLogByGuidAndType(String guid, TypeRefType typeRefType) {
+    public ExchangeLogType getExchangeLogByGuidAndType(UUID guid, TypeRefType typeRefType) {
         try {
             ExchangeLog exchangeLogByGuid = logDao.getExchangeLogByGuid(guid, typeRefType);
             return LogMapper.toModel(exchangeLogByGuid);
@@ -78,7 +71,7 @@ public class ExchangeLogModelBean implements ExchangeLogModel {
     }
 
     @Override
-    public Set<ExchangeLogType> getExchangeLogByRefUUIDAndType(String refUUID, TypeRefType typeRefType) {
+    public Set<ExchangeLogType> getExchangeLogByRefUUIDAndType(UUID refUUID, TypeRefType typeRefType) {
         Set<ExchangeLogType> exchangeLogTypeSet = new HashSet<>();
         try {
             List<ExchangeLog> exchangeLogByTypesRefAndGuid = logDao.getExchangeLogByTypesRefAndGuid(refUUID, Collections.singletonList(typeRefType));
@@ -144,18 +137,18 @@ public class ExchangeLogModelBean implements ExchangeLogModel {
     }
 
     private void enrichDtosWithRelatedLogsInfo(List<ExchangeLogType> exchangeLogList) {
-        List<String> guids = new ArrayList<>();
+        List<UUID> guids = new ArrayList<>();
         for (ExchangeLogType log : exchangeLogList) {
-            guids.add(log.getGuid());
+            guids.add(UUID.fromString(log.getGuid()));
         }
         List<ExchangeLog> relatedLogs = logDao.getExchangeLogByRangeOfRefGuids(guids);
         if (CollectionUtils.isNotEmpty(relatedLogs)) {
             for (ExchangeLog logEntity : relatedLogs) {
                 RelatedLogInfo refLogInfo = new RelatedLogInfo();
-                refLogInfo.setGuid(logEntity.getGuid());
+                refLogInfo.setGuid(logEntity.getId().toString());
                 refLogInfo.setType(logEntity.getTypeRefType().toString());
                 for (ExchangeLogType logType : exchangeLogList) {
-                    if (StringUtils.equals(logEntity.getTypeRefGuid(), logType.getGuid())) {
+                    if (StringUtils.equals(logEntity.getTypeRefGuid().toString(), logType.getGuid())) {
                         logType.getRelatedLogData().add(refLogInfo);
                     }
                 }
@@ -174,17 +167,8 @@ public class ExchangeLogModelBean implements ExchangeLogModel {
             String sql = SearchFieldMapper.createSearchSql(query);
             List<ExchangeLogStatus> logList = logDao.getExchangeLogStatusHistory(sql, query);
 
-            Set<String> uniqueExchangeLogGuid = new HashSet<>();
-            Map<String, TypeRefType> logTypeMap = new HashMap<>();
             for (ExchangeLogStatus log : logList) {
-                uniqueExchangeLogGuid.add(log.getLog().getGuid());
-                logTypeMap.put(log.getLog().getGuid(), log.getLog().getTypeRefType());
-            }
-
-            //TODO not two db-calls?
-            for (String guid : uniqueExchangeLogGuid) {
-                ExchangeLog log = logDao.getExchangeLogByGuid(guid);
-                ExchangeLogStatusType statusType = LogMapper.toStatusModel(log);
+                ExchangeLogStatusType statusType = LogMapper.toStatusModel(log.getLog());
                 logStatusHistoryList.add(statusType);
             }
 
@@ -224,7 +208,7 @@ public class ExchangeLogModelBean implements ExchangeLogModel {
         }
         try {
             ExchangeLogStatusHistoryType updateStatus = status.getHistory().get(0);
-            ExchangeLog exchangeLog = logDao.getExchangeLogByGuid(status.getGuid());
+            ExchangeLog exchangeLog = logDao.getExchangeLogByGuid(UUID.fromString(status.getGuid()));
             List<ExchangeLogStatus> statusList = exchangeLog.getStatusHistory();
             statusList.add(LogMapper.toNewStatusEntity(exchangeLog, updateStatus.getStatus(), username));
             exchangeLog.setStatus(updateStatus.getStatus());
@@ -242,7 +226,7 @@ public class ExchangeLogModelBean implements ExchangeLogModel {
             throw new InputArgumentException("No exchange log to update status");
         }
         try {
-            ExchangeLog exchangeLog = logDao.getExchangeLogByGuid(status.getGuid());
+            ExchangeLog exchangeLog = logDao.getExchangeLogByGuid(UUID.fromString(status.getGuid()));
             exchangeLog.setBusinessError(businessError);
             ExchangeLog retEntity = logDao.updateLog(exchangeLog);
             return LogMapper.toModel(retEntity);
@@ -253,8 +237,8 @@ public class ExchangeLogModelBean implements ExchangeLogModel {
     }
 
     @Override
-    public ExchangeLogStatusType getExchangeLogStatusHistory(String guid, TypeRefType typeRefType) throws ExchangeModelException {
-        if (guid == null || guid.isEmpty())
+    public ExchangeLogStatusType getExchangeLogStatusHistory(UUID guid, TypeRefType typeRefType) throws ExchangeModelException {
+        if (guid == null)
             throw new InputArgumentException("Non valid guid to fetch log status history");
         try {
             if (typeRefType == null || TypeRefType.UNKNOWN.equals(typeRefType)) {
@@ -273,7 +257,7 @@ public class ExchangeLogModelBean implements ExchangeLogModel {
     }
 
     @Override
-    public List<ExchangeLogStatusType> getExchangeLogsStatusHistories(String guid, List<TypeRefType> typeRefType) {
+    public List<ExchangeLogStatusType> getExchangeLogsStatusHistories(UUID guid, List<TypeRefType> typeRefType) {
         List<ExchangeLogStatusType> logStatusTypeList = new ArrayList<>();
         try {
             List<ExchangeLog> exchangeLogByTypesRefAndGuid = logDao.getExchangeLogByTypesRefAndGuid(guid, typeRefType);
@@ -296,7 +280,7 @@ public class ExchangeLogModelBean implements ExchangeLogModel {
             throw new InputArgumentException("No poll id to update status");
         }
         try {
-            List<ExchangeLog> exchangeLogByTypesRefAndGuid = logDao.getExchangeLogByTypesRefAndGuid(pollStatus.getPollGuid(), Collections.singletonList(TypeRefType.POLL));
+            List<ExchangeLog> exchangeLogByTypesRefAndGuid = logDao.getExchangeLogByTypesRefAndGuid(UUID.fromString(pollStatus.getPollGuid()), Collections.singletonList(TypeRefType.POLL));
             for(ExchangeLog log : exchangeLogByTypesRefAndGuid){
                 List<ExchangeLogStatus> statusList = log.getStatusHistory();
                 statusList.add(LogMapper.toNewStatusEntity(log, pollStatus.getStatus(), username));
@@ -312,7 +296,7 @@ public class ExchangeLogModelBean implements ExchangeLogModel {
     }
 
     @Override
-    public LogWithRawMsgAndType getExchangeLogRawXmlByGuid(String guid) {
+    public LogWithRawMsgAndType getExchangeLogRawXmlByGuid(UUID guid) {
         LogWithRawMsgAndType logWrapper = new LogWithRawMsgAndType();
         try {
             ExchangeLog exchangeLog = logDao.getExchangeLogByGuid(guid);
@@ -320,7 +304,7 @@ public class ExchangeLogModelBean implements ExchangeLogModel {
                 String rawMsg = exchangeLog.getTypeRefMessage();
                 logWrapper.setRawMsg(rawMsg);
                 logWrapper.setType(exchangeLog.getTypeRefType());
-                logWrapper.setRefGuid(exchangeLog.getTypeRefGuid());
+                logWrapper.setRefGuid(exchangeLog.getTypeRefGuid().toString());
             }
         } catch (ExchangeDaoException e) {
             LOG.error("[ERROR] Couldn't find Log with the following GUID : [[" + guid + "]]", e);

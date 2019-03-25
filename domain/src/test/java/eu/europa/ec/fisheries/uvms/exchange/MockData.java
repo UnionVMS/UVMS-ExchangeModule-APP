@@ -94,16 +94,16 @@ public class MockData {
 		ExchangeLog log1 = new ExchangeLog();
 		log1.setDateReceived(Instant.now().minusSeconds(30));
 		log1.setType(LogType.RECEIVE_FA_QUERY_MSG);
-		log1.setTypeRefGuid("SomeRefGuid_1AAA");
+		log1.setTypeRefGuid(UUID.randomUUID());
 		log1.setTransferIncoming(false);
-		log1.setGuid("AAA-BBB-CCC");
+		log1.setId(UUID.randomUUID());
 		log1.setTypeRefType(TypeRefType.FA_QUERY);
 		ExchangeLog log2 = new ExchangeLog();
 		log2.setDateReceived(Instant.now());
 		log2.setType(LogType.RECEIVE_FA_QUERY_MSG);
-		log2.setTypeRefGuid("SomeRefGuid_2BBB");
+		log2.setTypeRefGuid(UUID.randomUUID());
 		log2.setTransferIncoming(true);
-		log2.setGuid("CCC-DDD-EEE");
+		log2.setId(UUID.randomUUID());
 		log2.setTypeRefType(TypeRefType.FA_RESPONSE);
 		return Arrays.asList(log1, log2);
 	}

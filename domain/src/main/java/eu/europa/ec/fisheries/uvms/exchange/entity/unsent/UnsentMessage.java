@@ -19,8 +19,6 @@ import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
-import eu.europa.ec.fisheries.uvms.exchange.constant.ExchangeConstants;
-
 @Entity
 @Table(name="unsent_message")
 //@formatter:off

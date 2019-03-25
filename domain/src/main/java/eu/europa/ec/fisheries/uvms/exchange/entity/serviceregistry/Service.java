@@ -16,7 +16,6 @@ import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
-import javax.persistence.Basic;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -36,7 +35,6 @@ import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 
 import eu.europa.ec.fisheries.schema.exchange.plugin.types.v1.PluginType;
-import eu.europa.ec.fisheries.uvms.exchange.constant.ExchangeConstants;
 
 @Entity
 @Table(name = "service")

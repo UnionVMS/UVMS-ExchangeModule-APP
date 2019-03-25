@@ -11,6 +11,7 @@ copy of the GNU General Public License along with the IFDM Suite. If not, see <h
  */
 package eu.europa.ec.fisheries.uvms.exchange.service.bean;
 
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 import javax.annotation.PostConstruct;
@@ -23,20 +24,20 @@ import org.slf4j.LoggerFactory;
 public class ExchangeEventLogCache {
 	final static Logger LOG = LoggerFactory.getLogger(ExchangeEventLogCache.class);
 	
-	private ConcurrentHashMap<String, String> cache;
+	private ConcurrentHashMap<String, UUID> cache;
 	
 	@PostConstruct
 	public void init() {
-		cache = new ConcurrentHashMap<String, String>();
+		cache = new ConcurrentHashMap<String, UUID>();
 		//TODO set TTL on cached objects
 	}
 	
-	public void put(String messageId, String logGuid) {
+	public void put(String messageId, UUID logGuid) {
 		LOG.info(".put( " + messageId + ", " + logGuid + ")");
 		cache.put(messageId, logGuid);
 	}
 
-	public String acknowledged(String messageId) {
+	public UUID acknowledged(String messageId) {
 		LOG.info(".acknowledged( " + messageId + ")");
 		return cache.remove(messageId);
 	}

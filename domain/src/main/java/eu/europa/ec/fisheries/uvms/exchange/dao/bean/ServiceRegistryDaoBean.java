@@ -16,9 +16,7 @@ import java.util.UUID;
 
 import javax.ejb.Stateless;
 import javax.persistence.EntityExistsException;
-import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
-import javax.persistence.PersistenceContext;
 import javax.persistence.TypedQuery;
 
 import eu.europa.ec.fisheries.uvms.exchange.dao.Dao;
@@ -26,7 +24,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import eu.europa.ec.fisheries.schema.exchange.plugin.types.v1.PluginType;
-import eu.europa.ec.fisheries.uvms.exchange.constant.ExchangeConstants;
 import eu.europa.ec.fisheries.uvms.exchange.dao.ServiceRegistryDao;
 import eu.europa.ec.fisheries.uvms.exchange.entity.serviceregistry.Service;
 import eu.europa.ec.fisheries.uvms.exchange.entity.serviceregistry.ServiceCapability;
@@ -168,14 +165,4 @@ public class ServiceRegistryDaoBean extends Dao implements ServiceRegistryDao {
         }
     }
 
-    @Override
-    public Service getServiceByMappedServiceName(String mappedServiceName) {
-        try {
-            TypedQuery<Service> query = em.createNamedQuery(ExchangeConstants.SERVICE_FIND_BY_NAME, Service.class);
-            query.setParameter(SERVICE_MAP_NAME_PARAMETER, mappedServiceName);
-            return query.getSingleResult();
-        } catch (NoResultException e) {
-            return null;
-        }
-    }
 }

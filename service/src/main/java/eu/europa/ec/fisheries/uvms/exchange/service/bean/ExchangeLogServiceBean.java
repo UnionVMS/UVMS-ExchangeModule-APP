@@ -16,10 +16,8 @@ import javax.ejb.Stateless;
 import javax.enterprise.event.Event;
 import javax.inject.Inject;
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;  //leave be
-import java.util.List;
+import java.util.*;
+
 import eu.europa.ec.fisheries.schema.exchange.module.v1.ExchangeBaseRequest;
 import eu.europa.ec.fisheries.schema.exchange.movement.v1.MovementRefType;
 import eu.europa.ec.fisheries.schema.exchange.v1.*;
@@ -74,7 +72,7 @@ public class ExchangeLogServiceBean implements ExchangeLogService {
     @Override
     public ExchangeLogType logAndCache(ExchangeLogType log, String pluginMessageId, String username) throws ExchangeLogException {
         ExchangeLogType createdLog = log(log, username);
-        logCache.put(pluginMessageId, createdLog.getGuid());
+        logCache.put(pluginMessageId, UUID.fromString(createdLog.getGuid()));
 
         return createdLog;
     }
@@ -120,7 +118,7 @@ public class ExchangeLogServiceBean implements ExchangeLogService {
     @Override
     public ExchangeLogType updateStatus(String pluginMessageId, ExchangeLogStatusTypeType logStatus, String username) throws ExchangeLogException {
         try {
-            String logGuid = logCache.acknowledged(pluginMessageId);
+            UUID logGuid = logCache.acknowledged(pluginMessageId);
             ExchangeLogStatusType exchangeLogStatusType = createExchangeLogStatusType(logStatus, logGuid);
             ExchangeLogType updatedLog = exchangeLogModel.updateExchangeLogStatus(exchangeLogStatusType, username);
             // For long polling
@@ -131,9 +129,9 @@ public class ExchangeLogServiceBean implements ExchangeLogService {
         }
     }
 
-    private ExchangeLogStatusType createExchangeLogStatusType(ExchangeLogStatusTypeType logStatus, String logGuid) {
+    private ExchangeLogStatusType createExchangeLogStatusType(ExchangeLogStatusTypeType logStatus, UUID logGuid) {
         ExchangeLogStatusType exchangeLogStatusType = new ExchangeLogStatusType();
-        exchangeLogStatusType.setGuid(logGuid);
+        exchangeLogStatusType.setGuid(logGuid.toString());
         ArrayList statusHistoryList = new ArrayList();
         ExchangeLogStatusHistoryType statusHistory = new ExchangeLogStatusHistoryType();
         statusHistory.setStatus(logStatus);
@@ -150,7 +148,7 @@ public class ExchangeLogServiceBean implements ExchangeLogService {
     }
 
     @Override
-    public ExchangeLogType updateStatus(String logGuid, ExchangeLogStatusTypeType logStatus) throws ExchangeLogException {
+    public ExchangeLogType updateStatus(UUID logGuid, ExchangeLogStatusTypeType logStatus) throws ExchangeLogException {
         try {
             ExchangeLogStatusType exchangeLogStatusType = createExchangeLogStatusType(logStatus, logGuid);
             return exchangeLogModel.updateExchangeLogStatus(exchangeLogStatusType, "SYSTEM");
@@ -160,9 +158,9 @@ public class ExchangeLogServiceBean implements ExchangeLogService {
     }
 
     @Override
-    public ExchangeLogType updateExchangeLogBusinessError(String logGuid, String errorMessage) throws ExchangeLogException {
+    public ExchangeLogType updateExchangeLogBusinessError(UUID logGuid, String errorMessage) throws ExchangeLogException {
         try {
-            ExchangeLogStatusType exchangeLogStatusType = createExchangeLogBusinessError(logGuid, errorMessage);
+            ExchangeLogStatusType exchangeLogStatusType = createExchangeLogBusinessError(logGuid.toString(), errorMessage);
         return exchangeLogModel.updateExchangeLogBusinessError(exchangeLogStatusType, errorMessage);
         } catch (ExchangeModelException e) {
             throw new ExchangeLogException("Couldn't update the status of the exchange log with guid " + logGuid, e);
@@ -203,9 +201,9 @@ public class ExchangeLogServiceBean implements ExchangeLogService {
     }
 
     @Override
-    public ExchangeLogStatusType getExchangeStatusHistory(TypeRefType type, String typeRefGuid, String userName) throws ExchangeLogException {
+    public ExchangeLogStatusType getExchangeStatusHistory(TypeRefType type, UUID typeRefGuid, String userName) throws ExchangeLogException {
         LOG.info("Get poll status history in service layer:{}",type);
-        if (typeRefGuid == null || typeRefGuid.isEmpty()) {
+        if (typeRefGuid == null) {
             throw new ExchangeLogException("Invalid id");
         }
         try {
@@ -251,20 +249,20 @@ public class ExchangeLogServiceBean implements ExchangeLogService {
 
     @Override
     public void updateTypeRef(ExchangeLogType exchangeLogStatusType, MovementRefType movementRefType) throws ExchangeModelException {
-        ExchangeLog exchangeLog = exchangeLogDao.getExchangeLogByGuid(exchangeLogStatusType.getGuid());
+        ExchangeLog exchangeLog = exchangeLogDao.getExchangeLogByGuid(UUID.fromString(exchangeLogStatusType.getGuid()));
         exchangeLog.setTypeRefType(TypeRefType.valueOf(movementRefType.getType().value()));
-        exchangeLog.setTypeRefGuid(movementRefType.getMovementRefGuid());
+        exchangeLog.setTypeRefGuid(UUID.fromString(movementRefType.getMovementRefGuid()));
     }
 
     @Override
-    public ExchangeLogWithValidationResults getExchangeLogRawMessageAndValidationByGuid(String guid) {
+    public ExchangeLogWithValidationResults getExchangeLogRawMessageAndValidationByGuid(UUID guid) {
         LogWithRawMsgAndType rawMsg = exchangeLogModel.getExchangeLogRawXmlByGuid(guid);
         ExchangeLogWithValidationResults validationFromRules = new ExchangeLogWithValidationResults();
         if (rawMsg.getType() != null){
             if (TypeRefType.FA_RESPONSE.equals(rawMsg.getType())){
-                guid = rawMsg.getRefGuid();
+                guid = UUID.fromString(rawMsg.getRefGuid());
             }
-            validationFromRules = exchangeToRulesSyncMsgBean.getValidationFromRules(guid, rawMsg.getType());
+            validationFromRules = exchangeToRulesSyncMsgBean.getValidationFromRules(guid.toString(), rawMsg.getType());
             validationFromRules.setMsg(rawMsg.getRawMsg() != null ? rawMsg.getRawMsg() : StringUtils.EMPTY);
         }
         return validationFromRules;
@@ -296,12 +294,12 @@ public class ExchangeLogServiceBean implements ExchangeLogService {
     }
 
     @Override
-    public PollStatus setPollStatus(String jmsCorrelationId, String pollId, ExchangeLogStatusTypeType logStatus, String username) throws ExchangeLogException {
+    public PollStatus setPollStatus(String jmsCorrelationId, UUID pollId, ExchangeLogStatusTypeType logStatus, String username) throws ExchangeLogException {
         try {
             // Remove the message from cache, because legancy implementation
             logCache.acknowledged(jmsCorrelationId);
             PollStatus pollStatus = new PollStatus();
-            pollStatus.setPollGuid(pollId);
+            pollStatus.setPollGuid(pollId.toString());
             pollStatus.setStatus(logStatus);
 
             ExchangeLogType exchangeLogType = exchangeLogModel.setPollStatus(pollStatus, username);

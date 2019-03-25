@@ -15,6 +15,7 @@ import javax.ejb.LocalBean;
 import javax.ejb.Stateless;
 
 import java.util.Set;
+import java.util.UUID;
 
 import eu.europa.ec.fisheries.schema.exchange.source.v1.GetLogListByQueryResponse;
 import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeListQuery;
@@ -37,7 +38,7 @@ public class ExchangeLogRestServiceBean {
     @EJB
     private ExchangeLogModel exchangeLogModel;
 
-    public ExchangeLogType getExchangeLogByGuid(String guid) throws ExchangeLogException {
+    public ExchangeLogType getExchangeLogByGuid(UUID guid) throws ExchangeLogException {
         try {
             return exchangeLogModel.getExchangeLogByGuid(guid);
         } catch (ExchangeModelException e) {
@@ -59,11 +60,11 @@ public class ExchangeLogRestServiceBean {
         }
     }
 
-    public LogWithRawMsgAndType getExchangeLogRawMessage(String guid) {
+    public LogWithRawMsgAndType getExchangeLogRawMessage(UUID guid) {
         return exchangeLogModel.getExchangeLogRawXmlByGuid(guid);
     }
 
-    public Set<ExchangeLogType> getExchangeLogsByRefUUID(String guid, TypeRefType type) throws ExchangeLogException {
+    public Set<ExchangeLogType> getExchangeLogsByRefUUID(UUID guid, TypeRefType type) throws ExchangeLogException {
         try {
             return exchangeLogModel.getExchangeLogByRefUUIDAndType(guid, type);
         } catch (ExchangeModelException e) {

@@ -108,11 +108,5 @@ public interface ServiceRegistryDao {
      */
     public Service getServiceByServiceClassName(String serviceClassName);
 
-    /**
-     *
-     * @param mappedServiceName
-     * @return
-     */
-    public Service getServiceByMappedServiceName(String mappedServiceName);
 
 }

@@ -149,6 +149,7 @@ public class ExchangeAPIResourceTest extends BuildExchangeRestTestDeployment {
     @OperateOnDeployment("exchangeservice")
     public void sendCommandToPollPluginTest() throws Exception {
         String serviceClassName = "Service Class Name " + UUID.randomUUID().toString();
+        String guid = UUID.randomUUID().toString();
         Service s = RestHelper.createBasicService("Test Service Name:" + UUID.randomUUID().toString(), serviceClassName, PluginType.SATELLITE_RECEIVER);
         s = serviceRegistryDao.createEntity(s);
         JMSHelper jmsHelper = new JMSHelper(connectionFactory);
@@ -158,7 +159,7 @@ public class ExchangeAPIResourceTest extends BuildExchangeRestTestDeployment {
         commandType.setCommand(CommandTypeType.POLL);
 
         PollType pollType = new PollType();
-        pollType.setPollId("Test Poll ID");
+        pollType.setPollId(guid);
         pollType.setMessage("Test Poll Message");
         pollType.setPollTypeType(PollTypeType.POLL);
         KeyValueType connectId = new KeyValueType();

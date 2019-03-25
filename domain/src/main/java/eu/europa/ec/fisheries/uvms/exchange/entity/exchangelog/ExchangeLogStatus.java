@@ -30,6 +30,7 @@ import javax.validation.constraints.Size;
 import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogStatusTypeType;
 
 import java.time.Instant;
+import java.util.UUID;
 
 @Entity
 @Table(name="log_status")
@@ -38,7 +39,7 @@ public class ExchangeLogStatus {
 	@Id
 	@Column(name="logstatus_id")
 	@GeneratedValue(strategy = GenerationType.AUTO)
-	private Long id;
+	private UUID id;
 	
 	@NotNull
 	@Enumerated(EnumType.STRING)
@@ -59,11 +60,11 @@ public class ExchangeLogStatus {
 	@Column(name="logstatus_upuser")
 	private String updatedBy;
 	
-	public Long getId() {
+	public UUID getId() {
 		return id;
 	}
 
-	public void setId(Long id) {
+	public void setId(UUID id) {
 		this.id = id;
 	}
 

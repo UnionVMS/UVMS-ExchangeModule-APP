@@ -66,7 +66,7 @@ public class ExchangeLogRestResourceTest extends BuildExchangeRestTestDeployment
         assertNotNull(stringResponse);
         ListQueryResponse response = RestHelper.readResponseDto(stringResponse, ListQueryResponse.class);
         assertFalse(response.getLogList().isEmpty());
-        assertEquals(exchangeLog.getGuid(), response.getLogList().get(0).getId());
+        assertEquals(exchangeLog.getId().toString(), response.getLogList().get(0).getId());
         assertEquals(DateUtils.parseInstantToString(exchangeLog.getDateReceived()), response.getLogList().get(0).getDateRecieved());
 
     }
@@ -96,14 +96,14 @@ public class ExchangeLogRestResourceTest extends BuildExchangeRestTestDeployment
         List<ExchangeLogStatusType> response = RestHelper.readResponseDtoList(stringResponse, ExchangeLogStatusType.class);
         assertFalse(response.isEmpty());
         ExchangeLogStatusType output = response.get(0);
-        assertEquals(exchangeLog.getGuid(), output.getGuid());
+        assertEquals(exchangeLog.getId().toString(), output.getGuid());
     }
 
     @Test
     @OperateOnDeployment("exchangeservice")
     public void getPollStatusByRefIdTest() throws Exception {
         ExchangeLog exchangeLog = createBasicLog();
-        exchangeLog.setTypeRefGuid(UUID.randomUUID().toString());
+        exchangeLog.setTypeRefGuid(UUID.randomUUID());
         exchangeLog.setTypeRefType(TypeRefType.POLL);
         exchangeLog.setStatus(ExchangeLogStatusTypeType.PROBABLY_TRANSMITTED);
         addLogStatusToLog(exchangeLog,ExchangeLogStatusTypeType.PROBABLY_TRANSMITTED);
@@ -111,20 +111,20 @@ public class ExchangeLogRestResourceTest extends BuildExchangeRestTestDeployment
 
         String stringResponse = getWebTarget()
                 .path("exchange/poll")
-                .path(exchangeLog.getTypeRefGuid())
+                .path(exchangeLog.getTypeRefGuid().toString())
                 .request(MediaType.APPLICATION_JSON)
                 .get(String.class);
 
         assertNotNull(stringResponse);
         ExchangeLogStatusType response = RestHelper.readResponseDto(stringResponse, ExchangeLogStatusType.class);
-        assertEquals(exchangeLog.getGuid(), response.getGuid());
+        assertEquals(exchangeLog.getId().toString(), response.getGuid());
     }
 
     @Test
     @OperateOnDeployment("exchangeservice")
     public void getExchangeLogRawXMLByGuidTest() throws Exception {
         ExchangeLog exchangeLog = createBasicLog();
-        exchangeLog.setTypeRefGuid(UUID.randomUUID().toString());
+        exchangeLog.setTypeRefGuid(UUID.randomUUID());
         exchangeLog.setTypeRefMessage(UUID.randomUUID().toString());
         exchangeLog.setTypeRefType(TypeRefType.POLL);
         exchangeLog.setStatus(ExchangeLogStatusTypeType.PROBABLY_TRANSMITTED);
@@ -133,7 +133,7 @@ public class ExchangeLogRestResourceTest extends BuildExchangeRestTestDeployment
 
         String stringResponse = getWebTarget()
                 .path("exchange/message")
-                .path(exchangeLog.getGuid())
+                .path(exchangeLog.getId().toString())
                 .request(MediaType.APPLICATION_JSON)
                 .get(String.class);
 
@@ -145,7 +145,7 @@ public class ExchangeLogRestResourceTest extends BuildExchangeRestTestDeployment
     @OperateOnDeployment("exchangeservice")
     public void getExchangeLogRawXMLAndValidationByGuidTest() throws Exception {
         ExchangeLog exchangeLog = createBasicLog();
-        exchangeLog.setTypeRefGuid(UUID.randomUUID().toString());
+        exchangeLog.setTypeRefGuid(UUID.randomUUID());
         exchangeLog.setTypeRefMessage(UUID.randomUUID().toString());
         exchangeLog.setTypeRefType(TypeRefType.FA_RESPONSE);
         exchangeLog.setStatus(ExchangeLogStatusTypeType.PROBABLY_TRANSMITTED);
@@ -154,7 +154,7 @@ public class ExchangeLogRestResourceTest extends BuildExchangeRestTestDeployment
 
         String stringResponse = getWebTarget()
                 .path("exchange/validation")
-                .path(exchangeLog.getGuid())
+                .path(exchangeLog.getId().toString())
                 .request(MediaType.APPLICATION_JSON)
                 .get(String.class);
 
@@ -169,7 +169,7 @@ public class ExchangeLogRestResourceTest extends BuildExchangeRestTestDeployment
     @OperateOnDeployment("exchangeservice")
     public void getExchangeLogByUUIDTest() throws Exception {
         ExchangeLog exchangeLog = createBasicLog();
-        exchangeLog.setTypeRefGuid(UUID.randomUUID().toString());
+        exchangeLog.setTypeRefGuid(UUID.randomUUID());
         exchangeLog.setTypeRefMessage(UUID.randomUUID().toString());
         exchangeLog.setTypeRefType(TypeRefType.FA_RESPONSE);
         exchangeLog.setStatus(ExchangeLogStatusTypeType.PROBABLY_TRANSMITTED);
@@ -178,13 +178,13 @@ public class ExchangeLogRestResourceTest extends BuildExchangeRestTestDeployment
 
         String stringResponse = getWebTarget()
                 .path("exchange/")
-                .path(exchangeLog.getGuid())
+                .path(exchangeLog.getId().toString())
                 .request(MediaType.APPLICATION_JSON)
                 .get(String.class);
 
         assertNotNull(stringResponse);
         ExchangeLogType response = RestHelper.readResponseDto(stringResponse, ExchangeLogType.class);
-        assertEquals(exchangeLog.getGuid(), response.getGuid());
+        assertEquals(exchangeLog.getId().toString(), response.getGuid());
         assertEquals(exchangeLog.getSenderReceiver(), response.getSenderReceiver());
         assertEquals(exchangeLog.getSource(), response.getSource());
     }
@@ -194,7 +194,6 @@ public class ExchangeLogRestResourceTest extends BuildExchangeRestTestDeployment
 
     private ExchangeLog createBasicLog(){
         ExchangeLog exchangeLog = new ExchangeLog();
-        exchangeLog.setGuid("Basic Guid: " + UUID.randomUUID().toString());
         exchangeLog.setType(LogType.PROCESSED_MOVEMENT);
         exchangeLog.setStatus(ExchangeLogStatusTypeType.UNKNOWN);
         exchangeLog.setUpdatedBy("Tester");

@@ -14,6 +14,7 @@ package eu.europa.ec.fisheries.uvms.exchange;
 import javax.ejb.Local;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 
 import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeHistoryListQuery;
 import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeListQuery;
@@ -38,19 +39,19 @@ public interface ExchangeLogModel {
 
     ExchangeLogType updateExchangeLogBusinessError(ExchangeLogStatusType status, String businessError) throws ExchangeModelException;
 
-    ExchangeLogStatusType getExchangeLogStatusHistory(String guid, TypeRefType typeRefType) throws ExchangeModelException;
+    ExchangeLogStatusType getExchangeLogStatusHistory(UUID guid, TypeRefType typeRefType) throws ExchangeModelException;
 
-    List<ExchangeLogStatusType> getExchangeLogsStatusHistories(String guid, List<TypeRefType> typeRefType) throws ExchangeModelException;
+    List<ExchangeLogStatusType> getExchangeLogsStatusHistories(UUID guid, List<TypeRefType> typeRefType) throws ExchangeModelException;
 
     List<ExchangeLogStatusType> getExchangeLogStatusHistoryByQuery(ExchangeHistoryListQuery query) throws ExchangeModelException;
 
-	ExchangeLogType getExchangeLogByGuid(String guid) throws ExchangeModelException;
+	ExchangeLogType getExchangeLogByGuid(UUID guid) throws ExchangeModelException;
 
-    ExchangeLogType getExchangeLogByGuidAndType(String guid, TypeRefType typeRefType) throws ExchangeModelException;
+    ExchangeLogType getExchangeLogByGuidAndType(UUID guid, TypeRefType typeRefType) throws ExchangeModelException;
 
-    Set<ExchangeLogType> getExchangeLogByRefUUIDAndType(String refUUID, TypeRefType typeRefType) throws ExchangeModelException;
+    Set<ExchangeLogType> getExchangeLogByRefUUIDAndType(UUID refUUID, TypeRefType typeRefType) throws ExchangeModelException;
 
     ExchangeLogType setPollStatus(PollStatus pollStatus, String username) throws ExchangeModelException;
 
-    LogWithRawMsgAndType getExchangeLogRawXmlByGuid(String guid);
+    LogWithRawMsgAndType getExchangeLogRawXmlByGuid(UUID guid);
 }
