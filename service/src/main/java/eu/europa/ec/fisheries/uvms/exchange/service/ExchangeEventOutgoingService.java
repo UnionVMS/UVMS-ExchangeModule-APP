@@ -12,12 +12,11 @@
 package eu.europa.ec.fisheries.uvms.exchange.service;
 
 import javax.ejb.Local;
-import javax.enterprise.event.Observes;
+import javax.jms.TextMessage;
 
 import eu.europa.ec.fisheries.schema.exchange.module.v1.SetCommandRequest;
 import eu.europa.ec.fisheries.schema.exchange.plugin.types.v1.PluginType;
 import eu.europa.ec.fisheries.schema.exchange.plugin.v1.PluginBaseRequest;
-import eu.europa.ec.fisheries.uvms.exchange.service.message.event.carrier.ExchangeMessageEvent;
 import eu.europa.ec.fisheries.uvms.exchange.service.message.exception.ExchangeMessageException;
 import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelMarshallException;
 
@@ -29,20 +28,20 @@ public interface ExchangeEventOutgoingService {
      *
      * @param message
      */
-    public void sendReportToPlugin( ExchangeMessageEvent message);
+    public void sendReportToPlugin( TextMessage message);
 
     /**
      * Send a command to a plugin
      *
      * @param message
      */
-    public void sendCommandToPlugin(ExchangeMessageEvent message);
+    public void sendCommandToPlugin(TextMessage message);
 
     /**
      * Sends MDR sync message to the MDR plugin
      * @param message
      */
-    void forwardMdrSyncMessageToPlugin(ExchangeMessageEvent message);
+    void forwardMdrSyncMessageToPlugin(TextMessage message);
 
     String sendCommandToPluginFromRest(SetCommandRequest request);
 
@@ -50,7 +49,7 @@ public interface ExchangeEventOutgoingService {
      * Sends FLUX FA response message to ERS/Activity plugin
      * @param message
      */
-    void sendFLUXFAResponseToPlugin(ExchangeMessageEvent message);
+    void sendFLUXFAResponseToPlugin(TextMessage message);
 
     /**
      * Sends a Sales response to the FLUX plugin
@@ -70,9 +69,9 @@ public interface ExchangeEventOutgoingService {
      */
     void sendSalesReportToFLUX(eu.europa.ec.fisheries.schema.exchange.plugin.v1.SendSalesReportRequest salesReport) throws ExchangeModelMarshallException, ExchangeMessageException;
 
-    void sendFLUXFAQueryToPlugin(ExchangeMessageEvent message);
+    void sendFLUXFAQueryToPlugin(TextMessage message);
 
-    void sendFLUXFAReportToPlugin(ExchangeMessageEvent message);
+    void sendFLUXFAReportToPlugin(TextMessage message);
 
     void sendAssetInformationToFLUX(PluginBaseRequest request) throws ExchangeModelMarshallException, ExchangeMessageException;
 
@@ -80,32 +79,32 @@ public interface ExchangeEventOutgoingService {
      * Logs and sends a sales response to FLUX
      * @param message
      */
-    void sendSalesResponse(ExchangeMessageEvent message);
+    void sendSalesResponse(TextMessage message);
 
     /**
      * Logs and sends a sales report to FLUX
      * @param message
      */
-    void sendSalesReport(ExchangeMessageEvent message);
+    void sendSalesReport(TextMessage message);
 
     /**
      * Logs and sends a send asset information to FLUX fleet plugin
      *
      * @param event send asset information message
      */
-    void sendAssetInformation(ExchangeMessageEvent event);
+    void sendAssetInformation(TextMessage event);
 
-    void updateLogStatus(ExchangeMessageEvent message);
+    void updateLogStatus(TextMessage message);
 
-    void updateLogBusinessError(ExchangeMessageEvent message);
+    void updateLogBusinessError(TextMessage message);
 
     /**
      * Async response handler for processed movements
      *
      * @param message
      */
-    void handleProcessedMovement(ExchangeMessageEvent message);
+    void handleProcessedMovement(TextMessage message);
 
-    void handleProcessedMovementBatch(ExchangeMessageEvent message);
+    void handleProcessedMovementBatch(TextMessage message);
 
 }

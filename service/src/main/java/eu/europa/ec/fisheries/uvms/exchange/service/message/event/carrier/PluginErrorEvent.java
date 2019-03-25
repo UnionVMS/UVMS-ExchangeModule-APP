@@ -20,17 +20,13 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
-public class PluginMessageEvent {
+public class PluginErrorEvent {
 
     private TextMessage jmsMessage;
     private ServiceType serviceType;
     private PluginFault fault;
 
-    public PluginMessageEvent(TextMessage jmsMessage) {
-        this.jmsMessage = jmsMessage;
-    }
-
-    public PluginMessageEvent(TextMessage jmsMessage, ServiceType type, PluginFault fault) {
+    public PluginErrorEvent(TextMessage jmsMessage, ServiceType type, PluginFault fault) {
         this.jmsMessage = jmsMessage;
         this.serviceType = type;
         this.fault = fault;
@@ -40,32 +36,12 @@ public class PluginMessageEvent {
         return fault;
     }
 
-    public void setErrorFault(PluginFault fault) {
-        this.fault = fault;
-    }
-
     public TextMessage getJmsMessage() {
         return jmsMessage;
     }
 
-    public void setJmsMessage(TextMessage jmsMessage) {
-        this.jmsMessage = jmsMessage;
-    }
-
     public ServiceType getServiceType() {
         return serviceType;
-    }
-
-    public void setServiceType(ServiceType serviceType) {
-        this.serviceType = serviceType;
-    }
-
-    public PluginFault getFault() {
-        return fault;
-    }
-
-    public void setFault(PluginFault fault) {
-        this.fault = fault;
     }
 
     @Override
