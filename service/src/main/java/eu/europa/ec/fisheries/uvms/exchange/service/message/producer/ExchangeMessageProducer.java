@@ -21,7 +21,7 @@ import javax.ejb.Local;
 import javax.jms.TextMessage;
 
 @Local
-public interface ExchangeMessageProducer {
+public interface ExchangeMessageProducer {      //leave be for now ;(
 
     String sendMessageOnQueue(String text, MessageQueue queue) throws ExchangeMessageException;
 

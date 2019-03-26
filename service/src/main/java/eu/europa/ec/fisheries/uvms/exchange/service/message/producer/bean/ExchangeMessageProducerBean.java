@@ -83,7 +83,6 @@ public class ExchangeMessageProducerBean extends AbstractProducer implements Exc
     }
 
     @Override
-    @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
     public String sendMessageOnQueue(String text, MessageQueue queue) throws ExchangeMessageException {
         try {
             Queue destination = getDestinationQueue(queue);
@@ -98,7 +97,6 @@ public class ExchangeMessageProducerBean extends AbstractProducer implements Exc
     }
 
     @Override
-    @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
     public String sendEventBusMessage(String text, String serviceName) throws ExchangeMessageException {
         try {
             LOG.debug("Sending event bus message from Exchange module to recipient om JMS Topic to: {} ", serviceName);
@@ -121,7 +119,6 @@ public class ExchangeMessageProducerBean extends AbstractProducer implements Exc
     }
 
     @Override
-    @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
     public String sendRulesMessage(String text) throws ConfigMessageException {
         try {
             return sendMessageOnQueue(text, MessageQueue.RULES);
@@ -132,7 +129,6 @@ public class ExchangeMessageProducerBean extends AbstractProducer implements Exc
     }
 
     @Override
-    @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
     public String sendRulesMessage(String text, String messageSelector) throws ExchangeMessageException {
         try {
             Map<String, String> messageProperties = new HashMap<>();
@@ -148,7 +144,6 @@ public class ExchangeMessageProducerBean extends AbstractProducer implements Exc
     }
     
     @Override
-    @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
     public String sendMovementMessage(String text, String groupId) throws ExchangeMessageException {
         try {
             Map<String, String> properties = new HashMap<>();
