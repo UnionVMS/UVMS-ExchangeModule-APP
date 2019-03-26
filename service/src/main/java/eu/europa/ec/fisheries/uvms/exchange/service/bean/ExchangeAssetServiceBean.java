@@ -23,17 +23,15 @@ import org.slf4j.LoggerFactory;
 import eu.europa.ec.fisheries.uvms.asset.model.exception.AssetModelMapperException;
 import eu.europa.ec.fisheries.uvms.asset.model.mapper.AssetModuleRequestMapper;
 import eu.europa.ec.fisheries.uvms.asset.model.mapper.AssetModuleResponseMapper;
-import eu.europa.ec.fisheries.uvms.exchange.service.message.constants.MessageQueue;
 import eu.europa.ec.fisheries.uvms.exchange.service.message.consumer.ExchangeConsumer;
 import eu.europa.ec.fisheries.uvms.exchange.service.message.exception.ExchangeMessageException;
 import eu.europa.ec.fisheries.uvms.exchange.service.message.producer.ExchangeMessageProducer;
-import eu.europa.ec.fisheries.uvms.exchange.service.ExchangeAssetService;
 import eu.europa.ec.fisheries.uvms.exchange.service.exception.ExchangeServiceException;
 import eu.europa.ec.fisheries.wsdl.asset.types.Asset;
 import eu.europa.ec.fisheries.wsdl.asset.types.AssetIdType;
 
 @Stateless
-public class ExchangeAssetServiceBean implements ExchangeAssetService {
+public class ExchangeAssetServiceBean {
 	final static Logger LOG = LoggerFactory.getLogger(ExchangeAssetServiceBean.class);
 	
 	@EJB
@@ -42,7 +40,6 @@ public class ExchangeAssetServiceBean implements ExchangeAssetService {
 	@EJB
     ExchangeConsumer consumer;
 
-	@Override
 	public Asset getAsset(String assetGuid) throws ExchangeServiceException {
 		try {
             String request = AssetModuleRequestMapper.createGetAssetModuleRequest(assetGuid, AssetIdType.GUID);

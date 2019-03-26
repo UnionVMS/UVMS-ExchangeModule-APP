@@ -24,7 +24,7 @@ import javax.json.bind.Jsonb;
 import javax.json.bind.JsonbBuilder;
 import javax.xml.bind.JAXBException;
 
-import eu.europa.ec.fisheries.uvms.exchange.entity.serviceregistry.Service;
+import eu.europa.ec.fisheries.uvms.exchange.bean.ExchangeLogModelBean;
 import org.apache.commons.collections.CollectionUtils;
 import eu.europa.ec.fisheries.schema.exchange.common.v1.AcknowledgeType;
 import eu.europa.ec.fisheries.schema.exchange.module.v1.*;
@@ -42,7 +42,6 @@ import eu.europa.ec.fisheries.schema.rules.module.v1.RulesModuleMethod;
 import eu.europa.ec.fisheries.schema.rules.module.v1.SetFLUXMDRSyncMessageRulesResponse;
 import eu.europa.ec.fisheries.uvms.commons.message.api.MessageException;
 import eu.europa.ec.fisheries.uvms.commons.message.impl.JAXBUtils;
-import eu.europa.ec.fisheries.uvms.exchange.ExchangeLogModel;
 import eu.europa.ec.fisheries.uvms.exchange.service.message.constants.MessageQueue;
 import eu.europa.ec.fisheries.uvms.exchange.service.message.event.ErrorEvent;
 import eu.europa.ec.fisheries.uvms.exchange.service.message.event.carrier.ExchangeErrorEvent;
@@ -56,10 +55,6 @@ import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelMarshal
 import eu.europa.ec.fisheries.uvms.exchange.model.mapper.ExchangeModuleResponseMapper;
 import eu.europa.ec.fisheries.uvms.exchange.model.mapper.ExchangePluginResponseMapper;
 import eu.europa.ec.fisheries.uvms.exchange.model.mapper.JAXBMarshaller;
-import eu.europa.ec.fisheries.uvms.exchange.service.ExchangeEventIncomingService;
-import eu.europa.ec.fisheries.uvms.exchange.service.ExchangeEventOutgoingService;
-import eu.europa.ec.fisheries.uvms.exchange.service.ExchangeLogService;
-import eu.europa.ec.fisheries.uvms.exchange.service.ExchangeService;
 import eu.europa.ec.fisheries.uvms.exchange.service.event.ExchangePluginStatusEvent;
 import eu.europa.ec.fisheries.uvms.exchange.service.event.PollEvent;
 import eu.europa.ec.fisheries.uvms.exchange.service.exception.ExchangeLogException;
@@ -75,7 +70,7 @@ import org.slf4j.LoggerFactory;
 
 
 @Stateless
-public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingService {
+public class ExchangeEventIncomingServiceBean {
 
     private final static Logger LOG = LoggerFactory.getLogger(ExchangeEventIncomingServiceBean.class);
 
@@ -96,23 +91,26 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
     private Event<NotificationMessage> pollEvent;
 
     @EJB
-    private ExchangeLogService exchangeLog;
+    private ExchangeLogServiceBean exchangeLog;
 
     @EJB
-    private ExchangeLogModel exchangeLogModel;
+    private ExchangeLogModelBean exchangeLogModel;
 
     @EJB
     private ExchangeMessageProducer producer;
 
     @EJB
-    private ExchangeService exchangeService;
+    private ExchangeServiceBean exchangeService;
 
     @EJB
-    private ExchangeEventOutgoingService exchangeEventOutgoingService;
+    private ExchangeEventOutgoingServiceBean exchangeEventOutgoingService;
 
     private Jsonb jsonb = JsonbBuilder.create();
-    
-    @Override
+
+    /**
+     * Process FLUXFAReportMessage coming from Flux Activity plugin
+     * @param message
+     */
     public void processFLUXFAReportMessage(TextMessage message) {
         try {
             SetFLUXFAReportMessageRequest request = JAXBMarshaller.unmarshallTextMessage(message, SetFLUXFAReportMessageRequest.class);
@@ -133,7 +131,6 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
         }
     }
 
-    @Override
     public void processFAQueryMessage(TextMessage message) {
         try {
             SetFAQueryMessageRequest request = JAXBMarshaller.unmarshallTextMessage(message, SetFAQueryMessageRequest.class);
@@ -150,7 +147,6 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
         }
     }
 
-    @Override
     public void processFluxFAResponseMessage(TextMessage message) {
         try {
             RcvFLUXFaResponseMessageRequest request = JAXBMarshaller.unmarshallTextMessage(message, RcvFLUXFaResponseMessageRequest.class);
@@ -173,7 +169,10 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
      * module has arrived (synchronisation of the mdr).
      *
      */
-    @Override
+    /**
+     * Process MDR sync response message sent to Flux MDR plugin
+     * @param message
+     */
     public void sendResponseToRulesModule(TextMessage message) {           //and nothing to the exchange log?
         try {
             SetFLUXMDRSyncMessageExchangeResponse exchangeResponse = JAXBMarshaller.unmarshallTextMessage(message, SetFLUXMDRSyncMessageExchangeResponse.class);
@@ -189,7 +188,11 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
         }
     }
 
-    @Override
+    /**
+     * Get plugin list from APP module
+     *
+     * @param message
+     */
     public void getPluginListByTypes(TextMessage message) {
         try {
             GetServiceListRequest request = JAXBMarshaller.unmarshallTextMessage(message, GetServiceListRequest.class);
@@ -203,7 +206,6 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
         }
     }
 
-    @Override
     public void processReceivedMovementBatch(TextMessage message) {
         try {
             // Log it.
@@ -230,7 +232,11 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
         }
     }
 
-    @Override
+    /**
+     * Process a received Movement
+     *
+     * @param message
+     */
     public void processMovement(TextMessage message) {
         try {
             final TextMessage jmsMessage = message;
@@ -278,7 +284,11 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
         } 
     }
 
-    @Override
+    /**
+     * Logs and sends a received asset information to Asset
+     *
+     * @param event received asset information message
+     */
     public void receiveAssetInformation(TextMessage event) {
         try {
             ReceiveAssetInformationRequest request = JAXBMarshaller.unmarshallTextMessage(event, ReceiveAssetInformationRequest.class);
@@ -298,7 +308,11 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
         }
     }
 
-    @Override
+    /**
+     * Logs and sends a received sales report through to Rules
+     *
+     * @param event received sales report
+     */
     public void receiveSalesReport(TextMessage event) {
         try {
             ReceiveSalesReportRequest request = JAXBMarshaller.unmarshallTextMessage(event, ReceiveSalesReportRequest.class);
@@ -325,7 +339,11 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
         }
     }
 
-    @Override
+    /**
+     * Logs and sends a received sales query through to Rules
+     *
+     * @param event received sales query
+     */
     public void receiveSalesQuery(TextMessage event) {
         try {
             ReceiveSalesQueryRequest request = JAXBMarshaller.unmarshallTextMessage(event, ReceiveSalesQueryRequest.class);
@@ -351,7 +369,10 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
         }
     }
 
-    @Override
+    /**
+     * Logs and sends a received sales response through to Rules
+     * @param event
+     */
     public void receiveSalesResponse(TextMessage event) {
         try {
             ReceiveSalesResponseRequest request = JAXBMarshaller.unmarshallTextMessage(event, ReceiveSalesResponseRequest.class);
@@ -370,7 +391,6 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
     }
 
 
-    @Override
     public void receiveInvalidSalesMessage(TextMessage event) {
         try {
             ReceiveInvalidSalesMessage request = JAXBMarshaller.unmarshallTextMessage(event, ReceiveInvalidSalesMessage.class);
@@ -383,7 +403,10 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
         }
     }
 
-    @Override
+    /**
+     * Checks for a reference in log table for a certain type of message
+     * @param event
+     */
     public void logRefIdByTypeExists(TextMessage event) {      //this one has the wierd behavour that it both returns the correct answer AND puts the initial message in DLQ for causing an exception AT THE SAME TIME if the input is an empty list..........
         try {
             LogRefIdByTypeExistsRequest request = unMarshallMessage(event.getText(), LogRefIdByTypeExistsRequest.class);
@@ -396,12 +419,15 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
             }
             String responseAsString = JAXBUtils.marshallJaxBObjectToString(response);
             producer.sendModuleResponseMessage(event, responseAsString);
-        } catch (ExchangeModelException | MessageException | JAXBException | JMSException e) {
+        } catch (MessageException | JAXBException | JMSException e) {
             fireExchangeFault(event, "Could not un-marshall " + LogRefIdByTypeExistsRequest.class, e);
         }
     }
 
-    @Override
+    /**
+     * Checks for a guid in log table for a certain type of message
+     * @param event
+     */
     public void logIdByTypeExists(TextMessage event) {
         try {
             LogIdByTypeExistsRequest request = unMarshallMessage(event.getText(), LogIdByTypeExistsRequest.class);
@@ -415,14 +441,17 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
             String responseAsString = JAXBUtils.marshallJaxBObjectToString(response);
             producer.sendModuleResponseMessage(event, responseAsString);
 
-        } catch (ExchangeModelException | MessageException | JAXBException | JMSException e) {
+        } catch (MessageException | JAXBException | JMSException e) {
             fireExchangeFault(event, "Could not un-marshall " + LogRefIdByTypeExistsRequest.class, e);
         }
 
     }
 
-
-    @Override
+    /**
+     * Logs and sends a query asset information to FLUX fleet plugin
+     *
+     * @param event query asset information message
+     */
     public void queryAssetInformation(TextMessage event) {
         try {
             QueryAssetInformationRequest incomingRequest = JAXBMarshaller.unmarshallTextMessage(event, QueryAssetInformationRequest.class);
@@ -445,8 +474,11 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
         }
     }
 
-
-    @Override
+    /**
+     * Ping Exchange APP module
+     *
+     * @param message
+     */
     public void ping(TextMessage message) {
         try {
             PingResponse response = new PingResponse();
@@ -457,7 +489,11 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
         }
     }
 
-    @Override
+    /**
+     * Process answer of ping sent to plugins
+     *
+     * @param message
+     */
     public void processPluginPing(TextMessage message) {
         try {
             eu.europa.ec.fisheries.schema.exchange.plugin.v1.PingResponse response = JAXBMarshaller.unmarshallTextMessage(message, eu.europa.ec.fisheries.schema.exchange.plugin.v1.PingResponse.class);
@@ -468,7 +504,11 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
         }
     }
 
-    @Override
+    /**
+     * Process answer of commands sent to plugins
+     *
+     * @param message
+     */
     public void processAcknowledge(TextMessage message) {
         try {
             AcknowledgeResponse response = JAXBMarshaller.unmarshallTextMessage(message, AcknowledgeResponse.class);

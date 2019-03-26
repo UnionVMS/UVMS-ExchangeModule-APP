@@ -4,7 +4,7 @@ import eu.europa.ec.fisheries.schema.exchange.common.v1.AcknowledgeTypeType;
 import eu.europa.ec.fisheries.schema.exchange.plugin.types.v1.PluginType;
 import eu.europa.ec.fisheries.schema.exchange.registry.v1.RegisterServiceResponse;
 import eu.europa.ec.fisheries.schema.exchange.service.v1.*;
-import eu.europa.ec.fisheries.uvms.exchange.dao.ServiceRegistryDao;
+import eu.europa.ec.fisheries.uvms.exchange.dao.bean.ServiceRegistryDaoBean;
 import eu.europa.ec.fisheries.uvms.exchange.entity.serviceregistry.Service;
 import eu.europa.ec.fisheries.uvms.exchange.model.mapper.ExchangeModuleRequestMapper;
 import eu.europa.ec.fisheries.uvms.exchange.model.mapper.JAXBMarshaller;
@@ -35,7 +35,7 @@ public class RegistryBusEventListenerTest extends BuildExchangeServiceTestDeploy
     private ConnectionFactory connectionFactory;
 
     @Inject
-    ServiceRegistryDao serviceRegistryDao;
+    ServiceRegistryDaoBean serviceRegistryDao;
 
     private Jsonb jsonb;
 
@@ -113,6 +113,7 @@ public class RegistryBusEventListenerTest extends BuildExchangeServiceTestDeploy
         assertEquals(AcknowledgeTypeType.OK, response.getAck().getType());
         assertEquals(service.getServiceClassName(), response.getService().getServiceClassName());
 
+        Thread.sleep(500);      //removed a requires new transaction on the register service part so this is needed to allow the transaction go commit
         String unregisterRequest = ExchangeModuleRequestMapper.createUnregisterServiceRequest(service);
         jmsHelper.sendMessageOnEventQueue(unregisterRequest);
 
@@ -122,8 +123,8 @@ public class RegistryBusEventListenerTest extends BuildExchangeServiceTestDeploy
         assertFalse(unregistredService.getActive());
         assertEquals(false, unregistredService.getStatus());
         assertEquals(PluginType.MANUAL.value(), unregistredService.getType().value());
-
     }
+
     private ServiceType createBasicService(PluginType pluginType) {
 
         ServiceType service = new ServiceType();

@@ -69,10 +69,6 @@ import eu.europa.ec.fisheries.uvms.exchange.model.mapper.ExchangeModuleResponseM
 import eu.europa.ec.fisheries.uvms.exchange.model.mapper.ExchangePluginRequestMapper;
 import eu.europa.ec.fisheries.uvms.exchange.model.mapper.ExchangePluginResponseMapper;
 import eu.europa.ec.fisheries.uvms.exchange.model.mapper.JAXBMarshaller;
-import eu.europa.ec.fisheries.uvms.exchange.service.ExchangeAssetService;
-import eu.europa.ec.fisheries.uvms.exchange.service.ExchangeEventOutgoingService;
-import eu.europa.ec.fisheries.uvms.exchange.service.ExchangeLogService;
-import eu.europa.ec.fisheries.uvms.exchange.service.ExchangeService;
 import eu.europa.ec.fisheries.uvms.exchange.service.constants.ExchangeServiceConstants;
 import eu.europa.ec.fisheries.uvms.exchange.service.event.PollEvent;
 import eu.europa.ec.fisheries.uvms.exchange.service.exception.ExchangeLogException;
@@ -85,7 +81,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @Stateless
-public class ExchangeEventOutgoingServiceBean implements ExchangeEventOutgoingService {
+public class ExchangeEventOutgoingServiceBean {
 
     private final static Logger LOG = LoggerFactory.getLogger(ExchangeEventOutgoingServiceBean.class);
 
@@ -105,21 +101,24 @@ public class ExchangeEventOutgoingServiceBean implements ExchangeEventOutgoingSe
     private ExchangeMessageProducer producer;
 
     @EJB
-    private ExchangeConsumer consumer;
+    private ExchangeLogServiceBean exchangeLogService;
 
     @EJB
-    private ExchangeLogService exchangeLogService;
+    private ExchangeServiceBean exchangeService;
 
     @EJB
-    private ExchangeService exchangeService;
+    private ExchangeAssetServiceBean exchangeAssetService;
 
     @EJB
-    private ExchangeAssetService exchangeAssetService;
+    private ExchangeEventOutgoingServiceBean exchangeEventOutgoingService;
 
-    @EJB
-    private ExchangeEventOutgoingService exchangeEventOutgoingService;
-
-    @Override
+    /**
+     * Sends a Sales response to the FLUX plugin
+     * @param sendSalesResponseRequest the sales response that needs to be sent
+     * @param pluginType type of the plugin which the Sales response should be sent through
+     * @throws ExchangeModelMarshallException
+     * @throws ExchangeMessageException
+     */
     public void sendSalesResponseToPlugin(SendSalesResponseRequest sendSalesResponseRequest, PluginType pluginType) throws ExchangeModelMarshallException, ExchangeMessageException {
         if (pluginType == null) {
             throw new IllegalArgumentException("No plugin provided to send the Sales response to.");
@@ -129,19 +128,27 @@ public class ExchangeEventOutgoingServiceBean implements ExchangeEventOutgoingSe
         producer.sendEventBusMessage(marshalledRequest, serviceName);
     }
 
-    @Override
+    /**
+     * Sends a Sales report to the FLUX plugin
+     * @param sendSalesReportRequest
+     * @throws ExchangeModelMarshallException
+     * @throws ExchangeMessageException
+     */
     public void sendSalesReportToFLUX(SendSalesReportRequest sendSalesReportRequest) throws ExchangeModelMarshallException, ExchangeMessageException {
         String marshalledRequest = JAXBMarshaller.marshallJaxBObjectToString(sendSalesReportRequest);
         producer.sendEventBusMessage(marshalledRequest, ExchangeServiceConstants.FLUX_SALES_PLUGIN_SERVICE_NAME);
     }
 
-    @Override
     public void sendAssetInformationToFLUX(PluginBaseRequest request) throws ExchangeModelMarshallException, ExchangeMessageException {
         String marshalledRequest = JAXBMarshaller.marshallJaxBObjectToString(request);
         producer.sendEventBusMessage(marshalledRequest, ExchangeServiceConstants.FLUX_VESSEL_PLUGIN_SERVICE_NAME);
     }
 
-    @Override
+    /**
+     * Send a report to a plugin
+     *
+     * @param message
+     */
     public void sendReportToPlugin(TextMessage message) {
         try {
             SendMovementToPluginRequest request = JAXBMarshaller.unmarshallTextMessage(message, SendMovementToPluginRequest.class);
@@ -196,7 +203,10 @@ public class ExchangeEventOutgoingServiceBean implements ExchangeEventOutgoingSe
 	 * so that it gets intercepted by MDR Plugin Registered Subscriber and sent to Flux.
 	 *
 	 */
-    @Override
+    /**
+     * Sends MDR sync message to the MDR plugin
+     * @param message
+     */
     public void forwardMdrSyncMessageToPlugin(TextMessage message) {               //not adding anything to the exchange log????
         try {
             LOG.info("[INFO] Received MdrSyncMessageEvent. Going to send to the Plugin now..");
@@ -207,7 +217,11 @@ public class ExchangeEventOutgoingServiceBean implements ExchangeEventOutgoingSe
         }
     }
 
-    @Override
+    /**
+     * Send a command to a plugin
+     *
+     * @param message
+     */
     public void sendCommandToPlugin(TextMessage message) {
         SetCommandRequest request = new SetCommandRequest();
         try {
@@ -242,7 +256,6 @@ public class ExchangeEventOutgoingServiceBean implements ExchangeEventOutgoingSe
         }
     }
 
-    @Override
     public String sendCommandToPluginFromRest(SetCommandRequest request){
         try {
             ServiceResponseType service = exchangeService.getService(request.getCommand().getPluginName());
@@ -259,7 +272,10 @@ public class ExchangeEventOutgoingServiceBean implements ExchangeEventOutgoingSe
     }
 
 
-    @Override
+    /**
+     * Sends FLUX FA response message to ERS/Activity plugin
+     * @param message
+     */
     public void sendFLUXFAResponseToPlugin(TextMessage message) {
         try {
             SetFLUXFAResponseMessageRequest request = JAXBMarshaller.unmarshallTextMessage(message, SetFLUXFAResponseMessageRequest.class);
@@ -280,7 +296,6 @@ public class ExchangeEventOutgoingServiceBean implements ExchangeEventOutgoingSe
         }
     }
 
-    @Override
     public void sendFLUXFAQueryToPlugin(TextMessage message) {
         try {
             SetFAQueryMessageRequest request = JAXBMarshaller.unmarshallTextMessage(message, SetFAQueryMessageRequest.class);
@@ -298,7 +313,6 @@ public class ExchangeEventOutgoingServiceBean implements ExchangeEventOutgoingSe
     }
 
 
-    @Override
     public void sendFLUXFAReportToPlugin(TextMessage message) {
         try {
             SetFLUXFAReportMessageRequest request = JAXBMarshaller.unmarshallTextMessage(message, SetFLUXFAReportMessageRequest.class);
@@ -315,7 +329,10 @@ public class ExchangeEventOutgoingServiceBean implements ExchangeEventOutgoingSe
         }
     }
 
-    @Override
+    /**
+     * Logs and sends a sales response to FLUX
+     * @param message
+     */
     public void sendSalesResponse(TextMessage message) {
         try {
             eu.europa.ec.fisheries.schema.exchange.module.v1.SendSalesResponseRequest request = JAXBMarshaller.unmarshallTextMessage(message, eu.europa.ec.fisheries.schema.exchange.module.v1.SendSalesResponseRequest.class);
@@ -337,7 +354,10 @@ public class ExchangeEventOutgoingServiceBean implements ExchangeEventOutgoingSe
         }
     }
 
-    @Override
+    /**
+     * Logs and sends a sales report to FLUX
+     * @param message
+     */
     public void sendSalesReport(TextMessage message) {
         try {
             eu.europa.ec.fisheries.schema.exchange.module.v1.SendSalesReportRequest request = JAXBMarshaller.unmarshallTextMessage(message, eu.europa.ec.fisheries.schema.exchange.module.v1.SendSalesReportRequest.class);
@@ -364,7 +384,11 @@ public class ExchangeEventOutgoingServiceBean implements ExchangeEventOutgoingSe
         }
     }
 
-    @Override
+    /**
+     * Logs and sends a send asset information to FLUX fleet plugin
+     *
+     * @param event send asset information message
+     */
     public void sendAssetInformation(TextMessage event) {
         try {
             SendAssetInformationRequest incomingRequest = JAXBMarshaller.unmarshallTextMessage(event, SendAssetInformationRequest.class);
@@ -387,7 +411,6 @@ public class ExchangeEventOutgoingServiceBean implements ExchangeEventOutgoingSe
         }
     }
 
-    @Override
     public void updateLogStatus(TextMessage message) {
         try {
             UpdateLogStatusRequest request = JAXBMarshaller.unmarshallTextMessage(message, UpdateLogStatusRequest.class);
@@ -401,7 +424,6 @@ public class ExchangeEventOutgoingServiceBean implements ExchangeEventOutgoingSe
         }
     }
 
-    @Override
     public void updateLogBusinessError(TextMessage message) {  //should this chain not set a log status or something?
         try {
             UpdateLogStatusRequest request = JAXBMarshaller.unmarshallTextMessage(message, UpdateLogStatusRequest.class);
@@ -413,7 +435,11 @@ public class ExchangeEventOutgoingServiceBean implements ExchangeEventOutgoingSe
         }
     }
 
-    @Override
+    /**
+     * Async response handler for processed movements
+     *
+     * @param message
+     */
     public void handleProcessedMovement(TextMessage message) {
         try {
             ProcessedMovementResponse response = JAXBMarshaller.unmarshallTextMessage(message, ProcessedMovementResponse.class);
@@ -442,7 +468,6 @@ public class ExchangeEventOutgoingServiceBean implements ExchangeEventOutgoingSe
         }
     }
 
-    @Override
     public void handleProcessedMovementBatch(TextMessage message) {
         try {
             ProcessedMovementResponseBatch request = JAXBMarshaller.unmarshallTextMessage(message, ProcessedMovementResponseBatch.class);

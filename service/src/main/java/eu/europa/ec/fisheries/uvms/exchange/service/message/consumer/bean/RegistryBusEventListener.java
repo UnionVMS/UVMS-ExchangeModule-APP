@@ -21,7 +21,7 @@ import javax.jms.Message;
 import javax.jms.MessageListener;
 import javax.jms.TextMessage;
 
-import eu.europa.ec.fisheries.uvms.exchange.service.PluginService;
+import eu.europa.ec.fisheries.uvms.exchange.service.bean.PluginServiceBean;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -52,7 +52,7 @@ public class RegistryBusEventListener implements MessageListener {
     final static Logger LOG = LoggerFactory.getLogger(RegistryBusEventListener.class);
 
     @Inject
-    private PluginService pluginServiceBean;
+    private PluginServiceBean pluginServiceBean;
 
     @Inject
     @eu.europa.ec.fisheries.uvms.exchange.service.message.event.PluginErrorEvent

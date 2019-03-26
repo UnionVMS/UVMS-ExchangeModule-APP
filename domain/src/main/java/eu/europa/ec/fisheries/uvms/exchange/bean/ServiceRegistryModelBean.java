@@ -13,14 +13,13 @@ package eu.europa.ec.fisheries.uvms.exchange.bean;
 
 import eu.europa.ec.fisheries.schema.exchange.plugin.types.v1.PluginType;
 import eu.europa.ec.fisheries.schema.exchange.service.v1.*;
-import eu.europa.ec.fisheries.uvms.exchange.dao.ServiceRegistryDao;
+import eu.europa.ec.fisheries.uvms.exchange.dao.bean.ServiceRegistryDaoBean;
 import eu.europa.ec.fisheries.uvms.exchange.entity.serviceregistry.Service;
 import eu.europa.ec.fisheries.uvms.exchange.entity.serviceregistry.ServiceCapability;
 import eu.europa.ec.fisheries.uvms.exchange.entity.serviceregistry.ServiceSetting;
 import eu.europa.ec.fisheries.uvms.exchange.exception.ExchangeDaoException;
 import eu.europa.ec.fisheries.uvms.exchange.mapper.ServiceMapper;
 import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelException;
-import eu.europa.ec.fisheries.uvms.exchange.ServiceRegistryModel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,14 +30,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Stateless
-public class ServiceRegistryModelBean implements ServiceRegistryModel {
+public class ServiceRegistryModelBean {
 
     final static Logger LOG = LoggerFactory.getLogger(ServiceRegistryModelBean.class);
 
     @EJB
-    ServiceRegistryDao dao;
+    ServiceRegistryDaoBean dao;
 
-    @Override
     public ServiceResponseType registerService(ServiceType serviceType, CapabilityListType capabilityList, SettingListType settingList, String username) throws ExchangeModelException {
         // Look for existing service
         Service service = dao.getServiceByServiceClassName(serviceType.getServiceClassName());
@@ -67,7 +65,6 @@ public class ServiceRegistryModelBean implements ServiceRegistryModel {
         return ServiceMapper.toServiceModel(service);        
     }
 
-    @Override
     public ServiceResponseType unregisterService(ServiceType serviceType, String username) throws ExchangeModelException {
         // Look for existing service
         Service service = dao.getServiceByServiceClassName(serviceType.getServiceClassName());
@@ -90,7 +87,6 @@ public class ServiceRegistryModelBean implements ServiceRegistryModel {
         throw new ExchangeDaoException("[ No service to unregister ]"); 
     }
 
-    @Override
     public List<ServiceResponseType> getPlugins(List<PluginType> pluginTypes) throws ExchangeModelException {
         List<ServiceResponseType> services = new ArrayList<>();
 
@@ -106,7 +102,6 @@ public class ServiceRegistryModelBean implements ServiceRegistryModel {
         return services;
     }
 
-    @Override
 	public ServiceResponseType updatePluginSettings(String serviceClassName, SettingListType settings, String username) throws ExchangeModelException {
     	LOG.info("Update plugin settings for " + serviceClassName);
     	Service service = dao.getServiceByServiceClassName(serviceClassName);
@@ -120,7 +115,6 @@ public class ServiceRegistryModelBean implements ServiceRegistryModel {
     	throw new ExchangeDaoException("No plugin found when update plugin settings");
 	}
     
-    @Override
     public List<SettingType> getPluginSettings(String serviceClassName) throws ExchangeModelException {
         LOG.info("Get plugin settings:{}",serviceClassName);
 
@@ -140,7 +134,6 @@ public class ServiceRegistryModelBean implements ServiceRegistryModel {
 
     }
 
-    @Override
     public List<CapabilityType> getPluginCapabilities(String serviceClassName) throws ExchangeModelException {
         LOG.info("Get plugin capabilities:{}",serviceClassName);
 
@@ -160,7 +153,6 @@ public class ServiceRegistryModelBean implements ServiceRegistryModel {
         return capabilities;
     }
 
-    @Override
     public ServiceResponseType getPlugin(String serviceClassName) throws ExchangeModelException {
         try {
             Service service = dao.getServiceByServiceClassName(serviceClassName);
@@ -172,7 +164,6 @@ public class ServiceRegistryModelBean implements ServiceRegistryModel {
         }
     }
 
-	@Override
 	public ServiceResponseType updatePluginStatus(String serviceName, StatusType status, String username) throws ExchangeModelException {
 		Service service = dao.getServiceByServiceClassName(serviceName);
 		if(service != null) {

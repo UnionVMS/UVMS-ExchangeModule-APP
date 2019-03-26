@@ -37,8 +37,6 @@ import eu.europa.ec.fisheries.uvms.exchange.model.mapper.ExchangeModuleResponseM
 import eu.europa.ec.fisheries.uvms.exchange.model.mapper.ExchangePluginRequestMapper;
 import eu.europa.ec.fisheries.uvms.exchange.model.mapper.ExchangePluginResponseMapper;
 import eu.europa.ec.fisheries.uvms.exchange.model.mapper.JAXBMarshaller;
-import eu.europa.ec.fisheries.uvms.exchange.service.ExchangeService;
-import eu.europa.ec.fisheries.uvms.exchange.service.PluginService;
 import eu.europa.ec.fisheries.uvms.exchange.service.exception.ExchangeServiceException;
 import eu.europa.ec.fisheries.uvms.exchange.service.exception.InputArgumentException;
 import eu.europa.ec.fisheries.uvms.exchange.service.mapper.SettingTypeMapper;
@@ -56,7 +54,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @Stateless
-public class PluginServiceBean implements PluginService {
+public class PluginServiceBean {
 
     private final static Logger LOG = LoggerFactory.getLogger(PluginServiceBean.class);
 
@@ -71,7 +69,7 @@ public class PluginServiceBean implements PluginService {
     private Event<ExchangeErrorEvent> exchangeErrorEvent;
 
     @EJB
-    private ExchangeService exchangeService;
+    private ExchangeServiceBean exchangeService;
 
     @EJB
     private ExchangeMessageProducer producer;
@@ -154,7 +152,6 @@ public class PluginServiceBean implements PluginService {
         }
     }
 
-    @Override
     public void registerService(TextMessage message) {
         RegisterServiceRequest register = null;
         try {
@@ -207,7 +204,6 @@ public class PluginServiceBean implements PluginService {
         return  settingTypeMap;
     }
 
-    @Override
     public void unregisterService(TextMessage message) {
         LOG.trace("[INFO] Received @UnRegisterServiceEvent request : {}", message);
         ServiceResponseType service = null;
@@ -232,7 +228,6 @@ public class PluginServiceBean implements PluginService {
     	producer.sendEventBusMessage(text, serviceClassName);
     }
     
-    @Override
     public void setConfig(ConfigSettingEvent settingEvent) {
         switch (settingEvent.getType()) {
             case STORE:
@@ -276,7 +271,6 @@ public class PluginServiceBean implements PluginService {
         }
     }
 
-    @Override
 	public void updatePluginSetting(TextMessage settingEvent) {
 		try {
 			TextMessage jmsMessage = settingEvent;
@@ -299,7 +293,6 @@ public class PluginServiceBean implements PluginService {
 		
 	}
     
-    @Override
     public boolean start(String serviceClassName) throws ExchangeServiceException {
         if (serviceClassName == null) {
             throw new InputArgumentException("No service to start");
@@ -329,7 +322,6 @@ public class PluginServiceBean implements PluginService {
         return false;
     }
 
-    @Override
     public boolean stop(String serviceClassName) throws ExchangeServiceException {
         if (serviceClassName == null) {
             throw new InputArgumentException("No service to stop");
@@ -349,7 +341,6 @@ public class PluginServiceBean implements PluginService {
         }
     }
 
-    @Override
     public boolean ping(String serviceClassName) throws ExchangeServiceException {
         if (serviceClassName == null) {
             throw new InputArgumentException("No service to ping");

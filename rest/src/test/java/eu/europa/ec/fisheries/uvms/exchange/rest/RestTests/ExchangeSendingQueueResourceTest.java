@@ -6,8 +6,8 @@ import eu.europa.ec.fisheries.schema.exchange.plugin.types.v1.EmailType;
 import eu.europa.ec.fisheries.schema.exchange.plugin.types.v1.PluginType;
 import eu.europa.ec.fisheries.schema.exchange.plugin.v1.SetCommandRequest;
 import eu.europa.ec.fisheries.schema.exchange.service.v1.CapabilityTypeType;
-import eu.europa.ec.fisheries.uvms.exchange.dao.ServiceRegistryDao;
-import eu.europa.ec.fisheries.uvms.exchange.dao.UnsentMessageDao;
+import eu.europa.ec.fisheries.uvms.exchange.dao.bean.ServiceRegistryDaoBean;
+import eu.europa.ec.fisheries.uvms.exchange.dao.bean.UnsentMessageDaoBean;
 import eu.europa.ec.fisheries.uvms.exchange.entity.serviceregistry.Service;
 import eu.europa.ec.fisheries.uvms.exchange.entity.serviceregistry.ServiceCapability;
 import eu.europa.ec.fisheries.uvms.exchange.entity.unsent.UnsentMessage;
@@ -17,7 +17,7 @@ import eu.europa.ec.fisheries.uvms.exchange.rest.BuildExchangeRestTestDeployment
 import eu.europa.ec.fisheries.uvms.exchange.rest.JMSHelper;
 import eu.europa.ec.fisheries.uvms.exchange.rest.RestHelper;
 import eu.europa.ec.fisheries.uvms.exchange.rest.dto.exchange.SendingGroupLog;
-import eu.europa.ec.fisheries.uvms.exchange.service.ExchangeLogService;
+import eu.europa.ec.fisheries.uvms.exchange.service.bean.ExchangeLogServiceBean;
 import org.jboss.arquillian.container.test.api.OperateOnDeployment;
 import org.jboss.arquillian.junit.Arquillian;
 import org.junit.Test;
@@ -41,13 +41,13 @@ import static org.junit.Assert.assertEquals;
 public class ExchangeSendingQueueResourceTest extends BuildExchangeRestTestDeployment {
 
     @Inject
-    ExchangeLogService exchangeLogService;
+    ExchangeLogServiceBean exchangeLogService;
 
     @Inject
-    UnsentMessageDao unsentMessageDao;
+    UnsentMessageDaoBean unsentMessageDao;
 
     @Inject
-    ServiceRegistryDao serviceRegistryDao;
+    ServiceRegistryDaoBean serviceRegistryDao;
 
     @Resource(mappedName = "java:/ConnectionFactory")
     private ConnectionFactory connectionFactory;

@@ -12,14 +12,13 @@ copy of the GNU General Public License along with the IFDM Suite. If not, see <h
 package eu.europa.ec.fisheries.uvms.exchange.bean;
 
 import eu.europa.ec.fisheries.schema.exchange.v1.UnsentMessageType;
-import eu.europa.ec.fisheries.uvms.exchange.dao.UnsentMessageDao;
+import eu.europa.ec.fisheries.uvms.exchange.dao.bean.UnsentMessageDaoBean;
 import eu.europa.ec.fisheries.uvms.exchange.entity.unsent.UnsentMessage;
 import eu.europa.ec.fisheries.uvms.exchange.exception.ExchangeDaoException;
 import eu.europa.ec.fisheries.uvms.exchange.exception.NoEntityFoundException;
 import eu.europa.ec.fisheries.uvms.exchange.mapper.UnsentMessageMapper;
 import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelException;
 import eu.europa.ec.fisheries.uvms.exchange.model.exception.InputArgumentException;
-import eu.europa.ec.fisheries.uvms.exchange.UnsentModel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,14 +29,13 @@ import java.util.List;
 import java.util.UUID;
 
 @Stateless
-public class UnsentModelBean implements UnsentModel {
+public class UnsentModelBean {
 
     final static Logger LOG = LoggerFactory.getLogger(UnsentModelBean.class);
 
     @EJB
-    UnsentMessageDao dao;
+    UnsentMessageDaoBean dao;
 
-    @Override
     public String createMessage(UnsentMessageType message, String username) throws ExchangeModelException {
         if (message == null) {
             throw new InputArgumentException("No message to create");
@@ -54,7 +52,6 @@ public class UnsentModelBean implements UnsentModel {
         }
     }
 
-    @Override
     public String removeMessage(String unsentMessageId) throws ExchangeModelException {
         if (unsentMessageId == null) {
             throw new InputArgumentException("No message to remove");
@@ -76,7 +73,6 @@ public class UnsentModelBean implements UnsentModel {
         }
     }
 
-    @Override
     public List<UnsentMessageType> getMessageList() throws ExchangeModelException {
         try {
             List<UnsentMessage> list = dao.getAll();
@@ -87,7 +83,6 @@ public class UnsentModelBean implements UnsentModel {
         }
     }
 
-    @Override
     public List<UnsentMessageType> resend(List<String> unsentMessageId) throws ExchangeModelException {
         if (unsentMessageId == null) {
             throw new InputArgumentException("No messageList to resend");

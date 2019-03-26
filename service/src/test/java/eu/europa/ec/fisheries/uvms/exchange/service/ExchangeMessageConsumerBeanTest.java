@@ -26,9 +26,9 @@ import eu.europa.ec.fisheries.schema.rules.module.v1.ReceiveSalesReportRequest;
 import eu.europa.ec.fisheries.schema.rules.module.v1.ReceiveSalesResponseRequest;
 import eu.europa.ec.fisheries.schema.rules.module.v1.SetFLUXFAReportMessageRequest;
 import eu.europa.ec.fisheries.uvms.commons.message.api.MessageConstants;
-import eu.europa.ec.fisheries.uvms.exchange.dao.ExchangeLogDao;
-import eu.europa.ec.fisheries.uvms.exchange.dao.ServiceRegistryDao;
-import eu.europa.ec.fisheries.uvms.exchange.dao.UnsentMessageDao;
+import eu.europa.ec.fisheries.uvms.exchange.dao.bean.ExchangeLogDaoBean;
+import eu.europa.ec.fisheries.uvms.exchange.dao.bean.ServiceRegistryDaoBean;
+import eu.europa.ec.fisheries.uvms.exchange.dao.bean.UnsentMessageDaoBean;
 import eu.europa.ec.fisheries.uvms.exchange.entity.exchangelog.ExchangeLog;
 import eu.europa.ec.fisheries.uvms.exchange.entity.serviceregistry.Service;
 import eu.europa.ec.fisheries.uvms.exchange.entity.serviceregistry.ServiceCapability;
@@ -73,16 +73,16 @@ public class ExchangeMessageConsumerBeanTest extends BuildExchangeServiceTestDep
     private ConnectionFactory connectionFactory;
 
     @Inject
-    ServiceRegistryDao serviceRegistryDao;
+    ServiceRegistryDaoBean serviceRegistryDao;
 
     @Inject
-    UnsentMessageDao unsentMessageDao;
+    UnsentMessageDaoBean unsentMessageDao;
 
     @Inject
     ExchangeEventLogCache exchangeEventLogCache;
 
     @Inject
-    ExchangeLogDao exchangeLogDao;
+    ExchangeLogDaoBean exchangeLogDao;
 
     private Jsonb jsonb;
 
@@ -663,6 +663,7 @@ public class ExchangeMessageConsumerBeanTest extends BuildExchangeServiceTestDep
         assertEquals("Query", output.getRequest());
 
         UUID logGuid = UUID.fromString(output.getLogGuid());
+        Thread.sleep(100);
         ExchangeLog exchangeLog = exchangeLogDao.getExchangeLogByGuid(logGuid);
         assertNotNull(exchangeLog);
         assertEquals(TypeRefType.SALES_QUERY, exchangeLog.getTypeRefType());
@@ -929,6 +930,7 @@ public class ExchangeMessageConsumerBeanTest extends BuildExchangeServiceTestDep
         assertEquals("RCV Flux FA Response Message username", output.getUsername());
 
         UUID logID = UUID.fromString(output.getLogGuid());
+        Thread.sleep(100);
         ExchangeLog exchangeLog = exchangeLogDao.getExchangeLogByGuid(logID);
         assertEquals(rcvMessage, exchangeLog.getTypeRefMessage());
         assertEquals(LogType.RECEIVE_FLUX_RESPONSE_MSG, exchangeLog.getType());
