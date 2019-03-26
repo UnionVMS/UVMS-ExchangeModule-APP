@@ -21,8 +21,7 @@ import eu.europa.ec.fisheries.schema.exchange.service.v1.ServiceResponseType;
 import eu.europa.ec.fisheries.schema.exchange.service.v1.ServiceType;
 import eu.europa.ec.fisheries.schema.exchange.service.v1.SettingListType;
 import eu.europa.ec.fisheries.schema.exchange.service.v1.StatusType;
-import eu.europa.ec.fisheries.uvms.exchange.ServiceRegistryModel;
-import eu.europa.ec.fisheries.uvms.exchange.service.message.producer.ExchangeMessageProducer;
+import eu.europa.ec.fisheries.uvms.exchange.bean.ServiceRegistryModelBean;
 import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelException;
 import eu.europa.ec.fisheries.uvms.exchange.service.exception.ExchangeServiceException;
 import org.slf4j.Logger;
@@ -34,7 +33,7 @@ public class ExchangeServiceBean{
     final static Logger LOG = LoggerFactory.getLogger(ExchangeServiceBean.class);
 
     @EJB
-    private ServiceRegistryModel serviceRegistryModel;
+    private ServiceRegistryModelBean serviceRegistryModel;
 
     /**
      * Register a service
