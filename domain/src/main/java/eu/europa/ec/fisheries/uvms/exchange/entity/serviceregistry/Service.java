@@ -41,7 +41,7 @@ import eu.europa.ec.fisheries.schema.exchange.plugin.types.v1.PluginType;
 @XmlRootElement
 //@formatter:off
 @NamedQueries({
-    @NamedQuery(name = Service.SERVICE_FIND_ALL, query = "SELECT s FROM Service s WHERE s.active = true"),
+    @NamedQuery(name = Service.SERVICE_FIND_ALL, query = "SELECT s FROM Service s WHERE s.active = true ORDER BY updated ASC"),
     @NamedQuery(name = Service.SERVICE_FIND_BY_SERVICE_CLASS_NAME, query = "SELECT s FROM Service s WHERE s.serviceClassName = :serviceClassName"),
     @NamedQuery(name = Service.SERVICE_FIND_BY_TYPES, query = "SELECT s FROM Service s WHERE s.type IN :types")
 })

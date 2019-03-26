@@ -12,7 +12,7 @@ copy of the GNU General Public License along with the IFDM Suite. If not, see <h
 package eu.europa.ec.fisheries.uvms.exchange.bean;
 
 import eu.europa.ec.fisheries.schema.exchange.v1.UnsentMessageType;
-import eu.europa.ec.fisheries.uvms.exchange.dao.UnsentMessageDao;
+import eu.europa.ec.fisheries.uvms.exchange.dao.bean.UnsentMessageDaoBean;
 import eu.europa.ec.fisheries.uvms.exchange.entity.unsent.UnsentMessage;
 import eu.europa.ec.fisheries.uvms.exchange.exception.ExchangeDaoException;
 import eu.europa.ec.fisheries.uvms.exchange.exception.NoEntityFoundException;
@@ -34,7 +34,7 @@ public class UnsentModelBean {
     final static Logger LOG = LoggerFactory.getLogger(UnsentModelBean.class);
 
     @EJB
-    UnsentMessageDao dao;
+    UnsentMessageDaoBean dao;
 
     public String createMessage(UnsentMessageType message, String username) throws ExchangeModelException {
         if (message == null) {

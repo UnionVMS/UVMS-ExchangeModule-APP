@@ -7,7 +7,7 @@ import eu.europa.ec.fisheries.schema.exchange.plugin.types.v1.PluginType;
 import eu.europa.ec.fisheries.schema.exchange.plugin.v1.SetCommandRequest;
 import eu.europa.ec.fisheries.schema.exchange.service.v1.CapabilityTypeType;
 import eu.europa.ec.fisheries.uvms.exchange.dao.ServiceRegistryDao;
-import eu.europa.ec.fisheries.uvms.exchange.dao.UnsentMessageDao;
+import eu.europa.ec.fisheries.uvms.exchange.dao.bean.UnsentMessageDaoBean;
 import eu.europa.ec.fisheries.uvms.exchange.entity.serviceregistry.Service;
 import eu.europa.ec.fisheries.uvms.exchange.entity.serviceregistry.ServiceCapability;
 import eu.europa.ec.fisheries.uvms.exchange.entity.unsent.UnsentMessage;
@@ -44,7 +44,7 @@ public class ExchangeSendingQueueResourceTest extends BuildExchangeRestTestDeplo
     ExchangeLogServiceBean exchangeLogService;
 
     @Inject
-    UnsentMessageDao unsentMessageDao;
+    UnsentMessageDaoBean unsentMessageDao;
 
     @Inject
     ServiceRegistryDao serviceRegistryDao;

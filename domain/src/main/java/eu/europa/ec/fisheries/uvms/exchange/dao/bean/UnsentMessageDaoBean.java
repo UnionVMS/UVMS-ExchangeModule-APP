@@ -12,7 +12,6 @@ copy of the GNU General Public License along with the IFDM Suite. If not, see <h
 package eu.europa.ec.fisheries.uvms.exchange.dao.bean;
 
 import eu.europa.ec.fisheries.uvms.exchange.dao.Dao;
-import eu.europa.ec.fisheries.uvms.exchange.dao.UnsentMessageDao;
 import eu.europa.ec.fisheries.uvms.exchange.entity.unsent.UnsentMessage;
 import eu.europa.ec.fisheries.uvms.exchange.exception.ExchangeDaoException;
 import eu.europa.ec.fisheries.uvms.exchange.exception.NoEntityFoundException;
@@ -26,10 +25,9 @@ import java.util.List;
 import java.util.UUID;
 
 @Stateless
-public class UnsentMessageDaoBean extends Dao implements UnsentMessageDao {
+public class UnsentMessageDaoBean extends Dao {
     final static Logger LOG = LoggerFactory.getLogger(UnsentMessageDaoBean.class);
     
-	@Override
 	public UnsentMessage create(UnsentMessage unsentMessage) throws ExchangeDaoException {
 		try {
 			em.persist(unsentMessage);
@@ -40,7 +38,6 @@ public class UnsentMessageDaoBean extends Dao implements UnsentMessageDao {
 		}
 	}
 
-	@Override
 	public UnsentMessage remove(UnsentMessage unsentMessage) throws ExchangeDaoException {
 		try {
 			em.remove(unsentMessage);
@@ -51,7 +48,6 @@ public class UnsentMessageDaoBean extends Dao implements UnsentMessageDao {
 		}
 	}
 
-	@Override
 	public List<UnsentMessage> getAll() throws ExchangeDaoException {
 		try {
             TypedQuery<UnsentMessage> query = em.createNamedQuery(UnsentMessage.UNSENT_FIND_ALL, UnsentMessage.class);
@@ -62,7 +58,6 @@ public class UnsentMessageDaoBean extends Dao implements UnsentMessageDao {
         }
 	}
 
-	@Override
 	public UnsentMessage getByGuid(UUID guid) throws NoEntityFoundException {
 		try {
             TypedQuery<UnsentMessage> query = em.createNamedQuery(UnsentMessage.UNSENT_BY_GUID, UnsentMessage.class);
