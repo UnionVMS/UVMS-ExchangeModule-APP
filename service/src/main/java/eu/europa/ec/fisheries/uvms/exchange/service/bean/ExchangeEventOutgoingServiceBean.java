@@ -69,7 +69,6 @@ import eu.europa.ec.fisheries.uvms.exchange.model.mapper.ExchangeModuleResponseM
 import eu.europa.ec.fisheries.uvms.exchange.model.mapper.ExchangePluginRequestMapper;
 import eu.europa.ec.fisheries.uvms.exchange.model.mapper.ExchangePluginResponseMapper;
 import eu.europa.ec.fisheries.uvms.exchange.model.mapper.JAXBMarshaller;
-import eu.europa.ec.fisheries.uvms.exchange.service.ExchangeAssetService;
 import eu.europa.ec.fisheries.uvms.exchange.service.constants.ExchangeServiceConstants;
 import eu.europa.ec.fisheries.uvms.exchange.service.event.PollEvent;
 import eu.europa.ec.fisheries.uvms.exchange.service.exception.ExchangeLogException;
@@ -102,16 +101,13 @@ public class ExchangeEventOutgoingServiceBean {
     private ExchangeMessageProducer producer;
 
     @EJB
-    private ExchangeConsumer consumer;
-
-    @EJB
     private ExchangeLogServiceBean exchangeLogService;
 
     @EJB
     private ExchangeServiceBean exchangeService;
 
     @EJB
-    private ExchangeAssetService exchangeAssetService;
+    private ExchangeAssetServiceBean exchangeAssetService;
 
     @EJB
     private ExchangeEventOutgoingServiceBean exchangeEventOutgoingService;
