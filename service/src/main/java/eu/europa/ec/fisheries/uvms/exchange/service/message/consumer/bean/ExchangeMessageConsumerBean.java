@@ -16,7 +16,7 @@ import eu.europa.ec.fisheries.schema.exchange.module.v1.ExchangeModuleMethod;
 import eu.europa.ec.fisheries.uvms.commons.message.api.MessageConstants;
 import eu.europa.ec.fisheries.uvms.commons.message.context.MappedDiagnosticContext;
 import eu.europa.ec.fisheries.uvms.exchange.service.ExchangeEventIncomingService;
-import eu.europa.ec.fisheries.uvms.exchange.service.ExchangeEventOutgoingService;
+import eu.europa.ec.fisheries.uvms.exchange.service.bean.ExchangeEventOutgoingServiceBean;
 import eu.europa.ec.fisheries.uvms.exchange.service.bean.PluginServiceBean;
 import eu.europa.ec.fisheries.uvms.exchange.service.message.event.*;
 import eu.europa.ec.fisheries.uvms.exchange.service.message.event.carrier.ExchangeErrorEvent;
@@ -55,7 +55,7 @@ public class ExchangeMessageConsumerBean implements MessageListener {
     private ExchangeEventIncomingService incomingServiceBean;
 
     @Inject
-    private ExchangeEventOutgoingService outgoingServiceBean;
+    private ExchangeEventOutgoingServiceBean outgoingServiceBean;
 
     @Inject
     private PluginServiceBean pluginServiceBean;

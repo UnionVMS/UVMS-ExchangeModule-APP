@@ -56,7 +56,6 @@ import eu.europa.ec.fisheries.uvms.exchange.model.mapper.ExchangeModuleResponseM
 import eu.europa.ec.fisheries.uvms.exchange.model.mapper.ExchangePluginResponseMapper;
 import eu.europa.ec.fisheries.uvms.exchange.model.mapper.JAXBMarshaller;
 import eu.europa.ec.fisheries.uvms.exchange.service.ExchangeEventIncomingService;
-import eu.europa.ec.fisheries.uvms.exchange.service.ExchangeEventOutgoingService;
 import eu.europa.ec.fisheries.uvms.exchange.service.event.ExchangePluginStatusEvent;
 import eu.europa.ec.fisheries.uvms.exchange.service.event.PollEvent;
 import eu.europa.ec.fisheries.uvms.exchange.service.exception.ExchangeLogException;
@@ -105,7 +104,7 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
     private ExchangeServiceBean exchangeService;
 
     @EJB
-    private ExchangeEventOutgoingService exchangeEventOutgoingService;
+    private ExchangeEventOutgoingServiceBean exchangeEventOutgoingService;
 
     private Jsonb jsonb = JsonbBuilder.create();
     

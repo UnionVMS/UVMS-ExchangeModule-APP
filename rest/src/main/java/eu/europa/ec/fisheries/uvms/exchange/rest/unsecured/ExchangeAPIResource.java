@@ -4,7 +4,7 @@ import eu.europa.ec.fisheries.schema.exchange.module.v1.GetServiceListRequest;
 import eu.europa.ec.fisheries.schema.exchange.module.v1.GetServiceListResponse;
 import eu.europa.ec.fisheries.schema.exchange.module.v1.SetCommandRequest;
 import eu.europa.ec.fisheries.schema.exchange.service.v1.ServiceResponseType;
-import eu.europa.ec.fisheries.uvms.exchange.service.ExchangeEventOutgoingService;
+import eu.europa.ec.fisheries.uvms.exchange.service.bean.ExchangeEventOutgoingServiceBean;
 import eu.europa.ec.fisheries.uvms.exchange.service.bean.ExchangeServiceBean;
 import eu.europa.ec.fisheries.uvms.exchange.service.exception.ExchangeServiceException;
 import org.slf4j.Logger;
@@ -29,7 +29,7 @@ public class ExchangeAPIResource {
     private ExchangeServiceBean exchangeService;
 
     @EJB
-    private ExchangeEventOutgoingService exchangeEventOutgoingService;
+    private ExchangeEventOutgoingServiceBean exchangeEventOutgoingService;
 
     /**
      *
