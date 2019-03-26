@@ -13,7 +13,7 @@ package eu.europa.ec.fisheries.uvms.exchange.bean;
 
 import eu.europa.ec.fisheries.schema.exchange.plugin.types.v1.PluginType;
 import eu.europa.ec.fisheries.schema.exchange.service.v1.*;
-import eu.europa.ec.fisheries.uvms.exchange.dao.ServiceRegistryDao;
+import eu.europa.ec.fisheries.uvms.exchange.dao.bean.ServiceRegistryDaoBean;
 import eu.europa.ec.fisheries.uvms.exchange.entity.serviceregistry.Service;
 import eu.europa.ec.fisheries.uvms.exchange.entity.serviceregistry.ServiceCapability;
 import eu.europa.ec.fisheries.uvms.exchange.entity.serviceregistry.ServiceSetting;
@@ -35,7 +35,7 @@ public class ServiceRegistryModelBean {
     final static Logger LOG = LoggerFactory.getLogger(ServiceRegistryModelBean.class);
 
     @EJB
-    ServiceRegistryDao dao;
+    ServiceRegistryDaoBean dao;
 
     public ServiceResponseType registerService(ServiceType serviceType, CapabilityListType capabilityList, SettingListType settingList, String username) throws ExchangeModelException {
         // Look for existing service

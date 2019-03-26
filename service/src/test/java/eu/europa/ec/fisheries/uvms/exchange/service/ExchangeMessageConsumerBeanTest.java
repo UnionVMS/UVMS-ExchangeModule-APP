@@ -27,7 +27,7 @@ import eu.europa.ec.fisheries.schema.rules.module.v1.ReceiveSalesResponseRequest
 import eu.europa.ec.fisheries.schema.rules.module.v1.SetFLUXFAReportMessageRequest;
 import eu.europa.ec.fisheries.uvms.commons.message.api.MessageConstants;
 import eu.europa.ec.fisheries.uvms.exchange.dao.ExchangeLogDao;
-import eu.europa.ec.fisheries.uvms.exchange.dao.ServiceRegistryDao;
+import eu.europa.ec.fisheries.uvms.exchange.dao.bean.ServiceRegistryDaoBean;
 import eu.europa.ec.fisheries.uvms.exchange.dao.bean.UnsentMessageDaoBean;
 import eu.europa.ec.fisheries.uvms.exchange.entity.exchangelog.ExchangeLog;
 import eu.europa.ec.fisheries.uvms.exchange.entity.serviceregistry.Service;
@@ -73,7 +73,7 @@ public class ExchangeMessageConsumerBeanTest extends BuildExchangeServiceTestDep
     private ConnectionFactory connectionFactory;
 
     @Inject
-    ServiceRegistryDao serviceRegistryDao;
+    ServiceRegistryDaoBean serviceRegistryDao;
 
     @Inject
     UnsentMessageDaoBean unsentMessageDao;
@@ -663,6 +663,7 @@ public class ExchangeMessageConsumerBeanTest extends BuildExchangeServiceTestDep
         assertEquals("Query", output.getRequest());
 
         UUID logGuid = UUID.fromString(output.getLogGuid());
+        Thread.sleep(100);
         ExchangeLog exchangeLog = exchangeLogDao.getExchangeLogByGuid(logGuid);
         assertNotNull(exchangeLog);
         assertEquals(TypeRefType.SALES_QUERY, exchangeLog.getTypeRefType());

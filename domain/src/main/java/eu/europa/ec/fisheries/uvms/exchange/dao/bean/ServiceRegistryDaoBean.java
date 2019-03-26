@@ -24,7 +24,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import eu.europa.ec.fisheries.schema.exchange.plugin.types.v1.PluginType;
-import eu.europa.ec.fisheries.uvms.exchange.dao.ServiceRegistryDao;
 import eu.europa.ec.fisheries.uvms.exchange.entity.serviceregistry.Service;
 import eu.europa.ec.fisheries.uvms.exchange.entity.serviceregistry.ServiceCapability;
 import eu.europa.ec.fisheries.uvms.exchange.entity.serviceregistry.ServiceSetting;
@@ -32,7 +31,7 @@ import eu.europa.ec.fisheries.uvms.exchange.exception.ExchangeDaoException;
 import eu.europa.ec.fisheries.uvms.exchange.exception.NoEntityFoundException;
 
 @Stateless
-public class ServiceRegistryDaoBean extends Dao implements ServiceRegistryDao {
+public class ServiceRegistryDaoBean extends Dao {
 
     private static final String SERVICE_CLASS_NAME_PARAMETER = "serviceClassName";
     private static final String SERVICE_MAP_NAME_PARAMETER = "mapName";
@@ -40,7 +39,14 @@ public class ServiceRegistryDaoBean extends Dao implements ServiceRegistryDao {
     final static Logger LOG = LoggerFactory.getLogger(ServiceRegistryDaoBean.class);
 
     // registerService
-    @Override
+    /**
+     * Create entity in database
+     *
+     * @param entity
+     * @return
+     * @throws
+     * eu.europa.ec.fisheries.uvms.exchange.exception.ExchangeDaoException
+     */
     public Service createEntity(Service entity) throws ExchangeDaoException {
         try {
             em.persist(entity);
@@ -58,7 +64,14 @@ public class ServiceRegistryDaoBean extends Dao implements ServiceRegistryDao {
     }
 
     // getService
-    @Override
+    /**
+     * Get entity by internal entity id
+     *
+     * @param id
+     * @return
+     * @throws
+     * eu.europa.ec.fisheries.uvms.exchange.exception.ExchangeDaoException
+     */
     public Service getEntityById(String id) throws NoEntityFoundException, ExchangeDaoException {
         try {
             return em.find(Service.class, UUID.fromString(id));                //SRSLY!?!?!?!?!?!?!?!?!?!?!? WHY??????????
@@ -72,7 +85,14 @@ public class ServiceRegistryDaoBean extends Dao implements ServiceRegistryDao {
     }
 
     // updateService
-    @Override
+    /**
+     * Update entity in database
+     *
+     * @param entity
+     * @return
+     * @throws
+     * eu.europa.ec.fisheries.uvms.exchange.exception.ExchangeDaoException
+     */
     public Service updateService(Service entity) throws ExchangeDaoException {
         try {
             em.merge(entity);
@@ -88,14 +108,26 @@ public class ServiceRegistryDaoBean extends Dao implements ServiceRegistryDao {
     }
 
     // deactivateService
-    @Override
+    /**
+     * Delete entity from database
+     *
+     * @param o
+     * @throws
+     * eu.europa.ec.fisheries.uvms.exchange.exception.ExchangeDaoException
+     */
     public void deleteEntity(UUID id ) {
         Service s = em.find(Service.class, id);
         em.remove(s);
 
     }
 
-    @Override
+    /**
+     * Get all services (FIND_ALL)
+     *
+     * @return
+     * @throws
+     * eu.europa.ec.fisheries.uvms.exchange.exception.ExchangeDaoException
+     */
     public List<Service> getServices() throws ExchangeDaoException {
         try {
             TypedQuery<Service> query = em.createNamedQuery(Service.SERVICE_FIND_ALL, Service.class);
@@ -109,7 +141,11 @@ public class ServiceRegistryDaoBean extends Dao implements ServiceRegistryDao {
         }
     }
 
-    @Override
+    /**
+     * Get services depending on plugin types
+     * @return
+     * @throws ExchangeDaoException
+     */
 	public List<Service> getServicesByTypes(List<PluginType> pluginTypes) throws ExchangeDaoException {
         try {
             TypedQuery<Service> query = em.createNamedQuery(Service.SERVICE_FIND_BY_TYPES, Service.class);
@@ -123,8 +159,15 @@ public class ServiceRegistryDaoBean extends Dao implements ServiceRegistryDao {
             throw new ExchangeDaoException("[ Error when getting service list by types] ");
         }
 	}
-    
-    @Override
+
+    /**
+     *
+     * Gets all capabilities for a service
+     *
+     * @param serviceClassName
+     * @return
+     * @throws ExchangeDaoException
+     */
     public List<ServiceCapability> getServiceCapabilities(String serviceClassName) throws ExchangeDaoException {
         try {
             TypedQuery<ServiceCapability> query = em.createNamedQuery(ServiceCapability.CAPABILITY_FIND_BY_SERVICE, ServiceCapability.class);
@@ -139,7 +182,14 @@ public class ServiceRegistryDaoBean extends Dao implements ServiceRegistryDao {
         }
     }
 
-    @Override
+    /**
+     *
+     * gets all settings for a service
+     *
+     * @param serviceClassName
+     * @return
+     * @throws ExchangeDaoException
+     */
     public List<ServiceSetting> getServiceSettings(String serviceClassName) throws ExchangeDaoException {
         try {
             TypedQuery<ServiceSetting> query = em.createNamedQuery(ServiceSetting.SETTING_FIND_BY_SERVICE, ServiceSetting.class);
@@ -154,7 +204,12 @@ public class ServiceRegistryDaoBean extends Dao implements ServiceRegistryDao {
         }
     }
 
-    @Override
+    /**
+     * Get service by Service Class Name
+     *
+     * @param serviceClassName
+     * @return
+     */
     public Service getServiceByServiceClassName(String serviceClassName) {
         try {
             TypedQuery<Service> query = em.createNamedQuery(Service.SERVICE_FIND_BY_SERVICE_CLASS_NAME, Service.class);
