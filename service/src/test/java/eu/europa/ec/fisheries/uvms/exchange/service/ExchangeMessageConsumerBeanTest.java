@@ -26,7 +26,7 @@ import eu.europa.ec.fisheries.schema.rules.module.v1.ReceiveSalesReportRequest;
 import eu.europa.ec.fisheries.schema.rules.module.v1.ReceiveSalesResponseRequest;
 import eu.europa.ec.fisheries.schema.rules.module.v1.SetFLUXFAReportMessageRequest;
 import eu.europa.ec.fisheries.uvms.commons.message.api.MessageConstants;
-import eu.europa.ec.fisheries.uvms.exchange.dao.ExchangeLogDao;
+import eu.europa.ec.fisheries.uvms.exchange.dao.bean.ExchangeLogDaoBean;
 import eu.europa.ec.fisheries.uvms.exchange.dao.bean.ServiceRegistryDaoBean;
 import eu.europa.ec.fisheries.uvms.exchange.dao.bean.UnsentMessageDaoBean;
 import eu.europa.ec.fisheries.uvms.exchange.entity.exchangelog.ExchangeLog;
@@ -82,7 +82,7 @@ public class ExchangeMessageConsumerBeanTest extends BuildExchangeServiceTestDep
     ExchangeEventLogCache exchangeEventLogCache;
 
     @Inject
-    ExchangeLogDao exchangeLogDao;
+    ExchangeLogDaoBean exchangeLogDao;
 
     private Jsonb jsonb;
 

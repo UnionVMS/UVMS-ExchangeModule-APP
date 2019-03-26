@@ -23,7 +23,7 @@ import eu.europa.ec.fisheries.schema.exchange.movement.v1.MovementRefType;
 import eu.europa.ec.fisheries.schema.exchange.v1.*;
 import eu.europa.ec.fisheries.uvms.exchange.bean.ExchangeLogModelBean;
 import eu.europa.ec.fisheries.uvms.exchange.bean.UnsentModelBean;
-import eu.europa.ec.fisheries.uvms.exchange.dao.ExchangeLogDao;
+import eu.europa.ec.fisheries.uvms.exchange.dao.bean.ExchangeLogDaoBean;
 import eu.europa.ec.fisheries.uvms.exchange.entity.exchangelog.ExchangeLog;
 import eu.europa.ec.fisheries.uvms.exchange.service.message.constants.MessageQueue;
 import eu.europa.ec.fisheries.uvms.exchange.service.message.exception.ExchangeMessageException;
@@ -66,7 +66,7 @@ public class ExchangeLogServiceBean {
     private UnsentModelBean unsentModel;
 
     @EJB
-    private ExchangeLogDao exchangeLogDao;
+    private ExchangeLogDaoBean exchangeLogDao;
 
 
     public ExchangeLogType logAndCache(ExchangeLogType log, String pluginMessageId, String username) throws ExchangeLogException {

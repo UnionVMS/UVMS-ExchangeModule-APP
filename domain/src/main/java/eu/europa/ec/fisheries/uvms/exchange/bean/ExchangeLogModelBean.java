@@ -17,7 +17,7 @@ import java.text.ParseException;
 import java.util.*;
 
 import eu.europa.ec.fisheries.schema.exchange.v1.*;
-import eu.europa.ec.fisheries.uvms.exchange.dao.ExchangeLogDao;
+import eu.europa.ec.fisheries.uvms.exchange.dao.bean.ExchangeLogDaoBean;
 import eu.europa.ec.fisheries.uvms.exchange.entity.exchangelog.ExchangeLog;
 import eu.europa.ec.fisheries.uvms.exchange.entity.exchangelog.ExchangeLogStatus;
 import eu.europa.ec.fisheries.uvms.exchange.exception.ExchangeDaoException;
@@ -41,7 +41,7 @@ public class ExchangeLogModelBean {
     private final static Logger LOG = LoggerFactory.getLogger(ExchangeLogModelBean.class);
 
     @EJB
-    private ExchangeLogDao logDao;
+    private ExchangeLogDaoBean logDao;
 
     public ExchangeLogType getExchangeLogByGuid(UUID guid) {
         ExchangeLogType exchangeLogType;
