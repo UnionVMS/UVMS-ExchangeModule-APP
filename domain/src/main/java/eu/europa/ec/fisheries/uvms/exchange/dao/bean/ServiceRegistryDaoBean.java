@@ -80,7 +80,7 @@ public class ServiceRegistryDaoBean extends Dao implements ServiceRegistryDao {
             return entity;
         } catch (IllegalArgumentException e) {
             LOG.error("[ Error when updating entity ] {}", e.getMessage());
-            throw new ExchangeDaoException("[ Error when updating entity ]");
+            throw new ExchangeDaoException("[ Error when updating entity ]", e);
         } catch (Exception e) {
             LOG.error("[ Error when updating entity ] {}", e.getMessage());
             throw new ExchangeDaoException("[ Error when updating entity ]", e);

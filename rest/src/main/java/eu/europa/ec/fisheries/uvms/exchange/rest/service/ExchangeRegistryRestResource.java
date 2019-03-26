@@ -21,6 +21,7 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
+import eu.europa.ec.fisheries.uvms.exchange.service.bean.ExchangeServiceBean;
 import eu.europa.ec.fisheries.uvms.exchange.service.bean.PluginServiceBean;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,7 +30,6 @@ import eu.europa.ec.fisheries.uvms.exchange.rest.dto.ResponseDto;
 import eu.europa.ec.fisheries.uvms.exchange.rest.dto.RestResponseCode;
 import eu.europa.ec.fisheries.uvms.exchange.rest.error.ErrorHandler;
 import eu.europa.ec.fisheries.uvms.exchange.rest.mapper.ServiceMapper;
-import eu.europa.ec.fisheries.uvms.exchange.service.ExchangeService;
 import eu.europa.ec.fisheries.uvms.exchange.service.exception.ExchangeServiceException;
 import eu.europa.ec.fisheries.uvms.rest.security.RequiresFeature;
 import eu.europa.ec.fisheries.uvms.rest.security.UnionVMSFeature;
@@ -42,7 +42,7 @@ public class ExchangeRegistryRestResource {
 			.getLogger(ExchangeRegistryRestResource.class);
 
 	@EJB
-	ExchangeService serviceLayer;
+	ExchangeServiceBean serviceLayer;
 
 	@EJB
 	PluginServiceBean pluginService;

@@ -113,6 +113,7 @@ public class RegistryBusEventListenerTest extends BuildExchangeServiceTestDeploy
         assertEquals(AcknowledgeTypeType.OK, response.getAck().getType());
         assertEquals(service.getServiceClassName(), response.getService().getServiceClassName());
 
+        Thread.sleep(500);      //removed a requires new transaction on the register service part so this is needed to allow the transaction go commit
         String unregisterRequest = ExchangeModuleRequestMapper.createUnregisterServiceRequest(service);
         jmsHelper.sendMessageOnEventQueue(unregisterRequest);
 

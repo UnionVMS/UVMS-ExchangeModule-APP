@@ -37,7 +37,6 @@ import eu.europa.ec.fisheries.uvms.exchange.model.mapper.ExchangeModuleResponseM
 import eu.europa.ec.fisheries.uvms.exchange.model.mapper.ExchangePluginRequestMapper;
 import eu.europa.ec.fisheries.uvms.exchange.model.mapper.ExchangePluginResponseMapper;
 import eu.europa.ec.fisheries.uvms.exchange.model.mapper.JAXBMarshaller;
-import eu.europa.ec.fisheries.uvms.exchange.service.ExchangeService;
 import eu.europa.ec.fisheries.uvms.exchange.service.exception.ExchangeServiceException;
 import eu.europa.ec.fisheries.uvms.exchange.service.exception.InputArgumentException;
 import eu.europa.ec.fisheries.uvms.exchange.service.mapper.SettingTypeMapper;
@@ -70,7 +69,7 @@ public class PluginServiceBean {
     private Event<ExchangeErrorEvent> exchangeErrorEvent;
 
     @EJB
-    private ExchangeService exchangeService;
+    private ExchangeServiceBean exchangeService;
 
     @EJB
     private ExchangeMessageProducer producer;
