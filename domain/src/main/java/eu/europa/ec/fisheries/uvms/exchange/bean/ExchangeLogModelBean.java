@@ -17,7 +17,6 @@ import java.text.ParseException;
 import java.util.*;
 
 import eu.europa.ec.fisheries.schema.exchange.v1.*;
-import eu.europa.ec.fisheries.uvms.exchange.ExchangeLogModel;
 import eu.europa.ec.fisheries.uvms.exchange.dao.ExchangeLogDao;
 import eu.europa.ec.fisheries.uvms.exchange.entity.exchangelog.ExchangeLog;
 import eu.europa.ec.fisheries.uvms.exchange.entity.exchangelog.ExchangeLogStatus;
@@ -37,14 +36,13 @@ import org.slf4j.LoggerFactory;
 /**
  **/
 @Stateless
-public class ExchangeLogModelBean implements ExchangeLogModel {
+public class ExchangeLogModelBean {
 
     private final static Logger LOG = LoggerFactory.getLogger(ExchangeLogModelBean.class);
 
     @EJB
     private ExchangeLogDao logDao;
 
-    @Override
     public ExchangeLogType getExchangeLogByGuid(UUID guid) {
         ExchangeLogType exchangeLogType;
         try {
@@ -59,7 +57,6 @@ public class ExchangeLogModelBean implements ExchangeLogModel {
         return exchangeLogType;
     }
 
-    @Override
     public ExchangeLogType getExchangeLogByGuidAndType(UUID guid, TypeRefType typeRefType) {
         try {
             ExchangeLog exchangeLogByGuid = logDao.getExchangeLogByGuid(guid, typeRefType);
@@ -70,7 +67,6 @@ public class ExchangeLogModelBean implements ExchangeLogModel {
         return null;
     }
 
-    @Override
     public Set<ExchangeLogType> getExchangeLogByRefUUIDAndType(UUID refUUID, TypeRefType typeRefType) {
         Set<ExchangeLogType> exchangeLogTypeSet = new HashSet<>();
         try {
@@ -87,7 +83,6 @@ public class ExchangeLogModelBean implements ExchangeLogModel {
         return exchangeLogTypeSet;
     }
 
-    @Override
     public ListResponseDto getExchangeLogListByQuery(ExchangeListQuery query) throws ExchangeModelException {
         if (query == null) {
             throw new InputArgumentException("Exchange list query is null");
@@ -156,7 +151,6 @@ public class ExchangeLogModelBean implements ExchangeLogModel {
         }
     }
 
-    @Override
     public List<ExchangeLogStatusType> getExchangeLogStatusHistoryByQuery(ExchangeHistoryListQuery query) throws ExchangeModelException {
         if (query == null) {
             throw new InputArgumentException("Exchange status list query is null");
@@ -179,7 +173,6 @@ public class ExchangeLogModelBean implements ExchangeLogModel {
         }
     }
 
-    @Override
     public ExchangeLogType createExchangeLog(ExchangeLogType logType, String username) throws ExchangeModelException {
         if (logType == null) {
             throw new InputArgumentException("No logType to create");
@@ -198,7 +191,6 @@ public class ExchangeLogModelBean implements ExchangeLogModel {
     }
 
 
-    @Override
     public ExchangeLogType updateExchangeLogStatus(ExchangeLogStatusType status, String username) throws ExchangeModelException {
         if (status == null || status.getGuid() == null || status.getGuid().isEmpty()) {
             throw new InputArgumentException("No exchange log to update status");
@@ -220,7 +212,6 @@ public class ExchangeLogModelBean implements ExchangeLogModel {
         }
     }
 
-    @Override
     public ExchangeLogType updateExchangeLogBusinessError(ExchangeLogStatusType status, String businessError) throws ExchangeModelException {
         if (status == null || status.getGuid() == null || status.getGuid().isEmpty()) {
             throw new InputArgumentException("No exchange log to update status");
@@ -236,7 +227,6 @@ public class ExchangeLogModelBean implements ExchangeLogModel {
         }
     }
 
-    @Override
     public ExchangeLogStatusType getExchangeLogStatusHistory(UUID guid, TypeRefType typeRefType) throws ExchangeModelException {
         if (guid == null)
             throw new InputArgumentException("Non valid guid to fetch log status history");
@@ -256,7 +246,6 @@ public class ExchangeLogModelBean implements ExchangeLogModel {
         return null;
     }
 
-    @Override
     public List<ExchangeLogStatusType> getExchangeLogsStatusHistories(UUID guid, List<TypeRefType> typeRefType) {
         List<ExchangeLogStatusType> logStatusTypeList = new ArrayList<>();
         try {
@@ -273,7 +262,6 @@ public class ExchangeLogModelBean implements ExchangeLogModel {
         return logStatusTypeList;
     }
 
-    @Override
     public ExchangeLogType setPollStatus(PollStatus pollStatus, String username) throws ExchangeModelException {
         ExchangeLogType logType = null;
         if (pollStatus == null || pollStatus.getPollGuid() == null) {
@@ -295,7 +283,6 @@ public class ExchangeLogModelBean implements ExchangeLogModel {
         return logType;
     }
 
-    @Override
     public LogWithRawMsgAndType getExchangeLogRawXmlByGuid(UUID guid) {
         LogWithRawMsgAndType logWrapper = new LogWithRawMsgAndType();
         try {

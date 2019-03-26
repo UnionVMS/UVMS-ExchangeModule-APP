@@ -22,9 +22,9 @@ import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeListQuery;
 import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogType;
 import eu.europa.ec.fisheries.schema.exchange.v1.LogWithRawMsgAndType;
 import eu.europa.ec.fisheries.schema.exchange.v1.TypeRefType;
+import eu.europa.ec.fisheries.uvms.exchange.bean.ExchangeLogModelBean;
 import eu.europa.ec.fisheries.uvms.exchange.model.dto.ListResponseDto;
 import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelException;
-import eu.europa.ec.fisheries.uvms.exchange.ExchangeLogModel;
 import eu.europa.ec.fisheries.uvms.exchange.service.exception.ExchangeLogException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,15 +36,10 @@ public class ExchangeLogRestServiceBean {
     private final static Logger LOG = LoggerFactory.getLogger(ExchangeLogRestServiceBean.class);
 
     @EJB
-    private ExchangeLogModel exchangeLogModel;
+    private ExchangeLogModelBean exchangeLogModel;
 
-    public ExchangeLogType getExchangeLogByGuid(UUID guid) throws ExchangeLogException {
-        try {
+    public ExchangeLogType getExchangeLogByGuid(UUID guid) {
             return exchangeLogModel.getExchangeLogByGuid(guid);
-        } catch (ExchangeModelException e) {
-            LOG.error("[ Error when getting exchange log by GUID. {}] {}",guid, e.getMessage());
-            throw new ExchangeLogException("Error when getting exchange log by GUID.");
-        }
     }
 
     public GetLogListByQueryResponse getExchangeLogList(ExchangeListQuery query) throws ExchangeLogException {
@@ -64,12 +59,7 @@ public class ExchangeLogRestServiceBean {
         return exchangeLogModel.getExchangeLogRawXmlByGuid(guid);
     }
 
-    public Set<ExchangeLogType> getExchangeLogsByRefUUID(UUID guid, TypeRefType type) throws ExchangeLogException {
-        try {
+    public Set<ExchangeLogType> getExchangeLogsByRefUUID(UUID guid, TypeRefType type) {
             return exchangeLogModel.getExchangeLogByRefUUIDAndType(guid, type);
-        } catch (ExchangeModelException e) {
-            LOG.error("[ Error when getting exchange log by refUUID. {}] {}",guid, e.getMessage());
-            throw new ExchangeLogException("Error when getting exchange log by refUUID.");
-        }
     }
 }

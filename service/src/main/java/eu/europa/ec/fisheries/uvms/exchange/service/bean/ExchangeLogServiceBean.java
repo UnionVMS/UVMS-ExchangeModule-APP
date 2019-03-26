@@ -21,7 +21,7 @@ import java.util.*;
 import eu.europa.ec.fisheries.schema.exchange.module.v1.ExchangeBaseRequest;
 import eu.europa.ec.fisheries.schema.exchange.movement.v1.MovementRefType;
 import eu.europa.ec.fisheries.schema.exchange.v1.*;
-import eu.europa.ec.fisheries.uvms.exchange.ExchangeLogModel;
+import eu.europa.ec.fisheries.uvms.exchange.bean.ExchangeLogModelBean;
 import eu.europa.ec.fisheries.uvms.exchange.bean.UnsentModelBean;
 import eu.europa.ec.fisheries.uvms.exchange.dao.ExchangeLogDao;
 import eu.europa.ec.fisheries.uvms.exchange.entity.exchangelog.ExchangeLog;
@@ -60,7 +60,7 @@ public class ExchangeLogServiceBean {
     private Event<NotificationMessage> sendingQueueEvent;
 
     @EJB
-    private ExchangeLogModel exchangeLogModel;
+    private ExchangeLogModelBean exchangeLogModel;
 
     @EJB
     private UnsentModelBean unsentModel;

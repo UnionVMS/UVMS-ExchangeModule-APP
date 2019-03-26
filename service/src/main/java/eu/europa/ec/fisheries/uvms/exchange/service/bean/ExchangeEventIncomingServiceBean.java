@@ -24,6 +24,7 @@ import javax.json.bind.Jsonb;
 import javax.json.bind.JsonbBuilder;
 import javax.xml.bind.JAXBException;
 
+import eu.europa.ec.fisheries.uvms.exchange.bean.ExchangeLogModelBean;
 import org.apache.commons.collections.CollectionUtils;
 import eu.europa.ec.fisheries.schema.exchange.common.v1.AcknowledgeType;
 import eu.europa.ec.fisheries.schema.exchange.module.v1.*;
@@ -41,7 +42,6 @@ import eu.europa.ec.fisheries.schema.rules.module.v1.RulesModuleMethod;
 import eu.europa.ec.fisheries.schema.rules.module.v1.SetFLUXMDRSyncMessageRulesResponse;
 import eu.europa.ec.fisheries.uvms.commons.message.api.MessageException;
 import eu.europa.ec.fisheries.uvms.commons.message.impl.JAXBUtils;
-import eu.europa.ec.fisheries.uvms.exchange.ExchangeLogModel;
 import eu.europa.ec.fisheries.uvms.exchange.service.message.constants.MessageQueue;
 import eu.europa.ec.fisheries.uvms.exchange.service.message.event.ErrorEvent;
 import eu.europa.ec.fisheries.uvms.exchange.service.message.event.carrier.ExchangeErrorEvent;
@@ -94,7 +94,7 @@ public class ExchangeEventIncomingServiceBean {
     private ExchangeLogServiceBean exchangeLog;
 
     @EJB
-    private ExchangeLogModel exchangeLogModel;
+    private ExchangeLogModelBean exchangeLogModel;
 
     @EJB
     private ExchangeMessageProducer producer;
@@ -419,7 +419,7 @@ public class ExchangeEventIncomingServiceBean {
             }
             String responseAsString = JAXBUtils.marshallJaxBObjectToString(response);
             producer.sendModuleResponseMessage(event, responseAsString);
-        } catch (ExchangeModelException | MessageException | JAXBException | JMSException e) {
+        } catch (MessageException | JAXBException | JMSException e) {
             fireExchangeFault(event, "Could not un-marshall " + LogRefIdByTypeExistsRequest.class, e);
         }
     }
@@ -441,7 +441,7 @@ public class ExchangeEventIncomingServiceBean {
             String responseAsString = JAXBUtils.marshallJaxBObjectToString(response);
             producer.sendModuleResponseMessage(event, responseAsString);
 
-        } catch (ExchangeModelException | MessageException | JAXBException | JMSException e) {
+        } catch (MessageException | JAXBException | JMSException e) {
             fireExchangeFault(event, "Could not un-marshall " + LogRefIdByTypeExistsRequest.class, e);
         }
 
