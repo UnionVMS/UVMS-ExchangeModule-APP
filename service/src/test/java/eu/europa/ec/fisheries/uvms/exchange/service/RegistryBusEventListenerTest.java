@@ -123,8 +123,8 @@ public class RegistryBusEventListenerTest extends BuildExchangeServiceTestDeploy
         assertFalse(unregistredService.getActive());
         assertEquals(false, unregistredService.getStatus());
         assertEquals(PluginType.MANUAL.value(), unregistredService.getType().value());
-
     }
+
     private ServiceType createBasicService(PluginType pluginType) {
 
         ServiceType service = new ServiceType();

@@ -17,7 +17,7 @@ import eu.europa.ec.fisheries.uvms.exchange.rest.BuildExchangeRestTestDeployment
 import eu.europa.ec.fisheries.uvms.exchange.rest.JMSHelper;
 import eu.europa.ec.fisheries.uvms.exchange.rest.RestHelper;
 import eu.europa.ec.fisheries.uvms.exchange.rest.dto.exchange.SendingGroupLog;
-import eu.europa.ec.fisheries.uvms.exchange.service.ExchangeLogService;
+import eu.europa.ec.fisheries.uvms.exchange.service.bean.ExchangeLogServiceBean;
 import org.jboss.arquillian.container.test.api.OperateOnDeployment;
 import org.jboss.arquillian.junit.Arquillian;
 import org.junit.Test;
@@ -41,7 +41,7 @@ import static org.junit.Assert.assertEquals;
 public class ExchangeSendingQueueResourceTest extends BuildExchangeRestTestDeployment {
 
     @Inject
-    ExchangeLogService exchangeLogService;
+    ExchangeLogServiceBean exchangeLogService;
 
     @Inject
     UnsentMessageDao unsentMessageDao;

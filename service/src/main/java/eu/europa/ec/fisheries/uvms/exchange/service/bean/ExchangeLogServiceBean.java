@@ -29,7 +29,6 @@ import eu.europa.ec.fisheries.uvms.exchange.service.message.constants.MessageQue
 import eu.europa.ec.fisheries.uvms.exchange.service.message.exception.ExchangeMessageException;
 import eu.europa.ec.fisheries.uvms.exchange.service.message.producer.ExchangeMessageProducer;
 import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelException;
-import eu.europa.ec.fisheries.uvms.exchange.service.ExchangeLogService;
 import eu.europa.ec.fisheries.uvms.exchange.service.event.ExchangeLogEvent;
 import eu.europa.ec.fisheries.uvms.exchange.service.event.ExchangeSendingQueueEvent;
 import eu.europa.ec.fisheries.uvms.exchange.service.exception.ExchangeLogException;
@@ -39,7 +38,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @Stateless
-public class ExchangeLogServiceBean implements ExchangeLogService {
+public class ExchangeLogServiceBean {
 
     private final static Logger LOG = LoggerFactory.getLogger(ExchangeLogServiceBean.class);
 
@@ -69,7 +68,7 @@ public class ExchangeLogServiceBean implements ExchangeLogService {
     @EJB
     private ExchangeLogDao exchangeLogDao;
 
-    @Override
+
     public ExchangeLogType logAndCache(ExchangeLogType log, String pluginMessageId, String username) throws ExchangeLogException {
         ExchangeLogType createdLog = log(log, username);
         logCache.put(pluginMessageId, UUID.fromString(createdLog.getGuid()));
@@ -77,7 +76,6 @@ public class ExchangeLogServiceBean implements ExchangeLogService {
         return createdLog;
     }
 
-    @Override
     public ExchangeLogType log(ExchangeLogType logType, String username) throws ExchangeLogException {
         try {
             ExchangeLogType exchangeLog = exchangeLogModel.createExchangeLog(logType, username);
@@ -90,7 +88,16 @@ public class ExchangeLogServiceBean implements ExchangeLogService {
         }
     }
 
-    @Override
+    /**
+     * Create a new log entry.
+     * @param request the incoming exchange request
+     * @param logType the type of the log
+     * @param status the status of the message (does it needs to be validated, is it valid, ...)
+     * @param messageType the type of the message
+     * @param messageText XML representation of the incoming/outgoing message
+     * @param incoming is this an incoming message (then true) or an outgoing message (then false)?
+     * @return the created log entry
+     */
     public ExchangeLogType log(ExchangeBaseRequest request, LogType logType, ExchangeLogStatusTypeType status, TypeRefType messageType, String messageText, boolean incoming) throws ExchangeLogException {
         LogRefType ref = new LogRefType();
         ref.setMessage(messageText);
@@ -115,7 +122,6 @@ public class ExchangeLogServiceBean implements ExchangeLogService {
         return log(log, request.getUsername());
     }
 
-    @Override
     public ExchangeLogType updateStatus(String pluginMessageId, ExchangeLogStatusTypeType logStatus, String username) throws ExchangeLogException {
         try {
             UUID logGuid = logCache.acknowledged(pluginMessageId);
@@ -147,7 +153,17 @@ public class ExchangeLogServiceBean implements ExchangeLogService {
         return exchangeLogStatusType;
     }
 
-    @Override
+    /**
+     * Adds a new log status to a log with the specified log guid.
+     *
+     * Since the guid is not something that an end user will have to, this method is assumed to be used by the system.
+     * Therefore, the logged username will be "SYSTEM".
+     *
+     * @param logGuid guid of the log. Notice that this is NOT the internal id.
+     * @param logStatus the next status
+     * @return the updated log
+     * @throws ExchangeLogException when something goes wrong
+     */
     public ExchangeLogType updateStatus(UUID logGuid, ExchangeLogStatusTypeType logStatus) throws ExchangeLogException {
         try {
             ExchangeLogStatusType exchangeLogStatusType = createExchangeLogStatusType(logStatus, logGuid);
@@ -157,7 +173,6 @@ public class ExchangeLogServiceBean implements ExchangeLogService {
         }
     }
 
-    @Override
     public ExchangeLogType updateExchangeLogBusinessError(UUID logGuid, String errorMessage) throws ExchangeLogException {
         try {
             ExchangeLogStatusType exchangeLogStatusType = createExchangeLogBusinessError(logGuid.toString(), errorMessage);
@@ -167,7 +182,6 @@ public class ExchangeLogServiceBean implements ExchangeLogService {
         }
     }
 
-    @Override
     public List<UnsentMessageType> getUnsentMessageList() throws ExchangeLogException {
         LOG.info("Get unsent message list in service layer");
         try {
@@ -177,7 +191,6 @@ public class ExchangeLogServiceBean implements ExchangeLogService {
         }
     }
 
-    @Override
     public List<ExchangeLogStatusType> getExchangeStatusHistoryList(ExchangeLogStatusTypeType status, TypeRefType type, Instant from, Instant to) throws ExchangeLogException {
         LOG.info("Get pollstatus list in service layer:{}",status);
         try {
@@ -200,7 +213,6 @@ public class ExchangeLogServiceBean implements ExchangeLogService {
         }
     }
 
-    @Override
     public ExchangeLogStatusType getExchangeStatusHistory(TypeRefType type, UUID typeRefGuid, String userName) throws ExchangeLogException {
         LOG.info("Get poll status history in service layer:{}",type);
         if (typeRefGuid == null) {
@@ -213,7 +225,6 @@ public class ExchangeLogServiceBean implements ExchangeLogService {
         }
     }
 
-    @Override
     public String createUnsentMessage(String senderReceiver, Instant timestamp, String recipient, String message, List<UnsentMessageTypeProperty> properties, String username) throws ExchangeLogException {
         LOG.debug("[INFO] CreateUnsentMessage in service layer:{}",message);
         try {
@@ -234,7 +245,6 @@ public class ExchangeLogServiceBean implements ExchangeLogService {
         }
     }
 
-    @Override
     public void removeUnsentMessage(String unsentMessageId, String username) throws ExchangeLogException {
         LOG.debug("removeUnsentMessage in service layer:{}",unsentMessageId);
         try {
@@ -247,14 +257,12 @@ public class ExchangeLogServiceBean implements ExchangeLogService {
         }
     }
 
-    @Override
     public void updateTypeRef(ExchangeLogType exchangeLogStatusType, MovementRefType movementRefType) throws ExchangeModelException {
         ExchangeLog exchangeLog = exchangeLogDao.getExchangeLogByGuid(UUID.fromString(exchangeLogStatusType.getGuid()));
         exchangeLog.setTypeRefType(TypeRefType.valueOf(movementRefType.getType().value()));
         exchangeLog.setTypeRefGuid(UUID.fromString(movementRefType.getMovementRefGuid()));
     }
 
-    @Override
     public ExchangeLogWithValidationResults getExchangeLogRawMessageAndValidationByGuid(UUID guid) {
         LogWithRawMsgAndType rawMsg = exchangeLogModel.getExchangeLogRawXmlByGuid(guid);
         ExchangeLogWithValidationResults validationFromRules = new ExchangeLogWithValidationResults();
@@ -268,7 +276,6 @@ public class ExchangeLogServiceBean implements ExchangeLogService {
         return validationFromRules;
     }
 
-    @Override
     public void resend(List<String> messageIdList, String username) throws ExchangeLogException {
         LOG.debug("resend in service layer:{} {}",messageIdList,username);
         List<UnsentMessageType> unsentMessageList;
@@ -293,7 +300,6 @@ public class ExchangeLogServiceBean implements ExchangeLogService {
         }
     }
 
-    @Override
     public PollStatus setPollStatus(String jmsCorrelationId, UUID pollId, ExchangeLogStatusTypeType logStatus, String username) throws ExchangeLogException {
         try {
             // Remove the message from cache, because legancy implementation

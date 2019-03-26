@@ -57,7 +57,6 @@ import eu.europa.ec.fisheries.uvms.exchange.model.mapper.ExchangePluginResponseM
 import eu.europa.ec.fisheries.uvms.exchange.model.mapper.JAXBMarshaller;
 import eu.europa.ec.fisheries.uvms.exchange.service.ExchangeEventIncomingService;
 import eu.europa.ec.fisheries.uvms.exchange.service.ExchangeEventOutgoingService;
-import eu.europa.ec.fisheries.uvms.exchange.service.ExchangeLogService;
 import eu.europa.ec.fisheries.uvms.exchange.service.event.ExchangePluginStatusEvent;
 import eu.europa.ec.fisheries.uvms.exchange.service.event.PollEvent;
 import eu.europa.ec.fisheries.uvms.exchange.service.exception.ExchangeLogException;
@@ -94,7 +93,7 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
     private Event<NotificationMessage> pollEvent;
 
     @EJB
-    private ExchangeLogService exchangeLog;
+    private ExchangeLogServiceBean exchangeLog;
 
     @EJB
     private ExchangeLogModel exchangeLogModel;
