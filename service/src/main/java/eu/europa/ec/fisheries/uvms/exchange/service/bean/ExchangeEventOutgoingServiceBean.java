@@ -58,9 +58,8 @@ import eu.europa.ec.fisheries.uvms.commons.message.api.MessageConstants;
 import eu.europa.ec.fisheries.uvms.commons.message.api.MessageException;
 import eu.europa.ec.fisheries.uvms.exchange.service.message.consumer.ExchangeConsumer;
 import eu.europa.ec.fisheries.uvms.exchange.service.message.event.ErrorEvent;
-import eu.europa.ec.fisheries.uvms.exchange.service.message.event.carrier.ExchangeMessageEvent;
-import eu.europa.ec.fisheries.uvms.exchange.service.message.event.carrier.PluginMessageEvent;
-import eu.europa.ec.fisheries.uvms.exchange.service.message.event.PluginErrorEvent;
+import eu.europa.ec.fisheries.uvms.exchange.service.message.event.carrier.ExchangeErrorEvent;
+import eu.europa.ec.fisheries.uvms.exchange.service.message.event.carrier.PluginErrorEvent;
 import eu.europa.ec.fisheries.uvms.exchange.service.message.exception.ExchangeMessageException;
 import eu.europa.ec.fisheries.uvms.exchange.service.message.producer.ExchangeMessageProducer;
 import eu.europa.ec.fisheries.uvms.exchange.model.constant.FaultCode;
@@ -92,11 +91,11 @@ public class ExchangeEventOutgoingServiceBean implements ExchangeEventOutgoingSe
 
     @Inject
     @ErrorEvent
-    private Event<ExchangeMessageEvent> exchangeErrorEvent;
+    private Event<ExchangeErrorEvent> exchangeErrorEvent;
 
     @Inject
-    @PluginErrorEvent
-    private Event<PluginMessageEvent> pluginErrorEvent;
+    @eu.europa.ec.fisheries.uvms.exchange.service.message.event.PluginErrorEvent
+    private Event<PluginErrorEvent> pluginErrorEvent;
 
     @Inject
     @PollEvent
@@ -143,16 +142,21 @@ public class ExchangeEventOutgoingServiceBean implements ExchangeEventOutgoingSe
     }
 
     @Override
-    public void sendReportToPlugin(ExchangeMessageEvent message) {
+    public void sendReportToPlugin(TextMessage message) {
         try {
-            SendMovementToPluginRequest request = JAXBMarshaller.unmarshallTextMessage(message.getJmsMessage(), SendMovementToPluginRequest.class);
+            SendMovementToPluginRequest request = JAXBMarshaller.unmarshallTextMessage(message, SendMovementToPluginRequest.class);
+            if(request.getUsername() == null){
+                LOG.error("[ Error when receiving message in exchange, username must be set in the request: ]");
+                exchangeErrorEvent.fire(new ExchangeErrorEvent(message, ExchangeModuleResponseMapper.createFaultMessage(FaultCode.EXCHANGE_MESSAGE, "Username in the request must be set")));
+                return;
+            }
             LOG.info("Send report to plugin: {}",request);
             SendMovementToPluginType sendReport = request.getReport();
 
             String unsentMessageGuid;
             try {
                 List<UnsentMessageTypeProperty> unsentMessageProperties = ExchangeLogMapper.getUnsentMessageProperties(sendReport);
-                unsentMessageGuid = exchangeLogService.createUnsentMessage(sendReport.getRecipient(), sendReport.getTimestamp().toInstant(), ExchangeLogMapper.getSendMovementSenderReceiver(sendReport), message.getJmsMessage().getText(), unsentMessageProperties, request.getUsername());
+                unsentMessageGuid = exchangeLogService.createUnsentMessage(sendReport.getRecipient(), sendReport.getTimestamp().toInstant(), ExchangeLogMapper.getSendMovementSenderReceiver(sendReport), message.getText(), unsentMessageProperties, request.getUsername());
             } catch (Exception e) {
                 throw new IllegalStateException("Could not create unsent message ", e);
             }
@@ -193,11 +197,10 @@ public class ExchangeEventOutgoingServiceBean implements ExchangeEventOutgoingSe
 	 *
 	 */
     @Override
-    public void forwardMdrSyncMessageToPlugin(ExchangeMessageEvent message) {               //not adding anything to the exchange log????
-        TextMessage requestMessage = message.getJmsMessage();
+    public void forwardMdrSyncMessageToPlugin(TextMessage message) {               //not adding anything to the exchange log????
         try {
             LOG.info("[INFO] Received MdrSyncMessageEvent. Going to send to the Plugin now..");
-            String marshalledReq = ExchangeToMdrRulesMapper.mapExchangeToMdrPluginRequest(requestMessage);
+            String marshalledReq = ExchangeToMdrRulesMapper.mapExchangeToMdrPluginRequest(message);
             producer.sendEventBusMessage(marshalledReq, ExchangeServiceConstants.MDR_PLUGIN_SERVICE_NAME);
         } catch (Exception e) {
             LOG.error("[ERROR] Something strange happend during message conversion {} {}",message,e);       //so, if we dont update the mdr plugin bc of an exception, we just ignore the entire message?
@@ -205,26 +208,31 @@ public class ExchangeEventOutgoingServiceBean implements ExchangeEventOutgoingSe
     }
 
     @Override
-    public void sendCommandToPlugin(ExchangeMessageEvent message) {
+    public void sendCommandToPlugin(TextMessage message) {
         SetCommandRequest request = new SetCommandRequest();
         try {
-            request = JAXBMarshaller.unmarshallTextMessage(message.getJmsMessage(), SetCommandRequest.class);
+            request = JAXBMarshaller.unmarshallTextMessage(message, SetCommandRequest.class);
+            if(request.getUsername() == null){
+                LOG.error("[ Error when receiving message in exchange, username must be set in the request: ]");
+                exchangeErrorEvent.fire(new ExchangeErrorEvent(message, ExchangeModuleResponseMapper.createFaultMessage(FaultCode.EXCHANGE_MESSAGE, "Username in the request must be set")));
+                return;
+            }
 
             LOG.info("Send command to plugin:{}",request);
             String pluginName = request.getCommand().getPluginName();
 
             ServiceResponseType service = exchangeService.getService(pluginName);
 
-            if (validate(request.getCommand(), message.getJmsMessage(), service, request.getCommand(), request.getUsername())) {
-                sendCommandToPlugin(request, service.getName(), message.getJmsMessage().getText());
+            if (validate(request.getCommand(), message, service, request.getCommand(), request.getUsername())) {
+                sendCommandToPlugin(request, service.getName(), message.getText());
             } else {
             LOG.debug("Can not send to plugin. Response sent to caller.");
             }
         } catch (NullPointerException | ExchangeException e) {
             if (request.getCommand().getCommand() != CommandTypeType.EMAIL) {
                 LOG.error("[ Error when sending command to plugin {} ]", e);
-                if (getTimesRedelivered(message.getJmsMessage()) > MessageConstants.JMS_MAX_REDELIVERIES) {
-                    exchangeErrorEvent.fire(new ExchangeMessageEvent(message.getJmsMessage(), ExchangeModuleResponseMapper.createFaultMessage(FaultCode.EXCHANGE_EVENT_SERVICE, "Exception when sending command to plugin")));
+                if (getTimesRedelivered(message) > MessageConstants.JMS_MAX_REDELIVERIES) {
+                    exchangeErrorEvent.fire(new ExchangeErrorEvent(message, ExchangeModuleResponseMapper.createFaultMessage(FaultCode.EXCHANGE_EVENT_SERVICE, "Exception when sending command to plugin")));
                 }
             }
             throw new IllegalStateException("Error when sending command to plugin", e);
@@ -252,9 +260,9 @@ public class ExchangeEventOutgoingServiceBean implements ExchangeEventOutgoingSe
 
 
     @Override
-    public void sendFLUXFAResponseToPlugin(ExchangeMessageEvent message) {
+    public void sendFLUXFAResponseToPlugin(TextMessage message) {
         try {
-            SetFLUXFAResponseMessageRequest request = JAXBMarshaller.unmarshallTextMessage(message.getJmsMessage(), SetFLUXFAResponseMessageRequest.class);
+            SetFLUXFAResponseMessageRequest request = JAXBMarshaller.unmarshallTextMessage(message, SetFLUXFAResponseMessageRequest.class);
             LOG.debug("[INFO] Got FLUXFAResponse in exchange with destination :" + request.getDestination());
             String text = ExchangePluginRequestMapper.createSetFLUXFAResponseRequestWithOn(
                     request.getRequest(), request.getDestination(), request.getFluxDataFlow(), request.getSenderOrReceiver(), request.getOnValue());
@@ -273,9 +281,9 @@ public class ExchangeEventOutgoingServiceBean implements ExchangeEventOutgoingSe
     }
 
     @Override
-    public void sendFLUXFAQueryToPlugin(ExchangeMessageEvent message) {
+    public void sendFLUXFAQueryToPlugin(TextMessage message) {
         try {
-            SetFAQueryMessageRequest request = JAXBMarshaller.unmarshallTextMessage(message.getJmsMessage(), SetFAQueryMessageRequest.class);
+            SetFAQueryMessageRequest request = JAXBMarshaller.unmarshallTextMessage(message, SetFAQueryMessageRequest.class);
             LOG.debug("Got SetFAQueryMessageRequest in exchange : " + request.getRequest());
             String text = ExchangePluginRequestMapper.createSendFLUXFAQueryRequest(
                     request.getRequest(), request.getDestination(), request.getFluxDataFlow(), request.getSenderOrReceiver());
@@ -291,9 +299,9 @@ public class ExchangeEventOutgoingServiceBean implements ExchangeEventOutgoingSe
 
 
     @Override
-    public void sendFLUXFAReportToPlugin(ExchangeMessageEvent message) {
+    public void sendFLUXFAReportToPlugin(TextMessage message) {
         try {
-            SetFLUXFAReportMessageRequest request = JAXBMarshaller.unmarshallTextMessage(message.getJmsMessage(), SetFLUXFAReportMessageRequest.class);
+            SetFLUXFAReportMessageRequest request = JAXBMarshaller.unmarshallTextMessage(message, SetFLUXFAReportMessageRequest.class);
             LOG.debug("Got SetFAQueryMessageRequest in exchange : " + request.getRequest());
             String text = ExchangePluginRequestMapper.createSendFLUXFAReportRequest(
                     request.getRequest(), request.getDestination(), request.getFluxDataFlow(), request.getSenderOrReceiver());
@@ -308,9 +316,9 @@ public class ExchangeEventOutgoingServiceBean implements ExchangeEventOutgoingSe
     }
 
     @Override
-    public void sendSalesResponse(ExchangeMessageEvent message) {
+    public void sendSalesResponse(TextMessage message) {
         try {
-            eu.europa.ec.fisheries.schema.exchange.module.v1.SendSalesResponseRequest request = JAXBMarshaller.unmarshallTextMessage(message.getJmsMessage(), eu.europa.ec.fisheries.schema.exchange.module.v1.SendSalesResponseRequest.class);
+            eu.europa.ec.fisheries.schema.exchange.module.v1.SendSalesResponseRequest request = JAXBMarshaller.unmarshallTextMessage(message, eu.europa.ec.fisheries.schema.exchange.module.v1.SendSalesResponseRequest.class);
             ExchangeLogStatusTypeType validationStatus = request.getValidationStatus();
             exchangeLogService.log(request, LogType.SEND_SALES_RESPONSE, validationStatus, TypeRefType.SALES_RESPONSE, request.getResponse(), false);
             if (validationStatus == ExchangeLogStatusTypeType.SUCCESSFUL || validationStatus == ExchangeLogStatusTypeType.SUCCESSFUL_WITH_WARNINGS) {
@@ -330,9 +338,9 @@ public class ExchangeEventOutgoingServiceBean implements ExchangeEventOutgoingSe
     }
 
     @Override
-    public void sendSalesReport(ExchangeMessageEvent message) {
+    public void sendSalesReport(TextMessage message) {
         try {
-            eu.europa.ec.fisheries.schema.exchange.module.v1.SendSalesReportRequest request = JAXBMarshaller.unmarshallTextMessage(message.getJmsMessage(), eu.europa.ec.fisheries.schema.exchange.module.v1.SendSalesReportRequest.class);
+            eu.europa.ec.fisheries.schema.exchange.module.v1.SendSalesReportRequest request = JAXBMarshaller.unmarshallTextMessage(message, eu.europa.ec.fisheries.schema.exchange.module.v1.SendSalesReportRequest.class);
             ExchangeLogStatusTypeType validationStatus = request.getValidationStatus();
 
             exchangeLogService.log(request, LogType.SEND_SALES_REPORT, validationStatus, TypeRefType.SALES_REPORT, request.getReport(), false);
@@ -357,9 +365,9 @@ public class ExchangeEventOutgoingServiceBean implements ExchangeEventOutgoingSe
     }
 
     @Override
-    public void sendAssetInformation(ExchangeMessageEvent event) {
+    public void sendAssetInformation(TextMessage event) {
         try {
-            SendAssetInformationRequest incomingRequest = JAXBMarshaller.unmarshallTextMessage(event.getJmsMessage(), SendAssetInformationRequest.class);
+            SendAssetInformationRequest incomingRequest = JAXBMarshaller.unmarshallTextMessage(event, SendAssetInformationRequest.class);
             String message = incomingRequest.getAssets();
             String destination = incomingRequest.getDestination();
             String senderOrReceiver = incomingRequest.getSenderOrReceiver();
@@ -380,9 +388,9 @@ public class ExchangeEventOutgoingServiceBean implements ExchangeEventOutgoingSe
     }
 
     @Override
-    public void updateLogStatus(ExchangeMessageEvent message) {
+    public void updateLogStatus(TextMessage message) {
         try {
-            UpdateLogStatusRequest request = JAXBMarshaller.unmarshallTextMessage(message.getJmsMessage(), UpdateLogStatusRequest.class);
+            UpdateLogStatusRequest request = JAXBMarshaller.unmarshallTextMessage(message, UpdateLogStatusRequest.class);
             UUID logGuid = UUID.fromString(request.getLogGuid());
             ExchangeLogStatusTypeType status = request.getNewStatus();
             exchangeLogService.updateStatus(logGuid, status);
@@ -394,9 +402,9 @@ public class ExchangeEventOutgoingServiceBean implements ExchangeEventOutgoingSe
     }
 
     @Override
-    public void updateLogBusinessError(ExchangeMessageEvent message) {  //should this chain not set a log status or something?
+    public void updateLogBusinessError(TextMessage message) {  //should this chain not set a log status or something?
         try {
-            UpdateLogStatusRequest request = JAXBMarshaller.unmarshallTextMessage(message.getJmsMessage(), UpdateLogStatusRequest.class);
+            UpdateLogStatusRequest request = JAXBMarshaller.unmarshallTextMessage(message, UpdateLogStatusRequest.class);
             UUID exchangeLogGuid = UUID.fromString(request.getLogGuid());
             String businessModuleExceptionMessage = request.getBusinessModuleExceptionMessage();
             exchangeLogService.updateExchangeLogBusinessError(exchangeLogGuid, businessModuleExceptionMessage);
@@ -406,9 +414,14 @@ public class ExchangeEventOutgoingServiceBean implements ExchangeEventOutgoingSe
     }
 
     @Override
-    public void handleProcessedMovement(ExchangeMessageEvent message) {
+    public void handleProcessedMovement(TextMessage message) {
         try {
-            ProcessedMovementResponse response = JAXBMarshaller.unmarshallTextMessage(message.getJmsMessage(), ProcessedMovementResponse.class);
+            ProcessedMovementResponse response = JAXBMarshaller.unmarshallTextMessage(message, ProcessedMovementResponse.class);
+            if(response.getUsername() == null){
+                LOG.error("[ Error when receiving message in exchange, username must be set in the request: ]");
+                exchangeErrorEvent.fire(new ExchangeErrorEvent(message, ExchangeModuleResponseMapper.createFaultMessage(FaultCode.EXCHANGE_MESSAGE, "Username in the request must be set")));
+                return;
+            }
             LOG.debug("Received processed movement from Movement:{}", response);
             MovementRefType movementRefType = response.getMovementRefType();
             if (movementRefType.getAckResponseMessageID() == null) {
@@ -430,9 +443,9 @@ public class ExchangeEventOutgoingServiceBean implements ExchangeEventOutgoingSe
     }
 
     @Override
-    public void handleProcessedMovementBatch(ExchangeMessageEvent message) {
+    public void handleProcessedMovementBatch(TextMessage message) {
         try {
-            ProcessedMovementResponseBatch request = JAXBMarshaller.unmarshallTextMessage(message.getJmsMessage(), ProcessedMovementResponseBatch.class);
+            ProcessedMovementResponseBatch request = JAXBMarshaller.unmarshallTextMessage(message, ProcessedMovementResponseBatch.class);
             LOG.debug("Received processed movement from Rules:{}", request);
             String username;
             MovementRefType movementRefType = request.getMovementRefType();
@@ -451,35 +464,35 @@ public class ExchangeEventOutgoingServiceBean implements ExchangeEventOutgoingSe
         }
     }
 
-    private void firePluginFault(ExchangeMessageEvent messageEvent, String errorMessage, Throwable exception) {
+    private void firePluginFault(TextMessage messageEvent, String errorMessage, Throwable exception) {
         LOG.error(errorMessage, exception);
         PluginFault fault = ExchangePluginResponseMapper.mapToPluginFaultResponse(FaultCode.EXCHANGE_PLUGIN_EVENT.getCode(), errorMessage);
-        pluginErrorEvent.fire(new PluginMessageEvent(messageEvent.getJmsMessage(), null, fault));
+        pluginErrorEvent.fire(new PluginErrorEvent(messageEvent, null, fault));
     }
 
-    private void fireExchangeFault(ExchangeMessageEvent messageEvent, String errorMessage, Throwable exception) {
+    private void fireExchangeFault(TextMessage messageEvent, String errorMessage, Throwable exception) {
         LOG.error(errorMessage, exception);
         eu.europa.ec.fisheries.schema.exchange.common.v1.ExchangeFault exchangeFault = ExchangeModuleResponseMapper.createFaultMessage(FaultCode.EXCHANGE_EVENT_SERVICE, errorMessage);
-        exchangeErrorEvent.fire(new ExchangeMessageEvent(messageEvent.getJmsMessage(), exchangeFault));
+        exchangeErrorEvent.fire(new ExchangeErrorEvent(messageEvent, exchangeFault));
     }
 
 
     private boolean validate(CommandType command, TextMessage origin, ServiceResponseType service, CommandType commandType, String username) {
         if (command == null) {
             String faultMessage = "No command";
-            exchangeErrorEvent.fire(new ExchangeMessageEvent(origin, ExchangeModuleResponseMapper.createFaultMessage(FaultCode.EXCHANGE_COMMAND_INVALID, faultMessage)));
+            exchangeErrorEvent.fire(new ExchangeErrorEvent(origin, ExchangeModuleResponseMapper.createFaultMessage(FaultCode.EXCHANGE_COMMAND_INVALID, faultMessage)));
             return false;
         } else if (command.getCommand() == null) {
             String faultMessage = "No command type";
-            exchangeErrorEvent.fire(new ExchangeMessageEvent(origin, ExchangeModuleResponseMapper.createFaultMessage(FaultCode.EXCHANGE_COMMAND_INVALID, faultMessage)));
+            exchangeErrorEvent.fire(new ExchangeErrorEvent(origin, ExchangeModuleResponseMapper.createFaultMessage(FaultCode.EXCHANGE_COMMAND_INVALID, faultMessage)));
             return false;
         } else if (command.getPluginName() == null) {
             String faultMessage = "No plugin to send to";
-            exchangeErrorEvent.fire(new ExchangeMessageEvent(origin, ExchangeModuleResponseMapper.createFaultMessage(FaultCode.EXCHANGE_COMMAND_INVALID, faultMessage)));
+            exchangeErrorEvent.fire(new ExchangeErrorEvent(origin, ExchangeModuleResponseMapper.createFaultMessage(FaultCode.EXCHANGE_COMMAND_INVALID, faultMessage)));
             return false;
         } else if (service == null || service.getServiceClassName() == null || !service.getServiceClassName().equalsIgnoreCase(command.getPluginName())) {                  //this can never happen since a nullpointer is thrown in the remapping process
             String faultMessage = "No plugin receiver available";
-            exchangeErrorEvent.fire(new ExchangeMessageEvent(origin, ExchangeModuleResponseMapper.createFaultMessage(FaultCode.EXCHANGE_COMMAND_INVALID, faultMessage)));
+            exchangeErrorEvent.fire(new ExchangeErrorEvent(origin, ExchangeModuleResponseMapper.createFaultMessage(FaultCode.EXCHANGE_COMMAND_INVALID, faultMessage)));
             try {
                 List<UnsentMessageTypeProperty> setUnsentMessageTypePropertiesForPoll = getSetUnsentMessageTypePropertiesForPoll(commandType);
                 exchangeLogService.createUnsentMessage(service.getName(), command.getTimestamp().toInstant(), command.getCommand().name(), origin.getText(), setUnsentMessageTypePropertiesForPoll, username);
@@ -489,7 +502,7 @@ public class ExchangeEventOutgoingServiceBean implements ExchangeEventOutgoingSe
             return false;
         } else if (command.getTimestamp() == null) {
             String faultMessage = "No timestamp";
-            exchangeErrorEvent.fire(new ExchangeMessageEvent(origin, ExchangeModuleResponseMapper.createFaultMessage(FaultCode.EXCHANGE_COMMAND_INVALID, faultMessage)));
+            exchangeErrorEvent.fire(new ExchangeErrorEvent(origin, ExchangeModuleResponseMapper.createFaultMessage(FaultCode.EXCHANGE_COMMAND_INVALID, faultMessage)));
             return false;
         } else if (!StatusType.STARTED.equals(service.getStatus())) {
             LOG.info("Plugin to send report to is not started:{}",service);

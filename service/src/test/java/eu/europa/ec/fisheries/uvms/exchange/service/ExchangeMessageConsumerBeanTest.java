@@ -334,7 +334,7 @@ public class ExchangeMessageConsumerBeanTest extends BuildExchangeServiceTestDep
         AcknowledgeType ackType = new AcknowledgeType();
         ackType.setType(AcknowledgeTypeType.OK);
         String request = ExchangePluginResponseMapper.mapToStopResponse(serviceClassName, ackType);
-        String corrID = jmsHelper.sendExchangeMessage(request, null, "STOP_ACK");
+        String corrID = jmsHelper.sendExchangeMessage(request, null, ExchangeModuleMethod.PLUGIN_STOP_ACK.value());
 
         Thread.sleep(1000);
         Service updatedService = serviceRegistryDao.getServiceByServiceClassName(serviceClassName);
@@ -355,7 +355,7 @@ public class ExchangeMessageConsumerBeanTest extends BuildExchangeServiceTestDep
         AcknowledgeType ackType = new AcknowledgeType();
         ackType.setType(AcknowledgeTypeType.OK);
         String request = ExchangePluginResponseMapper.mapToStartResponse(serviceClassName, ackType);
-        String corrID = jmsHelper.sendExchangeMessage(request, null, "START_ACK");
+        String corrID = jmsHelper.sendExchangeMessage(request, null, ExchangeModuleMethod.PLUGIN_START_ACK.value());
 
         Thread.sleep(1000);
         Service updatedService = serviceRegistryDao.getServiceByServiceClassName(serviceClassName);
@@ -390,7 +390,7 @@ public class ExchangeMessageConsumerBeanTest extends BuildExchangeServiceTestDep
         exchangeEventLogCache.put(exchangeLog.getId().toString(),exchangeLog.getId());
 
         String request = ExchangePluginResponseMapper.mapToSetReportResponse("Fake service class name", ackType);
-        String corrID = jmsHelper.sendExchangeMessage(request, null, "SET_REPORT_ACK");
+        String corrID = jmsHelper.sendExchangeMessage(request, null, ExchangeModuleMethod.PLUGIN_SET_REPORT_ACK.value());
 
         Thread.sleep(1000);
         try {
@@ -430,7 +430,7 @@ public class ExchangeMessageConsumerBeanTest extends BuildExchangeServiceTestDep
         exchangeEventLogCache.put(exchangeLog.getId().toString(),exchangeLog.getId());
 
         String request = ExchangePluginResponseMapper.mapToSetCommandResponse("Fake service class name", ackType);
-        String corrID = jmsHelper.sendExchangeMessage(request, null, "SET_COMMAND_ACK");
+        String corrID = jmsHelper.sendExchangeMessage(request, null, ExchangeModuleMethod.PLUGIN_SET_COMMAND_ACK.value());
 
         Thread.sleep(1000);
         try {
@@ -476,7 +476,7 @@ public class ExchangeMessageConsumerBeanTest extends BuildExchangeServiceTestDep
         exchangeEventLogCache.put(exchangeLog.getId().toString(),exchangeLog.getId());
 
         String request = ExchangePluginResponseMapper.mapToSetCommandResponse("Fake service class name", ackType);
-        String corrID = jmsHelper.sendExchangeMessage(request, null, "SET_COMMAND_ACK");
+        String corrID = jmsHelper.sendExchangeMessage(request, null, ExchangeModuleMethod.PLUGIN_SET_COMMAND_ACK.value());
 
         Thread.sleep(1000);
         try {
@@ -701,7 +701,7 @@ public class ExchangeMessageConsumerBeanTest extends BuildExchangeServiceTestDep
         int salesLogB4 = exchangeLogDao.getExchangeLogByTypesRefAndGuid(guid, list).size();
 
         String request = ExchangeModuleRequestMapper.createReceiveInvalidSalesMessage("Response invalid message", guid.toString(), "Invalid sender", Instant.now(), "Invalid username", PluginType.BELGIAN_SALES, "Invalid original message");
-        String corrID = jmsHelper.sendExchangeMessage(request, null, "RECEIVE_INVALID_SALES_RESPONSE");
+        String corrID = jmsHelper.sendExchangeMessage(request, null, "RECEIVE_INVALID_SALES_MESSAGE");
         TextMessage message = (TextMessage)jmsHelper.listenOnQueue("UVMSSalesEvent");
         assertEquals("Response invalid message", message.getText());                //Kinda wondering how the hell this works on the sales side......
 

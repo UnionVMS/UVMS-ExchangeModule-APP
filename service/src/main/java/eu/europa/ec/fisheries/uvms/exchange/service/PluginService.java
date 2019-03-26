@@ -12,20 +12,17 @@ copy of the GNU General Public License along with the IFDM Suite. If not, see <h
 package eu.europa.ec.fisheries.uvms.exchange.service;
 
 import eu.europa.ec.fisheries.uvms.config.event.ConfigSettingEvent;
-import eu.europa.ec.fisheries.uvms.config.event.ConfigSettingUpdatedEvent;
-import eu.europa.ec.fisheries.uvms.exchange.service.message.event.carrier.ExchangeMessageEvent;
-import eu.europa.ec.fisheries.uvms.exchange.service.message.event.carrier.PluginMessageEvent;
 import eu.europa.ec.fisheries.uvms.exchange.service.exception.ExchangeServiceException;
 import javax.ejb.Local;
-import javax.enterprise.event.Observes;
+import javax.jms.TextMessage;
 
 @Local
 public interface PluginService {
 
-    void registerService(PluginMessageEvent message);
-    void unregisterService(PluginMessageEvent message);
+    void registerService(TextMessage message);
+    void unregisterService(TextMessage message);
     void setConfig(ConfigSettingEvent settingEvent);
-    void updatePluginSetting(ExchangeMessageEvent settingEvent);
+    void updatePluginSetting(TextMessage settingEvent);
     boolean ping(String serviceClassName) throws ExchangeServiceException;
 	boolean start(String serviceClassName) throws ExchangeServiceException;
 	boolean stop(String serviceClassName) throws ExchangeServiceException;

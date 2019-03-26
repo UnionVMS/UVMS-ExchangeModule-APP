@@ -14,14 +14,10 @@ package eu.europa.ec.fisheries.uvms.exchange.service.message.producer;
 import eu.europa.ec.fisheries.uvms.commons.message.api.MessageException;
 import eu.europa.ec.fisheries.uvms.config.exception.ConfigMessageException;
 import eu.europa.ec.fisheries.uvms.exchange.service.message.constants.MessageQueue;
-import eu.europa.ec.fisheries.uvms.exchange.service.message.event.ErrorEvent;
-import eu.europa.ec.fisheries.uvms.exchange.service.message.event.carrier.ExchangeMessageEvent;
-import eu.europa.ec.fisheries.uvms.exchange.service.message.event.carrier.PluginMessageEvent;
-import eu.europa.ec.fisheries.uvms.exchange.service.message.event.PluginErrorEvent;
+import eu.europa.ec.fisheries.uvms.exchange.service.message.event.carrier.ExchangeErrorEvent;
+import eu.europa.ec.fisheries.uvms.exchange.service.message.event.carrier.PluginErrorEvent;
 import eu.europa.ec.fisheries.uvms.exchange.service.message.exception.ExchangeMessageException;
 import javax.ejb.Local;
-import javax.enterprise.event.Observes;
-import javax.jms.Destination;
 import javax.jms.TextMessage;
 
 @Local
@@ -39,9 +35,9 @@ public interface ExchangeMessageProducer {
     
     String sendMovementMessage(String text, String groupId) throws ExchangeMessageException;
 
-    void sendModuleErrorResponseMessage(ExchangeMessageEvent event);
+    void sendModuleErrorResponseMessage(ExchangeErrorEvent event);
 
-    void sendPluginErrorResponseMessage(PluginMessageEvent event);
+    void sendPluginErrorResponseMessage(PluginErrorEvent event);
 
     void sendModuleAckMessage(String messageId, MessageQueue queue, String text);
 

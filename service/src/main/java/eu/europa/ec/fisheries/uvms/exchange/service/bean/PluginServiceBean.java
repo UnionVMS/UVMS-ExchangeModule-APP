@@ -25,9 +25,9 @@ import eu.europa.ec.fisheries.uvms.config.exception.ConfigServiceException;
 import eu.europa.ec.fisheries.uvms.config.service.ParameterService;
 import eu.europa.ec.fisheries.uvms.config.service.UVMSConfigService;
 import eu.europa.ec.fisheries.uvms.exchange.service.message.consumer.ExchangeConsumer;
-import eu.europa.ec.fisheries.uvms.exchange.service.message.event.carrier.ExchangeMessageEvent;
-import eu.europa.ec.fisheries.uvms.exchange.service.message.event.carrier.PluginMessageEvent;
-import eu.europa.ec.fisheries.uvms.exchange.service.message.event.PluginErrorEvent;
+import eu.europa.ec.fisheries.uvms.exchange.service.message.event.ErrorEvent;
+import eu.europa.ec.fisheries.uvms.exchange.service.message.event.carrier.ExchangeErrorEvent;
+import eu.europa.ec.fisheries.uvms.exchange.service.message.event.carrier.PluginErrorEvent;
 import eu.europa.ec.fisheries.uvms.exchange.service.message.exception.ExchangeMessageException;
 import eu.europa.ec.fisheries.uvms.exchange.service.message.producer.ExchangeMessageProducer;
 import eu.europa.ec.fisheries.uvms.exchange.model.constant.FaultCode;
@@ -63,8 +63,12 @@ public class PluginServiceBean implements PluginService {
     private static final String PARAMETER_DELIMETER = "\\.";
 
     @Inject
-    @PluginErrorEvent
-    private Event<PluginMessageEvent> errorEvent;
+    @eu.europa.ec.fisheries.uvms.exchange.service.message.event.PluginErrorEvent
+    private Event<PluginErrorEvent> errorEvent;
+
+    @Inject
+    @ErrorEvent
+    private Event<ExchangeErrorEvent> exchangeErrorEvent;
 
     @EJB
     private ExchangeService exchangeService;
@@ -151,13 +155,12 @@ public class PluginServiceBean implements PluginService {
     }
 
     @Override
-    public void registerService(PluginMessageEvent event) {
-        TextMessage textMessage = event.getJmsMessage();
+    public void registerService(TextMessage message) {
         RegisterServiceRequest register = null;
         try {
-            register = JAXBMarshaller.unmarshallTextMessage(textMessage, RegisterServiceRequest.class);
+            register = JAXBMarshaller.unmarshallTextMessage(message, RegisterServiceRequest.class);
             LOG.info("[INFO] Received @RegisterServiceEvent : {}" , register.getService());
-            String messageId = textMessage.getJMSMessageID();
+            String messageId = message.getJMSMessageID();
             boolean sendMessage;
             if (register.getService() != null) {
                 sendMessage = checkPluginType(register.getService().getPluginType(), register.getService().getServiceResponseMessageName(), messageId);
@@ -166,8 +169,8 @@ public class PluginServiceBean implements PluginService {
                 }
             }
         } catch (ExchangeModelMarshallException | ExchangeMessageException | JMSException e) {
-            LOG.error("[ERROR] Register service exception {} {}",event, e.getMessage());
-            errorEvent.fire(new PluginMessageEvent(textMessage, register.getService(), ExchangePluginResponseMapper.mapToPluginFaultResponse(FaultCode.EXCHANGE_PLUGIN_EVENT.getCode(), "Exception when register service")));
+            LOG.error("[ERROR] Register service exception {} {}", message, e.getMessage());
+            errorEvent.fire(new PluginErrorEvent(message, register.getService(), ExchangePluginResponseMapper.mapToPluginFaultResponse(FaultCode.EXCHANGE_PLUGIN_EVENT.getCode(), "Exception when register service")));
         }
     }
 
@@ -205,19 +208,18 @@ public class PluginServiceBean implements PluginService {
     }
 
     @Override
-    public void unregisterService(PluginMessageEvent event) {
-        LOG.info("[INFO] Received @UnRegisterServiceEvent request : {}", event);
-        TextMessage textMessage = event.getJmsMessage();
+    public void unregisterService(TextMessage message) {
+        LOG.trace("[INFO] Received @UnRegisterServiceEvent request : {}", message);
         ServiceResponseType service = null;
         try {
-            UnregisterServiceRequest unregister = JAXBMarshaller.unmarshallTextMessage(textMessage, UnregisterServiceRequest.class);
+            UnregisterServiceRequest unregister = JAXBMarshaller.unmarshallTextMessage(message, UnregisterServiceRequest.class);
             service = exchangeService.unregisterService(unregister.getService(), unregister.getService().getName());
             String serviceClassName = service.getServiceClassName();
             //NO ack back to plugin
             //TODO log to exchange log
         } catch (ExchangeModelMarshallException | ExchangeServiceException e) {
             LOG.error("Unregister service exception " + e.getMessage());
-            errorEvent.fire(new PluginMessageEvent(textMessage, service, ExchangePluginResponseMapper.mapToPluginFaultResponse(FaultCode.EXCHANGE_PLUGIN_EVENT.getCode(), "Exception when unregister service")));
+            errorEvent.fire(new PluginErrorEvent(message, service, ExchangePluginResponseMapper.mapToPluginFaultResponse(FaultCode.EXCHANGE_PLUGIN_EVENT.getCode(), "Exception when unregister service")));
         }
     }
     
@@ -275,18 +277,23 @@ public class PluginServiceBean implements PluginService {
     }
 
     @Override
-	public void updatePluginSetting(ExchangeMessageEvent settingEvent) {
+	public void updatePluginSetting(TextMessage settingEvent) {
 		try {
-			TextMessage jmsMessage = settingEvent.getJmsMessage();
+			TextMessage jmsMessage = settingEvent;
 			UpdatePluginSettingRequest request = JAXBMarshaller.unmarshallTextMessage(jmsMessage, UpdatePluginSettingRequest.class);
+            if(request.getUsername() == null){
+                LOG.error("[ Error when receiving message in exchange, username must be set in the request: ]");
+                exchangeErrorEvent.fire(new ExchangeErrorEvent(settingEvent, ExchangeModuleResponseMapper.createFaultMessage(FaultCode.EXCHANGE_MESSAGE, "Username in the request must be set")));
+                return;
+            }
             LOG.info("Received @UpdatePluginSettingEvent from module queue:{}" , request.toString());
 			updatePluginSetting(request.getServiceClassName(), request.getSetting(), request.getUsername());
 			String text = ExchangeModuleResponseMapper.mapUpdateSettingResponse(ExchangeModuleResponseMapper.mapAcknowledgeTypeOK());
-			producer.sendModuleResponseMessage(settingEvent.getJmsMessage(), text);
+			producer.sendModuleResponseMessage(settingEvent, text);
 		} catch (ExchangeModelMarshallException | ExchangeServiceException | ExchangeMessageException | MessageException e) {
 			LOG.error("Couldn't unmarshall update setting request");
-			settingEvent.setErrorFault(ExchangeModuleResponseMapper.createFaultMessage(FaultCode.EXCHANGE_EVENT_SERVICE, "Couldn't update plugin setting"));
-			producer.sendModuleErrorResponseMessage(settingEvent);
+            ExchangeErrorEvent exchangeErrorEvent = new ExchangeErrorEvent(settingEvent, ExchangeModuleResponseMapper.createFaultMessage(FaultCode.EXCHANGE_EVENT_SERVICE, "Couldn't update plugin setting"));
+			producer.sendModuleErrorResponseMessage(exchangeErrorEvent);
 		}
 		
 		

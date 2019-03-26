@@ -11,6 +11,7 @@ copy of the GNU General Public License along with the IFDM Suite. If not, see <h
  */
 package eu.europa.ec.fisheries.uvms.exchange.service.message.consumer.bean;
 
+import eu.europa.ec.fisheries.schema.exchange.registry.v1.ExchangeRegistryMethod;
 import eu.europa.ec.fisheries.uvms.commons.message.api.MessageConstants;
 import javax.ejb.ActivationConfigProperty;
 import javax.ejb.MessageDriven;
@@ -28,9 +29,7 @@ import eu.europa.ec.fisheries.schema.exchange.registry.v1.ExchangeRegistryBaseRe
 import eu.europa.ec.fisheries.schema.exchange.registry.v1.RegisterServiceRequest;
 import eu.europa.ec.fisheries.schema.exchange.registry.v1.UnregisterServiceRequest;
 import eu.europa.ec.fisheries.schema.exchange.service.v1.ServiceType;
-import eu.europa.ec.fisheries.uvms.exchange.service.message.event.carrier.PluginMessageEvent;
-import eu.europa.ec.fisheries.uvms.exchange.service.message.event.PluginErrorEvent;
-import eu.europa.ec.fisheries.uvms.exchange.service.message.exception.ExchangeMessageException;
+import eu.europa.ec.fisheries.uvms.exchange.service.message.event.carrier.PluginErrorEvent;
 import eu.europa.ec.fisheries.uvms.exchange.model.constant.ExchangeModelConstants;
 import eu.europa.ec.fisheries.uvms.exchange.model.constant.FaultCode;
 import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelMarshallException;
@@ -56,34 +55,44 @@ public class RegistryBusEventListener implements MessageListener {
     private PluginService pluginServiceBean;
 
     @Inject
-    @PluginErrorEvent
-    private Event<PluginMessageEvent> errorEvent;
+    @eu.europa.ec.fisheries.uvms.exchange.service.message.event.PluginErrorEvent
+    private Event<PluginErrorEvent> errorEvent;
 
     @Override
     public void onMessage(Message message) {
         TextMessage textMessage = (TextMessage) message;
         ServiceType settings = null;
+        ExchangeRegistryMethod method = null;
         try {
-            ExchangeRegistryBaseRequest request = JAXBMarshaller.unmarshallTextMessage(textMessage, ExchangeRegistryBaseRequest.class);
+            String function = textMessage.getStringProperty(MessageConstants.JMS_FUNCTION_PROPERTY);
+            method = (function != null) ? ExchangeRegistryMethod.valueOf(function) : unmarshallExchangeRegistryBaseRequest(textMessage).getMethod();
             LOG.info("[INFO] Eventbus listener for Exchange Registry (ExchangeModelConstants.EXCHANGE_REGISTER_SERVICE): {} {}", ExchangeModelConstants.EXCHANGE_REGISTER_SERVICE);
-            switch (request.getMethod()) {
+            switch (method) {
                 case REGISTER_SERVICE:
                     RegisterServiceRequest regReq = JAXBMarshaller.unmarshallTextMessage(textMessage, RegisterServiceRequest.class);
                     settings = regReq.getService();
-                    pluginServiceBean.registerService(new PluginMessageEvent(textMessage));
+                    pluginServiceBean.registerService(textMessage);
                     break;
                 case UNREGISTER_SERVICE:
                     UnregisterServiceRequest unRegReq = JAXBMarshaller.unmarshallTextMessage(textMessage, UnregisterServiceRequest.class);
                     settings = unRegReq.getService();
-                    pluginServiceBean.unregisterService(new PluginMessageEvent(textMessage));
+                    pluginServiceBean.unregisterService(textMessage);
                     break;
                 default:
-                    LOG.error("[ Not implemented method consumed: {} ]", request.getMethod());
-                    throw new ExchangeMessageException("[ Not implemented method consumed: " + request.getMethod() + " ]");
+                    LOG.error("[ Not implemented method consumed: {} ]", method);
+                    throw new UnsupportedOperationException("[ Not implemented method consumed: " + method + " ]");
             }
         } catch (Exception e /*ExchangeMessageException | ExchangeModelMarshallException | NullPointerException e*/) {
             LOG.error("[ Error when receiving message on topic in exchange: {}] {}",message,e);
-            errorEvent.fire(new PluginMessageEvent(textMessage, settings, ExchangePluginResponseMapper.mapToPluginFaultResponse(FaultCode.EXCHANGE_TOPIC_MESSAGE.getCode(), "Error when receiving message in exchange " + e.getMessage())));
+            errorEvent.fire(new PluginErrorEvent(textMessage, settings, ExchangePluginResponseMapper.mapToPluginFaultResponse(FaultCode.EXCHANGE_TOPIC_MESSAGE.getCode(), "Error when receiving message in exchange " + e.getMessage())));
+        }
+    }
+
+    private ExchangeRegistryBaseRequest unmarshallExchangeRegistryBaseRequest(TextMessage textMessage) {
+        try {
+            return JAXBMarshaller.unmarshallTextMessage(textMessage, ExchangeRegistryBaseRequest.class);
+        } catch (ExchangeModelMarshallException e) {
+            return null;
         }
     }
 

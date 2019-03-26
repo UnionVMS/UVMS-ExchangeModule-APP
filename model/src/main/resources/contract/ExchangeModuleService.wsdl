@@ -40,8 +40,25 @@
                     <xsd:enumeration value="SEND_ASSET_INFORMATION"/>
                     <xsd:enumeration value="QUERY_ASSET_INFORMATION"/>
 
+                    <!-- plugin commands Ack-->
+                    <xsd:enumeration value="PLUGIN_SET_CONFIG_ACK"/>
+                    <xsd:enumeration value="PLUGIN_SET_COMMAND_ACK"/>
+                    <xsd:enumeration value="PLUGIN_SET_REPORT_ACK"/>
+                    <xsd:enumeration value="PLUGIN_START_ACK"/>
+                    <xsd:enumeration value="PLUGIN_STOP_ACK"/>
+                    <xsd:enumeration value="PLUGIN_PING_ACK"/>
+                    <xsd:enumeration value="PLUGIN_SET_MDR_REQUEST_ACK"/>
+                    <xsd:enumeration value="PLUGIN_SEND_FA_REPORT_ACK"/>
+                    <xsd:enumeration value="PLUGIN_SEND_FA_QUERY_ACK"/>
+                    <xsd:enumeration value="PLUGIN_SET_FLUX_RESPONSE_ACK"/>
+                    <xsd:enumeration value="PLUGIN_SEND_SALES_REPORT_ACK"/>
+                    <xsd:enumeration value="PLUGIN_SEND_SALES_RESPONSE_ACK"/>
+                    <xsd:enumeration value="PLUGIN_SEND_VESSEL_INFORMATION_ACK"/>
+                    <xsd:enumeration value="PLUGIN_SEND_VESSEL_QUERY_ACK"/>
+
                     <!-- admin/config wants to-->
                     <xsd:enumeration value="PING"/>
+                    <xsd:enumeration value="PLUGIN_PING_RESPONSE"/>
 
                     <!-- asynch processed movement response -->
                     <xsd:enumeration value="PROCESSED_MOVEMENT"/>
