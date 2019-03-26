@@ -22,7 +22,7 @@ import eu.europa.ec.fisheries.schema.exchange.module.v1.ExchangeBaseRequest;
 import eu.europa.ec.fisheries.schema.exchange.movement.v1.MovementRefType;
 import eu.europa.ec.fisheries.schema.exchange.v1.*;
 import eu.europa.ec.fisheries.uvms.exchange.ExchangeLogModel;
-import eu.europa.ec.fisheries.uvms.exchange.UnsentModel;
+import eu.europa.ec.fisheries.uvms.exchange.bean.UnsentModelBean;
 import eu.europa.ec.fisheries.uvms.exchange.dao.ExchangeLogDao;
 import eu.europa.ec.fisheries.uvms.exchange.entity.exchangelog.ExchangeLog;
 import eu.europa.ec.fisheries.uvms.exchange.service.message.constants.MessageQueue;
@@ -63,7 +63,7 @@ public class ExchangeLogServiceBean {
     private ExchangeLogModel exchangeLogModel;
 
     @EJB
-    private UnsentModel unsentModel;
+    private UnsentModelBean unsentModel;
 
     @EJB
     private ExchangeLogDao exchangeLogDao;
