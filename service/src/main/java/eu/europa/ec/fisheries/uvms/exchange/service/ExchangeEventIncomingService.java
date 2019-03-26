@@ -12,9 +12,7 @@
 package eu.europa.ec.fisheries.uvms.exchange.service;
 
 import javax.ejb.Local;
-import javax.enterprise.event.Observes;
-
-import eu.europa.ec.fisheries.uvms.exchange.service.message.event.carrier.ExchangeMessageEvent;
+import javax.jms.TextMessage;
 
 @Local
 public interface ExchangeEventIncomingService {
@@ -24,100 +22,100 @@ public interface ExchangeEventIncomingService {
      *
      * @param message
      */
-    void ping(ExchangeMessageEvent message);
+    void ping(TextMessage message);
 
     /**
      * Get plugin list from APP module
      *
      * @param message
      */
-    void getPluginListByTypes(ExchangeMessageEvent message);
+    void getPluginListByTypes(TextMessage message);
 
-    void processReceivedMovementBatch(ExchangeMessageEvent message);
+    void processReceivedMovementBatch(TextMessage message);
 
     /**
      * Process a received Movement
      *
      * @param message
      */
-    void processMovement(ExchangeMessageEvent message);
+    void processMovement(TextMessage message);
 
     /**
      * Logs and sends a received asset information to Asset
      *
      * @param message received asset information message
      */
-    void receiveAssetInformation(ExchangeMessageEvent message);
+    void receiveAssetInformation(TextMessage message);
 
     /**
      * Logs and sends a query asset information to FLUX fleet plugin
      *
      * @param message query asset information message
      */
-    void queryAssetInformation(ExchangeMessageEvent message);
+    void queryAssetInformation(TextMessage message);
 
     /**
      * Logs and sends a received sales report through to Rules
      *
      * @param message received sales report
      */
-    void receiveSalesReport(ExchangeMessageEvent message);
+    void receiveSalesReport(TextMessage message);
 
     /**
      * Logs and sends a received sales query through to Rules
      *
      * @param message received sales query
      */
-    void receiveSalesQuery(ExchangeMessageEvent message);
+    void receiveSalesQuery(TextMessage message);
 
     /**
      * Logs and sends a received sales response through to Rules
      * @param message
      */
-    void receiveSalesResponse(ExchangeMessageEvent message);
+    void receiveSalesResponse(TextMessage message);
 
     /**
      * Process answer of commands sent to plugins
      *
      * @param message
      */
-    void processAcknowledge(ExchangeMessageEvent message);
+    void processAcknowledge(TextMessage message);
 
     /**
      * Process answer of ping sent to plugins
      *
      * @param message
      */
-    void processPluginPing(ExchangeMessageEvent message);
+    void processPluginPing(TextMessage message);
 
     /**
      * Process FLUXFAReportMessage coming from Flux Activity plugin
      * @param message
      */
-    void processFLUXFAReportMessage(ExchangeMessageEvent message);
+    void processFLUXFAReportMessage(TextMessage message);
 
-    void processFAQueryMessage(ExchangeMessageEvent message);
+    void processFAQueryMessage(TextMessage message);
 
-    void processFluxFAResponseMessage(ExchangeMessageEvent message);
+    void processFluxFAResponseMessage(TextMessage message);
 
     /**
      * Process MDR sync response message sent to Flux MDR plugin
      * @param message
      */
-    void sendResponseToRulesModule(ExchangeMessageEvent message);
+    void sendResponseToRulesModule(TextMessage message);
 
-    void receiveInvalidSalesMessage(ExchangeMessageEvent event);
+    void receiveInvalidSalesMessage(TextMessage event);
 
     /**
      * Checks for a reference in log table for a certain type of message
      * @param event
      */
-    void logRefIdByTypeExists(ExchangeMessageEvent event);
+    void logRefIdByTypeExists(TextMessage event);
 
     /**
      * Checks for a guid in log table for a certain type of message
      * @param event
      */
-    void logIdByTypeExists(ExchangeMessageEvent event);
+    void logIdByTypeExists(TextMessage event);
 
 }

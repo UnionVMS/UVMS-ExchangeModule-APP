@@ -19,7 +19,6 @@ import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
 import javax.enterprise.event.Observes;
-import javax.jms.Destination;
 import javax.jms.JMSException;
 import javax.jms.Queue;
 import javax.jms.Topic;
@@ -33,9 +32,8 @@ import eu.europa.ec.fisheries.uvms.config.exception.ConfigMessageException;
 import eu.europa.ec.fisheries.uvms.config.message.ConfigMessageProducer;
 import eu.europa.ec.fisheries.uvms.exchange.service.message.constants.MessageQueue;
 import eu.europa.ec.fisheries.uvms.exchange.service.message.event.ErrorEvent;
-import eu.europa.ec.fisheries.uvms.exchange.service.message.event.carrier.ExchangeMessageEvent;
-import eu.europa.ec.fisheries.uvms.exchange.service.message.event.carrier.PluginMessageEvent;
-import eu.europa.ec.fisheries.uvms.exchange.service.message.event.PluginErrorEvent;
+import eu.europa.ec.fisheries.uvms.exchange.service.message.event.carrier.ExchangeErrorEvent;
+import eu.europa.ec.fisheries.uvms.exchange.service.message.event.carrier.PluginErrorEvent;
 import eu.europa.ec.fisheries.uvms.exchange.service.message.exception.ExchangeMessageException;
 import eu.europa.ec.fisheries.uvms.exchange.service.message.producer.ExchangeMessageProducer;
 import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelMapperException;
@@ -181,7 +179,7 @@ public class ExchangeMessageProducerBean extends AbstractProducer implements Exc
 
 
     @Override
-    public void sendModuleErrorResponseMessage(@Observes @ErrorEvent ExchangeMessageEvent message) {
+    public void sendModuleErrorResponseMessage(@Observes @ErrorEvent ExchangeErrorEvent message) {
         try {
             LOG.debug("Sending error message back from Exchange module to recipient om JMS Queue with correlationID: {} ", message.getJmsMessage().getJMSMessageID());
             String data = JAXBMarshaller.marshallJaxBObjectToString(message.getErrorFault());
@@ -192,7 +190,7 @@ public class ExchangeMessageProducerBean extends AbstractProducer implements Exc
     }
 
     @Override
-    public void sendPluginErrorResponseMessage(@Observes @PluginErrorEvent PluginMessageEvent message) {
+    public void sendPluginErrorResponseMessage(@Observes @eu.europa.ec.fisheries.uvms.exchange.service.message.event.PluginErrorEvent PluginErrorEvent message) {
         try {
             String data = JAXBMarshaller.marshallJaxBObjectToString(message.getErrorFault());
             final String jmsMessageID = message.getJmsMessage().getJMSMessageID();

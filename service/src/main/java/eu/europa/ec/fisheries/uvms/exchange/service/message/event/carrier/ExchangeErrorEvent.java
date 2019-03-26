@@ -19,16 +19,13 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
-public class ExchangeMessageEvent {
+public class ExchangeErrorEvent {
 
     private TextMessage jmsMessage;
     private ExchangeFault fault;
 
-    public ExchangeMessageEvent(TextMessage jmsMessage) {
-        this.jmsMessage = jmsMessage;
-    }
 
-    public ExchangeMessageEvent(TextMessage jmsMessage, ExchangeFault fault) {
+    public ExchangeErrorEvent(TextMessage jmsMessage, ExchangeFault fault) {
         this.jmsMessage = jmsMessage;
         this.fault = fault;
     }
@@ -37,16 +34,8 @@ public class ExchangeMessageEvent {
         return fault;
     }
 
-    public void setErrorFault(ExchangeFault fault) {
-        this.fault = fault;
-    }
-
     public TextMessage getJmsMessage() {
         return jmsMessage;
-    }
-
-    public void setJmsMessage(TextMessage jmsMessage) {
-        this.jmsMessage = jmsMessage;
     }
 
     @Override

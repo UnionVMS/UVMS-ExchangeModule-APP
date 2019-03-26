@@ -13,15 +13,13 @@ package eu.europa.ec.fisheries.uvms.exchange.service.message.consumer.bean;
 
 import eu.europa.ec.fisheries.schema.exchange.module.v1.ExchangeBaseRequest;
 import eu.europa.ec.fisheries.schema.exchange.module.v1.ExchangeModuleMethod;
-import eu.europa.ec.fisheries.schema.exchange.plugin.v1.AcknowledgeResponse;
-import eu.europa.ec.fisheries.schema.exchange.plugin.v1.PingResponse;
 import eu.europa.ec.fisheries.uvms.commons.message.api.MessageConstants;
 import eu.europa.ec.fisheries.uvms.commons.message.context.MappedDiagnosticContext;
 import eu.europa.ec.fisheries.uvms.exchange.service.ExchangeEventIncomingService;
 import eu.europa.ec.fisheries.uvms.exchange.service.ExchangeEventOutgoingService;
-import eu.europa.ec.fisheries.uvms.exchange.service.PluginService;
+import eu.europa.ec.fisheries.uvms.exchange.service.bean.PluginServiceBean;
 import eu.europa.ec.fisheries.uvms.exchange.service.message.event.*;
-import eu.europa.ec.fisheries.uvms.exchange.service.message.event.carrier.ExchangeMessageEvent;
+import eu.europa.ec.fisheries.uvms.exchange.service.message.event.carrier.ExchangeErrorEvent;
 import eu.europa.ec.fisheries.uvms.exchange.model.constant.FaultCode;
 import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelMarshallException;
 import eu.europa.ec.fisheries.uvms.exchange.model.mapper.ExchangeModuleResponseMapper;
@@ -60,11 +58,11 @@ public class ExchangeMessageConsumerBean implements MessageListener {
     private ExchangeEventOutgoingService outgoingServiceBean;
 
     @Inject
-    private PluginService pluginServiceBean;
+    private PluginServiceBean pluginServiceBean;
 
     @Inject
     @ErrorEvent
-    private Event<ExchangeMessageEvent> errorEvent;
+    private Event<ExchangeErrorEvent> errorEvent;
 
 
     @Override
@@ -72,164 +70,151 @@ public class ExchangeMessageConsumerBean implements MessageListener {
 
         TextMessage textMessage = (TextMessage) message;
         MappedDiagnosticContext.addMessagePropertiesToThreadMappedDiagnosticContext(textMessage);
-        ExchangeBaseRequest request = tryConsumeExchangeBaseRequest(textMessage);
         LOG.debug("Message received in Exchange Message MDB. Times redelivered: " + getTimesRedelivered(message));
-        LOG.trace("Request body : ", request);
-        final ExchangeMessageEvent messageEventWrapper = new ExchangeMessageEvent(textMessage);
-        if (request == null) {
-            LOG.warn("[ERROR] ExchangeBaseRequest is null!! Check the message sent...");
-            try {
-                //Handle PingResponse from plugin
-                JAXBMarshaller.unmarshallTextMessage(textMessage, PingResponse.class);
-                incomingServiceBean.processPluginPing(messageEventWrapper);
-            } catch (ExchangeModelMarshallException e) {
-                AcknowledgeResponse type = tryConsumeAcknowledgeResponse(textMessage);
-                if (type == null) {
-                    LOG.error("[ Error when receiving message in exchange: {}]", message);
-                    errorEvent.fire(new ExchangeMessageEvent(textMessage, ExchangeModuleResponseMapper.createFaultMessage(FaultCode.EXCHANGE_MESSAGE, "Error when receiving message in exchange")));
-                } else {
-                    incomingServiceBean.processAcknowledge(messageEventWrapper);
-                }
-            }
-        } else if (!checkUsernameShouldBeProvided(request)) {
-            LOG.error("[ Error when receiving message in exchange, username must be set in the request: ]");
-            errorEvent.fire(new ExchangeMessageEvent(textMessage, ExchangeModuleResponseMapper.createFaultMessage(FaultCode.EXCHANGE_MESSAGE, "Username in the request must be set")));
-        } else {
-            ExchangeModuleMethod exchangeMethod = request.getMethod();
+
+
+        ExchangeModuleMethod exchangeMethod = null;
+        try {
+            LOG.trace("Request body : ", textMessage.getText());
+            String function = textMessage.getStringProperty(MessageConstants.JMS_FUNCTION_PROPERTY);
+            exchangeMethod = (function != null) ? ExchangeModuleMethod.valueOf(function) : tryConsumeExchangeBaseRequest(textMessage).getMethod();
             LOG.info("[INFO] Going to process following message type [ {} ] : ", exchangeMethod);
             switch (exchangeMethod) {
 
                     /* PLUGIN */
 
                 case LIST_SERVICES:
-                    incomingServiceBean.getPluginListByTypes(messageEventWrapper);
+                    incomingServiceBean.getPluginListByTypes(textMessage);
                     break;
                 case SET_COMMAND:
-                    outgoingServiceBean.sendCommandToPlugin(messageEventWrapper);
+                    outgoingServiceBean.sendCommandToPlugin(textMessage);
                     break;
                 case SEND_REPORT_TO_PLUGIN:
-                    outgoingServiceBean.sendReportToPlugin(messageEventWrapper);
+                    outgoingServiceBean.sendReportToPlugin(textMessage);
                     break;
                 case UPDATE_PLUGIN_SETTING:
-                    pluginServiceBean.updatePluginSetting(messageEventWrapper);
+                    pluginServiceBean.updatePluginSetting(textMessage);
+                    break;
+                case PLUGIN_SET_CONFIG_ACK:
+                case PLUGIN_SET_COMMAND_ACK:
+                case PLUGIN_SET_REPORT_ACK:
+                case PLUGIN_START_ACK:
+                case PLUGIN_STOP_ACK:
+                case PLUGIN_PING_ACK:
+                case PLUGIN_SET_MDR_REQUEST_ACK:
+                case PLUGIN_SEND_FA_REPORT_ACK:
+                case PLUGIN_SEND_FA_QUERY_ACK:
+                case PLUGIN_SET_FLUX_RESPONSE_ACK:
+                case PLUGIN_SEND_SALES_REPORT_ACK:
+                case PLUGIN_SEND_SALES_RESPONSE_ACK:
+                case PLUGIN_SEND_VESSEL_INFORMATION_ACK:
+                case PLUGIN_SEND_VESSEL_QUERY_ACK:
+                    incomingServiceBean.processAcknowledge(textMessage);
+                    break;
+                case PLUGIN_PING_RESPONSE:
+                    incomingServiceBean.processPluginPing(textMessage);
                     break;
 
                     /* MOVEMENTS */
 
                 case SET_MOVEMENT_REPORT:
-                    incomingServiceBean.processMovement(messageEventWrapper);
+                    incomingServiceBean.processMovement(textMessage);
                     break;
                 case RECEIVE_MOVEMENT_REPORT_BATCH:
-                    incomingServiceBean.processReceivedMovementBatch(messageEventWrapper);
+                    incomingServiceBean.processReceivedMovementBatch(textMessage);
                     break;
                 case PROCESSED_MOVEMENT:
-                    outgoingServiceBean.handleProcessedMovement(messageEventWrapper);
+                    outgoingServiceBean.handleProcessedMovement(textMessage);
                     break;
                 case PROCESSED_MOVEMENT_BATCH:
-                    outgoingServiceBean.handleProcessedMovementBatch(messageEventWrapper);
+                    outgoingServiceBean.handleProcessedMovementBatch(textMessage);
                     break;
 
                     /* SALES */
 
                 case RECEIVE_SALES_REPORT:
-                    incomingServiceBean.receiveSalesReport(messageEventWrapper);
+                    incomingServiceBean.receiveSalesReport(textMessage);
                     break;
                 case RECEIVE_SALES_QUERY:
-                    incomingServiceBean.receiveSalesQuery(messageEventWrapper);
+                    incomingServiceBean.receiveSalesQuery(textMessage);
                     break;
                 case RECEIVE_SALES_RESPONSE:
-                    incomingServiceBean.receiveSalesResponse(messageEventWrapper);
+                    incomingServiceBean.receiveSalesResponse(textMessage);
                     break;
                 case RECEIVE_INVALID_SALES_MESSAGE:
-                    incomingServiceBean.receiveInvalidSalesMessage(messageEventWrapper);
+                    incomingServiceBean.receiveInvalidSalesMessage(textMessage);
                     break;
                 case SEND_SALES_RESPONSE:
-                    outgoingServiceBean.sendSalesResponse(messageEventWrapper);
+                    outgoingServiceBean.sendSalesResponse(textMessage);
                     break;
                 case SEND_SALES_REPORT:
-                    outgoingServiceBean.sendSalesReport(messageEventWrapper);
+                    outgoingServiceBean.sendSalesReport(textMessage);
                     break;
                 case PING:
-                    incomingServiceBean.ping(messageEventWrapper);
+                    incomingServiceBean.ping(textMessage);
                     break;
 
                     /* MDR */
 
                 case SET_MDR_SYNC_MESSAGE_REQUEST:
-                    outgoingServiceBean.forwardMdrSyncMessageToPlugin(messageEventWrapper);
+                    outgoingServiceBean.forwardMdrSyncMessageToPlugin(textMessage);
                     break;
                 case SET_MDR_SYNC_MESSAGE_RESPONSE:
-                    incomingServiceBean.sendResponseToRulesModule(messageEventWrapper);
+                    incomingServiceBean.sendResponseToRulesModule(textMessage);
                     break;
 
                     /* FLUX */
 
                 case SET_FLUX_FA_REPORT_MESSAGE:
                 case UNKNOWN:
-                    incomingServiceBean.processFLUXFAReportMessage(messageEventWrapper);
+                    incomingServiceBean.processFLUXFAReportMessage(textMessage);
                     break;
                 case SEND_FLUX_FA_REPORT_MESSAGE:
-                    outgoingServiceBean.sendFLUXFAReportToPlugin(messageEventWrapper);
+                    outgoingServiceBean.sendFLUXFAReportToPlugin(textMessage);
                     break;
                 case SET_FA_QUERY_MESSAGE:
-                    incomingServiceBean.processFAQueryMessage(messageEventWrapper);
+                    incomingServiceBean.processFAQueryMessage(textMessage);
                     break;
                 case SEND_FA_QUERY_MESSAGE:
-                    outgoingServiceBean.sendFLUXFAQueryToPlugin(messageEventWrapper);
+                    outgoingServiceBean.sendFLUXFAQueryToPlugin(textMessage);
                     break;
                 case SET_FLUX_FA_RESPONSE_MESSAGE:
-                    outgoingServiceBean.sendFLUXFAResponseToPlugin(messageEventWrapper);
+                    outgoingServiceBean.sendFLUXFAResponseToPlugin(textMessage);
                     break;
                 case RCV_FLUX_FA_RESPONSE_MESSAGE:
-                    incomingServiceBean.processFluxFAResponseMessage(messageEventWrapper);
+                    incomingServiceBean.processFluxFAResponseMessage(textMessage);
                     break;
 
                     /* LOG */
 
                 case UPDATE_LOG_STATUS:
-                    outgoingServiceBean.updateLogStatus(messageEventWrapper);
+                    outgoingServiceBean.updateLogStatus(textMessage);
                     break;
                 case UPDATE_LOG_BUSINESS_ERROR:
-                    outgoingServiceBean.updateLogBusinessError(messageEventWrapper);
+                    outgoingServiceBean.updateLogBusinessError(textMessage);
                     break;
                 case LOG_REF_ID_BY_TYPE_EXISTS:
-                    incomingServiceBean.logRefIdByTypeExists(messageEventWrapper);
+                    incomingServiceBean.logRefIdByTypeExists(textMessage);
                     break;
                 case LOG_ID_BY_TYPE_EXISTS:
-                    incomingServiceBean.logIdByTypeExists(messageEventWrapper);
+                    incomingServiceBean.logIdByTypeExists(textMessage);
                     break;
 
                     /* ASSET */
 
                 case RECEIVE_ASSET_INFORMATION:
-                        incomingServiceBean.receiveAssetInformation(messageEventWrapper);
+                        incomingServiceBean.receiveAssetInformation(textMessage);
                     break;
                 default:
                     LOG.error("[ Not implemented method consumed: {} ] ", exchangeMethod);
-                    errorEvent.fire(new ExchangeMessageEvent(textMessage, ExchangeModuleResponseMapper.createFaultMessage(FaultCode.EXCHANGE_MESSAGE, "Method not implemented")));
+                    errorEvent.fire(new ExchangeErrorEvent(textMessage, ExchangeModuleResponseMapper.createFaultMessage(FaultCode.EXCHANGE_MESSAGE, "Method not implemented")));
             }
+        } catch (Exception e){
+            LOG.error("Error in exchange call to {} : ", exchangeMethod, e);
+            throw new RuntimeException("Error in exchange call to " + exchangeMethod + " : ", e);
         }
     }
 
-    private boolean checkUsernameShouldBeProvided(ExchangeBaseRequest request) {
-        boolean usernameProvided = false;
-        switch (request.getMethod()) {
-            case SET_COMMAND:
-            case SEND_REPORT_TO_PLUGIN:
-            case SET_MOVEMENT_REPORT:
-            case UPDATE_PLUGIN_SETTING:
-            case PROCESSED_MOVEMENT:
-                if (request.getUsername() != null) {
-                    usernameProvided = true;
-                }
-                break;
-            default:
-                usernameProvided = true;
-                break;
-
-        }
-        return usernameProvided;
-    }
 
     private ExchangeBaseRequest tryConsumeExchangeBaseRequest(TextMessage textMessage) {
         try {
@@ -239,13 +224,6 @@ public class ExchangeMessageConsumerBean implements MessageListener {
         }
     }
 
-    private AcknowledgeResponse tryConsumeAcknowledgeResponse(TextMessage textMessage) {
-        try {
-            return JAXBMarshaller.unmarshallTextMessage(textMessage, AcknowledgeResponse.class);
-        } catch (ExchangeModelMarshallException e) {
-            return null;
-        }
-    }
 
     private int getTimesRedelivered(Message message) {
         try {
