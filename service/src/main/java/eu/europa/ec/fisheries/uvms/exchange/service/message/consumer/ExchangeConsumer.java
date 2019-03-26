@@ -15,7 +15,7 @@ import eu.europa.ec.fisheries.uvms.commons.message.api.MessageException;
 import javax.ejb.Local;
 
 @Local
-public interface ExchangeConsumer {
+public interface ExchangeConsumer { //leave be for now ;(
 
     public <T> T getMessage(String correlationId, Class type) throws MessageException;
 
