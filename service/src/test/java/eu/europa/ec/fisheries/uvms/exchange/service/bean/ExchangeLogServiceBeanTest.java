@@ -13,6 +13,8 @@ import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogStatusType;
 import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogStatusTypeType;
 import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogType;
 import eu.europa.ec.fisheries.uvms.exchange.bean.ExchangeLogModelBean;
+import eu.europa.ec.fisheries.uvms.exchange.entity.exchangelog.ExchangeLog;
+import eu.europa.ec.fisheries.uvms.exchange.entity.exchangelog.ExchangeLogStatus;
 import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelException;
 import eu.europa.ec.fisheries.uvms.exchange.service.exception.ExchangeLogException;
 import eu.europa.ec.fisheries.uvms.longpolling.notifications.NotificationMessage;
@@ -49,28 +51,27 @@ public class ExchangeLogServiceBeanTest {
     @Test
     public void updateStatusByLogGuidWhenSuccess() throws Exception {
         //data set
-        ArgumentCaptor<ExchangeLogStatusType> captorForExchangeLogStatusType = ArgumentCaptor.forClass(ExchangeLogStatusType.class);
-        ExchangeLogType expectedUpdatedLog = new ExchangeLogType();
+        ArgumentCaptor<ExchangeLogStatus> captorForExchangeLogStatus = ArgumentCaptor.forClass(ExchangeLogStatus.class);
+        ExchangeLog expectedUpdatedLog = new ExchangeLog();
         UUID logGuid = UUID.randomUUID();
-        expectedUpdatedLog.setGuid(logGuid.toString());
+        expectedUpdatedLog.setId(logGuid);
         ExchangeLogStatusTypeType status = ExchangeLogStatusTypeType.SUCCESSFUL;
 
         //mock
         doReturn(logGuid).when(logCache).acknowledged(anyString());
-        doReturn(expectedUpdatedLog).when(exchangeLogModel).updateExchangeLogStatus(isA(ExchangeLogStatusType.class), eq("SYSTEM"));
+        doReturn(expectedUpdatedLog).when(exchangeLogModel).updateExchangeLogStatus(isA(ExchangeLogStatus.class), eq("SYSTEM"), isA(UUID.class));
 
         //execute
-        ExchangeLogType actualUpdatedLog = exchangeLogService.updateStatus(logGuid.toString(), status, "SYSTEM");
+        ExchangeLog actualUpdatedLog = exchangeLogService.updateStatus(logGuid.toString(), status, "SYSTEM");
 
         //verify and assert
-        verify(exchangeLogModel).updateExchangeLogStatus(captorForExchangeLogStatusType.capture(), eq("SYSTEM"));
+        verify(exchangeLogModel).updateExchangeLogStatus(captorForExchangeLogStatus.capture(), eq("SYSTEM"), isA(UUID.class));
 
         assertSame(expectedUpdatedLog, actualUpdatedLog);
 
-        ExchangeLogStatusType capturedExchangeLogStatusType = captorForExchangeLogStatusType.getValue();
-        assertEquals(logGuid.toString(), capturedExchangeLogStatusType.getGuid());
-        assertEquals(1, capturedExchangeLogStatusType.getHistory().size());
-        assertEquals(status, capturedExchangeLogStatusType.getHistory().get(0).getStatus());
+        ExchangeLogStatus capturedExchangeLogStatus = captorForExchangeLogStatus.getValue();
+        assertEquals("SYSTEM", capturedExchangeLogStatus.getUpdatedBy());
+        assertEquals(ExchangeLogStatusTypeType.SUCCESSFUL, capturedExchangeLogStatus.getStatus());
     }
 
     @Test
@@ -82,7 +83,7 @@ public class ExchangeLogServiceBeanTest {
 
         //mock
         doReturn(id).when(logCache).acknowledged(anyString());
-        doThrow(new ExchangeModelException("noooooooooooooooooooo!!!")).when(exchangeLogModel).updateExchangeLogStatus(isA(ExchangeLogStatusType.class), eq("SYSTEM"));
+        doThrow(new ExchangeModelException("noooooooooooooooooooo!!!")).when(exchangeLogModel).updateExchangeLogStatus(isA(ExchangeLogStatus.class), eq("SYSTEM"), isA(UUID.class));
 
         exchangeLogService.updateStatus(id.toString(), ExchangeLogStatusTypeType.FAILED, "SYSTEM");
     }

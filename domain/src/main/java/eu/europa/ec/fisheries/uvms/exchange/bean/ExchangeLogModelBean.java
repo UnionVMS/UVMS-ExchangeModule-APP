@@ -173,41 +173,40 @@ public class ExchangeLogModelBean {
         }
     }
 
-    public ExchangeLogType createExchangeLog(ExchangeLogType logType, String username) throws ExchangeModelException {
-        if (logType == null) {
+    public ExchangeLog createExchangeLog(ExchangeLog log, String username) throws ExchangeModelException {
+        if (log == null) {
             throw new InputArgumentException("No logType to create");
         }
-        if (logType.getType() == null) {
+        if (log.getType() == null) {
             throw new InputArgumentException("No type in logType to create");
         }
         try {
-            ExchangeLog exchangeLog = LogMapper.toNewEntity(logType, username);
-            ExchangeLog persistedLog = logDao.createLog(exchangeLog);
-            return LogMapper.toModel(persistedLog);
+            return logDao.createLog(log);
         } catch (ExchangeDaoException ex) {
-            LOG.error("[ERROR] when creating Exchange logType {} {}] {}", logType, username, ex.getMessage());
+            LOG.error("[ERROR] when creating Exchange logType {} {}] {}", log, username, ex.getMessage());
             throw new ExchangeModelException("Error when creating Exchange logType ", ex);
         }
     }
 
 
-    public ExchangeLogType updateExchangeLogStatus(ExchangeLogStatusType status, String username) throws ExchangeModelException {
-        if (status == null || status.getGuid() == null || status.getGuid().isEmpty()) {
+    public ExchangeLog updateExchangeLogStatus(ExchangeLogStatus status, String username, UUID logId) throws ExchangeModelException {
+        if (status == null || logId == null ) {
             throw new InputArgumentException("No exchange log to update status");
         }
-        if (status.getHistory() == null || status.getHistory().isEmpty() || status.getHistory().size() != 1) {
+        if (status.getStatus() == null) {
             throw new InputArgumentException("Non valid status to update to");
         }
         try {
-            ExchangeLogStatusHistoryType updateStatus = status.getHistory().get(0);
-            ExchangeLog exchangeLog = logDao.getExchangeLogByGuid(UUID.fromString(status.getGuid()));
-            List<ExchangeLogStatus> statusList = exchangeLog.getStatusHistory();
-            statusList.add(LogMapper.toNewStatusEntity(exchangeLog, updateStatus.getStatus(), username));
-            exchangeLog.setStatus(updateStatus.getStatus());
+            ExchangeLog exchangeLog = logDao.getExchangeLogByGuid(logId);
+            status.setLog(exchangeLog);
+            exchangeLog.setStatus(status.getStatus());
+            exchangeLog.getStatusHistory().add(status);
+            exchangeLog.setUpdatedBy(username);
+
             ExchangeLog retEntity = logDao.updateLog(exchangeLog);
-            return LogMapper.toModel(retEntity);
+            return retEntity;
         } catch (ExchangeDaoException ex) {
-            LOG.error("[ERROR] when update status of Exchange log {} {}] {}", status, username, ex.getMessage());
+            LOG.error("[ERROR] when update status of Exchange log {} {}] {}", status, logId, ex.getMessage());
             throw new ExchangeModelException("Error when update status of Exchange log", ex);
         }
     }
@@ -230,7 +229,6 @@ public class ExchangeLogModelBean {
     public ExchangeLogStatusType getExchangeLogStatusHistory(UUID guid, TypeRefType typeRefType) throws ExchangeModelException {
         if (guid == null)
             throw new InputArgumentException("Non valid guid to fetch log status history");
-        try {
             if (typeRefType == null || TypeRefType.UNKNOWN.equals(typeRefType)) {
                 return LogMapper.toStatusModel(logDao.getExchangeLogByGuid(guid));
             } else {
@@ -239,10 +237,6 @@ public class ExchangeLogModelBean {
                     return LogMapper.toStatusModel(exchangeLogByTypesRefAndGuid.get(0));
                 }
             }
-        } catch (ExchangeDaoException e) {
-            LOG.error("[ERROR] when getting status history Exchange log {} {}] {}", guid, typeRefType, e.getMessage());
-            throw new ExchangeModelException("Error when getting status history of Exchange log ");
-        }
         return null;
     }
 
@@ -285,7 +279,6 @@ public class ExchangeLogModelBean {
 
     public LogWithRawMsgAndType getExchangeLogRawXmlByGuid(UUID guid) {
         LogWithRawMsgAndType logWrapper = new LogWithRawMsgAndType();
-        try {
             ExchangeLog exchangeLog = logDao.getExchangeLogByGuid(guid);
             if (exchangeLog != null){
                 String rawMsg = exchangeLog.getTypeRefMessage();
@@ -293,9 +286,6 @@ public class ExchangeLogModelBean {
                 logWrapper.setType(exchangeLog.getTypeRefType());
                 logWrapper.setRefGuid(exchangeLog.getTypeRefGuid().toString());
             }
-        } catch (ExchangeDaoException e) {
-            LOG.error("[ERROR] Couldn't find Log with the following GUID : [[" + guid + "]]", e);
-        }
         return logWrapper;
     }
 }

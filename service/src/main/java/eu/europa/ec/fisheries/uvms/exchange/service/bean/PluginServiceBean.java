@@ -27,7 +27,7 @@ import eu.europa.ec.fisheries.uvms.config.service.UVMSConfigService;
 import eu.europa.ec.fisheries.uvms.exchange.service.message.consumer.ExchangeConsumer;
 import eu.europa.ec.fisheries.uvms.exchange.service.message.event.ErrorEvent;
 import eu.europa.ec.fisheries.uvms.exchange.service.message.event.carrier.ExchangeErrorEvent;
-import eu.europa.ec.fisheries.uvms.exchange.service.message.event.carrier.PluginErrorEvent;
+import eu.europa.ec.fisheries.uvms.exchange.service.message.event.carrier.PluginErrorEventCarrier;
 import eu.europa.ec.fisheries.uvms.exchange.service.message.exception.ExchangeMessageException;
 import eu.europa.ec.fisheries.uvms.exchange.service.message.producer.ExchangeMessageProducer;
 import eu.europa.ec.fisheries.uvms.exchange.model.constant.FaultCode;
@@ -62,7 +62,7 @@ public class PluginServiceBean {
 
     @Inject
     @eu.europa.ec.fisheries.uvms.exchange.service.message.event.PluginErrorEvent
-    private Event<PluginErrorEvent> errorEvent;
+    private Event<PluginErrorEventCarrier> errorEvent;
 
     @Inject
     @ErrorEvent
@@ -167,7 +167,7 @@ public class PluginServiceBean {
             }
         } catch (ExchangeModelMarshallException | ExchangeMessageException | JMSException e) {
             LOG.error("[ERROR] Register service exception {} {}", message, e.getMessage());
-            errorEvent.fire(new PluginErrorEvent(message, register.getService(), ExchangePluginResponseMapper.mapToPluginFaultResponse(FaultCode.EXCHANGE_PLUGIN_EVENT.getCode(), "Exception when register service")));
+            errorEvent.fire(new PluginErrorEventCarrier(message, register.getService(), ExchangePluginResponseMapper.mapToPluginFaultResponse(FaultCode.EXCHANGE_PLUGIN_EVENT.getCode(), "Exception when register service")));
         }
     }
 
@@ -215,7 +215,7 @@ public class PluginServiceBean {
             //TODO log to exchange log
         } catch (ExchangeModelMarshallException | ExchangeServiceException e) {
             LOG.error("Unregister service exception " + e.getMessage());
-            errorEvent.fire(new PluginErrorEvent(message, service, ExchangePluginResponseMapper.mapToPluginFaultResponse(FaultCode.EXCHANGE_PLUGIN_EVENT.getCode(), "Exception when unregister service")));
+            errorEvent.fire(new PluginErrorEventCarrier(message, service, ExchangePluginResponseMapper.mapToPluginFaultResponse(FaultCode.EXCHANGE_PLUGIN_EVENT.getCode(), "Exception when unregister service")));
         }
     }
     

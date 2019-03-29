@@ -20,13 +20,13 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
-public class PluginErrorEvent {
+public class PluginErrorEventCarrier {
 
     private TextMessage jmsMessage;
     private ServiceType serviceType;
     private PluginFault fault;
 
-    public PluginErrorEvent(TextMessage jmsMessage, ServiceType type, PluginFault fault) {
+    public PluginErrorEventCarrier(TextMessage jmsMessage, ServiceType type, PluginFault fault) {
         this.jmsMessage = jmsMessage;
         this.serviceType = type;
         this.fault = fault;

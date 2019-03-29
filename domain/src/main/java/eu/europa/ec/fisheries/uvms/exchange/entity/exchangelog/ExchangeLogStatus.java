@@ -12,18 +12,7 @@ copy of the GNU General Public License along with the IFDM Suite. If not, see <h
 package eu.europa.ec.fisheries.uvms.exchange.entity.exchangelog;
 
 
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
+import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
@@ -59,6 +48,12 @@ public class ExchangeLogStatus {
 	@Size(max=60)
 	@Column(name="logstatus_upuser")
 	private String updatedBy;
+
+	@PreUpdate
+	@PrePersist
+	public void preUpdate(){
+		updateTime = Instant.now();
+	}
 	
 	public UUID getId() {
 		return id;

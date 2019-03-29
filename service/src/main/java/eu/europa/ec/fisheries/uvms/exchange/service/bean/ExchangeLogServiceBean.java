@@ -25,6 +25,8 @@ import eu.europa.ec.fisheries.uvms.exchange.bean.ExchangeLogModelBean;
 import eu.europa.ec.fisheries.uvms.exchange.bean.UnsentModelBean;
 import eu.europa.ec.fisheries.uvms.exchange.dao.bean.ExchangeLogDaoBean;
 import eu.europa.ec.fisheries.uvms.exchange.entity.exchangelog.ExchangeLog;
+import eu.europa.ec.fisheries.uvms.exchange.entity.exchangelog.ExchangeLogStatus;
+import eu.europa.ec.fisheries.uvms.exchange.service.mapper.ExchangeLogMapper;
 import eu.europa.ec.fisheries.uvms.exchange.service.message.constants.MessageQueue;
 import eu.europa.ec.fisheries.uvms.exchange.service.message.exception.ExchangeMessageException;
 import eu.europa.ec.fisheries.uvms.exchange.service.message.producer.ExchangeMessageProducer;
@@ -69,17 +71,17 @@ public class ExchangeLogServiceBean {
     private ExchangeLogDaoBean exchangeLogDao;
 
 
-    public ExchangeLogType logAndCache(ExchangeLogType log, String pluginMessageId, String username) throws ExchangeLogException {
-        ExchangeLogType createdLog = log(log, username);
-        logCache.put(pluginMessageId, UUID.fromString(createdLog.getGuid()));
+    public ExchangeLog logAndCache(ExchangeLog log, String pluginMessageId, String username) throws ExchangeLogException {
+        ExchangeLog createdLog = log(log, username);
+        logCache.put(pluginMessageId, createdLog.getId());
 
         return createdLog;
     }
 
-    public ExchangeLogType log(ExchangeLogType logType, String username) throws ExchangeLogException {
+    public ExchangeLog log(ExchangeLog log, String username) throws ExchangeLogException {
         try {
-            ExchangeLogType exchangeLog = exchangeLogModel.createExchangeLog(logType, username);
-            String guid = exchangeLog.getGuid();
+            ExchangeLog exchangeLog = exchangeLogModel.createExchangeLog(log, username);
+            String guid = exchangeLog.getId().toString();
             exchangeLogEvent.fire(new NotificationMessage("guid", guid));
             LOG.debug("[INFO] Logging message with guid : [ "+guid+" ] was successful.");
             return exchangeLog;
@@ -98,52 +100,49 @@ public class ExchangeLogServiceBean {
      * @param incoming is this an incoming message (then true) or an outgoing message (then false)?
      * @return the created log entry
      */
-    public ExchangeLogType log(ExchangeBaseRequest request, LogType logType, ExchangeLogStatusTypeType status, TypeRefType messageType, String messageText, boolean incoming) throws ExchangeLogException {
-        LogRefType ref = new LogRefType();
-        ref.setMessage(messageText);
-        ref.setRefGuid(request.getMessageGuid());
-        ref.setType(messageType);
+    public ExchangeLog log(ExchangeBaseRequest request, LogType logType, ExchangeLogStatusTypeType status, TypeRefType messageType, String messageText, boolean incoming) throws ExchangeLogException {
+        ExchangeLog log = new ExchangeLog();
+        log.setTypeRefType(messageType);
+        log.setTypeRefMessage(messageText);
+        log.setTypeRefGuid( (request.getMessageGuid() == null) ? null : UUID.fromString(request.getMessageGuid()));
 
-        ExchangeLogType log = new ExchangeLogType();
         log.setSenderReceiver(request.getSenderOrReceiver());
-        log.setDateRecieved(request.getDate());
+        log.setDateReceived(request.getDate().toInstant());
         log.setType(logType);
         log.setStatus(status);
-        log.setIncoming(incoming);
-        log.setTypeRef(ref);
+        log.setTransferIncoming(incoming);
         log.setDestination(request.getDestination());
         log.setSource(request.getPluginType().toString());
         log.setOn(request.getOnValue());
         log.setTo(request.getTo());
         log.setTodt(request.getTodt());
         log.setDf(request.getFluxDataFlow());
-        log.setGuid(request.getResponseMessageGuid());
+        log.setUpdatedBy("SYSTEM");
+
+        log = ExchangeLogMapper.addStatusHistory(log);
 
         return log(log, request.getUsername());
     }
 
-    public ExchangeLogType updateStatus(String pluginMessageId, ExchangeLogStatusTypeType logStatus, String username) throws ExchangeLogException {
+    public ExchangeLog updateStatus(String pluginMessageId, ExchangeLogStatusTypeType logStatus, String username) throws ExchangeLogException {
         try {
             UUID logGuid = logCache.acknowledged(pluginMessageId);
-            ExchangeLogStatusType exchangeLogStatusType = createExchangeLogStatusType(logStatus, logGuid);
-            ExchangeLogType updatedLog = exchangeLogModel.updateExchangeLogStatus(exchangeLogStatusType, username);
+            ExchangeLogStatus exchangeLogStatus = createExchangeLogStatus(logStatus);
+            ExchangeLog updatedLog = exchangeLogModel.updateExchangeLogStatus(exchangeLogStatus, username, logGuid);
             // For long polling
-            exchangeLogEvent.fire(new NotificationMessage("guid", updatedLog.getGuid()));
+            exchangeLogEvent.fire(new NotificationMessage("guid", updatedLog.getId()));
             return updatedLog;
         } catch (ExchangeModelException e) {
             throw new ExchangeLogException("Couldn't update status of exchange log", e);
         }
     }
 
-    private ExchangeLogStatusType createExchangeLogStatusType(ExchangeLogStatusTypeType logStatus, UUID logGuid) {
-        ExchangeLogStatusType exchangeLogStatusType = new ExchangeLogStatusType();
-        exchangeLogStatusType.setGuid(logGuid.toString());
-        ArrayList statusHistoryList = new ArrayList();
-        ExchangeLogStatusHistoryType statusHistory = new ExchangeLogStatusHistoryType();
-        statusHistory.setStatus(logStatus);
-        statusHistoryList.add(statusHistory);
-        exchangeLogStatusType.getHistory().addAll(statusHistoryList);
-        return exchangeLogStatusType;
+    private ExchangeLogStatus createExchangeLogStatus(ExchangeLogStatusTypeType logStatus) {
+        ExchangeLogStatus exchangeLogStatus = new ExchangeLogStatus();
+        exchangeLogStatus.setStatus(logStatus);
+        exchangeLogStatus.setUpdatedBy("SYSTEM");
+        exchangeLogStatus.setStatusTimestamp(Instant.now());
+        return exchangeLogStatus;
     }
 
     private ExchangeLogStatusType createExchangeLogBusinessError(String logGuid,String businessMessageError) {
@@ -164,10 +163,10 @@ public class ExchangeLogServiceBean {
      * @return the updated log
      * @throws ExchangeLogException when something goes wrong
      */
-    public ExchangeLogType updateStatus(UUID logGuid, ExchangeLogStatusTypeType logStatus) throws ExchangeLogException {
+    public ExchangeLog updateStatus(UUID logGuid, ExchangeLogStatusTypeType logStatus) throws ExchangeLogException {
         try {
-            ExchangeLogStatusType exchangeLogStatusType = createExchangeLogStatusType(logStatus, logGuid);
-            return exchangeLogModel.updateExchangeLogStatus(exchangeLogStatusType, "SYSTEM");
+            ExchangeLogStatus exchangeLogStatus = createExchangeLogStatus(logStatus);
+            return exchangeLogModel.updateExchangeLogStatus(exchangeLogStatus, "SYSTEM", logGuid);
         } catch (ExchangeModelException e) {
             throw new ExchangeLogException("Couldn't update the status of the exchange log with guid " + logGuid + ". The new status should be " + logStatus, e);
         }
@@ -257,10 +256,9 @@ public class ExchangeLogServiceBean {
         }
     }
 
-    public void updateTypeRef(ExchangeLogType exchangeLogStatusType, MovementRefType movementRefType) throws ExchangeModelException {
-        ExchangeLog exchangeLog = exchangeLogDao.getExchangeLogByGuid(UUID.fromString(exchangeLogStatusType.getGuid()));
-        exchangeLog.setTypeRefType(TypeRefType.valueOf(movementRefType.getType().value()));
-        exchangeLog.setTypeRefGuid(UUID.fromString(movementRefType.getMovementRefGuid()));
+    public void updateTypeRef(ExchangeLog exchangeLogStatus, MovementRefType movementRefType){
+        exchangeLogStatus.setTypeRefType(TypeRefType.valueOf(movementRefType.getType().value()));
+        exchangeLogStatus.setTypeRefGuid(UUID.fromString(movementRefType.getMovementRefGuid()));
     }
 
     public ExchangeLogWithValidationResults getExchangeLogRawMessageAndValidationByGuid(UUID guid) {

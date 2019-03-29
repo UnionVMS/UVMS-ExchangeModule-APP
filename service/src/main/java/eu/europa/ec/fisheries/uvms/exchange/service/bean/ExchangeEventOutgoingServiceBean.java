@@ -23,6 +23,7 @@ import javax.inject.Inject;
 import javax.jms.JMSException;
 import javax.jms.TextMessage;
 
+import eu.europa.ec.fisheries.uvms.exchange.entity.exchangelog.ExchangeLog;
 import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelException;
 import org.apache.commons.collections.CollectionUtils;
 import eu.europa.ec.fisheries.schema.exchange.common.v1.AcknowledgeType;
@@ -56,10 +57,9 @@ import eu.europa.ec.fisheries.schema.exchange.v1.TypeRefType;
 import eu.europa.ec.fisheries.schema.exchange.v1.UnsentMessageTypeProperty;
 import eu.europa.ec.fisheries.uvms.commons.message.api.MessageConstants;
 import eu.europa.ec.fisheries.uvms.commons.message.api.MessageException;
-import eu.europa.ec.fisheries.uvms.exchange.service.message.consumer.ExchangeConsumer;
 import eu.europa.ec.fisheries.uvms.exchange.service.message.event.ErrorEvent;
 import eu.europa.ec.fisheries.uvms.exchange.service.message.event.carrier.ExchangeErrorEvent;
-import eu.europa.ec.fisheries.uvms.exchange.service.message.event.carrier.PluginErrorEvent;
+import eu.europa.ec.fisheries.uvms.exchange.service.message.event.carrier.PluginErrorEventCarrier;
 import eu.europa.ec.fisheries.uvms.exchange.service.message.exception.ExchangeMessageException;
 import eu.europa.ec.fisheries.uvms.exchange.service.message.producer.ExchangeMessageProducer;
 import eu.europa.ec.fisheries.uvms.exchange.model.constant.FaultCode;
@@ -91,7 +91,7 @@ public class ExchangeEventOutgoingServiceBean {
 
     @Inject
     @eu.europa.ec.fisheries.uvms.exchange.service.message.event.PluginErrorEvent
-    private Event<PluginErrorEvent> pluginErrorEvent;
+    private Event<PluginErrorEventCarrier> pluginErrorEvent;
 
     @Inject
     @PollEvent
@@ -182,7 +182,7 @@ public class ExchangeEventOutgoingServiceBean {
                 String text = ExchangePluginRequestMapper.createSetReportRequest(sendReport.getTimestamp().toInstant(), sendReport, unsentMessageGuid);
                 String pluginMessageId = producer.sendEventBusMessage(text, serviceName);
                 try {
-                    ExchangeLogType log = ExchangeLogMapper.getSendMovementExchangeLog(sendReport);
+                    ExchangeLog log = ExchangeLogMapper.getSendMovementExchangeLog(sendReport);
                     exchangeLogService.logAndCache(log, pluginMessageId, request.getUsername());
                 } catch (ExchangeLogException e) {
                     LOG.error("Could not create log", e);
@@ -282,8 +282,8 @@ public class ExchangeEventOutgoingServiceBean {
             LOG.debug("[INFO] Got FLUXFAResponse in exchange with destination :" + request.getDestination());
             String text = ExchangePluginRequestMapper.createSetFLUXFAResponseRequestWithOn(
                     request.getRequest(), request.getDestination(), request.getFluxDataFlow(), request.getSenderOrReceiver(), request.getOnValue());
-            final ExchangeLogType logType = exchangeLogService.log(request, LogType.SEND_FLUX_RESPONSE_MSG, request.getStatus(), TypeRefType.FA_RESPONSE, request.getRequest(), false);
-            if(!logType.getStatus().equals(ExchangeLogStatusTypeType.FAILED)){ // Send response only if it is NOT FAILED
+            final ExchangeLog exchangeLog = exchangeLogService.log(request, LogType.SEND_FLUX_RESPONSE_MSG, request.getStatus(), TypeRefType.FA_RESPONSE, request.getRequest(), false);
+            if(!exchangeLog.getStatus().equals(ExchangeLogStatusTypeType.FAILED)){ // Send response only if it is NOT FAILED
                 LOG.debug("[START] Sending FLUXFAResponse to Flux Activity Plugin..");
                 String pluginMessageId = producer.sendEventBusMessage(text, ((request.getPluginType() == BELGIAN_ACTIVITY)
                         ? ExchangeServiceConstants.BELGIAN_ACTIVITY_PLUGIN_SERVICE_NAME : ExchangeServiceConstants.FLUX_ACTIVITY_PLUGIN_SERVICE_NAME));
@@ -459,7 +459,7 @@ public class ExchangeEventOutgoingServiceBean {
             } else {
                 statusType = ExchangeLogStatusTypeType.SUCCESSFUL;
             }
-            ExchangeLogType updatedLog = exchangeLogService.updateStatus(UUID.fromString(movementRefType.getAckResponseMessageID()), statusType);
+            ExchangeLog updatedLog = exchangeLogService.updateStatus(UUID.fromString(movementRefType.getAckResponseMessageID()), statusType);
             exchangeLogService.updateTypeRef(updatedLog, movementRefType);
 
         } catch (ExchangeLogException | ExchangeModelException e) {
@@ -482,7 +482,7 @@ public class ExchangeEventOutgoingServiceBean {
                 setReportMovementType = new SetReportMovementType();
             }
             username = request.getUsername();
-            ExchangeLogType log = ExchangeLogMapper.getReceivedMovementExchangeLog(setReportMovementType, movementRefType.getMovementRefGuid(), movementRefType.getType().value(), username);
+            ExchangeLog log = ExchangeLogMapper.getReceivedMovementExchangeLog(setReportMovementType, movementRefType.getMovementRefGuid(), movementRefType.getType().value(), username);
             exchangeLogService.log(log, username);
         } catch (ExchangeLogException | ExchangeModelMarshallException e) {
             LOG.error(e.getMessage());
@@ -492,7 +492,7 @@ public class ExchangeEventOutgoingServiceBean {
     private void firePluginFault(TextMessage messageEvent, String errorMessage, Throwable exception) {
         LOG.error(errorMessage, exception);
         PluginFault fault = ExchangePluginResponseMapper.mapToPluginFaultResponse(FaultCode.EXCHANGE_PLUGIN_EVENT.getCode(), errorMessage);
-        pluginErrorEvent.fire(new PluginErrorEvent(messageEvent, null, fault));
+        pluginErrorEvent.fire(new PluginErrorEventCarrier(messageEvent, null, fault));
     }
 
     private void fireExchangeFault(TextMessage messageEvent, String errorMessage, Throwable exception) {
@@ -551,7 +551,7 @@ public class ExchangeEventOutgoingServiceBean {
         return true;
     }
 
-    private String validateRestCommand(SetCommandRequest request, ServiceResponseType service, CommandType command) throws ExchangeServiceException {
+    private String validateRestCommand(SetCommandRequest request, ServiceResponseType service, CommandType command) {
         String faultMessage = "OK";
         if (command == null) {
             faultMessage = "No command";
@@ -594,7 +594,7 @@ public class ExchangeEventOutgoingServiceBean {
         String pluginMessageId = producer.sendEventBusMessage(text, request.getCommand().getPluginName());
 
         try {
-            ExchangeLogType log = ExchangeLogMapper.getSendCommandExchangeLog(request.getCommand());
+            ExchangeLog log = ExchangeLogMapper.getSendCommandExchangeLog(request.getCommand(), request.getUsername());
             exchangeLogService.logAndCache(log, pluginMessageId, request.getUsername());
         } catch (ExchangeLogException e) {
             LOG.error("Could not create log", e);

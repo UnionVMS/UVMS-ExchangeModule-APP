@@ -33,7 +33,7 @@ import eu.europa.ec.fisheries.uvms.config.message.ConfigMessageProducer;
 import eu.europa.ec.fisheries.uvms.exchange.service.message.constants.MessageQueue;
 import eu.europa.ec.fisheries.uvms.exchange.service.message.event.ErrorEvent;
 import eu.europa.ec.fisheries.uvms.exchange.service.message.event.carrier.ExchangeErrorEvent;
-import eu.europa.ec.fisheries.uvms.exchange.service.message.event.carrier.PluginErrorEvent;
+import eu.europa.ec.fisheries.uvms.exchange.service.message.event.carrier.PluginErrorEventCarrier;
 import eu.europa.ec.fisheries.uvms.exchange.service.message.exception.ExchangeMessageException;
 import eu.europa.ec.fisheries.uvms.exchange.service.message.producer.ExchangeMessageProducer;
 import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelMapperException;
@@ -185,7 +185,7 @@ public class ExchangeMessageProducerBean extends AbstractProducer implements Exc
     }
 
     @Override
-    public void sendPluginErrorResponseMessage(@Observes @eu.europa.ec.fisheries.uvms.exchange.service.message.event.PluginErrorEvent PluginErrorEvent message) {
+    public void sendPluginErrorResponseMessage(@Observes @eu.europa.ec.fisheries.uvms.exchange.service.message.event.PluginErrorEvent PluginErrorEventCarrier message) {
         try {
             String data = JAXBMarshaller.marshallJaxBObjectToString(message.getErrorFault());
             final String jmsMessageID = message.getJmsMessage().getJMSMessageID();
