@@ -25,6 +25,7 @@ import javax.jms.TextMessage;
 
 import eu.europa.ec.fisheries.uvms.exchange.entity.exchangelog.ExchangeLog;
 import eu.europa.ec.fisheries.uvms.exchange.entity.serviceregistry.Service;
+import eu.europa.ec.fisheries.uvms.exchange.entity.unsent.UnsentMessageProperty;
 import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelException;
 import org.apache.commons.collections.CollectionUtils;
 import eu.europa.ec.fisheries.schema.exchange.common.v1.AcknowledgeType;
@@ -52,7 +53,6 @@ import eu.europa.ec.fisheries.schema.exchange.plugin.v1.SendSalesResponseRequest
 import eu.europa.ec.fisheries.schema.exchange.service.v1.ServiceResponseType;
 import eu.europa.ec.fisheries.schema.exchange.service.v1.StatusType;
 import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogStatusTypeType;
-import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogType;
 import eu.europa.ec.fisheries.schema.exchange.v1.LogType;
 import eu.europa.ec.fisheries.schema.exchange.v1.TypeRefType;
 import eu.europa.ec.fisheries.schema.exchange.v1.UnsentMessageTypeProperty;
@@ -163,7 +163,7 @@ public class ExchangeEventOutgoingServiceBean {
 
             String unsentMessageGuid;
             try {
-                List<UnsentMessageTypeProperty> unsentMessageProperties = ExchangeLogMapper.getUnsentMessageProperties(sendReport);
+                List<UnsentMessageProperty> unsentMessageProperties = ExchangeLogMapper.getUnsentMessageProperties(sendReport);
                 unsentMessageGuid = exchangeLogService.createUnsentMessage(sendReport.getRecipient(), sendReport.getTimestamp().toInstant(), ExchangeLogMapper.getSendMovementSenderReceiver(sendReport), message.getText(), unsentMessageProperties, request.getUsername());
             } catch (Exception e) {
                 throw new IllegalStateException("Could not create unsent message ", e);
@@ -520,7 +520,7 @@ public class ExchangeEventOutgoingServiceBean {
             String faultMessage = "No plugin receiver available";
             exchangeErrorEvent.fire(new ExchangeErrorEvent(origin, ExchangeModuleResponseMapper.createFaultMessage(FaultCode.EXCHANGE_COMMAND_INVALID, faultMessage)));
             try {
-                List<UnsentMessageTypeProperty> setUnsentMessageTypePropertiesForPoll = getSetUnsentMessageTypePropertiesForPoll(commandType);
+                List<UnsentMessageProperty> setUnsentMessageTypePropertiesForPoll = getSetUnsentMessageTypePropertiesForPoll(commandType);
                 exchangeLogService.createUnsentMessage(service.getName(), command.getTimestamp().toInstant(), command.getCommand().name(), origin.getText(), setUnsentMessageTypePropertiesForPoll, username);
             } catch (ExchangeLogException | JMSException e) {
                 LOG.error("Couldn't create unsentMessage " + e.getMessage());
@@ -533,7 +533,7 @@ public class ExchangeEventOutgoingServiceBean {
         } else if (!service.getStatus()) {  //StatusType.STARTED.equals aka not running
             LOG.info("Plugin to send report to is not started:{}",service);
             try {
-                List<UnsentMessageTypeProperty> setUnsentMessageTypePropertiesForPoll = getSetUnsentMessageTypePropertiesForPoll(commandType);
+                List<UnsentMessageProperty> setUnsentMessageTypePropertiesForPoll = getSetUnsentMessageTypePropertiesForPoll(commandType);
                 exchangeLogService.createUnsentMessage(service.getName(), command.getTimestamp().toInstant(), command.getCommand().name(), origin.getText(), setUnsentMessageTypePropertiesForPoll, username);
             } catch (ExchangeLogException | JMSException e) {
                 LOG.error("Couldn't create unsentMessage " + e.getMessage());
@@ -563,8 +563,8 @@ public class ExchangeEventOutgoingServiceBean {
         } else if (service == null || service.getServiceClassName() == null || !service.getServiceClassName().equalsIgnoreCase(command.getPluginName())) {
             faultMessage = "No plugin receiver available";
             try {
-                List<UnsentMessageTypeProperty> setUnsentMessageTypePropertiesForPoll = getSetUnsentMessageTypePropertiesForPoll(request.getCommand());
-                exchangeLogService.createUnsentMessage(service.getName(), command.getTimestamp().toInstant(), command.getCommand().name(), request.toString(), setUnsentMessageTypePropertiesForPoll, request.getUsername());
+                List<UnsentMessageProperty> setUnsentMessagePropertiesForPoll = getSetUnsentMessageTypePropertiesForPoll(request.getCommand());
+                exchangeLogService.createUnsentMessage(service.getName(), command.getTimestamp().toInstant(), command.getCommand().name(), request.toString(), setUnsentMessagePropertiesForPoll, request.getUsername());
             } catch (ExchangeLogException e) {
                 LOG.error("Couldn't create unsentMessage " + e.getMessage());
             }
@@ -573,8 +573,8 @@ public class ExchangeEventOutgoingServiceBean {
         } else if (!service.getStatus()) {      //!StatusType.STARTED.equals
             LOG.info("Plugin to send report to is not started:{}",service);
             try {
-                List<UnsentMessageTypeProperty> setUnsentMessageTypePropertiesForPoll = getSetUnsentMessageTypePropertiesForPoll(request.getCommand());
-                exchangeLogService.createUnsentMessage(service.getName(), command.getTimestamp().toInstant(), command.getCommand().name(), request.toString(), setUnsentMessageTypePropertiesForPoll, request.getUsername());
+                List<UnsentMessageProperty> setUnsentMessagePropertiesForPoll = getSetUnsentMessageTypePropertiesForPoll(request.getCommand());
+                exchangeLogService.createUnsentMessage(service.getName(), command.getTimestamp().toInstant(), command.getCommand().name(), request.toString(), setUnsentMessagePropertiesForPoll, request.getUsername());
             } catch (ExchangeLogException e) {
                 LOG.error("Couldn't create unsentMessage " + e.getMessage());
             }
@@ -587,8 +587,8 @@ public class ExchangeEventOutgoingServiceBean {
 
         CommandType commandType = request.getCommand();
 
-        List<UnsentMessageTypeProperty> setUnsentMessageTypePropertiesForPoll = getSetUnsentMessageTypePropertiesForPoll(commandType);
-        String unsentMessageGuid = exchangeLogService.createUnsentMessage(serviceName, request.getCommand().getTimestamp().toInstant(), request.getCommand().getCommand().name(), originalJMSText, setUnsentMessageTypePropertiesForPoll, request.getUsername());
+        List<UnsentMessageProperty> setUnsentMessagePropertiesForPoll = getSetUnsentMessageTypePropertiesForPoll(commandType);
+        String unsentMessageGuid = exchangeLogService.createUnsentMessage(serviceName, request.getCommand().getTimestamp().toInstant(), request.getCommand().getCommand().name(), originalJMSText, setUnsentMessagePropertiesForPoll, request.getUsername());
 
         request.getCommand().setUnsentMessageGuid(unsentMessageGuid);
         String text = ExchangePluginRequestMapper.createSetCommandRequest(request.getCommand());
@@ -613,8 +613,8 @@ public class ExchangeEventOutgoingServiceBean {
         return asset;
     }
 
-    private List<UnsentMessageTypeProperty> getSetUnsentMessageTypePropertiesForPoll(CommandType commandType) throws ExchangeLogException {
-        List<UnsentMessageTypeProperty> properties = new ArrayList<>();
+    private List<UnsentMessageProperty> getSetUnsentMessageTypePropertiesForPoll(CommandType commandType) throws ExchangeLogException {
+        List<UnsentMessageProperty> properties = new ArrayList<>();
         if (commandType.getPoll() != null) {
             String connectId = ExchangeLogMapper.getConnectId(commandType.getPoll());
             Asset asset = getAsset(connectId);

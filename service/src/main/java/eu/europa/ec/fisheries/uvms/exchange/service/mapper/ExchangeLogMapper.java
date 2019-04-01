@@ -18,6 +18,7 @@ import java.util.UUID;
 
 import eu.europa.ec.fisheries.uvms.exchange.entity.exchangelog.ExchangeLog;
 import eu.europa.ec.fisheries.uvms.exchange.entity.exchangelog.ExchangeLogStatus;
+import eu.europa.ec.fisheries.uvms.exchange.entity.unsent.UnsentMessageProperty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -265,14 +266,15 @@ public class ExchangeLogMapper {
         return log;
     }
 
-    public static List<UnsentMessageTypeProperty> getUnsentMessageProperties(SendMovementToPluginType sendReport) {
 
-        List<UnsentMessageTypeProperty> unsentMessageTypeProperties = new ArrayList<>();
-        UnsentMessageTypeProperty propertyAssetName = new UnsentMessageTypeProperty();
-        UnsentMessageTypeProperty propertyIrcs = new UnsentMessageTypeProperty();
-        UnsentMessageTypeProperty propertyLong = new UnsentMessageTypeProperty();
-        UnsentMessageTypeProperty propertyLat = new UnsentMessageTypeProperty();
-        UnsentMessageTypeProperty propertyPositionTime = new UnsentMessageTypeProperty();
+    public static List<UnsentMessageProperty> getUnsentMessageProperties(SendMovementToPluginType sendReport) {
+
+        List<UnsentMessageProperty> unsentMessageProperties = new ArrayList<>();
+        UnsentMessageProperty propertyAssetName = new UnsentMessageProperty();
+        UnsentMessageProperty propertyIrcs = new UnsentMessageProperty();
+        UnsentMessageProperty propertyLong = new UnsentMessageProperty();
+        UnsentMessageProperty propertyLat = new UnsentMessageProperty();
+        UnsentMessageProperty propertyPositionTime = new UnsentMessageProperty();
 
         propertyAssetName.setKey(UnsentMessageTypePropertyKey.ASSET_NAME);
         propertyAssetName.setValue(sendReport.getAssetName());
@@ -285,34 +287,34 @@ public class ExchangeLogMapper {
         propertyPositionTime.setKey(UnsentMessageTypePropertyKey.POSITION_TIME);
         propertyPositionTime.setValue(sendReport.getMovement().getPositionTime().toString());
 
-        unsentMessageTypeProperties.add(propertyAssetName);
-        unsentMessageTypeProperties.add(propertyIrcs);
-        unsentMessageTypeProperties.add(propertyLong);
-        unsentMessageTypeProperties.add(propertyLat);
-        unsentMessageTypeProperties.add(propertyPositionTime);
-        return unsentMessageTypeProperties;
+        unsentMessageProperties.add(propertyAssetName);
+        unsentMessageProperties.add(propertyIrcs);
+        unsentMessageProperties.add(propertyLong);
+        unsentMessageProperties.add(propertyLat);
+        unsentMessageProperties.add(propertyPositionTime);
+        return unsentMessageProperties;
     }
 
-    public static List<UnsentMessageTypeProperty> getPropertiesForPoll(PollType poll, String assetName) throws ExchangeLogException {
-        List<UnsentMessageTypeProperty> unsentMessageTypeProperties = new ArrayList<>();
-        UnsentMessageTypeProperty propertyAssetName = new UnsentMessageTypeProperty();
+    public static List<UnsentMessageProperty> getPropertiesForPoll(PollType poll, String assetName){
+        List<UnsentMessageProperty> unsentMessageProperties = new ArrayList<>();
+        UnsentMessageProperty propertyAssetName = new UnsentMessageProperty();
         propertyAssetName.setKey(UnsentMessageTypePropertyKey.ASSET_NAME);
         propertyAssetName.setValue(assetName);
-        UnsentMessageTypeProperty pollType = new UnsentMessageTypeProperty();
+        UnsentMessageProperty pollType = new UnsentMessageProperty();
         pollType.setKey(UnsentMessageTypePropertyKey.POLL_TYPE);
         pollType.setValue(poll.getPollTypeType().name());
-        unsentMessageTypeProperties.add(propertyAssetName);
-        unsentMessageTypeProperties.add(pollType);
-        return unsentMessageTypeProperties;
+        unsentMessageProperties.add(propertyAssetName);
+        unsentMessageProperties.add(pollType);
+        return unsentMessageProperties;
     }
 
-    public static List<UnsentMessageTypeProperty> getPropertiesForEmail(EmailType email) throws ExchangeLogException {
-        List<UnsentMessageTypeProperty> unsentMessageTypeProperties = new ArrayList<>();
-        UnsentMessageTypeProperty propertyEmail = new UnsentMessageTypeProperty();
+    public static List<UnsentMessageProperty> getPropertiesForEmail(EmailType email) {
+        List<UnsentMessageProperty> unsentMessageProperties = new ArrayList<>();
+        UnsentMessageProperty propertyEmail = new UnsentMessageProperty();
         propertyEmail.setKey(UnsentMessageTypePropertyKey.EMAIL);
         propertyEmail.setValue(email.getTo());
-        unsentMessageTypeProperties.add(propertyEmail);
-        return unsentMessageTypeProperties;
+        unsentMessageProperties.add(propertyEmail);
+        return unsentMessageProperties;
     }
 
     public static String getConnectId(PollType poll) {

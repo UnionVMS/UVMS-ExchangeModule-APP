@@ -26,6 +26,8 @@ import eu.europa.ec.fisheries.uvms.exchange.bean.UnsentModelBean;
 import eu.europa.ec.fisheries.uvms.exchange.dao.bean.ExchangeLogDaoBean;
 import eu.europa.ec.fisheries.uvms.exchange.entity.exchangelog.ExchangeLog;
 import eu.europa.ec.fisheries.uvms.exchange.entity.exchangelog.ExchangeLogStatus;
+import eu.europa.ec.fisheries.uvms.exchange.entity.unsent.UnsentMessage;
+import eu.europa.ec.fisheries.uvms.exchange.entity.unsent.UnsentMessageProperty;
 import eu.europa.ec.fisheries.uvms.exchange.service.mapper.ExchangeLogMapper;
 import eu.europa.ec.fisheries.uvms.exchange.service.message.constants.MessageQueue;
 import eu.europa.ec.fisheries.uvms.exchange.service.message.exception.ExchangeMessageException;
@@ -181,7 +183,7 @@ public class ExchangeLogServiceBean {
         }
     }
 
-    public List<UnsentMessageType> getUnsentMessageList() throws ExchangeLogException {
+    public List<UnsentMessage> getUnsentMessageList() throws ExchangeLogException {
         LOG.info("Get unsent message list in service layer");
         try {
             return unsentModel.getMessageList();
@@ -224,16 +226,18 @@ public class ExchangeLogServiceBean {
         }
     }
 
-    public String createUnsentMessage(String senderReceiver, Instant timestamp, String recipient, String message, List<UnsentMessageTypeProperty> properties, String username) throws ExchangeLogException {
+    public String createUnsentMessage(String senderReceiver, Instant timestamp, String recipient, String message, List<UnsentMessageProperty> properties, String username) throws ExchangeLogException {
         LOG.debug("[INFO] CreateUnsentMessage in service layer:{}",message);
         try {
-            UnsentMessageType unsentMessage = new UnsentMessageType();
-            unsentMessage.setDateReceived(Date.from(timestamp));
+            UnsentMessage unsentMessage = new UnsentMessage();
+            unsentMessage.setDateReceived(timestamp);
             unsentMessage.setSenderReceiver(senderReceiver);
             unsentMessage.setRecipient(recipient);
             unsentMessage.setMessage(message);
+            unsentMessage.setUpdatedBy(username);
+            unsentMessage.setProperties(new ArrayList<>());
             unsentMessage.getProperties().addAll(properties);
-            String createdUnsentMessageId = unsentModel.createMessage(unsentMessage, username);
+            String createdUnsentMessageId = unsentModel.createMessage(unsentMessage);
 
             List<String> unsentMessageIds = Collections.singletonList(createdUnsentMessageId);
             sendingQueueEvent.fire(new NotificationMessage("messageIds", unsentMessageIds));
@@ -244,7 +248,7 @@ public class ExchangeLogServiceBean {
         }
     }
 
-    public void removeUnsentMessage(String unsentMessageId, String username) throws ExchangeLogException {
+    public void removeUnsentMessage(String unsentMessageId) throws ExchangeLogException {
         LOG.debug("removeUnsentMessage in service layer:{}",unsentMessageId);
         try {
             String removeMessageId = unsentModel.removeMessage(unsentMessageId);
@@ -276,7 +280,7 @@ public class ExchangeLogServiceBean {
 
     public void resend(List<String> messageIdList, String username) throws ExchangeLogException {
         LOG.debug("resend in service layer:{} {}",messageIdList,username);
-        List<UnsentMessageType> unsentMessageList;
+        List<UnsentMessage> unsentMessageList;
         try {
             unsentMessageList = unsentModel.resend(messageIdList);
         } catch (ExchangeModelException e) {
@@ -286,7 +290,7 @@ public class ExchangeLogServiceBean {
         if (unsentMessageList != null && !unsentMessageList.isEmpty()) {
             sendingQueueEvent.fire(new NotificationMessage("messageIds", messageIdList));
 
-            for (UnsentMessageType unsentMessage : unsentMessageList) {
+            for (UnsentMessage unsentMessage : unsentMessageList) {
                 try {
                     String unsentMessageId = producer.sendMessageOnQueue(unsentMessage.getMessage(), MessageQueue.EVENT);
                     //TextMessage unsentResponse = consumer.getMessage(unsentMessageId, TextMessage.class);

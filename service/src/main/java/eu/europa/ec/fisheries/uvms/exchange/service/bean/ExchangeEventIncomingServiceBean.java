@@ -673,7 +673,7 @@ public class ExchangeEventIncomingServiceBean {
 
     private void removeUnsentMessage(String serviceClassName, AcknowledgeType ack) {
         try {
-            exchangeLogService.removeUnsentMessage(ack.getUnsentMessageGuid(), serviceClassName);
+            exchangeLogService.removeUnsentMessage(ack.getUnsentMessageGuid());
         } catch (ExchangeLogException ex) {
             LOG.error(ex.getMessage());
         }

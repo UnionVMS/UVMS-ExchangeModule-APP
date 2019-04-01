@@ -24,6 +24,8 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 
+import eu.europa.ec.fisheries.uvms.exchange.entity.unsent.UnsentMessage;
+import eu.europa.ec.fisheries.uvms.exchange.mapper.UnsentMessageMapper;
 import eu.europa.ec.fisheries.uvms.exchange.service.bean.ExchangeLogServiceBean;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -65,8 +67,9 @@ public class ExchangeSendingQueueResource {
 	public ResponseDto getSendingQueue() {
 		LOG.info("Get list invoked in rest layer");
 		try {
-			List<UnsentMessageType> unsentMessageList = serviceLayer.getUnsentMessageList();
-			List<SendingGroupLog> sendingQueue = ExchangeLogMapper.mapToSendingQueue(unsentMessageList);
+			List<UnsentMessage> unsentMessageList = serviceLayer.getUnsentMessageList();
+			List<UnsentMessageType> unsentMessageTypeList = UnsentMessageMapper.toModel(unsentMessageList);
+			List<SendingGroupLog> sendingQueue = ExchangeLogMapper.mapToSendingQueue(unsentMessageTypeList);
 			return new ResponseDto(sendingQueue, RestResponseCode.OK);
 		} catch (Exception ex) {
 			LOG.error("[ Error when geting log list. ] {} ", ex.getMessage());
