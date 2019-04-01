@@ -26,6 +26,7 @@ import javax.xml.bind.JAXBException;
 
 import eu.europa.ec.fisheries.uvms.exchange.bean.ExchangeLogModelBean;
 import eu.europa.ec.fisheries.uvms.exchange.entity.exchangelog.ExchangeLog;
+import eu.europa.ec.fisheries.uvms.exchange.entity.serviceregistry.Service;
 import org.apache.commons.collections.CollectionUtils;
 import eu.europa.ec.fisheries.schema.exchange.common.v1.AcknowledgeType;
 import eu.europa.ec.fisheries.schema.exchange.module.v1.*;
@@ -589,9 +590,9 @@ public class ExchangeEventIncomingServiceBean {
     private void firePluginFault(TextMessage messageEvent, String errorMessage, Throwable exception, String serviceClassName) {
         try {
             LOG.error(errorMessage, exception);
-            ServiceResponseType service = ((serviceClassName == null) ? null : exchangeService.getService(serviceClassName));
+            Service service = ((serviceClassName == null) ? null : exchangeService.getService(serviceClassName));
             PluginFault fault = ExchangePluginResponseMapper.mapToPluginFaultResponse(FaultCode.EXCHANGE_PLUGIN_EVENT.getCode(), errorMessage);
-            pluginErrorEvent.fire(new PluginErrorEventCarrier(messageEvent, service, fault));
+            pluginErrorEvent.fire(new PluginErrorEventCarrier(messageEvent, service.getServiceResponse(), fault));
         } catch (ExchangeServiceException e) {
             LOG.error("Unable to send PluginError message due to: {}", e);
         }

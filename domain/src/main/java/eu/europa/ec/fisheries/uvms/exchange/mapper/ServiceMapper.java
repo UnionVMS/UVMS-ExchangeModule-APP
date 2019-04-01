@@ -11,6 +11,7 @@ copy of the GNU General Public License along with the IFDM Suite. If not, see <h
  */
 package eu.europa.ec.fisheries.uvms.exchange.mapper;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -101,7 +102,7 @@ public class ServiceMapper {
         return capabilityEntities;
     }
     
-    private static SettingListType toSettingListModel(List<ServiceSetting> serviceSettingList) {
+    public static SettingListType toSettingListModel(List<ServiceSetting> serviceSettingList) {
         SettingListType model = new SettingListType();
         if (serviceSettingList != null) {
             for (ServiceSetting setting : serviceSettingList) {
@@ -125,6 +126,16 @@ public class ServiceMapper {
         entity.setUpdatedBy(username);
         entity.setUpdatedTime(DateUtils.nowUTC());
         entity.setValue("TRUE".equals(capability.getValue()));
+        return entity;
+    }
+
+    private static ServiceCapability toCapabilityEntity(Service parent, ServiceCapability capability, String username) {
+        ServiceCapability entity = new ServiceCapability();
+        entity.setService(parent);
+        entity.setCapability(capability.getCapability());
+        entity.setUpdatedBy(username);
+        entity.setUpdatedTime(DateUtils.nowUTC());
+        entity.setValue(capability.getValue());
         return entity;
     }
     
@@ -163,10 +174,48 @@ public class ServiceMapper {
         return newSettings;
     }
 
+    public static List<ServiceSetting> mapSettingsList(Service old, List<ServiceSetting> newSettingList, String username) {
+        List<ServiceSetting> newSettings = new ArrayList<>();
+
+        List<ServiceSetting> currentSettings = old.getServiceSettingList();
+        Map<String, ServiceSetting> map = new HashMap<>();
+        if (currentSettings != null) {
+            for (ServiceSetting i : currentSettings) {
+                map.put(i.getSetting(), i);
+            }
+        }
+
+        for (ServiceSetting setting : newSettingList) {
+            ServiceSetting currentSetting = map.get(setting.getSetting());
+            if (currentSetting == null) {
+                ServiceSetting newSetting = toSettingEntity(old, setting, username);
+                newSettings.add(newSetting);
+            } else {
+                if (!currentSetting.getValue().equalsIgnoreCase(setting.getValue())) {
+                    currentSetting.setValue(setting.getValue());
+                    currentSetting.setUpdatedTime(DateUtils.nowUTC());
+                    currentSetting.setUser(username);
+                }
+                newSettings.add(currentSetting);
+            }
+        }
+        return newSettings;
+    }
+
     public static List<ServiceCapability> upsetCapabilityList(Service parent, CapabilityListType capabilityList, String username){
        List<ServiceCapability> newCapabilityList = new ArrayList<>();
         for(CapabilityType capabilityType : capabilityList.getCapability()){
             ServiceCapability newServiceCapability = toCapabilityEntity(parent, capabilityType, username);
+            newCapabilityList.add(newServiceCapability);
+        }
+
+        return newCapabilityList;
+    }
+
+    public static List<ServiceCapability> upsetCapabilityList(Service parent, List<ServiceCapability> capabilityList, String username){
+        List<ServiceCapability> newCapabilityList = new ArrayList<>();
+        for(ServiceCapability capability : capabilityList){
+            ServiceCapability newServiceCapability = toCapabilityEntity(parent, capability, username);
             newCapabilityList.add(newServiceCapability);
         }
 
@@ -190,11 +239,28 @@ public class ServiceMapper {
         entity.setValue(setting.getValue());
         return entity;
     }
+
+    private static ServiceSetting toSettingEntity(Service parent, ServiceSetting setting, String username) {
+        ServiceSetting entity = new ServiceSetting();
+        entity.setService(parent);
+        entity.setSetting(setting.getSetting());
+        entity.setUpdatedTime(Instant.now());
+        entity.setUser(username);
+        entity.setValue(setting.getValue());
+        return entity;
+    }
     
     public static SettingType toModel(ServiceSetting entity) {
         SettingType type = new SettingType();
         type.setKey(entity.getSetting());
         type.setValue(entity.getValue());
         return type;
+    }
+
+    public static ServiceSetting simpleToSettingEntity(SettingType type){
+        ServiceSetting setting = new ServiceSetting();
+        setting.setSetting(type.getKey());
+        setting.setValue(type.getValue());
+        return setting;
     }
 }

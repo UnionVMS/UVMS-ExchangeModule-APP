@@ -55,7 +55,7 @@ public class DomainModelBeanTest {
 
     @Ignore
     @Test
-    public void testCreateModel() throws ExchangeModelException, ExchangeDaoException, ExchangeDaoMappingException {
+    public void testCreateModel() throws ExchangeModelException {
         UUID id = UUID.randomUUID();
 
         ServiceType serviceType = MockData.getModel((int) id.getLeastSignificantBits());
@@ -73,7 +73,7 @@ public class DomainModelBeanTest {
         when(dao.getServiceByServiceClassName(any(String.class))).thenReturn(null);
         //when(dao.updateService(any(Service.class))).thenReturn(service);
 
-        ServiceResponseType result = model.registerService(serviceType, capabilityListType, settingListType, "TEST");
+        Service result = model.registerService(service, "TEST");
         
         //assertEquals(id.toString(), result.getId());
     }

@@ -24,6 +24,7 @@ import javax.jms.JMSException;
 import javax.jms.TextMessage;
 
 import eu.europa.ec.fisheries.uvms.exchange.entity.exchangelog.ExchangeLog;
+import eu.europa.ec.fisheries.uvms.exchange.entity.serviceregistry.Service;
 import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelException;
 import org.apache.commons.collections.CollectionUtils;
 import eu.europa.ec.fisheries.schema.exchange.common.v1.AcknowledgeType;
@@ -235,7 +236,7 @@ public class ExchangeEventOutgoingServiceBean {
             LOG.info("Send command to plugin:{}",request);
             String pluginName = request.getCommand().getPluginName();
 
-            ServiceResponseType service = exchangeService.getService(pluginName);
+            Service service = exchangeService.getService(pluginName);
 
             if (validate(request.getCommand(), message, service, request.getCommand(), request.getUsername())) {
                 sendCommandToPlugin(request, service.getName(), message.getText());
@@ -258,7 +259,7 @@ public class ExchangeEventOutgoingServiceBean {
 
     public String sendCommandToPluginFromRest(SetCommandRequest request){
         try {
-            ServiceResponseType service = exchangeService.getService(request.getCommand().getPluginName());
+            Service service = exchangeService.getService(request.getCommand().getPluginName());
             CommandType command = request.getCommand();
             String validationResult = validateRestCommand(request, service, command);
             if (validationResult.equals("OK")) {
@@ -502,7 +503,7 @@ public class ExchangeEventOutgoingServiceBean {
     }
 
 
-    private boolean validate(CommandType command, TextMessage origin, ServiceResponseType service, CommandType commandType, String username) {
+    private boolean validate(CommandType command, TextMessage origin, Service service, CommandType commandType, String username) {
         if (command == null) {
             String faultMessage = "No command";
             exchangeErrorEvent.fire(new ExchangeErrorEvent(origin, ExchangeModuleResponseMapper.createFaultMessage(FaultCode.EXCHANGE_COMMAND_INVALID, faultMessage)));
@@ -529,7 +530,7 @@ public class ExchangeEventOutgoingServiceBean {
             String faultMessage = "No timestamp";
             exchangeErrorEvent.fire(new ExchangeErrorEvent(origin, ExchangeModuleResponseMapper.createFaultMessage(FaultCode.EXCHANGE_COMMAND_INVALID, faultMessage)));
             return false;
-        } else if (!StatusType.STARTED.equals(service.getStatus())) {
+        } else if (!service.getStatus()) {  //StatusType.STARTED.equals aka not running
             LOG.info("Plugin to send report to is not started:{}",service);
             try {
                 List<UnsentMessageTypeProperty> setUnsentMessageTypePropertiesForPoll = getSetUnsentMessageTypePropertiesForPoll(commandType);
@@ -551,7 +552,7 @@ public class ExchangeEventOutgoingServiceBean {
         return true;
     }
 
-    private String validateRestCommand(SetCommandRequest request, ServiceResponseType service, CommandType command) {
+    private String validateRestCommand(SetCommandRequest request, Service service, CommandType command) {
         String faultMessage = "OK";
         if (command == null) {
             faultMessage = "No command";
@@ -569,7 +570,7 @@ public class ExchangeEventOutgoingServiceBean {
             }
         } else if (command.getTimestamp() == null) {
             faultMessage = "No timestamp";
-        } else if (!StatusType.STARTED.equals(service.getStatus())) {
+        } else if (!service.getStatus()) {      //!StatusType.STARTED.equals
             LOG.info("Plugin to send report to is not started:{}",service);
             try {
                 List<UnsentMessageTypeProperty> setUnsentMessageTypePropertiesForPoll = getSetUnsentMessageTypePropertiesForPoll(request.getCommand());

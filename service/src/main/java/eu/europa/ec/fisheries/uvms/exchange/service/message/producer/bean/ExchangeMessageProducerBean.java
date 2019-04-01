@@ -189,7 +189,7 @@ public class ExchangeMessageProducerBean extends AbstractProducer implements Exc
         try {
             String data = JAXBMarshaller.marshallJaxBObjectToString(message.getErrorFault());
             final String jmsMessageID = message.getJmsMessage().getJMSMessageID();
-            final String serviceName = message.getServiceType() != null ? message.getServiceType().getServiceResponseMessageName() : "unknown";
+            final String serviceName = message.getServiceType() != null ? message.getServiceType() : "unknown";
             eventBusProducer.sendEventBusMessageWithSpecificIds(data, serviceName, null, null, jmsMessageID);
             LOG.debug("Sending error message back from Exchange module to recipient om JMS Topic with correlationID: {} ", jmsMessageID);
         } catch (ExchangeModelMapperException | JMSException | MessageException e) {
