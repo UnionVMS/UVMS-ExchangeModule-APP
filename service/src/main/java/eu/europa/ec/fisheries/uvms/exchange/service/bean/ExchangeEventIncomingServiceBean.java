@@ -53,7 +53,6 @@ import eu.europa.ec.fisheries.uvms.exchange.service.message.exception.ExchangeMe
 import eu.europa.ec.fisheries.uvms.exchange.service.message.producer.ExchangeMessageProducer;
 import eu.europa.ec.fisheries.uvms.exchange.model.constant.FaultCode;
 import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeException;
-import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelMarshallException;
 import eu.europa.ec.fisheries.uvms.exchange.model.mapper.ExchangeModuleResponseMapper;
 import eu.europa.ec.fisheries.uvms.exchange.model.mapper.ExchangePluginResponseMapper;
 import eu.europa.ec.fisheries.uvms.exchange.model.mapper.JAXBMarshaller;
@@ -64,8 +63,6 @@ import eu.europa.ec.fisheries.uvms.exchange.service.exception.ExchangeServiceExc
 import eu.europa.ec.fisheries.uvms.exchange.service.mapper.MovementMapper;
 import eu.europa.ec.fisheries.uvms.exchange.service.model.IncomingMovement;
 import eu.europa.ec.fisheries.uvms.longpolling.notifications.NotificationMessage;
-import eu.europa.ec.fisheries.uvms.rules.model.exception.RulesModelMapperException;
-import eu.europa.ec.fisheries.uvms.rules.model.exception.RulesModelMarshallException;
 import eu.europa.ec.fisheries.uvms.rules.model.mapper.RulesModuleRequestMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -126,10 +123,8 @@ public class ExchangeEventIncomingServiceBean {
             String msg = RulesModuleRequestMapper.createSetFLUXFAReportMessageRequest(extractPluginType(request), request.getRequest()
                     , username, extractLogId(message, exchangeLog), fluxDataFlow, senderOrReceiver, onValue);
             forwardToRules(msg);
-        } catch (RulesModelMapperException | ExchangeModelMarshallException e) {
+        } catch (Exception e) {
             LOG.error("Couldn't map to SetFLUXFAReportMessageRequest when processing FLUXFAReportMessage coming from fa-plugin!", e);
-        } catch (ExchangeLogException e) {
-            LOG.error("Couldn't log FAReportMessage received from plugin into database", e);
         }
     }
 
@@ -142,10 +137,8 @@ public class ExchangeEventIncomingServiceBean {
             String msg = RulesModuleRequestMapper.createSetFaQueryMessageRequest(extractPluginType(request), request.getRequest(),
                     request.getUsername(), extractLogId(message, exchangeLog), request.getFluxDataFlow(), request.getSenderOrReceiver(), request.getOnValue());
             forwardToRules(msg);
-        } catch (RulesModelMapperException | ExchangeModelMarshallException e) {
+        } catch (Exception e) {
             LOG.error("Couldn't map to SetFAQueryMessageRequest when processing FAQueryMessage coming from fa-plugin!", e);
-        } catch (ExchangeLogException e) {
-            LOG.error("Couldn't log FAQueryMessage received from plugin into database", e);
         }
     }
 
@@ -159,10 +152,8 @@ public class ExchangeEventIncomingServiceBean {
                     , request.getRequest(), request.getUsername(), extractLogId(message, exchangeLog), request.getFluxDataFlow()
                     , request.getSenderOrReceiver(), request.getOnValue());
             forwardToRules(msg);
-        } catch (RulesModelMapperException | ExchangeModelMarshallException e) {
+        } catch (Exception e) {
             LOG.error("Couldn't map to RcvFLUXFaResponseMessageRequest when processing FLUXResponseMessage coming from fa-plugin!", e);
-        } catch (ExchangeLogException e) {
-            LOG.error("Couldn't log FLUXResponseMessage received from plugin into database", e);
         }
     }
 
@@ -227,10 +218,8 @@ public class ExchangeEventIncomingServiceBean {
                     username, extractLogId(message, exchangeLog), fluxDataFlow, senderOrReceiver, onValue,
                     registeredClassName, ad, to, todt);
             forwardToRules(msg);
-        } catch (RulesModelMapperException | ExchangeModelMarshallException e) {
+        } catch (Exception e) {
             LOG.error("Couldn't map to SetFLUXMovementReportRequest when processing FLUXMovementReport coming from movement-plugin!", e);
-        } catch (ExchangeLogException e) {
-            LOG.error("Couldn't log FLUXMovementReport received from plugin into database!", e);
         }
     }
 
@@ -282,7 +271,7 @@ public class ExchangeEventIncomingServiceBean {
             }
         } catch (Exception e) {
             LOG.error("Could not process SetMovementReportRequest", e);
-            throw new IllegalArgumentException("Could not process SetMovementReportRequest", e);
+            throw new RuntimeException("Could not process SetMovementReportRequest", e);
         } 
     }
 
@@ -297,16 +286,13 @@ public class ExchangeEventIncomingServiceBean {
             String message = request.getAssets();
             forwardToAsset(message);
             exchangeLogService.log(request, LogType.RECEIVE_ASSET_INFORMATION, ExchangeLogStatusTypeType.SUCCESSFUL, TypeRefType.ASSETS, message, true);
-        } catch (ExchangeModelMarshallException e) {
+        } catch (Exception e) {
             try {
                 String errorMessage = "Couldn't map to ReceiveAssetInformationRequest when processing asset information from plugin. The event was " + event.getText();
                 firePluginFault(event, errorMessage, e, null);
             } catch (JMSException e1) {
                 firePluginFault(event, "Couldn't map to ReceiveAssetInformationRequest when processing asset information from plugin.", e, null);
             }
-        } catch (Exception e) {
-            LOG.warn(e.toString(), e);
-
         }
     }
 
@@ -328,16 +314,12 @@ public class ExchangeEventIncomingServiceBean {
             String receiveSalesReportRequest = RulesModuleRequestMapper.createReceiveSalesReportRequest(report, messageGuid, plugin.name(), log.getId().toString(), sender, request.getOnValue());
             String messageSelector = "ReceiveSalesReportRequest";
             forwardToRules(receiveSalesReportRequest, messageSelector);
-        } catch (ExchangeModelMarshallException e) {
+        } catch (Exception e) {
             try {
                 firePluginFault(event, "Couldn't map to SetSalesReportRequest when processing sales report from plugin. The event was " + event.getText(), e, null);
             } catch (JMSException e1) {
                 firePluginFault(event, "Couldn't map to SetSalesReportRequest when processing sales report from plugin.", e, null);
             }
-        } catch (ExchangeLogException e) {
-            firePluginFault(event, "Could not log the incoming sales report.", e, null);
-        } catch (RulesModelMarshallException e) {
-            firePluginFault(event, "Could not create a request for the Rules module for an incoming sales report.", e, null);
         }
     }
 
@@ -358,16 +340,12 @@ public class ExchangeEventIncomingServiceBean {
             String receiveSalesQueryRequest = RulesModuleRequestMapper.createReceiveSalesQueryRequest(query, messageGuid, plugin.name(), log.getId().toString(), sender, request.getOnValue());
             String messageSelector = "ReceiveSalesQueryRequest";
             forwardToRules(receiveSalesQueryRequest, messageSelector);
-        } catch (ExchangeModelMarshallException e) {
+        } catch (Exception e) {
             try {
                 firePluginFault(event, "Couldn't map to SalesQueryRequest when processing sales query from plugin. The message was " + event.getText(), e, null);
             } catch (JMSException e1) {
                 firePluginFault(event, "Couldn't map to SalesQueryRequest when processing sales query from plugin.", e, null);
             }
-        } catch (ExchangeLogException e) {
-            firePluginFault(event, "Could not log the incoming sales query.", e, null);
-        } catch (RulesModelMarshallException e) {
-            firePluginFault(event, "Could not create a request for the Rules module for an incoming sales query.", e, null);
         }
     }
 
@@ -383,12 +361,8 @@ public class ExchangeEventIncomingServiceBean {
             String receiveSalesResponseRequest = RulesModuleRequestMapper.createReceiveSalesResponseRequest(response, log.getId().toString(), request.getSenderOrReceiver());
             String messageSelector = "ReceiveSalesResponseRequest";
             forwardToRules(receiveSalesResponseRequest, messageSelector);
-        } catch (ExchangeModelMarshallException e) {
+        } catch (Exception e) {
             firePluginFault(event, "Error when receiving a Sales response from FLUX", e, null);
-        } catch (ExchangeLogException e) {
-            firePluginFault(event, "Could not log the incoming sales response.", e, null);
-        } catch (RulesModelMarshallException e) {
-            firePluginFault(event, "Could not create a request for the Rules module for an incoming sales response.", e, null);
         }
     }
 
@@ -398,10 +372,8 @@ public class ExchangeEventIncomingServiceBean {
             ReceiveInvalidSalesMessage request = JAXBMarshaller.unmarshallTextMessage(event, ReceiveInvalidSalesMessage.class);
             exchangeLogService.log(request, LogType.RECEIVE_SALES_REPORT, ExchangeLogStatusTypeType.FAILED, TypeRefType.SALES_REPORT, request.getOriginalMessage(), true);
             producer.sendMessageOnQueue(request.getRespondToInvalidMessageRequest(), MessageQueue.SALES);
-        } catch (ExchangeLogException e) {
+        } catch (Exception e) {
             firePluginFault(event, "Could not log the incoming invalid sales message", e, null);
-        } catch (ExchangeMessageException | ExchangeModelMarshallException e) {
-            firePluginFault(event, "Error when receiving an invalid sales message from FLUX", e, null);
         }
     }
 
@@ -469,9 +441,8 @@ public class ExchangeEventIncomingServiceBean {
 
             exchangeEventOutgoingService.sendAssetInformationToFLUX(outgoingRequest);
             exchangeLogService.log(incomingRequest, LogType.QUERY_ASSET_INFORMATION, ExchangeLogStatusTypeType.SUCCESSFUL, TypeRefType.ASSETS, message, false);
-        } catch (ExchangeModelMarshallException | ExchangeMessageException e) {
+        } catch (Exception e) {
             fireExchangeFault(event, "Error when sending asset information query to FLUX", e);
-        } catch (ExchangeLogException e) {
             firePluginFault(event, "Could not log the outgoing asset information query.", e, null);
         }
     }
@@ -486,7 +457,7 @@ public class ExchangeEventIncomingServiceBean {
             PingResponse response = new PingResponse();
             response.setResponse("pong");
             producer.sendModuleResponseMessage(message, JAXBMarshaller.marshallJaxBObjectToString(response));
-        } catch (ExchangeModelMarshallException | MessageException e) {
+        } catch (Exception e) {
             LOG.error("[ Error when marshalling ping response ]");
         }
     }
@@ -501,7 +472,7 @@ public class ExchangeEventIncomingServiceBean {
             eu.europa.ec.fisheries.schema.exchange.plugin.v1.PingResponse response = JAXBMarshaller.unmarshallTextMessage(message, eu.europa.ec.fisheries.schema.exchange.plugin.v1.PingResponse.class);
             //TODO handle ping response from plugin, eg. no serviceClassName in response
             LOG.info("FIX ME handle ping response from plugin");
-        } catch (ExchangeModelMarshallException e) {
+        } catch (Exception e) {
             LOG.error("Couldn't process ping response from plugin {} {} ", message, e.getMessage());
         }
     }
@@ -543,12 +514,8 @@ public class ExchangeEventIncomingServiceBean {
                     handleAcknowledge(method, serviceClassName, acknowledge);
                     break;
             }
-        } catch (ExchangeModelMarshallException e) {
+        } catch (Exception e) {
             LOG.error("Process acknowledge couldn't be marshalled {} {}", message, e);
-            throw new IllegalStateException("Could not process acknowledge", e);
-        } catch (ExchangeServiceException e) {
-            //TODO Audit.log() couldn't process acknowledge in exchange service
-            LOG.error("Couldn't process acknowledge in exchange service:{} {} ", message, e);
             throw new IllegalStateException("Could not process acknowledge", e);
         }
     }

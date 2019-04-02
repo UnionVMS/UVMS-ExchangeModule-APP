@@ -37,7 +37,7 @@ public class ServiceRegistryModelBean {
     @EJB
     ServiceRegistryDaoBean dao;
 
-    public Service registerService(Service newService, String username) throws ExchangeModelException {
+    public Service registerService(Service newService, String username) {
         // Look for existing service
         Service existingService = dao.getServiceByServiceClassName(newService.getServiceClassName());
         if (existingService == null) {
@@ -64,7 +64,7 @@ public class ServiceRegistryModelBean {
         return existingService;
     }
 
-    public Service unregisterService(ServiceType serviceType, String username) throws ExchangeModelException {
+    public Service unregisterService(ServiceType serviceType, String username) {
         // Look for existing service
         Service service = dao.getServiceByServiceClassName(serviceType.getServiceClassName());
         if (service != null) {
@@ -78,10 +78,10 @@ public class ServiceRegistryModelBean {
         }
 
         //TODO handle unable to unregister
-        throw new ExchangeDaoException("[ No service to unregister ]"); 
+        throw new IllegalArgumentException("[ No service to unregister ]"); 
     }
 
-    public List<Service> getPlugins(List<PluginType> pluginTypes) throws ExchangeModelException {
+    public List<Service> getPlugins(List<PluginType> pluginTypes) {
 
        	List<Service> entityList = new ArrayList<>();
        	if(pluginTypes == null || pluginTypes.isEmpty()) {
@@ -93,7 +93,7 @@ public class ServiceRegistryModelBean {
         return entityList;
     }
 
-	public Service updatePluginSettings(String serviceClassName, List<ServiceSetting> settings, String username) throws ExchangeModelException {
+	public Service updatePluginSettings(String serviceClassName, List<ServiceSetting> settings, String username) {
     	LOG.info("Update plugin settings for " + serviceClassName);
     	Service service = dao.getServiceByServiceClassName(serviceClassName);
     	if(service != null) {
@@ -103,59 +103,44 @@ public class ServiceRegistryModelBean {
     		dao.updateService(service);
     		return service;
     	}
-    	throw new ExchangeDaoException("No plugin found when update plugin settings");
+    	throw new IllegalArgumentException("No plugin found when update plugin settings");
 	}
     
-    public List<SettingType> getPluginSettings(String serviceClassName) throws ExchangeModelException {
+    public List<SettingType> getPluginSettings(String serviceClassName) {
         LOG.info("Get plugin settings:{}",serviceClassName);
 
         List<SettingType> settings = new ArrayList<>();
-        try {
-            List<ServiceSetting> entityList = dao.getServiceSettings(serviceClassName);
-            for (ServiceSetting entity : entityList) {
-                settings.add(ServiceMapper.toModel(entity));
-            }
-
-        } catch (ExchangeDaoException e) {
-            LOG.error("[ Error when getting list. {}] {}", serviceClassName, e.getMessage());
-            throw new ExchangeModelException("[ Error when getting list. ]");
+        List<ServiceSetting> entityList = dao.getServiceSettings(serviceClassName);
+        for (ServiceSetting entity : entityList) {
+            settings.add(ServiceMapper.toModel(entity));
         }
+
 
         return settings;
 
     }
 
-    public List<CapabilityType> getPluginCapabilities(String serviceClassName) throws ExchangeModelException {
+    public List<CapabilityType> getPluginCapabilities(String serviceClassName) {
         LOG.info("Get plugin capabilities:{}",serviceClassName);
 
         List<CapabilityType> capabilities = new ArrayList<>();
-        try {
-            List<ServiceCapability> entityList = dao.getServiceCapabilities(serviceClassName);
-            for (ServiceCapability entity : entityList) {
-                capabilities.add(ServiceMapper.toModel(entity));
-            }
+        List<ServiceCapability> entityList = dao.getServiceCapabilities(serviceClassName);
+        for (ServiceCapability entity : entityList) {
+            capabilities.add(ServiceMapper.toModel(entity));
+        }
 
             
 
-        } catch (ExchangeDaoException e) {
-            LOG.error("[ Error when getting list.{} ] {}",serviceClassName, e.getMessage());
-            throw new ExchangeModelException("[ Error when getting list. ]");
-        }
         return capabilities;
     }
 
-    public Service getPlugin(String serviceClassName) throws ExchangeModelException {
-        try {
+    public Service getPlugin(String serviceClassName) {
             Service service = dao.getServiceByServiceClassName(serviceClassName);
             return service;
 
-        } catch (NullPointerException e) {
-            LOG.error("[ Error when getting Service. {} ] {}",serviceClassName,  e.getMessage());
-            throw new ExchangeModelException("[ Error when getting service. ]", e);
-        }
     }
 
-	public ServiceResponseType updatePluginStatus(String serviceName, StatusType status, String username) throws ExchangeModelException {
+	public ServiceResponseType updatePluginStatus(String serviceName, StatusType status, String username) {
 		Service service = dao.getServiceByServiceClassName(serviceName);
 		if(service != null) {
 			service.setStatus(StatusType.STARTED.equals(status));
@@ -163,6 +148,6 @@ public class ServiceRegistryModelBean {
             service.setUpdated(Instant.now());
 			return ServiceMapper.toServiceModel(dao.updateService(service));
 		}
-		throw new ExchangeModelException("[ Error when update plugin " + serviceName + " with status " + status.name());
+		throw new IllegalArgumentException("[ Error when update plugin " + serviceName + " with status " + status.name());
 	}
 }

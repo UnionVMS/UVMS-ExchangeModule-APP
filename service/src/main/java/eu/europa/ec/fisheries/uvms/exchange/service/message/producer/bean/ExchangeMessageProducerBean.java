@@ -19,7 +19,6 @@ import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
 import javax.enterprise.event.Observes;
-import javax.jms.JMSException;
 import javax.jms.Queue;
 import javax.jms.Topic;
 import org.slf4j.Logger;
@@ -36,7 +35,6 @@ import eu.europa.ec.fisheries.uvms.exchange.service.message.event.carrier.Exchan
 import eu.europa.ec.fisheries.uvms.exchange.service.message.event.carrier.PluginErrorEventCarrier;
 import eu.europa.ec.fisheries.uvms.exchange.service.message.exception.ExchangeMessageException;
 import eu.europa.ec.fisheries.uvms.exchange.service.message.producer.ExchangeMessageProducer;
-import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelMapperException;
 import eu.europa.ec.fisheries.uvms.exchange.model.mapper.JAXBMarshaller;
 
 @Stateless
@@ -97,13 +95,13 @@ public class ExchangeMessageProducerBean extends AbstractProducer implements Exc
     }
 
     @Override
-    public String sendEventBusMessage(String text, String serviceName) throws ExchangeMessageException {
+    public String sendEventBusMessage(String text, String serviceName) {
         try {
             LOG.debug("Sending event bus message from Exchange module to recipient om JMS Topic to: {} ", serviceName);
             return eventBusProducer.sendEventBusMessage(text, serviceName, exchangeEventQueue);
-        } catch (/*Message*/Exception e) {
+        } catch (Exception e) {
             LOG.error("[ Error when sending message. ] ", e);
-            throw new ExchangeMessageException("[ Error when sending message. ]", e);
+            throw new RuntimeException("[ Error when sending message. ]", e);
         }
     }
 
@@ -179,7 +177,7 @@ public class ExchangeMessageProducerBean extends AbstractProducer implements Exc
             LOG.debug("Sending error message back from Exchange module to recipient om JMS Queue with correlationID: {} ", message.getJmsMessage().getJMSMessageID());
             String data = JAXBMarshaller.marshallJaxBObjectToString(message.getErrorFault());
             this.sendResponseMessageToSender(message.getJmsMessage(), data);
-        } catch (ExchangeModelMapperException | JMSException | MessageException e) {
+        } catch (Exception e) {
             LOG.error("Error when returning Error message to recipient");
         }
     }
@@ -192,7 +190,7 @@ public class ExchangeMessageProducerBean extends AbstractProducer implements Exc
             final String serviceName = message.getServiceType() != null ? message.getServiceType() : "unknown";
             eventBusProducer.sendEventBusMessageWithSpecificIds(data, serviceName, null, null, jmsMessageID);
             LOG.debug("Sending error message back from Exchange module to recipient om JMS Topic with correlationID: {} ", jmsMessageID);
-        } catch (ExchangeModelMapperException | JMSException | MessageException e) {
+        } catch (Exception e) {
             LOG.error("Error when returning Error message to recipient", e);
         }
     }

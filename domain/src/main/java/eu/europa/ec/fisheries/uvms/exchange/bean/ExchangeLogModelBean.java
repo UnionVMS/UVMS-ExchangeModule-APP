@@ -24,8 +24,6 @@ import eu.europa.ec.fisheries.uvms.exchange.exception.ExchangeDaoException;
 import eu.europa.ec.fisheries.uvms.exchange.mapper.LogMapper;
 import eu.europa.ec.fisheries.uvms.exchange.model.dto.ListResponseDto;
 import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelException;
-import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeSearchMapperException;
-import eu.europa.ec.fisheries.uvms.exchange.model.exception.InputArgumentException;
 import eu.europa.ec.fisheries.uvms.exchange.search.SearchFieldMapper;
 import eu.europa.ec.fisheries.uvms.exchange.search.SearchValue;
 import org.apache.commons.collections.CollectionUtils;
@@ -85,13 +83,13 @@ public class ExchangeLogModelBean {
 
     public ListResponseDto getExchangeLogListByQuery(ExchangeListQuery query) throws ExchangeModelException {
         if (query == null) {
-            throw new InputArgumentException("Exchange list query is null");
+            throw new IllegalArgumentException("Exchange list query is null");
         }
         if (query.getPagination() == null) {
-            throw new InputArgumentException("Pagination in Exchange query is null");
+            throw new IllegalArgumentException("Pagination in Exchange query is null");
         }
         if (query.getExchangeSearchCriteria() == null) {
-            throw new InputArgumentException("No search criterias in Exchange query");
+            throw new IllegalArgumentException("No search criterias in Exchange query");
         }
         try {
             ListResponseDto response = new ListResponseDto();
@@ -125,7 +123,7 @@ public class ExchangeLogModelBean {
             response.setCurrentPage(query.getPagination().getPage());
             response.setExchangeLogList(exchLogTypes);
             return response;
-        } catch (ExchangeSearchMapperException | ExchangeDaoException | ParseException ex) {
+        } catch (ExchangeDaoException | ParseException ex) {
             LOG.error("[ERROR] when getting ExchangeLogs by query {}] {} ", query, ex.getMessage());
             throw new ExchangeModelException(ex.getMessage(), ex);
         }
@@ -153,7 +151,7 @@ public class ExchangeLogModelBean {
 
     public List<ExchangeLogStatusType> getExchangeLogStatusHistoryByQuery(ExchangeHistoryListQuery query) throws ExchangeModelException {
         if (query == null) {
-            throw new InputArgumentException("Exchange status list query is null");
+            throw new IllegalArgumentException("Exchange status list query is null");
         }
         try {
             List<ExchangeLogStatusType> logStatusHistoryList = new ArrayList<>();
@@ -175,10 +173,10 @@ public class ExchangeLogModelBean {
 
     public ExchangeLog createExchangeLog(ExchangeLog log, String username) throws ExchangeModelException {
         if (log == null) {
-            throw new InputArgumentException("No logType to create");
+            throw new IllegalArgumentException("No logType to create");
         }
         if (log.getType() == null) {
-            throw new InputArgumentException("No type in logType to create");
+            throw new IllegalArgumentException("No type in logType to create");
         }
         try {
             return logDao.createLog(log);
@@ -191,10 +189,10 @@ public class ExchangeLogModelBean {
 
     public ExchangeLog updateExchangeLogStatus(ExchangeLogStatus status, String username, UUID logId) throws ExchangeModelException {
         if (status == null || logId == null ) {
-            throw new InputArgumentException("No exchange log to update status");
+            throw new IllegalArgumentException("No exchange log to update status");
         }
         if (status.getStatus() == null) {
-            throw new InputArgumentException("Non valid status to update to");
+            throw new IllegalArgumentException("Non valid status to update to");
         }
         try {
             ExchangeLog exchangeLog = logDao.getExchangeLogByGuid(logId);
@@ -213,7 +211,7 @@ public class ExchangeLogModelBean {
 
     public ExchangeLogType updateExchangeLogBusinessError(ExchangeLogStatusType status, String businessError) throws ExchangeModelException {
         if (status == null || status.getGuid() == null || status.getGuid().isEmpty()) {
-            throw new InputArgumentException("No exchange log to update status");
+            throw new IllegalArgumentException("No exchange log to update status");
         }
         try {
             ExchangeLog exchangeLog = logDao.getExchangeLogByGuid(UUID.fromString(status.getGuid()));
@@ -228,7 +226,7 @@ public class ExchangeLogModelBean {
 
     public ExchangeLogStatusType getExchangeLogStatusHistory(UUID guid, TypeRefType typeRefType) throws ExchangeModelException {
         if (guid == null) {
-            throw new InputArgumentException("Non valid guid to fetch log status history");
+            throw new IllegalArgumentException("Non valid guid to fetch log status history");
         }
 
         ExchangeLog returnLog = null;
@@ -262,7 +260,7 @@ public class ExchangeLogModelBean {
     public ExchangeLogType setPollStatus(PollStatus pollStatus, String username) throws ExchangeModelException {
         ExchangeLogType logType = null;
         if (pollStatus == null || pollStatus.getPollGuid() == null) {
-            throw new InputArgumentException("No poll id to update status");
+            throw new IllegalArgumentException("No poll id to update status");
         }
         try {
             List<ExchangeLog> exchangeLogByTypesRefAndGuid = logDao.getExchangeLogByTypesRefAndGuid(UUID.fromString(pollStatus.getPollGuid()), Collections.singletonList(TypeRefType.POLL));

@@ -12,6 +12,7 @@ copy of the GNU General Public License along with the IFDM Suite. If not, see <h
 package eu.europa.ec.fisheries.uvms.exchange.dao.bean;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.UUID;
 
 import javax.ejb.Stateless;
@@ -47,20 +48,9 @@ public class ServiceRegistryDaoBean extends Dao {
      * @throws
      * eu.europa.ec.fisheries.uvms.exchange.exception.ExchangeDaoException
      */
-    public Service createEntity(Service entity) throws ExchangeDaoException {
-        try {
-            em.persist(entity);
-            return entity;
-        } catch (EntityExistsException e) {
-            LOG.error("[ Error when creating. ] {}", e.getMessage());
-            throw new ExchangeDaoException("[ Error when creating. Service already exists. ] ");
-        } catch (IllegalArgumentException e) {
-            LOG.error("[ Error when creating. ] {}", e.getMessage());
-            throw new ExchangeDaoException("[ Error when creating. Illegal input. ]");
-        } catch (Exception e) {
-            LOG.error("[ Error when creating. ] {}", e.getMessage());
-            throw new ExchangeDaoException("[ Error when creating. ]");
-        }
+    public Service createEntity(Service entity) {
+        em.persist(entity);
+        return entity;
     }
 
     // getService
@@ -72,16 +62,8 @@ public class ServiceRegistryDaoBean extends Dao {
      * @throws
      * eu.europa.ec.fisheries.uvms.exchange.exception.ExchangeDaoException
      */
-    public Service getEntityById(String id) throws NoEntityFoundException, ExchangeDaoException {
-        try {
-            return em.find(Service.class, UUID.fromString(id));                //SRSLY!?!?!?!?!?!?!?!?!?!?!? WHY??????????
-        } catch (NoResultException e) {
-            LOG.error("[ Error when getting entity by ID. ] {}", e.getMessage());
-            throw new NoEntityFoundException("[ Error when getting entity by ID. ]");
-        } catch (Exception e) {
-            LOG.error("[ Error when getting entity by ID. ] {}", e.getMessage());
-            throw new ExchangeDaoException("[ Error when getting entity by ID. ] " + id);
-        }
+    public Service getEntityById(String id) {
+        return em.find(Service.class, UUID.fromString(id));
     }
 
     // updateService
@@ -93,18 +75,10 @@ public class ServiceRegistryDaoBean extends Dao {
      * @throws
      * eu.europa.ec.fisheries.uvms.exchange.exception.ExchangeDaoException
      */
-    public Service updateService(Service entity) throws ExchangeDaoException {
-        try {
-            em.merge(entity);
-            em.flush();
-            return entity;
-        } catch (IllegalArgumentException e) {
-            LOG.error("[ Error when updating entity ] {}", e.getMessage());
-            throw new ExchangeDaoException("[ Error when updating entity ]", e);
-        } catch (Exception e) {
-            LOG.error("[ Error when updating entity ] {}", e.getMessage());
-            throw new ExchangeDaoException("[ Error when updating entity ]", e);
-        }
+    public Service updateService(Service entity) {
+        em.merge(entity);
+        em.flush();
+        return entity;
     }
 
     // deactivateService
@@ -128,16 +102,13 @@ public class ServiceRegistryDaoBean extends Dao {
      * @throws
      * eu.europa.ec.fisheries.uvms.exchange.exception.ExchangeDaoException
      */
-    public List<Service> getServices() throws ExchangeDaoException {
+    public List<Service> getServices() {
         try {
             TypedQuery<Service> query = em.createNamedQuery(Service.SERVICE_FIND_ALL, Service.class);
             return query.getResultList();
-        } catch (IllegalArgumentException e) {
-            LOG.error("[ Error when getting service list ] {}", e.getMessage());
-            throw new ExchangeDaoException("[ Error when getting service list ] ");
         } catch (Exception e) {
             LOG.error("[ Error when updating entity ] {}", e.getMessage());
-            throw new ExchangeDaoException("[ Error when getting service list ] ");
+            throw new RuntimeException("[ Error when getting service list ] ", e);
         }
     }
 
@@ -146,18 +117,10 @@ public class ServiceRegistryDaoBean extends Dao {
      * @return
      * @throws ExchangeDaoException
      */
-	public List<Service> getServicesByTypes(List<PluginType> pluginTypes) throws ExchangeDaoException {
-        try {
+	public List<Service> getServicesByTypes(List<PluginType> pluginTypes) {
             TypedQuery<Service> query = em.createNamedQuery(Service.SERVICE_FIND_BY_TYPES, Service.class);
             query.setParameter("types", pluginTypes);
             return query.getResultList();
-        } catch (IllegalArgumentException e) {
-            LOG.error("[ Error when getting service list by types ] {}", e.getMessage());
-            throw new ExchangeDaoException("[ Error when getting service list by types ] ");
-        } catch (Exception e) {
-            LOG.error("[ Error when getting service list by types ] {}", e.getMessage());
-            throw new ExchangeDaoException("[ Error when getting service list by types] ");
-        }
 	}
 
     /**
@@ -168,18 +131,10 @@ public class ServiceRegistryDaoBean extends Dao {
      * @return
      * @throws ExchangeDaoException
      */
-    public List<ServiceCapability> getServiceCapabilities(String serviceClassName) throws ExchangeDaoException {
-        try {
+    public List<ServiceCapability> getServiceCapabilities(String serviceClassName) {
             TypedQuery<ServiceCapability> query = em.createNamedQuery(ServiceCapability.CAPABILITY_FIND_BY_SERVICE, ServiceCapability.class);
             query.setParameter(SERVICE_CLASS_NAME_PARAMETER, serviceClassName);
             return query.getResultList();
-        } catch (IllegalArgumentException e) {
-            LOG.error("[ Error when getting capabilities ] {}", e.getMessage());
-            throw new ExchangeDaoException("[ Error when getting capabilities ] ");
-        } catch (Exception e) {
-            LOG.error("[ Error when getting capabilities ] {}", e.getMessage());
-            throw new ExchangeDaoException("[ Error when getting capabilities ] ");
-        }
     }
 
     /**
@@ -190,18 +145,10 @@ public class ServiceRegistryDaoBean extends Dao {
      * @return
      * @throws ExchangeDaoException
      */
-    public List<ServiceSetting> getServiceSettings(String serviceClassName) throws ExchangeDaoException {
-        try {
+    public List<ServiceSetting> getServiceSettings(String serviceClassName) {
             TypedQuery<ServiceSetting> query = em.createNamedQuery(ServiceSetting.SETTING_FIND_BY_SERVICE, ServiceSetting.class);
             query.setParameter("serviceClassName", serviceClassName);
             return query.getResultList();
-        } catch (IllegalArgumentException e) {
-            LOG.error("[ Error when getting settings ] {}", e.getMessage());
-            throw new ExchangeDaoException("[ Error when getting settings ] ");
-        } catch (Exception e) {
-            LOG.error("[ Error when getting settings ] {}", e.getMessage());
-            throw new ExchangeDaoException("[ Error when getting settings ] ");
-        }
     }
 
     /**

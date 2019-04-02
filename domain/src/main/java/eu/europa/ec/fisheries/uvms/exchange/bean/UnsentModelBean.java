@@ -16,12 +16,12 @@ import eu.europa.ec.fisheries.uvms.exchange.entity.unsent.UnsentMessage;
 import eu.europa.ec.fisheries.uvms.exchange.exception.ExchangeDaoException;
 import eu.europa.ec.fisheries.uvms.exchange.exception.NoEntityFoundException;
 import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelException;
-import eu.europa.ec.fisheries.uvms.exchange.model.exception.InputArgumentException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
+import javax.persistence.NoResultException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -36,7 +36,7 @@ public class UnsentModelBean {
 
     public String createMessage(UnsentMessage message) throws ExchangeModelException {
         if (message == null) {
-            throw new InputArgumentException("No message to create");
+            throw new IllegalArgumentException("No message to create");
         }
 
         try {
@@ -51,7 +51,7 @@ public class UnsentModelBean {
 
     public String removeMessage(String unsentMessageId) throws ExchangeModelException {
         if (unsentMessageId == null) {
-            throw new InputArgumentException("No message to remove");
+            throw new IllegalArgumentException("No message to remove");
         }
 
         try {
@@ -80,26 +80,21 @@ public class UnsentModelBean {
         }
     }
 
-    public List<UnsentMessage> resend(List<String> unsentMessageId) throws ExchangeModelException {
+    public List<UnsentMessage> resend(List<String> unsentMessageId) {
         if (unsentMessageId == null) {
-            throw new InputArgumentException("No messageList to resend");
+            throw new IllegalArgumentException("No messageList to resend");
         }
 
-        try {
-            List<UnsentMessage> unsentMessageList = new ArrayList<>();
-            for (String messageId : unsentMessageId) {
-                try {
-                    UnsentMessage message = dao.getByGuid(UUID.fromString(messageId));
-                    UnsentMessage removedMessage = dao.remove(message);
-                    unsentMessageList.add(removedMessage);
-                } catch (NoEntityFoundException e) {
-                    LOG.error("Couldn't find message to resend with guid: " + messageId);
-                }
+        List<UnsentMessage> unsentMessageList = new ArrayList<>();
+        for (String messageId : unsentMessageId) {
+            try {
+                UnsentMessage message = dao.getByGuid(UUID.fromString(messageId));
+                UnsentMessage removedMessage = dao.remove(message);
+                unsentMessageList.add(removedMessage);
+            } catch (NoResultException e) {
+                LOG.error("Couldn't find message to resend with guid: " + messageId);
             }
-            return unsentMessageList;
-        } catch (ExchangeDaoException ex) {
-            LOG.error("[ Error when resending message message list ] {}", ex.getMessage());
-            throw new ExchangeModelException("Error when resending unsent message list");
         }
+        return unsentMessageList;
     }
 }

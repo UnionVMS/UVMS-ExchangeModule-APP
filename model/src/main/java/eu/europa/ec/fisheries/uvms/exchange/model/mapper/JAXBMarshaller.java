@@ -11,7 +11,6 @@ copy of the GNU General Public License along with the IFDM Suite. If not, see <h
  */
 package eu.europa.ec.fisheries.uvms.exchange.model.mapper;
 
-import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelMarshallException;
 import org.apache.commons.lang3.StringUtils;
 
 import javax.jms.JMSException;
@@ -41,7 +40,7 @@ public class JAXBMarshaller {
      * @throws
      * eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelMarshallException
      */
-    public static <T> String marshallJaxBObjectToString(T data) throws ExchangeModelMarshallException {
+    public static <T> String marshallJaxBObjectToString(T data) {
         try {
             JAXBContext jaxbContext = contexts.get(data.getClass().getName());
             if (jaxbContext == null) {
@@ -56,7 +55,7 @@ public class JAXBMarshaller {
             String marshalled = sw.toString();
             return marshalled;
         } catch (JAXBException ex) {
-            throw new ExchangeModelMarshallException("[ Error when marshalling Object to String ]", ex);
+            throw new RuntimeException("[ Error when marshalling Object to String ]", ex);
         }
     }
 
@@ -71,7 +70,7 @@ public class JAXBMarshaller {
      * @throws
      * eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelMarshallException
      */
-    public static <R> R unmarshallTextMessage(TextMessage textMessage, Class clazz) throws ExchangeModelMarshallException {
+    public static <R> R unmarshallTextMessage(TextMessage textMessage, Class clazz) {
         try {
             JAXBContext jc = contexts.get(clazz.getName());
             if (jc == null) {
@@ -84,7 +83,7 @@ public class JAXBMarshaller {
             R object = (R) unmarshaller.unmarshal(source);
             return object;
         } catch (JMSException | JAXBException ex) {
-            throw new ExchangeModelMarshallException("[Error when unmarshalling response in ResponseMapper ]", ex);
+            throw new RuntimeException("[Error when unmarshalling response in ResponseMapper ]", ex);
         }
     }
 
@@ -98,7 +97,7 @@ public class JAXBMarshaller {
      * @return
      * @throws ExchangeModelMarshallException
      */
-    public static <R> R unmarshallString(String text, Class clazz) throws ExchangeModelMarshallException {
+    public static <R> R unmarshallString(String text, Class clazz) {
         try {
             JAXBContext jc = contexts.get(clazz.getName());
             if (jc == null) {
@@ -111,7 +110,7 @@ public class JAXBMarshaller {
             R object = (R) unmarshaller.unmarshal(source);
             return object;
         } catch (JAXBException ex) {
-            throw new ExchangeModelMarshallException("Error when unmarshalling text", ex);
+            throw new IllegalArgumentException("Error when unmarshalling text", ex);
         }
     }
 

@@ -28,45 +28,25 @@ import java.util.UUID;
 public class UnsentMessageDaoBean extends Dao {
     final static Logger LOG = LoggerFactory.getLogger(UnsentMessageDaoBean.class);
     
-	public UnsentMessage create(UnsentMessage unsentMessage) throws ExchangeDaoException {
-		try {
-			em.persist(unsentMessage);
-			return unsentMessage;
-		}  catch (Exception e) {
-			LOG.error("[ Error when creating unsent message ]" + e.getMessage());
-			throw new ExchangeDaoException("[ Error when creating unsent message ]", e);
-		}
+	public UnsentMessage create(UnsentMessage unsentMessage) {
+		em.persist(unsentMessage);
+		return unsentMessage;
 	}
 
-	public UnsentMessage remove(UnsentMessage unsentMessage) throws ExchangeDaoException {
-		try {
-			em.remove(unsentMessage);
-			return unsentMessage;
-		}  catch (Exception e) {
-			LOG.error("[ Error when removing unsent message ]" + e.getMessage());
-			throw new ExchangeDaoException("[ Error when removing unsent message ]", e);
-		}
+	public UnsentMessage remove(UnsentMessage unsentMessage) {
+		em.remove(unsentMessage);
+		return unsentMessage;
 	}
 
-	public List<UnsentMessage> getAll() throws ExchangeDaoException {
-		try {
-            TypedQuery<UnsentMessage> query = em.createNamedQuery(UnsentMessage.UNSENT_FIND_ALL, UnsentMessage.class);
-            return query.getResultList();
-        } catch (Exception e) {
-            LOG.error("[ Error when getting entity list. ] {}", e.getMessage());
-            throw new ExchangeDaoException("[ Error when getting entity list. ]", e);
-        }
+	public List<UnsentMessage> getAll() {
+		TypedQuery<UnsentMessage> query = em.createNamedQuery(UnsentMessage.UNSENT_FIND_ALL, UnsentMessage.class);
+		return query.getResultList();
 	}
 
-	public UnsentMessage getByGuid(UUID guid) throws NoEntityFoundException {
-		try {
-            TypedQuery<UnsentMessage> query = em.createNamedQuery(UnsentMessage.UNSENT_BY_GUID, UnsentMessage.class);
-            query.setParameter("guid", guid);
-            return query.getSingleResult();
-        } catch (NoResultException e) {
-            LOG.error("[ Error when getting entity by ID. ] {}", e.getMessage());
-            throw new NoEntityFoundException("[ Error when getting entity by ID. ]", e);
-        }
+	public UnsentMessage getByGuid(UUID guid) {
+		TypedQuery<UnsentMessage> query = em.createNamedQuery(UnsentMessage.UNSENT_BY_GUID, UnsentMessage.class);
+		query.setParameter("guid", guid);
+		return query.getSingleResult();
 	}
 
 }

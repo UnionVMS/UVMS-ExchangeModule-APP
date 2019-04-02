@@ -29,39 +29,27 @@ import eu.europa.ec.fisheries.schema.exchange.service.v1.CapabilityListType;
 import eu.europa.ec.fisheries.schema.exchange.service.v1.ServiceType;
 import eu.europa.ec.fisheries.schema.exchange.service.v1.SettingListType;
 import eu.europa.ec.fisheries.schema.exchange.service.v1.StatusType;
-import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelMapperException;
-import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelMarshallException;
 
 public class ExchangeDataSourceRequestMapper {
 
     final static Logger LOG = LoggerFactory.getLogger(ExchangeDataSourceRequestMapper.class);
 
-    public static String mapCreateExchangeLogToString(ExchangeLogType log, String username) throws ExchangeModelMapperException {
-        try {
+    public static String mapCreateExchangeLogToString(ExchangeLogType log, String username) {
             CreateLogRequest request = new CreateLogRequest();
             request.setMethod(ExchangeDataSourceMethod.CREATE_LOG);
             request.setExchangeLog(log);
             request.setUsername(username);
             return JAXBMarshaller.marshallJaxBObjectToString(request);
-        } catch (Exception e) {
-            LOG.error("[ Error when mapping GetServiceListRequest to String ] {}", e.getMessage());
-            throw new ExchangeModelMapperException("[ Error when mapping GetServiceListRequest to String ]");
-        }
     }
 
-    public static String mapGetExchageLogListByQueryToString(ExchangeListQuery query) throws ExchangeModelMapperException {
-        try {
+    public static String mapGetExchageLogListByQueryToString(ExchangeListQuery query) {
             GetLogListByQueryRequest request = new GetLogListByQueryRequest();
             request.setMethod(ExchangeDataSourceMethod.GET_LOG_BY_QUERY);
             request.setQuery(query);
             return JAXBMarshaller.marshallJaxBObjectToString(request);
-        } catch (Exception e) {
-            LOG.error("[ Error when mapping GetServiceListRequest to String ] {}", e.getMessage());
-            throw new ExchangeModelMapperException("[ Error when mapping GetServiceListRequest to String ]");
-        }
     }
 
-    public static String mapGetServiceListToString(List<PluginType> pluginTypes) throws ExchangeModelMarshallException {
+    public static String mapGetServiceListToString(List<PluginType> pluginTypes) {
         GetServiceListRequest request = new GetServiceListRequest();
         request.setMethod(ExchangeDataSourceMethod.LIST_SERVICES);
         if (pluginTypes != null) {
@@ -70,34 +58,28 @@ public class ExchangeDataSourceRequestMapper {
         return JAXBMarshaller.marshallJaxBObjectToString(request);
     }
 
-    public static String mapGetServiceToString(String serviceId) throws ExchangeModelMapperException {
-        try {
+    public static String mapGetServiceToString(String serviceId) {
             GetServiceRequest request = new GetServiceRequest();
             request.setMethod(ExchangeDataSourceMethod.GET_SERVICE);
             request.setServiceId(serviceId);
             return JAXBMarshaller.marshallJaxBObjectToString(request);
-        } catch (Exception e) {
-            LOG.error("[ Error when mapping GetServiceListRequest to String ] {}", e.getMessage());
-            throw new ExchangeModelMapperException("[ Error when mapping GetServiceListRequest to String ]");
-        }
     }
 
-    public static String mapRegisterServiceToString(ServiceType service, CapabilityListType capabilityList, SettingListType settingList, String username) throws ExchangeModelMapperException {
-        try {
+    public static String mapRegisterServiceToString(ServiceType service, CapabilityListType capabilityList, SettingListType settingList, String username) {
             RegisterServiceRequest request = new RegisterServiceRequest();
             request.setMethod(ExchangeDataSourceMethod.REGISTER_SERVICE);
             request.setUsername(username);
 
             if (service == null) {
-                throw new ExchangeModelMapperException("ServiceType cannot be null in RegisterServiceRequest!");
+                throw new IllegalArgumentException("ServiceType cannot be null in RegisterServiceRequest!");
             } else {
 
                 if (service.getServiceResponseMessageName() == null || service.getServiceResponseMessageName().isEmpty()) {
-                    throw new ExchangeModelMapperException("Service response message name in ServiceType cannot be null or empty!");
+                    throw new IllegalArgumentException("Service response message name in ServiceType cannot be null or empty!");
                 }
 
                 if (service.getServiceClassName() == null || service.getServiceResponseMessageName().isEmpty()) {
-                    throw new ExchangeModelMapperException("Service classname ServiceType cannot be null or empty!");
+                    throw new IllegalArgumentException("Service classname ServiceType cannot be null or empty!");
                 }
 
             }
@@ -106,78 +88,49 @@ public class ExchangeDataSourceRequestMapper {
             request.setCapabilityList(capabilityList);
             request.setSettingList(settingList);
             return JAXBMarshaller.marshallJaxBObjectToString(request);
-        } catch (Exception e) {
-            LOG.error("[ Error when mapping RegisterServiceRequest to String ] {}", e.getMessage());
-            throw new ExchangeModelMapperException("[ Error when mapping RegisterServiceRequest to String ]");
-        }
     }
 
-    public static String mapUnregisterServiceToString(ServiceType service, String username) throws ExchangeModelMapperException {
-        try {
+    public static String mapUnregisterServiceToString(ServiceType service, String username) {
             UnregisterServiceRequest request = new UnregisterServiceRequest();
             request.setService(service);
             request.setMethod(ExchangeDataSourceMethod.UNREGISTER_SERVICE);
             request.setUsername(username);
             return JAXBMarshaller.marshallJaxBObjectToString(request);
-        } catch (Exception e) {
-            LOG.error("[ Error when mapping RegisterServiceRequest to String ] {}", e.getMessage());
-            throw new ExchangeModelMapperException("[ Error when mapping RegisterServiceRequest to String ]");
-        }
     }
 
-    public static String mapGetServiceSettingsToString(String serviceClassName) throws ExchangeModelMapperException {
-        try {
+    public static String mapGetServiceSettingsToString(String serviceClassName) {
             GetServiceSettingsRequest request = new GetServiceSettingsRequest();
             request.setServiceName(serviceClassName);
             request.setMethod(ExchangeDataSourceMethod.GET_SETTINGS);
             return JAXBMarshaller.marshallJaxBObjectToString(request);
-        } catch (Exception e) {
-            LOG.error("[ Error when mapping GetServiceSettingsRequest to String ] {}", e.getMessage());
-            throw new ExchangeModelMapperException("[ Error when mapping GetServiceSettingsRequest to String ]");
-        }
     }
 
-    public static String mapGetServiceCapabilitiesToString(String serviceClassName) throws ExchangeModelMapperException {
-        try {
+    public static String mapGetServiceCapabilitiesToString(String serviceClassName) {
             GetServiceCapabilitiesRequest request = new GetServiceCapabilitiesRequest();
             request.setServiceName(serviceClassName);
             request.setMethod(ExchangeDataSourceMethod.GET_CAPABILITIES);
             return JAXBMarshaller.marshallJaxBObjectToString(request);
-        } catch (Exception e) {
-            LOG.error("[ Error when mapping GetServiceCapabilitiesRequest to String ] {}", e.getMessage());
-            throw new ExchangeModelMapperException("[ Error when mapping GetServiceCapabilitiesRequest to String ]");
-        }
     }
 
-    public static String mapSetSettingsToString(String serviceClassName, SettingListType settingListType, String username) throws ExchangeModelMapperException {
-        try {
+    public static String mapSetSettingsToString(String serviceClassName, SettingListType settingListType, String username) {
             SetServiceSettingsRequest request = new SetServiceSettingsRequest();
             request.setMethod(ExchangeDataSourceMethod.SET_SETTINGS);
             request.setServiceName(serviceClassName);
             request.setSettings(settingListType);
             request.setUsername(username);
             return JAXBMarshaller.marshallJaxBObjectToString(request);
-        } catch (ExchangeModelMarshallException e) {
-            LOG.error("[ Error when mapping SetServiceSettingsRequest ] ");
-            throw new ExchangeModelMapperException("[ Error when mapping SetServiceSettingsRequest ]");
-        }
     }
 
-    public static String mapSetServiceStatus(String serviceClassName, StatusType status, String username) throws ExchangeModelMapperException {
-        try {
+    public static String mapSetServiceStatus(String serviceClassName, StatusType status, String username) {
             SetServiceStatusRequest request = new SetServiceStatusRequest();
             request.setMethod(ExchangeDataSourceMethod.SET_SERVICE_STATUS);
             request.setServiceName(serviceClassName);
             request.setStatus(status);
             request.setUsername(username);
             return JAXBMarshaller.marshallJaxBObjectToString(request);
-        } catch (ExchangeModelMarshallException e) {
-            LOG.error("[ Error when mapping SetServiceStatusRequest ]");
-            throw new ExchangeModelMapperException("[ Error when mapping SetServiceStatusRequest ]");
-        }
     }
 
-    public static String mapGetLogStatusHistoryRequest(String guid, TypeRefType typeRefType, String userName) throws ExchangeModelMarshallException {
+    public static String mapGetLogStatusHistoryRequest(String guid, TypeRefType typeRefType, String userName) {
         GetLogStatusHistoryRequest request = new GetLogStatusHistoryRequest();
         request.setMethod(ExchangeDataSourceMethod.GET_LOG_STATUS_HISTORY);
         request.setGuid(guid);
@@ -186,7 +139,7 @@ public class ExchangeDataSourceRequestMapper {
         return JAXBMarshaller.marshallJaxBObjectToString(request);
     }
 
-    public static String mapUpdateLogStatusRequest(String guid, ExchangeLogStatusTypeType type, String username) throws ExchangeModelMarshallException {
+    public static String mapUpdateLogStatusRequest(String guid, ExchangeLogStatusTypeType type, String username) {
         UpdateLogStatusRequest request = new UpdateLogStatusRequest();
         request.setMethod(ExchangeDataSourceMethod.UPDATE_LOG_STATUS);
         ExchangeLogStatusType status = new ExchangeLogStatusType();
@@ -202,13 +155,13 @@ public class ExchangeDataSourceRequestMapper {
         return JAXBMarshaller.marshallJaxBObjectToString(request);
     }
 
-    public static String mapGetUnsentMessageList() throws ExchangeModelMarshallException {
+    public static String mapGetUnsentMessageList() {
         GetUnsentMessageListRequest request = new GetUnsentMessageListRequest();
         request.setMethod(ExchangeDataSourceMethod.GET_UNSENT_MESSAGE_LIST);
         return JAXBMarshaller.marshallJaxBObjectToString(request);
     }
 
-    public static String mapResendMessage(List<String> messageIdList, String username) throws ExchangeModelMarshallException {
+    public static String mapResendMessage(List<String> messageIdList, String username) {
         ResendMessageRequest request = new ResendMessageRequest();
         request.setMethod(ExchangeDataSourceMethod.RESEND_UNSENT_MESSAGE);
         request.getUnsentMessageId().addAll(messageIdList);
@@ -216,7 +169,7 @@ public class ExchangeDataSourceRequestMapper {
         return JAXBMarshaller.marshallJaxBObjectToString(request);
     }
 
-    public static String mapCreateUnsentMessage(Instant dateReceived, String senderReceiver, String recipient, String messageText, List<UnsentMessageTypeProperty> properties, String username) throws ExchangeModelMarshallException {
+    public static String mapCreateUnsentMessage(Instant dateReceived, String senderReceiver, String recipient, String messageText, List<UnsentMessageTypeProperty> properties, String username) {
         CreateUnsentMessageRequest request = new CreateUnsentMessageRequest();
         request.setMethod(ExchangeDataSourceMethod.CREATE_UNSENT_MESSAGE);
         UnsentMessageType unsentMessage = new UnsentMessageType();
@@ -230,7 +183,7 @@ public class ExchangeDataSourceRequestMapper {
         return JAXBMarshaller.marshallJaxBObjectToString(request);
     }
 
-    public static String mapRemoveUnsentMessage(String unsentMessageId, String username) throws ExchangeModelMarshallException {
+    public static String mapRemoveUnsentMessage(String unsentMessageId, String username) {
         RemoveUnsentMessageRequest request = new RemoveUnsentMessageRequest();
         request.setMethod(ExchangeDataSourceMethod.REMOVE_UNSENT_MESSAGE);
         request.setUnsentMessageId(unsentMessageId);
@@ -238,7 +191,7 @@ public class ExchangeDataSourceRequestMapper {
         return JAXBMarshaller.marshallJaxBObjectToString(request);
     }
 
-    public static String mapGetLogStatusHistoryByQueryRequest(Instant fromDate, Instant toDate, List<ExchangeLogStatusTypeType> statusList, List<TypeRefType> typeList) throws ExchangeModelMarshallException {
+    public static String mapGetLogStatusHistoryByQueryRequest(Instant fromDate, Instant toDate, List<ExchangeLogStatusTypeType> statusList, List<TypeRefType> typeList) {
         GetLogStatusHistoryByQueryRequest request = new GetLogStatusHistoryByQueryRequest();
         request.setMethod(ExchangeDataSourceMethod.GET_LOG_STATUS_HISTORY_BY_QUERY);
         ExchangeHistoryListQuery query = new ExchangeHistoryListQuery();
@@ -250,14 +203,14 @@ public class ExchangeDataSourceRequestMapper {
         return JAXBMarshaller.marshallJaxBObjectToString(request);
     }
 
-    public static String mapGetExchangeLogRequest(String guid) throws ExchangeModelMarshallException {
+    public static String mapGetExchangeLogRequest(String guid) {
         GetExchangeLogRequest request = new GetExchangeLogRequest();
         request.setMethod(ExchangeDataSourceMethod.GET_LOG_BY_GUID);
         request.setGuid(guid);
         return JAXBMarshaller.marshallJaxBObjectToString(request);
     }
 
-    public static String mapSetPollStatusRequest(String guid, ExchangeLogStatusTypeType type, String username) throws ExchangeModelMarshallException {
+    public static String mapSetPollStatusRequest(String guid, ExchangeLogStatusTypeType type, String username) {
         PollStatus pollStatus = new PollStatus();
         pollStatus.setPollGuid(guid);
         pollStatus.setStatus(type);

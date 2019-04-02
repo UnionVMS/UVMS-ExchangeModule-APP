@@ -20,7 +20,6 @@ import eu.europa.ec.fisheries.schema.exchange.module.v1.SetCommandResponse;
 import eu.europa.ec.fisheries.schema.exchange.module.v1.UpdatePluginSettingResponse;
 import eu.europa.ec.fisheries.schema.exchange.service.v1.ServiceResponseType;
 import eu.europa.ec.fisheries.uvms.exchange.model.constant.FaultCode;
-import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelMarshallException;
 
 import java.util.List;
 
@@ -40,19 +39,19 @@ public class ExchangeModuleResponseMapper {
     	return ackType;
     }
     
-    public static String mapSetCommandResponse(AcknowledgeType ackType) throws ExchangeModelMarshallException {
+    public static String mapSetCommandResponse(AcknowledgeType ackType) {
         SetCommandResponse response = new SetCommandResponse();
         response.setResponse(ackType);
         return JAXBMarshaller.marshallJaxBObjectToString(response);
     }
     
-    public static String mapSendMovementToPluginResponse(AcknowledgeType ackType) throws ExchangeModelMarshallException {
+    public static String mapSendMovementToPluginResponse(AcknowledgeType ackType) {
     	SendMovementToPluginResponse response = new SendMovementToPluginResponse();
     	response.setResponse(ackType);
     	return JAXBMarshaller.marshallJaxBObjectToString(response);
 	}
     
-    public static String mapUpdateSettingResponse(AcknowledgeType ackType) throws ExchangeModelMarshallException {
+    public static String mapUpdateSettingResponse(AcknowledgeType ackType) {
     	UpdatePluginSettingResponse response = new UpdatePluginSettingResponse();
     	response.setResponse(ackType);
     	return JAXBMarshaller.marshallJaxBObjectToString(response);
@@ -65,7 +64,7 @@ public class ExchangeModuleResponseMapper {
     	return fault;
     }
 
-	public static String mapServiceListResponse(List<ServiceResponseType> serviceList) throws ExchangeModelMarshallException {
+	public static String mapServiceListResponse(List<ServiceResponseType> serviceList) {
 		GetServiceListResponse response = new GetServiceListResponse();
 		response.getService().addAll(serviceList);
 		return JAXBMarshaller.marshallJaxBObjectToString(response);

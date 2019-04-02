@@ -19,7 +19,6 @@ import eu.europa.ec.fisheries.schema.exchange.v1.SearchField;
 import eu.europa.ec.fisheries.schema.exchange.v1.SortField;
 import eu.europa.ec.fisheries.schema.exchange.v1.Sorting;
 import eu.europa.ec.fisheries.schema.exchange.v1.TypeRefType;
-import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeSearchMapperException;
 import eu.europa.ec.fisheries.uvms.exchange.model.util.DateUtils;
 import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
@@ -47,7 +46,7 @@ public class SearchFieldMapper {
      * @return
      * @throws ParseException
      */
-    public static String createSelectSearchSql(List<SearchValue> searchFields, boolean isDynamic, Sorting sorting) throws ParseException, ExchangeSearchMapperException {
+    public static String createSelectSearchSql(List<SearchValue> searchFields, boolean isDynamic, Sorting sorting) throws ParseException {
         StringBuilder selectBuffer = new StringBuilder();
         selectBuffer.append("SELECT DISTINCT ")
                 .append(SearchTable.LOG.getTableAlias())
@@ -64,17 +63,12 @@ public class SearchFieldMapper {
         return selectBuffer.toString();
     }
 
-    private static void getSortingString(Sorting sorting, StringBuilder selectBuffer) throws ExchangeSearchMapperException {
+    private static void getSortingString(Sorting sorting, StringBuilder selectBuffer) {
         if(sorting !=null && sorting.getSortBy()!=null ){
             SortField sortField= sorting.getSortBy();
             SortFieldMapper sortFieldMapper =null;
             if(sortField!=null){
-                try {
-                    sortFieldMapper=  mapSortField(sortField);
-                } catch (ExchangeSearchMapperException e) {
-                    LOG.error("Error while mapping criteria",e);
-                    throw e;
-                }
+                sortFieldMapper=  mapSortField(sortField);
             }
             String fieldName= sortFieldMapper.getFieldName();
             String sortingDirection= "ASC";
@@ -163,7 +157,7 @@ public class SearchFieldMapper {
         return builder.toString();
     }
 
-    private static String setParameter(SearchValue entry) throws ParseException {
+    private static String setParameter(SearchValue entry) {
         StringBuilder builder = new StringBuilder();
         if (entry.getField().getClazz().isAssignableFrom(Instant.class)) {
             switch (entry.getField()) {
@@ -263,7 +257,7 @@ public class SearchFieldMapper {
      * @return
      * @throws ExchangeSearchMapperException
      */
-    public static List<SearchValue> mapSearchField(List<ExchangeListCriteriaPair> listCriterias) throws ExchangeSearchMapperException {
+    public static List<SearchValue> mapSearchField(List<ExchangeListCriteriaPair> listCriterias) {
 
         if (CollectionUtils.isEmpty(listCriterias)) {
             LOG.debug(" Non valid search criteria when mapping ListCriterias to SearchValue, List is null or empty");
@@ -284,7 +278,7 @@ public class SearchFieldMapper {
                     searchFields.add(new SearchValue(field, criteria.getValue()));
                 }
 
-            } catch (ExchangeSearchMapperException ex) {
+            } catch (IllegalArgumentException ex) {
                 LOG.debug("[ Error when mapping to search field.. continuing with other criterias ]");
             }
         }
@@ -323,7 +317,7 @@ public class SearchFieldMapper {
      * @return
      * @throws ExchangeSearchMapperException
      */
-    public static ExchangeSearchField mapCriteria(SearchField key) throws ExchangeSearchMapperException {
+    public static ExchangeSearchField mapCriteria(SearchField key) {
         switch (key) {
             case TRANSFER_INCOMING:
                 return ExchangeSearchField.TRANSFER_INCOMING;
@@ -342,7 +336,7 @@ public class SearchFieldMapper {
             case SOURCE:
                 return ExchangeSearchField.SOURCE;
             default:
-                throw new ExchangeSearchMapperException("No field found: " + key.name());
+                throw new IllegalArgumentException("No field found: " + key.name());
         }
 
     }
@@ -355,7 +349,7 @@ public class SearchFieldMapper {
      * @return
      * @throws ExchangeSearchMapperException
      */
-    public static SortFieldMapper mapSortField(SortField key) throws ExchangeSearchMapperException {
+    public static SortFieldMapper mapSortField(SortField key) {
         switch (key) {
             case DATE_RECEIVED:
                 return SortFieldMapper.DATE_RECEIVED;
@@ -374,7 +368,7 @@ public class SearchFieldMapper {
             case DATE_FORWARDED:
                 return SortFieldMapper.DATE_FORWARDED;
             default:
-                throw new ExchangeSearchMapperException("No field found: " + key.name());
+                throw new IllegalArgumentException("No field found: " + key.name());
         }
 
     }
