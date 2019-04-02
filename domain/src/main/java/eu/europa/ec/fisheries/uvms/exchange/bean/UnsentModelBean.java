@@ -11,12 +11,10 @@ copy of the GNU General Public License along with the IFDM Suite. If not, see <h
  */
 package eu.europa.ec.fisheries.uvms.exchange.bean;
 
-import eu.europa.ec.fisheries.schema.exchange.v1.UnsentMessageType;
 import eu.europa.ec.fisheries.uvms.exchange.dao.bean.UnsentMessageDaoBean;
 import eu.europa.ec.fisheries.uvms.exchange.entity.unsent.UnsentMessage;
 import eu.europa.ec.fisheries.uvms.exchange.exception.ExchangeDaoException;
 import eu.europa.ec.fisheries.uvms.exchange.exception.NoEntityFoundException;
-import eu.europa.ec.fisheries.uvms.exchange.mapper.UnsentMessageMapper;
 import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelException;
 import eu.europa.ec.fisheries.uvms.exchange.model.exception.InputArgumentException;
 import org.slf4j.Logger;
@@ -36,14 +34,13 @@ public class UnsentModelBean {
     @EJB
     UnsentMessageDaoBean dao;
 
-    public String createMessage(UnsentMessageType message, String username) throws ExchangeModelException {
+    public String createMessage(UnsentMessage message) throws ExchangeModelException {
         if (message == null) {
             throw new InputArgumentException("No message to create");
         }
 
         try {
-            UnsentMessage entity = UnsentMessageMapper.toEntity(message, username);
-            UnsentMessage persistedEntity = dao.create(entity);
+            UnsentMessage persistedEntity = dao.create(message);
 
             return persistedEntity.getGuid().toString();
         } catch (ExchangeDaoException ex) {
@@ -64,37 +61,37 @@ public class UnsentModelBean {
                 dao.remove(entity);
                 return guid;
             } else {
-                LOG.error("[ Error when removing unsent message ]");
-                throw new ExchangeModelException("Error when removing unsent message ");
+                LOG.error("[ No message with id {} to remove ]", unsentMessageId);
+                throw new ExchangeModelException("[ No message with id " + unsentMessageId + " to remove ]");
             }
         } catch (ExchangeDaoException ex) {
             LOG.error("[ Error when creating unsent message ] {}", ex.getMessage());
-            throw new ExchangeModelException("Error when creating unsent message ");
+            throw new ExchangeModelException("Error when creating unsent message ", ex);
         }
     }
 
-    public List<UnsentMessageType> getMessageList() throws ExchangeModelException {
+    public List<UnsentMessage> getMessageList() throws ExchangeModelException {
         try {
             List<UnsentMessage> list = dao.getAll();
-            return UnsentMessageMapper.toModel(list);
+            return list;
         } catch (ExchangeDaoException ex) {
             LOG.error("[ Error when getting unsent message list ] {}", ex.getMessage());
             throw new ExchangeModelException("Error when getting unsent message list");
         }
     }
 
-    public List<UnsentMessageType> resend(List<String> unsentMessageId) throws ExchangeModelException {
+    public List<UnsentMessage> resend(List<String> unsentMessageId) throws ExchangeModelException {
         if (unsentMessageId == null) {
             throw new InputArgumentException("No messageList to resend");
         }
 
         try {
-            List<UnsentMessageType> unsentMessageList = new ArrayList<>();
+            List<UnsentMessage> unsentMessageList = new ArrayList<>();
             for (String messageId : unsentMessageId) {
                 try {
                     UnsentMessage message = dao.getByGuid(UUID.fromString(messageId));
                     UnsentMessage removedMessage = dao.remove(message);
-                    unsentMessageList.add(UnsentMessageMapper.toModel(removedMessage));
+                    unsentMessageList.add(removedMessage);
                 } catch (NoEntityFoundException e) {
                     LOG.error("Couldn't find message to resend with guid: " + messageId);
                 }

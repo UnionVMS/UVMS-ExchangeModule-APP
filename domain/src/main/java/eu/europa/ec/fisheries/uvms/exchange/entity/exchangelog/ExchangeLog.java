@@ -125,6 +125,11 @@ public class ExchangeLog {
 	@Column(name = "log_business_error")
 	private String businessError;
 
+	@PrePersist
+	@PreUpdate
+	public void updateTimestampOnCreateAndUpdate(){
+		updateTime = Instant.now();
+	}
 
 	public UUID getId() {
 		return id;

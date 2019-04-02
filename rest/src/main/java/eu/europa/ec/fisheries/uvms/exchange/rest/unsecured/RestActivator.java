@@ -29,7 +29,7 @@ public class RestActivator extends Application {
     private final Set<Class<?>> set = new HashSet<>();
 
     public RestActivator() {
-        set.add(ExchangeAPIResource.class);
+        set.add(ExchangeAPIRestResource.class);
         LOG.info(RestConstants.MODULE_NAME + " unsecured rest API starting up");
     }
 

@@ -14,21 +14,20 @@ package eu.europa.ec.fisheries.uvms.exchange.service.message.event.carrier;
 import javax.jms.TextMessage;
 
 import eu.europa.ec.fisheries.schema.exchange.plugin.types.v1.PluginFault;
-import eu.europa.ec.fisheries.schema.exchange.service.v1.ServiceType;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
-public class PluginErrorEvent {
+public class PluginErrorEventCarrier {
 
     private TextMessage jmsMessage;
-    private ServiceType serviceType;
+    private String serviceResponseMessageName;
     private PluginFault fault;
 
-    public PluginErrorEvent(TextMessage jmsMessage, ServiceType type, PluginFault fault) {
+    public PluginErrorEventCarrier(TextMessage jmsMessage, String serviceResponseMessageName, PluginFault fault) {
         this.jmsMessage = jmsMessage;
-        this.serviceType = type;
+        this.serviceResponseMessageName = serviceResponseMessageName;
         this.fault = fault;
     }
 
@@ -40,8 +39,8 @@ public class PluginErrorEvent {
         return jmsMessage;
     }
 
-    public ServiceType getServiceType() {
-        return serviceType;
+    public String getServiceType() {
+        return serviceResponseMessageName;
     }
 
     @Override

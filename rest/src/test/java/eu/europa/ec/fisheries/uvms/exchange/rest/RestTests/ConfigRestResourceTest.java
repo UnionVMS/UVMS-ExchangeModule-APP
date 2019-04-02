@@ -15,7 +15,7 @@ import javax.ws.rs.core.MediaType;
 import static org.junit.Assert.assertTrue;
 
 @RunWith(Arquillian.class)
-public class ConfigResourceTest extends BuildExchangeRestTestDeployment {
+public class ConfigRestResourceTest extends BuildExchangeRestTestDeployment {
 
     @Test
     @OperateOnDeployment("exchangeservice")

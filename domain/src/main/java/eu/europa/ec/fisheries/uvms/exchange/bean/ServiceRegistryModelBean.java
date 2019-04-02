@@ -37,38 +37,36 @@ public class ServiceRegistryModelBean {
     @EJB
     ServiceRegistryDaoBean dao;
 
-    public ServiceResponseType registerService(ServiceType serviceType, CapabilityListType capabilityList, SettingListType settingList, String username) throws ExchangeModelException {
+    public Service registerService(Service newService, String username) throws ExchangeModelException {
         // Look for existing service
-        Service service = dao.getServiceByServiceClassName(serviceType.getServiceClassName());
-        if (service == null) {
+        Service existingService = dao.getServiceByServiceClassName(newService.getServiceClassName());
+        if (existingService == null) {
         	//create
-        	service = ServiceMapper.toServiceEntity(serviceType, capabilityList, settingList, username);
-        	service.setActive(true);
-        	service.setStatus(true);
-            dao.createEntity(service);
+            newService.setActive(true);
+            newService.setStatus(true);
+            existingService = dao.createEntity(newService);
         } else {
-            service.setActive(true);
-            service.setStatus(true);
-            List<ServiceSetting> newSettings = ServiceMapper.mapSettingsList(service, settingList, username);
-            List<ServiceCapability> serviceCapabilityList = ServiceMapper.upsetCapabilityList(service, capabilityList, username);
+            existingService.setActive(true);
+            existingService.setStatus(true);
+            List<ServiceSetting> newSettings = ServiceMapper.mapSettingsList(existingService, newService.getServiceSettingList(), username);
+            List<ServiceCapability> serviceCapabilityList = ServiceMapper.upsetCapabilityList(existingService, newService.getServiceCapabilityList(), username);
 
-            service.getServiceCapabilityList().clear();
-            service.getServiceCapabilityList().addAll(serviceCapabilityList);
-            service.getServiceSettingList().clear();
-            service.getServiceSettingList().addAll(newSettings);
-            service.setDescription(serviceType.getDescription());
-            service.setName(serviceType.getName());
-            service.setUpdated(Instant.now());
-            service.setUpdatedBy(username);
-            dao.updateService(service);
+            existingService.getServiceCapabilityList().clear();
+            existingService.getServiceCapabilityList().addAll(serviceCapabilityList);
+            existingService.getServiceSettingList().clear();
+            existingService.getServiceSettingList().addAll(newSettings);
+            existingService.setDescription(newService.getDescription());
+            existingService.setName(newService.getName());
+            existingService.setUpdated(Instant.now());
+            existingService.setUpdatedBy(username);
+            dao.updateService(existingService);
         }
-        return ServiceMapper.toServiceModel(service);        
+        return existingService;
     }
 
-    public ServiceResponseType unregisterService(ServiceType serviceType, String username) throws ExchangeModelException {
+    public Service unregisterService(ServiceType serviceType, String username) throws ExchangeModelException {
         // Look for existing service
         Service service = dao.getServiceByServiceClassName(serviceType.getServiceClassName());
-        ServiceResponseType response = null;
         if (service != null) {
             service.setActive(false);
             service.setStatus(false);
@@ -76,19 +74,14 @@ public class ServiceRegistryModelBean {
             service.getServiceSettingList().clear();
             service.setUpdatedBy(username);
             Service updateService = dao.updateService(service);
-            response = ServiceMapper.toServiceModel(updateService);
+            return updateService;
         }
 
-        if(response != null) {
-        	return response;
-        }
-        
         //TODO handle unable to unregister
         throw new ExchangeDaoException("[ No service to unregister ]"); 
     }
 
-    public List<ServiceResponseType> getPlugins(List<PluginType> pluginTypes) throws ExchangeModelException {
-        List<ServiceResponseType> services = new ArrayList<>();
+    public List<Service> getPlugins(List<PluginType> pluginTypes) throws ExchangeModelException {
 
        	List<Service> entityList = new ArrayList<>();
        	if(pluginTypes == null || pluginTypes.isEmpty()) {
@@ -96,13 +89,11 @@ public class ServiceRegistryModelBean {
        	} else {
        		entityList = dao.getServicesByTypes(pluginTypes);
        	}
-        for (Service entity : entityList) {
-            services.add(ServiceMapper.toServiceModel(entity));
-        }
-        return services;
+
+        return entityList;
     }
 
-	public ServiceResponseType updatePluginSettings(String serviceClassName, SettingListType settings, String username) throws ExchangeModelException {
+	public Service updatePluginSettings(String serviceClassName, List<ServiceSetting> settings, String username) throws ExchangeModelException {
     	LOG.info("Update plugin settings for " + serviceClassName);
     	Service service = dao.getServiceByServiceClassName(serviceClassName);
     	if(service != null) {
@@ -110,7 +101,7 @@ public class ServiceRegistryModelBean {
     		service.getServiceSettingList().clear();
     		service.getServiceSettingList().addAll(newSettings);
     		dao.updateService(service);
-    		return ServiceMapper.toServiceModel(service);
+    		return service;
     	}
     	throw new ExchangeDaoException("No plugin found when update plugin settings");
 	}
@@ -153,10 +144,10 @@ public class ServiceRegistryModelBean {
         return capabilities;
     }
 
-    public ServiceResponseType getPlugin(String serviceClassName) throws ExchangeModelException {
+    public Service getPlugin(String serviceClassName) throws ExchangeModelException {
         try {
             Service service = dao.getServiceByServiceClassName(serviceClassName);
-            return ServiceMapper.toServiceModel(service);
+            return service;
 
         } catch (NullPointerException e) {
             LOG.error("[ Error when getting Service. {} ] {}",serviceClassName,  e.getMessage());

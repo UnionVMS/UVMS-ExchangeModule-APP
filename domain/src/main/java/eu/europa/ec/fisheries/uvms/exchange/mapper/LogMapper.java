@@ -216,6 +216,9 @@ public class LogMapper {
 
 
     public static ExchangeLogStatusType toStatusModel(ExchangeLog exchangeLog) {
+        if(exchangeLog == null){
+            return null;
+        }
         ExchangeLogStatusType model = new ExchangeLogStatusType();
         if (exchangeLog.getType().equals(LogType.SEND_POLL)) {
             model.setIdentifier(exchangeLog.getRecipient());

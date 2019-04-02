@@ -64,6 +64,12 @@ public class UnsentMessage {
     @OneToMany(cascade = {CascadeType.PERSIST, CascadeType.REMOVE}, fetch = FetchType.LAZY, mappedBy = "unsentMessage")
     private List<UnsentMessageProperty> properties;
 
+    @PreUpdate
+	@PrePersist
+	public void preUpdate(){
+    	updateTime = Instant.now();
+	}
+
 	public UUID getGuid() {
 		return guid;
 	}

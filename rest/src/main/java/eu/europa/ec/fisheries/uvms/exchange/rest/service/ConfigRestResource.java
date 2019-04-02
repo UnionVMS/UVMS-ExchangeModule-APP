@@ -35,9 +35,9 @@ import eu.europa.ec.fisheries.uvms.rest.security.UnionVMSFeature;
 @Path("/config")
 @Stateless
 @RequiresFeature(UnionVMSFeature.viewExchange)
-public class ConfigResource {
+public class ConfigRestResource {
 
-    final static Logger LOG = LoggerFactory.getLogger(ConfigResource.class);
+    final static Logger LOG = LoggerFactory.getLogger(ConfigRestResource.class);
     
     //@EJB
     //ConfigService configService;

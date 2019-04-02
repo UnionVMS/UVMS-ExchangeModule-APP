@@ -74,13 +74,13 @@ public class ExchangeModuleRequestMapper {
     }
 
     public static String createSetMovementReportRequest(SetReportMovementType message, String username, String fluxDFValue, Instant date,
-                                                      String messageGuid, PluginType pluginType, String senderReceiver, String onValue) throws ExchangeModelMarshallException {
+                                                        PluginType pluginType, String senderReceiver, String onValue) throws ExchangeModelMarshallException {
         SetMovementReportRequest request = new SetMovementReportRequest();
         request.setMethod(ExchangeModuleMethod.SET_MOVEMENT_REPORT);
         request.setUsername(username);
         request.setRequest(message);
         request.setDate(Date.from(date));
-        populateBaseProperties(request, fluxDFValue, date, messageGuid, pluginType, senderReceiver, onValue, username, null, null, "");
+        populateBaseProperties(request, fluxDFValue, date, null, pluginType, senderReceiver, onValue, username, null, null, "");
         return JAXBMarshaller.marshallJaxBObjectToString(request);
     }
 

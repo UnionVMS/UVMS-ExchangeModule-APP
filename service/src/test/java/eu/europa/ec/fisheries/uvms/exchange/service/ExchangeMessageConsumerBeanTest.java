@@ -509,7 +509,7 @@ public class ExchangeMessageConsumerBeanTest extends BuildExchangeServiceTestDep
         setReportMovementType.setTimestamp(Date.from(Instant.now()));
         setReportMovementType.setPluginType(PluginType.SATELLITE_RECEIVER);
         setReportMovementType.setPluginName(serviceClassName);
-        String request = ExchangeModuleRequestMapper.createSetMovementReportRequest(setReportMovementType, "Test User", null, Instant.now(), guid, PluginType.OTHER, "IRIDIUM", "OnValue?");
+        String request = ExchangeModuleRequestMapper.createSetMovementReportRequest(setReportMovementType, "Test User", null, Instant.now(), PluginType.OTHER, "IRIDIUM", "OnValue?");
 
         String corrID = jmsHelper.sendExchangeMessage(request, null, "SET_MOVEMENT_REPORT");
         TextMessage message = (TextMessage)jmsHelper.listenOnQueue(MessageConstants.COMPONENT_MESSAGE_IN_QUEUE_NAME);
@@ -542,7 +542,7 @@ public class ExchangeMessageConsumerBeanTest extends BuildExchangeServiceTestDep
     public void processedMovementAlarmTest() throws Exception{
         String serviceName = "Iridium Test Service";
         String serviceClassName = "eu.europa.ec.fisheries.uvms.plugins.Iridium";
-        String guid = UUID.randomUUID().toString();
+
 
 
         Service service = createAndPersistBasicService(serviceName, serviceClassName, PluginType.SATELLITE_RECEIVER);
@@ -553,22 +553,24 @@ public class ExchangeMessageConsumerBeanTest extends BuildExchangeServiceTestDep
         setReportMovementType.setTimestamp(Date.from(Instant.now()));
         setReportMovementType.setPluginType(PluginType.SATELLITE_RECEIVER);
         setReportMovementType.setPluginName(serviceClassName);
-        String setupRequest = ExchangeModuleRequestMapper.createSetMovementReportRequest(setReportMovementType, "Test User", null, Instant.now(), guid, PluginType.OTHER, "IRIDIUM", "OnValue?");
+        String setupRequest = ExchangeModuleRequestMapper.createSetMovementReportRequest(setReportMovementType, "Test User", null, Instant.now(), PluginType.OTHER, "IRIDIUM", "OnValue?");
 
         String corrID = jmsHelper.sendExchangeMessage(setupRequest, null, "SET_MOVEMENT_REPORT");
         TextMessage message = (TextMessage)jmsHelper.listenOnQueue(MessageConstants.COMPONENT_MESSAGE_IN_QUEUE_NAME);
         IncomingMovement output = jsonb.fromJson(message.getText(), IncomingMovement.class);
+        String logGuid = output.getAckResponseMessageId();
 
         MovementRefType movementRefType = new MovementRefType();
         movementRefType.setAckResponseMessageID(output.getAckResponseMessageId());
         movementRefType.setType(MovementRefTypeType.ALARM);
-        movementRefType.setMovementRefGuid(guid);
+        movementRefType.setMovementRefGuid(logGuid);
         String request = ExchangeModuleRequestMapper.mapToProcessedMovementResponse("Test username", movementRefType);
 
         corrID = jmsHelper.sendExchangeMessage(request, null, "PROCESSED_MOVEMENT");
         Thread.sleep(1000); //to let it work
 
         ExchangeLog exchangeLog = exchangeLogDao.getExchangeLogByGuid(UUID.fromString(output.getAckResponseMessageId()));
+        assertNotNull(exchangeLog);
         assertEquals(ExchangeLogStatusTypeType.FAILED, exchangeLog.getStatus());
 
         serviceRegistryDao.deleteEntity(service.getId());
@@ -580,7 +582,6 @@ public class ExchangeMessageConsumerBeanTest extends BuildExchangeServiceTestDep
     public void processedMovementSuccessTest() throws Exception{
         String serviceName = "Iridium Test Service";
         String serviceClassName = "eu.europa.ec.fisheries.uvms.plugins.Iridium";
-        String guid = UUID.randomUUID().toString();
 
 
         Service service = createAndPersistBasicService(serviceName, serviceClassName, PluginType.SATELLITE_RECEIVER);
@@ -591,7 +592,7 @@ public class ExchangeMessageConsumerBeanTest extends BuildExchangeServiceTestDep
         setReportMovementType.setTimestamp(Date.from(Instant.now()));
         setReportMovementType.setPluginType(PluginType.SATELLITE_RECEIVER);
         setReportMovementType.setPluginName(serviceClassName);
-        String setupRequest = ExchangeModuleRequestMapper.createSetMovementReportRequest(setReportMovementType, "Test User", null, Instant.now(), guid, PluginType.OTHER, "IRIDIUM", "OnValue?");
+        String setupRequest = ExchangeModuleRequestMapper.createSetMovementReportRequest(setReportMovementType, "Test User", null, Instant.now(), PluginType.OTHER, "IRIDIUM", "OnValue?");
 
         String corrID = jmsHelper.sendExchangeMessage(setupRequest, null, "SET_MOVEMENT_REPORT");
         TextMessage message = (TextMessage)jmsHelper.listenOnQueue(MessageConstants.COMPONENT_MESSAGE_IN_QUEUE_NAME);
@@ -600,7 +601,7 @@ public class ExchangeMessageConsumerBeanTest extends BuildExchangeServiceTestDep
         MovementRefType movementRefType = new MovementRefType();
         movementRefType.setAckResponseMessageID(output.getAckResponseMessageId());
         movementRefType.setType(MovementRefTypeType.MOVEMENT);
-        movementRefType.setMovementRefGuid(guid);
+        movementRefType.setMovementRefGuid(output.getAckResponseMessageId());
         String request = ExchangeModuleRequestMapper.mapToProcessedMovementResponse("Test username", movementRefType);
 
         corrID = jmsHelper.sendExchangeMessage(request, null, "PROCESSED_MOVEMENT");

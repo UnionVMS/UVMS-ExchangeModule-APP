@@ -21,6 +21,7 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
+import eu.europa.ec.fisheries.schema.exchange.service.v1.ServiceResponseType;
 import eu.europa.ec.fisheries.uvms.exchange.service.bean.ExchangeServiceBean;
 import eu.europa.ec.fisheries.uvms.exchange.service.bean.PluginServiceBean;
 import org.slf4j.Logger;
@@ -33,6 +34,8 @@ import eu.europa.ec.fisheries.uvms.exchange.rest.mapper.ServiceMapper;
 import eu.europa.ec.fisheries.uvms.exchange.service.exception.ExchangeServiceException;
 import eu.europa.ec.fisheries.uvms.rest.security.RequiresFeature;
 import eu.europa.ec.fisheries.uvms.rest.security.UnionVMSFeature;
+
+import java.util.List;
 
 @Path("/plugin")
 @Stateless

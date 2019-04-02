@@ -15,7 +15,7 @@ import eu.europa.ec.fisheries.uvms.commons.message.api.MessageException;
 import eu.europa.ec.fisheries.uvms.config.exception.ConfigMessageException;
 import eu.europa.ec.fisheries.uvms.exchange.service.message.constants.MessageQueue;
 import eu.europa.ec.fisheries.uvms.exchange.service.message.event.carrier.ExchangeErrorEvent;
-import eu.europa.ec.fisheries.uvms.exchange.service.message.event.carrier.PluginErrorEvent;
+import eu.europa.ec.fisheries.uvms.exchange.service.message.event.carrier.PluginErrorEventCarrier;
 import eu.europa.ec.fisheries.uvms.exchange.service.message.exception.ExchangeMessageException;
 import javax.ejb.Local;
 import javax.jms.TextMessage;
@@ -37,7 +37,7 @@ public interface ExchangeMessageProducer {      //leave be for now ;(
 
     void sendModuleErrorResponseMessage(ExchangeErrorEvent event);
 
-    void sendPluginErrorResponseMessage(PluginErrorEvent event);
+    void sendPluginErrorResponseMessage(PluginErrorEventCarrier event);
 
     void sendModuleAckMessage(String messageId, MessageQueue queue, String text);
 

@@ -77,7 +77,7 @@ public class ExchangeLogDaoBean extends Dao {
         }
     }
 
-    public Long getExchangeLogListSearchCount(String countSql, List<SearchValue> searchKeyValues) throws ExchangeDaoException {
+    public Long getExchangeLogListSearchCount(String countSql, List<SearchValue> searchKeyValues) {
         LOG.debug("SQL QUERY IN LIST COUNT: " + countSql);
         TypedQuery<Long> query = em.createQuery(countSql, Long.class);
         HashMap<ExchangeSearchField, List<SearchValue>> orderedValues = SearchFieldMapper.combineSearchFields(searchKeyValues);
@@ -85,7 +85,7 @@ public class ExchangeLogDaoBean extends Dao {
         return query.getSingleResult();
     }
 
-    public ExchangeLog getExchangeLogByGuid(UUID logGuid) throws ExchangeDaoException {
+    public ExchangeLog getExchangeLogByGuid(UUID logGuid)  {
         return getExchangeLogByGuid(logGuid, null);
     }
 

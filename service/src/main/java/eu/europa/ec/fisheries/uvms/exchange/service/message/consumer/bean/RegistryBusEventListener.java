@@ -29,7 +29,7 @@ import eu.europa.ec.fisheries.schema.exchange.registry.v1.ExchangeRegistryBaseRe
 import eu.europa.ec.fisheries.schema.exchange.registry.v1.RegisterServiceRequest;
 import eu.europa.ec.fisheries.schema.exchange.registry.v1.UnregisterServiceRequest;
 import eu.europa.ec.fisheries.schema.exchange.service.v1.ServiceType;
-import eu.europa.ec.fisheries.uvms.exchange.service.message.event.carrier.PluginErrorEvent;
+import eu.europa.ec.fisheries.uvms.exchange.service.message.event.carrier.PluginErrorEventCarrier;
 import eu.europa.ec.fisheries.uvms.exchange.model.constant.ExchangeModelConstants;
 import eu.europa.ec.fisheries.uvms.exchange.model.constant.FaultCode;
 import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelMarshallException;
@@ -56,7 +56,7 @@ public class RegistryBusEventListener implements MessageListener {
 
     @Inject
     @eu.europa.ec.fisheries.uvms.exchange.service.message.event.PluginErrorEvent
-    private Event<PluginErrorEvent> errorEvent;
+    private Event<PluginErrorEventCarrier> errorEvent;
 
     @Override
     public void onMessage(Message message) {
@@ -84,7 +84,7 @@ public class RegistryBusEventListener implements MessageListener {
             }
         } catch (Exception e /*ExchangeMessageException | ExchangeModelMarshallException | NullPointerException e*/) {
             LOG.error("[ Error when receiving message on topic in exchange: {}] {}",message,e);
-            errorEvent.fire(new PluginErrorEvent(textMessage, settings, ExchangePluginResponseMapper.mapToPluginFaultResponse(FaultCode.EXCHANGE_TOPIC_MESSAGE.getCode(), "Error when receiving message in exchange " + e.getMessage())));
+            errorEvent.fire(new PluginErrorEventCarrier(textMessage, settings.getServiceResponseMessageName(), ExchangePluginResponseMapper.mapToPluginFaultResponse(FaultCode.EXCHANGE_TOPIC_MESSAGE.getCode(), "Error when receiving message in exchange " + e.getMessage())));
         }
     }
 
