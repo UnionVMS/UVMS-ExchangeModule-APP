@@ -208,13 +208,14 @@ public class ExchangeLogServiceBean {
             query.setTypeRefDateTo(Date.from(to));
             query.getStatus().addAll(statusList);
             query.getType().addAll(typeList);
+
             return  exchangeLogModel.getExchangeLogStatusHistoryByQuery(query);
         } catch (ExchangeModelException e) {
             throw new ExchangeLogException("Couldn't get exchange status history list.");
         }
     }
 
-    public ExchangeLogStatusType getExchangeStatusHistory(TypeRefType type, UUID typeRefGuid, String userName) throws ExchangeLogException {
+    public ExchangeLogStatusType getExchangeStatusHistory(TypeRefType type, UUID typeRefGuid) throws ExchangeLogException {
         LOG.info("Get poll status history in service layer:{}",type);
         if (typeRefGuid == null) {
             throw new ExchangeLogException("Invalid id");
@@ -266,14 +267,14 @@ public class ExchangeLogServiceBean {
     }
 
     public ExchangeLogWithValidationResults getExchangeLogRawMessageAndValidationByGuid(UUID guid) {
-        LogWithRawMsgAndType rawMsg = exchangeLogModel.getExchangeLogRawXmlByGuid(guid);
+        ExchangeLog log = exchangeLogDao.getExchangeLogByGuid(guid);
         ExchangeLogWithValidationResults validationFromRules = new ExchangeLogWithValidationResults();
-        if (rawMsg.getType() != null){
-            if (TypeRefType.FA_RESPONSE.equals(rawMsg.getType())){
-                guid = UUID.fromString(rawMsg.getRefGuid());
+        if (log.getTypeRefType() != null){
+            if (TypeRefType.FA_RESPONSE.equals(log.getTypeRefType())){
+                guid = log.getTypeRefGuid();
             }
-            validationFromRules = exchangeToRulesSyncMsgBean.getValidationFromRules(guid.toString(), rawMsg.getType());
-            validationFromRules.setMsg(rawMsg.getRawMsg() != null ? rawMsg.getRawMsg() : StringUtils.EMPTY);
+            validationFromRules = exchangeToRulesSyncMsgBean.getValidationFromRules(guid.toString(), log.getTypeRefType());
+            validationFromRules.setMsg(log.getTypeRefMessage() != null ? log.getTypeRefMessage() : StringUtils.EMPTY);
         }
         return validationFromRules;
     }

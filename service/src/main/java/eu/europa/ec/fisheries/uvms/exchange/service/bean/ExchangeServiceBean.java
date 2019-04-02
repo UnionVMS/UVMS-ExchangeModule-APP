@@ -75,10 +75,10 @@ public class ExchangeServiceBean{
      * @return
      * @throws ExchangeServiceException
      */
-    public List<ServiceResponseType> getServiceList(List<PluginType> pluginTypes) throws ExchangeServiceException {
+    public List<Service> getServiceList(List<PluginType> pluginTypes) throws ExchangeServiceException {
         LOG.info("Get list invoked in service layer:{}",pluginTypes);
         try {
-            List<ServiceResponseType> plugins = serviceRegistryModel.getPlugins(pluginTypes);
+            List<Service> plugins = serviceRegistryModel.getPlugins(pluginTypes);
             return plugins;
         } catch (ExchangeModelException e) {
             throw new ExchangeServiceException(e.getMessage(), e);

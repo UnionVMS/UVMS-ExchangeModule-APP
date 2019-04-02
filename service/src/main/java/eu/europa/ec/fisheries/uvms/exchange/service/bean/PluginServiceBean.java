@@ -94,10 +94,10 @@ public class PluginServiceBean {
             List<PluginType> type = new ArrayList<>();
             type.add(pluginType);
             try {
-                List<ServiceResponseType> services = exchangeService.getServiceList(type);
+                List<Service> services = exchangeService.getServiceList(type);
                 if (!services.isEmpty()) {
-                    for(ServiceResponseType service : services){
-                        if(service.isActive()){
+                    for(Service service : services){
+                        if(service.getActive()){
                             //TODO log to audit log
                             String response = ExchangePluginResponseMapper.mapToRegisterServiceResponseNOK(messageId, "Plugin of " + pluginType + " already registered. Only one is allowed.");
                             producer.sendEventBusMessage(response, responseTopicMessageSelector);

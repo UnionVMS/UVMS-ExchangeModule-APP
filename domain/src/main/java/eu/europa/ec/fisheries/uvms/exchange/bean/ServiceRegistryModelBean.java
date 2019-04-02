@@ -81,8 +81,7 @@ public class ServiceRegistryModelBean {
         throw new ExchangeDaoException("[ No service to unregister ]"); 
     }
 
-    public List<ServiceResponseType> getPlugins(List<PluginType> pluginTypes) throws ExchangeModelException {
-        List<ServiceResponseType> services = new ArrayList<>();
+    public List<Service> getPlugins(List<PluginType> pluginTypes) throws ExchangeModelException {
 
        	List<Service> entityList = new ArrayList<>();
        	if(pluginTypes == null || pluginTypes.isEmpty()) {
@@ -90,10 +89,8 @@ public class ServiceRegistryModelBean {
        	} else {
        		entityList = dao.getServicesByTypes(pluginTypes);
        	}
-        for (Service entity : entityList) {
-            services.add(ServiceMapper.toServiceModel(entity));
-        }
-        return services;
+
+        return entityList;
     }
 
 	public Service updatePluginSettings(String serviceClassName, List<ServiceSetting> settings, String username) throws ExchangeModelException {

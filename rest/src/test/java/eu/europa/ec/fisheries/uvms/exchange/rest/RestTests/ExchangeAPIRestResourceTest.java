@@ -39,7 +39,7 @@ import static org.junit.Assert.*;
 import static org.junit.Assert.assertEquals;
 
 @RunWith(Arquillian.class)
-public class ExchangeAPIResourceTest extends BuildExchangeRestTestDeployment {
+public class ExchangeAPIRestResourceTest extends BuildExchangeRestTestDeployment {
 
     @Inject
     ServiceRegistryDaoBean serviceRegistryDao;

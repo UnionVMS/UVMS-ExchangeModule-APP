@@ -127,7 +127,7 @@ public class ExchangeLogModelBean {
             return response;
         } catch (ExchangeSearchMapperException | ExchangeDaoException | ParseException ex) {
             LOG.error("[ERROR] when getting ExchangeLogs by query {}] {} ", query, ex.getMessage());
-            throw new ExchangeModelException(ex.getMessage());
+            throw new ExchangeModelException(ex.getMessage(), ex);
         }
     }
 
@@ -227,17 +227,20 @@ public class ExchangeLogModelBean {
     }
 
     public ExchangeLogStatusType getExchangeLogStatusHistory(UUID guid, TypeRefType typeRefType) throws ExchangeModelException {
-        if (guid == null)
+        if (guid == null) {
             throw new InputArgumentException("Non valid guid to fetch log status history");
-            if (typeRefType == null || TypeRefType.UNKNOWN.equals(typeRefType)) {
-                return LogMapper.toStatusModel(logDao.getExchangeLogByGuid(guid));
-            } else {
-                List<ExchangeLog> exchangeLogByTypesRefAndGuid = logDao.getExchangeLogByTypesRefAndGuid(guid, Arrays.asList(typeRefType));
-                if (CollectionUtils.isNotEmpty(exchangeLogByTypesRefAndGuid)) {
-                    return LogMapper.toStatusModel(exchangeLogByTypesRefAndGuid.get(0));
-                }
+        }
+
+        ExchangeLog returnLog = null;
+        if (typeRefType == null || TypeRefType.UNKNOWN.equals(typeRefType)) {
+            returnLog = logDao.getExchangeLogByGuid(guid);
+        } else {
+            List<ExchangeLog> exchangeLogByTypesRefAndGuid = logDao.getExchangeLogByTypesRefAndGuid(guid, Arrays.asList(typeRefType));
+            if (CollectionUtils.isNotEmpty(exchangeLogByTypesRefAndGuid)) {
+                returnLog = exchangeLogByTypesRefAndGuid.get(0);
             }
-        return null;
+        }
+        return LogMapper.toStatusModel(returnLog);
     }
 
     public List<ExchangeLogStatusType> getExchangeLogsStatusHistories(UUID guid, List<TypeRefType> typeRefType) {
@@ -277,7 +280,7 @@ public class ExchangeLogModelBean {
         return logType;
     }
 
-    public LogWithRawMsgAndType getExchangeLogRawXmlByGuid(UUID guid) {
+    public LogWithRawMsgAndType getExchangeLogRawXmlByGuid(UUID guid) {     //
         LogWithRawMsgAndType logWrapper = new LogWithRawMsgAndType();
             ExchangeLog exchangeLog = logDao.getExchangeLogByGuid(guid);
             if (exchangeLog != null){

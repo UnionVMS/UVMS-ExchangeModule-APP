@@ -4,6 +4,8 @@ import eu.europa.ec.fisheries.schema.exchange.module.v1.GetServiceListRequest;
 import eu.europa.ec.fisheries.schema.exchange.module.v1.GetServiceListResponse;
 import eu.europa.ec.fisheries.schema.exchange.module.v1.SetCommandRequest;
 import eu.europa.ec.fisheries.schema.exchange.service.v1.ServiceResponseType;
+import eu.europa.ec.fisheries.uvms.exchange.entity.serviceregistry.Service;
+import eu.europa.ec.fisheries.uvms.exchange.mapper.ServiceMapper;
 import eu.europa.ec.fisheries.uvms.exchange.service.bean.ExchangeEventOutgoingServiceBean;
 import eu.europa.ec.fisheries.uvms.exchange.service.bean.ExchangeServiceBean;
 import eu.europa.ec.fisheries.uvms.exchange.service.exception.ExchangeServiceException;
@@ -19,10 +21,10 @@ import java.util.List;
 
 @Path("/api")
 @Stateless
-public class ExchangeAPIResource {
+public class ExchangeAPIRestResource {
 
     final static Logger LOG = LoggerFactory
-            .getLogger(ExchangeAPIResource.class);
+            .getLogger(ExchangeAPIRestResource.class);
 
 
     @EJB
@@ -46,8 +48,8 @@ public class ExchangeAPIResource {
     public GetServiceListResponse getServiceList(GetServiceListRequest request) {
         GetServiceListResponse getServiceListResponse = new GetServiceListResponse();
         try {
-            List<ServiceResponseType> serviceList = exchangeService.getServiceList(request.getType());
-            getServiceListResponse.getService().addAll(serviceList);
+            List<Service> serviceList = exchangeService.getServiceList(request.getType());
+            getServiceListResponse.getService().addAll(ServiceMapper.toServiceModelList(serviceList));
             return getServiceListResponse;
         } catch (ExchangeServiceException ex) {
             LOG.error("Call failed", ex);

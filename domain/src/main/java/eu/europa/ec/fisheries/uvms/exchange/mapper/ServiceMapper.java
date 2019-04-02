@@ -55,7 +55,15 @@ public class ServiceMapper {
         
         return entity;
     }
-    
+
+    public static List<ServiceResponseType> toServiceModelList(List<Service> serviceList){
+        List<ServiceResponseType> responseTypes = new ArrayList<>();
+        for (Service service : serviceList) {
+            responseTypes.add(toServiceModel(service));
+        }
+        return responseTypes;
+    }
+
     public static ServiceResponseType toServiceModel(Service entity) {
         ServiceResponseType model = new ServiceResponseType();
         model.setDescription(entity.getDescription());

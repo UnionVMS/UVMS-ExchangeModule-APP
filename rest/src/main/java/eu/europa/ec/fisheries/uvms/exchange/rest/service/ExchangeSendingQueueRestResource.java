@@ -41,9 +41,9 @@ import eu.europa.ec.fisheries.uvms.rest.security.UnionVMSFeature;
 
 @Path("/sendingqueue")
 @Stateless
-public class ExchangeSendingQueueResource {
+public class ExchangeSendingQueueRestResource {
 
-	final static Logger LOG = LoggerFactory.getLogger(ExchangeSendingQueueResource.class);
+	final static Logger LOG = LoggerFactory.getLogger(ExchangeSendingQueueRestResource.class);
 
 	@EJB
 	ExchangeLogServiceBean serviceLayer;

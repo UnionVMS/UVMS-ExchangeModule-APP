@@ -169,11 +169,11 @@ public class ExchangeEventOutgoingServiceBean {
                 throw new IllegalStateException("Could not create unsent message ", e);
             }
 
-            ServiceResponseType service = null;
-            List<ServiceResponseType> services = exchangeService.getServiceList(Arrays.asList(sendReport.getPluginType()));
-            for (ServiceResponseType serviceResponseType : services) {
-                if (StatusType.STARTED.equals(serviceResponseType.getStatus())) {
-                    service = serviceResponseType;
+            Service service = null;
+            List<Service> services = exchangeService.getServiceList(Arrays.asList(sendReport.getPluginType()));
+            for (Service serviceIteration : services) {
+                if (serviceIteration.getStatus()) {       //StatusType.STARTED.equals(serviceIteration.getStatus())
+                    service = serviceIteration;
                 }
             }
             

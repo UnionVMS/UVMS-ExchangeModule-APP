@@ -38,7 +38,7 @@ import static org.junit.Assert.*;
 import static org.junit.Assert.assertEquals;
 
 @RunWith(Arquillian.class)
-public class ExchangeSendingQueueResourceTest extends BuildExchangeRestTestDeployment {
+public class ExchangeSendingQueueRestResourceTest extends BuildExchangeRestTestDeployment {
 
     @Inject
     ExchangeLogServiceBean exchangeLogService;

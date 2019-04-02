@@ -27,6 +27,7 @@ import javax.xml.bind.JAXBException;
 import eu.europa.ec.fisheries.uvms.exchange.bean.ExchangeLogModelBean;
 import eu.europa.ec.fisheries.uvms.exchange.entity.exchangelog.ExchangeLog;
 import eu.europa.ec.fisheries.uvms.exchange.entity.serviceregistry.Service;
+import eu.europa.ec.fisheries.uvms.exchange.mapper.ServiceMapper;
 import org.apache.commons.collections.CollectionUtils;
 import eu.europa.ec.fisheries.schema.exchange.common.v1.AcknowledgeType;
 import eu.europa.ec.fisheries.schema.exchange.module.v1.*;
@@ -198,7 +199,7 @@ public class ExchangeEventIncomingServiceBean {
         try {
             GetServiceListRequest request = JAXBMarshaller.unmarshallTextMessage(message, GetServiceListRequest.class);
             LOG.info("[INFO] Get plugin config LIST_SERVICE:{}", request.getType());
-            List<ServiceResponseType> serviceList = exchangeService.getServiceList(request.getType());
+            List<ServiceResponseType> serviceList = ServiceMapper.toServiceModelList(exchangeService.getServiceList(request.getType()));
             producer.sendModuleResponseMessage(message, ExchangeModuleResponseMapper.mapServiceListResponse(serviceList));
         } catch (ExchangeException | MessageException e) {
             LOG.error("[ Error when getting plugin list from source {}] {}", message, e);
