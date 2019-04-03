@@ -25,6 +25,7 @@ import javax.json.bind.JsonbBuilder;
 import javax.xml.bind.JAXBException;
 
 import eu.europa.ec.fisheries.uvms.exchange.bean.ExchangeLogModelBean;
+import eu.europa.ec.fisheries.uvms.exchange.bean.ServiceRegistryModelBean;
 import eu.europa.ec.fisheries.uvms.exchange.entity.exchangelog.ExchangeLog;
 import eu.europa.ec.fisheries.uvms.exchange.entity.serviceregistry.Service;
 import eu.europa.ec.fisheries.uvms.exchange.mapper.ServiceMapper;
@@ -85,6 +86,9 @@ public class ExchangeEventIncomingServiceBean {
     @PollEvent
     private Event<NotificationMessage> pollEvent;
 
+    @Inject
+    private ServiceRegistryModelBean serviceRegistryModel;
+
     @EJB
     private ExchangeLogServiceBean exchangeLogService;
 
@@ -93,9 +97,6 @@ public class ExchangeEventIncomingServiceBean {
 
     @EJB
     private ExchangeMessageProducer producer;
-
-    @EJB
-    private ExchangeServiceBean exchangeService;
 
     @EJB
     private ExchangeEventOutgoingServiceBean exchangeEventOutgoingService;
@@ -186,7 +187,7 @@ public class ExchangeEventIncomingServiceBean {
         try {
             GetServiceListRequest request = JAXBMarshaller.unmarshallTextMessage(message, GetServiceListRequest.class);
             LOG.info("[INFO] Get plugin config LIST_SERVICE:{}", request.getType());
-            List<ServiceResponseType> serviceList = ServiceMapper.toServiceModelList(exchangeService.getServiceList(request.getType()));
+            List<ServiceResponseType> serviceList = ServiceMapper.toServiceModelList(serviceRegistryModel.getPlugins(request.getType()));
             producer.sendModuleResponseMessage(message, ExchangeModuleResponseMapper.mapServiceListResponse(serviceList));
         } catch (Exception e) {
             LOG.error("[ Error when getting plugin list from source {}] {}", message, e);
@@ -554,7 +555,7 @@ public class ExchangeEventIncomingServiceBean {
     private void firePluginFault(TextMessage messageEvent, String errorMessage, Throwable exception, String serviceClassName) {
         try {
             LOG.error(errorMessage, exception);
-            Service service = ((serviceClassName == null) ? null : exchangeService.getService(serviceClassName));
+            Service service = ((serviceClassName == null) ? null : serviceRegistryModel.getPlugin(serviceClassName));
             PluginFault fault = ExchangePluginResponseMapper.mapToPluginFaultResponse(FaultCode.EXCHANGE_PLUGIN_EVENT.getCode(), errorMessage);
             pluginErrorEvent.fire(new PluginErrorEventCarrier(messageEvent, service.getServiceResponse(), fault));
         } catch (Exception e) {
@@ -599,7 +600,7 @@ public class ExchangeEventIncomingServiceBean {
         ExchangeLogStatusTypeType logStatus = ExchangeLogStatusTypeType.FAILED;
         if (ack.getType() == eu.europa.ec.fisheries.schema.exchange.common.v1.AcknowledgeTypeType.OK) {//TODO if(poll probably transmitted)
             logStatus = ExchangeLogStatusTypeType.SUCCESSFUL;
-            removeUnsentMessage(serviceClassName, ack);
+            removeUnsentMessage(ack);
 
         } else if (ack.getType() == eu.europa.ec.fisheries.schema.exchange.common.v1.AcknowledgeTypeType.NOK) {
             LOG.debug(method + " was NOK: " + ack.getMessage());
@@ -624,7 +625,7 @@ public class ExchangeEventIncomingServiceBean {
         ExchangeLogStatusTypeType exchangeLogStatus = ack.getPollStatus().getStatus();
         if (exchangeLogStatus.equals(ExchangeLogStatusTypeType.SUCCESSFUL) ||
                 exchangeLogStatus.equals(ExchangeLogStatusTypeType.FAILED)) {
-            removeUnsentMessage(serviceClassName, ack);
+            removeUnsentMessage(ack);
         }
         try {
             PollStatus updatedLog = exchangeLogService.setPollStatus(ack.getMessageId(), UUID.fromString(ack.getPollStatus().getPollId()), exchangeLogStatus, serviceClassName);
@@ -635,7 +636,7 @@ public class ExchangeEventIncomingServiceBean {
         }
     }
 
-    private void removeUnsentMessage(String serviceClassName, AcknowledgeType ack) {
+    private void removeUnsentMessage(AcknowledgeType ack) {
         try {
             exchangeLogService.removeUnsentMessage(ack.getUnsentMessageGuid());
         } catch (Exception ex) {
@@ -645,7 +646,7 @@ public class ExchangeEventIncomingServiceBean {
 
     private void handleUpdateServiceAcknowledge(String serviceClassName, AcknowledgeType ack, StatusType status) {
         if (ack.getType() == eu.europa.ec.fisheries.schema.exchange.common.v1.AcknowledgeTypeType.OK) {
-            exchangeService.updateServiceStatus(serviceClassName, status, serviceClassName);
+            serviceRegistryModel.updatePluginStatus(serviceClassName, status, serviceClassName);
 
         } else if (ack.getType() == eu.europa.ec.fisheries.schema.exchange.common.v1.AcknowledgeTypeType.NOK) {//TODO Audit.log()
             LOG.error("Couldn't start service " + serviceClassName);

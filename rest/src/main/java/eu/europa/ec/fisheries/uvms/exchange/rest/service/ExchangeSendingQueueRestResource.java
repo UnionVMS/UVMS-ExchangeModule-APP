@@ -15,6 +15,7 @@ import java.util.List;
 
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
+import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
@@ -24,6 +25,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 
+import eu.europa.ec.fisheries.uvms.exchange.dao.bean.UnsentMessageDaoBean;
 import eu.europa.ec.fisheries.uvms.exchange.entity.unsent.UnsentMessage;
 import eu.europa.ec.fisheries.uvms.exchange.mapper.UnsentMessageMapper;
 import eu.europa.ec.fisheries.uvms.exchange.service.bean.ExchangeLogServiceBean;
@@ -48,6 +50,9 @@ public class ExchangeSendingQueueRestResource {
 	@EJB
 	ExchangeLogServiceBean serviceLayer;
 
+	@Inject
+	private UnsentMessageDaoBean unsentMessageDao;
+
     @Context
     private HttpServletRequest request;
 
@@ -67,7 +72,7 @@ public class ExchangeSendingQueueRestResource {
 	public ResponseDto getSendingQueue() {
 		LOG.info("Get list invoked in rest layer");
 		try {
-			List<UnsentMessage> unsentMessageList = serviceLayer.getUnsentMessageList();
+			List<UnsentMessage> unsentMessageList = unsentMessageDao.getAll();
 			List<UnsentMessageType> unsentMessageTypeList = UnsentMessageMapper.toModel(unsentMessageList);
 			List<SendingGroupLog> sendingQueue = ExchangeLogMapper.mapToSendingQueue(unsentMessageTypeList);
 			return new ResponseDto(sendingQueue, RestResponseCode.OK);

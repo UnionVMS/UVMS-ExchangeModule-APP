@@ -13,6 +13,7 @@ package eu.europa.ec.fisheries.uvms.exchange.rest.service;
 
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
+import javax.inject.Inject;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.PUT;
@@ -21,7 +22,7 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
-import eu.europa.ec.fisheries.uvms.exchange.service.bean.ExchangeServiceBean;
+import eu.europa.ec.fisheries.uvms.exchange.bean.ServiceRegistryModelBean;
 import eu.europa.ec.fisheries.uvms.exchange.service.bean.PluginServiceBean;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,8 +41,9 @@ public class ExchangeRegistryRestResource {
 	final static Logger LOG = LoggerFactory
 			.getLogger(ExchangeRegistryRestResource.class);
 
-	@EJB
-	ExchangeServiceBean serviceLayer;
+
+	@Inject
+	private ServiceRegistryModelBean serviceRegistryModel;
 
 	@EJB
 	PluginServiceBean pluginService;
@@ -62,7 +64,7 @@ public class ExchangeRegistryRestResource {
 	public ResponseDto getList() {
 		LOG.info("Get list invoked in rest layer");
 		try {
-			return new ResponseDto(ServiceMapper.map(serviceLayer.getServiceList(null)), RestResponseCode.OK);
+			return new ResponseDto(ServiceMapper.map(serviceRegistryModel.getPlugins(null)), RestResponseCode.OK);
 		} catch (Exception ex) {
 			LOG.error("[ Error when geting list. ] {} ", ex.getMessage());
 			return ErrorHandler.getFault(ex);

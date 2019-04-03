@@ -114,7 +114,10 @@ public class ExchangeLogRestResource {
     public ResponseDto getPollStatus(@PathParam("typeRefGuid") String typeRefGuid) {
         try {
             LOG.info("Get ExchangeLog status for Poll by typeRefGuid : {}", typeRefGuid);
-            ExchangeLogStatusType response = serviceLayer.getExchangeStatusHistory(TypeRefType.POLL, UUID.fromString(typeRefGuid));
+            if (typeRefGuid == null) {
+                throw new IllegalArgumentException("Invalid id");
+            }
+            ExchangeLogStatusType response = exchangeLogModel.getExchangeLogStatusHistory(UUID.fromString(typeRefGuid), TypeRefType.POLL);
             return new ResponseDto(response, RestResponseCode.OK);
         } catch (Exception e) {
             LOG.error("[ Error when getting config search fields. {} ] {}", typeRefGuid, e.getMessage());

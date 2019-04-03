@@ -186,14 +186,14 @@ public class ExchangeLogModelBean {
         return retEntity;
     }
 
-    public ExchangeLogType updateExchangeLogBusinessError(ExchangeLogStatusType status, String businessError) {
-        if (status == null || status.getGuid() == null || status.getGuid().isEmpty()) {
+    public ExchangeLog updateExchangeLogBusinessError(UUID logGuid, String businessError) {
+        if (logGuid == null) {
             throw new IllegalArgumentException("No exchange log to update status");
         }
-        ExchangeLog exchangeLog = logDao.getExchangeLogByGuid(UUID.fromString(status.getGuid()));
+        ExchangeLog exchangeLog = logDao.getExchangeLogByGuid(logGuid);
         exchangeLog.setBusinessError(businessError);
         ExchangeLog retEntity = logDao.updateLog(exchangeLog);
-        return LogMapper.toModel(retEntity);
+        return retEntity;
     }
 
     public ExchangeLogStatusType getExchangeLogStatusHistory(UUID guid, TypeRefType typeRefType) {

@@ -137,13 +137,6 @@ public class ExchangeLogServiceBean {
         return exchangeLogStatus;
     }
 
-    private ExchangeLogStatusType createExchangeLogBusinessError(String logGuid,String businessMessageError) {
-        ExchangeLogStatusType exchangeLogStatusType = new ExchangeLogStatusType();
-        exchangeLogStatusType.setGuid(logGuid);
-        exchangeLogStatusType.setBusinessModuleExceptionMessage(businessMessageError);
-        return exchangeLogStatusType;
-    }
-
     /**
      * Adds a new log status to a log with the specified log guid.
      *
@@ -160,15 +153,6 @@ public class ExchangeLogServiceBean {
         return exchangeLogModel.updateExchangeLogStatus(exchangeLogStatus, "SYSTEM", logGuid);
     }
 
-    public ExchangeLogType updateExchangeLogBusinessError(UUID logGuid, String errorMessage) {
-        ExchangeLogStatusType exchangeLogStatusType = createExchangeLogBusinessError(logGuid.toString(), errorMessage);
-        return  exchangeLogModel.updateExchangeLogBusinessError(exchangeLogStatusType, errorMessage);
-    }
-
-    public List<UnsentMessage> getUnsentMessageList() {
-        LOG.info("Get unsent message list in service layer");
-        return unsentMessageDao.getAll();
-    }
 
     public List<ExchangeLogStatusType> getExchangeStatusHistoryList(ExchangeLogStatusTypeType status, TypeRefType type, Instant from, Instant to) {
         LOG.info("Get pollstatus list in service layer:{}",status);
@@ -187,14 +171,6 @@ public class ExchangeLogServiceBean {
         query.getType().addAll(typeList);
 
         return  exchangeLogModel.getExchangeLogStatusHistoryByQuery(query);
-    }
-
-    public ExchangeLogStatusType getExchangeStatusHistory(TypeRefType type, UUID typeRefGuid) {
-        LOG.info("Get poll status history in service layer:{}",type);
-        if (typeRefGuid == null) {
-            throw new IllegalArgumentException("Invalid id");
-        }
-        return exchangeLogModel.getExchangeLogStatusHistory(typeRefGuid, type);
     }
 
     public String createUnsentMessage(String senderReceiver, Instant timestamp, String recipient, String message, List<UnsentMessageProperty> properties, String username) {

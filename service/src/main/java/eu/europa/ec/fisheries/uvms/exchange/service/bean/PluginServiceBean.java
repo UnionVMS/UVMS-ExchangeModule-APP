@@ -19,6 +19,7 @@ import eu.europa.ec.fisheries.uvms.config.event.ConfigSettingEvent;
 import eu.europa.ec.fisheries.uvms.config.exception.ConfigServiceException;
 import eu.europa.ec.fisheries.uvms.config.service.ParameterService;
 import eu.europa.ec.fisheries.uvms.config.service.UVMSConfigService;
+import eu.europa.ec.fisheries.uvms.exchange.bean.ServiceRegistryModelBean;
 import eu.europa.ec.fisheries.uvms.exchange.dao.bean.ServiceRegistryDaoBean;
 import eu.europa.ec.fisheries.uvms.exchange.entity.serviceregistry.Service;
 import eu.europa.ec.fisheries.uvms.exchange.entity.serviceregistry.ServiceSetting;
@@ -64,8 +65,8 @@ public class PluginServiceBean {
     @Inject
     ServiceRegistryDaoBean serviceRegistryDao;
 
-    @EJB
-    private ExchangeServiceBean exchangeService;
+    @Inject
+    private ServiceRegistryModelBean serviceRegistryModel;
 
     @EJB
     private ExchangeMessageProducer producer;
@@ -86,7 +87,7 @@ public class PluginServiceBean {
             List<PluginType> type = new ArrayList<>();
             type.add(pluginType);
             try {
-                List<Service> services = exchangeService.getServiceList(type);
+                List<Service> services = serviceRegistryModel.getPlugins(type);
                 if (!services.isEmpty()) {
                     for(Service service : services){
                         if(service.getActive()){
@@ -109,7 +110,7 @@ public class PluginServiceBean {
     private void registerService(RegisterServiceRequest register, Service newService, String messageId) {
         try {
             overrideSettingsFromConfig(newService);       //aka if config has settings for xyz parameter, use configs version instead
-            Service service = exchangeService.registerService(newService, register.getService().getName());
+            Service service = serviceRegistryModel.registerService(newService, register.getService().getName());
             //push to config module
             try {
                 String serviceClassName = register.getService().getServiceClassName();
@@ -206,7 +207,7 @@ public class PluginServiceBean {
         Service service = null;
         try {
             UnregisterServiceRequest unregister = JAXBMarshaller.unmarshallTextMessage(message, UnregisterServiceRequest.class);
-            service = exchangeService.unregisterService(unregister.getService(), unregister.getService().getName());
+            service = serviceRegistryModel.unregisterService(unregister.getService(), unregister.getService().getName());
             //NO ack back to plugin
             //TODO log to exchange log
         } catch (Exception e) {
@@ -219,7 +220,7 @@ public class PluginServiceBean {
 
         List<ServiceSetting> settingList = new ArrayList<>();
         settingList.add(updatedSetting);
-    	Service service = exchangeService.upsertSettings(serviceClassName, settingList, username);
+    	Service service = serviceRegistryModel.updatePluginSettings(serviceClassName, settingList, username);
         // Send the plugin settings to the topic where all plugins should listen to
     	String text = ExchangePluginRequestMapper.createSetConfigRequest(ServiceMapper.toSettingListModel(service.getServiceSettingList()));
     	producer.sendEventBusMessage(text, serviceClassName);

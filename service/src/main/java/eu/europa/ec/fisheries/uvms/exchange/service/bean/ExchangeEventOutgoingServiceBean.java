@@ -22,6 +22,8 @@ import javax.enterprise.event.Event;
 import javax.inject.Inject;
 import javax.jms.TextMessage;
 
+import eu.europa.ec.fisheries.uvms.exchange.bean.ExchangeLogModelBean;
+import eu.europa.ec.fisheries.uvms.exchange.bean.ServiceRegistryModelBean;
 import eu.europa.ec.fisheries.uvms.exchange.entity.exchangelog.ExchangeLog;
 import eu.europa.ec.fisheries.uvms.exchange.entity.serviceregistry.Service;
 import eu.europa.ec.fisheries.uvms.exchange.entity.unsent.UnsentMessageProperty;
@@ -87,14 +89,17 @@ public class ExchangeEventOutgoingServiceBean {
     @PollEvent
     private Event<NotificationMessage> pollEvent;
 
+    @Inject
+    private ExchangeLogModelBean exchangeLogModel;
+
+    @Inject
+    private ServiceRegistryModelBean serviceRegistryModel;
+
     @EJB
     private ExchangeMessageProducer producer;
 
     @EJB
     private ExchangeLogServiceBean exchangeLogService;
-
-    @EJB
-    private ExchangeServiceBean exchangeService;
 
     @EJB
     private ExchangeAssetServiceBean exchangeAssetService;
@@ -107,7 +112,7 @@ public class ExchangeEventOutgoingServiceBean {
      * @param sendSalesResponseRequest the sales response that needs to be sent
      * @param pluginType type of the plugin which the Sales response should be sent through
      * @throws 
-     * @throws ExchangeMessageException
+     * @throws
      */
     public void sendSalesResponseToPlugin(SendSalesResponseRequest sendSalesResponseRequest, PluginType pluginType) {
         if (pluginType == null) {
@@ -122,7 +127,7 @@ public class ExchangeEventOutgoingServiceBean {
      * Sends a Sales report to the FLUX plugin
      * @param sendSalesReportRequest
      * @throws 
-     * @throws ExchangeMessageException
+     * @throws
      */
     public void sendSalesReportToFLUX(SendSalesReportRequest sendSalesReportRequest) {
         String marshalledRequest = JAXBMarshaller.marshallJaxBObjectToString(sendSalesReportRequest);
@@ -158,7 +163,7 @@ public class ExchangeEventOutgoingServiceBean {
             }
 
             Service service = null;
-            List<Service> services = exchangeService.getServiceList(Arrays.asList(sendReport.getPluginType()));
+            List<Service> services = serviceRegistryModel.getPlugins(Arrays.asList(sendReport.getPluginType()));
             for (Service serviceIteration : services) {
                 if (serviceIteration.getStatus()) {       //StatusType.STARTED.equals(serviceIteration.getStatus())
                     service = serviceIteration;
@@ -220,7 +225,7 @@ public class ExchangeEventOutgoingServiceBean {
             LOG.info("Send command to plugin:{}",request);
             String pluginName = request.getCommand().getPluginName();
 
-            Service service = exchangeService.getService(pluginName);
+            Service service = serviceRegistryModel.getPlugin(pluginName);
 
             if (validate(request.getCommand(), message, service, request.getCommand(), request.getUsername())) {
                 sendCommandToPlugin(request, service.getName(), message.getText());
@@ -240,7 +245,7 @@ public class ExchangeEventOutgoingServiceBean {
 
     public String sendCommandToPluginFromRest(SetCommandRequest request){
         try {
-            Service service = exchangeService.getService(request.getCommand().getPluginName());
+            Service service = serviceRegistryModel.getPlugin(request.getCommand().getPluginName());
             CommandType command = request.getCommand();
             String validationResult = validateRestCommand(request, service, command);
             if (validationResult.equals("OK")) {
@@ -403,7 +408,7 @@ public class ExchangeEventOutgoingServiceBean {
             UpdateLogStatusRequest request = JAXBMarshaller.unmarshallTextMessage(message, UpdateLogStatusRequest.class);
             UUID exchangeLogGuid = UUID.fromString(request.getLogGuid());
             String businessModuleExceptionMessage = request.getBusinessModuleExceptionMessage();
-            exchangeLogService.updateExchangeLogBusinessError(exchangeLogGuid, businessModuleExceptionMessage);
+            exchangeLogModel.updateExchangeLogBusinessError(exchangeLogGuid, businessModuleExceptionMessage);
         } catch (Exception e) {
             fireExchangeFault(message, "Could not unmarshall the incoming UpdateLogStatus message", e);
         }
@@ -456,12 +461,6 @@ public class ExchangeEventOutgoingServiceBean {
         } catch (Exception e) {
             LOG.error(e.getMessage(), e);
         }
-    }
-
-    private void firePluginFault(TextMessage messageEvent, String errorMessage, Throwable exception) {
-        LOG.error(errorMessage, exception);
-        PluginFault fault = ExchangePluginResponseMapper.mapToPluginFaultResponse(FaultCode.EXCHANGE_PLUGIN_EVENT.getCode(), errorMessage);
-        pluginErrorEvent.fire(new PluginErrorEventCarrier(messageEvent, null, fault));
     }
 
     private void fireExchangeFault(TextMessage messageEvent, String errorMessage, Throwable exception) {
