@@ -12,11 +12,9 @@ copy of the GNU General Public License along with the IFDM Suite. If not, see <h
 package eu.europa.ec.fisheries.uvms.exchange.dao.bean;
 
 import java.util.List;
-import java.util.NoSuchElementException;
 import java.util.UUID;
 
 import javax.ejb.Stateless;
-import javax.persistence.EntityExistsException;
 import javax.persistence.NoResultException;
 import javax.persistence.TypedQuery;
 
@@ -28,8 +26,6 @@ import eu.europa.ec.fisheries.schema.exchange.plugin.types.v1.PluginType;
 import eu.europa.ec.fisheries.uvms.exchange.entity.serviceregistry.Service;
 import eu.europa.ec.fisheries.uvms.exchange.entity.serviceregistry.ServiceCapability;
 import eu.europa.ec.fisheries.uvms.exchange.entity.serviceregistry.ServiceSetting;
-import eu.europa.ec.fisheries.uvms.exchange.exception.ExchangeDaoException;
-import eu.europa.ec.fisheries.uvms.exchange.exception.NoEntityFoundException;
 
 @Stateless
 public class ServiceRegistryDaoBean extends Dao {

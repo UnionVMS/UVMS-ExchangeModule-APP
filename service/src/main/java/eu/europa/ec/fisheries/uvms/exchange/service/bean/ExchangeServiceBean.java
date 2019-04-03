@@ -22,8 +22,6 @@ import eu.europa.ec.fisheries.schema.exchange.service.v1.StatusType;
 import eu.europa.ec.fisheries.uvms.exchange.bean.ServiceRegistryModelBean;
 import eu.europa.ec.fisheries.uvms.exchange.entity.serviceregistry.Service;
 import eu.europa.ec.fisheries.uvms.exchange.entity.serviceregistry.ServiceSetting;
-import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelException;
-import eu.europa.ec.fisheries.uvms.exchange.service.exception.ExchangeServiceException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,14 +40,10 @@ public class ExchangeServiceBean{
      * @return
      * @throws ExchangeServiceException
      */
-    public Service registerService(Service data, String username) throws ExchangeServiceException {
+    public Service registerService(Service data, String username) {
         LOG.info("Register service invoked in service layer: {} {}",data,username);
-        try {
-            Service service = serviceRegistryModel.registerService(data, username);
-            return service;
-        } catch (ExchangeModelException e) {
-            throw new ExchangeServiceException(e.getMessage(), e);
-        }
+        Service service = serviceRegistryModel.registerService(data, username);
+        return service;
     }
 
     /**
@@ -59,14 +53,10 @@ public class ExchangeServiceBean{
      * @return
      * @throws ExchangeServiceException
      */
-    public Service unregisterService(ServiceType data, String username) throws ExchangeServiceException {
+    public Service unregisterService(ServiceType data, String username) {
         LOG.info("Unregister service invoked in service layer: {} {}",data,username);
-        try {
-            Service service = serviceRegistryModel.unregisterService(data, username);
-            return service;
-        } catch (ExchangeModelException ex) {
-            throw new ExchangeServiceException(ex.getMessage(), ex);
-        }
+        Service service = serviceRegistryModel.unregisterService(data, username);
+        return service;
     }
 
     /**
@@ -75,14 +65,10 @@ public class ExchangeServiceBean{
      * @return
      * @throws ExchangeServiceException
      */
-    public List<Service> getServiceList(List<PluginType> pluginTypes) throws ExchangeServiceException {
+    public List<Service> getServiceList(List<PluginType> pluginTypes) {
         LOG.info("Get list invoked in service layer:{}",pluginTypes);
-        try {
-            List<Service> plugins = serviceRegistryModel.getPlugins(pluginTypes);
-            return plugins;
-        } catch (ExchangeModelException e) {
-            throw new ExchangeServiceException(e.getMessage(), e);
-        }
+        List<Service> plugins = serviceRegistryModel.getPlugins(pluginTypes);
+        return plugins;
     }
 
     /**
@@ -92,26 +78,10 @@ public class ExchangeServiceBean{
      * @return updated service
      * @throws ExchangeServiceException
      */
-    public Service upsertSettings(String serviceClassName, List<ServiceSetting> settingList, String username) throws ExchangeServiceException {
+    public Service upsertSettings(String serviceClassName, List<ServiceSetting> settingList, String username) {
         LOG.info("Upsert settings in service layer: {} {} {}",serviceClassName, settingList,username);
-        try {
-            Service updatedSettings = serviceRegistryModel.updatePluginSettings(serviceClassName, settingList, username);
-            return updatedSettings;
-        } catch (ExchangeModelException  e) {
-            throw new ExchangeServiceException(e.getMessage(), e);
-        }
-    }
-
-    /**
-     * Get an object by id
-     *
-     * @param id
-     * @return
-     * @throws ExchangeServiceException
-     */
-    public ServiceType getById(Long id) throws ExchangeServiceException {
-        LOG.info("Get by id invoked in service layer:{}",id);
-        throw new ExchangeServiceException("Get by id not implemented in service layer");
+        Service updatedSettings = serviceRegistryModel.updatePluginSettings(serviceClassName, settingList, username);
+        return updatedSettings;
     }
 
     /**
@@ -120,13 +90,9 @@ public class ExchangeServiceBean{
      * @return
      * @throws ExchangeServiceException
      */
-    public Service getService(String serviceId) throws ExchangeServiceException {
-        try {
-            Service plugin = serviceRegistryModel.getPlugin(serviceId);
-            return plugin;
-        } catch (ExchangeModelException e) {
-            throw new ExchangeServiceException(e.getMessage(),e);
-        }
+    public Service getService(String serviceId) {
+        Service plugin = serviceRegistryModel.getPlugin(serviceId);
+        return plugin;
     }
 
 
@@ -137,13 +103,9 @@ public class ExchangeServiceBean{
      * @return
      * @throws ExchangeServiceException
      */
-    public ServiceResponseType updateServiceStatus(String serviceClassName, StatusType status, String username) throws ExchangeServiceException {
+    public ServiceResponseType updateServiceStatus(String serviceClassName, StatusType status, String username) {
         LOG.info("Update service status invoked in service layer: {} {} {}",serviceClassName,status,username);
-        try {
-            ServiceResponseType updatedServiceStatus = serviceRegistryModel.updatePluginStatus(serviceClassName, status, username);
-            return updatedServiceStatus;
-        } catch (ExchangeModelException e) {
-            throw new ExchangeServiceException(e.getMessage());
-        }
+        ServiceResponseType updatedServiceStatus = serviceRegistryModel.updatePluginStatus(serviceClassName, status, username);
+        return updatedServiceStatus;
     }
 }

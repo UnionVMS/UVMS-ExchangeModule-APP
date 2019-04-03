@@ -3,12 +3,10 @@ package eu.europa.ec.fisheries.uvms.exchange.rest.unsecured;
 import eu.europa.ec.fisheries.schema.exchange.module.v1.GetServiceListRequest;
 import eu.europa.ec.fisheries.schema.exchange.module.v1.GetServiceListResponse;
 import eu.europa.ec.fisheries.schema.exchange.module.v1.SetCommandRequest;
-import eu.europa.ec.fisheries.schema.exchange.service.v1.ServiceResponseType;
 import eu.europa.ec.fisheries.uvms.exchange.entity.serviceregistry.Service;
 import eu.europa.ec.fisheries.uvms.exchange.mapper.ServiceMapper;
 import eu.europa.ec.fisheries.uvms.exchange.service.bean.ExchangeEventOutgoingServiceBean;
 import eu.europa.ec.fisheries.uvms.exchange.service.bean.ExchangeServiceBean;
-import eu.europa.ec.fisheries.uvms.exchange.service.exception.ExchangeServiceException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -51,7 +49,7 @@ public class ExchangeAPIRestResource {
             List<Service> serviceList = exchangeService.getServiceList(request.getType());
             getServiceListResponse.getService().addAll(ServiceMapper.toServiceModelList(serviceList));
             return getServiceListResponse;
-        } catch (ExchangeServiceException ex) {
+        } catch (Exception ex) {
             LOG.error("Call failed", ex);
         }
         return getServiceListResponse;

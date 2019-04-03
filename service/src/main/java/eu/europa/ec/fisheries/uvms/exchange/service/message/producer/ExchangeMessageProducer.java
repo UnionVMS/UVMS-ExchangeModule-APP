@@ -16,24 +16,24 @@ import eu.europa.ec.fisheries.uvms.config.exception.ConfigMessageException;
 import eu.europa.ec.fisheries.uvms.exchange.service.message.constants.MessageQueue;
 import eu.europa.ec.fisheries.uvms.exchange.service.message.event.carrier.ExchangeErrorEvent;
 import eu.europa.ec.fisheries.uvms.exchange.service.message.event.carrier.PluginErrorEventCarrier;
-import eu.europa.ec.fisheries.uvms.exchange.service.message.exception.ExchangeMessageException;
+
 import javax.ejb.Local;
 import javax.jms.TextMessage;
 
 @Local
 public interface ExchangeMessageProducer {      //leave be for now ;(
 
-    String sendMessageOnQueue(String text, MessageQueue queue) throws ExchangeMessageException;
+    String sendMessageOnQueue(String text, MessageQueue queue) ;
 
-    String sendEventBusMessage(String text, String serviceName) throws ExchangeMessageException;
+    String sendEventBusMessage(String text, String serviceName) ;
     
     void sendModuleResponseMessage(TextMessage message, String text) throws MessageException;
 
     String sendRulesMessage(String text) throws ConfigMessageException;
 
-    String sendRulesMessage(String text, String messageSelector) throws ExchangeMessageException;
+    String sendRulesMessage(String text, String messageSelector) ;
     
-    String sendMovementMessage(String text, String groupId) throws ExchangeMessageException;
+    String sendMovementMessage(String text, String groupId) ;
 
     void sendModuleErrorResponseMessage(ExchangeErrorEvent event);
 
@@ -41,5 +41,5 @@ public interface ExchangeMessageProducer {      //leave be for now ;(
 
     void sendModuleAckMessage(String messageId, MessageQueue queue, String text);
 
-    String forwardToAsset(String text, String function) throws ExchangeMessageException;
+    String forwardToAsset(String text, String function) ;
 }

@@ -13,13 +13,10 @@ package eu.europa.ec.fisheries.uvms.exchange.dao.bean;
 
 import eu.europa.ec.fisheries.uvms.exchange.dao.Dao;
 import eu.europa.ec.fisheries.uvms.exchange.entity.unsent.UnsentMessage;
-import eu.europa.ec.fisheries.uvms.exchange.exception.ExchangeDaoException;
-import eu.europa.ec.fisheries.uvms.exchange.exception.NoEntityFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.ejb.Stateless;
-import javax.persistence.NoResultException;
 import javax.persistence.TypedQuery;
 import java.util.List;
 import java.util.UUID;

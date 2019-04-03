@@ -34,7 +34,6 @@ import eu.europa.ec.fisheries.uvms.exchange.entity.serviceregistry.Service;
 import eu.europa.ec.fisheries.uvms.exchange.entity.serviceregistry.ServiceCapability;
 import eu.europa.ec.fisheries.uvms.exchange.entity.serviceregistry.ServiceSetting;
 import eu.europa.ec.fisheries.uvms.exchange.entity.unsent.UnsentMessage;
-import eu.europa.ec.fisheries.uvms.exchange.exception.NoEntityFoundException;
 import eu.europa.ec.fisheries.uvms.exchange.model.mapper.ExchangeModuleRequestMapper;
 import eu.europa.ec.fisheries.uvms.exchange.model.mapper.ExchangePluginResponseMapper;
 import eu.europa.ec.fisheries.uvms.exchange.model.mapper.JAXBMarshaller;
@@ -50,11 +49,13 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import javax.annotation.Resource;
+import javax.ejb.EJBException;
 import javax.inject.Inject;
 import javax.jms.ConnectionFactory;
 import javax.jms.TextMessage;
 import javax.json.bind.Jsonb;
 import javax.json.bind.JsonbBuilder;
+import javax.persistence.NoResultException;
 
 import java.time.Instant;
 import java.util.ArrayList;
@@ -396,8 +397,8 @@ public class ExchangeMessageConsumerBeanTest extends BuildExchangeServiceTestDep
         try {
             unsentMessageDao.getByGuid(unsent.getGuid());
             fail("The guid on the line above should not exist in the db");
-        }catch (NoEntityFoundException e){
-            assertTrue(true);
+        }catch (EJBException e){
+            assertTrue(e.getMessage().contains("javax.persistence.NoResultException: No entity found for query"));
         }
 
         ExchangeLog updatedExchangeLog = exchangeLogDao.getExchangeLogByGuid(exchangeLog.getId());
@@ -436,8 +437,8 @@ public class ExchangeMessageConsumerBeanTest extends BuildExchangeServiceTestDep
         try {
             unsentMessageDao.getByGuid(unsent.getGuid());
             fail("The guid on the line above should not exist in the db");
-        }catch (NoEntityFoundException e){
-            assertTrue(true);
+        }catch (EJBException e){
+            assertTrue(e.getMessage().contains("javax.persistence.NoResultException: No entity found for query"));
         }
 
         ExchangeLog updatedExchangeLog = exchangeLogDao.getExchangeLogByGuid(exchangeLog.getId());
@@ -482,8 +483,8 @@ public class ExchangeMessageConsumerBeanTest extends BuildExchangeServiceTestDep
         try {
             unsentMessageDao.getByGuid(unsent.getGuid());
             fail("The guid on the line above should not exist in the db");
-        }catch (NoEntityFoundException e){
-            assertTrue(true);
+        }catch (EJBException e){
+            assertTrue(e.getMessage().contains("javax.persistence.NoResultException: No entity found for query"));
         }
 
         ExchangeLog updatedExchangeLog = exchangeLogDao.getExchangeLogByGuid(exchangeLog.getId());

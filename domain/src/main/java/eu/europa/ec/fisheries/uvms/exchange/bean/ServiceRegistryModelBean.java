@@ -17,9 +17,7 @@ import eu.europa.ec.fisheries.uvms.exchange.dao.bean.ServiceRegistryDaoBean;
 import eu.europa.ec.fisheries.uvms.exchange.entity.serviceregistry.Service;
 import eu.europa.ec.fisheries.uvms.exchange.entity.serviceregistry.ServiceCapability;
 import eu.europa.ec.fisheries.uvms.exchange.entity.serviceregistry.ServiceSetting;
-import eu.europa.ec.fisheries.uvms.exchange.exception.ExchangeDaoException;
 import eu.europa.ec.fisheries.uvms.exchange.mapper.ServiceMapper;
-import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -49,17 +49,13 @@ import eu.europa.ec.fisheries.uvms.exchange.service.message.constants.MessageQue
 import eu.europa.ec.fisheries.uvms.exchange.service.message.event.ErrorEvent;
 import eu.europa.ec.fisheries.uvms.exchange.service.message.event.carrier.ExchangeErrorEvent;
 import eu.europa.ec.fisheries.uvms.exchange.service.message.event.carrier.PluginErrorEventCarrier;
-import eu.europa.ec.fisheries.uvms.exchange.service.message.exception.ExchangeMessageException;
 import eu.europa.ec.fisheries.uvms.exchange.service.message.producer.ExchangeMessageProducer;
 import eu.europa.ec.fisheries.uvms.exchange.model.constant.FaultCode;
-import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeException;
 import eu.europa.ec.fisheries.uvms.exchange.model.mapper.ExchangeModuleResponseMapper;
 import eu.europa.ec.fisheries.uvms.exchange.model.mapper.ExchangePluginResponseMapper;
 import eu.europa.ec.fisheries.uvms.exchange.model.mapper.JAXBMarshaller;
 import eu.europa.ec.fisheries.uvms.exchange.service.event.ExchangePluginStatusEvent;
 import eu.europa.ec.fisheries.uvms.exchange.service.event.PollEvent;
-import eu.europa.ec.fisheries.uvms.exchange.service.exception.ExchangeLogException;
-import eu.europa.ec.fisheries.uvms.exchange.service.exception.ExchangeServiceException;
 import eu.europa.ec.fisheries.uvms.exchange.service.mapper.MovementMapper;
 import eu.europa.ec.fisheries.uvms.exchange.service.model.IncomingMovement;
 import eu.europa.ec.fisheries.uvms.longpolling.notifications.NotificationMessage;
@@ -192,7 +188,7 @@ public class ExchangeEventIncomingServiceBean {
             LOG.info("[INFO] Get plugin config LIST_SERVICE:{}", request.getType());
             List<ServiceResponseType> serviceList = ServiceMapper.toServiceModelList(exchangeService.getServiceList(request.getType()));
             producer.sendModuleResponseMessage(message, ExchangeModuleResponseMapper.mapServiceListResponse(serviceList));
-        } catch (ExchangeException | MessageException e) {
+        } catch (Exception e) {
             LOG.error("[ Error when getting plugin list from source {}] {}", message, e);
             exchangeErrorEvent.fire(new ExchangeErrorEvent(message, ExchangeModuleResponseMapper.createFaultMessage(
                     FaultCode.EXCHANGE_MESSAGE, "Excpetion when getting service list")));
@@ -535,7 +531,7 @@ public class ExchangeEventIncomingServiceBean {
             LOG.info("[INFO] Forwarding the msg to rules Module.");
             producer.sendRulesMessage(messageToForward, messageSelector);
 
-        } catch (ExchangeMessageException e) {
+        } catch (Exception e) {
             LOG.error("[ERROR] Failed to forward message to Rules: {} {}", messageToForward, e);
         }
     }
@@ -549,7 +545,7 @@ public class ExchangeEventIncomingServiceBean {
         try {
             LOG.info("Forwarding the message to Asset.");
             String s = producer.forwardToAsset(messageToForward, "ASSET_INFORMATION");
-        } catch (ExchangeMessageException e) {
+        } catch (Exception e) {
             LOG.error("Failed to forward message to Asset: {} {}", messageToForward, e);
         }
     }
@@ -561,7 +557,7 @@ public class ExchangeEventIncomingServiceBean {
             Service service = ((serviceClassName == null) ? null : exchangeService.getService(serviceClassName));
             PluginFault fault = ExchangePluginResponseMapper.mapToPluginFaultResponse(FaultCode.EXCHANGE_PLUGIN_EVENT.getCode(), errorMessage);
             pluginErrorEvent.fire(new PluginErrorEventCarrier(messageEvent, service.getServiceResponse(), fault));
-        } catch (ExchangeServiceException e) {
+        } catch (Exception e) {
             LOG.error("Unable to send PluginError message due to: {}", e);
         }
     }
@@ -618,7 +614,7 @@ public class ExchangeEventIncomingServiceBean {
                 String pollGuid = updatedLog.getTypeRefGuid().toString();
                 pollEvent.fire(new NotificationMessage("guid", pollGuid));
             }
-        } catch (ExchangeLogException e) {
+        } catch (Exception e) {
             LOG.error(e.getMessage());
         }
     }
@@ -634,7 +630,7 @@ public class ExchangeEventIncomingServiceBean {
             PollStatus updatedLog = exchangeLogService.setPollStatus(ack.getMessageId(), UUID.fromString(ack.getPollStatus().getPollId()), exchangeLogStatus, serviceClassName);
             // Long polling
             pollEvent.fire(new NotificationMessage("guid", updatedLog.getPollGuid()));
-        } catch (ExchangeLogException e) {
+        } catch (Exception e) {
             LOG.error(e.getMessage());
         }
     }
@@ -642,12 +638,12 @@ public class ExchangeEventIncomingServiceBean {
     private void removeUnsentMessage(String serviceClassName, AcknowledgeType ack) {
         try {
             exchangeLogService.removeUnsentMessage(ack.getUnsentMessageGuid());
-        } catch (ExchangeLogException ex) {
+        } catch (Exception ex) {
             LOG.error(ex.getMessage());
         }
     }
 
-    private void handleUpdateServiceAcknowledge(String serviceClassName, AcknowledgeType ack, StatusType status) throws ExchangeServiceException {
+    private void handleUpdateServiceAcknowledge(String serviceClassName, AcknowledgeType ack, StatusType status) {
         if (ack.getType() == eu.europa.ec.fisheries.schema.exchange.common.v1.AcknowledgeTypeType.OK) {
             exchangeService.updateServiceStatus(serviceClassName, status, serviceClassName);
 

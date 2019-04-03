@@ -27,15 +27,12 @@ import eu.europa.ec.fisheries.uvms.exchange.service.message.consumer.ExchangeCon
 import eu.europa.ec.fisheries.uvms.exchange.service.message.event.ErrorEvent;
 import eu.europa.ec.fisheries.uvms.exchange.service.message.event.carrier.ExchangeErrorEvent;
 import eu.europa.ec.fisheries.uvms.exchange.service.message.event.carrier.PluginErrorEventCarrier;
-import eu.europa.ec.fisheries.uvms.exchange.service.message.exception.ExchangeMessageException;
 import eu.europa.ec.fisheries.uvms.exchange.service.message.producer.ExchangeMessageProducer;
 import eu.europa.ec.fisheries.uvms.exchange.model.constant.FaultCode;
 import eu.europa.ec.fisheries.uvms.exchange.model.mapper.ExchangeModuleResponseMapper;
 import eu.europa.ec.fisheries.uvms.exchange.model.mapper.ExchangePluginRequestMapper;
 import eu.europa.ec.fisheries.uvms.exchange.model.mapper.ExchangePluginResponseMapper;
 import eu.europa.ec.fisheries.uvms.exchange.model.mapper.JAXBMarshaller;
-import eu.europa.ec.fisheries.uvms.exchange.service.exception.ExchangeServiceException;
-import eu.europa.ec.fisheries.uvms.exchange.service.exception.InputArgumentException;
 import eu.europa.ec.fisheries.uvms.exchange.service.mapper.SettingTypeMapper;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -82,7 +79,7 @@ public class PluginServiceBean {
     @EJB
     private UVMSConfigService configService;
 
-    private boolean checkPluginType(PluginType pluginType, String responseTopicMessageSelector, String messageId) throws ExchangeMessageException {
+    private boolean checkPluginType(PluginType pluginType, String responseTopicMessageSelector, String messageId) {
         LOG.debug("[INFO] CheckPluginType " + pluginType.name());
         if (PluginType.EMAIL == pluginType || PluginType.NAF == pluginType) {
             //Check if type already exists
@@ -100,7 +97,7 @@ public class PluginServiceBean {
                         }
                     }
                 }
-            } catch (ExchangeServiceException e) {
+            } catch (Exception e) {
                 String response = ExchangePluginResponseMapper.mapToRegisterServiceResponseNOK(messageId, "Exchange service exception when registering plugin [ " + e.getMessage() + " ]");
                 producer.sendEventBusMessage(response, responseTopicMessageSelector);
                 return false;
@@ -109,7 +106,7 @@ public class PluginServiceBean {
         return true;
     }
 
-    private void registerService(RegisterServiceRequest register, Service newService, String messageId) throws ExchangeMessageException {
+    private void registerService(RegisterServiceRequest register, Service newService, String messageId) {
         try {
             overrideSettingsFromConfig(newService);       //aka if config has settings for xyz parameter, use configs version instead
             Service service = exchangeService.registerService(newService, register.getService().getName());
@@ -135,7 +132,7 @@ public class PluginServiceBean {
         }
     }
 
-    private void setServiceStatusOnRegister(Service service) throws ExchangeServiceException {
+    private void setServiceStatusOnRegister(Service service) {
         if (service != null) {
             boolean status = service.getStatus();
             if ((status)) {     //StatusType.STARTED.equals
@@ -218,7 +215,7 @@ public class PluginServiceBean {
         }
     }
     
-    private void updatePluginSetting(String serviceClassName, ServiceSetting updatedSetting, String username) throws ExchangeServiceException, ExchangeMessageException {
+    private void updatePluginSetting(String serviceClassName, ServiceSetting updatedSetting, String username) {
 
         List<ServiceSetting> settingList = new ArrayList<>();
         settingList.add(updatedSetting);
@@ -287,16 +284,16 @@ public class PluginServiceBean {
 		
 	}
     
-    public boolean start(String serviceClassName) throws ExchangeServiceException {
+    public boolean start(String serviceClassName) {
         if (serviceClassName == null) {
-            throw new InputArgumentException("No service to start");
+            throw new IllegalArgumentException("No service to start");
         }
         if (isServiceRegistered(serviceClassName)){
             String text = ExchangePluginRequestMapper.createStartRequest();
             producer.sendEventBusMessage(text, serviceClassName);
             return true;
         }else{
-            throw new ExchangeServiceException("Service with service class name: "+ serviceClassName + " does not exist");
+            throw new IllegalArgumentException("Service with service class name: "+ serviceClassName + " does not exist");
         }
     }
 
@@ -305,22 +302,22 @@ public class PluginServiceBean {
         return checkRegistered != null;
     }
 
-    public boolean stop(String serviceClassName) throws ExchangeServiceException {
+    public boolean stop(String serviceClassName) {
         if (serviceClassName == null) {
-            throw new InputArgumentException("No service to stop");
+            throw new IllegalArgumentException("No service to stop");
         }
         if(isServiceRegistered(serviceClassName)) {
             String text = ExchangePluginRequestMapper.createStopRequest();
             producer.sendEventBusMessage(text, serviceClassName);
             return true;
         }else{
-            throw new ExchangeServiceException("Service with service class name: "+ serviceClassName + " does not exist");
+            throw new IllegalArgumentException("Service with service class name: "+ serviceClassName + " does not exist");
         }
     }
 
-    public boolean ping(String serviceClassName) throws ExchangeServiceException {
+    public boolean ping(String serviceClassName) {
         if (serviceClassName == null) {
-            throw new InputArgumentException("No service to ping");
+            throw new IllegalArgumentException("No service to ping");
         }
         String text = ExchangePluginRequestMapper.createPingRequest();
         producer.sendEventBusMessage(text, serviceClassName);

@@ -27,13 +27,11 @@ import eu.europa.ec.fisheries.uvms.commons.message.api.MessageConstants;
 import eu.europa.ec.fisheries.uvms.commons.message.api.MessageException;
 import eu.europa.ec.fisheries.uvms.commons.message.impl.AbstractProducer;
 import eu.europa.ec.fisheries.uvms.commons.message.impl.JMSUtils;
-import eu.europa.ec.fisheries.uvms.config.exception.ConfigMessageException;
 import eu.europa.ec.fisheries.uvms.config.message.ConfigMessageProducer;
 import eu.europa.ec.fisheries.uvms.exchange.service.message.constants.MessageQueue;
 import eu.europa.ec.fisheries.uvms.exchange.service.message.event.ErrorEvent;
 import eu.europa.ec.fisheries.uvms.exchange.service.message.event.carrier.ExchangeErrorEvent;
 import eu.europa.ec.fisheries.uvms.exchange.service.message.event.carrier.PluginErrorEventCarrier;
-import eu.europa.ec.fisheries.uvms.exchange.service.message.exception.ExchangeMessageException;
 import eu.europa.ec.fisheries.uvms.exchange.service.message.producer.ExchangeMessageProducer;
 import eu.europa.ec.fisheries.uvms.exchange.model.mapper.JAXBMarshaller;
 
@@ -81,7 +79,7 @@ public class ExchangeMessageProducerBean extends AbstractProducer implements Exc
     }
 
     @Override
-    public String sendMessageOnQueue(String text, MessageQueue queue) throws ExchangeMessageException {
+    public String sendMessageOnQueue(String text, MessageQueue queue) {
         try {
             Queue destination = getDestinationQueue(queue);
             if(destination != null){
@@ -90,7 +88,7 @@ public class ExchangeMessageProducerBean extends AbstractProducer implements Exc
             return null;
         } catch (MessageException e) {
             LOG.error("[ Error when sending message. ]");
-            throw new ExchangeMessageException("[ Error when sending message. ]");
+            throw new RuntimeException("[ Error when sending message. ]");
         }
     }
 
@@ -107,27 +105,17 @@ public class ExchangeMessageProducerBean extends AbstractProducer implements Exc
 
     @Override
     @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
-    public String sendConfigMessage(String text) throws ConfigMessageException {
-        try {
-            return sendMessageOnQueue(text, MessageQueue.CONFIG);
-        } catch (ExchangeMessageException e) {
-            LOG.error("[ Error when sending config message. ] {}", e.getMessage());
-            throw new ConfigMessageException("Error when sending config message.");
-        }
+    public String sendConfigMessage(String text) {
+        return sendMessageOnQueue(text, MessageQueue.CONFIG);
     }
 
     @Override
-    public String sendRulesMessage(String text) throws ConfigMessageException {
-        try {
-            return sendMessageOnQueue(text, MessageQueue.RULES);
-        } catch (ExchangeMessageException e) {
-            LOG.error("[ Error when sending config message. ] {}", e.getMessage());
-            throw new ConfigMessageException("Error when sending config message.");
-        }
+    public String sendRulesMessage(String text) {
+        return sendMessageOnQueue(text, MessageQueue.RULES);
     }
 
     @Override
-    public String sendRulesMessage(String text, String messageSelector) throws ExchangeMessageException {
+    public String sendRulesMessage(String text, String messageSelector) {
         try {
             Map<String, String> messageProperties = new HashMap<>();
             if (messageSelector != null) {
@@ -137,12 +125,12 @@ public class ExchangeMessageProducerBean extends AbstractProducer implements Exc
 
         } catch (MessageException e) {
             LOG.error("[ Error when sending rules message. ] {}", e.getMessage());
-            throw new ExchangeMessageException("Error when sending rules message.");
+            throw new RuntimeException("Error when sending rules message.");
         }
     }
     
     @Override
-    public String sendMovementMessage(String text, String groupId) throws ExchangeMessageException {
+    public String sendMovementMessage(String text, String groupId) {
         try {
             Map<String, String> properties = new HashMap<>();
             properties.put(MessageConstants.JMS_FUNCTION_PROPERTY, "CREATE");
@@ -150,12 +138,12 @@ public class ExchangeMessageProducerBean extends AbstractProducer implements Exc
             return movementProducer.sendModuleMessageWithProps(text, exchangeResponseQueue, properties);
         } catch (MessageException e) {
             LOG.error("[ Error when sending movement message. ] {}", e);
-            throw new ExchangeMessageException("Error when sending movement message.");
+            throw new RuntimeException("Error when sending movement message.");
         }
     }
 
     @Override
-    public String forwardToAsset(String text, String function) throws ExchangeMessageException {
+    public String forwardToAsset(String text, String function) {
         try {
             Queue destination = getDestinationQueue(MessageQueue.VESSEL);
             String s = "";
@@ -165,7 +153,7 @@ public class ExchangeMessageProducerBean extends AbstractProducer implements Exc
             return s;
         } catch (MessageException e) {
             LOG.error("[ Error when sending Asset info message. ] {}", e);
-            throw new ExchangeMessageException("Error when sending asset info message.", e);
+            throw new RuntimeException("Error when sending asset info message.", e);
         }
 
     }

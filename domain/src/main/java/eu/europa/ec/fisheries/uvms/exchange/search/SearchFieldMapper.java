@@ -46,7 +46,7 @@ public class SearchFieldMapper {
      * @return
      * @throws ParseException
      */
-    public static String createSelectSearchSql(List<SearchValue> searchFields, boolean isDynamic, Sorting sorting) throws ParseException {
+    public static String createSelectSearchSql(List<SearchValue> searchFields, boolean isDynamic, Sorting sorting) {
         StringBuilder selectBuffer = new StringBuilder();
         selectBuffer.append("SELECT DISTINCT ")
                 .append(SearchTable.LOG.getTableAlias())
@@ -90,7 +90,7 @@ public class SearchFieldMapper {
      * @return
      * @throws ParseException
      */
-    public static String createCountSearchSql(List<SearchValue> searchFields, boolean isDynamic) throws ParseException {
+    public static String createCountSearchSql(List<SearchValue> searchFields, boolean isDynamic) {
         StringBuilder countBuffer = new StringBuilder();
         countBuffer.append("SELECT COUNT(").append(SearchTable.LOG.getTableAlias()).append(") FROM ")
                 .append(SearchTable.LOG.getTableName())
@@ -113,7 +113,7 @@ public class SearchFieldMapper {
      * @return
      * @throws ParseException
      */
-    private static String createSearchSql(List<SearchValue> criterias, boolean dynamic) throws ParseException {
+    private static String createSearchSql(List<SearchValue> criterias, boolean dynamic) {
 
         String OPERATOR = " OR ";
         if (dynamic) {
@@ -255,7 +255,7 @@ public class SearchFieldMapper {
      *
      * @param listCriterias
      * @return
-     * @throws ExchangeSearchMapperException
+     * @throws
      */
     public static List<SearchValue> mapSearchField(List<ExchangeListCriteriaPair> listCriterias) {
 
@@ -315,7 +315,7 @@ public class SearchFieldMapper {
      *
      * @param key
      * @return
-     * @throws ExchangeSearchMapperException
+     * @throws
      */
     public static ExchangeSearchField mapCriteria(SearchField key) {
         switch (key) {
@@ -347,7 +347,7 @@ public class SearchFieldMapper {
      *
      * @param key
      * @return
-     * @throws ExchangeSearchMapperException
+     * @throws
      */
     public static SortFieldMapper mapSortField(SortField key) {
         switch (key) {
