@@ -158,7 +158,7 @@ public class ExchangeLogModelBean {
         return logStatusHistoryList;
     }
 
-    public ExchangeLog createExchangeLog(ExchangeLog log, String username) {
+    public ExchangeLog createExchangeLog(ExchangeLog log) {
         if (log == null) {
             throw new IllegalArgumentException("No logType to create");
         }

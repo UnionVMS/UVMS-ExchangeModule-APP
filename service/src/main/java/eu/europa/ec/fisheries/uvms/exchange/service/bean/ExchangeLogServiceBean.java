@@ -15,6 +15,7 @@ import javax.ejb.EJB;
 import javax.ejb.Stateless;
 import javax.enterprise.event.Event;
 import javax.inject.Inject;
+import javax.persistence.NoResultException;
 import java.time.Instant;
 import java.util.*;
 
@@ -22,8 +23,8 @@ import eu.europa.ec.fisheries.schema.exchange.module.v1.ExchangeBaseRequest;
 import eu.europa.ec.fisheries.schema.exchange.movement.v1.MovementRefType;
 import eu.europa.ec.fisheries.schema.exchange.v1.*;
 import eu.europa.ec.fisheries.uvms.exchange.bean.ExchangeLogModelBean;
-import eu.europa.ec.fisheries.uvms.exchange.bean.UnsentModelBean;
 import eu.europa.ec.fisheries.uvms.exchange.dao.bean.ExchangeLogDaoBean;
+import eu.europa.ec.fisheries.uvms.exchange.dao.bean.UnsentMessageDaoBean;
 import eu.europa.ec.fisheries.uvms.exchange.entity.exchangelog.ExchangeLog;
 import eu.europa.ec.fisheries.uvms.exchange.entity.exchangelog.ExchangeLogStatus;
 import eu.europa.ec.fisheries.uvms.exchange.entity.unsent.UnsentMessage;
@@ -64,21 +65,21 @@ public class ExchangeLogServiceBean {
     private ExchangeLogModelBean exchangeLogModel;
 
     @EJB
-    private UnsentModelBean unsentModel;
-
-    @EJB
     private ExchangeLogDaoBean exchangeLogDao;
 
+    @Inject
+    private UnsentMessageDaoBean unsentMessageDao;
 
-    public ExchangeLog logAndCache(ExchangeLog log, String pluginMessageId, String username) {
-        ExchangeLog createdLog = log(log, username);
+
+    public ExchangeLog logAndCache(ExchangeLog log, String pluginMessageId) {
+        ExchangeLog createdLog = log(log);
         logCache.put(pluginMessageId, createdLog.getId());
 
         return createdLog;
     }
 
-    public ExchangeLog log(ExchangeLog log, String username) {
-        ExchangeLog exchangeLog = exchangeLogModel.createExchangeLog(log, username);
+    public ExchangeLog log(ExchangeLog log) {
+        ExchangeLog exchangeLog = exchangeLogModel.createExchangeLog(log);
         String guid = exchangeLog.getId().toString();
         exchangeLogEvent.fire(new NotificationMessage("guid", guid));
         LOG.debug("[INFO] Logging message with guid : [ "+guid+" ] was successful.");
@@ -116,7 +117,7 @@ public class ExchangeLogServiceBean {
 
         log = ExchangeLogMapper.addStatusHistory(log);
 
-        return log(log, request.getUsername());
+        return log(log);
     }
 
     public ExchangeLog updateStatus(String pluginMessageId, ExchangeLogStatusTypeType logStatus, String username) {
@@ -166,7 +167,7 @@ public class ExchangeLogServiceBean {
 
     public List<UnsentMessage> getUnsentMessageList() {
         LOG.info("Get unsent message list in service layer");
-        return unsentModel.getMessageList();
+        return unsentMessageDao.getAll();
     }
 
     public List<ExchangeLogStatusType> getExchangeStatusHistoryList(ExchangeLogStatusTypeType status, TypeRefType type, Instant from, Instant to) {
@@ -206,7 +207,8 @@ public class ExchangeLogServiceBean {
         unsentMessage.setUpdatedBy(username);
         unsentMessage.setProperties(new ArrayList<>());
         unsentMessage.getProperties().addAll(properties);
-        String createdUnsentMessageId = unsentModel.createMessage(unsentMessage);
+
+        String createdUnsentMessageId = unsentMessageDao.create(unsentMessage).getGuid().toString();
 
         List<String> unsentMessageIds = Collections.singletonList(createdUnsentMessageId);
         sendingQueueEvent.fire(new NotificationMessage("messageIds", unsentMessageIds));
@@ -214,8 +216,21 @@ public class ExchangeLogServiceBean {
     }
 
     public void removeUnsentMessage(String unsentMessageId) {
-        LOG.debug("removeUnsentMessage in service layer:{}",unsentMessageId);
-        String removeMessageId = unsentModel.removeMessage(unsentMessageId);
+        LOG.trace("removeUnsentMessage in service layer:{}",unsentMessageId);
+        if (unsentMessageId == null) {
+            throw new IllegalArgumentException("No message to remove");
+        }
+
+        String removeMessageId = null;
+        UnsentMessage entity = unsentMessageDao.getByGuid(UUID.fromString(unsentMessageId));
+        if (entity != null) {
+            removeMessageId = entity.getGuid().toString();
+            unsentMessageDao.remove(entity);
+        } else {
+            LOG.error("[ No message with id {} to remove ]", unsentMessageId);
+            throw new IllegalArgumentException("[ No message with id " + unsentMessageId + " to remove ]");
+        }
+
         List<String> removedMessageIds = Collections.singletonList(removeMessageId);
         sendingQueueEvent.fire(new NotificationMessage("messageIds", removedMessageIds));
     }
@@ -241,7 +256,7 @@ public class ExchangeLogServiceBean {
     public void resend(List<String> messageIdList, String username) {
         LOG.debug("resend in service layer:{} {}",messageIdList,username);
         List<UnsentMessage> unsentMessageList;
-        unsentMessageList = unsentModel.resend(messageIdList);
+        unsentMessageList = getAndRemoveUnsentMessagesFromDB(messageIdList);
         if (unsentMessageList != null && !unsentMessageList.isEmpty()) {
             sendingQueueEvent.fire(new NotificationMessage("messageIds", messageIdList));
 
@@ -269,5 +284,23 @@ public class ExchangeLogServiceBean {
         // For long polling
         exchangeLogEvent.fire(new NotificationMessage("guid", pollStatus.getExchangeLogGuid()));
         return pollStatus;
+    }
+
+    private List<UnsentMessage> getAndRemoveUnsentMessagesFromDB(List<String> unsentMessageId) {
+        if (unsentMessageId == null) {
+            throw new IllegalArgumentException("No messageList to resend");
+        }
+
+        List<UnsentMessage> unsentMessageList = new ArrayList<>();
+        for (String messageId : unsentMessageId) {
+            try {
+                UnsentMessage message = unsentMessageDao.getByGuid(UUID.fromString(messageId));
+                UnsentMessage removedMessage = unsentMessageDao.remove(message);
+                unsentMessageList.add(removedMessage);
+            } catch (NoResultException e) {
+                LOG.error("Couldn't find message to resend with guid: " + messageId);
+            }
+        }
+        return unsentMessageList;
     }
 }

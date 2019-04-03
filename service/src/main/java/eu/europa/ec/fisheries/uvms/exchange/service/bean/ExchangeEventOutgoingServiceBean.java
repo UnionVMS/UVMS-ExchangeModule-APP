@@ -172,7 +172,7 @@ public class ExchangeEventOutgoingServiceBean {
                 String pluginMessageId = producer.sendEventBusMessage(text, serviceName);
                 try {
                     ExchangeLog log = ExchangeLogMapper.getSendMovementExchangeLog(sendReport);
-                    exchangeLogService.logAndCache(log, pluginMessageId, request.getUsername());
+                    exchangeLogService.logAndCache(log, pluginMessageId);
                 } catch (Exception e) {
                     LOG.error("Could not create log", e);
                 }
@@ -452,7 +452,7 @@ public class ExchangeEventOutgoingServiceBean {
             }
             username = request.getUsername();
             ExchangeLog log = ExchangeLogMapper.getReceivedMovementExchangeLog(setReportMovementType, movementRefType.getMovementRefGuid(), movementRefType.getType().value(), username);
-            exchangeLogService.log(log, username);
+            exchangeLogService.log(log);
         } catch (Exception e) {
             LOG.error(e.getMessage(), e);
         }
@@ -564,7 +564,7 @@ public class ExchangeEventOutgoingServiceBean {
 
         try {
             ExchangeLog log = ExchangeLogMapper.getSendCommandExchangeLog(request.getCommand(), request.getUsername());
-            exchangeLogService.logAndCache(log, pluginMessageId, request.getUsername());
+            exchangeLogService.logAndCache(log, pluginMessageId);
         } catch (Exception e) {
             LOG.error("Could not create log", e);
         }
