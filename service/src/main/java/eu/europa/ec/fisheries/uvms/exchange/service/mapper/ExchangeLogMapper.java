@@ -33,26 +33,18 @@ import eu.europa.ec.fisheries.schema.exchange.plugin.types.v1.EmailType;
 import eu.europa.ec.fisheries.schema.exchange.plugin.types.v1.PluginType;
 import eu.europa.ec.fisheries.schema.exchange.plugin.types.v1.PollType;
 import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogStatusTypeType;
-import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogType;
-import eu.europa.ec.fisheries.schema.exchange.v1.LogRefType;
 import eu.europa.ec.fisheries.schema.exchange.v1.LogType;
-import eu.europa.ec.fisheries.schema.exchange.v1.ReceiveMovementType;
-import eu.europa.ec.fisheries.schema.exchange.v1.SendEmailType;
-import eu.europa.ec.fisheries.schema.exchange.v1.SendMovementType;
-import eu.europa.ec.fisheries.schema.exchange.v1.SendPollType;
 import eu.europa.ec.fisheries.schema.exchange.v1.TypeRefType;
-import eu.europa.ec.fisheries.schema.exchange.v1.UnsentMessageTypeProperty;
 import eu.europa.ec.fisheries.schema.exchange.v1.UnsentMessageTypePropertyKey;
 import eu.europa.ec.fisheries.schema.rules.mobileterminal.v1.IdType;
-import eu.europa.ec.fisheries.uvms.exchange.service.exception.ExchangeLogException;
 
 public class ExchangeLogMapper {
 
     final static Logger LOG = LoggerFactory.getLogger(ExchangeLogMapper.class);
 
-    public static ExchangeLog getReceivedMovementExchangeLog(SetReportMovementType request, String typeRefGuid, String typeRefType,String username) throws ExchangeLogException {
+    public static ExchangeLog getReceivedMovementExchangeLog(SetReportMovementType request, String typeRefGuid, String typeRefType,String username) {
         if (request == null) {
-            throw new ExchangeLogException("No request");
+            throw new IllegalArgumentException("No request");
         }
         ExchangeLog log = new ExchangeLog();
         log.setDateReceived(request.getTimestamp().toInstant());
@@ -71,12 +63,12 @@ public class ExchangeLogMapper {
         return log;
     }
 
-    private static String getSenderReceiver(MovementBaseType movement, PluginType pluginType, String pluginName, String username) throws ExchangeLogException {
+    private static String getSenderReceiver(MovementBaseType movement, PluginType pluginType, String pluginName, String username) {
         if (movement == null) {
-            throw new ExchangeLogException("No movement");
+            throw new IllegalArgumentException("No movement");
         }
         if (pluginType == null) {
-            throw new ExchangeLogException("No plugin type");
+            throw new IllegalArgumentException("No plugin type");
         }
         String senderReceiver = null;
         switch (pluginType) {
@@ -96,12 +88,12 @@ public class ExchangeLogMapper {
         return senderReceiver;
     }
 
-    private static String getSenderReceiver(AssetId assetId) throws ExchangeLogException {
+    private static String getSenderReceiver(AssetId assetId) {
         if (assetId == null) {
-            throw new ExchangeLogException("No asset");
+            throw new IllegalArgumentException("No asset");
         }
         if (assetId.getAssetIdList() == null) {
-            throw new ExchangeLogException("No asset id");
+            throw new IllegalArgumentException("No asset id");
         }
         String senderReceiver = null;
         for (AssetIdList idList : assetId.getAssetIdList()) {
@@ -121,12 +113,12 @@ public class ExchangeLogMapper {
         if (senderReceiver != null) {
             return senderReceiver;
         }
-        throw new ExchangeLogException("No asset id value");
+        throw new IllegalArgumentException("No asset id value");
     }
 
-    private static String getRecipientOfPoll(List<KeyValueType> pollReceiverList) throws ExchangeLogException {
+    private static String getRecipientOfPoll(List<KeyValueType> pollReceiverList) {
         if (pollReceiverList == null || pollReceiverList.isEmpty()) {
-            throw new ExchangeLogException("No poll receiver list");
+            throw new IllegalArgumentException("No poll receiver list");
         }
         String dnid = null;
         String memberNumber = null;
@@ -150,7 +142,7 @@ public class ExchangeLogMapper {
         } else if (les != null) {
             return les;
         }
-        throw new ExchangeLogException("No receiver of poll");
+        throw new IllegalArgumentException("No receiver of poll");
     }
 
     public static String getSendMovementSenderReceiver(SendMovementToPluginType sendReport) {
@@ -169,15 +161,15 @@ public class ExchangeLogMapper {
         }
         try {
             senderReceiver = getSenderReceiver(sendReport.getMovement(), sendReport.getPluginType(), sendReport.getPluginName(), null);
-        } catch (ExchangeLogException e) {
+        } catch (Exception e) {
             LOG.debug("Report sent to plugin couldn't map to senderReceiver");
         }
         return senderReceiver;
     }
 
-    public static ExchangeLog getSendMovementExchangeLog(SendMovementToPluginType sendReport) throws ExchangeLogException {
+    public static ExchangeLog getSendMovementExchangeLog(SendMovementToPluginType sendReport) {
         if (sendReport == null) {
-            throw new ExchangeLogException("No request");
+            throw new IllegalArgumentException("No request");
         }
         ExchangeLog log = new ExchangeLog();
         log.setDateReceived(sendReport.getTimestamp().toInstant());
@@ -199,12 +191,12 @@ public class ExchangeLogMapper {
         return log;
     }
 
-    public static ExchangeLog getSendCommandExchangeLog(CommandType command, String username) throws ExchangeLogException {
+    public static ExchangeLog getSendCommandExchangeLog(CommandType command, String username) {
         if (command == null) {
-            throw new ExchangeLogException("No command");
+            throw new IllegalArgumentException("No command");
         }
         if (command.getCommand() == null) {
-            throw new ExchangeLogException("No command type");
+            throw new IllegalArgumentException("No command type");
         }
         switch (command.getCommand()) {
             case EMAIL:
@@ -212,12 +204,12 @@ public class ExchangeLogMapper {
             case POLL:
                 return getPollExchangeLog(command, username);
         }
-        throw new ExchangeLogException("Not implemented command type");
+        throw new IllegalArgumentException("Not implemented command type");
     }
 
-    private static ExchangeLog getSendEmailExchangeLog(CommandType command, String username) throws ExchangeLogException {
+    private static ExchangeLog getSendEmailExchangeLog(CommandType command, String username) {
         if (command.getEmail() == null) {
-            throw new ExchangeLogException("No email");
+            throw new IllegalArgumentException("No email");
         }
         ExchangeLog log = new ExchangeLog();
         log.setType(LogType.SEND_EMAIL);
@@ -232,9 +224,9 @@ public class ExchangeLogMapper {
         return addStatusHistory(log);
     }
 
-    private static ExchangeLog getPollExchangeLog(CommandType command, String username) throws ExchangeLogException {
+    private static ExchangeLog getPollExchangeLog(CommandType command, String username) {
         if (command.getPoll() == null) {
-            throw new ExchangeLogException("No poll");
+            throw new IllegalArgumentException("No poll");
         }
 
         //TODO fix in mobileterminal
@@ -327,12 +319,12 @@ public class ExchangeLogMapper {
         return null;
     }
 
-    private static String getRecipient(MovementBaseType movementBaseType, PluginType pluginType) throws ExchangeLogException {
+    private static String getRecipient(MovementBaseType movementBaseType, PluginType pluginType) {
         if(movementBaseType== null){
-            throw new ExchangeLogException("Movement is empty");
+            throw new IllegalArgumentException("Movement is empty");
         }
         if(pluginType == null){
-            throw new ExchangeLogException("PluginType is empty");
+            throw new IllegalArgumentException("PluginType is empty");
         }
         String recipient;
         switch (pluginType){

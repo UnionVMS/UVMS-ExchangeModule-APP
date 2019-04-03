@@ -19,7 +19,6 @@ import java.util.List;
 import java.util.UUID;
 
 import eu.europa.ec.fisheries.schema.exchange.service.v1.CapabilityListType;
-import eu.europa.ec.fisheries.schema.exchange.service.v1.ServiceResponseType;
 import eu.europa.ec.fisheries.schema.exchange.service.v1.ServiceType;
 import eu.europa.ec.fisheries.schema.exchange.service.v1.SettingListType;
 import eu.europa.ec.fisheries.uvms.exchange.bean.ServiceRegistryModelBean;
@@ -27,9 +26,6 @@ import eu.europa.ec.fisheries.uvms.exchange.dao.bean.ServiceRegistryDaoBean;
 import eu.europa.ec.fisheries.uvms.exchange.entity.serviceregistry.Service;
 import eu.europa.ec.fisheries.uvms.exchange.entity.serviceregistry.ServiceCapability;
 import eu.europa.ec.fisheries.uvms.exchange.entity.serviceregistry.ServiceSetting;
-import eu.europa.ec.fisheries.uvms.exchange.exception.ExchangeDaoException;
-import eu.europa.ec.fisheries.uvms.exchange.exception.ExchangeDaoMappingException;
-import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelException;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -55,7 +51,7 @@ public class DomainModelBeanTest {
 
     @Ignore
     @Test
-    public void testCreateModel() throws ExchangeModelException {
+    public void testCreateModel() {
         UUID id = UUID.randomUUID();
 
         ServiceType serviceType = MockData.getModel((int) id.getLeastSignificantBits());

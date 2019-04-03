@@ -21,7 +21,6 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
-import eu.europa.ec.fisheries.schema.exchange.service.v1.ServiceResponseType;
 import eu.europa.ec.fisheries.uvms.exchange.service.bean.ExchangeServiceBean;
 import eu.europa.ec.fisheries.uvms.exchange.service.bean.PluginServiceBean;
 import org.slf4j.Logger;
@@ -31,11 +30,8 @@ import eu.europa.ec.fisheries.uvms.exchange.rest.dto.ResponseDto;
 import eu.europa.ec.fisheries.uvms.exchange.rest.dto.RestResponseCode;
 import eu.europa.ec.fisheries.uvms.exchange.rest.error.ErrorHandler;
 import eu.europa.ec.fisheries.uvms.exchange.rest.mapper.ServiceMapper;
-import eu.europa.ec.fisheries.uvms.exchange.service.exception.ExchangeServiceException;
 import eu.europa.ec.fisheries.uvms.rest.security.RequiresFeature;
 import eu.europa.ec.fisheries.uvms.rest.security.UnionVMSFeature;
-
-import java.util.List;
 
 @Path("/plugin")
 @Stateless
@@ -67,7 +63,7 @@ public class ExchangeRegistryRestResource {
 		LOG.info("Get list invoked in rest layer");
 		try {
 			return new ResponseDto(ServiceMapper.map(serviceLayer.getServiceList(null)), RestResponseCode.OK);
-		} catch (ExchangeServiceException | NullPointerException ex) {
+		} catch (Exception ex) {
 			LOG.error("[ Error when geting list. ] {} ", ex.getMessage());
 			return ErrorHandler.getFault(ex);
 		}
@@ -90,7 +86,7 @@ public class ExchangeRegistryRestResource {
 		LOG.info("Start service invoked in rest layer:{}",serviceClassName);
 		try {
 			return new ResponseDto(pluginService.start(serviceClassName), RestResponseCode.OK);
-		} catch (ExchangeServiceException ex) {
+		} catch (Exception ex) {
 			LOG.error("[ Error when starting service {}] {}",serviceClassName,ex);
 			return ErrorHandler.getFault(ex);
 		}
@@ -113,7 +109,7 @@ public class ExchangeRegistryRestResource {
 		LOG.info("Stop service invoked in rest layer:{}",serviceClassName);
 		try {
 			return new ResponseDto(pluginService.stop(serviceClassName), RestResponseCode.OK);
-		} catch (ExchangeServiceException | NullPointerException ex) {
+		} catch (Exception ex) {
 			LOG.error("[ Error when stopping service {} ] {} ",serviceClassName, ex.getMessage());
 			return ErrorHandler.getFault(ex);
 		}

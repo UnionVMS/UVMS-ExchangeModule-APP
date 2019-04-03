@@ -24,8 +24,6 @@ import eu.europa.ec.fisheries.schema.exchange.v1.LogWithRawMsgAndType;
 import eu.europa.ec.fisheries.schema.exchange.v1.TypeRefType;
 import eu.europa.ec.fisheries.uvms.exchange.bean.ExchangeLogModelBean;
 import eu.europa.ec.fisheries.uvms.exchange.model.dto.ListResponseDto;
-import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelException;
-import eu.europa.ec.fisheries.uvms.exchange.service.exception.ExchangeLogException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,17 +40,13 @@ public class ExchangeLogRestServiceBean {
             return exchangeLogModel.getExchangeLogByGuid(guid);
     }
 
-    public GetLogListByQueryResponse getExchangeLogList(ExchangeListQuery query) throws ExchangeLogException {
+    public GetLogListByQueryResponse getExchangeLogList(ExchangeListQuery query) {
         GetLogListByQueryResponse response = new GetLogListByQueryResponse();
-        try {
-            ListResponseDto exchangeLogList = exchangeLogModel.getExchangeLogListByQuery(query);
-            response.setCurrentPage(exchangeLogList.getCurrentPage());
-            response.setTotalNumberOfPages(exchangeLogList.getTotalNumberOfPages());
-            response.getExchangeLog().addAll(exchangeLogList.getExchangeLogList());
-            return response;
-        } catch (ExchangeModelException e) {
-            throw new ExchangeLogException("Couldn't get exchange log list.");
-        }
+        ListResponseDto exchangeLogList = exchangeLogModel.getExchangeLogListByQuery(query);
+        response.setCurrentPage(exchangeLogList.getCurrentPage());
+        response.setTotalNumberOfPages(exchangeLogList.getTotalNumberOfPages());
+        response.getExchangeLog().addAll(exchangeLogList.getExchangeLogList());
+        return response;
     }
 
     public LogWithRawMsgAndType getExchangeLogRawMessage(UUID guid) {

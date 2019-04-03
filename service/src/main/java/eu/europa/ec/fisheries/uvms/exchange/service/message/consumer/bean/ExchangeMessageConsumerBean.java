@@ -21,7 +21,6 @@ import eu.europa.ec.fisheries.uvms.exchange.service.bean.PluginServiceBean;
 import eu.europa.ec.fisheries.uvms.exchange.service.message.event.*;
 import eu.europa.ec.fisheries.uvms.exchange.service.message.event.carrier.ExchangeErrorEvent;
 import eu.europa.ec.fisheries.uvms.exchange.model.constant.FaultCode;
-import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelMarshallException;
 import eu.europa.ec.fisheries.uvms.exchange.model.mapper.ExchangeModuleResponseMapper;
 import eu.europa.ec.fisheries.uvms.exchange.model.mapper.JAXBMarshaller;
 import org.slf4j.Logger;
@@ -219,7 +218,7 @@ public class ExchangeMessageConsumerBean implements MessageListener {
     private ExchangeBaseRequest tryConsumeExchangeBaseRequest(TextMessage textMessage) {
         try {
             return JAXBMarshaller.unmarshallTextMessage(textMessage, ExchangeBaseRequest.class);
-        } catch (ExchangeModelMarshallException e) {
+        } catch (RuntimeException e) {
             return null;
         }
     }

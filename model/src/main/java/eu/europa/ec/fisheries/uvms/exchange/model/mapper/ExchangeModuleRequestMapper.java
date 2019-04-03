@@ -41,15 +41,13 @@ import eu.europa.ec.fisheries.schema.exchange.service.v1.SettingType;
 import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogStatusTypeType;
 import eu.europa.ec.fisheries.schema.exchange.v1.TypeRefType;
 import eu.europa.ec.fisheries.uvms.commons.date.DateUtils;
-import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelMapperException;
-import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelMarshallException;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 
 public class ExchangeModuleRequestMapper {
 
     private static final String FLUX_VESSEL_PLUGIN = "flux-vessel-plugin";
 
-    public static String createRegisterServiceRequest(ServiceType serviceType, CapabilityListType capabilityList, SettingListType settingList) throws ExchangeModelMarshallException {
+    public static String createRegisterServiceRequest(ServiceType serviceType, CapabilityListType capabilityList, SettingListType settingList) {
         RegisterServiceRequest request = new RegisterServiceRequest();
         request.setMethod(ExchangeRegistryMethod.REGISTER_SERVICE);
         request.setService(serviceType);
@@ -58,14 +56,14 @@ public class ExchangeModuleRequestMapper {
         return JAXBMarshaller.marshallJaxBObjectToString(request);
     }
 
-    public static String createUnregisterServiceRequest(ServiceType serviceType) throws ExchangeModelMarshallException {
+    public static String createUnregisterServiceRequest(ServiceType serviceType) {
         UnregisterServiceRequest request = new UnregisterServiceRequest();
         request.setMethod(ExchangeRegistryMethod.UNREGISTER_SERVICE);
         request.setService(serviceType);
         return JAXBMarshaller.marshallJaxBObjectToString(request);
     }
 
-    public static String createSetMovementReportRequest(SetReportMovementType reportType, String username) throws ExchangeModelMarshallException {
+    public static String createSetMovementReportRequest(SetReportMovementType reportType, String username) {
         SetMovementReportRequest request = new SetMovementReportRequest();
         request.setMethod(ExchangeModuleMethod.SET_MOVEMENT_REPORT);
         request.setUsername(username);
@@ -74,7 +72,7 @@ public class ExchangeModuleRequestMapper {
     }
 
     public static String createSetMovementReportRequest(SetReportMovementType message, String username, String fluxDFValue, Instant date,
-                                                        PluginType pluginType, String senderReceiver, String onValue) throws ExchangeModelMarshallException {
+                                                        PluginType pluginType, String senderReceiver, String onValue) {
         SetMovementReportRequest request = new SetMovementReportRequest();
         request.setMethod(ExchangeModuleMethod.SET_MOVEMENT_REPORT);
         request.setUsername(username);
@@ -85,7 +83,7 @@ public class ExchangeModuleRequestMapper {
     }
 
 
-    public static String createReceiveAssetInformation(String assets, String username, PluginType pluginType) throws ExchangeModelMarshallException {
+    public static String createReceiveAssetInformation(String assets, String username, PluginType pluginType) {
         ReceiveAssetInformationRequest request = new ReceiveAssetInformationRequest();
         request.setAssets(assets);
         request.setUsername(username);
@@ -96,7 +94,7 @@ public class ExchangeModuleRequestMapper {
         return JAXBMarshaller.marshallJaxBObjectToString(request);
     }
 
-    public static String createSendAssetInformation(String assets, String username) throws ExchangeModelMarshallException {
+    public static String createSendAssetInformation(String assets, String username) {
         SendAssetInformationRequest request = new SendAssetInformationRequest();
         request.setAssets(assets);
         request.setUsername(username);
@@ -106,7 +104,7 @@ public class ExchangeModuleRequestMapper {
         return JAXBMarshaller.marshallJaxBObjectToString(request);
     }
 
-    public static String createQueryAssetInformation(String assets, String username) throws ExchangeModelMarshallException {
+    public static String createQueryAssetInformation(String assets, String username) {
         QueryAssetInformationRequest request = new QueryAssetInformationRequest();
         request.setAssets(assets);
         request.setUsername(username);
@@ -116,7 +114,7 @@ public class ExchangeModuleRequestMapper {
         return JAXBMarshaller.marshallJaxBObjectToString(request);
     }
 
-    public static String createReceiveSalesReportRequest(String report, String reportGuid, String sender, String username, PluginType typeOfOriginatingPlugin, Instant dateReceived, String on) throws ExchangeModelMarshallException {
+    public static String createReceiveSalesReportRequest(String report, String reportGuid, String sender, String username, PluginType typeOfOriginatingPlugin, Instant dateReceived, String on) {
         ReceiveSalesReportRequest request = new ReceiveSalesReportRequest();
         request.setReport(report);
 
@@ -125,11 +123,11 @@ public class ExchangeModuleRequestMapper {
     }
 
     @Deprecated
-    public static String createReceiveSalesReportRequest(String report, String reportGuid, String sender, String username, PluginType typeOfOriginatingPlugin, Instant dateReceived) throws ExchangeModelMarshallException {
+    public static String createReceiveSalesReportRequest(String report, String reportGuid, String sender, String username, PluginType typeOfOriginatingPlugin, Instant dateReceived) {
         return createReceiveSalesReportRequest(report, reportGuid, sender, username, typeOfOriginatingPlugin, dateReceived, null);
     }
 
-    public static String createReceiveSalesQueryRequest(String query, String queryGuid, String sender, Instant receiveDate, String username, PluginType typeOfOriginatingPlugin, String on) throws ExchangeModelMarshallException {
+    public static String createReceiveSalesQueryRequest(String query, String queryGuid, String sender, Instant receiveDate, String username, PluginType typeOfOriginatingPlugin, String on) {
         ReceiveSalesQueryRequest request = new ReceiveSalesQueryRequest();
         request.setQuery(query);
         enrichBaseRequest(request, ExchangeModuleMethod.RECEIVE_SALES_QUERY, queryGuid, null, sender, receiveDate, username, typeOfOriginatingPlugin, on);
@@ -137,11 +135,11 @@ public class ExchangeModuleRequestMapper {
     }
 
     @Deprecated
-    public static String createReceiveSalesQueryRequest(String query, String queryGuid, String sender, Instant receiveDate, String username, PluginType typeOfOriginatingPlugin) throws ExchangeModelMarshallException {
+    public static String createReceiveSalesQueryRequest(String query, String queryGuid, String sender, Instant receiveDate, String username, PluginType typeOfOriginatingPlugin) {
         return createReceiveSalesQueryRequest(query, queryGuid, sender, receiveDate, username, typeOfOriginatingPlugin, null);
     }
 
-    public static String createReceiveSalesResponseRequest(String response, String guid, String sender, Instant date, String username, PluginType pluginType, String on) throws ExchangeModelMarshallException {
+    public static String createReceiveSalesResponseRequest(String response, String guid, String sender, Instant date, String username, PluginType pluginType, String on) {
         ReceiveSalesResponseRequest receiveSalesResponseRequest = new ReceiveSalesResponseRequest();
         receiveSalesResponseRequest.setResponse(response);
 
@@ -150,16 +148,16 @@ public class ExchangeModuleRequestMapper {
     }
 
     @Deprecated
-    public static String createReceiveSalesResponseRequest(String response, String guid, String sender, Instant date, String username, PluginType pluginType) throws ExchangeModelMarshallException {
+    public static String createReceiveSalesResponseRequest(String response, String guid, String sender, Instant date, String username, PluginType pluginType) {
         return createReceiveSalesResponseRequest(response, guid, sender, date, username, pluginType, null);
     }
 
-    public static String createReceiveInvalidSalesMessage(String respondToInvalidMessageRequest, String guid, String sender, Instant date, String username, PluginType pluginType) throws ExchangeModelMarshallException {
+    public static String createReceiveInvalidSalesMessage(String respondToInvalidMessageRequest, String guid, String sender, Instant date, String username, PluginType pluginType) {
         return createReceiveInvalidSalesMessage(respondToInvalidMessageRequest, guid, sender,
                 date, username, pluginType, null);
     }
 
-    public static String createReceiveInvalidSalesMessage(String respondToInvalidMessageRequest, String guid, String sender, Instant date, String username, PluginType pluginType, String originalMessage) throws ExchangeModelMarshallException {
+    public static String createReceiveInvalidSalesMessage(String respondToInvalidMessageRequest, String guid, String sender, Instant date, String username, PluginType pluginType, String originalMessage) {
         ReceiveInvalidSalesMessage receiveInvalidSalesMessage = new ReceiveInvalidSalesMessage();
         receiveInvalidSalesMessage.setRespondToInvalidMessageRequest(respondToInvalidMessageRequest);
         receiveInvalidSalesMessage.setOriginalMessage(originalMessage);
@@ -180,7 +178,7 @@ public class ExchangeModuleRequestMapper {
     public static String createSendSalesResponseRequest(String response,
                                                         String guid, String dataFlow,
                                                         String receiver, Instant date,
-                                                        ExchangeLogStatusTypeType validationStatus) throws ExchangeModelMarshallException {
+                                                        ExchangeLogStatusTypeType validationStatus) {
         return createSendSalesResponseRequest(response, guid, dataFlow, receiver, date, validationStatus, PluginType.FLUX);
     }
 
@@ -188,7 +186,7 @@ public class ExchangeModuleRequestMapper {
                                                         String guid, String dataFlow,
                                                         String receiver, Instant date,
                                                         ExchangeLogStatusTypeType validationStatus,
-                                                        String typeOfOriginatingPlugin) throws ExchangeModelMarshallException {
+                                                        String typeOfOriginatingPlugin) {
         return createSendSalesResponseRequest(response, guid, dataFlow, receiver, date, validationStatus, PluginType.valueOf(typeOfOriginatingPlugin));
     }
 
@@ -196,7 +194,7 @@ public class ExchangeModuleRequestMapper {
                                                         String guid, String dataFlow,
                                                         String receiver, Instant date,
                                                         ExchangeLogStatusTypeType validationStatus,
-                                                        PluginType typeOfOriginatingPlugin) throws ExchangeModelMarshallException {
+                                                        PluginType typeOfOriginatingPlugin) {
         SendSalesResponseRequest sendSalesResponseRequest = new SendSalesResponseRequest();
         sendSalesResponseRequest.setResponse(checkNotNull(response));
         sendSalesResponseRequest.setValidationStatus(validationStatus);
@@ -214,19 +212,19 @@ public class ExchangeModuleRequestMapper {
      **/
     @Deprecated
     public static String createSendSalesReportRequest(String report, String guid, String dataFlow, String receiver,
-                                                      Instant date, ExchangeLogStatusTypeType validationStatus) throws ExchangeModelMarshallException {
+                                                      Instant date, ExchangeLogStatusTypeType validationStatus) {
         return createSendSalesReportRequest(report, guid, dataFlow, receiver, date, validationStatus, PluginType.FLUX);
     }
 
     public static String createSendSalesReportRequest(String report, String guid, String dataFlow, String receiver,
                                                       Instant date, ExchangeLogStatusTypeType validationStatus,
-                                                      String typeOfOriginatingPlugin) throws ExchangeModelMarshallException {
+                                                      String typeOfOriginatingPlugin) {
         return createSendSalesReportRequest(report, guid, dataFlow, receiver, date, validationStatus, PluginType.valueOf(typeOfOriginatingPlugin));
     }
 
     public static String createSendSalesReportRequest(String report, String guid, String dataFlow, String receiver,
                                                       Instant date, ExchangeLogStatusTypeType validationStatus,
-                                                      PluginType typeOfOriginatingPlugin) throws ExchangeModelMarshallException {
+                                                      PluginType typeOfOriginatingPlugin) {
         SendSalesReportRequest sendSalesReportRequest = new SendSalesReportRequest();
         sendSalesReportRequest.setReport(checkNotNull(report));
         sendSalesReportRequest.setValidationStatus(validationStatus);
@@ -236,12 +234,12 @@ public class ExchangeModuleRequestMapper {
     }
 
 
-    public static String createSendReportToPlugin(String pluginName, PluginType type, Instant fwdDate, String fwdRule, String recipient, MovementType payload, List<RecipientInfoType> recipientInfoList, String assetName, String ircs, String mmsi, String externalMarking, String flagState) throws ExchangeModelMapperException {
+    public static String createSendReportToPlugin(String pluginName, PluginType type, Instant fwdDate, String fwdRule, String recipient, MovementType payload, List<RecipientInfoType> recipientInfoList, String assetName, String ircs, String mmsi, String externalMarking, String flagState) {
         SendMovementToPluginRequest request = createSendReportToPluginRequest(pluginName, type, fwdDate, fwdRule, recipient, payload, recipientInfoList, assetName, ircs, mmsi, externalMarking, flagState);
         return JAXBMarshaller.marshallJaxBObjectToString(request);
     }
 
-    private static SendMovementToPluginRequest createSendReportToPluginRequest(String pluginName, PluginType type, Instant fwdDate, String fwdRule, String recipient, MovementType payload, List<RecipientInfoType> recipientInfoList, String assetName, String ircs, String mmsi, String externalMarking, String flagState) throws ExchangeModelMapperException {
+    private static SendMovementToPluginRequest createSendReportToPluginRequest(String pluginName, PluginType type, Instant fwdDate, String fwdRule, String recipient, MovementType payload, List<RecipientInfoType> recipientInfoList, String assetName, String ircs, String mmsi, String externalMarking, String flagState) {
         SendMovementToPluginRequest request = new SendMovementToPluginRequest();
         request.setMethod(ExchangeModuleMethod.SEND_REPORT_TO_PLUGIN);
         SendMovementToPluginType sendMovementToPluginType = createSendMovementToPluginType(pluginName, type, fwdDate, fwdRule, recipient, payload, recipientInfoList, assetName, ircs, mmsi, externalMarking, flagState);
@@ -250,7 +248,7 @@ public class ExchangeModuleRequestMapper {
         return request;
     }
 
-    public static SendMovementToPluginType createSendMovementToPluginType(String pluginName, PluginType type, Instant fwdDate, String fwdRule, String recipient, MovementType payload, List<RecipientInfoType> recipientInfoList, String assetName, String ircs, String mmsi, String externalMarking, String flagState) throws ExchangeModelMapperException {
+    public static SendMovementToPluginType createSendMovementToPluginType(String pluginName, PluginType type, Instant fwdDate, String fwdRule, String recipient, MovementType payload, List<RecipientInfoType> recipientInfoList, String assetName, String ircs, String mmsi, String externalMarking, String flagState) {
         SendMovementToPluginType report = new SendMovementToPluginType();
         mapToMovementType(payload, ircs, mmsi, externalMarking, flagState, assetName);
         report.setTimestamp(DateUtils.nowUTC().toDate());
@@ -274,19 +272,19 @@ public class ExchangeModuleRequestMapper {
         movementType.setAssetName(assetName);
     }
 
-    public static String createSetCommandSendPollRequest(String pluginName, PollType poll, String username, String fwdRule) throws ExchangeModelMapperException {
+    public static String createSetCommandSendPollRequest(String pluginName, PollType poll, String username, String fwdRule) {
         SetCommandRequest request = createSetCommandRequest(pluginName, CommandTypeType.POLL, username, fwdRule);
         request.getCommand().setPoll(poll);
         return JAXBMarshaller.marshallJaxBObjectToString(request);
     }
 
-    public static String createSetCommandSendEmailRequest(String pluginName, EmailType email, String fwdRule) throws ExchangeModelMapperException {
+    public static String createSetCommandSendEmailRequest(String pluginName, EmailType email, String fwdRule) {
         SetCommandRequest request = createSetCommandRequest(pluginName, CommandTypeType.EMAIL, "UVMS", fwdRule);
         request.getCommand().setEmail(email);
         return JAXBMarshaller.marshallJaxBObjectToString(request);
     }
 
-    private static SetCommandRequest createSetCommandRequest(String pluginName, CommandTypeType type, String username, String fwdRule) throws ExchangeModelMapperException {
+    private static SetCommandRequest createSetCommandRequest(String pluginName, CommandTypeType type, String username, String fwdRule) {
         SetCommandRequest request = new SetCommandRequest();
         request.setMethod(ExchangeModuleMethod.SET_COMMAND);
         CommandType commandType = new CommandType();
@@ -299,14 +297,14 @@ public class ExchangeModuleRequestMapper {
         return request;
     }
 
-    public static String createGetServiceListRequest(List<PluginType> pluginTypes) throws ExchangeModelMapperException {
+    public static String createGetServiceListRequest(List<PluginType> pluginTypes) {
         GetServiceListRequest request = new GetServiceListRequest();
         request.setMethod(ExchangeModuleMethod.LIST_SERVICES);
         request.getType().addAll(pluginTypes);
         return JAXBMarshaller.marshallJaxBObjectToString(request);
     }
 
-    public static String createUpdatePluginSettingRequest(String serviceClassName, String settingKey, String settingValue, String username) throws ExchangeModelMarshallException {
+    public static String createUpdatePluginSettingRequest(String serviceClassName, String settingKey, String settingValue, String username) {
         UpdatePluginSettingRequest request = new UpdatePluginSettingRequest();
         request.setMethod(ExchangeModuleMethod.UPDATE_PLUGIN_SETTING);
         request.setServiceClassName(serviceClassName);
@@ -319,7 +317,7 @@ public class ExchangeModuleRequestMapper {
     }
 
     // Asynch processed movement response
-    public static String mapToProcessedMovementResponse(String username, MovementRefType movementRef) throws ExchangeModelMapperException {
+    public static String mapToProcessedMovementResponse(String username, MovementRefType movementRef) {
         ProcessedMovementResponse response = new ProcessedMovementResponse();
         response.setMethod(ExchangeModuleMethod.PROCESSED_MOVEMENT);
         response.setMovementRefType(movementRef);
@@ -327,7 +325,7 @@ public class ExchangeModuleRequestMapper {
         return JAXBMarshaller.marshallJaxBObjectToString(response);
     }
 
-    public static String createFluxMdrSyncEntityRequest(String reportType, String username, String fr) throws ExchangeModelMarshallException {
+    public static String createFluxMdrSyncEntityRequest(String reportType, String username, String fr) {
         SetFLUXMDRSyncMessageExchangeRequest request = new SetFLUXMDRSyncMessageExchangeRequest();
         request.setMethod(ExchangeModuleMethod.SET_MDR_SYNC_MESSAGE_REQUEST);
         request.setUsername(username);
@@ -336,7 +334,7 @@ public class ExchangeModuleRequestMapper {
         return JAXBMarshaller.marshallJaxBObjectToString(request);
     }
 
-    public static String createFluxMdrSyncEntityResponse(String reportType, String username) throws ExchangeModelMarshallException {
+    public static String createFluxMdrSyncEntityResponse(String reportType, String username) {
         SetFLUXMDRSyncMessageExchangeResponse request = new SetFLUXMDRSyncMessageExchangeResponse();
         request.setMethod(ExchangeModuleMethod.SET_MDR_SYNC_MESSAGE_RESPONSE);
         request.setUsername(username);
@@ -349,7 +347,7 @@ public class ExchangeModuleRequestMapper {
      *                                              String messageGuid, PluginType pluginType, String senderReceiver, String onValue)
      */
     @Deprecated
-    public static String createFluxFAReportRequest(String message, String username, String fluxDFValue,Instant date, String messageGuid,PluginType pluginType,String senderReceiver) throws ExchangeModelMarshallException {
+    public static String createFluxFAReportRequest(String message, String username, String fluxDFValue,Instant date, String messageGuid,PluginType pluginType,String senderReceiver) {
         SetFLUXFAReportMessageRequest request = new SetFLUXFAReportMessageRequest();
         request.setMethod(ExchangeModuleMethod.SET_FLUX_FA_REPORT_MESSAGE);
         request.setUsername(username);
@@ -364,7 +362,7 @@ public class ExchangeModuleRequestMapper {
 
     public static String createFluxFAReportRequest(String message, String username, String fluxDFValue, Instant date,
                                                    String messageGuid, PluginType pluginType, String senderReceiver, String onValue,
-                                                   String todt, String to, String ad) throws ExchangeModelMarshallException {
+                                                   String todt, String to, String ad) {
         SetFLUXFAReportMessageRequest request = new SetFLUXFAReportMessageRequest();
         request.setMethod(ExchangeModuleMethod.SET_FLUX_FA_REPORT_MESSAGE);
         request.setRequest(message);
@@ -374,7 +372,7 @@ public class ExchangeModuleRequestMapper {
 
     public static String createFARequestForUnknownType(String message, String username, String fluxDFValue, Instant date,
                                                        String messageGuid, PluginType pluginType, String senderReceiver, String onValue,
-                                                       String todt, String to, String ad) throws ExchangeModelMarshallException {
+                                                       String todt, String to, String ad) {
         SetFLUXFAReportMessageRequest request = new SetFLUXFAReportMessageRequest();
         request.setMethod(ExchangeModuleMethod.UNKNOWN);
         request.setRequest(message);
@@ -384,7 +382,7 @@ public class ExchangeModuleRequestMapper {
 
     public static String createFaQueryRequest(String message, String username, String fluxDFValue, Instant date,
                                               String messageGuid, PluginType pluginType, String senderReceiver, String onValue,
-                                              String todt, String to, String ad) throws ExchangeModelMarshallException {
+                                              String todt, String to, String ad) {
         SetFAQueryMessageRequest request = new SetFAQueryMessageRequest();
         request.setMethod(ExchangeModuleMethod.SET_FA_QUERY_MESSAGE);
         request.setRequest(message);
@@ -394,7 +392,7 @@ public class ExchangeModuleRequestMapper {
 
     public static String createFluxResponseRequest(String message, String username, String dfValue, Instant date,
                                                    String messageGuid, PluginType pluginType, String senderReceiver, String onValue,
-                                                   String todt, String to, String ad) throws ExchangeModelMarshallException {
+                                                   String todt, String to, String ad) {
         RcvFLUXFaResponseMessageRequest request = new RcvFLUXFaResponseMessageRequest();
         request.setMethod(ExchangeModuleMethod.RCV_FLUX_FA_RESPONSE_MESSAGE);
         request.setRequest(message);
@@ -404,7 +402,7 @@ public class ExchangeModuleRequestMapper {
     }
 
     public static String createSendFaQueryMessageRequest(String faQueryMessageStr, String username, String logId, String fluxDataFlow,
-                                                         String senderOrReceiver, String todt, String to, String ad, PluginType pluginType) throws ExchangeModelMarshallException {
+                                                         String senderOrReceiver, String todt, String to, String ad, PluginType pluginType) {
         SetFAQueryMessageRequest request = new SetFAQueryMessageRequest();
         request.setMethod(ExchangeModuleMethod.SEND_FA_QUERY_MESSAGE);
         request.setRequest(faQueryMessageStr);
@@ -413,7 +411,7 @@ public class ExchangeModuleRequestMapper {
     }
 
     public static String createSendFaReportMessageRequest(String faReportMessageStr, String username, String logId, String fluxDataFlow,
-                                                         String senderOrReceiver, String onValue, String todt, String to, String ad, PluginType pluginType) throws ExchangeModelMarshallException {
+                                                         String senderOrReceiver, String onValue, String todt, String to, String ad, PluginType pluginType) {
         SetFLUXFAReportMessageRequest request = new SetFLUXFAReportMessageRequest();
         request.setMethod(ExchangeModuleMethod.SEND_FLUX_FA_REPORT_MESSAGE);
         request.setRequest(faReportMessageStr);
@@ -436,13 +434,13 @@ public class ExchangeModuleRequestMapper {
     }
 
 
-    public static String createFluxFAResponseRequest(String response, String username, String df, String messageGuid, String fr, ExchangeLogStatusTypeType status, String destination) throws ExchangeModelMarshallException {
+    public static String createFluxFAResponseRequest(String response, String username, String df, String messageGuid, String fr, ExchangeLogStatusTypeType status, String destination) {
         return createFluxFAResponseRequest(response, username, df, messageGuid, fr, status, destination, PluginType.FLUX);
     }
 
     public static String createFluxFAResponseRequestWithOnValue(String response, String username, String df, String messageGuid, String fr,
                                                                 String onVal, ExchangeLogStatusTypeType status, String destination, PluginType pluginType,
-                                                                String responseGuid) throws ExchangeModelMarshallException {
+                                                                String responseGuid) {
         SetFLUXFAResponseMessageRequest request = new SetFLUXFAResponseMessageRequest();
         request.setMethod(ExchangeModuleMethod.SET_FLUX_FA_RESPONSE_MESSAGE);
         request.setUsername(username);
@@ -464,7 +462,7 @@ public class ExchangeModuleRequestMapper {
      *@Deprecated Use the createFluxFAResponseRequestWithOnValue(...){} method instead
      */
     @Deprecated
-    public static String createFluxFAResponseRequest(String response, String username, String df, String messageGuid, String fr, ExchangeLogStatusTypeType status, String destination, PluginType pluginType) throws ExchangeModelMarshallException {
+    public static String createFluxFAResponseRequest(String response, String username, String df, String messageGuid, String fr, ExchangeLogStatusTypeType status, String destination, PluginType pluginType) {
         SetFLUXFAResponseMessageRequest request = new SetFLUXFAResponseMessageRequest();
         request.setMethod(ExchangeModuleMethod.SET_FLUX_FA_RESPONSE_MESSAGE);
         request.setUsername(username);
@@ -481,7 +479,7 @@ public class ExchangeModuleRequestMapper {
 
     public static String createFluxFAResponseRequest(String response, String username, String df, String messageGuid, String fr,
                                                      ExchangeLogStatusTypeType status, String destination, PluginType pluginType, String todt,
-                                                     String to, String onValue) throws ExchangeModelMarshallException {
+                                                     String to, String onValue) {
         SetFLUXFAResponseMessageRequest request = new SetFLUXFAResponseMessageRequest();
         request.setMethod(ExchangeModuleMethod.SET_FLUX_FA_RESPONSE_MESSAGE);
         request.setUsername(username);
@@ -499,7 +497,7 @@ public class ExchangeModuleRequestMapper {
         return JAXBMarshaller.marshallJaxBObjectToString(request);
     }
 
-    public static String createFluxFAManualResponseRequest(String reportType, String username) throws ExchangeModelMarshallException {
+    public static String createFluxFAManualResponseRequest(String reportType, String username) {
         SetFLUXFAReportMessageRequest request = new SetFLUXFAReportMessageRequest();
         request.setMethod(ExchangeModuleMethod.SET_FLUX_FA_REPORT_MESSAGE);
         request.setUsername(username);
@@ -508,7 +506,7 @@ public class ExchangeModuleRequestMapper {
         return JAXBMarshaller.marshallJaxBObjectToString(request);
     }
 
-    public static String createUpdateLogStatusRequest(String logGuid, ExchangeLogStatusTypeType newStatus) throws ExchangeModelMarshallException {
+    public static String createUpdateLogStatusRequest(String logGuid, ExchangeLogStatusTypeType newStatus) {
         UpdateLogStatusRequest request = new UpdateLogStatusRequest();
         request.setMethod(ExchangeModuleMethod.UPDATE_LOG_STATUS);
         request.setLogGuid(logGuid);
@@ -516,7 +514,7 @@ public class ExchangeModuleRequestMapper {
         return JAXBMarshaller.marshallJaxBObjectToString(request);
     }
 
-    public static String createUpdateLogStatusRequest(String logGuid, Exception e) throws ExchangeModelMarshallException {
+    public static String createUpdateLogStatusRequest(String logGuid, Exception e) {
         UpdateLogStatusRequest request = new UpdateLogStatusRequest();
         request.setMethod(ExchangeModuleMethod.UPDATE_LOG_BUSINESS_ERROR);
         request.setLogGuid(logGuid);
@@ -526,7 +524,7 @@ public class ExchangeModuleRequestMapper {
         return JAXBMarshaller.marshallJaxBObjectToString(request);
     }
 
-    public static String createLogRefIdByTypeExistsRequest(String refGuid, List<TypeRefType> refTypes) throws ExchangeModelMarshallException {
+    public static String createLogRefIdByTypeExistsRequest(String refGuid, List<TypeRefType> refTypes) {
         LogRefIdByTypeExistsRequest request = new LogRefIdByTypeExistsRequest();
         request.setMethod(ExchangeModuleMethod.LOG_REF_ID_BY_TYPE_EXISTS);
         request.setRefGuid(refGuid);
@@ -534,7 +532,7 @@ public class ExchangeModuleRequestMapper {
         return JAXBMarshaller.marshallJaxBObjectToString(request);
     }
 
-    public static String createLogIdByTypeExistsRequest(String id, TypeRefType refType) throws ExchangeModelMarshallException {
+    public static String createLogIdByTypeExistsRequest(String id, TypeRefType refType) {
         LogIdByTypeExistsRequest request = new LogIdByTypeExistsRequest();
         request.setMethod(ExchangeModuleMethod.LOG_ID_BY_TYPE_EXISTS);
         request.setMessageGuid(id);

@@ -9,14 +9,10 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 
-import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogStatusType;
 import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogStatusTypeType;
-import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogType;
 import eu.europa.ec.fisheries.uvms.exchange.bean.ExchangeLogModelBean;
 import eu.europa.ec.fisheries.uvms.exchange.entity.exchangelog.ExchangeLog;
 import eu.europa.ec.fisheries.uvms.exchange.entity.exchangelog.ExchangeLogStatus;
-import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelException;
-import eu.europa.ec.fisheries.uvms.exchange.service.exception.ExchangeLogException;
 import eu.europa.ec.fisheries.uvms.longpolling.notifications.NotificationMessage;
 import org.junit.Rule;
 import org.junit.Test;
@@ -76,14 +72,14 @@ public class ExchangeLogServiceBeanTest {
 
     @Test
     public void updateStatusByLogGuidWhenFailure() throws Exception {
-        expectedException.expect(ExchangeLogException.class);
-        expectedException.expectMessage("Couldn't update status of exchange log");
+        expectedException.expect(RuntimeException.class);
+        expectedException.expectMessage("noooooooooooooooooooo!!!");
 
         UUID id = UUID.randomUUID();
 
         //mock
         doReturn(id).when(logCache).acknowledged(anyString());
-        doThrow(new ExchangeModelException("noooooooooooooooooooo!!!")).when(exchangeLogModel).updateExchangeLogStatus(isA(ExchangeLogStatus.class), eq("SYSTEM"), isA(UUID.class));
+        doThrow(new RuntimeException("noooooooooooooooooooo!!!")).when(exchangeLogModel).updateExchangeLogStatus(isA(ExchangeLogStatus.class), eq("SYSTEM"), isA(UUID.class));
 
         exchangeLogService.updateStatus(id.toString(), ExchangeLogStatusTypeType.FAILED, "SYSTEM");
     }

@@ -32,7 +32,6 @@ import eu.europa.ec.fisheries.schema.exchange.service.v1.ServiceType;
 import eu.europa.ec.fisheries.uvms.exchange.service.message.event.carrier.PluginErrorEventCarrier;
 import eu.europa.ec.fisheries.uvms.exchange.model.constant.ExchangeModelConstants;
 import eu.europa.ec.fisheries.uvms.exchange.model.constant.FaultCode;
-import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelMarshallException;
 import eu.europa.ec.fisheries.uvms.exchange.model.mapper.ExchangePluginResponseMapper;
 import eu.europa.ec.fisheries.uvms.exchange.model.mapper.JAXBMarshaller;
 
@@ -91,7 +90,7 @@ public class RegistryBusEventListener implements MessageListener {
     private ExchangeRegistryBaseRequest unmarshallExchangeRegistryBaseRequest(TextMessage textMessage) {
         try {
             return JAXBMarshaller.unmarshallTextMessage(textMessage, ExchangeRegistryBaseRequest.class);
-        } catch (ExchangeModelMarshallException e) {
+        } catch (RuntimeException e) {
             return null;
         }
     }

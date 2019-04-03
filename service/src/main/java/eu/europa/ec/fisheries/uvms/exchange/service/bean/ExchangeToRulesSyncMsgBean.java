@@ -23,13 +23,9 @@ import eu.europa.ec.fisheries.schema.exchange.v1.RuleValidationStatus;
 import eu.europa.ec.fisheries.schema.exchange.v1.TypeRefType;
 import eu.europa.ec.fisheries.schema.rules.rule.v1.ValidationMessageType;
 import eu.europa.ec.fisheries.schema.rules.rule.v1.ValidationMessageTypeResponse;
-import eu.europa.ec.fisheries.uvms.commons.message.api.MessageException;
 import eu.europa.ec.fisheries.uvms.exchange.service.message.consumer.ExchangeConsumer;
-import eu.europa.ec.fisheries.uvms.exchange.service.message.exception.ExchangeMessageException;
 import eu.europa.ec.fisheries.uvms.exchange.service.message.producer.ExchangeMessageProducer;
-import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelMarshallException;
 import eu.europa.ec.fisheries.uvms.exchange.model.mapper.JAXBMarshaller;
-import eu.europa.ec.fisheries.uvms.rules.model.exception.RulesModelMarshallException;
 import eu.europa.ec.fisheries.uvms.rules.model.mapper.RulesModuleRequestMapper;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.EnumUtils;
@@ -65,7 +61,7 @@ public class ExchangeToRulesSyncMsgBean {
                     resp.getValidationList().add(mapToLogValidationResult(validMsgFromRules));
                 }
             }
-        } catch (ExchangeMessageException | MessageException | RulesModelMarshallException | ExchangeModelMarshallException e) {
+        } catch (Exception e) {
             LOG.error("Error while trying to get Validation Results for RawMessage GUID from Rules!", e);
         }
         return resp;

@@ -26,7 +26,6 @@ import eu.europa.ec.fisheries.uvms.exchange.bean.ExchangeLogModelBean;
 import eu.europa.ec.fisheries.uvms.exchange.dao.bean.ExchangeLogDaoBean;
 import eu.europa.ec.fisheries.uvms.exchange.entity.exchangelog.ExchangeLog;
 import eu.europa.ec.fisheries.uvms.exchange.model.dto.ListResponseDto;
-import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelException;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -61,7 +60,7 @@ public class ExchangeLogModelTest {
     }
 
     @Test
-    public void testGetExchangeLogByRefUUIDAndType() throws ExchangeModelException {
+    public void testGetExchangeLogByRefUUIDAndType() {
         Mockito.when(logDao.getExchangeLogByTypesRefAndGuid(Mockito.any(), Mockito.anyList()))
                 .thenReturn(logs);
         Set<ExchangeLogType> exchangeLogByRefUUIDAndType = exchangeLogModel.getExchangeLogByRefUUIDAndType(UUID.randomUUID(), TypeRefType.FA_QUERY);

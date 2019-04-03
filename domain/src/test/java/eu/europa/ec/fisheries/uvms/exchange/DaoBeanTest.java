@@ -13,7 +13,6 @@ package eu.europa.ec.fisheries.uvms.exchange;
 
 import eu.europa.ec.fisheries.uvms.exchange.dao.bean.ServiceRegistryDaoBean;
 import eu.europa.ec.fisheries.uvms.exchange.entity.serviceregistry.Service;
-import eu.europa.ec.fisheries.uvms.exchange.exception.ExchangeDaoException;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -48,7 +47,7 @@ public class DaoBeanTest {
     }
 
     @Test
-    public void testCreateService() throws ExchangeDaoException {
+    public void testCreateService() {
         Service carrier = new Service();
 
         dao.createEntity(carrier);
@@ -56,7 +55,7 @@ public class DaoBeanTest {
     }
 
     @Test
-    public void testGetServiceById() throws ExchangeDaoException {
+    public void testGetServiceById() {
         UUID id = UUID.randomUUID();
         Service entity = new Service();
         entity.setId(id);
@@ -69,7 +68,7 @@ public class DaoBeanTest {
     }
 
     @Test
-    public void testUpdateService() throws ExchangeDaoException {
+    public void testUpdateService() {
         UUID id = UUID.randomUUID();
 
         Service myEntity = new Service();
@@ -86,12 +85,12 @@ public class DaoBeanTest {
     }
 
     @Test
-    public void testDeleteService() throws ExchangeDaoException {
+    public void testDeleteService() {
         // em.remove(arg0);
     }
 
     @Test
-    public void testGetServiceList() throws ExchangeDaoException {
+    public void testGetServiceList() {
         TypedQuery<Service> query = mock(TypedQuery.class);
         when(em.createNamedQuery(Service.SERVICE_FIND_ALL, Service.class)).thenReturn(query);
 

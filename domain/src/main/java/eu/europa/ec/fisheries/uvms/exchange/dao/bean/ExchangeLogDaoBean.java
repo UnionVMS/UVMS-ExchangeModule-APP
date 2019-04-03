@@ -13,7 +13,6 @@ package eu.europa.ec.fisheries.uvms.exchange.dao.bean;
 
 import javax.ejb.Stateless;
 import javax.persistence.NoResultException;
-import javax.persistence.PersistenceException;
 import javax.persistence.Query;
 import javax.persistence.TypedQuery;
 import java.time.Instant;
@@ -24,7 +23,6 @@ import eu.europa.ec.fisheries.schema.exchange.v1.TypeRefType;
 import eu.europa.ec.fisheries.uvms.exchange.dao.Dao;
 import eu.europa.ec.fisheries.uvms.exchange.entity.exchangelog.ExchangeLog;
 import eu.europa.ec.fisheries.uvms.exchange.entity.exchangelog.ExchangeLogStatus;
-import eu.europa.ec.fisheries.uvms.exchange.exception.ExchangeDaoException;
 import eu.europa.ec.fisheries.uvms.exchange.search.ExchangeSearchField;
 import eu.europa.ec.fisheries.uvms.exchange.search.SearchFieldMapper;
 import eu.europa.ec.fisheries.uvms.exchange.search.SearchValue;
@@ -39,8 +37,7 @@ public class ExchangeLogDaoBean extends Dao {
 
     private final static Logger LOG = LoggerFactory.getLogger(ExchangeLogDaoBean.class);
 
-    public List<ExchangeLogStatus> getExchangeLogStatusHistory(String sql, ExchangeHistoryListQuery searchQuery) throws ExchangeDaoException {
-        try {
+    public List<ExchangeLogStatus> getExchangeLogStatusHistory(String sql, ExchangeHistoryListQuery searchQuery) {
             LOG.debug("SQL query for status history " + sql);
             TypedQuery<ExchangeLogStatus> query = em.createQuery(sql, ExchangeLogStatus.class);
             if (searchQuery.getStatus() != null && !searchQuery.getStatus().isEmpty()) {
@@ -58,13 +55,9 @@ public class ExchangeLogDaoBean extends Dao {
                 query.setParameter("to", to);
             }
             return query.getResultList();
-        } catch (Exception e) {
-            throw new ExchangeDaoException("[ERROR] when getting search list ] ");
-        }
     }
 
-    public List<ExchangeLog> getExchangeLogListPaginated(Integer page, Integer listSize, String sql, List<SearchValue> searchKeyValues) throws ExchangeDaoException {
-        try {
+    public List<ExchangeLog> getExchangeLogListPaginated(Integer page, Integer listSize, String sql, List<SearchValue> searchKeyValues) {
             LOG.debug("SQL QUERY IN LIST PAGINATED: " + sql);
             TypedQuery<ExchangeLog> query = em.createQuery(sql, ExchangeLog.class);
             HashMap<ExchangeSearchField, List<SearchValue>> orderedValues = SearchFieldMapper.combineSearchFields(searchKeyValues);
@@ -72,9 +65,6 @@ public class ExchangeLogDaoBean extends Dao {
             query.setFirstResult(listSize * (page - 1));
             query.setMaxResults(listSize);
             return query.getResultList();
-        } catch (Exception e) {
-            throw new ExchangeDaoException("[ERROR] when getting list.");
-        }
     }
 
     public Long getExchangeLogListSearchCount(String countSql, List<SearchValue> searchKeyValues) {
@@ -100,13 +90,9 @@ public class ExchangeLogDaoBean extends Dao {
     }
 
 
-    public ExchangeLog createLog(ExchangeLog log) throws ExchangeDaoException {
-        try {
+    public ExchangeLog createLog(ExchangeLog log) {
             em.persist(log);
             return log;
-        } catch (PersistenceException e) {
-            throw new ExchangeDaoException("[ERROR] creating log.", e);
-        }
     }
 
     public ExchangeLog getExchangeLogByGuid(UUID logGuid, TypeRefType typeRefType) {
@@ -145,14 +131,10 @@ public class ExchangeLogDaoBean extends Dao {
         return null;
     }
 
-    public ExchangeLog updateLog(ExchangeLog entity) throws ExchangeDaoException {
-        try {
+    public ExchangeLog updateLog(ExchangeLog entity) {
             em.merge(entity);
             em.flush();
             return entity;
-        } catch (Exception e) {
-            throw new ExchangeDaoException("[ERROR] when updating entity ]", e);
-        }
     }
 
     public ExchangeLog getLatestLog(){
