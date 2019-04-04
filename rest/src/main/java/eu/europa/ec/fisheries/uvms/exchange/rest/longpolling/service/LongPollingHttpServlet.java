@@ -43,7 +43,7 @@ public class LongPollingHttpServlet extends HttpServlet {
     LongPollingContextHelper asyncContexts;
 
     @Override
-    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp) {
         AsyncContext ctx = req.startAsync(req, resp);
         ctx.setTimeout(LongPollingConstants.ASYNC_TIMEOUT);
         ctx.addListener(new LongPollingAsyncListener() {

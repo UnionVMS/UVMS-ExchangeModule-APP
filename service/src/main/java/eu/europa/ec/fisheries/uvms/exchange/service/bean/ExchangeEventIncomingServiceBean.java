@@ -234,7 +234,7 @@ public class ExchangeEventIncomingServiceBean {
                 exchangeErrorEvent.fire(new ExchangeErrorEvent(message, ExchangeModuleResponseMapper.createFaultMessage(FaultCode.EXCHANGE_MESSAGE, "Username in the request must be set")));
                 return;
             }
-            LOG.debug("Processing Movement : {}", request.getRefGuid());
+            LOG.trace("Processing Movement : {}", request.getRefGuid());
             String username;
             SetReportMovementType setRepMovType = request.getRequest();
             if (MovementSourceType.MANUAL.equals(setRepMovType.getMovement().getSource())) {// A person has created a position

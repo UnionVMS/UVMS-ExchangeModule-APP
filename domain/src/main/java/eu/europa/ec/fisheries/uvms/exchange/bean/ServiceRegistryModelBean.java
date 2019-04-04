@@ -81,7 +81,7 @@ public class ServiceRegistryModelBean {
 
     public List<Service> getPlugins(List<PluginType> pluginTypes) {
 
-       	List<Service> entityList = new ArrayList<>();
+       	List<Service> entityList;
        	if(pluginTypes == null || pluginTypes.isEmpty()) {
        		entityList = dao.getServices();
        	} else {

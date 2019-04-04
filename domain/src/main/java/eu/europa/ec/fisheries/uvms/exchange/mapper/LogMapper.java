@@ -86,12 +86,7 @@ public class LogMapper {
         }
 
         List<ExchangeLogStatus> statusHistory = new ArrayList<>();
-        ExchangeLogStatus statusLog = new ExchangeLogStatus();
-        statusLog.setLog(entity);
-        statusLog.setStatus(status);
-        statusLog.setStatusTimestamp(Instant.now());
-        statusLog.setUpdatedBy(username);
-        statusLog.setUpdateTime(Instant.now());
+        ExchangeLogStatus statusLog = toNewStatusEntity(entity, status, username);
         statusHistory.add(statusLog);
 
         entity.setStatus(status);

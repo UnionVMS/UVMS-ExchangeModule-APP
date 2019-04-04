@@ -29,6 +29,7 @@ import eu.europa.ec.fisheries.uvms.exchange.entity.exchangelog.ExchangeLog;
 import eu.europa.ec.fisheries.uvms.exchange.entity.exchangelog.ExchangeLogStatus;
 import eu.europa.ec.fisheries.uvms.exchange.entity.unsent.UnsentMessage;
 import eu.europa.ec.fisheries.uvms.exchange.entity.unsent.UnsentMessageProperty;
+import eu.europa.ec.fisheries.uvms.exchange.mapper.LogMapper;
 import eu.europa.ec.fisheries.uvms.exchange.service.mapper.ExchangeLogMapper;
 import eu.europa.ec.fisheries.uvms.exchange.service.message.constants.MessageQueue;
 import eu.europa.ec.fisheries.uvms.exchange.service.message.producer.ExchangeMessageProducer;
@@ -79,7 +80,7 @@ public class ExchangeLogServiceBean {
     }
 
     public ExchangeLog log(ExchangeLog log) {
-        ExchangeLog exchangeLog = exchangeLogModel.createExchangeLog(log);
+        ExchangeLog exchangeLog = exchangeLogDao.createLog(log);
         String guid = exchangeLog.getId().toString();
         exchangeLogEvent.fire(new NotificationMessage("guid", guid));
         LOG.debug("[INFO] Logging message with guid : [ "+guid+" ] was successful.");
@@ -170,7 +171,14 @@ public class ExchangeLogServiceBean {
         query.getStatus().addAll(statusList);
         query.getType().addAll(typeList);
 
-        return  exchangeLogModel.getExchangeLogStatusHistoryByQuery(query);
+        List<ExchangeLogStatus> logList = exchangeLogModel.getExchangeLogStatusHistoryByQuery(query);
+        List<ExchangeLogStatusType> logStatusHistoryList = new ArrayList<>();
+        for (ExchangeLogStatus log : logList) {
+            ExchangeLogStatusType statusType = LogMapper.toStatusModel(log.getLog());
+            logStatusHistoryList.add(statusType);
+        }
+
+        return  logStatusHistoryList;
     }
 
     public String createUnsentMessage(String senderReceiver, Instant timestamp, String recipient, String message, List<UnsentMessageProperty> properties, String username) {

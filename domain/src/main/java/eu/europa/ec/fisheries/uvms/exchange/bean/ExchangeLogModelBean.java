@@ -141,31 +141,15 @@ public class ExchangeLogModelBean {
         }
     }
 
-    public List<ExchangeLogStatusType> getExchangeLogStatusHistoryByQuery(ExchangeHistoryListQuery query) {
+    public List<ExchangeLogStatus> getExchangeLogStatusHistoryByQuery(ExchangeHistoryListQuery query) {
         if (query == null) {
             throw new IllegalArgumentException("Exchange status list query is null");
         }
-        List<ExchangeLogStatusType> logStatusHistoryList = new ArrayList<>();
 
         String sql = SearchFieldMapper.createSearchSql(query);
         List<ExchangeLogStatus> logList = logDao.getExchangeLogStatusHistory(sql, query);
 
-        for (ExchangeLogStatus log : logList) {
-            ExchangeLogStatusType statusType = LogMapper.toStatusModel(log.getLog());
-            logStatusHistoryList.add(statusType);
-        }
-
-        return logStatusHistoryList;
-    }
-
-    public ExchangeLog createExchangeLog(ExchangeLog log) {
-        if (log == null) {
-            throw new IllegalArgumentException("No logType to create");
-        }
-        if (log.getType() == null) {
-            throw new IllegalArgumentException("No type in logType to create");
-        }
-        return logDao.createLog(log);
+        return logList;
     }
 
 

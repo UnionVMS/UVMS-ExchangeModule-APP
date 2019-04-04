@@ -38,7 +38,6 @@ public class JAXBMarshaller {
      * @param data
      * @return
      * @throws
-     * eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelMarshallException
      */
     public static <T> String marshallJaxBObjectToString(T data) {
         try {
@@ -68,7 +67,6 @@ public class JAXBMarshaller {
      * @param clazz pperException
      * @return
      * @throws
-     * eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelMarshallException
      */
     public static <R> R unmarshallTextMessage(TextMessage textMessage, Class clazz) {
         try {
@@ -95,7 +93,6 @@ public class JAXBMarshaller {
      * @param clazz class to marshall to. The class must be the
      * root object of the unmarchalled message!
      * @return
-     * @throws ExchangeModelMarshallException
      */
     public static <R> R unmarshallString(String text, Class clazz) {
         try {
