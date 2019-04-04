@@ -114,23 +114,23 @@ public class MapperTest {
     	entity.setServiceCapabilityList(MockData.getEntityCapabilities(entity));
     	entity.setServiceSettingList(MockData.getEntitySettings(entity));
 
-    	SettingListType updateSettings = new SettingListType();
-    	SettingType updateSetting = new SettingType();
-    	updateSetting.setKey(MockData.SETTING_KEY);
+    	List<ServiceSetting> updateSettings = new ArrayList<>();
+        ServiceSetting updateSetting = new ServiceSetting();
+    	updateSetting.setSetting(MockData.SETTING_KEY);
 		updateSetting.setValue(newValue);
-    	updateSettings.getSetting().add(updateSetting);
+    	updateSettings.add(updateSetting);
     	List<ServiceSetting> list = mapper.mapSettingsList(entity, updateSettings, "TEST");
     	
     	assertFalse(list.isEmpty());
     	for(ServiceSetting setting : list) {
     		assertSame(setting.getValue(), newValue);
     	}
-    	
-    	SettingListType newSettings = new SettingListType();
-    	SettingType newSetting = new SettingType();
-    	newSetting.setKey("NEW.KEY");
+
+        List<ServiceSetting>  newSettings = new ArrayList<>();
+        ServiceSetting newSetting = new ServiceSetting();
+    	newSetting.setSetting("NEW.KEY");
     	newSetting.setValue("NEW.VALUE");
-		newSettings.getSetting().add(newSetting);
+		newSettings.add(newSetting);
 		list = mapper.mapSettingsList(entity, newSettings, "TEST");
 
 		assertTrue(list.size() == 1);

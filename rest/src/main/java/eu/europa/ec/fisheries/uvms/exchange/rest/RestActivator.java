@@ -39,7 +39,6 @@ public class RestActivator extends Application {
         set.add(ExchangeSendingQueueRestResource.class);
         set.add(ConfigRestResource.class);
         set.add(UnionVMSFeatureFilter.class);
-        set.add(ExchangeAPIRestResource.class);
         LOG.info(RestConstants.MODULE_NAME + " module starting up");
     }
 

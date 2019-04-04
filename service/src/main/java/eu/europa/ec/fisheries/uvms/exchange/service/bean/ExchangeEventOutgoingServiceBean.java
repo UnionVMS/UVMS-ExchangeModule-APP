@@ -22,6 +22,8 @@ import javax.enterprise.event.Event;
 import javax.inject.Inject;
 import javax.jms.TextMessage;
 
+import eu.europa.ec.fisheries.uvms.exchange.bean.ExchangeLogModelBean;
+import eu.europa.ec.fisheries.uvms.exchange.bean.ServiceRegistryModelBean;
 import eu.europa.ec.fisheries.uvms.exchange.entity.exchangelog.ExchangeLog;
 import eu.europa.ec.fisheries.uvms.exchange.entity.serviceregistry.Service;
 import eu.europa.ec.fisheries.uvms.exchange.entity.unsent.UnsentMessageProperty;
@@ -42,7 +44,6 @@ import eu.europa.ec.fisheries.schema.exchange.movement.v1.MovementRefType;
 import eu.europa.ec.fisheries.schema.exchange.movement.v1.MovementRefTypeType;
 import eu.europa.ec.fisheries.schema.exchange.movement.v1.SendMovementToPluginType;
 import eu.europa.ec.fisheries.schema.exchange.movement.v1.SetReportMovementType;
-import eu.europa.ec.fisheries.schema.exchange.plugin.types.v1.PluginFault;
 import eu.europa.ec.fisheries.schema.exchange.plugin.types.v1.PluginType;
 import eu.europa.ec.fisheries.schema.exchange.plugin.v1.ExchangePluginMethod;
 import eu.europa.ec.fisheries.schema.exchange.plugin.v1.PluginBaseRequest;
@@ -59,7 +60,6 @@ import eu.europa.ec.fisheries.uvms.exchange.service.message.producer.ExchangeMes
 import eu.europa.ec.fisheries.uvms.exchange.model.constant.FaultCode;
 import eu.europa.ec.fisheries.uvms.exchange.model.mapper.ExchangeModuleResponseMapper;
 import eu.europa.ec.fisheries.uvms.exchange.model.mapper.ExchangePluginRequestMapper;
-import eu.europa.ec.fisheries.uvms.exchange.model.mapper.ExchangePluginResponseMapper;
 import eu.europa.ec.fisheries.uvms.exchange.model.mapper.JAXBMarshaller;
 import eu.europa.ec.fisheries.uvms.exchange.service.constants.ExchangeServiceConstants;
 import eu.europa.ec.fisheries.uvms.exchange.service.event.PollEvent;
@@ -87,14 +87,17 @@ public class ExchangeEventOutgoingServiceBean {
     @PollEvent
     private Event<NotificationMessage> pollEvent;
 
+    @Inject
+    private ExchangeLogModelBean exchangeLogModel;
+
+    @Inject
+    private ServiceRegistryModelBean serviceRegistryModel;
+
     @EJB
     private ExchangeMessageProducer producer;
 
     @EJB
     private ExchangeLogServiceBean exchangeLogService;
-
-    @EJB
-    private ExchangeServiceBean exchangeService;
 
     @EJB
     private ExchangeAssetServiceBean exchangeAssetService;
@@ -107,7 +110,7 @@ public class ExchangeEventOutgoingServiceBean {
      * @param sendSalesResponseRequest the sales response that needs to be sent
      * @param pluginType type of the plugin which the Sales response should be sent through
      * @throws 
-     * @throws ExchangeMessageException
+     * @throws
      */
     public void sendSalesResponseToPlugin(SendSalesResponseRequest sendSalesResponseRequest, PluginType pluginType) {
         if (pluginType == null) {
@@ -122,7 +125,7 @@ public class ExchangeEventOutgoingServiceBean {
      * Sends a Sales report to the FLUX plugin
      * @param sendSalesReportRequest
      * @throws 
-     * @throws ExchangeMessageException
+     * @throws
      */
     public void sendSalesReportToFLUX(SendSalesReportRequest sendSalesReportRequest) {
         String marshalledRequest = JAXBMarshaller.marshallJaxBObjectToString(sendSalesReportRequest);
@@ -158,7 +161,7 @@ public class ExchangeEventOutgoingServiceBean {
             }
 
             Service service = null;
-            List<Service> services = exchangeService.getServiceList(Arrays.asList(sendReport.getPluginType()));
+            List<Service> services = serviceRegistryModel.getPlugins(Arrays.asList(sendReport.getPluginType()));
             for (Service serviceIteration : services) {
                 if (serviceIteration.getStatus()) {       //StatusType.STARTED.equals(serviceIteration.getStatus())
                     service = serviceIteration;
@@ -172,7 +175,7 @@ public class ExchangeEventOutgoingServiceBean {
                 String pluginMessageId = producer.sendEventBusMessage(text, serviceName);
                 try {
                     ExchangeLog log = ExchangeLogMapper.getSendMovementExchangeLog(sendReport);
-                    exchangeLogService.logAndCache(log, pluginMessageId, request.getUsername());
+                    exchangeLogService.logAndCache(log, pluginMessageId);
                 } catch (Exception e) {
                     LOG.error("Could not create log", e);
                 }
@@ -220,12 +223,12 @@ public class ExchangeEventOutgoingServiceBean {
             LOG.info("Send command to plugin:{}",request);
             String pluginName = request.getCommand().getPluginName();
 
-            Service service = exchangeService.getService(pluginName);
+            Service service = serviceRegistryModel.getPlugin(pluginName);
 
             if (validate(request.getCommand(), message, service, request.getCommand(), request.getUsername())) {
                 sendCommandToPlugin(request, service.getName(), message.getText());
             } else {
-            LOG.debug("Can not send to plugin. Response sent to caller.");
+                LOG.debug("Can not send to plugin. Response sent to caller.");
             }
         } catch (Exception e) {
             if (request.getCommand().getCommand() != CommandTypeType.EMAIL) {
@@ -240,7 +243,7 @@ public class ExchangeEventOutgoingServiceBean {
 
     public String sendCommandToPluginFromRest(SetCommandRequest request){
         try {
-            Service service = exchangeService.getService(request.getCommand().getPluginName());
+            Service service = serviceRegistryModel.getPlugin(request.getCommand().getPluginName());
             CommandType command = request.getCommand();
             String validationResult = validateRestCommand(request, service, command);
             if (validationResult.equals("OK")) {
@@ -273,7 +276,7 @@ public class ExchangeEventOutgoingServiceBean {
             } else {
                 LOG.info("[WARN] FLUXFAResponse is FAILED so won't be sent to Flux Activity Plugin..");
             }
-        } catch (Exception e /*ExchangeModelMarshallException | ExchangeMessageException | ExchangeLogException e*/) {
+        } catch (Exception e) {
             LOG.error("Unable to send FLUX FA Report to plugin.", e);
         }
     }
@@ -289,7 +292,7 @@ public class ExchangeEventOutgoingServiceBean {
                     ? ExchangeServiceConstants.BELGIAN_ACTIVITY_PLUGIN_SERVICE_NAME : ExchangeServiceConstants.FLUX_ACTIVITY_PLUGIN_SERVICE_NAME));
             LOG.info("Message sent to Flux ERS Plugin :" + pluginMessageId);
             exchangeLogService.log(request, LogType.SEND_FA_QUERY_MSG, ExchangeLogStatusTypeType.SENT, TypeRefType.FA_QUERY, request.getRequest(), false);
-        } catch (Exception e /*ExchangeModelMarshallException | ExchangeMessageException | ExchangeLogException e*/) {
+        } catch (Exception e ) {
             LOG.error("Unable to send FLUX FA Report to plugin.", e);
         }
     }
@@ -403,7 +406,7 @@ public class ExchangeEventOutgoingServiceBean {
             UpdateLogStatusRequest request = JAXBMarshaller.unmarshallTextMessage(message, UpdateLogStatusRequest.class);
             UUID exchangeLogGuid = UUID.fromString(request.getLogGuid());
             String businessModuleExceptionMessage = request.getBusinessModuleExceptionMessage();
-            exchangeLogService.updateExchangeLogBusinessError(exchangeLogGuid, businessModuleExceptionMessage);
+            exchangeLogModel.updateExchangeLogBusinessError(exchangeLogGuid, businessModuleExceptionMessage);
         } catch (Exception e) {
             fireExchangeFault(message, "Could not unmarshall the incoming UpdateLogStatus message", e);
         }
@@ -452,16 +455,10 @@ public class ExchangeEventOutgoingServiceBean {
             }
             username = request.getUsername();
             ExchangeLog log = ExchangeLogMapper.getReceivedMovementExchangeLog(setReportMovementType, movementRefType.getMovementRefGuid(), movementRefType.getType().value(), username);
-            exchangeLogService.log(log, username);
+            exchangeLogService.log(log);
         } catch (Exception e) {
             LOG.error(e.getMessage(), e);
         }
-    }
-
-    private void firePluginFault(TextMessage messageEvent, String errorMessage, Throwable exception) {
-        LOG.error(errorMessage, exception);
-        PluginFault fault = ExchangePluginResponseMapper.mapToPluginFaultResponse(FaultCode.EXCHANGE_PLUGIN_EVENT.getCode(), errorMessage);
-        pluginErrorEvent.fire(new PluginErrorEventCarrier(messageEvent, null, fault));
     }
 
     private void fireExchangeFault(TextMessage messageEvent, String errorMessage, Throwable exception) {
@@ -484,37 +481,30 @@ public class ExchangeEventOutgoingServiceBean {
             String faultMessage = "No plugin to send to";
             exchangeErrorEvent.fire(new ExchangeErrorEvent(origin, ExchangeModuleResponseMapper.createFaultMessage(FaultCode.EXCHANGE_COMMAND_INVALID, faultMessage)));
             return false;
-        } else if (service == null || service.getServiceClassName() == null || !service.getServiceClassName().equalsIgnoreCase(command.getPluginName())) {                  //this can never happen since a nullpointer is thrown in the remapping process
+        } else if (service == null || service.getServiceClassName() == null || !service.getServiceClassName().equalsIgnoreCase(command.getPluginName()) || !service.getStatus()) {                  //this can never happen since a nullpointer is thrown in the remapping process. And the last one is StatusType.STARTED.equals aka not running
             String faultMessage = "No plugin receiver available";
-            exchangeErrorEvent.fire(new ExchangeErrorEvent(origin, ExchangeModuleResponseMapper.createFaultMessage(FaultCode.EXCHANGE_COMMAND_INVALID, faultMessage)));
             try {
                 List<UnsentMessageProperty> setUnsentMessageTypePropertiesForPoll = getSetUnsentMessageTypePropertiesForPoll(commandType);
                 exchangeLogService.createUnsentMessage(service.getName(), command.getTimestamp().toInstant(), command.getCommand().name(), origin.getText(), setUnsentMessageTypePropertiesForPoll, username);
             } catch (Exception e) {
                 LOG.error("Couldn't create unsentMessage " + e.getMessage());
+            }
+
+            if(!service.getStatus()){
+                try {
+                    AcknowledgeType ackType = ExchangeModuleResponseMapper.mapAcknowledgeTypeNOK(origin.getJMSMessageID(), "Plugin to send command to is not started");
+                    String moduleResponse = ExchangeModuleResponseMapper.mapSetCommandResponse(ackType);
+                    producer.sendModuleResponseMessage(origin, moduleResponse);
+                } catch (Exception e) {
+                    LOG.error("Plugin not started, couldn't send module response: " + e.getMessage());
+                }
+            }else{
+                exchangeErrorEvent.fire(new ExchangeErrorEvent(origin, ExchangeModuleResponseMapper.createFaultMessage(FaultCode.EXCHANGE_COMMAND_INVALID, faultMessage)));
             }
             return false;
         } else if (command.getTimestamp() == null) {
             String faultMessage = "No timestamp";
             exchangeErrorEvent.fire(new ExchangeErrorEvent(origin, ExchangeModuleResponseMapper.createFaultMessage(FaultCode.EXCHANGE_COMMAND_INVALID, faultMessage)));
-            return false;
-        } else if (!service.getStatus()) {  //StatusType.STARTED.equals aka not running
-            LOG.info("Plugin to send report to is not started:{}",service);
-            try {
-                List<UnsentMessageProperty> setUnsentMessageTypePropertiesForPoll = getSetUnsentMessageTypePropertiesForPoll(commandType);
-                exchangeLogService.createUnsentMessage(service.getName(), command.getTimestamp().toInstant(), command.getCommand().name(), origin.getText(), setUnsentMessageTypePropertiesForPoll, username);
-            } catch (Exception e) {
-                LOG.error("Couldn't create unsentMessage " + e.getMessage());
-            }
-
-            try {
-                AcknowledgeType ackType = ExchangeModuleResponseMapper.mapAcknowledgeTypeNOK(origin.getJMSMessageID(), "Plugin to send command to is not started");
-                String moduleResponse = ExchangeModuleResponseMapper.mapSetCommandResponse(ackType);
-                producer.sendModuleResponseMessage(origin, moduleResponse);
-            } catch (Exception e) {
-                LOG.error("Plugin not started, couldn't send module response: " + e.getMessage());
-            }
-
             return false;
         }
         return true;
@@ -528,8 +518,8 @@ public class ExchangeEventOutgoingServiceBean {
             faultMessage = "No command type";
         } else if (command.getPluginName() == null) {
             faultMessage = "No plugin to send to";
-        } else if (service == null || service.getServiceClassName() == null || !service.getServiceClassName().equalsIgnoreCase(command.getPluginName())) {
-            faultMessage = "No plugin receiver available";
+        } else if (service == null || service.getServiceClassName() == null || !service.getServiceClassName().equalsIgnoreCase(command.getPluginName()) || !service.getStatus()) {      //last one is !StatusType.STARTED.equals
+            faultMessage = "No plugin receiver available. Does not exist or not started";
             try {
                 List<UnsentMessageProperty> setUnsentMessagePropertiesForPoll = getSetUnsentMessageTypePropertiesForPoll(request.getCommand());
                 exchangeLogService.createUnsentMessage(service.getName(), command.getTimestamp().toInstant(), command.getCommand().name(), request.toString(), setUnsentMessagePropertiesForPoll, request.getUsername());
@@ -538,14 +528,6 @@ public class ExchangeEventOutgoingServiceBean {
             }
         } else if (command.getTimestamp() == null) {
             faultMessage = "No timestamp";
-        } else if (!service.getStatus()) {      //!StatusType.STARTED.equals
-            LOG.info("Plugin to send report to is not started:{}",service);
-            try {
-                List<UnsentMessageProperty> setUnsentMessagePropertiesForPoll = getSetUnsentMessageTypePropertiesForPoll(request.getCommand());
-                exchangeLogService.createUnsentMessage(service.getName(), command.getTimestamp().toInstant(), command.getCommand().name(), request.toString(), setUnsentMessagePropertiesForPoll, request.getUsername());
-            } catch (Exception e) {
-                LOG.error("Couldn't create unsentMessage " + e.getMessage());
-            }
         }
         return faultMessage;
     }
@@ -564,23 +546,18 @@ public class ExchangeEventOutgoingServiceBean {
 
         try {
             ExchangeLog log = ExchangeLogMapper.getSendCommandExchangeLog(request.getCommand(), request.getUsername());
-            exchangeLogService.logAndCache(log, pluginMessageId, request.getUsername());
+            exchangeLogService.logAndCache(log, pluginMessageId);
         } catch (Exception e) {
             LOG.error("Could not create log", e);
         }
     }
 
-    private Asset getAsset(String connectId) {
-        Asset asset;
-        asset = exchangeAssetService.getAsset(connectId);
-        return asset;
-    }
 
     private List<UnsentMessageProperty> getSetUnsentMessageTypePropertiesForPoll(CommandType commandType) {
         List<UnsentMessageProperty> properties = new ArrayList<>();
         if (commandType.getPoll() != null) {
             String connectId = ExchangeLogMapper.getConnectId(commandType.getPoll());
-            Asset asset = getAsset(connectId);
+            Asset asset = exchangeAssetService.getAsset(connectId);
             properties = ExchangeLogMapper.getPropertiesForPoll(commandType.getPoll(), asset.getName());
 
         } else if (commandType.getEmail() != null) {

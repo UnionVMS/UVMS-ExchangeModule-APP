@@ -27,6 +27,8 @@ import javax.annotation.Resource;
 import javax.inject.Inject;
 import javax.jms.ConnectionFactory;
 import javax.jms.TextMessage;
+import javax.ws.rs.client.Client;
+import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -52,8 +54,30 @@ public class ExchangeAPIRestResourceTest extends BuildExchangeRestTestDeployment
     public void getServiceListTest() throws Exception {
         GetServiceListRequest request = new GetServiceListRequest();
         request.getType().add(PluginType.OTHER);
+        Client client = ClientBuilder.newClient();
 
-        GetServiceListResponse response = getWebTarget()
+        GetServiceListResponse response = client.target("http://localhost:8080/exchangerest/unsecured/rest")
+                .path("api")
+                .path("serviceList")
+                .request(MediaType.APPLICATION_JSON)
+                .post(Entity.json(request), GetServiceListResponse.class);
+
+        assertNotNull(response);
+        List<ServiceResponseType> responseList = response.getService();
+        assertFalse(responseList.isEmpty());
+        assertEquals("STARTED", responseList.get(0).getStatus().value());
+        assertEquals("ManualMovement", responseList.get(0).getName());
+        assertEquals("ManualMovement", responseList.get(0).getServiceClassName());
+    }
+
+    @Test
+    @OperateOnDeployment("exchangeservice")
+    public void getServiceListTestFromTheSecurePart() throws Exception {
+        GetServiceListRequest request = new GetServiceListRequest();
+        request.getType().add(PluginType.OTHER);
+
+        Client client = ClientBuilder.newClient();
+        GetServiceListResponse response = client.target("http://localhost:8080/exchangerest/unsecured/rest")
                 .path("api")
                 .path("serviceList")
                 .request(MediaType.APPLICATION_JSON)
@@ -75,7 +99,8 @@ public class ExchangeAPIRestResourceTest extends BuildExchangeRestTestDeployment
         request.getType().add(PluginType.OTHER);
         request.getType().add(PluginType.BELGIAN_ACTIVITY);
 
-        GetServiceListResponse response = getWebTarget()
+        Client client = ClientBuilder.newClient();
+        GetServiceListResponse response = client.target("http://localhost:8080/exchangerest/unsecured/rest")
                 .path("api")
                 .path("serviceList")
                 .request(MediaType.APPLICATION_JSON)
@@ -86,7 +111,7 @@ public class ExchangeAPIRestResourceTest extends BuildExchangeRestTestDeployment
         Service s = RestHelper.createBasicService("Test Service Name:" + UUID.randomUUID().toString(), serviceClassName, PluginType.BELGIAN_ACTIVITY);
         s = serviceRegistryDao.createEntity(s);
 
-        response = getWebTarget()
+        response = client.target("http://localhost:8080/exchangerest/unsecured/rest")
                 .path("api")
                 .path("serviceList")
                 .request(MediaType.APPLICATION_JSON)
@@ -127,8 +152,9 @@ public class ExchangeAPIRestResourceTest extends BuildExchangeRestTestDeployment
         request.setDate(new java.util.Date());
         request.setUsername("sendCommandToEmailPluginTest Username");
 
+        Client client = ClientBuilder.newClient();
         jmsHelper.registerSubscriber("ServiceName = '" + serviceClassName + "'");
-        Response response = getWebTarget()
+        Response response = client.target("http://localhost:8080/exchangerest/unsecured/rest")
                 .path("api")
                 .path("pluginCommand")
                 .request(MediaType.APPLICATION_JSON)
@@ -179,8 +205,9 @@ public class ExchangeAPIRestResourceTest extends BuildExchangeRestTestDeployment
         request.setDate(new Date());
         request.setUsername("sendCommandToPollPluginTest Username");
 
+        Client client = ClientBuilder.newClient();
         jmsHelper.registerSubscriber("ServiceName = '" + serviceClassName + "'");
-        Response response = getWebTarget()
+        Response response = client.target("http://localhost:8080/exchangerest/unsecured/rest")
                 .path("api")
                 .path("pluginCommand")
                 .request(MediaType.APPLICATION_JSON)

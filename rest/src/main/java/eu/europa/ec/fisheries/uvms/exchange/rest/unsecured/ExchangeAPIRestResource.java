@@ -3,15 +3,16 @@ package eu.europa.ec.fisheries.uvms.exchange.rest.unsecured;
 import eu.europa.ec.fisheries.schema.exchange.module.v1.GetServiceListRequest;
 import eu.europa.ec.fisheries.schema.exchange.module.v1.GetServiceListResponse;
 import eu.europa.ec.fisheries.schema.exchange.module.v1.SetCommandRequest;
+import eu.europa.ec.fisheries.uvms.exchange.bean.ServiceRegistryModelBean;
 import eu.europa.ec.fisheries.uvms.exchange.entity.serviceregistry.Service;
 import eu.europa.ec.fisheries.uvms.exchange.mapper.ServiceMapper;
 import eu.europa.ec.fisheries.uvms.exchange.service.bean.ExchangeEventOutgoingServiceBean;
-import eu.europa.ec.fisheries.uvms.exchange.service.bean.ExchangeServiceBean;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
+import javax.inject.Inject;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -25,8 +26,8 @@ public class ExchangeAPIRestResource {
             .getLogger(ExchangeAPIRestResource.class);
 
 
-    @EJB
-    private ExchangeServiceBean exchangeService;
+    @Inject
+    private ServiceRegistryModelBean serviceRegistryModel;
 
     @EJB
     private ExchangeEventOutgoingServiceBean exchangeEventOutgoingService;
@@ -46,7 +47,7 @@ public class ExchangeAPIRestResource {
     public GetServiceListResponse getServiceList(GetServiceListRequest request) {
         GetServiceListResponse getServiceListResponse = new GetServiceListResponse();
         try {
-            List<Service> serviceList = exchangeService.getServiceList(request.getType());
+            List<Service> serviceList = serviceRegistryModel.getPlugins(request.getType());
             getServiceListResponse.getService().addAll(ServiceMapper.toServiceModelList(serviceList));
             return getServiceListResponse;
         } catch (Exception ex) {

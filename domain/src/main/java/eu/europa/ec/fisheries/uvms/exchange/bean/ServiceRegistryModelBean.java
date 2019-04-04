@@ -81,7 +81,7 @@ public class ServiceRegistryModelBean {
 
     public List<Service> getPlugins(List<PluginType> pluginTypes) {
 
-       	List<Service> entityList = new ArrayList<>();
+       	List<Service> entityList;
        	if(pluginTypes == null || pluginTypes.isEmpty()) {
        		entityList = dao.getServices();
        	} else {
@@ -104,33 +104,6 @@ public class ServiceRegistryModelBean {
     	throw new IllegalArgumentException("No plugin found when update plugin settings");
 	}
     
-    public List<SettingType> getPluginSettings(String serviceClassName) {
-        LOG.info("Get plugin settings:{}",serviceClassName);
-
-        List<SettingType> settings = new ArrayList<>();
-        List<ServiceSetting> entityList = dao.getServiceSettings(serviceClassName);
-        for (ServiceSetting entity : entityList) {
-            settings.add(ServiceMapper.toModel(entity));
-        }
-
-
-        return settings;
-
-    }
-
-    public List<CapabilityType> getPluginCapabilities(String serviceClassName) {
-        LOG.info("Get plugin capabilities:{}",serviceClassName);
-
-        List<CapabilityType> capabilities = new ArrayList<>();
-        List<ServiceCapability> entityList = dao.getServiceCapabilities(serviceClassName);
-        for (ServiceCapability entity : entityList) {
-            capabilities.add(ServiceMapper.toModel(entity));
-        }
-
-            
-
-        return capabilities;
-    }
 
     public Service getPlugin(String serviceClassName) {
             Service service = dao.getServiceByServiceClassName(serviceClassName);

@@ -24,32 +24,6 @@ import java.util.List;
 
 public class UnsentMessageMapper {
 
-	public static UnsentMessage toEntity(UnsentMessageType message, String username) {
-		UnsentMessage entity = new UnsentMessage();
-		entity.setDateReceived(message.getDateReceived().toInstant());
-		entity.setRecipient(message.getRecipient());
-		entity.setSenderReceiver(message.getSenderReceiver());
-		entity.setMessage(message.getMessage());
-		entity.setUpdatedBy(username);
-		entity.setUpdateTime(DateUtils.nowUTC());
-        List<UnsentMessageProperty> unsentMessageProperties = mapToUnsentMessagePropertyEntities(message, entity);
-        entity.setProperties(unsentMessageProperties);
-		return entity;
-	}
-
-    private static List<UnsentMessageProperty> mapToUnsentMessagePropertyEntities(UnsentMessageType message, UnsentMessage entity) {
-        List<UnsentMessageTypeProperty> properties = message.getProperties();
-        List<UnsentMessageProperty> unsentMessageProperties = new ArrayList<>();
-        for(UnsentMessageTypeProperty property : properties){
-            UnsentMessageProperty unsentMessageProperty = new UnsentMessageProperty();
-            unsentMessageProperty.setKey(property.getKey());
-            unsentMessageProperty.setValue(property.getValue());
-            unsentMessageProperty.setUnsentMessage(entity);
-            unsentMessageProperties.add(unsentMessageProperty);
-
-        }
-        return unsentMessageProperties;
-    }
 
     public static UnsentMessageType toModel(UnsentMessage entity) {
 		UnsentMessageType model = new UnsentMessageType();

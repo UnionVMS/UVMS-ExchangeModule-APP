@@ -146,41 +146,6 @@ public class ServiceMapper {
         entity.setValue(capability.getValue());
         return entity;
     }
-    
-    public static CapabilityType toModel(ServiceCapability entity) {
-        CapabilityType type = new CapabilityType();
-        type.setType(entity.getCapability());
-        type.setValue(entity.getValue() ? "TRUE" : "FALSE");
-        return type;
-    }
-    
-    public static List<ServiceSetting> mapSettingsList(Service parent, SettingListType settingList, String username) {
-        List<ServiceSetting> newSettings = new ArrayList<>();
-        
-        List<ServiceSetting> currentSettings = parent.getServiceSettingList();
-        Map<String, ServiceSetting> map = new HashMap<>();
-        if (currentSettings != null) {
-            for (ServiceSetting i : currentSettings) {
-                map.put(i.getSetting(), i);
-            }            
-        }
-
-        for (SettingType setting : settingList.getSetting()) {
-            ServiceSetting currentSetting = map.get(setting.getKey());
-            if (currentSetting == null) {
-                ServiceSetting newSetting = toSettingEntity(parent, setting, username);
-                newSettings.add(newSetting);
-            } else {
-                if (!currentSetting.getValue().equalsIgnoreCase(setting.getValue())) {
-                    currentSetting.setValue(setting.getValue());
-                    currentSetting.setUpdatedTime(DateUtils.nowUTC());
-                    currentSetting.setUser(username);
-                }
-                newSettings.add(currentSetting);
-            }
-        }
-        return newSettings;
-    }
 
     public static List<ServiceSetting> mapSettingsList(Service old, List<ServiceSetting> newSettingList, String username) {
         List<ServiceSetting> newSettings = new ArrayList<>();
@@ -208,16 +173,6 @@ public class ServiceMapper {
             }
         }
         return newSettings;
-    }
-
-    public static List<ServiceCapability> upsetCapabilityList(Service parent, CapabilityListType capabilityList, String username){
-       List<ServiceCapability> newCapabilityList = new ArrayList<>();
-        for(CapabilityType capabilityType : capabilityList.getCapability()){
-            ServiceCapability newServiceCapability = toCapabilityEntity(parent, capabilityType, username);
-            newCapabilityList.add(newServiceCapability);
-        }
-
-        return newCapabilityList;
     }
 
     public static List<ServiceCapability> upsetCapabilityList(Service parent, List<ServiceCapability> capabilityList, String username){
@@ -258,13 +213,6 @@ public class ServiceMapper {
         return entity;
     }
     
-    public static SettingType toModel(ServiceSetting entity) {
-        SettingType type = new SettingType();
-        type.setKey(entity.getSetting());
-        type.setValue(entity.getValue());
-        return type;
-    }
-
     public static ServiceSetting simpleToSettingEntity(SettingType type){
         ServiceSetting setting = new ServiceSetting();
         setting.setSetting(type.getKey());

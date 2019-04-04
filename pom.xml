@@ -39,6 +39,7 @@
         <uvms.config.version>4.0.2</uvms.config.version>
         <usm4uvms.version>4.0.8</usm4uvms.version>
         <uvms-pom-deps.version>1.18</uvms-pom-deps.version>
+        <asset.client.version>6.0.43</asset.client.version>
 
         <!-- Uvms models -->
         <asset.model.version>4.0.12</asset.model.version>
