@@ -11,40 +11,50 @@ copy of the GNU General Public License along with the IFDM Suite. If not, see <h
  */
 package eu.europa.ec.fisheries.uvms.exchange.service.bean;
 
-import javax.ejb.EJB;
 import javax.ejb.Stateless;
-import javax.jms.TextMessage;
+import javax.inject.Inject;
 
-import eu.europa.ec.fisheries.wsdl.asset.module.AssetModuleMethod;
+import eu.europa.ec.fisheries.uvms.asset.client.AssetClient;
+import eu.europa.ec.fisheries.uvms.asset.client.model.AssetDTO;
+import eu.europa.ec.fisheries.uvms.asset.client.model.AssetIdentifier;
+import eu.europa.ec.fisheries.wsdl.asset.types.AssetId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import eu.europa.ec.fisheries.uvms.asset.model.mapper.AssetModuleRequestMapper;
-import eu.europa.ec.fisheries.uvms.asset.model.mapper.AssetModuleResponseMapper;
-import eu.europa.ec.fisheries.uvms.exchange.service.message.consumer.ExchangeConsumer;
-import eu.europa.ec.fisheries.uvms.exchange.service.message.producer.ExchangeMessageProducer;
 import eu.europa.ec.fisheries.wsdl.asset.types.Asset;
 import eu.europa.ec.fisheries.wsdl.asset.types.AssetIdType;
 
 @Stateless
 public class ExchangeAssetServiceBean {
 	final static Logger LOG = LoggerFactory.getLogger(ExchangeAssetServiceBean.class);
-	
-	@EJB
-	ExchangeMessageProducer producer;
-	
-	@EJB
-    ExchangeConsumer consumer;
+
+	@Inject
+	private AssetClient assetClient;
 
 	public Asset getAsset(String assetGuid) {
 		try {
-			String request = AssetModuleRequestMapper.createGetAssetModuleRequest(assetGuid, AssetIdType.GUID);
-			String messageId = producer.forwardToAsset(request, AssetModuleMethod.GET_ASSET.value());
-			TextMessage response = consumer.getMessage(messageId, TextMessage.class);
-			return AssetModuleResponseMapper.mapToAssetFromResponse(response, messageId);
+
+			LOG.trace("Asking asset for asset with guid " + assetGuid);
+			AssetDTO assetDTO = assetClient.getAssetById(AssetIdentifier.GUID, assetGuid);
+			return mapToAssetFromAssetDTO(assetDTO);
+
 		}catch (Exception e){
 			throw new RuntimeException(e);		//convert various asset exceptions to runtime
 		}
+	}
+
+	public Asset mapToAssetFromAssetDTO(AssetDTO dto){
+		Asset asset = new Asset();
+		AssetId assetId = new AssetId();
+		assetId.setGuid(dto.getId().toString());
+		assetId.setType(AssetIdType.GUID);
+		assetId.setValue(dto.getId().toString());
+		asset.setAssetId(assetId);
+
+		asset.setName(dto.getName());
+		//Set more stuff in this thing when they are needed
+
+		return asset;
 	}
 
 }

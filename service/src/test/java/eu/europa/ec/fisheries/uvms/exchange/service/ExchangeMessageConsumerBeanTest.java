@@ -215,6 +215,7 @@ public class ExchangeMessageConsumerBeanTest extends BuildExchangeServiceTestDep
     public void setCommandPollTest() throws Exception{
         String serviceName = "Poll Test Service";
         String serviceClassName = "eu.europa.ec.fisheries.uvms.plugins.inmarsat";
+        System.out.println("Now");
         String guid = UUID.randomUUID().toString();
         int sizeB4 = unsentMessageDao.getAll().size();
         int eventLogSizeB4 = exchangeEventLogCache.size();
