@@ -1,7 +1,6 @@
 package eu.europa.ec.fisheries.uvms.exchange.rest;
 
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.eu.ingwar.tools.arquillian.extension.suite.annotations.ArquillianSuiteDeployment;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.shrinkwrap.api.Archive;
@@ -36,6 +35,9 @@ public abstract class BuildExchangeRestTestDeployment {
         testWar.addAsResource("META-INF/persistence.xml", "persistence.xml");
         testWar.addAsResource("META-INF/beans.xml", "beans.xml");
 
+        testWar.deleteClass(AssetModuleMock.class);
+        testWar.deleteClass(UnionVMSMock.class);
+
         testWar.delete("/WEB-INF/web.xml");
         testWar.addAsWebInfResource("mock-web.xml", "web.xml");
 
@@ -47,6 +49,15 @@ public abstract class BuildExchangeRestTestDeployment {
 
         WebArchive testWar = ShrinkWrap.create(WebArchive.class, "unionvms.war");
 
+        File[] files = Maven.configureResolver().loadPomFromFile("pom.xml")
+                .resolve("eu.europa.ec.fisheries.uvms.asset:asset-client",
+                        "eu.europa.ec.fisheries.uvms.commons:uvms-commons-message")
+                .withTransitivity().asFile();
+        testWar.addAsLibraries(files);
+
+
+        testWar.addClass(AssetModuleMock.class);
+        testWar.addClass(UnionVMSMock.class);
 
         return testWar;
     }

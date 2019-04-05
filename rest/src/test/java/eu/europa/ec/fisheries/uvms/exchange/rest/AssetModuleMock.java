@@ -1,60 +1,33 @@
 package eu.europa.ec.fisheries.uvms.exchange.rest;
 
-import eu.europa.ec.fisheries.uvms.commons.message.api.MessageConstants;
-import eu.europa.ec.fisheries.uvms.commons.message.api.MessageException;
-import eu.europa.ec.fisheries.uvms.config.model.exception.ModelMarshallException;
-import eu.europa.ec.fisheries.uvms.config.model.mapper.JAXBMarshaller;
-import eu.europa.ec.fisheries.uvms.exchange.service.message.producer.ExchangeMessageProducer;
-import eu.europa.ec.fisheries.wsdl.asset.module.GetAssetModuleResponse;
-import eu.europa.ec.fisheries.wsdl.asset.types.Asset;
-import eu.europa.ec.fisheries.wsdl.asset.types.AssetHistoryId;
-import eu.europa.ec.fisheries.wsdl.asset.types.AssetId;
-import eu.europa.ec.fisheries.wsdl.asset.types.AssetIdType;
+import eu.europa.ec.fisheries.uvms.asset.client.model.AssetDTO;
 
-import javax.ejb.ActivationConfigProperty;
-import javax.ejb.MessageDriven;
-import javax.inject.Inject;
-import javax.jms.Message;
-import javax.jms.MessageListener;
-import javax.jms.TextMessage;
+import javax.ejb.Stateless;
+import javax.ws.rs.*;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 import java.util.UUID;
 
-@MessageDriven(mappedName = "jms/queue/UVMSAssetEvent", activationConfig = {
-        @ActivationConfigProperty(propertyName = "messagingType", propertyValue = "javax.jms.MessageListener"),
-        @ActivationConfigProperty(propertyName = "destinationType", propertyValue = "javax.jms.Queue"),
-        @ActivationConfigProperty(propertyName = "destination", propertyValue = "UVMSAssetEvent"),
-       /* @ActivationConfigProperty(propertyName = "messageSelector", propertyValue = MessageConstants.JMS_FUNCTION_PROPERTY + " NOT IN ( 'ASSET_INFORMATION' ) AND JMSCorrelationID IS NULL")*/})
-public class AssetModuleMock implements MessageListener {
+@Path("/asset/rest/internal")
+@Stateless
+public class AssetModuleMock {
 
-    @Inject
-    ExchangeMessageProducer messageProducer;
+    @GET
+    @Path("asset/{idType : (guid|cfr|ircs|imo|mmsi|iccat|uvi|gfcm)}/{id}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getAssetById(@PathParam("idType") String type, @PathParam("id") String id) {
+        AssetDTO a = getBasicAsset();
+        return Response.ok(a).build();
 
-    @Override
-    public void onMessage(Message message) {
-        try {
-            Asset a = getBasicAsset();
-            GetAssetModuleResponse response = new GetAssetModuleResponse();
-            response.setAsset(a);
-            String stringResponse = JAXBMarshaller.marshallJaxBObjectToString(response);
-            messageProducer.sendModuleResponseMessage((TextMessage) message, stringResponse);
-
-
-        } catch (ModelMarshallException | MessageException e) {
-        }
     }
 
-    private Asset getBasicAsset() {
-        Asset asset = new Asset();
+    private AssetDTO getBasicAsset() {
+        AssetDTO asset = new AssetDTO();
         asset.setIrcs("IRCS");
-        AssetId assetId = new AssetId();
-        assetId.setType(AssetIdType.GUID);
-        assetId.setGuid(UUID.randomUUID().toString());
-        asset.setAssetId(assetId);
-        AssetHistoryId assetHistoryId = new AssetHistoryId();
-        assetHistoryId.setEventId(UUID.randomUUID().toString());
-        asset.setEventHistory(assetHistoryId);
+        asset.setId(UUID.randomUUID());
+        asset.setHistoryId(UUID.randomUUID());
         asset.setName("Test Asset");
-        asset.setCountryCode("SWE");
+        asset.setFlagStateCode("SWE");
         return asset;
     }
 }

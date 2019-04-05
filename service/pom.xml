@@ -36,6 +36,12 @@
             <version>${project.version}</version>
         </dependency>
 
+        <dependency>
+            <groupId>eu.europa.ec.fisheries.uvms.asset</groupId>
+            <artifactId>asset-client</artifactId>
+            <version>${asset.client.version}</version>
+        </dependency>
+
         <!-- Third party libs -->
         <dependency>
             <groupId>eu.europa.ec.fisheries.uvms</groupId>

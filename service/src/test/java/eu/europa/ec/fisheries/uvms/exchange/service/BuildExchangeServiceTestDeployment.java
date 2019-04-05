@@ -27,6 +27,9 @@ public abstract class BuildExchangeServiceTestDeployment {
 
         testWar.addPackages(true, "eu.europa.ec.fisheries.uvms.exchange.service");
 
+        testWar.deleteClass(AssetModuleMock.class);
+        testWar.deleteClass(UnionVMSMock.class);
+
         testWar.addAsWebInfResource("META-INF/ejb-jar.xml");
         testWar.addAsResource("META-INF/persistence.xml", "persistence.xml");
         testWar.addAsResource("META-INF/beans.xml", "beans.xml");
@@ -39,6 +42,15 @@ public abstract class BuildExchangeServiceTestDeployment {
 
         WebArchive testWar = ShrinkWrap.create(WebArchive.class, "unionvms.war");
 
+        File[] files = Maven.configureResolver().loadPomFromFile("pom.xml")
+                .resolve("eu.europa.ec.fisheries.uvms.asset:asset-client",
+                        "eu.europa.ec.fisheries.uvms.commons:uvms-commons-message")
+                .withTransitivity().asFile();
+        testWar.addAsLibraries(files);
+
+
+        testWar.addClass(AssetModuleMock.class);
+        testWar.addClass(UnionVMSMock.class);
 
         return testWar;
     }
