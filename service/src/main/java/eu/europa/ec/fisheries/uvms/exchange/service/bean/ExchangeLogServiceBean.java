@@ -181,7 +181,7 @@ public class ExchangeLogServiceBean {
         return  logStatusHistoryList;
     }
 
-    public String createUnsentMessage(String senderReceiver, Instant timestamp, String recipient, String message, List<UnsentMessageProperty> properties, String username) {
+    public String createUnsentMessage(String senderReceiver, Instant timestamp, String recipient, String message, List<UnsentMessageProperty> properties, String username, String function) {
         LOG.debug("[INFO] CreateUnsentMessage in service layer:{}",message);
         UnsentMessage unsentMessage = new UnsentMessage();
         unsentMessage.setDateReceived(timestamp);
@@ -191,6 +191,8 @@ public class ExchangeLogServiceBean {
         unsentMessage.setUpdatedBy(username);
         unsentMessage.setProperties(new ArrayList<>());
         unsentMessage.getProperties().addAll(properties);
+
+        unsentMessage.setFunction(function);
 
         String createdUnsentMessageId = unsentMessageDao.create(unsentMessage).getGuid().toString();
 
@@ -246,7 +248,7 @@ public class ExchangeLogServiceBean {
 
             for (UnsentMessage unsentMessage : unsentMessageList) {
                 try {
-                    String unsentMessageId = producer.sendMessageOnQueue(unsentMessage.getMessage(), MessageQueue.EVENT);
+                    String unsentMessageId = producer.sendExchangeEventMessage(unsentMessage.getMessage(), unsentMessage.getFunction());
                     //TextMessage unsentResponse = consumer.getMessage(unsentMessageId, TextMessage.class);
                     //ExchangeModuleResponseMapper.validateResponse(unsentResponse, unsentMessageId);
                 } catch (Exception e) {

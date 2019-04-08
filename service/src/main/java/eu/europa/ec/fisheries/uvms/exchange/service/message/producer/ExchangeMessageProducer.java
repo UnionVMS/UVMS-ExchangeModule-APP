@@ -23,17 +23,17 @@ import javax.jms.TextMessage;
 @Local
 public interface ExchangeMessageProducer {      //leave be for now ;(
 
-    String sendMessageOnQueue(String text, MessageQueue queue) ;
-
     String sendEventBusMessage(String text, String serviceName) ;
     
     void sendModuleResponseMessage(TextMessage message, String text) throws MessageException;
 
-    String sendRulesMessage(String text) throws ConfigMessageException;
-
     String sendRulesMessage(String text, String messageSelector) ;
     
     String sendMovementMessage(String text, String groupId) ;
+
+    String sendExchangeEventMessage(String text, String function);
+
+    String sendSalesMessage(String text);
 
     void sendModuleErrorResponseMessage(ExchangeErrorEvent event);
 

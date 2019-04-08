@@ -19,8 +19,12 @@ import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
 import javax.enterprise.event.Observes;
+import javax.inject.Inject;
+import javax.jms.Destination;
 import javax.jms.Queue;
 import javax.jms.Topic;
+
+import eu.europa.ec.fisheries.uvms.exchange.service.message.event.PluginErrorEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import eu.europa.ec.fisheries.uvms.commons.message.api.MessageConstants;
@@ -40,63 +44,32 @@ public class ExchangeMessageProducerBean extends AbstractProducer implements Exc
 
     final static Logger LOG = LoggerFactory.getLogger(ExchangeMessageProducerBean.class);
 
-    @EJB
+    @Inject
     private ExchangeEventBusTopicProducer eventBusProducer;
 
-    @EJB
+    @Inject
     private ExchangeMovementProducer movementProducer;
 
-    @EJB
+    @Inject
     private ExchangeRulesProducer rulesProducer;
 
-    private Queue exchangeResponseQueue;
-    private Queue exchangeEventQueue;
-    private Topic eventBus;
-    private Queue rulesQueue;
-    private Queue configQueue;
-    private Queue vesselQueue;
-    private Queue auditQueue;
-    private Queue movementResponseQueue;
-    private Queue activityQueue;
-    private Queue mdrQueue;
-    private Queue salesQueue;
-    private Queue rulesResponseQueue;
+    @Inject
+    private ExchangeAssetProducer assetProducer;
 
-    @PostConstruct
-    public void init() {
-        exchangeResponseQueue = JMSUtils.lookupQueue(MessageConstants.QUEUE_EXCHANGE);
-        exchangeEventQueue = JMSUtils.lookupQueue(MessageConstants.QUEUE_EXCHANGE_EVENT);
-        rulesQueue = JMSUtils.lookupQueue(MessageConstants.QUEUE_MODULE_RULES);
-        configQueue = JMSUtils.lookupQueue(MessageConstants.QUEUE_CONFIG);
-        vesselQueue = JMSUtils.lookupQueue(MessageConstants.QUEUE_ASSET_EVENT);
-        auditQueue = JMSUtils.lookupQueue(MessageConstants.QUEUE_AUDIT_EVENT);
-        movementResponseQueue = JMSUtils.lookupQueue(MessageConstants.QUEUE_MOVEMENT);
-        eventBus = JMSUtils.lookupTopic(MessageConstants.EVENT_BUS_TOPIC);
-        activityQueue = JMSUtils.lookupQueue(MessageConstants.QUEUE_MODULE_ACTIVITY);
-        mdrQueue = JMSUtils.lookupQueue(MessageConstants.QUEUE_MDR_EVENT);
-        salesQueue = JMSUtils.lookupQueue(MessageConstants.QUEUE_SALES_EVENT);
-        rulesResponseQueue = JMSUtils.lookupQueue(MessageConstants.QUEUE_RULES);
-    }
+    @Inject
+    private ExchangeSalesProducer salesProducer;
 
-    @Override
-    public String sendMessageOnQueue(String text, MessageQueue queue) {
-        try {
-            Queue destination = getDestinationQueue(queue);
-            if(destination != null){
-                return this.sendMessageToSpecificQueue(text, destination, exchangeResponseQueue);
-            }
-            return null;
-        } catch (MessageException e) {
-            LOG.error("[ Error when sending message. ]");
-            throw new RuntimeException("[ Error when sending message. ]");
-        }
-    }
+    @Inject
+    private ExchangeEventProducer eventProducer;
+
+    @Inject
+    private ExchangeConfigProducer configProducer;
 
     @Override
     public String sendEventBusMessage(String text, String serviceName) {
         try {
             LOG.debug("Sending event bus message from Exchange module to recipient om JMS Topic to: {} ", serviceName);
-            return eventBusProducer.sendEventBusMessage(text, serviceName, exchangeEventQueue);
+            return eventBusProducer.sendEventBusMessage(text, serviceName, getPluginReplyTo());
         } catch (Exception e) {
             LOG.error("[ Error when sending message. ] ", e);
             throw new RuntimeException("[ Error when sending message. ]", e);
@@ -104,15 +77,15 @@ public class ExchangeMessageProducerBean extends AbstractProducer implements Exc
     }
 
     @Override
-    @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
     public String sendConfigMessage(String text) {
-        return sendMessageOnQueue(text, MessageQueue.CONFIG);
+        try{
+            return configProducer.sendModuleMessage(text, JMSUtils.lookupQueue(MessageConstants.QUEUE_EXCHANGE));
+        } catch (MessageException e) {
+            LOG.error("[ Error when sending Asset info message. ] {}", e);
+            throw new RuntimeException("Error when sending asset info message.", e);
+        }
     }
 
-    @Override
-    public String sendRulesMessage(String text) {
-        return sendMessageOnQueue(text, MessageQueue.RULES);
-    }
 
     @Override
     public String sendRulesMessage(String text, String messageSelector) {
@@ -121,7 +94,7 @@ public class ExchangeMessageProducerBean extends AbstractProducer implements Exc
             if (messageSelector != null) {
                 messageProperties.put("messageSelector", messageSelector);
             }
-            return rulesProducer.sendModuleMessageWithProps(text, exchangeResponseQueue, messageProperties);
+            return rulesProducer.sendModuleMessageWithProps(text, getModuleReplyTo(), messageProperties);
 
         } catch (MessageException e) {
             LOG.error("[ Error when sending rules message. ] {}", e.getMessage());
@@ -135,7 +108,7 @@ public class ExchangeMessageProducerBean extends AbstractProducer implements Exc
             Map<String, String> properties = new HashMap<>();
             properties.put(MessageConstants.JMS_FUNCTION_PROPERTY, "CREATE");
             properties.put(MessageConstants.JMS_MESSAGE_GROUP, groupId);
-            return movementProducer.sendModuleMessageWithProps(text, exchangeResponseQueue, properties);
+            return movementProducer.sendModuleMessageWithProps(text, getModuleReplyTo(), properties);
         } catch (MessageException e) {
             LOG.error("[ Error when sending movement message. ] {}", e);
             throw new RuntimeException("Error when sending movement message.");
@@ -145,19 +118,40 @@ public class ExchangeMessageProducerBean extends AbstractProducer implements Exc
     @Override
     public String forwardToAsset(String text, String function) {
         try {
-            Queue destination = getDestinationQueue(MessageQueue.VESSEL);
-            String s = "";
-            if(destination != null) {
-                s = this.sendMessageToSpecificQueueWithFunction(text, destination, exchangeResponseQueue, function, null);
-            }
-            return s;
+
+            Map<String, String> properties = new HashMap<>();
+            properties.put(MessageConstants.JMS_FUNCTION_PROPERTY, function);
+            return assetProducer.sendModuleMessageWithProps(text, getModuleReplyTo(), properties);
+
         } catch (MessageException e) {
             LOG.error("[ Error when sending Asset info message. ] {}", e);
             throw new RuntimeException("Error when sending asset info message.", e);
         }
-
     }
 
+    @Override
+    public String sendExchangeEventMessage(String text, String function){
+        try {
+
+            Map<String, String> properties = new HashMap<>();
+            properties.put(MessageConstants.JMS_FUNCTION_PROPERTY, function);
+            return eventProducer.sendModuleMessageWithProps(text, getModuleReplyTo(), properties);
+
+        } catch (MessageException e) {
+            LOG.error("[ Error when sending Asset info message. ] {}", e);
+            throw new RuntimeException("Error when sending asset info message.", e);
+        }
+    }
+
+    @Override
+    public String sendSalesMessage(String text){
+        try{
+            return salesProducer.sendModuleMessage(text, JMSUtils.lookupQueue(MessageConstants.QUEUE_EXCHANGE));
+        } catch (MessageException e) {
+            LOG.error("[ Error when sending Asset info message. ] {}", e);
+            throw new RuntimeException("Error when sending asset info message.", e);
+        }
+    }
 
     @Override
     public void sendModuleErrorResponseMessage(@Observes @ErrorEvent ExchangeErrorEvent message) {
@@ -171,7 +165,7 @@ public class ExchangeMessageProducerBean extends AbstractProducer implements Exc
     }
 
     @Override
-    public void sendPluginErrorResponseMessage(@Observes @eu.europa.ec.fisheries.uvms.exchange.service.message.event.PluginErrorEvent PluginErrorEventCarrier message) {
+    public void sendPluginErrorResponseMessage(@Observes @PluginErrorEvent PluginErrorEventCarrier message) {
         try {
             String data = JAXBMarshaller.marshallJaxBObjectToString(message.getErrorFault());
             final String jmsMessageID = message.getJmsMessage().getJMSMessageID();
@@ -182,6 +176,7 @@ public class ExchangeMessageProducerBean extends AbstractProducer implements Exc
             LOG.error("Error when returning Error message to recipient", e);
         }
     }
+
 
     @Override
     public void sendModuleAckMessage(String messageId, MessageQueue queue, String text) {
@@ -200,45 +195,16 @@ public class ExchangeMessageProducerBean extends AbstractProducer implements Exc
         }
     }
 
-    private Queue getDestinationQueue(MessageQueue queue) {
-        Queue destination = null;
-        switch (queue) {
-            case EVENT:
-                destination = exchangeEventQueue;
-                break;
-            case RULES:
-                destination = rulesQueue;
-                break;
-            case CONFIG:
-                destination = configQueue;
-                break;
-            case VESSEL:
-                destination = vesselQueue;
-                break;
-            case SALES:
-                destination = salesQueue;
-                break;
-            case AUDIT:
-                destination = auditQueue;
-                break;
-            case ACTIVITY_EVENT:
-                destination = activityQueue;
-                break;
-            case MDR_EVENT:
-                destination = mdrQueue;
-                break;
-            case RULES_RESPONSE:
-                destination = rulesResponseQueue;
-                break;
-            default:
-                break;
-        }
-        return destination;
-    }
-
     @Override
     public String getDestinationName() {
         return MessageConstants.QUEUE_EXCHANGE;
     }
 
+    private Destination getPluginReplyTo(){
+        return JMSUtils.lookupQueue(MessageConstants.QUEUE_EXCHANGE_EVENT);
+    }
+
+    private Destination getModuleReplyTo(){
+        return JMSUtils.lookupQueue(MessageConstants.QUEUE_EXCHANGE);
+    }
 }

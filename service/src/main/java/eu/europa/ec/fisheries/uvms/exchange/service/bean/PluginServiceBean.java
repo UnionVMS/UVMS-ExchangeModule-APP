@@ -26,6 +26,7 @@ import eu.europa.ec.fisheries.uvms.exchange.entity.serviceregistry.ServiceSettin
 import eu.europa.ec.fisheries.uvms.exchange.mapper.ServiceMapper;
 import eu.europa.ec.fisheries.uvms.exchange.service.message.consumer.ExchangeConsumer;
 import eu.europa.ec.fisheries.uvms.exchange.service.message.event.ErrorEvent;
+import eu.europa.ec.fisheries.uvms.exchange.service.message.event.PluginErrorEvent;
 import eu.europa.ec.fisheries.uvms.exchange.service.message.event.carrier.ExchangeErrorEvent;
 import eu.europa.ec.fisheries.uvms.exchange.service.message.event.carrier.PluginErrorEventCarrier;
 import eu.europa.ec.fisheries.uvms.exchange.service.message.producer.ExchangeMessageProducer;
@@ -55,7 +56,7 @@ public class PluginServiceBean {
     private static final String PARAMETER_DELIMETER = "\\.";
 
     @Inject
-    @eu.europa.ec.fisheries.uvms.exchange.service.message.event.PluginErrorEvent
+    @PluginErrorEvent
     private Event<PluginErrorEventCarrier> errorEvent;
 
     @Inject

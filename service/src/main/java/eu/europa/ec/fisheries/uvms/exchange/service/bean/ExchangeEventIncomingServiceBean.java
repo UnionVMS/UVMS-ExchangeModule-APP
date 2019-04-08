@@ -29,6 +29,7 @@ import eu.europa.ec.fisheries.uvms.exchange.bean.ServiceRegistryModelBean;
 import eu.europa.ec.fisheries.uvms.exchange.entity.exchangelog.ExchangeLog;
 import eu.europa.ec.fisheries.uvms.exchange.entity.serviceregistry.Service;
 import eu.europa.ec.fisheries.uvms.exchange.mapper.ServiceMapper;
+import eu.europa.ec.fisheries.uvms.exchange.service.message.event.PluginErrorEvent;
 import org.apache.commons.collections.CollectionUtils;
 import eu.europa.ec.fisheries.schema.exchange.common.v1.AcknowledgeType;
 import eu.europa.ec.fisheries.schema.exchange.module.v1.*;
@@ -75,7 +76,7 @@ public class ExchangeEventIncomingServiceBean {
     private Event<ExchangeErrorEvent> exchangeErrorEvent;
 
     @Inject
-    @eu.europa.ec.fisheries.uvms.exchange.service.message.event.PluginErrorEvent
+    @PluginErrorEvent
     private Event<PluginErrorEventCarrier> pluginErrorEvent;
 
     @Inject
@@ -368,7 +369,7 @@ public class ExchangeEventIncomingServiceBean {
         try {
             ReceiveInvalidSalesMessage request = JAXBMarshaller.unmarshallTextMessage(event, ReceiveInvalidSalesMessage.class);
             exchangeLogService.log(request, LogType.RECEIVE_SALES_REPORT, ExchangeLogStatusTypeType.FAILED, TypeRefType.SALES_REPORT, request.getOriginalMessage(), true);
-            producer.sendMessageOnQueue(request.getRespondToInvalidMessageRequest(), MessageQueue.SALES);
+            producer.sendSalesMessage(request.getRespondToInvalidMessageRequest());
         } catch (Exception e) {
             firePluginFault(event, "Could not log the incoming invalid sales message", e, null);
         }
