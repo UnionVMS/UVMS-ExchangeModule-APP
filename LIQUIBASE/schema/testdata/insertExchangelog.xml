@@ -15,7 +15,7 @@
             <column name="log_status" value="SUCCESSFUL"/>
             <column name="log_type" value="EMAIL"/>
             <column name="log_transfer_incoming" valueBoolean="0"/>
-            <column name="log_updattim" valueDate="${now}"/>
+            <column name="log_updatetime" valueDate="${now}"/>
             <column name="log_upuser" value="johlyn"/>
         </insert>
         
@@ -24,7 +24,7 @@
             <column name="logstatus_status" value="ISSUED"/>
             <column name="logstatus_timestamp" valueDate="${now}"/>
             <column name="logstatus_log_id" value="00000000-0000-0000-0000-000000000001"/>
-            <column name="logstatus_updattim" valueDate="${now}"/>
+            <column name="logstatus_updatetime" valueDate="${now}"/>
             <column name="logstatus_upuser" value="johlyn"/>
         </insert>
         
@@ -33,7 +33,7 @@
             <column name="logstatus_status" value="SUCCESSFUL"/>
             <column name="logstatus_timestamp" valueDate="${now}"/>
             <column name="logstatus_log_id" value="00000000-0000-0000-0000-000000000001"/>
-            <column name="logstatus_updattim" valueDate="${now}"/>
+            <column name="logstatus_updatetime" valueDate="${now}"/>
             <column name="logstatus_upuser" value="johlyn"/>
         </insert>
         
@@ -47,7 +47,7 @@
             <column name="log_status" value="ISSUED"/>
             <column name="log_type" value="POLL"/>
             <column name="log_transfer_incoming" valueBoolean="false"/>
-            <column name="log_updattim" valueDate="${now}"/>
+            <column name="log_updatetime" valueDate="${now}"/>
             <column name="log_upuser" value="johlyn"/>
         </insert>
         
@@ -56,7 +56,7 @@
             <column name="logstatus_status" value="ISSUED"/>
             <column name="logstatus_timestamp" valueDate="${now}"/>
             <column name="logstatus_log_id" value="00000000-0000-0000-0000-000000000002"/>
-            <column name="logstatus_updattim" valueDate="${now}"/>
+            <column name="logstatus_updatetime" valueDate="${now}"/>
             <column name="logstatus_upuser" value="johlyn"/>
         </insert>
         
@@ -70,7 +70,7 @@
             <column name="log_status" value="SUCCESSFUL"/>
             <column name="log_type" value="SEND_MOVEMENT"/>
             <column name="log_transfer_incoming" valueBoolean="false"/>
-            <column name="log_updattim" valueDate="${now}"/>
+            <column name="log_updatetime" valueDate="${now}"/>
             <column name="log_upuser" value="johlyn"/>
             <column name="log_fwdrule" value="TESTDATA-RULE"/>
             <column name="log_recipient" value="TESTDATA"/>
@@ -82,7 +82,7 @@
             <column name="logstatus_status" value="ISSUED"/>
             <column name="logstatus_timestamp" valueDate="${now}"/>
             <column name="logstatus_log_id" value="00000000-0000-0000-0000-000000000003"/>
-            <column name="logstatus_updattim" valueDate="${now}"/>
+            <column name="logstatus_updatetime" valueDate="${now}"/>
             <column name="logstatus_upuser" value="johlyn"/>
         </insert>
         
@@ -91,7 +91,7 @@
             <column name="logstatus_status" value="SUCCESSFUL"/>
             <column name="logstatus_timestamp" valueDate="${now}"/>
             <column name="logstatus_log_id" value="00000000-0000-0000-0000-000000000003"/>
-            <column name="logstatus_updattim" valueDate="${now}"/>
+            <column name="logstatus_updatetime" valueDate="${now}"/>
             <column name="logstatus_upuser" value="johlyn"/>
         </insert>
         
@@ -105,7 +105,7 @@
             <column name="log_status" value="SUCCESSFUL"/>
             <column name="log_type" value="RECEIVE_MOVEMENT"/>
             <column name="log_transfer_incoming" valueBoolean="false"/>
-            <column name="log_updattim" valueDate="${now}"/>
+            <column name="log_updatetime" valueDate="${now}"/>
             <column name="log_upuser" value="johlyn"/>
             <column name="log_source" value="INMARSAT_C"/>
         </insert>
@@ -115,7 +115,7 @@
             <column name="logstatus_status" value="ISSUED"/>
             <column name="logstatus_timestamp" valueDate="${now}"/>
             <column name="logstatus_log_id" value="00000000-0000-0000-0000-000000000004"/>
-            <column name="logstatus_updattim" valueDate="${now}"/>
+            <column name="logstatus_updatetime" valueDate="${now}"/>
             <column name="logstatus_upuser" value="johlyn"/>
         </insert>
         
@@ -124,7 +124,7 @@
             <column name="logstatus_status" value="SUCCESSFUL"/>
             <column name="logstatus_timestamp" valueDate="${now}"/>
             <column name="logstatus_log_id" value="00000000-0000-0000-0000-000000000004"/>
-            <column name="logstatus_updattim" valueDate="${now}"/>
+            <column name="logstatus_updatetime" valueDate="${now}"/>
             <column name="logstatus_upuser" value="johlyn"/>
         </insert>
         
@@ -138,7 +138,7 @@
             <column name="log_status" value="FAILED"/>
             <column name="log_type" value="RECEIVE_MOVEMENT"/>
             <column name="log_transfer_incoming" valueBoolean="false"/>
-            <column name="log_updattim" valueDate="${now}"/>
+            <column name="log_updatetime" valueDate="${now}"/>
             <column name="log_upuser" value="johlyn"/>
             <column name="log_source" value="INMARSAT_C"/>
         </insert>
@@ -148,7 +148,7 @@
             <column name="logstatus_status" value="ISSUED"/>
             <column name="logstatus_timestamp" valueDate="${now}"/>
             <column name="logstatus_log_id" value="00000000-0000-0000-0000-000000000004"/>
-            <column name="logstatus_updattim" valueDate="${now}"/>
+            <column name="logstatus_updatetime" valueDate="${now}"/>
             <column name="logstatus_upuser" value="johlyn"/>
         </insert>
         
@@ -157,7 +157,7 @@
             <column name="logstatus_status" value="FAILED"/>
             <column name="logstatus_timestamp" valueDate="${now}"/>
             <column name="logstatus_log_id" value="00000000-0000-0000-0000-000000000004"/>
-            <column name="logstatus_updattim" valueDate="${now}"/>
+            <column name="logstatus_updatetime" valueDate="${now}"/>
             <column name="logstatus_upuser" value="johlyn"/>
         </insert>
         

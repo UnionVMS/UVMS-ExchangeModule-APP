@@ -26,7 +26,7 @@
                 <constraints nullable="true"/>
             </column>
             <column name="serv_status" remarks="Status of service. Stands for STARTED/STOPPED" type="BOOLEAN"/>
-            <column name="serv_updattim" type="timestamp with time zone" remarks="Last updated date time.">
+            <column name="serv_updatetime" type="timestamp with time zone" remarks="Last updated date time.">
                 <constraints nullable="false"/>
             </column>
             <column name="serv_upuser" type="varchar(60)" remarks="Last update userid.">

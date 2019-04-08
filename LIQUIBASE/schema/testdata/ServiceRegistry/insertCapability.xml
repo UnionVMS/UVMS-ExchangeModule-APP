@@ -7,13 +7,13 @@
         <insert tableName="capability">
             <column name="cap_id" value="1"/>
             <column name="cap_name" value="Configurable"/>
-            <column name="cap_updattim" value="${now}"/>
+            <column name="cap_updatetime" value="${now}"/>
             <column name="cap_upuser" value="jojoha"/>
         </insert>
         <insert tableName="capability">
             <column name="cap_id" value="2"/>
             <column name="cap_name" value="Pollable"/>
-            <column name="cap_updattim" value="${now}"/>
+            <column name="cap_updatetime" value="${now}"/>
             <column name="cap_upuser" value="jojoha"/>
         </insert>
         <rollback>

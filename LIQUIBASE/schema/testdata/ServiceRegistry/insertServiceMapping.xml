@@ -8,14 +8,14 @@
             <column name="map_id" value="1"/>
             <column name="map_setting_id" value="1"/> <!-- user -->
             <column name="map_service_id" value="1"/> <!-- eik -->
-            <column name="map_updattim" value="${now}"/>
+            <column name="map_updatetime" value="${now}"/>
             <column name="map_upuser" value="jojoha"/>
         </insert>
         <insert tableName="serviceparametermapping">
             <column name="map_id" value="2"/>
             <column name="map_setting_id" value="2"/> <!-- URL -->
             <column name="map_service_id" value="1"/> <!-- eik -->
-            <column name="map_updattim" value="${now}"/>
+            <column name="map_updatetime" value="${now}"/>
             <column name="map_upuser" value="jojoha"/>
         </insert>
         
@@ -23,7 +23,7 @@
             <column name="map_id" value="3"/>
             <column name="map_setting_id" value="3"/> <!-- user -->
             <column name="map_service_id" value="2"/> <!-- burum -->
-            <column name="map_updattim" value="${now}"/>
+            <column name="map_updatetime" value="${now}"/>
             <column name="map_upuser" value="jojoha"/>
         </insert>
         
@@ -31,7 +31,7 @@
             <column name="map_id" value="4"/>
             <column name="map_setting_id" value="4"/> <!-- timespan -->
             <column name="map_service_id" value="2"/> <!-- burum -->
-            <column name="map_updattim" value="${now}"/>
+            <column name="map_updatetime" value="${now}"/>
             <column name="map_upuser" value="jojoha"/>
         </insert>
         

@@ -42,7 +42,7 @@ public class ExchangeLogStatus {
 	@JoinColumn(name="logstatus_log_id")
 	private ExchangeLog log;
 
-	@Column(name="logstatus_updattim")
+	@Column(name="logstatus_updatetime")
 	private Instant updateTime;
 	
 	@Size(max=60)

@@ -37,7 +37,7 @@ public class ServiceSetting implements Serializable {
     private UUID id;
 
     @NotNull
-    @Column(name = "servset_updattim")
+    @Column(name = "servset_updatetime")
     private Instant updatedTime;
 
     @NotNull

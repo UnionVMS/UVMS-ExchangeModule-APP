@@ -54,7 +54,7 @@ public class UnsentMessage {
 	@Column(name="unsent_message")
 	private String message;
 	
-	@Column(name="unsent_updattim")
+	@Column(name="unsent_updatetime")
 	private Instant updateTime;
 	
 	@Size(max=60)

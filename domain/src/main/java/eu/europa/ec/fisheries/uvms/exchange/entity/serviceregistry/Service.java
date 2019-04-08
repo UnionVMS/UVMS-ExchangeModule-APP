@@ -90,7 +90,7 @@ public class Service implements Serializable {
     private boolean status;
 
     @NotNull
-    @Column(name = "serv_updattim")
+    @Column(name = "serv_updatetime")
     private Instant updated;
 
     @NotNull

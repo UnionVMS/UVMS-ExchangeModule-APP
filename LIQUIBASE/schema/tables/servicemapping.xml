@@ -15,7 +15,7 @@
             <column name="map_setting_id" remarks="The id of the setting" type="BIGINT">
                 <constraints nullable="false"/>
             </column>
-            <column name="map_updattim" type="timestamp" remarks="Last updated date time.">
+            <column name="map_updatetime" type="timestamp" remarks="Last updated date time.">
                 <constraints nullable="false"/>
             </column>
             <column name="map_upuser" type="varchar(60)" remarks="Last update userid.">

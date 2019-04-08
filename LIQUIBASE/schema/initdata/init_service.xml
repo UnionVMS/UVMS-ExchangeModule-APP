@@ -16,7 +16,7 @@
             <column name="serv_active" value="1"/>
             <column name="serv_type" value="OTHER"/>
             <column name="serv_status" value="1"/>
-            <column name="serv_updattim" valueDate="${now}"/>
+            <column name="serv_updatetime" valueDate="${now}"/>
             <column name="serv_upuser" value="UVMS"/>
 		</insert>
 

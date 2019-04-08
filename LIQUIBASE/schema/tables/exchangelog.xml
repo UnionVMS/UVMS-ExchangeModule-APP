@@ -19,7 +19,7 @@
             <column name="log_status" remarks="The status of the report" type="VARCHAR(50)">
                 <constraints nullable="false"/>
             </column>
-            <column name="log_updattim" type="timestamp" remarks="Last updated date time.">
+            <column name="log_updatetime" type="timestamp" remarks="Last updated date time.">
                 <constraints nullable="false"/>
             </column>
             <column name="log_upuser" type="varchar(60)" remarks="Last update userid.">

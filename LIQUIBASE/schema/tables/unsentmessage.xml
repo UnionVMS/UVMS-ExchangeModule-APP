@@ -16,7 +16,7 @@
             <column name="unsent_datereceived" remarks="DateReceived of the unsent message" type="timestamp with time zone">
                 <constraints nullable="false"/>
             </column>
-            <column name="unsent_updattim" type="timestamp with time zone" remarks="Last updated date time.">
+            <column name="unsent_updatetime" type="timestamp with time zone" remarks="Last updated date time.">
                 <constraints nullable="false"/>
             </column>
             <column name="unsent_upuser" type="varchar(60)" remarks="Last update userid.">

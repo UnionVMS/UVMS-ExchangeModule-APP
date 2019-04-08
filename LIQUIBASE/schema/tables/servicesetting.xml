@@ -18,7 +18,7 @@
             <column name="servset_value" remarks="The value of the setting" type="VARCHAR(4000)">
                 <constraints nullable="false"/>
             </column>
-            <column name="servset_updattim" type="timestamp with time zone" remarks="Last updated date time.">
+            <column name="servset_updatetime" type="timestamp with time zone" remarks="Last updated date time.">
                 <constraints nullable="false"/>
             </column>
             <column name="servset_upuser" type="varchar(60)" remarks="Last update userid.">

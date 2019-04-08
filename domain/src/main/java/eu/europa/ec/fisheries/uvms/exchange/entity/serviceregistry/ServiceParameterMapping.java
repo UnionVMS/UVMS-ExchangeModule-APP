@@ -48,7 +48,7 @@ public class ServiceParameterMapping implements Serializable {
 
     @Basic(optional = false)
     @NotNull
-    @Column(name = "map_updattim")
+    @Column(name = "map_updatetime")
     private Instant updateTime;
 
     @Basic(optional = false)

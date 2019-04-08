@@ -17,7 +17,7 @@
             <column name="logstatus_log_id" type="UUID" remarks="Fk to log table.">
                 <constraints nullable="false"/>
             </column>
-            <column name="logstatus_updattim" type="timestamp with time zone" remarks="Last updated date time.">
+            <column name="logstatus_updatetime" type="timestamp with time zone" remarks="Last updated date time.">
                 <constraints nullable="false"/>
             </column>
             <column name="logstatus_upuser" type="varchar(60)" remarks="Last update userid.">

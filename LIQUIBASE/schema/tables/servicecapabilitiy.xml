@@ -18,7 +18,7 @@
             <column name="servcap_value" remarks="Value of capability" type="BOOLEAN">
                 <constraints nullable="false"/>
             </column>
-             <column name="servcap_updattim" type="timestamp with time zone" remarks="Last updated date time.">
+             <column name="servcap_updatetime" type="timestamp with time zone" remarks="Last updated date time.">
                 <constraints nullable="false"/>
             </column>
             <column name="servcap_upuser" type="varchar(60)" remarks="Last update userid.">

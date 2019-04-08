@@ -87,8 +87,8 @@ public class ExchangeLog {
 	@Column(name = "log_status")
 	private ExchangeLogStatusTypeType status;
 
-	@NotNull(message = "The log_updattim field for the log cannot be empty!")
-	@Column(name = "log_updattim")
+	@NotNull(message = "The log_updatetime field for the log cannot be empty!")
+	@Column(name = "log_updatetime")
 	private Instant updateTime;
 
 	@NotNull(message = "The updatedBy field for the log cannot be empty!")

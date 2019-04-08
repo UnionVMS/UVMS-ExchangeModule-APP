@@ -13,7 +13,7 @@
             <column name="serv_active" value="true"/>
             <column name="serv_type" value="SATELLITE_RECEIVER"/>
             <column name="serv_status" value="true"/>
-            <column name="serv_updattim" value="${now}"/>
+            <column name="serv_updatetime" value="${now}"/>
             <column name="serv_upuser" value="jojoha"/>
         </insert>
         <insert tableName="service">
@@ -25,7 +25,7 @@
             <column name="serv_active" value="true"/>
             <column name="serv_type" value="SATELLITE_RECEIVER"/>
             <column name="serv_status" value="false"/>
-            <column name="serv_updattim" value="${now}"/>
+            <column name="serv_updatetime" value="${now}"/>
             <column name="serv_upuser" value="jojoha"/>
         </insert>
         <insert tableName="service">
@@ -37,7 +37,7 @@
             <column name="serv_active" value="true"/>
             <column name="serv_type" value="FLUX"/>
             <column name="serv_status" value="true"/>
-            <column name="serv_updattim" value="${now}"/>
+            <column name="serv_updatetime" value="${now}"/>
             <column name="serv_upuser" value="jojoha"/>
         </insert>
         <insert tableName="service">
@@ -49,7 +49,7 @@
             <column name="serv_active" value="true"/>
             <column name="serv_type" value="SATELLITE_RECEIVER"/>
             <column name="serv_status" value="true"/>
-            <column name="serv_updattim" value="${now}"/>
+            <column name="serv_updatetime" value="${now}"/>
             <column name="serv_upuser" value="jojoha"/>
         </insert>
         

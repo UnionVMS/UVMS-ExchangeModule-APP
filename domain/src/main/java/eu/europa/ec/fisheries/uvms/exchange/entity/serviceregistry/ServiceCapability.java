@@ -50,7 +50,7 @@ public class ServiceCapability implements Serializable {
     private UUID id;
 
     @NotNull
-    @Column(name = "servcap_updattim")
+    @Column(name = "servcap_updatetime")
     private Instant updatedTime;
 
     @NotNull
