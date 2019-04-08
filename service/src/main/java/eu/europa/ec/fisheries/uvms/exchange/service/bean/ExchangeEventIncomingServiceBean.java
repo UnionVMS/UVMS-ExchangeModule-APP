@@ -30,6 +30,10 @@ import eu.europa.ec.fisheries.uvms.exchange.entity.exchangelog.ExchangeLog;
 import eu.europa.ec.fisheries.uvms.exchange.entity.serviceregistry.Service;
 import eu.europa.ec.fisheries.uvms.exchange.mapper.ServiceMapper;
 import eu.europa.ec.fisheries.uvms.exchange.service.message.event.PluginErrorEvent;
+import eu.europa.ec.fisheries.uvms.exchange.service.message.producer.bean.ExchangeAssetProducer;
+import eu.europa.ec.fisheries.uvms.exchange.service.message.producer.bean.ExchangeMovementProducer;
+import eu.europa.ec.fisheries.uvms.exchange.service.message.producer.bean.ExchangeRulesProducer;
+import eu.europa.ec.fisheries.uvms.exchange.service.message.producer.bean.ExchangeSalesProducer;
 import org.apache.commons.collections.CollectionUtils;
 import eu.europa.ec.fisheries.schema.exchange.common.v1.AcknowledgeType;
 import eu.europa.ec.fisheries.schema.exchange.module.v1.*;
@@ -47,11 +51,9 @@ import eu.europa.ec.fisheries.schema.rules.module.v1.RulesModuleMethod;
 import eu.europa.ec.fisheries.schema.rules.module.v1.SetFLUXMDRSyncMessageRulesResponse;
 import eu.europa.ec.fisheries.uvms.commons.message.api.MessageException;
 import eu.europa.ec.fisheries.uvms.commons.message.impl.JAXBUtils;
-import eu.europa.ec.fisheries.uvms.exchange.service.message.constants.MessageQueue;
 import eu.europa.ec.fisheries.uvms.exchange.service.message.event.ErrorEvent;
 import eu.europa.ec.fisheries.uvms.exchange.service.message.event.carrier.ExchangeErrorEvent;
 import eu.europa.ec.fisheries.uvms.exchange.service.message.event.carrier.PluginErrorEventCarrier;
-import eu.europa.ec.fisheries.uvms.exchange.service.message.producer.ExchangeMessageProducer;
 import eu.europa.ec.fisheries.uvms.exchange.model.constant.FaultCode;
 import eu.europa.ec.fisheries.uvms.exchange.model.mapper.ExchangeModuleResponseMapper;
 import eu.europa.ec.fisheries.uvms.exchange.model.mapper.ExchangePluginResponseMapper;
@@ -96,11 +98,21 @@ public class ExchangeEventIncomingServiceBean {
     @EJB
     private ExchangeLogModelBean exchangeLogModel;
 
-    @EJB
-    private ExchangeMessageProducer producer;
 
     @EJB
     private ExchangeEventOutgoingServiceBean exchangeEventOutgoingService;
+
+    @Inject
+    private ExchangeAssetProducer exchangeAssetProducer;
+
+    @Inject
+    private ExchangeRulesProducer rulesProducer;
+
+    @Inject
+    private ExchangeMovementProducer movementProducer;
+
+    @Inject
+    private ExchangeSalesProducer salesProducer;
 
     private Jsonb jsonb = JsonbBuilder.create();
 
@@ -189,7 +201,7 @@ public class ExchangeEventIncomingServiceBean {
             GetServiceListRequest request = JAXBMarshaller.unmarshallTextMessage(message, GetServiceListRequest.class);
             LOG.info("[INFO] Get plugin config LIST_SERVICE:{}", request.getType());
             List<ServiceResponseType> serviceList = ServiceMapper.toServiceModelList(serviceRegistryModel.getPlugins(request.getType()));
-            producer.sendModuleResponseMessage(message, ExchangeModuleResponseMapper.mapServiceListResponse(serviceList));
+            movementProducer.sendResponseMessageToSender(message, ExchangeModuleResponseMapper.mapServiceListResponse(serviceList));
         } catch (Exception e) {
             LOG.error("[ Error when getting plugin list from source {}] {}", message, e);
             exchangeErrorEvent.fire(new ExchangeErrorEvent(message, ExchangeModuleResponseMapper.createFaultMessage(
@@ -262,7 +274,7 @@ public class ExchangeEventIncomingServiceBean {
 
                 //combine all possible values into one big grouping string
                 String groupId = incomingMovement.getAssetCFR() + incomingMovement.getAssetIMO() + incomingMovement.getAssetIRCS() + incomingMovement.getAssetMMSI() + incomingMovement.getAssetID() + incomingMovement.getAssetGuid() + incomingMovement.getMobileTerminalDNID() + incomingMovement.getMobileTerminalConnectId() + incomingMovement.getMobileTerminalGuid() + incomingMovement.getMobileTerminalLES() + incomingMovement.getMobileTerminalMemberNumber() + incomingMovement.getMobileTerminalSerialNumber() + "AllOtherThings";
-                producer.sendMovementMessage(json, groupId);
+                movementProducer.sendMovementMessage(json, groupId);
                 LOG.debug("Finished forwarding received movement to movement module.");
             } else {
                 LOG.debug("Validation error. Event sent to plugin {}", message);
@@ -369,7 +381,7 @@ public class ExchangeEventIncomingServiceBean {
         try {
             ReceiveInvalidSalesMessage request = JAXBMarshaller.unmarshallTextMessage(event, ReceiveInvalidSalesMessage.class);
             exchangeLogService.log(request, LogType.RECEIVE_SALES_REPORT, ExchangeLogStatusTypeType.FAILED, TypeRefType.SALES_REPORT, request.getOriginalMessage(), true);
-            producer.sendSalesMessage(request.getRespondToInvalidMessageRequest());
+            salesProducer.sendSalesMessage(request.getRespondToInvalidMessageRequest());
         } catch (Exception e) {
             firePluginFault(event, "Could not log the incoming invalid sales message", e, null);
         }
@@ -390,7 +402,7 @@ public class ExchangeEventIncomingServiceBean {
                 response.setRefGuid(exchangeStatusHistoryList.get(0).getTypeRef().getRefGuid());
             }
             String responseAsString = JAXBUtils.marshallJaxBObjectToString(response);
-            producer.sendModuleResponseMessage(event, responseAsString);
+            movementProducer.sendResponseMessageToSender(event, responseAsString);
         } catch (MessageException | JAXBException | JMSException e) {
             fireExchangeFault(event, "Could not un-marshall " + LogRefIdByTypeExistsRequest.class, e);
         }
@@ -411,7 +423,7 @@ public class ExchangeEventIncomingServiceBean {
                 response.setMessageGuid(exchangeLogByGuid.getGuid());
             }
             String responseAsString = JAXBUtils.marshallJaxBObjectToString(response);
-            producer.sendModuleResponseMessage(event, responseAsString);
+            movementProducer.sendResponseMessageToSender(event, responseAsString);
 
         } catch (MessageException | JAXBException | JMSException e) {
             fireExchangeFault(event, "Could not un-marshall " + LogRefIdByTypeExistsRequest.class, e);
@@ -454,7 +466,7 @@ public class ExchangeEventIncomingServiceBean {
         try {
             PingResponse response = new PingResponse();
             response.setResponse("pong");
-            producer.sendModuleResponseMessage(message, JAXBMarshaller.marshallJaxBObjectToString(response));
+            movementProducer.sendResponseMessageToSender(message, JAXBMarshaller.marshallJaxBObjectToString(response));
         } catch (Exception e) {
             LOG.error("[ Error when marshalling ping response ]");
         }
@@ -531,7 +543,7 @@ public class ExchangeEventIncomingServiceBean {
     private void forwardToRules(String messageToForward, String messageSelector) {
         try {
             LOG.info("[INFO] Forwarding the msg to rules Module.");
-            producer.sendRulesMessage(messageToForward, messageSelector);
+            rulesProducer.sendRulesMessage(messageToForward, messageSelector);
 
         } catch (Exception e) {
             LOG.error("[ERROR] Failed to forward message to Rules: {} {}", messageToForward, e);
@@ -546,7 +558,7 @@ public class ExchangeEventIncomingServiceBean {
     private void forwardToAsset(String messageToForward) {
         try {
             LOG.info("Forwarding the message to Asset.");
-            String s = producer.forwardToAsset(messageToForward, "ASSET_INFORMATION");
+            String s = exchangeAssetProducer.forwardToAsset(messageToForward, "ASSET_INFORMATION");
         } catch (Exception e) {
             LOG.error("Failed to forward message to Asset: {} {}", messageToForward, e);
         }

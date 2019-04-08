@@ -11,13 +11,38 @@ details. You should have received a copy of the GNU General Public License along
 package eu.europa.ec.fisheries.uvms.exchange.service.message.producer.bean;
 
 import eu.europa.ec.fisheries.uvms.commons.message.api.MessageConstants;
+import eu.europa.ec.fisheries.uvms.commons.message.api.MessageException;
 import eu.europa.ec.fisheries.uvms.commons.message.impl.AbstractProducer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.annotation.Resource;
 import javax.ejb.LocalBean;
 import javax.ejb.Stateless;
+import javax.jms.Queue;
+import java.util.HashMap;
+import java.util.Map;
 
 @Stateless
 @LocalBean
 public class ExchangeMovementProducer extends AbstractProducer {
+
+    final static Logger LOG = LoggerFactory.getLogger(ExchangeMovementProducer.class);
+
+    @Resource(mappedName = "java:/jms/queue/UVMSExchange")
+    private Queue replyToQueue;
+
+    public String sendMovementMessage(String text, String groupId) {
+        try {
+            Map<String, String> properties = new HashMap<>();
+            properties.put(MessageConstants.JMS_FUNCTION_PROPERTY, "CREATE");
+            properties.put(MessageConstants.JMS_MESSAGE_GROUP, groupId);
+            return sendModuleMessageWithProps(text, replyToQueue, properties);
+        } catch (MessageException e) {
+            LOG.error("[ Error when sending movement message. ] {}", e);
+            throw new RuntimeException("Error when sending movement message.");
+        }
+    }
 
     @Override
     public String getDestinationName() {

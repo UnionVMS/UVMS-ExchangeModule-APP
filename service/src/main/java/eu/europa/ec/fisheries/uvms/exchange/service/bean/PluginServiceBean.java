@@ -24,12 +24,10 @@ import eu.europa.ec.fisheries.uvms.exchange.dao.bean.ServiceRegistryDaoBean;
 import eu.europa.ec.fisheries.uvms.exchange.entity.serviceregistry.Service;
 import eu.europa.ec.fisheries.uvms.exchange.entity.serviceregistry.ServiceSetting;
 import eu.europa.ec.fisheries.uvms.exchange.mapper.ServiceMapper;
-import eu.europa.ec.fisheries.uvms.exchange.service.message.consumer.ExchangeConsumer;
 import eu.europa.ec.fisheries.uvms.exchange.service.message.event.ErrorEvent;
 import eu.europa.ec.fisheries.uvms.exchange.service.message.event.PluginErrorEvent;
 import eu.europa.ec.fisheries.uvms.exchange.service.message.event.carrier.ExchangeErrorEvent;
 import eu.europa.ec.fisheries.uvms.exchange.service.message.event.carrier.PluginErrorEventCarrier;
-import eu.europa.ec.fisheries.uvms.exchange.service.message.producer.ExchangeMessageProducer;
 import eu.europa.ec.fisheries.uvms.exchange.model.constant.FaultCode;
 import eu.europa.ec.fisheries.uvms.exchange.model.mapper.ExchangeModuleResponseMapper;
 import eu.europa.ec.fisheries.uvms.exchange.model.mapper.ExchangePluginRequestMapper;
@@ -45,6 +43,9 @@ import javax.ejb.Stateless;
 import javax.enterprise.event.Event;
 import javax.inject.Inject;
 import javax.jms.TextMessage;
+
+import eu.europa.ec.fisheries.uvms.exchange.service.message.producer.bean.ExchangeEventBusTopicProducer;
+import eu.europa.ec.fisheries.uvms.exchange.service.message.producer.bean.ExchangeEventProducer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -69,11 +70,11 @@ public class PluginServiceBean {
     @Inject
     private ServiceRegistryModelBean serviceRegistryModel;
 
-    @EJB
-    private ExchangeMessageProducer producer;
+    @Inject
+    private ExchangeEventBusTopicProducer eventBusTopicProducer;
 
-    @EJB
-    private ExchangeConsumer consumer;
+    @Inject
+    private ExchangeEventProducer exchangeEventProducer;
 
     @EJB
     private ParameterService parameterService;
@@ -94,14 +95,14 @@ public class PluginServiceBean {
                         if(service.getActive()){
                             //TODO log to audit log
                             String response = ExchangePluginResponseMapper.mapToRegisterServiceResponseNOK(messageId, "Plugin of " + pluginType + " already registered. Only one is allowed.");
-                            producer.sendEventBusMessage(response, responseTopicMessageSelector);
+                            eventBusTopicProducer.sendEventBusMessage(response, responseTopicMessageSelector);
                             return false;
                         }
                     }
                 }
             } catch (Exception e) {
                 String response = ExchangePluginResponseMapper.mapToRegisterServiceResponseNOK(messageId, "Exchange service exception when registering plugin [ " + e.getMessage() + " ]");
-                producer.sendEventBusMessage(response, responseTopicMessageSelector);
+                eventBusTopicProducer.sendEventBusMessage(response, responseTopicMessageSelector);
                 return false;
             }
         }
@@ -125,12 +126,12 @@ public class PluginServiceBean {
             //TODO log to exchange log
 
             String response = ExchangePluginResponseMapper.mapToRegisterServiceResponseOK(messageId, ServiceMapper.toServiceModel(service));
-            producer.sendEventBusMessage(response, register.getService().getServiceResponseMessageName());
+            eventBusTopicProducer.sendEventBusMessage(response, register.getService().getServiceResponseMessageName());
             setServiceStatusOnRegister(service);
 
         } catch (Exception e) {
             String response = ExchangePluginResponseMapper.mapToRegisterServiceResponseNOK(messageId, "Exchange service exception when registering plugin [ " + e.getMessage() + " ]");
-            producer.sendEventBusMessage(response, register.getService().getServiceResponseMessageName());
+            eventBusTopicProducer.sendEventBusMessage(response, register.getService().getServiceResponseMessageName());
         }
     }
 
@@ -224,7 +225,7 @@ public class PluginServiceBean {
     	Service service = serviceRegistryModel.updatePluginSettings(serviceClassName, settingList, username);
         // Send the plugin settings to the topic where all plugins should listen to
     	String text = ExchangePluginRequestMapper.createSetConfigRequest(ServiceMapper.toSettingListModel(service.getServiceSettingList()));
-    	producer.sendEventBusMessage(text, serviceClassName);
+        eventBusTopicProducer.sendEventBusMessage(text, serviceClassName);
     }
     
     public void setConfig(ConfigSettingEvent settingEvent) {
@@ -276,11 +277,11 @@ public class PluginServiceBean {
             ServiceSetting setting = ServiceMapper.simpleToSettingEntity(request.getSetting());
 			updatePluginSetting(request.getServiceClassName(), setting, request.getUsername());
 			String text = ExchangeModuleResponseMapper.mapUpdateSettingResponse(ExchangeModuleResponseMapper.mapAcknowledgeTypeOK());
-			producer.sendModuleResponseMessage(settingEvent, text);
+            exchangeEventProducer.sendResponseMessageToSender(settingEvent, text);
 		} catch (Exception e) {
 			LOG.error("Couldn't unmarshall update setting request");
-            ExchangeErrorEvent exchangeErrorEvent = new ExchangeErrorEvent(settingEvent, ExchangeModuleResponseMapper.createFaultMessage(FaultCode.EXCHANGE_EVENT_SERVICE, "Couldn't update plugin setting"));
-			producer.sendModuleErrorResponseMessage(exchangeErrorEvent);
+            ExchangeErrorEvent event = new ExchangeErrorEvent(settingEvent, ExchangeModuleResponseMapper.createFaultMessage(FaultCode.EXCHANGE_EVENT_SERVICE, "Couldn't update plugin setting"));
+			exchangeErrorEvent.fire(event);
 		}
 		
 		
@@ -292,7 +293,7 @@ public class PluginServiceBean {
         }
         if (isServiceRegistered(serviceClassName)){
             String text = ExchangePluginRequestMapper.createStartRequest();
-            producer.sendEventBusMessage(text, serviceClassName);
+            eventBusTopicProducer.sendEventBusMessage(text, serviceClassName);
             return true;
         }else{
             throw new IllegalArgumentException("Service with service class name: "+ serviceClassName + " does not exist");
@@ -310,7 +311,7 @@ public class PluginServiceBean {
         }
         if(isServiceRegistered(serviceClassName)) {
             String text = ExchangePluginRequestMapper.createStopRequest();
-            producer.sendEventBusMessage(text, serviceClassName);
+            eventBusTopicProducer.sendEventBusMessage(text, serviceClassName);
             return true;
         }else{
             throw new IllegalArgumentException("Service with service class name: "+ serviceClassName + " does not exist");
@@ -322,7 +323,7 @@ public class PluginServiceBean {
             throw new IllegalArgumentException("No service to ping");
         }
         String text = ExchangePluginRequestMapper.createPingRequest();
-        producer.sendEventBusMessage(text, serviceClassName);
+        eventBusTopicProducer.sendEventBusMessage(text, serviceClassName);
         return true;
 
     }
