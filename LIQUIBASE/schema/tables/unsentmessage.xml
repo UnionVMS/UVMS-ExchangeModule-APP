@@ -22,6 +22,9 @@
             <column name="unsent_upuser" type="varchar(60)" remarks="Last update userid.">
                 <constraints nullable="false"/>
             </column>
+            <column name="unsent_function" type="varchar(60)" remarks="Called function.">
+            </column>
+
         </createTable>
         <rollback>
             <dropTable tableName="unsent_message" cascadeConstraints="true"/>

@@ -10,7 +10,7 @@ copy of the GNU General Public License along with the IFDM Suite. If not, see <h
  */
 package eu.europa.ec.fisheries.uvms.exchange.rest;
 
-import eu.europa.ec.fisheries.uvms.exchange.service.message.producer.ExchangeMessageProducer;
+import eu.europa.ec.fisheries.uvms.exchange.service.message.producer.bean.ExchangeEventProducer;
 import eu.europa.ec.fisheries.uvms.rest.security.UnionVMSFeature;
 import eu.europa.ec.fisheries.uvms.user.model.mapper.UserModuleResponseMapper;
 import eu.europa.ec.fisheries.wsdl.user.types.*;
@@ -33,7 +33,7 @@ public class UserModuleMock implements MessageListener {
     final static Logger LOG = LoggerFactory.getLogger(UserModuleMock.class);
 
     @Inject
-    ExchangeMessageProducer messageProducer;
+    ExchangeEventProducer messageProducer;
     
     @Override
     public void onMessage(Message message) {
@@ -43,7 +43,7 @@ public class UserModuleMock implements MessageListener {
         String responseString;
             responseString = UserModuleResponseMapper.mapToGetUserContextResponse(userContext);
 
-        messageProducer.sendModuleResponseMessage((TextMessage) message, responseString);
+        messageProducer.sendResponseMessageToSender((TextMessage) message, responseString);
 
         } catch (Exception e) {
             LOG.error("UserModuleMock Error", e);

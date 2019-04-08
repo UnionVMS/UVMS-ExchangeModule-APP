@@ -22,24 +22,19 @@ import javax.enterprise.event.Event;
 import javax.inject.Inject;
 import javax.jms.TextMessage;
 
+import eu.europa.ec.fisheries.schema.exchange.module.v1.*;
 import eu.europa.ec.fisheries.uvms.exchange.bean.ExchangeLogModelBean;
 import eu.europa.ec.fisheries.uvms.exchange.bean.ServiceRegistryModelBean;
 import eu.europa.ec.fisheries.uvms.exchange.entity.exchangelog.ExchangeLog;
 import eu.europa.ec.fisheries.uvms.exchange.entity.serviceregistry.Service;
 import eu.europa.ec.fisheries.uvms.exchange.entity.unsent.UnsentMessageProperty;
+import eu.europa.ec.fisheries.uvms.exchange.service.message.event.PluginErrorEvent;
+import eu.europa.ec.fisheries.uvms.exchange.service.message.producer.bean.ExchangeEventBusTopicProducer;
+import eu.europa.ec.fisheries.uvms.exchange.service.message.producer.bean.ExchangeEventProducer;
 import org.apache.commons.collections.CollectionUtils;
 import eu.europa.ec.fisheries.schema.exchange.common.v1.AcknowledgeType;
 import eu.europa.ec.fisheries.schema.exchange.common.v1.CommandType;
 import eu.europa.ec.fisheries.schema.exchange.common.v1.CommandTypeType;
-import eu.europa.ec.fisheries.schema.exchange.module.v1.ProcessedMovementResponse;
-import eu.europa.ec.fisheries.schema.exchange.module.v1.ProcessedMovementResponseBatch;
-import eu.europa.ec.fisheries.schema.exchange.module.v1.SendAssetInformationRequest;
-import eu.europa.ec.fisheries.schema.exchange.module.v1.SendMovementToPluginRequest;
-import eu.europa.ec.fisheries.schema.exchange.module.v1.SetCommandRequest;
-import eu.europa.ec.fisheries.schema.exchange.module.v1.SetFAQueryMessageRequest;
-import eu.europa.ec.fisheries.schema.exchange.module.v1.SetFLUXFAReportMessageRequest;
-import eu.europa.ec.fisheries.schema.exchange.module.v1.SetFLUXFAResponseMessageRequest;
-import eu.europa.ec.fisheries.schema.exchange.module.v1.UpdateLogStatusRequest;
 import eu.europa.ec.fisheries.schema.exchange.movement.v1.MovementRefType;
 import eu.europa.ec.fisheries.schema.exchange.movement.v1.MovementRefTypeType;
 import eu.europa.ec.fisheries.schema.exchange.movement.v1.SendMovementToPluginType;
@@ -56,7 +51,6 @@ import eu.europa.ec.fisheries.uvms.commons.message.api.MessageConstants;
 import eu.europa.ec.fisheries.uvms.exchange.service.message.event.ErrorEvent;
 import eu.europa.ec.fisheries.uvms.exchange.service.message.event.carrier.ExchangeErrorEvent;
 import eu.europa.ec.fisheries.uvms.exchange.service.message.event.carrier.PluginErrorEventCarrier;
-import eu.europa.ec.fisheries.uvms.exchange.service.message.producer.ExchangeMessageProducer;
 import eu.europa.ec.fisheries.uvms.exchange.model.constant.FaultCode;
 import eu.europa.ec.fisheries.uvms.exchange.model.mapper.ExchangeModuleResponseMapper;
 import eu.europa.ec.fisheries.uvms.exchange.model.mapper.ExchangePluginRequestMapper;
@@ -80,7 +74,7 @@ public class ExchangeEventOutgoingServiceBean {
     private Event<ExchangeErrorEvent> exchangeErrorEvent;
 
     @Inject
-    @eu.europa.ec.fisheries.uvms.exchange.service.message.event.PluginErrorEvent
+    @PluginErrorEvent
     private Event<PluginErrorEventCarrier> pluginErrorEvent;
 
     @Inject
@@ -93,8 +87,11 @@ public class ExchangeEventOutgoingServiceBean {
     @Inject
     private ServiceRegistryModelBean serviceRegistryModel;
 
-    @EJB
-    private ExchangeMessageProducer producer;
+    @Inject
+    private ExchangeEventBusTopicProducer eventBusTopicProducer;
+
+    @Inject
+    private ExchangeEventProducer exchangeEventProducer;
 
     @EJB
     private ExchangeLogServiceBean exchangeLogService;
@@ -118,7 +115,7 @@ public class ExchangeEventOutgoingServiceBean {
         }
         String marshalledRequest = JAXBMarshaller.marshallJaxBObjectToString(sendSalesResponseRequest);
         final String serviceName = pluginType == PluginType.BELGIAN_SALES ? ExchangeServiceConstants.BELGIAN_AUCTION_SALES_PLUGIN_SERVICE_NAME : ExchangeServiceConstants.FLUX_SALES_PLUGIN_SERVICE_NAME;
-        producer.sendEventBusMessage(marshalledRequest, serviceName);
+        eventBusTopicProducer.sendEventBusMessage(marshalledRequest, serviceName);
     }
 
     /**
@@ -129,12 +126,12 @@ public class ExchangeEventOutgoingServiceBean {
      */
     public void sendSalesReportToFLUX(SendSalesReportRequest sendSalesReportRequest) {
         String marshalledRequest = JAXBMarshaller.marshallJaxBObjectToString(sendSalesReportRequest);
-        producer.sendEventBusMessage(marshalledRequest, ExchangeServiceConstants.FLUX_SALES_PLUGIN_SERVICE_NAME);
+        eventBusTopicProducer.sendEventBusMessage(marshalledRequest, ExchangeServiceConstants.FLUX_SALES_PLUGIN_SERVICE_NAME);
     }
 
     public void sendAssetInformationToFLUX(PluginBaseRequest request) {
         String marshalledRequest = JAXBMarshaller.marshallJaxBObjectToString(request);
-        producer.sendEventBusMessage(marshalledRequest, ExchangeServiceConstants.FLUX_VESSEL_PLUGIN_SERVICE_NAME);
+        eventBusTopicProducer.sendEventBusMessage(marshalledRequest, ExchangeServiceConstants.FLUX_VESSEL_PLUGIN_SERVICE_NAME);
     }
 
     /**
@@ -155,7 +152,7 @@ public class ExchangeEventOutgoingServiceBean {
             String unsentMessageGuid;
             try {
                 List<UnsentMessageProperty> unsentMessageProperties = ExchangeLogMapper.getUnsentMessageProperties(sendReport);
-                unsentMessageGuid = exchangeLogService.createUnsentMessage(sendReport.getRecipient(), sendReport.getTimestamp().toInstant(), ExchangeLogMapper.getSendMovementSenderReceiver(sendReport), message.getText(), unsentMessageProperties, request.getUsername());
+                unsentMessageGuid = exchangeLogService.createUnsentMessage(sendReport.getRecipient(), sendReport.getTimestamp().toInstant(), ExchangeLogMapper.getSendMovementSenderReceiver(sendReport), message.getText(), unsentMessageProperties, request.getUsername(), ExchangeModuleMethod.SEND_REPORT_TO_PLUGIN.value());
             } catch (Exception e) {
                 throw new IllegalStateException("Could not create unsent message ", e);
             }
@@ -172,7 +169,7 @@ public class ExchangeEventOutgoingServiceBean {
                 String serviceName = service.getServiceClassName();
                 
                 String text = ExchangePluginRequestMapper.createSetReportRequest(sendReport.getTimestamp().toInstant(), sendReport, unsentMessageGuid);
-                String pluginMessageId = producer.sendEventBusMessage(text, serviceName);
+                String pluginMessageId = eventBusTopicProducer.sendEventBusMessage(text, serviceName);
                 try {
                     ExchangeLog log = ExchangeLogMapper.getSendMovementExchangeLog(sendReport);
                     exchangeLogService.logAndCache(log, pluginMessageId);
@@ -199,7 +196,7 @@ public class ExchangeEventOutgoingServiceBean {
         try {
             LOG.info("[INFO] Received MdrSyncMessageEvent. Going to send to the Plugin now..");
             String marshalledReq = ExchangeToMdrRulesMapper.mapExchangeToMdrPluginRequest(message);
-            producer.sendEventBusMessage(marshalledReq, ExchangeServiceConstants.MDR_PLUGIN_SERVICE_NAME);
+            eventBusTopicProducer.sendEventBusMessage(marshalledReq, ExchangeServiceConstants.MDR_PLUGIN_SERVICE_NAME);
         } catch (Exception e) {
             LOG.error("[ERROR] Something strange happend during message conversion {} {}",message,e);       //so, if we dont update the mdr plugin bc of an exception, we just ignore the entire message?
         }
@@ -270,7 +267,7 @@ public class ExchangeEventOutgoingServiceBean {
             final ExchangeLog exchangeLog = exchangeLogService.log(request, LogType.SEND_FLUX_RESPONSE_MSG, request.getStatus(), TypeRefType.FA_RESPONSE, request.getRequest(), false);
             if(!exchangeLog.getStatus().equals(ExchangeLogStatusTypeType.FAILED)){ // Send response only if it is NOT FAILED
                 LOG.debug("[START] Sending FLUXFAResponse to Flux Activity Plugin..");
-                String pluginMessageId = producer.sendEventBusMessage(text, ((request.getPluginType() == BELGIAN_ACTIVITY)
+                String pluginMessageId = eventBusTopicProducer.sendEventBusMessage(text, ((request.getPluginType() == BELGIAN_ACTIVITY)
                         ? ExchangeServiceConstants.BELGIAN_ACTIVITY_PLUGIN_SERVICE_NAME : ExchangeServiceConstants.FLUX_ACTIVITY_PLUGIN_SERVICE_NAME));
                 LOG.debug("[END] FLUXFAResponse sent to Flux Activity Plugin {}" + pluginMessageId);
             } else {
@@ -288,7 +285,7 @@ public class ExchangeEventOutgoingServiceBean {
             String text = ExchangePluginRequestMapper.createSendFLUXFAQueryRequest(
                     request.getRequest(), request.getDestination(), request.getFluxDataFlow(), request.getSenderOrReceiver());
             LOG.debug("Message to plugin {}", text);
-            String pluginMessageId = producer.sendEventBusMessage(text, ((request.getPluginType() == BELGIAN_ACTIVITY)
+            String pluginMessageId = eventBusTopicProducer.sendEventBusMessage(text, ((request.getPluginType() == BELGIAN_ACTIVITY)
                     ? ExchangeServiceConstants.BELGIAN_ACTIVITY_PLUGIN_SERVICE_NAME : ExchangeServiceConstants.FLUX_ACTIVITY_PLUGIN_SERVICE_NAME));
             LOG.info("Message sent to Flux ERS Plugin :" + pluginMessageId);
             exchangeLogService.log(request, LogType.SEND_FA_QUERY_MSG, ExchangeLogStatusTypeType.SENT, TypeRefType.FA_QUERY, request.getRequest(), false);
@@ -305,7 +302,7 @@ public class ExchangeEventOutgoingServiceBean {
             String text = ExchangePluginRequestMapper.createSendFLUXFAReportRequest(
                     request.getRequest(), request.getDestination(), request.getFluxDataFlow(), request.getSenderOrReceiver());
             LOG.debug("Message to plugin {}", text);
-            String pluginMessageId = producer.sendEventBusMessage(text, ((request.getPluginType() == BELGIAN_ACTIVITY)
+            String pluginMessageId = eventBusTopicProducer.sendEventBusMessage(text, ((request.getPluginType() == BELGIAN_ACTIVITY)
                     ? ExchangeServiceConstants.BELGIAN_ACTIVITY_PLUGIN_SERVICE_NAME : ExchangeServiceConstants.FLUX_ACTIVITY_PLUGIN_SERVICE_NAME));
             LOG.info("Message sent to Flux ERS Plugin :" + pluginMessageId);
             exchangeLogService.log(request, LogType.SEND_FLUX_FA_REPORT_MSG, ExchangeLogStatusTypeType.SENT, TypeRefType.FA_REPORT, request.getRequest(), false);
@@ -485,7 +482,7 @@ public class ExchangeEventOutgoingServiceBean {
             String faultMessage = "No plugin receiver available";
             try {
                 List<UnsentMessageProperty> setUnsentMessageTypePropertiesForPoll = getSetUnsentMessageTypePropertiesForPoll(commandType);
-                exchangeLogService.createUnsentMessage(service.getName(), command.getTimestamp().toInstant(), command.getCommand().name(), origin.getText(), setUnsentMessageTypePropertiesForPoll, username);
+                exchangeLogService.createUnsentMessage(service.getName(), command.getTimestamp().toInstant(), command.getCommand().name(), origin.getText(), setUnsentMessageTypePropertiesForPoll, username, ExchangeModuleMethod.SET_COMMAND.value());
             } catch (Exception e) {
                 LOG.error("Couldn't create unsentMessage " + e.getMessage());
             }
@@ -494,7 +491,7 @@ public class ExchangeEventOutgoingServiceBean {
                 try {
                     AcknowledgeType ackType = ExchangeModuleResponseMapper.mapAcknowledgeTypeNOK(origin.getJMSMessageID(), "Plugin to send command to is not started");
                     String moduleResponse = ExchangeModuleResponseMapper.mapSetCommandResponse(ackType);
-                    producer.sendModuleResponseMessage(origin, moduleResponse);
+                    exchangeEventProducer.sendResponseMessageToSender(origin, moduleResponse);
                 } catch (Exception e) {
                     LOG.error("Plugin not started, couldn't send module response: " + e.getMessage());
                 }
@@ -522,7 +519,7 @@ public class ExchangeEventOutgoingServiceBean {
             faultMessage = "No plugin receiver available. Does not exist or not started";
             try {
                 List<UnsentMessageProperty> setUnsentMessagePropertiesForPoll = getSetUnsentMessageTypePropertiesForPoll(request.getCommand());
-                exchangeLogService.createUnsentMessage(service.getName(), command.getTimestamp().toInstant(), command.getCommand().name(), request.toString(), setUnsentMessagePropertiesForPoll, request.getUsername());
+                exchangeLogService.createUnsentMessage(service.getName(), command.getTimestamp().toInstant(), command.getCommand().name(), request.toString(), setUnsentMessagePropertiesForPoll, request.getUsername(), ExchangeModuleMethod.SET_COMMAND.value());
             } catch (Exception e) {
                 LOG.error("Couldn't create unsentMessage " + e.getMessage());
             }
@@ -538,11 +535,11 @@ public class ExchangeEventOutgoingServiceBean {
         CommandType commandType = request.getCommand();
 
         List<UnsentMessageProperty> setUnsentMessagePropertiesForPoll = getSetUnsentMessageTypePropertiesForPoll(commandType);
-        String unsentMessageGuid = exchangeLogService.createUnsentMessage(serviceName, request.getCommand().getTimestamp().toInstant(), request.getCommand().getCommand().name(), originalJMSText, setUnsentMessagePropertiesForPoll, request.getUsername());
+        String unsentMessageGuid = exchangeLogService.createUnsentMessage(serviceName, request.getCommand().getTimestamp().toInstant(), request.getCommand().getCommand().name(), originalJMSText, setUnsentMessagePropertiesForPoll, request.getUsername(), ExchangeModuleMethod.SET_COMMAND.value());
 
         request.getCommand().setUnsentMessageGuid(unsentMessageGuid);
         String text = ExchangePluginRequestMapper.createSetCommandRequest(request.getCommand());
-        String pluginMessageId = producer.sendEventBusMessage(text, request.getCommand().getPluginName());
+        String pluginMessageId = eventBusTopicProducer.sendEventBusMessage(text, request.getCommand().getPluginName());
 
         try {
             ExchangeLog log = ExchangeLogMapper.getSendCommandExchangeLog(request.getCommand(), request.getUsername());

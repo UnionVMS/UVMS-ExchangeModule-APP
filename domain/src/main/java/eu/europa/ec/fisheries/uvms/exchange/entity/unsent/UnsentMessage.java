@@ -61,6 +61,9 @@ public class UnsentMessage {
 	@Column(name="unsent_upuser")
 	private String updatedBy;
 
+	@Column(name="unsent_function")
+	private String function;
+
     @OneToMany(cascade = {CascadeType.PERSIST, CascadeType.REMOVE}, fetch = FetchType.LAZY, mappedBy = "unsentMessage")
     private List<UnsentMessageProperty> properties;
 
@@ -133,4 +136,12 @@ public class UnsentMessage {
     public void setProperties(List<UnsentMessageProperty> properties) {
         this.properties = properties;
     }
+
+	public String getFunction() {
+		return function;
+	}
+
+	public void setFunction(String function) {
+		this.function = function;
+	}
 }

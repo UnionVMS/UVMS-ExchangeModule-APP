@@ -22,6 +22,7 @@ import javax.jms.MessageListener;
 import javax.jms.TextMessage;
 
 import eu.europa.ec.fisheries.uvms.exchange.service.bean.PluginServiceBean;
+import eu.europa.ec.fisheries.uvms.exchange.service.message.event.PluginErrorEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -54,7 +55,7 @@ public class RegistryBusEventListener implements MessageListener {
     private PluginServiceBean pluginServiceBean;
 
     @Inject
-    @eu.europa.ec.fisheries.uvms.exchange.service.message.event.PluginErrorEvent
+    @PluginErrorEvent
     private Event<PluginErrorEventCarrier> errorEvent;
 
     @Override
@@ -81,7 +82,7 @@ public class RegistryBusEventListener implements MessageListener {
                     LOG.error("[ Not implemented method consumed: {} ]", method);
                     throw new UnsupportedOperationException("[ Not implemented method consumed: " + method + " ]");
             }
-        } catch (Exception e /*ExchangeMessageException | ExchangeModelMarshallException | NullPointerException e*/) {
+        } catch (Exception e) {
             LOG.error("[ Error when receiving message on topic in exchange: {}] {}",message,e);
             errorEvent.fire(new PluginErrorEventCarrier(textMessage, settings.getServiceResponseMessageName(), ExchangePluginResponseMapper.mapToPluginFaultResponse(FaultCode.EXCHANGE_TOPIC_MESSAGE.getCode(), "Error when receiving message in exchange " + e.getMessage())));
         }

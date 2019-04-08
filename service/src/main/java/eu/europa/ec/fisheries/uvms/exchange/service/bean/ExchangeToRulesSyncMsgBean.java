@@ -13,6 +13,7 @@ package eu.europa.ec.fisheries.uvms.exchange.service.bean;
 import javax.ejb.EJB;
 import javax.ejb.LocalBean;
 import javax.ejb.Stateless;
+import javax.inject.Inject;
 import javax.jms.TextMessage;
 import java.util.List;
 
@@ -24,8 +25,8 @@ import eu.europa.ec.fisheries.schema.exchange.v1.TypeRefType;
 import eu.europa.ec.fisheries.schema.rules.rule.v1.ValidationMessageType;
 import eu.europa.ec.fisheries.schema.rules.rule.v1.ValidationMessageTypeResponse;
 import eu.europa.ec.fisheries.uvms.exchange.service.message.consumer.ExchangeConsumer;
-import eu.europa.ec.fisheries.uvms.exchange.service.message.producer.ExchangeMessageProducer;
 import eu.europa.ec.fisheries.uvms.exchange.model.mapper.JAXBMarshaller;
+import eu.europa.ec.fisheries.uvms.exchange.service.message.producer.bean.ExchangeRulesProducer;
 import eu.europa.ec.fisheries.uvms.rules.model.mapper.RulesModuleRequestMapper;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.EnumUtils;
@@ -42,8 +43,9 @@ public class ExchangeToRulesSyncMsgBean {
     @EJB
     private ExchangeConsumer exchangeConsumerBean;
 
-    @EJB
-    private ExchangeMessageProducer exchangeProducerBean;
+    @Inject
+    private ExchangeRulesProducer rulesProducer;
+
 
     public ExchangeLogWithValidationResults getValidationFromRules(String guid, TypeRefType type) {
         if (StringUtils.isEmpty(guid)) {
@@ -52,7 +54,7 @@ public class ExchangeToRulesSyncMsgBean {
         ExchangeLogWithValidationResults resp = new ExchangeLogWithValidationResults();
         try {
             String getValidationsByGuidRequest = RulesModuleRequestMapper.createGetValidationsByGuidRequest(guid, type == null ? null : type.name());
-            String correlationId = exchangeProducerBean.sendRulesMessage(getValidationsByGuidRequest, "ValidationResultsByRawGuid");
+            String correlationId = rulesProducer.sendRulesMessage(getValidationsByGuidRequest, "ValidationResultsByRawGuid");
             TextMessage validationRespMsg = exchangeConsumerBean.getMessage(correlationId, TextMessage.class);
             ValidationMessageTypeResponse validTypeRespFromRules = JAXBMarshaller.unmarshallTextMessage(validationRespMsg, ValidationMessageTypeResponse.class);
             List<ValidationMessageType> validationsListResponse = validTypeRespFromRules.getValidationsListResponse();

@@ -4,7 +4,7 @@ import eu.europa.ec.fisheries.schema.rules.rule.v1.ErrorType;
 import eu.europa.ec.fisheries.schema.rules.rule.v1.ValidationMessageType;
 import eu.europa.ec.fisheries.schema.rules.rule.v1.ValidationMessageTypeResponse;
 import eu.europa.ec.fisheries.uvms.config.model.mapper.JAXBMarshaller;
-import eu.europa.ec.fisheries.uvms.exchange.service.message.producer.ExchangeMessageProducer;
+import eu.europa.ec.fisheries.uvms.exchange.service.message.producer.bean.ExchangeEventProducer;
 
 import javax.ejb.ActivationConfigProperty;
 import javax.ejb.MessageDriven;
@@ -20,7 +20,7 @@ import javax.jms.TextMessage;
 public class RulesModuleMock implements MessageListener {
 
     @Inject
-    ExchangeMessageProducer messageProducer;
+    ExchangeEventProducer messageProducer;
 
     @Override
     public void onMessage(Message message) {
@@ -37,7 +37,7 @@ public class RulesModuleMock implements MessageListener {
             response.getValidationsListResponse().add(validationMessageType);
 
             String stringResponse = JAXBMarshaller.marshallJaxBObjectToString(response);
-            messageProducer.sendModuleResponseMessage((TextMessage) message, stringResponse);
+            messageProducer.sendResponseMessageToSender((TextMessage) message, stringResponse);
 
 
         } catch (Exception e) {

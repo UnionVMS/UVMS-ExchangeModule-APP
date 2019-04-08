@@ -55,7 +55,7 @@ public class ExchangeSendingQueueRestResourceTest extends BuildExchangeRestTestD
     @Test
     @OperateOnDeployment("exchangeservice")
     public void getSendingQueueTest() throws Exception {
-        String unsentMessageId = exchangeLogService.createUnsentMessage("Sending queue test senderReceiver", Instant.now(), "Sending queue test recipient", "Sending queue test message", new ArrayList<>(), "Sending queue test username");
+        String unsentMessageId = exchangeLogService.createUnsentMessage("Sending queue test senderReceiver", Instant.now(), "Sending queue test recipient", "Sending queue test message", new ArrayList<>(), "Sending queue test username", null);
 
         String stringResponse = getWebTarget()
                 .path("sendingqueue")

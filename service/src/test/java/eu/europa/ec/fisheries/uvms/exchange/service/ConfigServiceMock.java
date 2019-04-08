@@ -15,7 +15,7 @@ import eu.europa.ec.fisheries.schema.config.types.v1.SettingType;
 import eu.europa.ec.fisheries.uvms.commons.message.api.MessageException;
 import eu.europa.ec.fisheries.uvms.config.model.exception.ModelMarshallException;
 import eu.europa.ec.fisheries.uvms.config.model.mapper.ModuleResponseMapper;
-import eu.europa.ec.fisheries.uvms.exchange.service.message.producer.ExchangeMessageProducer;
+import eu.europa.ec.fisheries.uvms.exchange.service.message.producer.bean.ExchangeEventProducer;
 
 import javax.ejb.ActivationConfigProperty;
 import javax.ejb.MessageDriven;
@@ -32,7 +32,7 @@ import java.util.Arrays;
 public class ConfigServiceMock implements MessageListener {
     
     @Inject
-    ExchangeMessageProducer messageProducer;
+    ExchangeEventProducer messageProducer;
 
     @Override
     public void onMessage(Message message) {
@@ -42,7 +42,7 @@ public class ConfigServiceMock implements MessageListener {
             mockSetting.setValue("500");
             mockSetting.setDescription("Set in ConfigServiceMock.java");
             String response = ModuleResponseMapper.toPullSettingsResponse(Arrays.asList(mockSetting), PullSettingsStatus.OK);
-            messageProducer.sendModuleResponseMessage((TextMessage) message, response);
+            messageProducer.sendResponseMessageToSender((TextMessage) message, response);
         } catch (ModelMarshallException | MessageException e) {
         }
     }
