@@ -38,12 +38,12 @@
         <dependency>
             <groupId>eu.europa.ec.fisheries.uvms.commons</groupId>
             <artifactId>uvms-commons-date</artifactId>
-            <version>3.0.8</version>
+            <version>${uvms.commons.version}</version>
         </dependency>
         <dependency>
             <groupId>org.jvnet.jaxb2_commons</groupId>
             <artifactId>jaxb2-basics</artifactId>
-            <version>0.9.5</version>
+            <version>1.11.1</version>
         </dependency>
     </dependencies>
 

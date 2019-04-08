@@ -58,7 +58,7 @@ public class PluginServiceBean {
 
     @Inject
     @PluginErrorEvent
-    private Event<PluginErrorEventCarrier> errorEvent;
+    private Event<PluginErrorEventCarrier> pluginErrorEvent;
 
     @Inject
     @ErrorEvent
@@ -165,7 +165,7 @@ public class PluginServiceBean {
             }
         } catch (Exception e) {
             LOG.error("[ERROR] Register service exception {} {}", message, e.getMessage());
-            errorEvent.fire(new PluginErrorEventCarrier(message, newService.getServiceResponse(), ExchangePluginResponseMapper.mapToPluginFaultResponse(FaultCode.EXCHANGE_PLUGIN_EVENT.getCode(), "Exception when register service")));
+            pluginErrorEvent.fire(new PluginErrorEventCarrier(message, newService.getServiceResponse(), ExchangePluginResponseMapper.mapToPluginFaultResponse(FaultCode.EXCHANGE_PLUGIN_EVENT.getCode(), "Exception when register service")));
         }
     }
 
@@ -214,7 +214,7 @@ public class PluginServiceBean {
             //TODO log to exchange log
         } catch (Exception e) {
             LOG.error("Unregister service exception " + e.getMessage());
-            errorEvent.fire(new PluginErrorEventCarrier(message, service.getServiceResponse(), ExchangePluginResponseMapper.mapToPluginFaultResponse(FaultCode.EXCHANGE_PLUGIN_EVENT.getCode(), "Exception when unregister service")));
+            pluginErrorEvent.fire(new PluginErrorEventCarrier(message, service.getServiceResponse(), ExchangePluginResponseMapper.mapToPluginFaultResponse(FaultCode.EXCHANGE_PLUGIN_EVENT.getCode(), "Exception when unregister service")));
         }
     }
     
