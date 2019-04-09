@@ -30,15 +30,6 @@
         </xsd:restriction>
     </xsd:simpleType>
     
-    <xsd:element name="PluginFault">
-        <xsd:complexType>
-            <xsd:sequence>
-                <xsd:element name="code" type="xsd:int"/>
-                <xsd:element name="message" type="xsd:string"/>
-            </xsd:sequence>
-        </xsd:complexType>
-    </xsd:element>
-    
     <xsd:complexType name="PollType">
         <xsd:sequence>
             <xsd:element name="pollId" type="xsd:string"/>

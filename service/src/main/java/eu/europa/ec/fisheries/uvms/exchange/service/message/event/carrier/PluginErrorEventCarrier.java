@@ -13,7 +13,6 @@ package eu.europa.ec.fisheries.uvms.exchange.service.message.event.carrier;
 
 import javax.jms.TextMessage;
 
-import eu.europa.ec.fisheries.schema.exchange.plugin.types.v1.PluginFault;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
@@ -23,16 +22,16 @@ public class PluginErrorEventCarrier {
 
     private TextMessage jmsMessage;
     private String serviceResponseMessageName;
-    private PluginFault fault;
+    private String faultMessage;
 
-    public PluginErrorEventCarrier(TextMessage jmsMessage, String serviceResponseMessageName, PluginFault fault) {
+    public PluginErrorEventCarrier(TextMessage jmsMessage, String serviceResponseMessageName, String fault) {
         this.jmsMessage = jmsMessage;
         this.serviceResponseMessageName = serviceResponseMessageName;
-        this.fault = fault;
+        this.faultMessage = fault;
     }
 
-    public PluginFault getErrorFault() {
-        return fault;
+    public String getErrorFault() {
+        return faultMessage;
     }
 
     public TextMessage getJmsMessage() {

@@ -528,9 +528,6 @@
         </xsd:schema>
     </types>
 
-    <message name="ExchangeFault">
-        <part name="body" element="common:exchangeFault"/>
-    </message>
 
     <message name="GetServiceListRequest">
         <part name="body" element="module:GetServiceListRequest"/>
@@ -621,60 +618,49 @@
         <operation name="GetServiceList">
             <input message="module:GetServiceListRequest"/>
             <output message="module:GetServiceListResponse"/>
-            <fault name="ExchangeFault" message="module:ExchangeFault"/>
         </operation>
 
         <operation name="CreatePoll">
             <input message="module:SetCommandRequest"/>
             <output message="module:SetCommandResponse"/>
-            <fault name="ExchangeFault" message="module:ExchangeFault"/>
         </operation>
 
         <operation name="SetMovementReport">
             <input message="module:SetMovementReportRequest"/>
-            <fault name="ExchangeFault" message="module:ExchangeFault"/>
         </operation>
 
         <operation name="SendMovementToPlugin">
             <input message="module:SendMovementToPluginRequest"/>
             <output message="module:SendMovementToPluginResponse"/>
-            <fault name="ExchangeFault" message="module:ExchangeFault"/>
         </operation>
 
         <operation name="ReceiveSalesReport">
             <input message="module:ReceiveSalesReportRequest"/>
-            <fault name="ExchangeFault" message="module:ExchangeFault"/>
         </operation>
 
         <operation name="ReceiveSalesQuery">
             <input message="module:ReceiveSalesQueryRequest"/>
-            <fault name="ExchangeFault" message="module:ExchangeFault"/>
         </operation>
 
         <operation name="ReceiveSalesResponse">
             <input message="module:ReceiveSalesResponseRequest"/>
-            <fault name="ExchangeFault" message="module:ExchangeFault"/>
         </operation>
 
         <operation name="SendSalesReport">
             <input message="module:SendSalesReportRequest"/>
-            <fault name="ExchangeFault" message="module:ExchangeFault"/>
         </operation>
 
         <operation name="SendSalesResponse">
             <input message="module:SendSalesResponseRequest"/>
-            <fault name="ExchangeFault" message="module:ExchangeFault"/>
         </operation>
 
         <operation name="UpdateLogStatus">
             <input message="module:UpdateLogStatusRequest"/>
-            <fault name="ExchangeFault" message="module:ExchangeFault"/>
         </operation>
 
         <operation name="UpdatePluginSetting">
             <input message="module:UpdatePluginSettingRequest"/>
             <output message="module:UpdatePluginSettingResponse"/>
-            <fault name="ExchangeFault" message="module:ExchangeFault"/>
         </operation>
 
         <operation name="Ping">
@@ -689,13 +675,11 @@
         <operation name="LogRefIdByTypeExistsService">
             <input message="module:LogRefIdByTypeExistsRequest"/>
             <output message="module:LogRefIdByTypeExistsResponse"/>
-            <fault name="ExchangeFault" message="module:ExchangeFault"/>
         </operation>
 
         <operation name="LogIdByTypeExistsService">
             <input message="module:LogIdByTypeExistsRequest"/>
             <output message="module:LogIdByTypeExistsResponse"/>
-            <fault name="ExchangeFault" message="module:ExchangeFault"/>
         </operation>
 
     </portType>
@@ -710,9 +694,6 @@
             <output>
                 <soap:body use="literal"/>
             </output>
-            <fault name="ExchangeFault">
-                <soap:fault name="ExchangeFault" use="literal"/>
-            </fault>
         </operation>
 
         <operation name="CreatePoll">
@@ -722,18 +703,12 @@
             <output>
                 <soap:body use="literal"/>
             </output>
-            <fault name="ExchangeFault">
-                <soap:fault name="ExchangeFault" use="literal"/>
-            </fault>
         </operation>
 
         <operation name="SetMovementReport">
             <input>
                 <soap:body use="literal"/>
             </input>
-            <fault name="ExchangeFault">
-                <soap:fault name="ExchangeFault" use="literal"/>
-            </fault>
         </operation>
 
         <operation name="SendMovementToPlugin">
@@ -743,54 +718,36 @@
             <output>
                 <soap:body use="literal"/>
             </output>
-            <fault name="ExchangeFault">
-                <soap:fault name="ExchangeFault" use="literal"/>
-            </fault>
         </operation>
 
         <operation name="ReceiveSalesReport">
             <input>
                 <soap:body use="literal"/>
             </input>
-            <fault name="ExchangeFault">
-                <soap:fault name="ExchangeFault" use="literal"/>
-            </fault>
         </operation>
 
         <operation name="ReceiveSalesQuery">
             <input>
                 <soap:body use="literal"/>
             </input>
-            <fault name="ExchangeFault">
-                <soap:fault name="ExchangeFault" use="literal"/>
-            </fault>
         </operation>
 
         <operation name="ReceiveSalesResponse">
             <input>
                 <soap:body use="literal"/>
             </input>
-            <fault name="ExchangeFault">
-                <soap:fault name="ExchangeFault" use="literal"/>
-            </fault>
         </operation>
 
         <operation name="SendSalesReport">
             <input>
                 <soap:body use="literal"/>
             </input>
-            <fault name="ExchangeFault">
-                <soap:fault name="ExchangeFault" use="literal"/>
-            </fault>
         </operation>
 
         <operation name="SendSalesResponse">
             <input>
                 <soap:body use="literal"/>
             </input>
-            <fault name="ExchangeFault">
-                <soap:fault name="ExchangeFault" use="literal"/>
-            </fault>
         </operation>
 
         <operation name="UpdatePluginSetting">
@@ -800,9 +757,6 @@
             <output>
                 <soap:body use="literal"/>
             </output>
-            <fault name="ExchangeFault">
-                <soap:fault name="ExchangeFault" use="literal"/>
-            </fault>
         </operation>
 
         <operation name="Ping">
@@ -824,9 +778,6 @@
             <input>
                 <soap:body use="literal"/>
             </input>
-            <fault name="ExchangeFault">
-                <soap:fault name="ExchangeFault" use="literal"/>
-            </fault>
         </operation>
 
     </binding>

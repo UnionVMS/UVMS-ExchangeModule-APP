@@ -20,8 +20,6 @@ import eu.europa.ec.fisheries.uvms.exchange.service.bean.ExchangeEventOutgoingSe
 import eu.europa.ec.fisheries.uvms.exchange.service.bean.PluginServiceBean;
 import eu.europa.ec.fisheries.uvms.exchange.service.message.event.*;
 import eu.europa.ec.fisheries.uvms.exchange.service.message.event.carrier.ExchangeErrorEvent;
-import eu.europa.ec.fisheries.uvms.exchange.model.constant.FaultCode;
-import eu.europa.ec.fisheries.uvms.exchange.model.mapper.ExchangeModuleResponseMapper;
 import eu.europa.ec.fisheries.uvms.exchange.model.mapper.JAXBMarshaller;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -206,7 +204,7 @@ public class ExchangeMessageConsumerBean implements MessageListener {
                     break;
                 default:
                     LOG.error("[ Not implemented method consumed: {} ] ", exchangeMethod);
-                    errorEvent.fire(new ExchangeErrorEvent(textMessage, ExchangeModuleResponseMapper.createFaultMessage(FaultCode.EXCHANGE_MESSAGE, "Method not implemented")));
+                    errorEvent.fire(new ExchangeErrorEvent(textMessage, "Method not implemented"));
             }
         } catch (Exception e){
             LOG.error("Error in exchange call to {} : ", exchangeMethod, e);

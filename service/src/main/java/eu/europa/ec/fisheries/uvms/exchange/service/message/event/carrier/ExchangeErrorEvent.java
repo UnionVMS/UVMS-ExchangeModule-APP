@@ -13,7 +13,6 @@ package eu.europa.ec.fisheries.uvms.exchange.service.message.event.carrier;
 
 import javax.jms.TextMessage;
 
-import eu.europa.ec.fisheries.schema.exchange.common.v1.ExchangeFault;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
@@ -22,15 +21,15 @@ import org.apache.commons.lang3.builder.ToStringStyle;
 public class ExchangeErrorEvent {
 
     private TextMessage jmsMessage;
-    private ExchangeFault fault;
+    private String fault;
 
 
-    public ExchangeErrorEvent(TextMessage jmsMessage, ExchangeFault fault) {
+    public ExchangeErrorEvent(TextMessage jmsMessage, String fault) {
         this.jmsMessage = jmsMessage;
         this.fault = fault;
     }
 
-    public ExchangeFault getErrorFault() {
+    public String getErrorFault() {
         return fault;
     }
 

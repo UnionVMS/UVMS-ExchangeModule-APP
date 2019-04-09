@@ -14,8 +14,6 @@ package eu.europa.ec.fisheries.uvms.exchange.entity.unsent;
 import eu.europa.ec.fisheries.schema.exchange.v1.UnsentMessageTypePropertyKey;
 
 import javax.persistence.*;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
 import javax.xml.bind.annotation.XmlRootElement;
 import java.util.UUID;
 

@@ -40,7 +40,6 @@ import eu.europa.ec.fisheries.schema.exchange.module.v1.*;
 import eu.europa.ec.fisheries.schema.exchange.movement.v1.MovementBaseType;
 import eu.europa.ec.fisheries.schema.exchange.movement.v1.MovementSourceType;
 import eu.europa.ec.fisheries.schema.exchange.movement.v1.SetReportMovementType;
-import eu.europa.ec.fisheries.schema.exchange.plugin.types.v1.PluginFault;
 import eu.europa.ec.fisheries.schema.exchange.plugin.types.v1.PluginType;
 import eu.europa.ec.fisheries.schema.exchange.plugin.v1.AcknowledgeResponse;
 import eu.europa.ec.fisheries.schema.exchange.plugin.v1.ExchangePluginMethod;
@@ -54,9 +53,7 @@ import eu.europa.ec.fisheries.uvms.commons.message.impl.JAXBUtils;
 import eu.europa.ec.fisheries.uvms.exchange.service.message.event.ErrorEvent;
 import eu.europa.ec.fisheries.uvms.exchange.service.message.event.carrier.ExchangeErrorEvent;
 import eu.europa.ec.fisheries.uvms.exchange.service.message.event.carrier.PluginErrorEventCarrier;
-import eu.europa.ec.fisheries.uvms.exchange.model.constant.FaultCode;
 import eu.europa.ec.fisheries.uvms.exchange.model.mapper.ExchangeModuleResponseMapper;
-import eu.europa.ec.fisheries.uvms.exchange.model.mapper.ExchangePluginResponseMapper;
 import eu.europa.ec.fisheries.uvms.exchange.model.mapper.JAXBMarshaller;
 import eu.europa.ec.fisheries.uvms.exchange.service.event.ExchangePluginStatusEvent;
 import eu.europa.ec.fisheries.uvms.exchange.service.event.PollEvent;
@@ -204,8 +201,7 @@ public class ExchangeEventIncomingServiceBean {
             movementProducer.sendResponseMessageToSender(message, ExchangeModuleResponseMapper.mapServiceListResponse(serviceList));
         } catch (Exception e) {
             LOG.error("[ Error when getting plugin list from source {}] {}", message, e);
-            exchangeErrorEvent.fire(new ExchangeErrorEvent(message, ExchangeModuleResponseMapper.createFaultMessage(
-                    FaultCode.EXCHANGE_MESSAGE, "Excpetion when getting service list")));
+            exchangeErrorEvent.fire(new ExchangeErrorEvent(message,"Excpetion when getting service list"));
         }
     }
 
@@ -244,7 +240,7 @@ public class ExchangeEventIncomingServiceBean {
             SetMovementReportRequest request = JAXBMarshaller.unmarshallTextMessage(jmsMessage, SetMovementReportRequest.class);
             if(request.getUsername() == null){
                 LOG.error("[ Error when receiving message in exchange, username must be set in the request: ]");
-                exchangeErrorEvent.fire(new ExchangeErrorEvent(message, ExchangeModuleResponseMapper.createFaultMessage(FaultCode.EXCHANGE_MESSAGE, "Username in the request must be set")));
+                exchangeErrorEvent.fire(new ExchangeErrorEvent(message,"Username in the request must be set"));
                 return;
             }
             LOG.trace("Processing Movement : {}", request.getRefGuid());
@@ -569,8 +565,7 @@ public class ExchangeEventIncomingServiceBean {
         try {
             LOG.error(errorMessage, exception);
             Service service = ((serviceClassName == null) ? null : serviceRegistryModel.getPlugin(serviceClassName));
-            PluginFault fault = ExchangePluginResponseMapper.mapToPluginFaultResponse(FaultCode.EXCHANGE_PLUGIN_EVENT.getCode(), errorMessage);
-            pluginErrorEvent.fire(new PluginErrorEventCarrier(messageEvent, service.getServiceResponse(), fault));
+            pluginErrorEvent.fire(new PluginErrorEventCarrier(messageEvent, service.getServiceResponse(), errorMessage));
         } catch (Exception e) {
             LOG.error("Unable to send PluginError message due to: {}", e);
         }
@@ -578,8 +573,7 @@ public class ExchangeEventIncomingServiceBean {
 
     private void fireExchangeFault(TextMessage messageEvent, String errorMessage, Throwable exception) {
         LOG.error(errorMessage, exception);
-        eu.europa.ec.fisheries.schema.exchange.common.v1.ExchangeFault exchangeFault = ExchangeModuleResponseMapper.createFaultMessage(FaultCode.EXCHANGE_EVENT_SERVICE, errorMessage);
-        exchangeErrorEvent.fire(new ExchangeErrorEvent(messageEvent, exchangeFault));
+        exchangeErrorEvent.fire(new ExchangeErrorEvent(messageEvent, errorMessage));
     }
 
 

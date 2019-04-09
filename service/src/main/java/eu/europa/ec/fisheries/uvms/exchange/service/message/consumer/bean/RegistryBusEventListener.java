@@ -32,8 +32,6 @@ import eu.europa.ec.fisheries.schema.exchange.registry.v1.UnregisterServiceReque
 import eu.europa.ec.fisheries.schema.exchange.service.v1.ServiceType;
 import eu.europa.ec.fisheries.uvms.exchange.service.message.event.carrier.PluginErrorEventCarrier;
 import eu.europa.ec.fisheries.uvms.exchange.model.constant.ExchangeModelConstants;
-import eu.europa.ec.fisheries.uvms.exchange.model.constant.FaultCode;
-import eu.europa.ec.fisheries.uvms.exchange.model.mapper.ExchangePluginResponseMapper;
 import eu.europa.ec.fisheries.uvms.exchange.model.mapper.JAXBMarshaller;
 
 @MessageDriven(mappedName = MessageConstants.EVENT_BUS_TOPIC, activationConfig = {
@@ -84,7 +82,7 @@ public class RegistryBusEventListener implements MessageListener {
             }
         } catch (Exception e) {
             LOG.error("[ Error when receiving message on topic in exchange: {}] {}",message,e);
-            errorEvent.fire(new PluginErrorEventCarrier(textMessage, settings.getServiceResponseMessageName(), ExchangePluginResponseMapper.mapToPluginFaultResponse(FaultCode.EXCHANGE_TOPIC_MESSAGE.getCode(), "Error when receiving message in exchange " + e.getMessage())));
+            errorEvent.fire(new PluginErrorEventCarrier(textMessage, settings.getServiceResponseMessageName(), "Error when receiving message in exchange " + e.getMessage()));
         }
     }
 

@@ -28,7 +28,6 @@ import eu.europa.ec.fisheries.uvms.exchange.service.message.event.ErrorEvent;
 import eu.europa.ec.fisheries.uvms.exchange.service.message.event.PluginErrorEvent;
 import eu.europa.ec.fisheries.uvms.exchange.service.message.event.carrier.ExchangeErrorEvent;
 import eu.europa.ec.fisheries.uvms.exchange.service.message.event.carrier.PluginErrorEventCarrier;
-import eu.europa.ec.fisheries.uvms.exchange.model.constant.FaultCode;
 import eu.europa.ec.fisheries.uvms.exchange.model.mapper.ExchangeModuleResponseMapper;
 import eu.europa.ec.fisheries.uvms.exchange.model.mapper.ExchangePluginRequestMapper;
 import eu.europa.ec.fisheries.uvms.exchange.model.mapper.ExchangePluginResponseMapper;
@@ -165,7 +164,7 @@ public class PluginServiceBean {
             }
         } catch (Exception e) {
             LOG.error("[ERROR] Register service exception {} {}", message, e.getMessage());
-            pluginErrorEvent.fire(new PluginErrorEventCarrier(message, newService.getServiceResponse(), ExchangePluginResponseMapper.mapToPluginFaultResponse(FaultCode.EXCHANGE_PLUGIN_EVENT.getCode(), "Exception when register service")));
+            pluginErrorEvent.fire(new PluginErrorEventCarrier(message, newService.getServiceResponse(), "Exception when register service"));
         }
     }
 
@@ -214,7 +213,7 @@ public class PluginServiceBean {
             //TODO log to exchange log
         } catch (Exception e) {
             LOG.error("Unregister service exception " + e.getMessage());
-            pluginErrorEvent.fire(new PluginErrorEventCarrier(message, service.getServiceResponse(), ExchangePluginResponseMapper.mapToPluginFaultResponse(FaultCode.EXCHANGE_PLUGIN_EVENT.getCode(), "Exception when unregister service")));
+            pluginErrorEvent.fire(new PluginErrorEventCarrier(message, service.getServiceResponse(), "Exception when unregister service"));
         }
     }
     
@@ -270,7 +269,7 @@ public class PluginServiceBean {
 			UpdatePluginSettingRequest request = JAXBMarshaller.unmarshallTextMessage(jmsMessage, UpdatePluginSettingRequest.class);
             if(request.getUsername() == null){
                 LOG.error("[ Error when receiving message in exchange, username must be set in the request: ]");
-                exchangeErrorEvent.fire(new ExchangeErrorEvent(settingEvent, ExchangeModuleResponseMapper.createFaultMessage(FaultCode.EXCHANGE_MESSAGE, "Username in the request must be set")));
+                exchangeErrorEvent.fire(new ExchangeErrorEvent(settingEvent, "Username in the request must be set"));
                 return;
             }
             LOG.info("Received @UpdatePluginSettingEvent from module queue:{}" , request.toString());
@@ -280,7 +279,7 @@ public class PluginServiceBean {
             exchangeEventProducer.sendResponseMessageToSender(settingEvent, text);
 		} catch (Exception e) {
 			LOG.error("Couldn't unmarshall update setting request");
-            ExchangeErrorEvent event = new ExchangeErrorEvent(settingEvent, ExchangeModuleResponseMapper.createFaultMessage(FaultCode.EXCHANGE_EVENT_SERVICE, "Couldn't update plugin setting"));
+            ExchangeErrorEvent event = new ExchangeErrorEvent(settingEvent, "Couldn't update plugin setting");
 			exchangeErrorEvent.fire(event);
 		}
 		

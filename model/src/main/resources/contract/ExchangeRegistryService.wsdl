@@ -82,10 +82,6 @@
         </xsd:schema>
     </types>
     
-    <message name="ExchangeException">
-        <part name="body" element="common:exchangeFault"/>
-    </message>
-    
     <message name="RegisterServiceRequest">
         <part name="body" element="registry:RegisterServiceRequest"/>
     </message>
@@ -105,13 +101,11 @@
         <operation name="RegisterService">
             <input message="registry:RegisterServiceRequest"/>
             <output message="registry:RegisterServiceResponse"/>
-            <fault name="ExchangeException" message="registry:ExchangeException"/>
         </operation>
         
         <operation name="UnregisterService">
             <input message="registry:UnregisterServiceRequest"/>
             <output message="registry:UnregisterServiceResponse"/>
-            <fault name="ExchangeException" message="registry:ExchangeException"/>
         </operation>
         
     </portType>
@@ -126,9 +120,6 @@
             <output>
                 <soap:body use="literal"/>
             </output>
-            <fault name="ExchangeException">
-                <soap:fault name="ExchangeException" use="literal"/>
-            </fault>
         </operation>
         
         <operation name="UnregisterService">
@@ -138,9 +129,6 @@
             <output>
                 <soap:body use="literal"/>
             </output>
-            <fault name="ExchangeException">
-                <soap:fault name="ExchangeException" use="literal"/>
-            </fault>
         </operation>
         
     </binding>

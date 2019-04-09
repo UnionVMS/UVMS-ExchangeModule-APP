@@ -77,7 +77,7 @@ public class ExchangePluginRequestMapper {
      *
      * @param mdrBaseRequest
      * @return
-     * @throws ExchangeModelMarshallException
+     * @throws
      */
     public static String mapMdrRequestToPluginBaseRequest(String mdrBaseRequest) {
         SetMdrPluginRequest pluginRequest = new SetMdrPluginRequest();
