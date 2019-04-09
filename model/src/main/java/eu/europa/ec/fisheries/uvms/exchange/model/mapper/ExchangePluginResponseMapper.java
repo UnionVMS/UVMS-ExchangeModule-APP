@@ -14,7 +14,6 @@ package eu.europa.ec.fisheries.uvms.exchange.model.mapper;
 import eu.europa.ec.fisheries.schema.exchange.common.v1.AcknowledgeType;
 import eu.europa.ec.fisheries.schema.exchange.common.v1.AcknowledgeTypeType;
 import eu.europa.ec.fisheries.schema.exchange.common.v1.PollStatusAcknowledgeType;
-import eu.europa.ec.fisheries.schema.exchange.plugin.types.v1.PluginFault;
 import eu.europa.ec.fisheries.schema.exchange.plugin.v1.AcknowledgeResponse;
 import eu.europa.ec.fisheries.schema.exchange.plugin.v1.ExchangePluginMethod;
 import eu.europa.ec.fisheries.schema.exchange.plugin.v1.PingResponse;
@@ -135,13 +134,6 @@ public class ExchangePluginResponseMapper {
 
     public static String mapToSetReportResponse(String serviceClassName, AcknowledgeType ackType)  {
         return mapToAcknowledgeResponse(serviceClassName, ackType, ExchangePluginMethod.SET_REPORT);
-    }
-
-    public static PluginFault mapToPluginFaultResponse(int code, String message) {
-        PluginFault fault = new PluginFault();
-        fault.setCode(code);
-        fault.setMessage(message);
-        return fault;
     }
     public static String mapToSetPollStatusToUnknownResponse(String serviceClassName, AcknowledgeType ackType, String pollGuid) {
         return mapToSetPollStatusAcknowledgeResponse(serviceClassName, ackType, pollGuid, ExchangeLogStatusTypeType.UNKNOWN, ExchangePluginMethod.SET_COMMAND);

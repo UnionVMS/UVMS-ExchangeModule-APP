@@ -229,15 +229,4 @@ public class ExchangeLogModelBean {
         return logType;
     }
 
-    public LogWithRawMsgAndType getExchangeLogRawXmlByGuid(UUID guid) {     //
-        LogWithRawMsgAndType logWrapper = new LogWithRawMsgAndType();
-            ExchangeLog exchangeLog = logDao.getExchangeLogByGuid(guid);
-            if (exchangeLog != null){
-                String rawMsg = exchangeLog.getTypeRefMessage();
-                logWrapper.setRawMsg(rawMsg);
-                logWrapper.setType(exchangeLog.getTypeRefType());
-                logWrapper.setRefGuid(exchangeLog.getTypeRefGuid().toString());
-            }
-        return logWrapper;
-    }
 }

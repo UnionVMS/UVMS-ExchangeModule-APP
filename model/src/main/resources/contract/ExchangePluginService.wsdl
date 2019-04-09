@@ -262,10 +262,7 @@
         </xsd:schema>
     </types>
     
-    <message name="PluginFault">
-        <part name="body" element="types:PluginFault"/>
-    </message>
-    
+
     <message name="SetConfigRequest">
         <part name="body" element="plugin:SetConfigRequest"/>
     </message>
@@ -313,31 +310,26 @@
         <operation name="SetConfig">
             <input message="plugin:SetConfigRequest"/>
             <output message="plugin:SetConfigResponse"/>
-            <fault name="PluginFault" message="plugin:PluginFault"/>
         </operation>
         
         <operation name="SetCommand">
             <input message="plugin:SetCommandRequest"/>
             <output message="plugin:SetCommandResponse"/>
-            <fault name="PluginFault" message="plugin:PluginFault"/>
         </operation>
         
         <operation name="SetReport">
             <input message="plugin:SetReportRequest"/>
             <output message="plugin:SetReportRequest"/>
-            <fault name="PluginFault" message="plugin:PluginFault"/>
         </operation>
         
         <operation name="Start">
             <input message="plugin:StartRequest"/>
             <output message="plugin:StartResponse"/>
-            <fault name="PluginFault" message="plugin:PluginFault"/>
         </operation>
         
         <operation name="Stop">
             <input message="plugin:StopRequest"/>
             <output message="plugin:StopResponse"/>
-            <fault name="PluginFault" message="plugin:PluginFault"/>
         </operation>
         
         <operation name="Ping">
@@ -357,9 +349,6 @@
             <output>
                 <soap:body use="literal"/>
             </output>
-            <fault name="PluginFault">
-                <soap:fault name="PluginFault" use="literal"/>
-            </fault>
         </operation>
         
         <operation name="SetCommand">
@@ -369,9 +358,6 @@
             <output>
                 <soap:body use="literal"/>
             </output>
-            <fault name="PluginFault">
-                <soap:fault name="PluginFault" use="literal"/>
-            </fault>
         </operation>
         
         <operation name="SetReport">
@@ -381,9 +367,6 @@
             <output>
                 <soap:body use="literal"/>
             </output>
-            <fault name="PluginFault">
-                <soap:fault name="PluginFault" use="literal"/>
-            </fault>
         </operation>
         
         <operation name="Start">
@@ -393,9 +376,6 @@
             <output>
                 <soap:body use="literal"/>
             </output>
-            <fault name="PluginFault">
-                <soap:fault name="PluginFault" use="literal"/>
-            </fault>
         </operation>
         
         <operation name="Stop">
@@ -405,9 +385,6 @@
             <output>
                 <soap:body use="literal"/>
             </output>
-            <fault name="PluginFault">
-                <soap:fault name="PluginFault" use="literal"/>
-            </fault>
         </operation>
 
         <operation name="Ping">

@@ -466,9 +466,6 @@
         </xsd:schema>
     </types>
     
-    <message name="ExchangeFault">
-        <part name="body" element="common:exchangeFault"/>
-    </message>
 
     <message name="GetUnsentMessageListRequest">  
         <part name="body" element="source:GetUnsentMessageListRequest"/>
@@ -608,103 +605,98 @@
         <operation name="GetUnsentMessageList">
             <input message="source:GetUnsentMessageListRequest"/>
             <output message="source:GetUnsentMessageListResponse"/>
-            <fault name="ExchangeFault" message="source:ExchangeFault"/>
         </operation>
 
         <operation name="CreateUnsentMessage">
             <input message="source:CreateUnsentMessageRequest"/>
             <output message="source:CreateUnsentMessageResponse"/>
-            <fault name="ExchangeFault" message="source:ExchangeFault"/>
         </operation>
         
         <operation name="ResendMessage">
             <input message="source:ResendMessageRequest"/>
             <output message="source:ResendMessageResponse"/>
-            <fault name="ExchangeFault" message="source:ExchangeFault"/>
         </operation>
         
         <operation name="GetLogListByQuery">
             <input message="source:GetLogListByQueryRequest"/>
             <output message="source:GetLogListByQueryResponse"/>
-            <fault name="ExchangeFault" message="source:ExchangeFault"/>
         </operation>
         
         <operation name="CreateLog">
             <input message="source:CreateLogRequest"/>
             <output message="source:CreateLogResponse"/>
-            <fault name="ExchangeFault" message="source:ExchangeFault"/>
         </operation>
        
         <operation name="UpdateLogStatus">
             <input message="source:UpdateLogStatusRequest"/>
             <output message="source:UpdateLogStatusResponse"/>
-            <fault name="ExchangeFault" message="source:ExchangeFault"/>
+            
         </operation>
 
         <operation name="SetPollStatus">
             <input message="source:SetPollStatusRequest"/>
             <output message="source:SetPollStatusResponse"/>
-            <fault name="ExchangeFault" message="source:ExchangeFault"/>
+            
         </operation>
        
         <operation name="GetLogStatusHistory">
             <input message="source:GetLogStatusHistoryRequest"/>
             <output message="source:GetLogStatusHistoryResponse"/>
-            <fault name="ExchangeFault" message="source:ExchangeFault"/>
+            
         </operation>
 
         <operation name="GetLogStatusHistoryByQuery">
             <input message="source:GetLogStatusHistoryByQueryRequest"/>
             <output message="source:GetLogStatusHistoryByQueryResponse"/>
-            <fault name="ExchangeFault" message="source:ExchangeFault"/>
+            
         </operation>
                
         <operation name="GetServiceList">
             <input message="source:GetServiceListRequest"/>
             <output message="source:GetServiceListResponse"/>
-            <fault name="ExchangeFault" message="source:ExchangeFault"/>
+            
         </operation>
         
         <operation name="GetService">
             <input message="source:GetServiceRequest"/>
             <output message="source:GetServiceResponse"/>
-            <fault name="ExchangeFault" message="source:ExchangeFault"/>
+            
         </operation>
         
         <operation name="RegisterService">
             <input message="source:RegisterServiceRequest"/>
             <output message="source:RegisterServiceResponse"/>
-            <fault name="ExchangeFault" message="source:ExchangeFault"/>
+            
         </operation>
         
         <operation name="UnregisterService">
             <input message="source:UnregisterServiceRequest"/>
             <output message="source:UnregisterServiceResponse"/>
-            <fault name="ExchangeFault" message="source:ExchangeFault"/>
+            
         </operation>
         
         <operation name="GetServiceCapabilities">
             <input message="source:GetServiceCapabilitiesRequest"/>
             <output message="source:GetServiceCapabilitiesResponse"/>
-            <fault name="ExchangeFault" message="source:ExchangeFault"/>
+            
         </operation>
         
         <operation name="SetServiceSettings">
             <input message="source:SetServiceSettingsRequest"/>
             <output message="source:SetServiceSettingsResponse"/>
-            <fault name="ExchangeFault" message="source:ExchangeFault"/>
+            
         </operation>
         
         <operation name="SetServiceStatus">
             <input message="source:SetServiceStatusRequest"/>
             <output message="source:SetServiceStatusResponse"/>
-            <fault name="ExchangeFault" message="source:ExchangeFault"/>
+            
         </operation>
         
         <operation name="GetServiceSettings">
             <input message="source:GetServiceSettingsRequest"/>
             <output message="source:GetServiceSettingsResponse"/>
-            <fault name="ExchangeFault" message="source:ExchangeFault"/>
+            
         </operation>
         
         <operation name="Ping">
@@ -715,7 +707,7 @@
         <operation name="GetExchangeLog">
             <input message="source:GetExchangeLogRequest"/>
             <output message="source:GetExchangeLogResponse"/>
-            <fault name="ExchangeFault" message="source:ExchangeFault"/>
+            
         </operation>
 
     </portType>
@@ -730,9 +722,6 @@
             <output>
                 <soap:body use="literal"/>
             </output>
-            <fault name="ExchangeFault">
-                <soap:fault name="ExchangeFault" use="literal"/>
-            </fault>
         </operation>
 
         <operation name="CreateUnsentMessage">
@@ -742,9 +731,6 @@
             <output>
                 <soap:body use="literal"/>
             </output>
-            <fault name="ExchangeFault">
-                <soap:fault name="ExchangeFault" use="literal"/>
-            </fault>
         </operation>
         
         <operation name="ResendMessage">
@@ -754,9 +740,6 @@
             <output>
                 <soap:body use="literal"/>
             </output>
-            <fault name="ExchangeFault">
-                <soap:fault name="ExchangeFault" use="literal"/>
-            </fault>
         </operation>
         
         <operation name="GetLogListByQuery">
@@ -766,9 +749,6 @@
             <output>
                 <soap:body use="literal"/>
             </output>
-            <fault name="ExchangeFault">
-                <soap:fault name="ExchangeFault" use="literal"/>
-            </fault>
         </operation>
         
         <operation name="CreateLog">
@@ -778,9 +758,6 @@
             <output>
                 <soap:body use="literal"/>
             </output>
-            <fault name="ExchangeFault">
-                <soap:fault name="ExchangeFault" use="literal"/>
-            </fault>
         </operation>
         
         <operation name="UpdateLogStatus">
@@ -790,9 +767,6 @@
             <output>
                 <soap:body use="literal"/>
             </output>
-            <fault name="ExchangeFault">
-                <soap:fault name="ExchangeFault" use="literal"/>
-            </fault>
         </operation>
         
         <operation name="GetLogStatusHistory">
@@ -802,9 +776,6 @@
             <output>
                 <soap:body use="literal"/>
             </output>
-            <fault name="ExchangeFault">
-                <soap:fault name="ExchangeFault" use="literal"/>
-            </fault>
         </operation>
         
         <operation name="GetLogStatusHistoryByQuery">
@@ -814,9 +785,6 @@
             <output>
                 <soap:body use="literal"/>
             </output>
-            <fault name="ExchangeFault">
-                <soap:fault name="ExchangeFault" use="literal"/>
-            </fault>
         </operation>
         
         <operation name="GetServiceList">
@@ -826,9 +794,6 @@
             <output>
                 <soap:body use="literal"/>
             </output>
-            <fault name="ExchangeFault">
-                <soap:fault name="ExchangeFault" use="literal"/>
-            </fault>
         </operation>
         
         <operation name="GetService">
@@ -838,9 +803,6 @@
             <output>
                 <soap:body use="literal"/>
             </output>
-            <fault name="ExchangeFault">
-                <soap:fault name="ExchangeFault" use="literal"/>
-            </fault>
         </operation>
         
         <operation name="RegisterService">
@@ -850,9 +812,6 @@
             <output>
                 <soap:body use="literal"/>
             </output>
-            <fault name="ExchangeFault">
-                <soap:fault name="ExchangeFault" use="literal"/>
-            </fault>
         </operation>
         
         <operation name="UnregisterService">
@@ -862,9 +821,6 @@
             <output>
                 <soap:body use="literal"/>
             </output>
-            <fault name="ExchangeFault">
-                <soap:fault name="ExchangeFault" use="literal"/>
-            </fault>
         </operation>
         
         <operation name="GetServiceCapabilities">
@@ -874,9 +830,6 @@
             <output>
                 <soap:body use="literal"/>
             </output>
-            <fault name="ExchangeFault">
-                <soap:fault name="ExchangeFault" use="literal"/>
-            </fault>
         </operation>
         
         <operation name="SetServiceSettings">
@@ -886,9 +839,6 @@
             <output>
                 <soap:body use="literal"/>
             </output>
-            <fault name="ExchangeFault">
-                <soap:fault name="ExchangeFault" use="literal"/>
-            </fault>
         </operation>
         
         <operation name="GetServiceSettings">
@@ -898,9 +848,6 @@
             <output>
                 <soap:body use="literal"/>
             </output>
-            <fault name="ExchangeFault">
-                <soap:fault name="ExchangeFault" use="literal"/>
-            </fault>
         </operation>
 
         <operation name="SetServiceStatus">
@@ -910,9 +857,6 @@
             <output>
                 <soap:body use="literal"/>
             </output>
-            <fault name="ExchangeFault">
-                <soap:fault name="ExchangeFault" use="literal"/>
-            </fault>
         </operation>
 
         <operation name="Ping">
@@ -940,9 +884,6 @@
             <output>
                 <soap:body use="literal"/>
             </output>
-            <fault name="ExchangeFault">
-                <soap:fault name="ExchangeFault" use="literal"/>
-            </fault>
         </operation>
         
     </binding>

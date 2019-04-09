@@ -143,7 +143,7 @@ public class ExchangeEventOutgoingServiceBean {
             SendMovementToPluginRequest request = JAXBMarshaller.unmarshallTextMessage(message, SendMovementToPluginRequest.class);
             if(request.getUsername() == null){
                 LOG.error("[ Error when receiving message in exchange, username must be set in the request: ]");
-                exchangeErrorEvent.fire(new ExchangeErrorEvent(message, ExchangeModuleResponseMapper.createFaultMessage(FaultCode.EXCHANGE_MESSAGE, "Username in the request must be set")));
+                exchangeErrorEvent.fire(new ExchangeErrorEvent(message, "Username in the request must be set"));
                 return;
             }
             LOG.info("Send report to plugin: {}",request);
@@ -213,7 +213,7 @@ public class ExchangeEventOutgoingServiceBean {
             request = JAXBMarshaller.unmarshallTextMessage(message, SetCommandRequest.class);
             if(request.getUsername() == null){
                 LOG.error("[ Error when receiving message in exchange, username must be set in the request: ]");
-                exchangeErrorEvent.fire(new ExchangeErrorEvent(message, ExchangeModuleResponseMapper.createFaultMessage(FaultCode.EXCHANGE_MESSAGE, "Username in the request must be set")));
+                exchangeErrorEvent.fire(new ExchangeErrorEvent(message,  "Username in the request must be set"));
                 return;
             }
 
@@ -231,7 +231,7 @@ public class ExchangeEventOutgoingServiceBean {
             if (request.getCommand().getCommand() != CommandTypeType.EMAIL) {
                 LOG.error("[ Error when sending command to plugin {} ]", e);
                 if (getTimesRedelivered(message) > MessageConstants.JMS_MAX_REDELIVERIES) {
-                    exchangeErrorEvent.fire(new ExchangeErrorEvent(message, ExchangeModuleResponseMapper.createFaultMessage(FaultCode.EXCHANGE_EVENT_SERVICE, "Exception when sending command to plugin")));
+                    exchangeErrorEvent.fire(new ExchangeErrorEvent(message, "Exception when sending command to plugin"));
                 }
             }
             throw new IllegalStateException("Error when sending command to plugin", e);
@@ -418,7 +418,7 @@ public class ExchangeEventOutgoingServiceBean {
         ProcessedMovementResponse response = JAXBMarshaller.unmarshallTextMessage(message, ProcessedMovementResponse.class);
         if(response.getUsername() == null){
             LOG.error("[ Error when receiving message in exchange, username must be set in the request: ]");
-            exchangeErrorEvent.fire(new ExchangeErrorEvent(message, ExchangeModuleResponseMapper.createFaultMessage(FaultCode.EXCHANGE_MESSAGE, "Username in the request must be set")));
+            exchangeErrorEvent.fire(new ExchangeErrorEvent(message, "Username in the request must be set"));
             return;
         }
         LOG.debug("Received processed movement from Movement:{}", response);
@@ -460,23 +460,22 @@ public class ExchangeEventOutgoingServiceBean {
 
     private void fireExchangeFault(TextMessage messageEvent, String errorMessage, Throwable exception) {
         LOG.error(errorMessage, exception);
-        eu.europa.ec.fisheries.schema.exchange.common.v1.ExchangeFault exchangeFault = ExchangeModuleResponseMapper.createFaultMessage(FaultCode.EXCHANGE_EVENT_SERVICE, errorMessage);
-        exchangeErrorEvent.fire(new ExchangeErrorEvent(messageEvent, exchangeFault));
+        exchangeErrorEvent.fire(new ExchangeErrorEvent(messageEvent, errorMessage));
     }
 
 
     private boolean validate(CommandType command, TextMessage origin, Service service, CommandType commandType, String username) {
         if (command == null) {
             String faultMessage = "No command";
-            exchangeErrorEvent.fire(new ExchangeErrorEvent(origin, ExchangeModuleResponseMapper.createFaultMessage(FaultCode.EXCHANGE_COMMAND_INVALID, faultMessage)));
+            exchangeErrorEvent.fire(new ExchangeErrorEvent(origin, faultMessage));
             return false;
         } else if (command.getCommand() == null) {
             String faultMessage = "No command type";
-            exchangeErrorEvent.fire(new ExchangeErrorEvent(origin, ExchangeModuleResponseMapper.createFaultMessage(FaultCode.EXCHANGE_COMMAND_INVALID, faultMessage)));
+            exchangeErrorEvent.fire(new ExchangeErrorEvent(origin, faultMessage));
             return false;
         } else if (command.getPluginName() == null) {
             String faultMessage = "No plugin to send to";
-            exchangeErrorEvent.fire(new ExchangeErrorEvent(origin, ExchangeModuleResponseMapper.createFaultMessage(FaultCode.EXCHANGE_COMMAND_INVALID, faultMessage)));
+            exchangeErrorEvent.fire(new ExchangeErrorEvent(origin, faultMessage));
             return false;
         } else if (service == null || service.getServiceClassName() == null || !service.getServiceClassName().equalsIgnoreCase(command.getPluginName()) || !service.getStatus()) {                  //this can never happen since a nullpointer is thrown in the remapping process. And the last one is StatusType.STARTED.equals aka not running
             String faultMessage = "No plugin receiver available";
@@ -496,12 +495,12 @@ public class ExchangeEventOutgoingServiceBean {
                     LOG.error("Plugin not started, couldn't send module response: " + e.getMessage());
                 }
             }else{
-                exchangeErrorEvent.fire(new ExchangeErrorEvent(origin, ExchangeModuleResponseMapper.createFaultMessage(FaultCode.EXCHANGE_COMMAND_INVALID, faultMessage)));
+                exchangeErrorEvent.fire(new ExchangeErrorEvent(origin, faultMessage));
             }
             return false;
         } else if (command.getTimestamp() == null) {
             String faultMessage = "No timestamp";
-            exchangeErrorEvent.fire(new ExchangeErrorEvent(origin, ExchangeModuleResponseMapper.createFaultMessage(FaultCode.EXCHANGE_COMMAND_INVALID, faultMessage)));
+            exchangeErrorEvent.fire(new ExchangeErrorEvent(origin, faultMessage));
             return false;
         }
         return true;

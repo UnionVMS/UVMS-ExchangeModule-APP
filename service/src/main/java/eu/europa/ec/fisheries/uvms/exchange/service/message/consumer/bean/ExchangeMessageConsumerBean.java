@@ -206,7 +206,7 @@ public class ExchangeMessageConsumerBean implements MessageListener {
                     break;
                 default:
                     LOG.error("[ Not implemented method consumed: {} ] ", exchangeMethod);
-                    errorEvent.fire(new ExchangeErrorEvent(textMessage, ExchangeModuleResponseMapper.createFaultMessage(FaultCode.EXCHANGE_MESSAGE, "Method not implemented")));
+                    errorEvent.fire(new ExchangeErrorEvent(textMessage, "Method not implemented"));
             }
         } catch (Exception e){
             LOG.error("Error in exchange call to {} : ", exchangeMethod, e);
