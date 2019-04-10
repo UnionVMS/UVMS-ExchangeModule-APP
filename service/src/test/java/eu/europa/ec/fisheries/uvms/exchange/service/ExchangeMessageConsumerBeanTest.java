@@ -395,12 +395,9 @@ public class ExchangeMessageConsumerBeanTest extends BuildExchangeServiceTestDep
         String corrID = jmsHelper.sendExchangeMessage(request, null, ExchangeModuleMethod.PLUGIN_SET_REPORT_ACK.value());
 
         Thread.sleep(1000);
-        try {
-            unsentMessageDao.getByGuid(unsent.getGuid());
-            fail("The guid on the line above should not exist in the db");
-        }catch (EJBException e){
-            assertTrue(e.getMessage().contains("javax.persistence.NoResultException: No entity found for query"));
-        }
+
+        UnsentMessage shouldBeNull = unsentMessageDao.getByGuid(unsent.getGuid());
+        assertNull("The guid on the line above should not exist in the db", shouldBeNull);
 
         ExchangeLog updatedExchangeLog = exchangeLogDao.getExchangeLogByGuid(exchangeLog.getId());
         assertEquals(ExchangeLogStatusTypeType.SUCCESSFUL, updatedExchangeLog.getStatus());
@@ -435,12 +432,9 @@ public class ExchangeMessageConsumerBeanTest extends BuildExchangeServiceTestDep
         String corrID = jmsHelper.sendExchangeMessage(request, null, ExchangeModuleMethod.PLUGIN_SET_COMMAND_ACK.value());
 
         Thread.sleep(1000);
-        try {
-            unsentMessageDao.getByGuid(unsent.getGuid());
-            fail("The guid on the line above should not exist in the db");
-        }catch (EJBException e){
-            assertTrue(e.getMessage().contains("javax.persistence.NoResultException: No entity found for query"));
-        }
+
+        UnsentMessage shouldBeNull = unsentMessageDao.getByGuid(unsent.getGuid());
+        assertNull("The guid on the line above should not exist in the db", shouldBeNull);
 
         ExchangeLog updatedExchangeLog = exchangeLogDao.getExchangeLogByGuid(exchangeLog.getId());
         assertEquals(ExchangeLogStatusTypeType.SUCCESSFUL, updatedExchangeLog.getStatus());
@@ -481,12 +475,9 @@ public class ExchangeMessageConsumerBeanTest extends BuildExchangeServiceTestDep
         String corrID = jmsHelper.sendExchangeMessage(request, null, ExchangeModuleMethod.PLUGIN_SET_COMMAND_ACK.value());
 
         Thread.sleep(1000);
-        try {
-            unsentMessageDao.getByGuid(unsent.getGuid());
-            fail("The guid on the line above should not exist in the db");
-        }catch (EJBException e){
-            assertTrue(e.getMessage().contains("javax.persistence.NoResultException: No entity found for query"));
-        }
+
+        UnsentMessage shouldBeNull = unsentMessageDao.getByGuid(unsent.getGuid());
+        assertNull("The guid on the line above should not exist in the db", shouldBeNull);
 
         ExchangeLog updatedExchangeLog = exchangeLogDao.getExchangeLogByGuid(exchangeLog.getId());
         assertEquals(ExchangeLogStatusTypeType.SUCCESSFUL, updatedExchangeLog.getStatus());
