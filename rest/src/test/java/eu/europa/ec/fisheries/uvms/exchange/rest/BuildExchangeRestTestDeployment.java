@@ -29,6 +29,10 @@ public abstract class BuildExchangeRestTestDeployment {
                 .importRuntimeAndTestDependencies().resolve().withTransitivity().asFile();
         testWar.addAsLibraries(files);
 
+        files = Maven.resolver().loadPomFromFile("pom.xml")
+                .resolve("eu.europa.ec.fisheries.uvms.exchange:exchange-service").withTransitivity().asFile();
+        testWar.addAsLibraries(files);
+
         testWar.addPackages(true, "eu.europa.ec.fisheries.uvms.exchange.rest");
 
         testWar.addAsWebInfResource("META-INF/ejb-jar.xml");

@@ -13,6 +13,7 @@ package eu.europa.ec.fisheries.uvms.exchange.service.message.consumer.bean;
 
 import eu.europa.ec.fisheries.schema.exchange.module.v1.ExchangeBaseRequest;
 import eu.europa.ec.fisheries.schema.exchange.module.v1.ExchangeModuleMethod;
+import eu.europa.ec.fisheries.schema.exchange.module.v1.SetCommandRequest;
 import eu.europa.ec.fisheries.uvms.commons.message.api.MessageConstants;
 import eu.europa.ec.fisheries.uvms.commons.message.context.MappedDiagnosticContext;
 import eu.europa.ec.fisheries.uvms.exchange.service.bean.ExchangeEventIncomingServiceBean;
@@ -28,20 +29,15 @@ import javax.ejb.ActivationConfigProperty;
 import javax.ejb.MessageDriven;
 import javax.enterprise.event.Event;
 import javax.inject.Inject;
+import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.MessageListener;
 import javax.jms.TextMessage;
 
 //@formatter:off
 @MessageDriven(mappedName = MessageConstants.QUEUE_EXCHANGE_EVENT, activationConfig = {
-        @ActivationConfigProperty(propertyName = MessageConstants.MESSAGING_TYPE_STR, propertyValue = MessageConstants.CONNECTION_TYPE),
         @ActivationConfigProperty(propertyName = MessageConstants.DESTINATION_TYPE_STR, propertyValue = MessageConstants.DESTINATION_TYPE_QUEUE),
         @ActivationConfigProperty(propertyName = MessageConstants.DESTINATION_STR, propertyValue = MessageConstants.QUEUE_EXCHANGE_EVENT_NAME),
-        @ActivationConfigProperty(propertyName = MessageConstants.DESTINATION_JNDI_NAME, propertyValue = MessageConstants.QUEUE_EXCHANGE_EVENT),
-        @ActivationConfigProperty(propertyName = MessageConstants.CONNECTION_FACTORY_JNDI_NAME, propertyValue = MessageConstants.CONNECTION_FACTORY),
-        @ActivationConfigProperty(propertyName = "maxMessagesPerSessions", propertyValue = "100"),
-        @ActivationConfigProperty(propertyName = "maximumRedeliveries", propertyValue = MessageConstants.JMS_MAX_REDELIVERIES + ""),
-        @ActivationConfigProperty(propertyName = "maxSessions", propertyValue = "50")
 })
 //@formatter:on
 public class ExchangeMessageConsumerBean implements MessageListener {
@@ -207,16 +203,26 @@ public class ExchangeMessageConsumerBean implements MessageListener {
                     errorEvent.fire(new ExchangeErrorEvent(textMessage, "Method not implemented"));
             }
         } catch (Exception e){
-            LOG.error("Error in exchange call to {} : ", exchangeMethod, e);
-            throw new RuntimeException("Error in exchange call to " + exchangeMethod + " : ", e);
+            try {
+                LOG.error("Error in exchange call to {} : Incoming message is {} . END", exchangeMethod, e, textMessage.getText());
+
+            throw new RuntimeException("Error in exchange call to " + exchangeMethod + " : Incoming message is " + textMessage.getText() + " .END", e);
+            } catch (JMSException e1) {
+                LOG.error("Can not get text from text message in exchange message consumer bean");
+            }
         }
     }
 
 
     private ExchangeBaseRequest tryConsumeExchangeBaseRequest(TextMessage textMessage) {
         try {
+            if(textMessage.getText().startsWith("<ns2:AcknowledgeResponse xmlns:ns2=\"urn:plugin.exchange.schema.fisheries.ec.europa.eu:v1\">")){
+                ExchangeBaseRequest plugin = new SetCommandRequest();
+                plugin.setMethod(ExchangeModuleMethod.PLUGIN_SET_COMMAND_ACK);                  //they all go to the same place so this does not matter, also this is really ugly ;(
+                return plugin;
+            }
             return JAXBMarshaller.unmarshallTextMessage(textMessage, ExchangeBaseRequest.class);
-        } catch (RuntimeException e) {
+        } catch (Exception e) {
             return null;
         }
     }

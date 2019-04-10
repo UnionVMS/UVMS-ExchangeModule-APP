@@ -101,7 +101,7 @@ public class ExchangeLogServiceBean {
         ExchangeLog log = new ExchangeLog();
         log.setTypeRefType(messageType);
         log.setTypeRefMessage(messageText);
-        log.setTypeRefGuid( (request.getMessageGuid() == null) ? null : UUID.fromString(request.getMessageGuid()));
+        log.setTypeRefGuid( (request.getMessageGuid() == null || request.getMessageGuid().isEmpty()) ? null : UUID.fromString(request.getMessageGuid()));
 
         log.setSenderReceiver(request.getSenderOrReceiver());
         log.setDateReceived(request.getDate().toInstant());
@@ -214,7 +214,8 @@ public class ExchangeLogServiceBean {
             unsentMessageDao.remove(entity);
         } else {
             LOG.error("[ No message with id {} to remove ]", unsentMessageId);
-            throw new IllegalArgumentException("[ No message with id " + unsentMessageId + " to remove ]");
+            return;
+            //throw new IllegalArgumentException("[ No message with id " + unsentMessageId + " to remove ]");   //if there, for some reason, is no unsent message to remove the the old way is to throw an exception, but that stops the system from doing anything else, and I dont know if that is correct behaviour
         }
 
         List<String> removedMessageIds = Collections.singletonList(removeMessageId);
