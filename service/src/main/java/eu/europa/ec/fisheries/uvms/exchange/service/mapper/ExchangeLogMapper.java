@@ -218,6 +218,7 @@ public class ExchangeLogMapper {
         log.setRecipient(command.getEmail().getTo());
         log.setFwdRule(command.getFwdRule());
         log.setFwdDate(command.getTimestamp().toInstant());
+        log.setTransferIncoming(false);
 
         log.setUpdatedBy(username);
         log.setStatus(ExchangeLogStatusTypeType.ISSUED);
@@ -237,6 +238,7 @@ public class ExchangeLogMapper {
         log.setSenderReceiver("System");
         log.setFwdDate(command.getTimestamp().toInstant());
         log.setUpdatedBy(username);
+        log.setTransferIncoming(false);
 
         log.setTypeRefType(TypeRefType.POLL);
         log.setTypeRefGuid(UUID.fromString(command.getPoll().getPollId()));

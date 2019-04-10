@@ -41,9 +41,10 @@ public class UnsentMessageDaoBean extends Dao {
 	}
 
 	public UnsentMessage getByGuid(UUID guid) {
-		TypedQuery<UnsentMessage> query = em.createNamedQuery(UnsentMessage.UNSENT_BY_GUID, UnsentMessage.class);
+		return em.find(UnsentMessage.class, guid);
+		/*TypedQuery<UnsentMessage> query = createNamedQuery(UnsentMessage.UNSENT_BY_GUID, UnsentMessage.class);
 		query.setParameter("guid", guid);
-		return query.getSingleResult();
+		return query.getSingleResult();*/
 	}
 
 }

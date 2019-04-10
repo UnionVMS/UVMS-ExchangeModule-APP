@@ -39,10 +39,10 @@
         <uvms.config.version>4.0.3</uvms.config.version>
         <usm4uvms.version>4.0.13</usm4uvms.version>
         <uvms-pom-deps.version>1.24</uvms-pom-deps.version>
-        <asset.client.version>6.0.43</asset.client.version>
+        <asset.client.version>6.0.44</asset.client.version>
 
         <!-- Uvms models -->
-        <asset.model.version>6.0.43</asset.model.version>
+        <asset.model.version>6.0.44</asset.model.version>
         <audit.model.version>4.0.11</audit.model.version>
         <movement.model.version>5.1.22-UVMS</movement.model.version>
         <rules.model.version>3.0.49</rules.model.version>
