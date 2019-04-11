@@ -6,10 +6,10 @@
     <changeSet author="jojoha" id="table for linking a service with settings">
         
         <createTable remarks="Table for linking a plugin service with settings" tableName="service_setting">
-            <column name="servset_id" remarks="Id and code for table" type="BIGINT">
+            <column name="servset_id" remarks="Id and code for table" type="UUID">
                 <constraints nullable="false" primaryKey="true" primaryKeyName="servset_pk"/>
             </column>
-            <column name="servset_serv_id" remarks="Foreign key to the plugin service." type="BIGINT">
+            <column name="servset_serv_id" remarks="Foreign key to the plugin service." type="UUID">
                 <constraints nullable="false"/>
             </column>
             <column name="servset_setting" remarks="The setting key" type="VARCHAR(500)">
@@ -18,7 +18,7 @@
             <column name="servset_value" remarks="The value of the setting" type="VARCHAR(4000)">
                 <constraints nullable="false"/>
             </column>
-            <column name="servset_updattim" type="timestamp" remarks="Last updated date time.">
+            <column name="servset_updatetime" type="timestamp with time zone" remarks="Last updated date time.">
                 <constraints nullable="false"/>
             </column>
             <column name="servset_upuser" type="varchar(60)" remarks="Last update userid.">

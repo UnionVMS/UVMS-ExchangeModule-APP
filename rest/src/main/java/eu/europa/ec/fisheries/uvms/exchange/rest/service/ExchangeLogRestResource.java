@@ -13,44 +13,53 @@ package eu.europa.ec.fisheries.uvms.exchange.rest.service;
 
 import eu.europa.ec.fisheries.schema.exchange.source.v1.GetLogListByQueryResponse;
 import eu.europa.ec.fisheries.schema.exchange.v1.*;
-import eu.europa.ec.fisheries.uvms.commons.date.DateUtils;
+import eu.europa.ec.fisheries.uvms.exchange.bean.ExchangeLogModelBean;
+import eu.europa.ec.fisheries.uvms.exchange.dao.bean.ExchangeLogDaoBean;
+import eu.europa.ec.fisheries.uvms.exchange.entity.exchangelog.ExchangeLog;
+import eu.europa.ec.fisheries.uvms.exchange.model.dto.ListResponseDto;
+import eu.europa.ec.fisheries.uvms.exchange.model.util.DateUtils;
 import eu.europa.ec.fisheries.uvms.exchange.rest.dto.PollQuery;
 import eu.europa.ec.fisheries.uvms.exchange.rest.dto.ResponseDto;
 import eu.europa.ec.fisheries.uvms.exchange.rest.dto.RestResponseCode;
 import eu.europa.ec.fisheries.uvms.exchange.rest.dto.exchange.BusinessRuleComparator;
-import eu.europa.ec.fisheries.uvms.exchange.rest.dto.exchange.ListQueryResponse;
 import eu.europa.ec.fisheries.uvms.exchange.rest.error.ErrorHandler;
 import eu.europa.ec.fisheries.uvms.exchange.rest.mapper.ExchangeLogMapper;
-import eu.europa.ec.fisheries.uvms.exchange.service.ExchangeLogService;
-import eu.europa.ec.fisheries.uvms.exchange.service.bean.ExchangeLogRestServiceBean;
+import eu.europa.ec.fisheries.uvms.exchange.service.bean.ExchangeLogServiceBean;
 import eu.europa.ec.fisheries.uvms.rest.security.RequiresFeature;
 import eu.europa.ec.fisheries.uvms.rest.security.UnionVMSFeature;
-import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
+import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
+import java.time.Instant;
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
+import java.util.UUID;
 
 @Path("/exchange")
 @Stateless
-@Slf4j
 public class ExchangeLogRestResource {
 
-    @EJB
-    private ExchangeLogService serviceLayer;
+    private final static Logger LOG = LoggerFactory.getLogger(ExchangeLogRestResource.class);
 
     @EJB
-    private ExchangeLogRestServiceBean logRestServiceBean;
+    private ExchangeLogServiceBean serviceLayer;
 
     @Context
     private HttpServletRequest request;
+
+    @Inject
+    private ExchangeLogModelBean exchangeLogModel;
+
+    @Inject
+    private ExchangeLogDaoBean logDao;
 
     /**
      * @responseMessage 200 [Success]
@@ -63,14 +72,18 @@ public class ExchangeLogRestResource {
     @Path("/list")
     @RequiresFeature(UnionVMSFeature.viewExchange)
     public ResponseDto getLogListByCriteria(final ExchangeListQuery query) {
-        log.info("Get list invoked in rest layer.");
+        LOG.info("Get list invoked in rest layer.");
         try {
             //TODO query in swagger
-            GetLogListByQueryResponse response = logRestServiceBean.getExchangeLogList(query);
-            ListQueryResponse exchangeLogList = ExchangeLogMapper.mapToQueryResponse(response);
-            return new ResponseDto(exchangeLogList, RestResponseCode.OK);
+            GetLogListByQueryResponse response = new GetLogListByQueryResponse();
+            ListResponseDto exchangeLogList = exchangeLogModel.getExchangeLogListByQuery(query);
+            response.setCurrentPage(exchangeLogList.getCurrentPage());
+            response.setTotalNumberOfPages(exchangeLogList.getTotalNumberOfPages());
+            response.getExchangeLog().addAll(exchangeLogList.getExchangeLogList());
+
+            return new ResponseDto(ExchangeLogMapper.mapToQueryResponse(response), RestResponseCode.OK);
         } catch (Exception ex) {
-            log.error("[ Error when geting log list. {} ] {} ", query, ex.getMessage());
+            LOG.error("[ Error when geting log list. {} ] {} ", query, ex.getMessage());
             return ErrorHandler.getFault(ex);
         }
     }
@@ -82,13 +95,13 @@ public class ExchangeLogRestResource {
     @RequiresFeature(UnionVMSFeature.viewExchange)
     public ResponseDto getPollStatus(PollQuery query) {
         try {
-            log.info("Get ExchangeLog status for Poll in rest layer:{}", query);
-            Date from = DateUtils.stringToDate(query.getStatusFromDate());
-            Date to = DateUtils.stringToDate(query.getStatusToDate());
+            LOG.info("Get ExchangeLog status for Poll in rest layer:{}", query);
+            Instant from = DateUtils.parseToUTCDateTime(query.getStatusFromDate());
+            Instant to = DateUtils.parseToUTCDateTime(query.getStatusToDate());
             List<ExchangeLogStatusType> response = serviceLayer.getExchangeStatusHistoryList(query.getStatus(), TypeRefType.POLL, from, to);
             return new ResponseDto(response, RestResponseCode.OK);
         } catch (Exception e) {
-            log.error("[ Error when getting config search fields. {}] {}", query, e.getMessage());
+            LOG.error("[ Error when getting config search fields. {}] {}", query, e.getMessage());
             return ErrorHandler.getFault(e);
         }
     }
@@ -100,11 +113,14 @@ public class ExchangeLogRestResource {
     @RequiresFeature(UnionVMSFeature.viewExchange)
     public ResponseDto getPollStatus(@PathParam("typeRefGuid") String typeRefGuid) {
         try {
-            log.info("Get ExchangeLog status for Poll by typeRefGuid : {}", typeRefGuid);
-            ExchangeLogStatusType response = serviceLayer.getExchangeStatusHistory(TypeRefType.POLL, typeRefGuid, request.getRemoteUser());
+            LOG.info("Get ExchangeLog status for Poll by typeRefGuid : {}", typeRefGuid);
+            if (typeRefGuid == null) {
+                throw new IllegalArgumentException("Invalid id");
+            }
+            ExchangeLogStatusType response = exchangeLogModel.getExchangeLogStatusHistory(UUID.fromString(typeRefGuid), TypeRefType.POLL);
             return new ResponseDto(response, RestResponseCode.OK);
         } catch (Exception e) {
-            log.error("[ Error when getting config search fields. {} ] {}", typeRefGuid, e.getMessage());
+            LOG.error("[ Error when getting config search fields. {} ] {}", typeRefGuid, e.getMessage());
             return ErrorHandler.getFault(e);
         }
     }
@@ -115,10 +131,11 @@ public class ExchangeLogRestResource {
     @RequiresFeature(UnionVMSFeature.viewExchange)
     public ResponseDto getExchangeLogRawXMLByGuid(@PathParam("guid") String guid) {
         try {
-            LogWithRawMsgAndType exchangeLogRawMessageByGuid = logRestServiceBean.getExchangeLogRawMessage(guid);
-            return new ResponseDto(exchangeLogRawMessageByGuid.getRawMsg(), RestResponseCode.OK);
+
+            ExchangeLog exchangeLog = logDao.getExchangeLogByGuid(UUID.fromString(guid));
+            return new ResponseDto(exchangeLog.getTypeRefMessage(), RestResponseCode.OK);
         } catch (Exception e) {
-            log.error("[ Error when getting exchange log by GUID. ] {}", e.getMessage());
+            LOG.error("[ Error when getting exchange log by GUID. ] {}", e.getMessage());
             return ErrorHandler.getFault(e);
         }
     }
@@ -129,13 +146,13 @@ public class ExchangeLogRestResource {
     @RequiresFeature(UnionVMSFeature.viewExchange)
     public ResponseDto getExchangeLogRawXMLAndValidationByGuid(@PathParam("guid") String guid) {
         try {
-            ExchangeLogWithValidationResults results = serviceLayer.getExchangeLogRawMessageAndValidationByGuid(guid);
+            ExchangeLogWithValidationResults results = serviceLayer.getExchangeLogRawMessageAndValidationByGuid(UUID.fromString(guid));
             if (results != null && CollectionUtils.isNotEmpty(results.getValidationList())) {
                 Collections.sort(results.getValidationList(), new BusinessRuleComparator());
             }
             return new ResponseDto(results, RestResponseCode.OK);
         } catch (Exception e) {
-            log.error("[ Error when getting exchange log by GUID. ] {}", e.getMessage());
+            LOG.error("[ Error when getting exchange log by GUID. ] {}", e.getMessage());
             return ErrorHandler.getFault(e);
         }
     }
@@ -146,9 +163,9 @@ public class ExchangeLogRestResource {
     @RequiresFeature(UnionVMSFeature.viewExchange)
     public ResponseDto getExchangeLogByUUID(@PathParam("guid") String guid) {
         try {
-            return new ResponseDto(logRestServiceBean.getExchangeLogByGuid(guid), RestResponseCode.OK);
+            return new ResponseDto(exchangeLogModel.getExchangeLogByGuid(UUID.fromString(guid)), RestResponseCode.OK);
         } catch (Exception e) {
-            log.error("[ Error when getting exchange log by GUID. ] {}", e.getMessage());
+            LOG.error("[ Error when getting exchange log by GUID. ] {}", e.getMessage());
             return ErrorHandler.getFault(e);
         }
     }

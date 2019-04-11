@@ -11,12 +11,35 @@
  */
 package eu.europa.ec.fisheries.uvms.exchange.service.bean;
 
+import static eu.europa.ec.fisheries.uvms.commons.message.impl.JAXBUtils.unMarshallMessage;
+import java.util.List;
+import java.util.UUID;
+import javax.ejb.EJB;
+import javax.ejb.Stateless;
+import javax.enterprise.event.Event;
+import javax.inject.Inject;
+import javax.jms.JMSException;
+import javax.jms.TextMessage;
+import javax.json.bind.Jsonb;
+import javax.json.bind.JsonbBuilder;
+import javax.xml.bind.JAXBException;
+
+import eu.europa.ec.fisheries.uvms.exchange.bean.ExchangeLogModelBean;
+import eu.europa.ec.fisheries.uvms.exchange.bean.ServiceRegistryModelBean;
+import eu.europa.ec.fisheries.uvms.exchange.entity.exchangelog.ExchangeLog;
+import eu.europa.ec.fisheries.uvms.exchange.entity.serviceregistry.Service;
+import eu.europa.ec.fisheries.uvms.exchange.mapper.ServiceMapper;
+import eu.europa.ec.fisheries.uvms.exchange.service.message.event.PluginErrorEvent;
+import eu.europa.ec.fisheries.uvms.exchange.service.message.producer.bean.ExchangeAssetProducer;
+import eu.europa.ec.fisheries.uvms.exchange.service.message.producer.bean.ExchangeMovementProducer;
+import eu.europa.ec.fisheries.uvms.exchange.service.message.producer.bean.ExchangeRulesProducer;
+import eu.europa.ec.fisheries.uvms.exchange.service.message.producer.bean.ExchangeSalesProducer;
+import org.apache.commons.collections.CollectionUtils;
 import eu.europa.ec.fisheries.schema.exchange.common.v1.AcknowledgeType;
 import eu.europa.ec.fisheries.schema.exchange.module.v1.*;
 import eu.europa.ec.fisheries.schema.exchange.movement.v1.MovementBaseType;
 import eu.europa.ec.fisheries.schema.exchange.movement.v1.MovementSourceType;
 import eu.europa.ec.fisheries.schema.exchange.movement.v1.SetReportMovementType;
-import eu.europa.ec.fisheries.schema.exchange.plugin.types.v1.PluginFault;
 import eu.europa.ec.fisheries.schema.exchange.plugin.types.v1.PluginType;
 import eu.europa.ec.fisheries.schema.exchange.plugin.v1.AcknowledgeResponse;
 import eu.europa.ec.fisheries.schema.exchange.plugin.v1.ExchangePluginMethod;
@@ -27,64 +50,33 @@ import eu.europa.ec.fisheries.schema.rules.module.v1.RulesModuleMethod;
 import eu.europa.ec.fisheries.schema.rules.module.v1.SetFLUXMDRSyncMessageRulesResponse;
 import eu.europa.ec.fisheries.uvms.commons.message.api.MessageException;
 import eu.europa.ec.fisheries.uvms.commons.message.impl.JAXBUtils;
-import eu.europa.ec.fisheries.uvms.exchange.ExchangeLogModel;
-import eu.europa.ec.fisheries.uvms.exchange.message.constants.MessageQueue;
-import eu.europa.ec.fisheries.uvms.exchange.message.event.*;
-import eu.europa.ec.fisheries.uvms.exchange.message.event.carrier.ExchangeMessageEvent;
-import eu.europa.ec.fisheries.uvms.exchange.message.event.carrier.PluginMessageEvent;
-import eu.europa.ec.fisheries.uvms.exchange.message.event.registry.PluginErrorEvent;
-import eu.europa.ec.fisheries.uvms.exchange.message.exception.ExchangeMessageException;
-import eu.europa.ec.fisheries.uvms.exchange.message.producer.ExchangeMessageProducer;
-import eu.europa.ec.fisheries.uvms.exchange.model.constant.FaultCode;
-import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeException;
-import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelException;
-import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelMarshallException;
+import eu.europa.ec.fisheries.uvms.exchange.service.message.event.ErrorEvent;
+import eu.europa.ec.fisheries.uvms.exchange.service.message.event.carrier.ExchangeErrorEvent;
+import eu.europa.ec.fisheries.uvms.exchange.service.message.event.carrier.PluginErrorEventCarrier;
 import eu.europa.ec.fisheries.uvms.exchange.model.mapper.ExchangeModuleResponseMapper;
-import eu.europa.ec.fisheries.uvms.exchange.model.mapper.ExchangePluginResponseMapper;
 import eu.europa.ec.fisheries.uvms.exchange.model.mapper.JAXBMarshaller;
-import eu.europa.ec.fisheries.uvms.exchange.service.ExchangeEventIncomingService;
-import eu.europa.ec.fisheries.uvms.exchange.service.ExchangeEventOutgoingService;
-import eu.europa.ec.fisheries.uvms.exchange.service.ExchangeLogService;
-import eu.europa.ec.fisheries.uvms.exchange.service.ExchangeService;
 import eu.europa.ec.fisheries.uvms.exchange.service.event.ExchangePluginStatusEvent;
 import eu.europa.ec.fisheries.uvms.exchange.service.event.PollEvent;
-import eu.europa.ec.fisheries.uvms.exchange.service.exception.ExchangeLogException;
-import eu.europa.ec.fisheries.uvms.exchange.service.exception.ExchangeServiceException;
 import eu.europa.ec.fisheries.uvms.exchange.service.mapper.MovementMapper;
 import eu.europa.ec.fisheries.uvms.exchange.service.model.IncomingMovement;
 import eu.europa.ec.fisheries.uvms.longpolling.notifications.NotificationMessage;
-import eu.europa.ec.fisheries.uvms.rules.model.exception.RulesModelMapperException;
-import eu.europa.ec.fisheries.uvms.rules.model.exception.RulesModelMarshallException;
 import eu.europa.ec.fisheries.uvms.rules.model.mapper.RulesModuleRequestMapper;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections.CollectionUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import javax.ejb.EJB;
-import javax.ejb.Stateless;
-import javax.enterprise.event.Event;
-import javax.enterprise.event.Observes;
-import javax.enterprise.event.TransactionPhase;
-import javax.inject.Inject;
-import javax.jms.JMSException;
-import javax.jms.TextMessage;
-import javax.json.bind.Jsonb;
-import javax.json.bind.JsonbBuilder;
-import javax.xml.bind.JAXBException;
-import java.util.List;
-
-import static eu.europa.ec.fisheries.uvms.commons.message.impl.JAXBUtils.unMarshallMessage;
 
 @Stateless
-@Slf4j
-public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingService {
+public class ExchangeEventIncomingServiceBean {
+
+    private final static Logger LOG = LoggerFactory.getLogger(ExchangeEventIncomingServiceBean.class);
 
     @Inject
     @ErrorEvent
-    private Event<ExchangeMessageEvent> exchangeErrorEvent;
+    private Event<ExchangeErrorEvent> exchangeErrorEvent;
 
     @Inject
     @PluginErrorEvent
-    private Event<PluginMessageEvent> pluginErrorEvent;
+    private Event<PluginErrorEventCarrier> pluginErrorEvent;
 
     @Inject
     @ExchangePluginStatusEvent
@@ -94,76 +86,87 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
     @PollEvent
     private Event<NotificationMessage> pollEvent;
 
-    @EJB
-    private ExchangeLogService exchangeLog;
+    @Inject
+    private ServiceRegistryModelBean serviceRegistryModel;
 
     @EJB
-    private ExchangeLogModel exchangeLogModel;
+    private ExchangeLogServiceBean exchangeLogService;
 
     @EJB
-    private ExchangeMessageProducer producer;
+    private ExchangeLogModelBean exchangeLogModel;
+
 
     @EJB
-    private ExchangeService exchangeService;
+    private ExchangeEventOutgoingServiceBean exchangeEventOutgoingService;
 
-    @EJB
-    private ExchangeEventOutgoingService exchangeEventOutgoingService;
+    @Inject
+    private ExchangeAssetProducer exchangeAssetProducer;
+
+    @Inject
+    private ExchangeRulesProducer rulesProducer;
+
+    @Inject
+    private ExchangeMovementProducer movementProducer;
+
+    @Inject
+    private ExchangeSalesProducer salesProducer;
 
     private Jsonb jsonb = JsonbBuilder.create();
-    
-    @Override
-    public void processFLUXFAReportMessage(@Observes @SetFluxFAReportMessageEvent ExchangeMessageEvent message) {
+
+    /**
+     * Process FLUXFAReportMessage coming from Flux Activity plugin
+     * @param message
+     */
+    public void processFLUXFAReportMessage(TextMessage message) {
         try {
-            SetFLUXFAReportMessageRequest request = JAXBMarshaller.unmarshallTextMessage(message.getJmsMessage(), SetFLUXFAReportMessageRequest.class);
+            SetFLUXFAReportMessageRequest request = JAXBMarshaller.unmarshallTextMessage(message, SetFLUXFAReportMessageRequest.class);
             String onValue = request.getOnValue();
             String username = request.getUsername();
             String fluxDataFlow = request.getFluxDataFlow();
             String senderOrReceiver = request.getSenderOrReceiver();
-            log.debug("Got FLUXFAReportMessage in exchange :" + request.getRequest());
-            ExchangeLogType exchangeLogType = exchangeLog.log(request, LogType.RCV_FLUX_FA_REPORT_MSG, ExchangeLogStatusTypeType.ISSUED
+            LOG.debug("Got FLUXFAReportMessage in exchange :" + request.getRequest());
+
+            ExchangeLog exchangeLog = exchangeLogService.log(request, LogType.RCV_FLUX_FA_REPORT_MSG, ExchangeLogStatusTypeType.ISSUED
                     , extractFaType(request.getMethod()), request.getRequest(), true);
             String msg = RulesModuleRequestMapper.createSetFLUXFAReportMessageRequest(extractPluginType(request), request.getRequest()
-                    , username, extractLogId(message, exchangeLogType), fluxDataFlow, senderOrReceiver, onValue);
-            forwardToRules(msg, message, null);
-        } catch (RulesModelMapperException | ExchangeModelMarshallException e) {
-            log.error("Couldn't map to SetFLUXFAReportMessageRequest when processing FLUXFAReportMessage coming from fa-plugin!", e);
-        } catch (ExchangeLogException e) {
-            log.error("Couldn't log FAReportMessage received from plugin into database", e);
+                    , username, extractLogId(message, exchangeLog), fluxDataFlow, senderOrReceiver, onValue);
+
+            forwardToRules(msg);
+        } catch (Exception e) {
+            LOG.error("Couldn't map to SetFLUXFAReportMessageRequest when processing FLUXFAReportMessage coming from fa-plugin!", e);
         }
     }
 
-    @Override
-    public void processFAQueryMessage(@Observes @SetFaQueryMessageEvent ExchangeMessageEvent message) {
+    public void processFAQueryMessage(TextMessage message) {
         try {
-            SetFAQueryMessageRequest request = JAXBMarshaller.unmarshallTextMessage(message.getJmsMessage(), SetFAQueryMessageRequest.class);
-            log.debug("Got FAQueryMessage in exchange :" + request.getRequest());
-            ExchangeLogType exchangeLogType = exchangeLog.log(request, LogType.RECEIVE_FA_QUERY_MSG, ExchangeLogStatusTypeType.ISSUED
+            SetFAQueryMessageRequest request = JAXBMarshaller.unmarshallTextMessage(message, SetFAQueryMessageRequest.class);
+            LOG.debug("Got FAQueryMessage in exchange :" + request.getRequest());
+
+            ExchangeLog exchangeLog = exchangeLogService.log(request, LogType.RECEIVE_FA_QUERY_MSG, ExchangeLogStatusTypeType.ISSUED
                     , TypeRefType.FA_QUERY, request.getRequest(), true);
             String msg = RulesModuleRequestMapper.createSetFaQueryMessageRequest(extractPluginType(request), request.getRequest(),
-                    request.getUsername(), extractLogId(message, exchangeLogType), request.getFluxDataFlow(), request.getSenderOrReceiver(), request.getOnValue());
-            forwardToRules(msg, message, null);
-        } catch (RulesModelMapperException | ExchangeModelMarshallException e) {
-            log.error("Couldn't map to SetFAQueryMessageRequest when processing FAQueryMessage coming from fa-plugin!", e);
-        } catch (ExchangeLogException e) {
-            log.error("Couldn't log FAQueryMessage received from plugin into database", e);
+                    request.getUsername(), extractLogId(message, exchangeLog), request.getFluxDataFlow(), request.getSenderOrReceiver(), request.getOnValue());
+
+            forwardToRules(msg);
+        } catch (Exception e) {
+            LOG.error("Couldn't map to SetFAQueryMessageRequest when processing FAQueryMessage coming from fa-plugin!", e);
         }
     }
 
-    @Override
-    public void processFluxFAResponseMessage(@Observes @ReceivedFluxFaResponseMessageEvent ExchangeMessageEvent message) {
+    public void processFluxFAResponseMessage(TextMessage message) {
         try {
-            RcvFLUXFaResponseMessageRequest request = JAXBMarshaller.unmarshallTextMessage(message.getJmsMessage(), RcvFLUXFaResponseMessageRequest.class);
-            log.debug("Got FLUXResponseMessage in exchange :" + request.getRequest());
-            ExchangeLogType exchangeLogType = exchangeLog.log(request, LogType.RECEIVE_FLUX_RESPONSE_MSG, ExchangeLogStatusTypeType.ISSUED
+            RcvFLUXFaResponseMessageRequest request = JAXBMarshaller.unmarshallTextMessage(message, RcvFLUXFaResponseMessageRequest.class);
+            LOG.debug("Got FLUXResponseMessage in exchange :" + request.getRequest());
+
+            ExchangeLog exchangeLog = exchangeLogService.log(request, LogType.RECEIVE_FLUX_RESPONSE_MSG, ExchangeLogStatusTypeType.ISSUED
                     , TypeRefType.FA_RESPONSE, request.getRequest(), true);
             String msg = RulesModuleRequestMapper.createRcvFluxFaResponseMessageRequest(extractPluginType(request)
-                    , request.getRequest(), request.getUsername(), extractLogId(message, exchangeLogType), request.getFluxDataFlow()
+                    , request.getRequest(), request.getUsername(), extractLogId(message, exchangeLog), request.getFluxDataFlow()
                     , request.getSenderOrReceiver(), request.getOnValue());
-            forwardToRules(msg, message, null);
-        } catch (RulesModelMapperException | ExchangeModelMarshallException e) {
-            log.error("Couldn't map to RcvFLUXFaResponseMessageRequest when processing FLUXResponseMessage coming from fa-plugin!", e);
-        } catch (ExchangeLogException e) {
-            log.error("Couldn't log FLUXResponseMessage received from plugin into database", e);
+
+            forwardToRules(msg);
+        } catch (Exception e) {
+            LOG.error("Couldn't map to RcvFLUXFaResponseMessageRequest when processing FLUXResponseMessage coming from fa-plugin!", e);
         }
     }
 
@@ -172,44 +175,49 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
      * module has arrived (synchronisation of the mdr).
      *
      */
-    @Override
-    public void sendResponseToRulesModule(@Observes @MdrSyncResponseMessageEvent ExchangeMessageEvent message) {
-        TextMessage requestMessage = message.getJmsMessage();
+    /**
+     * Process MDR sync response message sent to Flux MDR plugin
+     * @param message
+     */
+    public void sendResponseToRulesModule(TextMessage message) {           //and nothing to the exchange log?
         try {
-            SetFLUXMDRSyncMessageExchangeResponse exchangeResponse = JAXBMarshaller.unmarshallTextMessage(requestMessage, SetFLUXMDRSyncMessageExchangeResponse.class);
-            log.debug("[INFO] Received @MdrSyncResponseMessageEvent. Going to send it to Rules now..");
+            SetFLUXMDRSyncMessageExchangeResponse exchangeResponse = JAXBMarshaller.unmarshallTextMessage(message, SetFLUXMDRSyncMessageExchangeResponse.class);
+            LOG.debug("[INFO] Received @MdrSyncResponseMessageEvent. Going to send it to Rules now..");
             String strRequest = exchangeResponse.getRequest();
             SetFLUXMDRSyncMessageRulesResponse mdrResponse = new SetFLUXMDRSyncMessageRulesResponse();
             mdrResponse.setMethod(RulesModuleMethod.GET_FLUX_MDR_SYNC_RESPONSE);
             mdrResponse.setRequest(strRequest);
             String mdrStrReq = JAXBMarshaller.marshallJaxBObjectToString(mdrResponse);
-            forwardToRules(mdrStrReq, null, null);
+
+            forwardToRules(mdrStrReq);
         } catch (Exception e) {
-            log.error("[ERROR] Something strange happend during message conversion {} {}", message, e);
+            LOG.error("[ERROR] Something strange happend during message conversion {} {}", message, e);         //if something happens, just log it and move on?????
         }
     }
 
-    @Override
-    public void getPluginListByTypes(@Observes @PluginConfigEvent ExchangeMessageEvent message) {
+    /**
+     * Get plugin list from APP module
+     *
+     * @param message
+     */
+    public void getPluginListByTypes(TextMessage message) {
         try {
-            TextMessage jmsMessage = message.getJmsMessage();
-            GetServiceListRequest request = JAXBMarshaller.unmarshallTextMessage(jmsMessage, GetServiceListRequest.class);
-            log.info("[INFO] Get plugin config LIST_SERVICE:{}", request.getType());
-            List<ServiceResponseType> serviceList = exchangeService.getServiceList(request.getType());
-            producer.sendModuleResponseMessage(message.getJmsMessage(), ExchangeModuleResponseMapper.mapServiceListResponse(serviceList));
-        } catch (ExchangeException | MessageException e) {
-            log.error("[ Error when getting plugin list from source {}] {}", message, e);
-            exchangeErrorEvent.fire(new ExchangeMessageEvent(message.getJmsMessage(), ExchangeModuleResponseMapper.createFaultMessage(
-                    FaultCode.EXCHANGE_MESSAGE, "Excpetion when getting service list")));
+            GetServiceListRequest request = JAXBMarshaller.unmarshallTextMessage(message, GetServiceListRequest.class);
+            LOG.info("[INFO] Get plugin config LIST_SERVICE:{}", request.getType());
+
+            List<ServiceResponseType> serviceList = ServiceMapper.toServiceModelList(serviceRegistryModel.getPlugins(request.getType()));
+            movementProducer.sendResponseMessageToSender(message, ExchangeModuleResponseMapper.mapServiceListResponse(serviceList));
+        } catch (Exception e) {
+            LOG.error("[ Error when getting plugin list from source {}] {}", message, e);
+            exchangeErrorEvent.fire(new ExchangeErrorEvent(message,"Excpetion when getting service list"));
         }
     }
 
-    @Override
-    public void processReceivedMovementBatch(@Observes @ReceivedMovementBatchEvent ExchangeMessageEvent message) {
+    public void processReceivedMovementBatch(TextMessage message) {
         try {
             // Log it.
-            SetFLUXMovementReportRequest request = JAXBMarshaller.unmarshallTextMessage(message.getJmsMessage(), SetFLUXMovementReportRequest.class);
-            ExchangeLogType exchangeLogType = exchangeLog.log(request, LogType.RECEIVE_MOVEMENT, ExchangeLogStatusTypeType.ISSUED, TypeRefType.MOVEMENT, request.getRequest(), true);
+            SetFLUXMovementReportRequest request = JAXBMarshaller.unmarshallTextMessage(message, SetFLUXMovementReportRequest.class);
+            ExchangeLog exchangeLog = exchangeLogService.log(request, LogType.RECEIVE_MOVEMENT, ExchangeLogStatusTypeType.ISSUED, TypeRefType.MOVEMENT, request.getRequest(), true);
 
             // Send to rules.
             String onValue = request.getOnValue();
@@ -221,23 +229,31 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
             String to = request.getTo();
             String todt = request.getTodt();
             String msg = RulesModuleRequestMapper.createSetFLUXMovementReportRequest(extractPluginType(request), request.getRequest(),
-                    username, extractLogId(message, exchangeLogType), fluxDataFlow, senderOrReceiver, onValue,
+                    username, extractLogId(message, exchangeLog), fluxDataFlow, senderOrReceiver, onValue,
                     registeredClassName, ad, to, todt);
-            forwardToRules(msg, message, null);
-        } catch (RulesModelMapperException | ExchangeModelMarshallException e) {
-            log.error("Couldn't map to SetFLUXMovementReportRequest when processing FLUXMovementReport coming from movement-plugin!", e);
-        } catch (ExchangeLogException e) {
-            log.error("Couldn't log FLUXMovementReport received from plugin into database!", e);
+
+            forwardToRules(msg);
+        } catch (Exception e) {
+            LOG.error("Couldn't map to SetFLUXMovementReportRequest when processing FLUXMovementReport coming from movement-plugin!", e);
         }
     }
 
-    @Override
-    public void processMovement(@Observes(during=TransactionPhase.BEFORE_COMPLETION) @SetMovementEvent ExchangeMessageEvent message) {
+    /**
+     * Process a received Movement
+     *
+     * @param message
+     */
+    public void processMovement(TextMessage message) {
         try {
-            final TextMessage jmsMessage = message.getJmsMessage();
-            final String jmsMessageID = jmsMessage.getJMSMessageID();
+            final TextMessage jmsMessage = message;
             SetMovementReportRequest request = JAXBMarshaller.unmarshallTextMessage(jmsMessage, SetMovementReportRequest.class);
-            log.debug("Processing Movement : {}", request.getRefGuid());
+            if(request.getUsername() == null){
+                LOG.error("[ Error when receiving message in exchange, username must be set in the request: ]");
+                exchangeErrorEvent.fire(new ExchangeErrorEvent(message,"Username in the request must be set"));
+                return;
+            }
+
+            LOG.trace("Processing Movement : {}", request.getRefGuid());
             String username;
             SetReportMovementType setRepMovType = request.getRequest();
             if (MovementSourceType.MANUAL.equals(setRepMovType.getMovement().getSource())) {// A person has created a position
@@ -245,10 +261,10 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
             } else {// A plugin has reported a position
                 username = setRepMovType.getPluginType().name();
             }
+
             String pluginName = setRepMovType.getPluginName();
-            ServiceResponseType service = exchangeService.getService(pluginName);
             PluginType pluginType = setRepMovType.getPluginType();
-            if (validate(setRepMovType, service, jmsMessage)) {
+            if (validateMovementReport(setRepMovType, pluginName, jmsMessage)) {
                 MovementBaseType baseMovement = setRepMovType.getMovement();
                 IncomingMovement incomingMovement = MovementMapper.mapMovementBaseTypeToRawMovementType(baseMovement);
                 incomingMovement.setPluginType(pluginType.value());
@@ -256,177 +272,188 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
                 incomingMovement.setDateReceived(setRepMovType.getTimestamp().toInstant());
                 incomingMovement.setUpdatedBy(username);
                 if (!baseMovement.getSource().equals(MovementSourceType.AIS)) {
-                    log.debug("Logging received movement.");
-                    ExchangeLogType createdLog = exchangeLog.log(request, LogType.RECEIVE_MOVEMENT, ExchangeLogStatusTypeType.ISSUED, TypeRefType.MOVEMENT,
-                            JAXBMarshaller.marshallJaxBObjectToString(request), true);
-                    incomingMovement.setAckResponseMessageId(createdLog.getGuid());
+                    LOG.debug("Logging received movement.");
+                    ExchangeLog createdLog = exchangeLogService.log(request, LogType.RECEIVE_MOVEMENT, ExchangeLogStatusTypeType.ISSUED, TypeRefType.MOVEMENT,
+                            message.getText(), true);
+                    incomingMovement.setAckResponseMessageId(createdLog.getId().toString());
                 }
-                String json = jsonb.toJson(incomingMovement);
 
+                String json = jsonb.toJson(incomingMovement);
                 //combine all possible values into one big grouping string
                 String groupId = incomingMovement.getAssetCFR() + incomingMovement.getAssetIMO() + incomingMovement.getAssetIRCS() + incomingMovement.getAssetMMSI() + incomingMovement.getAssetID() + incomingMovement.getAssetGuid() + incomingMovement.getMobileTerminalDNID() + incomingMovement.getMobileTerminalConnectId() + incomingMovement.getMobileTerminalGuid() + incomingMovement.getMobileTerminalLES() + incomingMovement.getMobileTerminalMemberNumber() + incomingMovement.getMobileTerminalSerialNumber() + "AllOtherThings";
-                producer.sendMovementMessage(json, groupId);
-                log.debug("Finished forwarding received movement to movement module.");
+                movementProducer.sendMovementMessage(json, groupId);
+                LOG.debug("Finished forwarding received movement to movement module.");
             } else {
-                log.debug("Validation error. Event sent to plugin {}", message);
+                LOG.debug("Validation error. Event sent to plugin {}", message);    //This sending happens in validateMovementReport
             }
         } catch (Exception e) {
-            log.error("Could not process SetMovementReportRequest", e);
-            throw new IllegalArgumentException("Could not process SetMovementReportRequest", e);
+            LOG.error("Could not process SetMovementReportRequest", e);
+            throw new RuntimeException("Could not process SetMovementReportRequest", e);
         } 
     }
 
-    @Override
-    public void receiveAssetInformation(@Observes @ReceiveAssetInformationEvent ExchangeMessageEvent event) {
+    /**
+     * Logs and sends a received asset information to Asset
+     *
+     * @param event received asset information message
+     */
+    public void receiveAssetInformation(TextMessage event) {
         try {
-            ReceiveAssetInformationRequest request = JAXBMarshaller.unmarshallTextMessage(event.getJmsMessage(), ReceiveAssetInformationRequest.class);
+            ReceiveAssetInformationRequest request = JAXBMarshaller.unmarshallTextMessage(event, ReceiveAssetInformationRequest.class);
             String message = request.getAssets();
             forwardToAsset(message);
-            //exchangeLog.log(request, LogType.RECEIVE_ASSET_INFORMATION, ExchangeLogStatusTypeType.SUCCESSFUL, TypeRefType.ASSETS, message, true);
-        } catch (ExchangeModelMarshallException e) {
-            try {
-                String errorMessage = "Couldn't map to ReceiveAssetInformationRequest when processing asset information from plugin. The event was " + event.getJmsMessage().getText();
-                firePluginFault(event, errorMessage, e);
-            } catch (JMSException e1) {
-                firePluginFault(event, "Couldn't map to ReceiveAssetInformationRequest when processing asset information from plugin.", e);
-            }
-        //} catch (ExchangeLogException e) {
-        //    firePluginFault(event, "Could not log the incoming asset information.", e);
+            exchangeLogService.log(request, LogType.RECEIVE_ASSET_INFORMATION, ExchangeLogStatusTypeType.SUCCESSFUL, TypeRefType.ASSETS, message, true);
         } catch (Exception e) {
-            //firePluginFault(event, "Could not log the incoming asset information.", e);
-            log.warn(e.toString(), e);
-
+            try {
+                String errorMessage = "Couldn't map to ReceiveAssetInformationRequest when processing asset information from plugin. The event was " + event.getText();
+                firePluginFault(event, errorMessage, e, null);
+            } catch (JMSException e1) {
+                firePluginFault(event, "Couldn't map to ReceiveAssetInformationRequest when processing asset information from plugin.", e, null);
+            }
         }
     }
 
-    @Override
-    public void receiveSalesReport(@Observes @ReceiveSalesReportEvent ExchangeMessageEvent event) {
+    /**
+     * Logs and sends a received sales report through to Rules
+     *
+     * @param event received sales report
+     */
+    public void receiveSalesReport(TextMessage event) {
         try {
-            ReceiveSalesReportRequest request = JAXBMarshaller.unmarshallTextMessage(event.getJmsMessage(), ReceiveSalesReportRequest.class);
-            log.debug("Receive sales report in Exchange module : {}", request.getReport());
+            ReceiveSalesReportRequest request = JAXBMarshaller.unmarshallTextMessage(event, ReceiveSalesReportRequest.class);
+            LOG.debug("Receive sales report in Exchange module : {}", request.getReport());
             String report = request.getReport();
             PluginType plugin = request.getPluginType();
             String sender = request.getSenderOrReceiver();
             String messageGuid = request.getMessageGuid();
-            ExchangeLogType log = exchangeLog.log(request, LogType.RECEIVE_SALES_REPORT, ExchangeLogStatusTypeType.ISSUED, TypeRefType.SALES_REPORT, report, true);
+            ExchangeLog log = exchangeLogService.log(request, LogType.RECEIVE_SALES_REPORT, ExchangeLogStatusTypeType.ISSUED, TypeRefType.SALES_REPORT, report, true);
 
-            String receiveSalesReportRequest = RulesModuleRequestMapper.createReceiveSalesReportRequest(report, messageGuid, plugin.name(), log.getGuid(), sender, request.getOnValue());
+            String receiveSalesReportRequest = RulesModuleRequestMapper.createReceiveSalesReportRequest(report, messageGuid, plugin.name(), log.getId().toString(), sender, request.getOnValue());
             String messageSelector = "ReceiveSalesReportRequest";
             forwardToRules(receiveSalesReportRequest, messageSelector);
-        } catch (ExchangeModelMarshallException e) {
+        } catch (Exception e) {
             try {
-                firePluginFault(event, "Couldn't map to SetSalesReportRequest when processing sales report from plugin. The event was " + event.getJmsMessage().getText(), e);
+                firePluginFault(event, "Couldn't map to SetSalesReportRequest when processing sales report from plugin. The event was " + event.getText(), e, null);
             } catch (JMSException e1) {
-                firePluginFault(event, "Couldn't map to SetSalesReportRequest when processing sales report from plugin.", e);
+                firePluginFault(event, "Couldn't map to SetSalesReportRequest when processing sales report from plugin.", e, null);
             }
-        } catch (ExchangeLogException e) {
-            firePluginFault(event, "Could not log the incoming sales report.", e);
-        } catch (RulesModelMarshallException e) {
-            firePluginFault(event, "Could not create a request for the Rules module for an incoming sales report.", e);
         }
     }
 
-    @Override
-    public void receiveSalesQuery(@Observes @ReceiveSalesQueryEvent ExchangeMessageEvent event) {
+    /**
+     * Logs and sends a received sales query through to Rules
+     *
+     * @param event received sales query
+     */
+    public void receiveSalesQuery(TextMessage event) {
         try {
-            ReceiveSalesQueryRequest request = JAXBMarshaller.unmarshallTextMessage(event.getJmsMessage(), ReceiveSalesQueryRequest.class);
-            log.info("Process sales query in Exchange module:{}", request);
+            ReceiveSalesQueryRequest request = JAXBMarshaller.unmarshallTextMessage(event, ReceiveSalesQueryRequest.class);
+            LOG.info("Process sales query in Exchange module:{}", request);
             String query = request.getQuery();
             PluginType plugin = request.getPluginType();
             String sender = request.getSenderOrReceiver();
             String messageGuid = request.getMessageGuid();
-            ExchangeLogType log = exchangeLog.log(request, LogType.RECEIVE_SALES_QUERY, ExchangeLogStatusTypeType.ISSUED, TypeRefType.SALES_QUERY, query, true);
-            String receiveSalesQueryRequest = RulesModuleRequestMapper.createReceiveSalesQueryRequest(query, messageGuid, plugin.name(), log.getGuid(), sender, request.getOnValue());
+
+            ExchangeLog log = exchangeLogService.log(request, LogType.RECEIVE_SALES_QUERY, ExchangeLogStatusTypeType.ISSUED, TypeRefType.SALES_QUERY, query, true);
+            String receiveSalesQueryRequest = RulesModuleRequestMapper.createReceiveSalesQueryRequest(query, messageGuid, plugin.name(), log.getId().toString(), sender, request.getOnValue());
             String messageSelector = "ReceiveSalesQueryRequest";
+
             forwardToRules(receiveSalesQueryRequest, messageSelector);
-        } catch (ExchangeModelMarshallException e) {
+        } catch (Exception e) {
             try {
-                firePluginFault(event, "Couldn't map to SalesQueryRequest when processing sales query from plugin. The message was " + event.getJmsMessage().getText(), e);
+                firePluginFault(event, "Couldn't map to SalesQueryRequest when processing sales query from plugin. The message was " + event.getText(), e, null);
             } catch (JMSException e1) {
-                firePluginFault(event, "Couldn't map to SalesQueryRequest when processing sales query from plugin.", e);
+                firePluginFault(event, "Couldn't map to SalesQueryRequest when processing sales query from plugin.", e, null);
             }
-        } catch (ExchangeLogException e) {
-            firePluginFault(event, "Could not log the incoming sales query.", e);
-        } catch (RulesModelMarshallException e) {
-            firePluginFault(event, "Could not create a request for the Rules module for an incoming sales query.", e);
         }
     }
 
-    @Override
-    public void receiveSalesResponse(@Observes @ReceiveSalesResponseEvent ExchangeMessageEvent event) {
+    /**
+     * Logs and sends a received sales response through to Rules
+     * @param event
+     */
+    public void receiveSalesResponse(TextMessage event) {
         try {
-            ReceiveSalesResponseRequest request = JAXBMarshaller.unmarshallTextMessage(event.getJmsMessage(), ReceiveSalesResponseRequest.class);
+            ReceiveSalesResponseRequest request = JAXBMarshaller.unmarshallTextMessage(event, ReceiveSalesResponseRequest.class);
             String response = request.getResponse();
-            ExchangeLogType log = exchangeLog.log(request, LogType.RECEIVE_SALES_RESPONSE, ExchangeLogStatusTypeType.ISSUED, TypeRefType.SALES_RESPONSE, response, true);
-            String receiveSalesResponseRequest = RulesModuleRequestMapper.createReceiveSalesResponseRequest(response, log.getGuid(), request.getSenderOrReceiver());
+            ExchangeLog log = exchangeLogService.log(request, LogType.RECEIVE_SALES_RESPONSE, ExchangeLogStatusTypeType.ISSUED, TypeRefType.SALES_RESPONSE, response, true);
+
+            String receiveSalesResponseRequest = RulesModuleRequestMapper.createReceiveSalesResponseRequest(response, log.getId().toString(), request.getSenderOrReceiver());
             String messageSelector = "ReceiveSalesResponseRequest";
+
             forwardToRules(receiveSalesResponseRequest, messageSelector);
-        } catch (ExchangeModelMarshallException e) {
-            firePluginFault(event, "Error when receiving a Sales response from FLUX", e);
-        } catch (ExchangeLogException e) {
-            firePluginFault(event, "Could not log the incoming sales response.", e);
-        } catch (RulesModelMarshallException e) {
-            firePluginFault(event, "Could not create a request for the Rules module for an incoming sales response.", e);
+        } catch (Exception e) {
+            firePluginFault(event, "Error when receiving a Sales response from FLUX", e, null);
         }
     }
 
 
-    @Override
-    public void receiveInvalidSalesMessage(@Observes @ReceiveInvalidSalesMessageEvent ExchangeMessageEvent event) {
+    public void receiveInvalidSalesMessage(TextMessage event) {
         try {
-            ReceiveInvalidSalesMessage request = JAXBMarshaller.unmarshallTextMessage(event.getJmsMessage(), ReceiveInvalidSalesMessage.class);
-            exchangeLog.log(request, LogType.RECEIVE_SALES_REPORT, ExchangeLogStatusTypeType.FAILED, TypeRefType.SALES_REPORT, request.getOriginalMessage(), true);
-            producer.sendMessageOnQueue(request.getRespondToInvalidMessageRequest(), MessageQueue.SALES);
-        } catch (ExchangeLogException e) {
-            firePluginFault(event, "Could not log the incoming invalid sales message", e);
-        } catch (ExchangeMessageException | ExchangeModelMarshallException e) {
-            firePluginFault(event, "Error when receiving an invalid sales message from FLUX", e);
+            ReceiveInvalidSalesMessage request = JAXBMarshaller.unmarshallTextMessage(event, ReceiveInvalidSalesMessage.class);
+            exchangeLogService.log(request, LogType.RECEIVE_SALES_REPORT, ExchangeLogStatusTypeType.FAILED, TypeRefType.SALES_REPORT, request.getOriginalMessage(), true);
+            salesProducer.sendSalesMessage(request.getRespondToInvalidMessageRequest());
+        } catch (Exception e) {
+            firePluginFault(event, "Could not log the incoming invalid sales message", e, null);
         }
     }
 
-    @Override
-    public void logRefIdByTypeExists(@Observes @LogRefIdByTypeExists ExchangeMessageEvent event) {
+    /**
+     * Checks for a reference in log table for a certain type of message
+     * @param event
+     */
+    public void logRefIdByTypeExists(TextMessage event) {      //this one has the wierd behavour that it both returns the correct answer AND puts the initial message in DLQ for causing an exception AT THE SAME TIME if the input is an empty list..........
         try {
-            LogRefIdByTypeExistsRequest request = unMarshallMessage(event.getJmsMessage().getText(), LogRefIdByTypeExistsRequest.class);
-            String refGuid = request.getRefGuid();
+            LogRefIdByTypeExistsRequest request = unMarshallMessage(event.getText(), LogRefIdByTypeExistsRequest.class);
+            UUID refGuid = UUID.fromString(request.getRefGuid());
             List<TypeRefType> refTypes = request.getRefTypes();
             List<ExchangeLogStatusType> exchangeStatusHistoryList = exchangeLogModel.getExchangeLogsStatusHistories(refGuid, refTypes);
+
             LogRefIdByTypeExistsResponse response = new LogRefIdByTypeExistsResponse();
             if (CollectionUtils.isNotEmpty(exchangeStatusHistoryList)) {
                 response.setRefGuid(exchangeStatusHistoryList.get(0).getTypeRef().getRefGuid());
             }
+
             String responseAsString = JAXBUtils.marshallJaxBObjectToString(response);
-            producer.sendModuleResponseMessage(event.getJmsMessage(), responseAsString);
-        } catch (ExchangeModelException | MessageException | JAXBException | JMSException e) {
+            movementProducer.sendResponseMessageToSender(event, responseAsString);
+        } catch (MessageException | JAXBException | JMSException e) {
             fireExchangeFault(event, "Could not un-marshall " + LogRefIdByTypeExistsRequest.class, e);
         }
     }
 
-    @Override
-    public void logIdByTypeExists(@Observes @LogIdByTypeExists ExchangeMessageEvent event) {
+    /**
+     * Checks for a guid in log table for a certain type of message
+     * @param event
+     */
+    public void logIdByTypeExists(TextMessage event) {
         try {
-            LogIdByTypeExistsRequest request = unMarshallMessage(event.getJmsMessage().getText(), LogIdByTypeExistsRequest.class);
-            String messageGuid = request.getMessageGuid();
+            LogIdByTypeExistsRequest request = unMarshallMessage(event.getText(), LogIdByTypeExistsRequest.class);
+            UUID messageGuid = UUID.fromString(request.getMessageGuid());
             TypeRefType refType = request.getRefType();
             ExchangeLogType exchangeLogByGuid = exchangeLogModel.getExchangeLogByGuidAndType(messageGuid, refType);
+
             LogIdByTypeExistsResponse response = new LogIdByTypeExistsResponse();
             if (exchangeLogByGuid != null) {
                 response.setMessageGuid(exchangeLogByGuid.getGuid());
             }
-            String responseAsString = JAXBUtils.marshallJaxBObjectToString(response);
-            producer.sendModuleResponseMessage(event.getJmsMessage(), responseAsString);
 
-        } catch (ExchangeModelException | MessageException | JAXBException | JMSException e) {
+            String responseAsString = JAXBUtils.marshallJaxBObjectToString(response);
+            movementProducer.sendResponseMessageToSender(event, responseAsString);
+
+        } catch (MessageException | JAXBException | JMSException e) {
             fireExchangeFault(event, "Could not un-marshall " + LogRefIdByTypeExistsRequest.class, e);
         }
 
     }
 
-
-    @Override
-    public void queryAssetInformation(@Observes @QueryAssetInformationEvent ExchangeMessageEvent event) {
+    /**
+     * Logs and sends a query asset information to FLUX fleet plugin
+     *
+     * @param event query asset information message
+     */
+    public void queryAssetInformation(TextMessage event) {
         try {
-            QueryAssetInformationRequest incomingRequest = JAXBMarshaller.unmarshallTextMessage(event.getJmsMessage(), QueryAssetInformationRequest.class);
+            QueryAssetInformationRequest incomingRequest = JAXBMarshaller.unmarshallTextMessage(event, QueryAssetInformationRequest.class);
             String message = incomingRequest.getAssets();
             String destination = incomingRequest.getDestination();
             String senderOrReceiver = incomingRequest.getSenderOrReceiver();
@@ -438,45 +465,55 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
             outgoingRequest.setMethod(ExchangePluginMethod.SEND_VESSEL_QUERY);
 
             exchangeEventOutgoingService.sendAssetInformationToFLUX(outgoingRequest);
-            exchangeLog.log(incomingRequest, LogType.QUERY_ASSET_INFORMATION, ExchangeLogStatusTypeType.SUCCESSFUL, TypeRefType.ASSETS, message, false);
-        } catch (ExchangeModelMarshallException | ExchangeMessageException e) {
+            exchangeLogService.log(incomingRequest, LogType.QUERY_ASSET_INFORMATION, ExchangeLogStatusTypeType.SUCCESSFUL, TypeRefType.ASSETS, message, false);
+        } catch (Exception e) {
             fireExchangeFault(event, "Error when sending asset information query to FLUX", e);
-        } catch (ExchangeLogException e) {
-            firePluginFault(event, "Could not log the outgoing asset information query.", e);
+            firePluginFault(event, "Could not log the outgoing asset information query.", e, null);
         }
     }
 
-
-    @Override
-    public void ping(@Observes @PingEvent ExchangeMessageEvent message) {
+    /**
+     * Ping Exchange APP module
+     *
+     * @param message
+     */
+    public void ping(TextMessage message) {
         try {
             PingResponse response = new PingResponse();
             response.setResponse("pong");
-            producer.sendModuleResponseMessage(message.getJmsMessage(), JAXBMarshaller.marshallJaxBObjectToString(response));
-        } catch (ExchangeModelMarshallException | MessageException e) {
-            log.error("[ Error when marshalling ping response ]");
+            movementProducer.sendResponseMessageToSender(message, JAXBMarshaller.marshallJaxBObjectToString(response));
+        } catch (Exception e) {
+            LOG.error("[ Error when marshalling ping response ]");
         }
     }
 
-    @Override
-    public void processPluginPing(@Observes @PluginPingEvent ExchangeMessageEvent message) {
+    /**
+     * Process answer of ping sent to plugins
+     *
+     * @param message
+     */
+    public void processPluginPing(TextMessage message) {
         try {
-            eu.europa.ec.fisheries.schema.exchange.plugin.v1.PingResponse response = JAXBMarshaller.unmarshallTextMessage(message.getJmsMessage(), eu.europa.ec.fisheries.schema.exchange.plugin.v1.PingResponse.class);
+            eu.europa.ec.fisheries.schema.exchange.plugin.v1.PingResponse response = JAXBMarshaller.unmarshallTextMessage(message, eu.europa.ec.fisheries.schema.exchange.plugin.v1.PingResponse.class);
             //TODO handle ping response from plugin, eg. no serviceClassName in response
-            log.info("FIX ME handle ping response from plugin");
-        } catch (ExchangeModelMarshallException e) {
-            log.error("Couldn't process ping response from plugin {} {} ", message, e.getMessage());
+            LOG.info("FIX ME handle ping response from plugin");
+        } catch (Exception e) {
+            LOG.error("Couldn't process ping response from plugin {} {} ", message, e.getMessage());
         }
     }
 
-    @Override
-    public void processAcknowledge(@Observes(during=TransactionPhase.BEFORE_COMPLETION) @ExchangeLogEvent ExchangeMessageEvent message) {
+    /**
+     * Process answer of commands sent to plugins
+     *
+     * @param message
+     */
+    public void processAcknowledge(TextMessage message) {
         try {
-            AcknowledgeResponse response = JAXBMarshaller.unmarshallTextMessage(message.getJmsMessage(), AcknowledgeResponse.class);
+            AcknowledgeResponse response = JAXBMarshaller.unmarshallTextMessage(message, AcknowledgeResponse.class);
             AcknowledgeType acknowledge = response.getResponse();
             String serviceClassName = response.getServiceClassName();
             ExchangePluginMethod method = response.getMethod();
-            log.info("[INFO] Process acknowledge : {}", method);
+            LOG.info("[INFO] Process acknowledge : {}", method);
             switch (method) {
                 case SET_COMMAND:
                     // Only Acknowledge for poll should have a poll status set
@@ -502,38 +539,29 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
                     handleAcknowledge(method, serviceClassName, acknowledge);
                     break;
             }
-        } catch (ExchangeModelMarshallException e) {
-            log.error("Process acknowledge couldn't be marshalled {} {}", message, e);
-            throw new IllegalStateException("Could not process acknowledge", e);
-        } catch (ExchangeServiceException e) {
-            //TODO Audit.log() couldn't process acknowledge in exchange service
-            log.error("Couldn't process acknowledge in exchange service:{} {} ", message, e);
+        } catch (Exception e) {
+            LOG.error("Process acknowledge couldn't be marshalled {} {}", message, e);
             throw new IllegalStateException("Could not process acknowledge", e);
         }
     }
 
-    private void forwardToRules(String messageToForward, ExchangeMessageEvent exchangeMessageEvent, ServiceResponseType service) {
-        forwardToRules(messageToForward, exchangeMessageEvent, service, null);
+    private void forwardToRules(String messageToForward) {
+        forwardToRules(messageToForward, null);
     }
 
-    private void forwardToRules(String messageToForward, String messageSelector) {
-        forwardToRules(messageToForward, null, null, messageSelector);
-    }
 
     /**
      * forwards serialized message to Rules module
      *
      * @param messageToForward
-     * @param exchangeMessageEvent is optional
-     * @param service              is optional
      */
-    private void forwardToRules(String messageToForward, ExchangeMessageEvent exchangeMessageEvent, ServiceResponseType service, String messageSelector) {
+    private void forwardToRules(String messageToForward, String messageSelector) {
         try {
-            log.info("[INFO] Forwarding the msg to rules Module.");
-            producer.sendRulesMessage(messageToForward, messageSelector);
+            LOG.trace("[INFO] Forwarding the msg to rules Module.");
+            rulesProducer.sendRulesMessage(messageToForward, messageSelector);
 
-        } catch (ExchangeMessageException e) {
-            log.error("[ERROR] Failed to forward message to Rules: {} {}", messageToForward, e);
+        } catch (Exception e) {
+            LOG.error("[ERROR] Failed to forward message to Rules: {} {}", messageToForward, e);
         }
     }
 
@@ -544,47 +572,50 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
      */
     private void forwardToAsset(String messageToForward) {
         try {
-            log.info("Forwarding the message to Asset.");
-            String s = producer.forwardToAsset(messageToForward);
-        } catch (ExchangeMessageException e) {
-            log.error("Failed to forward message to Asset: {} {}", messageToForward, e);
+            LOG.info("Forwarding the message to Asset.");
+            String s = exchangeAssetProducer.forwardToAsset(messageToForward, "ASSET_INFORMATION");
+        } catch (Exception e) {
+            LOG.error("Failed to forward message to Asset: {} {}", messageToForward, e);
         }
     }
 
 
-    private void firePluginFault(ExchangeMessageEvent messageEvent, String errorMessage, Throwable exception) {
-        log.error(errorMessage, exception);
-        PluginFault fault = ExchangePluginResponseMapper.mapToPluginFaultResponse(FaultCode.EXCHANGE_PLUGIN_EVENT.getCode(), errorMessage);
-        pluginErrorEvent.fire(new PluginMessageEvent(messageEvent.getJmsMessage(), null, fault));
+    private void firePluginFault(TextMessage messageEvent, String errorMessage, Throwable exception, String serviceClassName) {
+        try {
+            LOG.error(errorMessage, exception);
+            Service service = ((serviceClassName == null) ? null : serviceRegistryModel.getPlugin(serviceClassName));
+            pluginErrorEvent.fire(new PluginErrorEventCarrier(messageEvent, service.getServiceResponse(), errorMessage));
+        } catch (Exception e) {
+            LOG.error("Unable to send PluginError message due to: {}", e);
+        }
     }
 
-    private void fireExchangeFault(ExchangeMessageEvent messageEvent, String errorMessage, Throwable exception) {
-        log.error(errorMessage, exception);
-        eu.europa.ec.fisheries.schema.exchange.common.v1.ExchangeFault exchangeFault = ExchangeModuleResponseMapper.createFaultMessage(FaultCode.EXCHANGE_EVENT_SERVICE, errorMessage);
-        exchangeErrorEvent.fire(new ExchangeMessageEvent(messageEvent.getJmsMessage(), exchangeFault));
+    private void fireExchangeFault(TextMessage messageEvent, String errorMessage, Throwable exception) {
+        LOG.error(errorMessage, exception);
+        exchangeErrorEvent.fire(new ExchangeErrorEvent(messageEvent, errorMessage));
     }
 
 
-    private boolean validate(SetReportMovementType setReport, ServiceResponseType service, TextMessage origin) {
+    private boolean validateMovementReport(SetReportMovementType setReport, String service, TextMessage origin) {
         if (setReport == null) {
             String faultMessage = "No setReport request";
-            pluginErrorEvent.fire(new PluginMessageEvent(origin, service, ExchangePluginResponseMapper.mapToPluginFaultResponse(FaultCode.PLUGIN_VALIDATION.getCode(), faultMessage)));
+            firePluginFault(origin, faultMessage, new RuntimeException(), service);
             return false;
         } else if (setReport.getMovement() == null) {
             String faultMessage = "No movement in setReport request";
-            pluginErrorEvent.fire(new PluginMessageEvent(origin, service, ExchangePluginResponseMapper.mapToPluginFaultResponse(FaultCode.PLUGIN_VALIDATION.getCode(), faultMessage)));
+            firePluginFault(origin, faultMessage, new RuntimeException(), service);
             return false;
         } else if (setReport.getPluginType() == null) {
             String faultMessage = "No pluginType in setReport request";
-            pluginErrorEvent.fire(new PluginMessageEvent(origin, service, ExchangePluginResponseMapper.mapToPluginFaultResponse(FaultCode.PLUGIN_VALIDATION.getCode(), faultMessage)));
+            firePluginFault(origin, faultMessage, new RuntimeException(), service);
             return false;
         } else if (setReport.getPluginName() == null || setReport.getPluginName().isEmpty()) {
             String faultMessage = "No pluginName in setReport request";
-            pluginErrorEvent.fire(new PluginMessageEvent(origin, service, ExchangePluginResponseMapper.mapToPluginFaultResponse(FaultCode.PLUGIN_VALIDATION.getCode(), faultMessage)));
+            firePluginFault(origin, faultMessage, new RuntimeException(), service);
             return false;
         } else if (setReport.getTimestamp() == null) {
             String faultMessage = "No timestamp in setReport request";
-            pluginErrorEvent.fire(new PluginMessageEvent(origin, service, ExchangePluginResponseMapper.mapToPluginFaultResponse(FaultCode.PLUGIN_VALIDATION.getCode(), faultMessage)));
+            firePluginFault(origin, faultMessage, new RuntimeException(), service);
             return false;
         }
         return true;
@@ -595,65 +626,64 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
         ExchangeLogStatusTypeType logStatus = ExchangeLogStatusTypeType.FAILED;
         if (ack.getType() == eu.europa.ec.fisheries.schema.exchange.common.v1.AcknowledgeTypeType.OK) {//TODO if(poll probably transmitted)
             logStatus = ExchangeLogStatusTypeType.SUCCESSFUL;
-            removeUnsentMessage(serviceClassName, ack);
+            removeUnsentMessage(ack);
 
         } else if (ack.getType() == eu.europa.ec.fisheries.schema.exchange.common.v1.AcknowledgeTypeType.NOK) {
-            log.debug(method + " was NOK: " + ack.getMessage());
+            LOG.debug(method + " was NOK: " + ack.getMessage());
 
         }
 
         try {
-            ExchangeLogType updatedLog = exchangeLog.updateStatus(ack.getMessageId(), logStatus, serviceClassName);
+            ExchangeLog updatedLog = exchangeLogService.updateStatus(ack.getMessageId(), logStatus, serviceClassName);
 
             // Long polling
-            LogRefType typeRef = updatedLog.getTypeRef();
-            if (typeRef != null && typeRef.getType() == TypeRefType.POLL) {
-                String pollGuid = typeRef.getRefGuid();
+            if (updatedLog.getTypeRefGuid() != null && updatedLog.getTypeRefType() == TypeRefType.POLL) {
+                String pollGuid = updatedLog.getTypeRefGuid().toString();
                 pollEvent.fire(new NotificationMessage("guid", pollGuid));
             }
-        } catch (ExchangeLogException e) {
-            log.error(e.getMessage());
+        } catch (Exception e) {
+            LOG.error(e.getMessage());
         }
     }
 
     private void handleSetPollStatusAcknowledge(ExchangePluginMethod method, String serviceClassName, AcknowledgeType ack) {
-        log.debug(method + " was acknowledged in " + serviceClassName);
+        LOG.debug(method + " was acknowledged in " + serviceClassName);
         ExchangeLogStatusTypeType exchangeLogStatus = ack.getPollStatus().getStatus();
         if (exchangeLogStatus.equals(ExchangeLogStatusTypeType.SUCCESSFUL) ||
                 exchangeLogStatus.equals(ExchangeLogStatusTypeType.FAILED)) {
-            removeUnsentMessage(serviceClassName, ack);
+            removeUnsentMessage(ack);
         }
         try {
-            PollStatus updatedLog = exchangeLog.setPollStatus(ack.getMessageId(), ack.getPollStatus().getPollId(), exchangeLogStatus, serviceClassName);
+            PollStatus updatedLog = exchangeLogService.setPollStatus(ack.getMessageId(), UUID.fromString(ack.getPollStatus().getPollId()), exchangeLogStatus, serviceClassName);
             // Long polling
             pollEvent.fire(new NotificationMessage("guid", updatedLog.getPollGuid()));
-        } catch (ExchangeLogException e) {
-            log.error(e.getMessage());
+        } catch (Exception e) {
+            LOG.error(e.getMessage());
         }
     }
 
-    private void removeUnsentMessage(String serviceClassName, AcknowledgeType ack) {
+    private void removeUnsentMessage(AcknowledgeType ack) {
         try {
-            exchangeLog.removeUnsentMessage(ack.getUnsentMessageGuid(), serviceClassName);
-        } catch (ExchangeLogException ex) {
-            log.error(ex.getMessage());
+            exchangeLogService.removeUnsentMessage(ack.getUnsentMessageGuid());
+        } catch (Exception ex) {
+            LOG.error(ex.getMessage());
         }
     }
 
-    private void handleUpdateServiceAcknowledge(String serviceClassName, AcknowledgeType ack, StatusType status) throws ExchangeServiceException {
+    private void handleUpdateServiceAcknowledge(String serviceClassName, AcknowledgeType ack, StatusType status) {
         if (ack.getType() == eu.europa.ec.fisheries.schema.exchange.common.v1.AcknowledgeTypeType.OK) {
-            exchangeService.updateServiceStatus(serviceClassName, status, serviceClassName);
+            serviceRegistryModel.updatePluginStatus(serviceClassName, status, serviceClassName);
 
         } else if (ack.getType() == eu.europa.ec.fisheries.schema.exchange.common.v1.AcknowledgeTypeType.NOK) {//TODO Audit.log()
-            log.error("Couldn't start service " + serviceClassName);
+            LOG.error("Couldn't start service " + serviceClassName);
 
         }
     }
 
     private void handleAcknowledge(ExchangePluginMethod method, String serviceClassName, AcknowledgeType ack) {
-        log.debug(method + " was acknowledged in " + serviceClassName);
+        LOG.debug(method + " was acknowledged in " + serviceClassName);
         if (ack.getType() == eu.europa.ec.fisheries.schema.exchange.common.v1.AcknowledgeTypeType.NOK) {//TODO Audit.log()
-            log.error(serviceClassName + " didn't like it. " + ack.getMessage());
+            LOG.error(serviceClassName + " didn't like it. " + ack.getMessage());
         }
     }
 
@@ -673,18 +703,18 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
                 faType = TypeRefType.UNKNOWN;
                 break;
             default:
-                log.error("[FATAL] FA Type could not be determined!!");
+                LOG.error("[FATAL] FA Type could not be determined!!");
         }
         return faType;
     }
 
-    private String extractLogId(ExchangeMessageEvent message, ExchangeLogType exchangeLogType) {
+    private String extractLogId(TextMessage message, ExchangeLog exchangeLog) {
         String logId = null;
-        if (exchangeLogType == null) {
-            log.error("ExchangeLogType received is NULL while trying to save {}", message);
+        if (exchangeLog == null) {
+            LOG.error("ExchangeLogType received is NULL while trying to save {}", message);
         } else {
-            logId = exchangeLogType.getGuid();
-            log.info("Logged to Exchange message with following GUID :" + logId);
+            logId = exchangeLog.getId().toString();
+            LOG.info("Logged to Exchange message with following GUID :" + logId);
         }
         return logId;
     }

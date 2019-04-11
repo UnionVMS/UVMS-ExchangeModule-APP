@@ -14,9 +14,8 @@ package eu.europa.ec.fisheries.uvms.exchange.entity.unsent;
 import eu.europa.ec.fisheries.schema.exchange.v1.UnsentMessageTypePropertyKey;
 
 import javax.persistence.*;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
 import javax.xml.bind.annotation.XmlRootElement;
+import java.util.UUID;
 
 @Entity
 @Table(name = "unsent_message_property")
@@ -24,11 +23,11 @@ import javax.xml.bind.annotation.XmlRootElement;
 public class UnsentMessageProperty {
 
     @Id
-    @Column(name="unsentprop_id")
     @GeneratedValue(strategy = GenerationType.AUTO)
-    private Long id;
+    @Column(name="unsentprop_id")
+    private UUID id;
 
-    @JoinColumn(name = "unsentprop_unsent_id", referencedColumnName = "unsent_id")
+    @JoinColumn(name = "unsentprop_unsent_id", referencedColumnName = "unsent_guid")
     @ManyToOne
     private UnsentMessage unsentMessage;
 
@@ -39,11 +38,11 @@ public class UnsentMessageProperty {
     @Column(name="unsentprop_value")
     private String value;
 
-    public Long getId() {
+    public UUID getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(UUID id) {
         this.id = id;
     }
 

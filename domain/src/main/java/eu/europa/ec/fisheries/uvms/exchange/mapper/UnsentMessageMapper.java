@@ -19,42 +19,17 @@ import eu.europa.ec.fisheries.uvms.exchange.entity.unsent.UnsentMessageProperty;
 import eu.europa.ec.fisheries.uvms.exchange.model.util.DateUtils;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 public class UnsentMessageMapper {
 
-	public static UnsentMessage toEntity(UnsentMessageType message, String username) {
-		UnsentMessage entity = new UnsentMessage();
-		entity.setDateReceived(message.getDateReceived());
-		entity.setRecipient(message.getRecipient());
-		entity.setSenderReceiver(message.getSenderReceiver());
-		entity.setMessage(message.getMessage());
-		entity.setUpdatedBy(username);
-		entity.setUpdateTime(DateUtils.nowUTC().toDate());
-        List<UnsentMessageProperty> unsentMessageProperties = mapToUnsentMessagePropertyEntities(message, entity);
-        entity.setProperties(unsentMessageProperties);
-		return entity;
-	}
-
-    private static List<UnsentMessageProperty> mapToUnsentMessagePropertyEntities(UnsentMessageType message, UnsentMessage entity) {
-        List<UnsentMessageTypeProperty> properties = message.getProperties();
-        List<UnsentMessageProperty> unsentMessageProperties = new ArrayList<>();
-        for(UnsentMessageTypeProperty property : properties){
-            UnsentMessageProperty unsentMessageProperty = new UnsentMessageProperty();
-            unsentMessageProperty.setKey(property.getKey());
-            unsentMessageProperty.setValue(property.getValue());
-            unsentMessageProperty.setUnsentMessage(entity);
-            unsentMessageProperties.add(unsentMessageProperty);
-
-        }
-        return unsentMessageProperties;
-    }
 
     public static UnsentMessageType toModel(UnsentMessage entity) {
 		UnsentMessageType model = new UnsentMessageType();
-		model.setDateReceived(entity.getDateReceived());
+		model.setDateReceived(Date.from(entity.getDateReceived()));
 		model.setSenderReceiver(entity.getSenderReceiver());
-		model.setMessageId(entity.getGuid());
+		model.setMessageId(entity.getGuid().toString());
 		model.setRecipient(entity.getRecipient());
 		model.setMessage(entity.getMessage());
         model.getProperties().addAll(mapToUnsentMessagePropertyModel(entity));

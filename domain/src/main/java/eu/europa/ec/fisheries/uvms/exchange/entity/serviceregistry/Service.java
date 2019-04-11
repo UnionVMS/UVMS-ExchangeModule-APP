@@ -12,10 +12,10 @@ copy of the GNU General Public License along with the IFDM Suite. If not, see <h
 package eu.europa.ec.fisheries.uvms.exchange.entity.serviceregistry;
 
 import java.io.Serializable;
-import java.util.Date;
+import java.time.Instant;
 import java.util.List;
+import java.util.UUID;
 
-import javax.persistence.Basic;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -29,35 +29,35 @@ import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 
 import eu.europa.ec.fisheries.schema.exchange.plugin.types.v1.PluginType;
-import eu.europa.ec.fisheries.uvms.exchange.constant.ExchangeConstants;
 
 @Entity
 @Table(name = "service")
 @XmlRootElement
 //@formatter:off
 @NamedQueries({
-    @NamedQuery(name = ExchangeConstants.SERVICE_FIND_ALL, query = "SELECT s FROM Service s WHERE s.active = true"),
-    @NamedQuery(name = ExchangeConstants.SERVICE_FIND_BY_SERVICE_CLASS_NAME, query = "SELECT s FROM Service s WHERE s.serviceClassName = :serviceClassName"),
-    @NamedQuery(name = ExchangeConstants.SERVICE_FIND_BY_TYPES, query = "SELECT s FROM Service s WHERE s.type IN :types")
+    @NamedQuery(name = Service.SERVICE_FIND_ALL, query = "SELECT s FROM Service s WHERE s.active = true ORDER BY updated ASC"),
+    @NamedQuery(name = Service.SERVICE_FIND_BY_SERVICE_CLASS_NAME, query = "SELECT s FROM Service s WHERE s.serviceClassName = :serviceClassName"),
+    @NamedQuery(name = Service.SERVICE_FIND_BY_TYPES, query = "SELECT s FROM Service s WHERE s.type IN :types")
 })
 //@formatter:on
 public class Service implements Serializable {
+
+    public static final String SERVICE_FIND_ALL = "Service.findAll";
+    public static final String SERVICE_FIND_BY_SERVICE_CLASS_NAME = "Service.findByServiceClassName";
+    public static final String SERVICE_FIND_BY_TYPES = "Service.findByTypes";
 
     private static final long serialVersionUID = 1L;
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    @Basic(optional = false)
     @Column(name = "serv_id")
-    private Long id;
+    private UUID id;
 
     @Size(max = 500)
     @Column(name = "serv_serviceclassname", unique = true)
@@ -86,17 +86,13 @@ public class Service implements Serializable {
     @Column(name = "serv_sat_type")
     private String satelliteType;
 
-    @Size(max = 20)
     @Column(name = "serv_status")
-    private String status;
+    private boolean status;
 
-    @Basic(optional = false)
     @NotNull
-    @Column(name = "serv_updattim")
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date updated;
+    @Column(name = "serv_updatetime")
+    private Instant updated;
 
-    @Basic(optional = false)
     @NotNull
     @Size(min = 1, max = 60)
     @Column(name = "serv_upuser")
@@ -108,14 +104,11 @@ public class Service implements Serializable {
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "service", fetch = FetchType.LAZY, orphanRemoval = true)
     private List<ServiceSetting> serviceSettingList;
 
-    /*
-     @OneToMany(mappedBy="service", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-     private List<ServiceParameterMapping> map;*/
-    public Long  getId() {
+    public UUID getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(UUID id) {
         this.id = id;
     }
 
@@ -151,11 +144,11 @@ public class Service implements Serializable {
         this.active = active;
     }
 
-    public Date getUpdated() {
+    public Instant getUpdated() {
         return updated;
     }
 
-    public void setUpdated(Date updated) {
+    public void setUpdated(Instant updated) {
         this.updated = updated;
     }
 
@@ -203,11 +196,11 @@ public class Service implements Serializable {
         this.satelliteType = satelliteType;
     }
 
-    public String getStatus() {
+    public boolean getStatus() {
         return status;
     }
 
-    public void setStatus(String status) {
+    public void setStatus(boolean status) {
         this.status = status;
     }
 

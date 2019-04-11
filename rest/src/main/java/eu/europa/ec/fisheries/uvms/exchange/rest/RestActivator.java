@@ -18,7 +18,7 @@ import javax.ws.rs.ApplicationPath;
 import javax.ws.rs.core.Application;
 
 import eu.europa.ec.fisheries.uvms.exchange.rest.service.*;
-import eu.europa.ec.fisheries.uvms.exchange.rest.unsecured.ExchangeAPIResource;
+import eu.europa.ec.fisheries.uvms.exchange.rest.unsecured.ExchangeAPIRestResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,11 +35,10 @@ public class RestActivator extends Application {
 
     public RestActivator() {
         set.add(ExchangeLogRestResource.class);
-        set.add(ExchangeRegistryResource.class);
-        set.add(ExchangeSendingQueueResource.class);
-        set.add(ConfigResource.class);
+        set.add(ExchangeRegistryRestResource.class);
+        set.add(ExchangeSendingQueueRestResource.class);
+        set.add(ConfigRestResource.class);
         set.add(UnionVMSFeatureFilter.class);
-        set.add(ExchangeAPIResource.class);
         LOG.info(RestConstants.MODULE_NAME + " module starting up");
     }
 

@@ -12,12 +12,10 @@ copy of the GNU General Public License along with the IFDM Suite. If not, see <h
 package eu.europa.ec.fisheries.uvms.exchange.dao.bean;
 
 import java.util.List;
+import java.util.UUID;
 
 import javax.ejb.Stateless;
-import javax.persistence.EntityExistsException;
-import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
-import javax.persistence.PersistenceContext;
 import javax.persistence.TypedQuery;
 
 import eu.europa.ec.fisheries.uvms.exchange.dao.Dao;
@@ -25,140 +23,133 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import eu.europa.ec.fisheries.schema.exchange.plugin.types.v1.PluginType;
-import eu.europa.ec.fisheries.uvms.exchange.constant.ExchangeConstants;
-import eu.europa.ec.fisheries.uvms.exchange.dao.ServiceRegistryDao;
 import eu.europa.ec.fisheries.uvms.exchange.entity.serviceregistry.Service;
 import eu.europa.ec.fisheries.uvms.exchange.entity.serviceregistry.ServiceCapability;
 import eu.europa.ec.fisheries.uvms.exchange.entity.serviceregistry.ServiceSetting;
-import eu.europa.ec.fisheries.uvms.exchange.exception.ExchangeDaoException;
-import eu.europa.ec.fisheries.uvms.exchange.exception.NoEntityFoundException;
 
 @Stateless
-public class ServiceRegistryDaoBean extends Dao implements ServiceRegistryDao {
+public class ServiceRegistryDaoBean extends Dao {
 
     private static final String SERVICE_CLASS_NAME_PARAMETER = "serviceClassName";
-    private static final String SERVICE_MAP_NAME_PARAMETER = "mapName";
 
     final static Logger LOG = LoggerFactory.getLogger(ServiceRegistryDaoBean.class);
 
     // registerService
-    @Override
-    public Service createEntity(Service entity) throws ExchangeDaoException {
-        try {
-            em.persist(entity);
-            return entity;
-        } catch (EntityExistsException e) {
-            LOG.error("[ Error when creating. ] {}", e.getMessage());
-            throw new ExchangeDaoException("[ Error when creating. Service already exists. ] ");
-        } catch (IllegalArgumentException e) {
-            LOG.error("[ Error when creating. ] {}", e.getMessage());
-            throw new ExchangeDaoException("[ Error when creating. Illegal input. ]");
-        } catch (Exception e) {
-            LOG.error("[ Error when creating. ] {}", e.getMessage());
-            throw new ExchangeDaoException("[ Error when creating. ]");
-        }
+    /**
+     * Create entity in database
+     *
+     * @param entity
+     * @return
+     * @throws
+     */
+    public Service createEntity(Service entity) {
+        em.persist(entity);
+        return entity;
     }
 
     // getService
-    @Override
-    public Service getEntityById(String id) throws NoEntityFoundException, ExchangeDaoException {
-        try {
-            return em.find(Service.class, new Long(id));
-        } catch (NoResultException e) {
-            LOG.error("[ Error when getting entity by ID. ] {}", e.getMessage());
-            throw new NoEntityFoundException("[ Error when getting entity by ID. ]");
-        } catch (Exception e) {
-            LOG.error("[ Error when getting entity by ID. ] {}", e.getMessage());
-            throw new ExchangeDaoException("[ Error when getting entity by ID. ] " + id);
-        }
+    /**
+     * Get entity by internal entity id
+     *
+     * @param id
+     * @return
+     * @throws
+     */
+    public Service getEntityById(String id) {
+        return em.find(Service.class, UUID.fromString(id));
     }
 
     // updateService
-    @Override
-    public Service updateService(Service entity) throws ExchangeDaoException {
-        try {
-            em.merge(entity);
-            em.flush();
-            return entity;
-        } catch (IllegalArgumentException e) {
-            LOG.error("[ Error when updating entity ] {}", e.getMessage());
-            throw new ExchangeDaoException("[ Error when updating entity ]");
-        } catch (Exception e) {
-            LOG.error("[ Error when updating entity ] {}", e.getMessage());
-            throw new ExchangeDaoException("[ Error when updating entity ]");
-        }
+    /**
+     * Update entity in database
+     *
+     * @param entity
+     * @return
+     * @throws
+     */
+    public Service updateService(Service entity) {
+        em.merge(entity);
+        em.flush();
+        return entity;
     }
 
     // deactivateService
-    @Override
-    public void deleteEntity(Long id) throws ExchangeDaoException {
-        LOG.info("Delete Entity not implemented yet.");
-        throw new ExchangeDaoException("Not implemented yet");
+    /**
+     * Delete entity from database
+     *
+     * @param id
+     * @throws
+     */
+    public void deleteEntity(UUID id ) {
+        Service s = em.find(Service.class, id);
+        em.remove(s);
+
     }
 
-    @Override
-    public List<Service> getServices() throws ExchangeDaoException {
+    /**
+     * Get all services (FIND_ALL)
+     *
+     * @return
+     * @throws
+     */
+    public List<Service> getServices() {
         try {
-            TypedQuery<Service> query = em.createNamedQuery(ExchangeConstants.SERVICE_FIND_ALL, Service.class);
+            TypedQuery<Service> query = em.createNamedQuery(Service.SERVICE_FIND_ALL, Service.class);
             return query.getResultList();
-        } catch (IllegalArgumentException e) {
-            LOG.error("[ Error when getting service list ] {}", e.getMessage());
-            throw new ExchangeDaoException("[ Error when getting service list ] ");
         } catch (Exception e) {
             LOG.error("[ Error when updating entity ] {}", e.getMessage());
-            throw new ExchangeDaoException("[ Error when getting service list ] ");
+            throw new RuntimeException("[ Error when getting service list ] ", e);
         }
     }
 
-    @Override
-	public List<Service> getServicesByTypes(List<PluginType> pluginTypes) throws ExchangeDaoException {
-        try {
-            TypedQuery<Service> query = em.createNamedQuery(ExchangeConstants.SERVICE_FIND_BY_TYPES, Service.class);
+    /**
+     * Get services depending on plugin types
+     * @return
+     * @throws
+     */
+	public List<Service> getServicesByTypes(List<PluginType> pluginTypes) {
+            TypedQuery<Service> query = em.createNamedQuery(Service.SERVICE_FIND_BY_TYPES, Service.class);
             query.setParameter("types", pluginTypes);
             return query.getResultList();
-        } catch (IllegalArgumentException e) {
-            LOG.error("[ Error when getting service list by types ] {}", e.getMessage());
-            throw new ExchangeDaoException("[ Error when getting service list by types ] ");
-        } catch (Exception e) {
-            LOG.error("[ Error when getting service list by types ] {}", e.getMessage());
-            throw new ExchangeDaoException("[ Error when getting service list by types] ");
-        }
 	}
-    
-    @Override
-    public List<ServiceCapability> getServiceCapabilities(String serviceClassName) throws ExchangeDaoException {
-        try {
-            TypedQuery<ServiceCapability> query = em.createNamedQuery(ExchangeConstants.CAPABILITY_FIND_BY_SERVICE, ServiceCapability.class);
+
+    /**
+     *
+     * Gets all capabilities for a service
+     *
+     * @param serviceClassName
+     * @return
+     * @throws
+     */
+    public List<ServiceCapability> getServiceCapabilities(String serviceClassName) {
+            TypedQuery<ServiceCapability> query = em.createNamedQuery(ServiceCapability.CAPABILITY_FIND_BY_SERVICE, ServiceCapability.class);
             query.setParameter(SERVICE_CLASS_NAME_PARAMETER, serviceClassName);
             return query.getResultList();
-        } catch (IllegalArgumentException e) {
-            LOG.error("[ Error when getting capabilities ] {}", e.getMessage());
-            throw new ExchangeDaoException("[ Error when getting capabilities ] ");
-        } catch (Exception e) {
-            LOG.error("[ Error when getting capabilities ] {}", e.getMessage());
-            throw new ExchangeDaoException("[ Error when getting capabilities ] ");
-        }
     }
 
-    @Override
-    public List<ServiceSetting> getServiceSettings(String serviceClassName) throws ExchangeDaoException {
-        try {
-            TypedQuery<ServiceSetting> query = em.createNamedQuery(ExchangeConstants.SETTING_FIND_BY_SERVICE, ServiceSetting.class);
+    /**
+     *
+     * gets all settings for a service
+     *
+     * @param serviceClassName
+     * @return
+     * @throws
+     */
+    public List<ServiceSetting> getServiceSettings(String serviceClassName) {
+            TypedQuery<ServiceSetting> query = em.createNamedQuery(ServiceSetting.SETTING_FIND_BY_SERVICE, ServiceSetting.class);
             query.setParameter("serviceClassName", serviceClassName);
             return query.getResultList();
-        } catch (IllegalArgumentException e) {
-            LOG.error("[ Error when getting settings ] {}", e.getMessage());
-            throw new ExchangeDaoException("[ Error when getting settings ] ");
-        } catch (Exception e) {
-            LOG.error("[ Error when getting settings ] {}", e.getMessage());
-            throw new ExchangeDaoException("[ Error when getting settings ] ");
-        }
     }
 
-    @Override
+    /**
+     * Get service by Service Class Name
+     *
+     * @param serviceClassName
+     * @return
+     */
     public Service getServiceByServiceClassName(String serviceClassName) {
         try {
-            TypedQuery<Service> query = em.createNamedQuery(ExchangeConstants.SERVICE_FIND_BY_SERVICE_CLASS_NAME, Service.class);
+            TypedQuery<Service> query = em.createNamedQuery(Service.SERVICE_FIND_BY_SERVICE_CLASS_NAME, Service.class);
             query.setParameter(SERVICE_CLASS_NAME_PARAMETER, serviceClassName);
             return query.getSingleResult();
         } catch (NoResultException e) {
@@ -166,14 +157,4 @@ public class ServiceRegistryDaoBean extends Dao implements ServiceRegistryDao {
         }
     }
 
-    @Override
-    public Service getServiceByMappedServiceName(String mappedServiceName) {
-        try {
-            TypedQuery<Service> query = em.createNamedQuery(ExchangeConstants.SERVICE_FIND_BY_NAME, Service.class);
-            query.setParameter(SERVICE_MAP_NAME_PARAMETER, mappedServiceName);
-            return query.getSingleResult();
-        } catch (NoResultException e) {
-            return null;
-        }
-    }
 }

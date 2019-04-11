@@ -13,23 +13,16 @@ package eu.europa.ec.fisheries.uvms.exchange.dao.bean;
 
 import javax.ejb.Stateless;
 import javax.persistence.NoResultException;
-import javax.persistence.PersistenceException;
 import javax.persistence.Query;
 import javax.persistence.TypedQuery;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.time.Instant;
+import java.util.*;
 
 import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeHistoryListQuery;
 import eu.europa.ec.fisheries.schema.exchange.v1.TypeRefType;
-import eu.europa.ec.fisheries.uvms.exchange.constant.ExchangeConstants;
 import eu.europa.ec.fisheries.uvms.exchange.dao.Dao;
-import eu.europa.ec.fisheries.uvms.exchange.dao.ExchangeLogDao;
 import eu.europa.ec.fisheries.uvms.exchange.entity.exchangelog.ExchangeLog;
 import eu.europa.ec.fisheries.uvms.exchange.entity.exchangelog.ExchangeLogStatus;
-import eu.europa.ec.fisheries.uvms.exchange.exception.ExchangeDaoException;
 import eu.europa.ec.fisheries.uvms.exchange.search.ExchangeSearchField;
 import eu.europa.ec.fisheries.uvms.exchange.search.SearchFieldMapper;
 import eu.europa.ec.fisheries.uvms.exchange.search.SearchValue;
@@ -40,13 +33,11 @@ import org.slf4j.LoggerFactory;
 /**
  **/
 @Stateless
-public class ExchangeLogDaoBean extends Dao implements ExchangeLogDao {
+public class ExchangeLogDaoBean extends Dao {
 
     private final static Logger LOG = LoggerFactory.getLogger(ExchangeLogDaoBean.class);
 
-    @Override
-    public List<ExchangeLogStatus> getExchangeLogStatusHistory(String sql, ExchangeHistoryListQuery searchQuery) throws ExchangeDaoException {
-        try {
+    public List<ExchangeLogStatus> getExchangeLogStatusHistory(String sql, ExchangeHistoryListQuery searchQuery) {
             LOG.debug("SQL query for status history " + sql);
             TypedQuery<ExchangeLogStatus> query = em.createQuery(sql, ExchangeLogStatus.class);
             if (searchQuery.getStatus() != null && !searchQuery.getStatus().isEmpty()) {
@@ -56,22 +47,17 @@ public class ExchangeLogDaoBean extends Dao implements ExchangeLogDao {
                 query.setParameter("type", searchQuery.getType());
             }
             if (searchQuery.getTypeRefDateFrom() != null) {
-                Date from = searchQuery.getTypeRefDateFrom();
+                Instant from = searchQuery.getTypeRefDateFrom().toInstant();
                 query.setParameter("from", from);
             }
             if (searchQuery.getTypeRefDateTo() != null) {
-                Date to = searchQuery.getTypeRefDateTo();
+                Instant to = searchQuery.getTypeRefDateTo().toInstant();
                 query.setParameter("to", to);
             }
             return query.getResultList();
-        } catch (Exception e) {
-            throw new ExchangeDaoException("[ERROR] when getting search list ] ");
-        }
     }
 
-    @Override
-    public List<ExchangeLog> getExchangeLogListPaginated(Integer page, Integer listSize, String sql, List<SearchValue> searchKeyValues) throws ExchangeDaoException {
-        try {
+    public List<ExchangeLog> getExchangeLogListPaginated(Integer page, Integer listSize, String sql, List<SearchValue> searchKeyValues) {
             LOG.debug("SQL QUERY IN LIST PAGINATED: " + sql);
             TypedQuery<ExchangeLog> query = em.createQuery(sql, ExchangeLog.class);
             HashMap<ExchangeSearchField, List<SearchValue>> orderedValues = SearchFieldMapper.combineSearchFields(searchKeyValues);
@@ -79,13 +65,9 @@ public class ExchangeLogDaoBean extends Dao implements ExchangeLogDao {
             query.setFirstResult(listSize * (page - 1));
             query.setMaxResults(listSize);
             return query.getResultList();
-        } catch (Exception e) {
-            throw new ExchangeDaoException("[ERROR] when getting list.");
-        }
     }
 
-    @Override
-    public Long getExchangeLogListSearchCount(String countSql, List<SearchValue> searchKeyValues) throws ExchangeDaoException {
+    public Long getExchangeLogListSearchCount(String countSql, List<SearchValue> searchKeyValues) {
         LOG.debug("SQL QUERY IN LIST COUNT: " + countSql);
         TypedQuery<Long> query = em.createQuery(countSql, Long.class);
         HashMap<ExchangeSearchField, List<SearchValue>> orderedValues = SearchFieldMapper.combineSearchFields(searchKeyValues);
@@ -93,8 +75,7 @@ public class ExchangeLogDaoBean extends Dao implements ExchangeLogDao {
         return query.getSingleResult();
     }
 
-    @Override
-    public ExchangeLog getExchangeLogByGuid(String logGuid) throws ExchangeDaoException {
+    public ExchangeLog getExchangeLogByGuid(UUID logGuid)  {
         return getExchangeLogByGuid(logGuid, null);
     }
 
@@ -109,20 +90,14 @@ public class ExchangeLogDaoBean extends Dao implements ExchangeLogDao {
     }
 
 
-    @Override
-    public ExchangeLog createLog(ExchangeLog log) throws ExchangeDaoException {
-        try {
+    public ExchangeLog createLog(ExchangeLog log) {
             em.persist(log);
             return log;
-        } catch (PersistenceException e) {
-            throw new ExchangeDaoException("[ERROR] creating log.", e);
-        }
     }
 
-    @Override
-    public ExchangeLog getExchangeLogByGuid(String logGuid, TypeRefType typeRefType) {
+    public ExchangeLog getExchangeLogByGuid(UUID logGuid, TypeRefType typeRefType) {
         try {
-            TypedQuery<ExchangeLog> query = em.createNamedQuery(ExchangeConstants.LOG_BY_GUID, ExchangeLog.class);
+            TypedQuery<ExchangeLog> query = em.createNamedQuery(ExchangeLog.LOG_BY_GUID, ExchangeLog.class);
             query.setParameter("typeRefType", typeRefType);
             query.setParameter("guid", logGuid);
             return query.getSingleResult();
@@ -133,21 +108,19 @@ public class ExchangeLogDaoBean extends Dao implements ExchangeLogDao {
         return null;
     }
 
-    @Override
-    public List<ExchangeLog> getExchangeLogByRangeOfRefGuids(List<String> logGuids) {
+    public List<ExchangeLog> getExchangeLogByRangeOfRefGuids(List<UUID> logGuids) {
         if(CollectionUtils.isEmpty(logGuids)){
             return new ArrayList<>();
         }
-        TypedQuery<ExchangeLog> query = em.createNamedQuery(ExchangeConstants.LOG_BY_TYPE_RANGE_OF_REF_GUIDS, ExchangeLog.class);
+        TypedQuery<ExchangeLog> query = em.createNamedQuery(ExchangeLog.LOG_BY_TYPE_RANGE_OF_REF_GUIDS, ExchangeLog.class);
         query.setParameter("refGuids", logGuids);
         return query.getResultList();
     }
 
 
-    @Override
-    public List<ExchangeLog> getExchangeLogByTypesRefAndGuid(String typeRefGuid, List<TypeRefType> types) {
+    public List<ExchangeLog> getExchangeLogByTypesRefAndGuid(UUID typeRefGuid, List<TypeRefType> types) {
         try {
-			TypedQuery<ExchangeLog> namedQuery = em.createNamedQuery(ExchangeConstants.LOG_BY_TYPE_REF_AND_GUID, ExchangeLog.class);
+			TypedQuery<ExchangeLog> namedQuery = em.createNamedQuery(ExchangeLog.LOG_BY_TYPE_REF_AND_GUID, ExchangeLog.class);
             namedQuery.setParameter("typeRefGuid", typeRefGuid);
             namedQuery.setParameter("typeRefTypes", types);
             return namedQuery.getResultList();
@@ -158,15 +131,16 @@ public class ExchangeLogDaoBean extends Dao implements ExchangeLogDao {
         return null;
     }
 
-    @Override
-    public ExchangeLog updateLog(ExchangeLog entity) throws ExchangeDaoException {
-        try {
+    public ExchangeLog updateLog(ExchangeLog entity) {
             em.merge(entity);
             em.flush();
             return entity;
-        } catch (Exception e) {
-            throw new ExchangeDaoException("[ERROR] when updating entity ]", e);
-        }
+    }
+
+    public ExchangeLog getLatestLog(){
+        TypedQuery<ExchangeLog> namedQuery = em.createNamedQuery(ExchangeLog.LATEST_LOG, ExchangeLog.class);
+        namedQuery.setMaxResults(1);
+        return namedQuery.getResultList().get(0);
     }
 
 }

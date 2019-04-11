@@ -11,8 +11,8 @@ copy of the GNU General Public License along with the IFDM Suite. If not, see <h
  */
 package eu.europa.ec.fisheries.uvms.exchange.rest.mapper;
 
+import java.time.Instant;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -26,7 +26,7 @@ import eu.europa.ec.fisheries.schema.exchange.v1.SendMovementType;
 import eu.europa.ec.fisheries.schema.exchange.v1.SendPollType;
 import eu.europa.ec.fisheries.schema.exchange.v1.UnsentMessageType;
 import eu.europa.ec.fisheries.schema.exchange.v1.UnsentMessageTypeProperty;
-import eu.europa.ec.fisheries.uvms.commons.date.DateUtils;
+import eu.europa.ec.fisheries.uvms.exchange.model.util.DateUtils;
 import eu.europa.ec.fisheries.uvms.exchange.rest.dto.LogTypeLabel;
 import eu.europa.ec.fisheries.uvms.exchange.rest.dto.exchange.ExchangeLogData;
 import eu.europa.ec.fisheries.uvms.exchange.rest.dto.exchange.ExchangeLogDto;
@@ -47,7 +47,7 @@ public class ExchangeLogMapper {
         dto.setTotalNumberOfPages(response.getTotalNumberOfPages());
 
         for (ExchangeLogType log : response.getExchangeLog()) {
-            dto.getLogs().add(mapToExchangeLogDto(log));
+            dto.getLogList().add(mapToExchangeLogDto(log));
         }
 
         return dto;
@@ -56,7 +56,7 @@ public class ExchangeLogMapper {
 
     public static ExchangeLogDto mapToExchangeLogDto(ExchangeLogType log) {
     	ExchangeLogDto dto = new ExchangeLogDto();
-        Date dateFwd;
+        Instant dateFwd;
     	switch(log.getType()) {
             case RECEIVE_MOVEMENT:
                 dto.setType(LogTypeLabel.RECEIVED_MOVEMENT.toString());
@@ -66,18 +66,18 @@ public class ExchangeLogMapper {
             case SEND_MOVEMENT:
                 dto.setType(LogTypeLabel.SENT_MOVEMENT.toString());
                 SendMovementType sendLog = (SendMovementType)log;
-                dateFwd = sendLog.getFwdDate();
-                dto.setDateFwd(DateUtils.dateToString(dateFwd));
+                dateFwd = sendLog.getFwdDate().toInstant();
+                dto.setDateFwd(DateUtils.parseInstantToString(dateFwd));
                 dto.setRule(sendLog.getFwdRule());
                 dto.setRecipient(sendLog.getRecipient());
                 break;
             case SEND_EMAIL:
                 SendEmailType sendEmail = (SendEmailType)log;
-                dateFwd = sendEmail.getFwdDate();
+                dateFwd = sendEmail.getFwdDate().toInstant();
                 dto.setType(LogTypeLabel.SENT_EMAIL.toString());
                 dto.setRecipient(sendEmail.getRecipient());
                 dto.setRule(sendEmail.getFwdRule());
-                dto.setDateFwd(DateUtils.dateToString(dateFwd));
+                dto.setDateFwd(DateUtils.parseInstantToString(dateFwd));
                 break;
             case SEND_POLL:
                 SendPollType sendPoll = (SendPollType)log;
@@ -106,9 +106,9 @@ public class ExchangeLogMapper {
                 }
                 break;
     	}
-    	
-    	Date dateReceived = log.getDateRecieved();
-    	dto.setDateRecieved(DateUtils.dateToString(dateReceived));
+
+        Instant dateReceived = log.getDateRecieved().toInstant();
+    	dto.setDateRecieved(DateUtils.parseInstantToString(dateReceived));
     	dto.setId(log.getGuid());
         dto.setDf(log.getDf());
 
@@ -163,8 +163,8 @@ public class ExchangeLogMapper {
 		List<SendingLog> sendingLog = new ArrayList<>();
 		for(UnsentMessageType message : messages) {
 			SendingLog log = new SendingLog();
-			Date dateRecieved = message.getDateReceived();
-			log.setDateRecieved(DateUtils.dateToString(dateRecieved));
+            Instant dateRecieved = message.getDateReceived().toInstant();
+			log.setDateRecieved(DateUtils.parseInstantToString(dateRecieved));
 			log.setMessageId(message.getMessageId());
 			log.setSenderRecipient(message.getSenderReceiver());
             log.setProperties(mapProperties(message.getProperties()));

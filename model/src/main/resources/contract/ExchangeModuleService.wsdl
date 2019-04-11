@@ -1,0 +1,792 @@
+<definitions name="ExchangeModuleService"
+             targetNamespace="urn:module.exchange.schema.fisheries.ec.europa.eu:v1"
+             xmlns:module="urn:module.exchange.schema.fisheries.ec.europa.eu:v1"
+             xmlns:common="urn:common.exchange.schema.fisheries.ec.europa.eu:v1"
+             xmlns:service="urn:service.exchange.schema.fisheries.ec.europa.eu:v1"
+             xmlns:exchange="urn:exchange.schema.fisheries.ec.europa.eu:v1"
+             xmlns:movement="urn:movement.exchange.schema.fisheries.ec.europa.eu:v1"
+             xmlns:plugin="urn:types.plugin.exchange.schema.fisheries.ec.europa.eu:v1"
+             xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+             xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+             xmlns="http://schemas.xmlsoap.org/wsdl/">
+
+    <types>
+        <xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema"  targetNamespace="urn:module.exchange.schema.fisheries.ec.europa.eu:v1">
+
+            <xsd:import namespace="urn:common.exchange.schema.fisheries.ec.europa.eu:v1" schemaLocation="ExchangeCommon.xsd"/>
+            <xsd:import namespace="urn:exchange.schema.fisheries.ec.europa.eu:v1" schemaLocation="Exchange.xsd"/>
+            <xsd:import namespace="urn:service.exchange.schema.fisheries.ec.europa.eu:v1" schemaLocation="Service.xsd"/>
+            <xsd:import namespace="urn:movement.exchange.schema.fisheries.ec.europa.eu:v1" schemaLocation="Movement.xsd"/>
+            <xsd:import namespace="urn:types.plugin.exchange.schema.fisheries.ec.europa.eu:v1" schemaLocation="Plugin.xsd"/>
+
+            <xsd:simpleType name="ExchangeModuleMethod">
+                <xsd:restriction base="xsd:string">
+                    <!-- unionvms wants to -->
+                    <xsd:enumeration value="LIST_SERVICES"/> <!-- mobileterminal - get plugins -->
+                    <xsd:enumeration value="UPDATE_PLUGIN_SETTING"/> <!-- mobileterminal - send dnidList -->
+                    <xsd:enumeration value="SET_COMMAND"/> <!-- mobileterminal - pollRequest OR rules - sendEmail -->
+                    <xsd:enumeration value="SEND_REPORT_TO_PLUGIN"/> <!-- rules - sendPositionToFLUX -->
+                    <xsd:enumeration value="SEND_SALES_REPORT"/>
+                    <xsd:enumeration value="SEND_SALES_RESPONSE"/>
+
+                    <!-- plugin wants to -->
+                    <xsd:enumeration value="SET_MOVEMENT_REPORT"/>
+                    <xsd:enumeration value="RECEIVE_MOVEMENT_REPORT_BATCH"/>
+                    <xsd:enumeration value="RECEIVE_SALES_REPORT"/>
+                    <xsd:enumeration value="RECEIVE_SALES_QUERY"/>
+                    <xsd:enumeration value="RECEIVE_SALES_RESPONSE"/>
+                    <xsd:enumeration value="RECEIVE_INVALID_SALES_MESSAGE"/> <!-- XSD validation of message failed -->
+                    <xsd:enumeration value="RECEIVE_ASSET_INFORMATION"/>
+                    <xsd:enumeration value="SEND_ASSET_INFORMATION"/>
+                    <xsd:enumeration value="QUERY_ASSET_INFORMATION"/>
+
+                    <!-- plugin commands Ack-->
+                    <xsd:enumeration value="PLUGIN_SET_CONFIG_ACK"/>
+                    <xsd:enumeration value="PLUGIN_SET_COMMAND_ACK"/>
+                    <xsd:enumeration value="PLUGIN_SET_REPORT_ACK"/>
+                    <xsd:enumeration value="PLUGIN_START_ACK"/>
+                    <xsd:enumeration value="PLUGIN_STOP_ACK"/>
+                    <xsd:enumeration value="PLUGIN_PING_ACK"/>
+                    <xsd:enumeration value="PLUGIN_SET_MDR_REQUEST_ACK"/>
+                    <xsd:enumeration value="PLUGIN_SEND_FA_REPORT_ACK"/>
+                    <xsd:enumeration value="PLUGIN_SEND_FA_QUERY_ACK"/>
+                    <xsd:enumeration value="PLUGIN_SET_FLUX_RESPONSE_ACK"/>
+                    <xsd:enumeration value="PLUGIN_SEND_SALES_REPORT_ACK"/>
+                    <xsd:enumeration value="PLUGIN_SEND_SALES_RESPONSE_ACK"/>
+                    <xsd:enumeration value="PLUGIN_SEND_VESSEL_INFORMATION_ACK"/>
+                    <xsd:enumeration value="PLUGIN_SEND_VESSEL_QUERY_ACK"/>
+
+                    <!-- admin/config wants to-->
+                    <xsd:enumeration value="PING"/>
+                    <xsd:enumeration value="PLUGIN_PING_RESPONSE"/>
+
+                    <!-- asynch processed movement response -->
+                    <xsd:enumeration value="PROCESSED_MOVEMENT"/>
+
+                    <!-- asynch processed movement response -->
+                    <xsd:enumeration value="PROCESSED_MOVEMENT_BATCH"/>
+
+					<!-- Asynch MDR Synchronization Request -->
+					<xsd:enumeration value="SET_MDR_SYNC_MESSAGE_REQUEST"/>
+
+					<!-- Asynch MDR Synchronization Response -->
+					<xsd:enumeration value="SET_MDR_SYNC_MESSAGE_RESPONSE"/>
+
+                    <!-- Sending FLUX RESPONSE MESSAGE to the plugin-->
+					<xsd:enumeration value="SET_FLUX_FA_RESPONSE_MESSAGE"/>
+
+                    <!-- Receiving FLUX RESPONSE MESSAGE from the plugin-->
+                    <xsd:enumeration value="RCV_FLUX_FA_RESPONSE_MESSAGE"/>
+
+					<!-- FLUX FA Message from FLUX Activity Plugin -->
+					<xsd:enumeration value="SET_FLUX_FA_REPORT_MESSAGE"/>
+
+                    <!-- FLUX FA Message to FLUX Activity Plugin -->
+                    <xsd:enumeration value="SEND_FLUX_FA_REPORT_MESSAGE"/>
+
+                    <!-- FLUX FA Message from FLUX Activity Plugin -->
+                    <xsd:enumeration value="SET_FA_QUERY_MESSAGE"/>
+
+                    <!-- FLUX FA Message to FLUX Activity Plugin -->
+                    <xsd:enumeration value="SEND_FA_QUERY_MESSAGE"/>
+
+                    <!-- FLUX UNKNOWN message received -->
+                    <xsd:enumeration value="UNKNOWN"/>
+
+                    <!-- report back to exchange what the validation status of a received message was, to update the log -->
+                    <xsd:enumeration value="UPDATE_LOG_STATUS" />
+                    <xsd:enumeration value="UPDATE_LOG_BUSINESS_ERROR" />
+
+                    <xsd:enumeration value="LOG_REF_ID_BY_TYPE_EXISTS" />
+
+                    <xsd:enumeration value="LOG_ID_BY_TYPE_EXISTS" />
+
+                </xsd:restriction>
+            </xsd:simpleType>
+
+            <xsd:complexType name="ExchangeBaseRequest" abstract="true">
+                <xsd:sequence>
+                    <xsd:element name="method" type="module:ExchangeModuleMethod"/>
+                    <xsd:element name="username" minOccurs="0" type="xsd:string"/>
+					<xsd:element name="pluginType" minOccurs="0" type="plugin:PluginType" default="OTHER" />
+                    <xsd:element name="senderOrReceiver" minOccurs="0" type="xsd:string"/>
+                    <xsd:element name="messageGuid" minOccurs="0" type="xsd:string"/>
+                    <xsd:element name="refGuid" minOccurs="0" type="xsd:string"/>
+                    <xsd:element name="responseMessageGuid" minOccurs="0" type="xsd:string"/>
+                    <xsd:element name="todt" minOccurs="0" type="xsd:string"/>
+                    <xsd:element name="df" minOccurs="0" type="xsd:string"/>
+                    <xsd:element name="date" minOccurs="0" type="xsd:dateTime"/>
+                    <xsd:element name="to" minOccurs="0" type="xsd:string"/>
+                    <xsd:element name="ad" minOccurs="0" type="xsd:string"/>
+                    <xsd:element name="fluxDataFlow" minOccurs="0" type="xsd:string" />
+                    <xsd:element name="destination" minOccurs="0" type="xsd:string" />
+                    <xsd:element name="onValue" minOccurs="0" type="xsd:string" />
+                    <xsd:element name="recipient" minOccurs="0" type="xsd:string" />
+                    <xsd:element name="refType" type="exchange:TypeRefType" />
+                    <xsd:element name="registeredClassName" type="xsd:string" />
+                </xsd:sequence>
+            </xsd:complexType>
+
+            <xsd:complexType name="ExchangeOutgoingBaseRequest" abstract="true">
+                <xsd:complexContent>
+                    <xsd:extension base="module:ExchangeBaseRequest">
+                        <xsd:sequence>
+                            <xsd:element name="validationStatus" type="exchange:ExchangeLogStatusTypeType"/>
+                        </xsd:sequence>
+                    </xsd:extension>
+                </xsd:complexContent>
+            </xsd:complexType>
+
+            <xsd:element name="ReceiveSalesReportRequest">
+                <xsd:complexType>
+                    <xsd:complexContent>
+                        <xsd:extension base="module:ExchangeBaseRequest">
+                            <xsd:sequence>
+                                <xsd:element name="report" type="xsd:string"/>
+                            </xsd:sequence>
+                        </xsd:extension>
+                    </xsd:complexContent>
+                </xsd:complexType>
+            </xsd:element>
+
+            <xsd:element name="ReceiveSalesQueryRequest">
+                <xsd:complexType>
+                    <xsd:complexContent>
+                        <xsd:extension base="module:ExchangeBaseRequest">
+                            <xsd:sequence>
+                                <xsd:element name="query" type="xsd:string"/>
+                            </xsd:sequence>
+                        </xsd:extension>
+                    </xsd:complexContent>
+                </xsd:complexType>
+            </xsd:element>
+
+            <xsd:element name="ReceiveSalesResponseRequest">
+                <xsd:complexType>
+                    <xsd:complexContent>
+                        <xsd:extension base="module:ExchangeBaseRequest">
+                            <xsd:sequence>
+                                <xsd:element name="response" type="xsd:string"/>
+                            </xsd:sequence>
+                        </xsd:extension>
+                    </xsd:complexContent>
+                </xsd:complexType>
+            </xsd:element>
+
+            <xsd:element name="ReceiveInvalidSalesMessage">
+                <xsd:complexType>
+                    <xsd:complexContent>
+                        <xsd:extension base="module:ExchangeBaseRequest">
+                            <xsd:sequence>
+                                <xsd:element name="respondToInvalidMessageRequest" type="xsd:string"/>
+                                <xsd:element name="originalMessage" type="xsd:string" minOccurs="0"/>
+                            </xsd:sequence>
+                        </xsd:extension>
+                    </xsd:complexContent>
+                </xsd:complexType>
+            </xsd:element>
+
+            <xsd:element name="SendSalesReportRequest">
+                <xsd:complexType>
+                    <xsd:complexContent>
+                        <xsd:extension base="module:ExchangeOutgoingBaseRequest">
+                            <xsd:sequence>
+                                <xsd:element name="report" type="xsd:string"/>
+                            </xsd:sequence>
+                        </xsd:extension>
+                    </xsd:complexContent>
+                </xsd:complexType>
+            </xsd:element>
+
+            <xsd:element name="SendSalesResponseRequest">
+                <xsd:complexType>
+                    <xsd:complexContent>
+                        <xsd:extension base="module:ExchangeOutgoingBaseRequest">
+                            <xsd:sequence>
+                                <xsd:element name="response" type="xsd:string"/>
+                            </xsd:sequence>
+                        </xsd:extension>
+                    </xsd:complexContent>
+                </xsd:complexType>
+            </xsd:element>
+
+            <xsd:element name="ReceiveAssetInformationRequest">
+                <xsd:complexType>
+                    <xsd:complexContent>
+                        <xsd:extension base="module:ExchangeBaseRequest">
+                            <xsd:sequence>
+                                <xsd:element name="assets" type="xsd:string"/>
+                            </xsd:sequence>
+                        </xsd:extension>
+                    </xsd:complexContent>
+                </xsd:complexType>
+            </xsd:element>
+
+            <xsd:element name="SendAssetInformationRequest">
+                <xsd:complexType>
+                    <xsd:complexContent>
+                        <xsd:extension base="module:ExchangeBaseRequest">
+                            <xsd:sequence>
+                                <xsd:element name="assets" type="xsd:string"/>
+                            </xsd:sequence>
+                        </xsd:extension>
+                    </xsd:complexContent>
+                </xsd:complexType>
+            </xsd:element>
+
+            <xsd:element name="QueryAssetInformationRequest">
+                <xsd:complexType>
+                    <xsd:complexContent>
+                        <xsd:extension base="module:ExchangeBaseRequest">
+                            <xsd:sequence>
+                                <xsd:element name="assets" type="xsd:string"/>
+                            </xsd:sequence>
+                        </xsd:extension>
+                    </xsd:complexContent>
+                </xsd:complexType>
+            </xsd:element>
+
+			<xsd:element name="SetFLUXFAResponseMessageRequest">
+				<xsd:complexType>
+					<xsd:complexContent>
+						<xsd:extension base="module:ExchangeBaseRequest">
+							<xsd:sequence>
+								<xsd:element name="request" type="xsd:string"/>
+                                <xsd:element name="status" type="exchange:ExchangeLogStatusTypeType"/>
+							</xsd:sequence>
+						</xsd:extension>
+					</xsd:complexContent>
+				</xsd:complexType>
+			</xsd:element>
+
+            <xsd:element name="RcvFLUXFaResponseMessageRequest">
+                <xsd:complexType>
+                    <xsd:complexContent>
+                        <xsd:extension base="module:ExchangeBaseRequest">
+                            <xsd:sequence>
+                                <xsd:element name="request" type="xsd:string"/>
+                            </xsd:sequence>
+                        </xsd:extension>
+                    </xsd:complexContent>
+                </xsd:complexType>
+            </xsd:element>
+
+			<xsd:element name="SetFLUXFAReportMessageRequest">
+                <xsd:complexType>
+                    <xsd:complexContent>
+                        <xsd:extension base="module:ExchangeBaseRequest">
+                            <xsd:sequence>
+                                <xsd:element name="request" type="xsd:string"/>
+                            </xsd:sequence>
+                        </xsd:extension>
+                    </xsd:complexContent>
+                </xsd:complexType>
+            </xsd:element>
+
+            <xsd:element name="SetMovementReportRequest">
+                <xsd:complexType>
+                    <xsd:complexContent>
+                        <xsd:extension base="module:ExchangeBaseRequest">
+                            <xsd:sequence>
+                                <xsd:element name="request" type="movement:SetReportMovementType"/>
+                            </xsd:sequence>
+                        </xsd:extension>
+                    </xsd:complexContent>
+                </xsd:complexType>
+            </xsd:element>
+
+            <xsd:element name="SetFLUXMovementReportRequest">
+                <xsd:complexType>
+                    <xsd:complexContent>
+                        <xsd:extension base="module:ExchangeBaseRequest">
+                            <xsd:sequence>
+                                <xsd:element name="request" type="xsd:string"/>
+                            </xsd:sequence>
+                        </xsd:extension>
+                    </xsd:complexContent>
+                </xsd:complexType>
+            </xsd:element>
+
+            <xsd:element name="SetFAQueryMessageRequest">
+                <xsd:complexType>
+                    <xsd:complexContent>
+                        <xsd:extension base="module:ExchangeBaseRequest">
+                            <xsd:sequence>
+                                <xsd:element name="request" type="xsd:string"/>
+                            </xsd:sequence>
+                        </xsd:extension>
+                    </xsd:complexContent>
+                </xsd:complexType>
+            </xsd:element>
+
+			<xsd:element name="SetFLUXMDRSyncMessageExchangeRequest">
+				<xsd:complexType>
+					<xsd:complexContent>
+						<xsd:extension base="module:ExchangeBaseRequest">
+							<xsd:sequence>
+								<xsd:element name="request" type="xsd:string"/>
+                                <xsd:element name="fr" type="xsd:string"/>
+							</xsd:sequence>
+						</xsd:extension>
+					</xsd:complexContent>
+				</xsd:complexType>
+			</xsd:element>
+
+			<xsd:element name="SetFLUXMDRSyncMessageExchangeResponse">
+				<xsd:complexType>
+					<xsd:complexContent>
+						<xsd:extension base="module:ExchangeBaseRequest">
+							<xsd:sequence>
+								<xsd:element name="request" type="xsd:string"/>
+							</xsd:sequence>
+						</xsd:extension>
+					</xsd:complexContent>
+				</xsd:complexType>
+			</xsd:element>
+
+
+			<xsd:element name="SetCommandRequest">
+                <xsd:complexType>
+                    <xsd:complexContent>
+                        <xsd:extension base="module:ExchangeBaseRequest">
+                            <xsd:sequence>
+                                <xsd:element name="command" type="common:CommandType"/>
+                            </xsd:sequence>
+                        </xsd:extension>
+                    </xsd:complexContent>
+                </xsd:complexType>
+            </xsd:element>
+
+            <xsd:element name="SetCommandResponse">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element name="response" type="common:AcknowledgeType" minOccurs="1" maxOccurs="1"/>
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
+
+            <xsd:element name="SendMovementToPluginRequest">
+                <xsd:complexType>
+                    <xsd:complexContent>
+                        <xsd:extension base="module:ExchangeBaseRequest">
+                            <xsd:sequence>
+                                <xsd:element name="report" type="movement:SendMovementToPluginType"/>
+                            </xsd:sequence>
+                        </xsd:extension>
+                    </xsd:complexContent>
+                </xsd:complexType>
+            </xsd:element>
+
+            <xsd:element name="SendMovementToPluginResponse">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element name="response" type="common:AcknowledgeType" minOccurs="1" maxOccurs="1"/>
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
+
+            <xsd:element name="GetServiceListRequest">
+                <xsd:complexType>
+                    <xsd:complexContent>
+                        <xsd:extension base="module:ExchangeBaseRequest">
+                            <xsd:sequence>
+                                <xsd:element name="type" type="plugin:PluginType" minOccurs="0" maxOccurs="unbounded"/>
+                            </xsd:sequence>
+                        </xsd:extension>
+                    </xsd:complexContent>
+                </xsd:complexType>
+            </xsd:element>
+
+            <xsd:element name="GetServiceListResponse">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element name="service" type="service:ServiceResponseType" minOccurs="0" maxOccurs="unbounded"/>
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
+
+            <xsd:element name="UpdatePluginSettingRequest">
+                <xsd:complexType>
+                    <xsd:complexContent>
+                        <xsd:extension base="module:ExchangeBaseRequest">
+                            <xsd:sequence>
+                                <xsd:element name="serviceClassName" type="xsd:string" minOccurs="1" maxOccurs="1"/>
+                                <xsd:element name="setting" type="service:SettingType" minOccurs="1" maxOccurs="1"/>
+                            </xsd:sequence>
+                        </xsd:extension>
+                    </xsd:complexContent>
+                </xsd:complexType>
+            </xsd:element>
+
+            <xsd:element name="UpdatePluginSettingResponse">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element name="response" type="common:AcknowledgeType" minOccurs="1" maxOccurs="1"/>
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
+
+            <!-- Ping request -->
+            <xsd:element name="pingRequest">
+                <xsd:complexType>
+                    <xsd:complexContent>
+                        <xsd:extension base="module:ExchangeBaseRequest"/>
+                    </xsd:complexContent>
+                </xsd:complexType>
+            </xsd:element>
+
+            <xsd:element name="pingResponse">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element name="response" type="xsd:string"/>
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
+
+            <!-- Asynch processed movement response -->
+            <xsd:element name="ProcessedMovementResponse">
+                <xsd:complexType>
+                    <xsd:complexContent>
+                        <xsd:extension base="module:ExchangeBaseRequest">
+                            <xsd:sequence>
+                                <xsd:element name="orgRequest" type="movement:SetReportMovementType" minOccurs="1" maxOccurs="1"/>
+                                <xsd:element name="movementRefType" type="movement:MovementRefType" minOccurs="1" maxOccurs="1"/>
+                            </xsd:sequence>
+                        </xsd:extension>
+                    </xsd:complexContent>
+                </xsd:complexType>
+            </xsd:element>
+
+            <xsd:element name="ProcessedMovementResponseBatch">
+                <xsd:complexType>
+                    <xsd:complexContent>
+                        <xsd:extension base="module:ExchangeBaseRequest">
+                            <xsd:sequence>
+                                <xsd:element name="orgRequest" type="movement:SetReportMovementType" minOccurs="1" maxOccurs="unbounded"/>
+                                <xsd:element name="movementRefType" type="movement:MovementRefType" minOccurs="1" maxOccurs="1"/>
+                            </xsd:sequence>
+                        </xsd:extension>
+                    </xsd:complexContent>
+                </xsd:complexType>
+            </xsd:element>
+
+            <xsd:element name="UpdateLogStatusRequest">
+                <xsd:complexType>
+                    <xsd:complexContent>
+                        <xsd:extension base="module:ExchangeBaseRequest">
+                            <xsd:sequence>
+                                <xsd:element name="logGuid" type="xsd:string" minOccurs="1" maxOccurs="1"/>
+                                <xsd:element name="newStatus" type="exchange:ExchangeLogStatusTypeType" minOccurs="1" maxOccurs="1"/>
+                                <xsd:element name="businessModuleExceptionMessage" type="xsd:string" minOccurs="1" maxOccurs="1"/>
+                            </xsd:sequence>
+                        </xsd:extension>
+                    </xsd:complexContent>
+                </xsd:complexType>
+            </xsd:element>
+
+            <xsd:element name="LogRefIdByTypeExistsRequest">
+                <xsd:complexType>
+                    <xsd:complexContent>
+                        <xsd:extension base="module:ExchangeBaseRequest">
+                            <xsd:sequence>
+                                <xsd:element name="refTypes" type="exchange:TypeRefType" minOccurs="0" maxOccurs="unbounded"/>
+                            </xsd:sequence>
+                        </xsd:extension>
+                    </xsd:complexContent>
+                </xsd:complexType>
+            </xsd:element>
+
+            <xsd:element name="LogRefIdByTypeExistsResponse">
+                <xsd:complexType>
+                    <xsd:complexContent>
+                        <xsd:extension base="module:ExchangeBaseRequest">
+                        </xsd:extension>
+                    </xsd:complexContent>
+                </xsd:complexType>
+            </xsd:element>
+
+            <xsd:element name="LogIdByTypeExistsRequest">
+                <xsd:complexType>
+                    <xsd:complexContent>
+                        <xsd:extension base="module:ExchangeBaseRequest">
+                            <xsd:sequence>
+                                <xsd:element name="refTypes" type="exchange:TypeRefType" minOccurs="0" maxOccurs="unbounded"/>
+                            </xsd:sequence>
+                        </xsd:extension>
+                    </xsd:complexContent>
+                </xsd:complexType>
+            </xsd:element>
+
+            <xsd:element name="LogIdByTypeExistsResponse">
+                <xsd:complexType>
+                    <xsd:complexContent>
+                        <xsd:extension base="module:ExchangeBaseRequest">
+                        </xsd:extension>
+                    </xsd:complexContent>
+                </xsd:complexType>
+            </xsd:element>
+        </xsd:schema>
+    </types>
+
+
+    <message name="GetServiceListRequest">
+        <part name="body" element="module:GetServiceListRequest"/>
+    </message>
+    <message name="GetServiceListResponse">
+        <part name="body" element="module:GetServiceListResponse"/>
+    </message>
+
+    <message name="SetCommandRequest">
+        <part name="body" element="module:SetCommandRequest"/>
+    </message>
+    <message name="SetCommandResponse">
+        <part name="body" element="module:SetCommandResponse"/>
+    </message>
+
+    <message name="SetMovementReportRequest">
+        <part name="body" element="module:SetMovementReportRequest"/>
+    </message>
+
+    <message name="SendMovementToPluginRequest">
+        <part name="body" element="module:SendMovementToPluginRequest"/>
+    </message>
+    <message name="SendMovementToPluginResponse">
+        <part name="body" element="module:SendMovementToPluginResponse"/>
+    </message>
+
+    <message name="ReceiveSalesReportRequest">
+        <part name="body" element="module:ReceiveSalesReportRequest"/>
+    </message>
+
+    <message name="ReceiveSalesQueryRequest">
+        <part name="body" element="module:ReceiveSalesQueryRequest"/>
+    </message>
+
+    <message name="ReceiveSalesResponseRequest">
+        <part name="body" element="module:ReceiveSalesResponseRequest"/>
+    </message>
+
+    <message name="SendSalesReportRequest">
+        <part name="body" element="module:SendSalesReportRequest"/>
+    </message>
+
+    <message name="SendSalesResponseRequest">
+        <part name="body" element="module:SendSalesResponseRequest"/>
+    </message>
+
+    <message name="UpdateLogStatusRequest">
+        <part name="body" element="module:UpdateLogStatusRequest"/>
+    </message>
+
+    <message name="UpdatePluginSettingRequest">
+        <part name="body" element="module:UpdatePluginSettingRequest"/>
+    </message>
+
+    <message name="UpdatePluginSettingResponse">
+        <part name="body" element="module:UpdatePluginSettingResponse"/>
+    </message>
+
+    <message name="PingRequest">
+        <part name="body" element="module:pingRequest"/>
+    </message>
+    <message name="PingResponse">
+        <part name="body" element="module:pingResponse"/>
+    </message>
+
+    <message name="ProcessedMovementResponse">
+        <part name="body" element="module:ProcessedMovementResponse"/>
+    </message>
+
+    <message name="LogRefIdByTypeExistsRequest">
+        <part name="body" element="module:LogRefIdByTypeExistsRequest"/>
+    </message>
+
+    <message name="LogRefIdByTypeExistsResponse">
+        <part name="body" element="module:LogRefIdByTypeExistsResponse"/>
+    </message>
+
+    <message name="LogIdByTypeExistsRequest">
+        <part name="body" element="module:LogIdByTypeExistsRequest"/>
+    </message>
+
+    <message name="LogIdByTypeExistsResponse">
+        <part name="body" element="module:LogIdByTypeExistsResponse"/>
+    </message>
+
+    <portType name="ExchangeModulePortType">
+
+        <operation name="GetServiceList">
+            <input message="module:GetServiceListRequest"/>
+            <output message="module:GetServiceListResponse"/>
+        </operation>
+
+        <operation name="CreatePoll">
+            <input message="module:SetCommandRequest"/>
+            <output message="module:SetCommandResponse"/>
+        </operation>
+
+        <operation name="SetMovementReport">
+            <input message="module:SetMovementReportRequest"/>
+        </operation>
+
+        <operation name="SendMovementToPlugin">
+            <input message="module:SendMovementToPluginRequest"/>
+            <output message="module:SendMovementToPluginResponse"/>
+        </operation>
+
+        <operation name="ReceiveSalesReport">
+            <input message="module:ReceiveSalesReportRequest"/>
+        </operation>
+
+        <operation name="ReceiveSalesQuery">
+            <input message="module:ReceiveSalesQueryRequest"/>
+        </operation>
+
+        <operation name="ReceiveSalesResponse">
+            <input message="module:ReceiveSalesResponseRequest"/>
+        </operation>
+
+        <operation name="SendSalesReport">
+            <input message="module:SendSalesReportRequest"/>
+        </operation>
+
+        <operation name="SendSalesResponse">
+            <input message="module:SendSalesResponseRequest"/>
+        </operation>
+
+        <operation name="UpdateLogStatus">
+            <input message="module:UpdateLogStatusRequest"/>
+        </operation>
+
+        <operation name="UpdatePluginSetting">
+            <input message="module:UpdatePluginSettingRequest"/>
+            <output message="module:UpdatePluginSettingResponse"/>
+        </operation>
+
+        <operation name="Ping">
+            <input message="module:PingRequest"/>
+            <output message="module:PingResponse"/>
+        </operation>
+
+        <operation name="ProcessedMovement">
+            <input message="module:ProcessedMovementResponse"/>
+        </operation>
+
+        <operation name="LogRefIdByTypeExistsService">
+            <input message="module:LogRefIdByTypeExistsRequest"/>
+            <output message="module:LogRefIdByTypeExistsResponse"/>
+        </operation>
+
+        <operation name="LogIdByTypeExistsService">
+            <input message="module:LogIdByTypeExistsRequest"/>
+            <output message="module:LogIdByTypeExistsResponse"/>
+        </operation>
+
+    </portType>
+
+    <binding name="ExchangeModuleSoapBinding" type="module:ExchangeModulePortType">
+        <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+
+        <operation name="GetServiceList">
+            <input>
+                <soap:body use="literal"/>
+            </input>
+            <output>
+                <soap:body use="literal"/>
+            </output>
+        </operation>
+
+        <operation name="CreatePoll">
+            <input>
+                <soap:body use="literal"/>
+            </input>
+            <output>
+                <soap:body use="literal"/>
+            </output>
+        </operation>
+
+        <operation name="SetMovementReport">
+            <input>
+                <soap:body use="literal"/>
+            </input>
+        </operation>
+
+        <operation name="SendMovementToPlugin">
+            <input>
+                <soap:body use="literal"/>
+            </input>
+            <output>
+                <soap:body use="literal"/>
+            </output>
+        </operation>
+
+        <operation name="ReceiveSalesReport">
+            <input>
+                <soap:body use="literal"/>
+            </input>
+        </operation>
+
+        <operation name="ReceiveSalesQuery">
+            <input>
+                <soap:body use="literal"/>
+            </input>
+        </operation>
+
+        <operation name="ReceiveSalesResponse">
+            <input>
+                <soap:body use="literal"/>
+            </input>
+        </operation>
+
+        <operation name="SendSalesReport">
+            <input>
+                <soap:body use="literal"/>
+            </input>
+        </operation>
+
+        <operation name="SendSalesResponse">
+            <input>
+                <soap:body use="literal"/>
+            </input>
+        </operation>
+
+        <operation name="UpdatePluginSetting">
+            <input>
+                <soap:body use="literal"/>
+            </input>
+            <output>
+                <soap:body use="literal"/>
+            </output>
+        </operation>
+
+        <operation name="Ping">
+            <input>
+                <soap:body use="literal"/>
+            </input>
+            <output>
+                <soap:body use="literal"/>
+            </output>
+        </operation>
+
+        <operation name="ProcessedMovement">
+            <input>
+                <soap:body use="literal"/>
+            </input>
+        </operation>
+
+        <operation name="UpdateLogStatus">
+            <input>
+                <soap:body use="literal"/>
+            </input>
+        </operation>
+
+    </binding>
+
+    <service name="ExchangeModuleService">
+        <port name="ExchangeModulePortType" binding="module:ExchangeModuleSoapBinding">
+            <soap:address location="http://REPLACE_ME"/>
+        </port>
+    </service>
+
+</definitions>
+

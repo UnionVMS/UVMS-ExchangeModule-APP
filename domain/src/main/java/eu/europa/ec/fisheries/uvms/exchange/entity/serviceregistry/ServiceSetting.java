@@ -12,50 +12,34 @@ copy of the GNU General Public License along with the IFDM Suite. If not, see <h
 package eu.europa.ec.fisheries.uvms.exchange.entity.serviceregistry;
 
 import java.io.Serializable;
-import java.util.Date;
+import java.time.Instant;
+import java.util.UUID;
 
-import javax.persistence.Basic;
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.NamedQueries;
-import javax.persistence.NamedQuery;
-import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
+import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import javax.xml.bind.annotation.XmlRootElement;
-
-import eu.europa.ec.fisheries.uvms.exchange.constant.ExchangeConstants;
 
 @Entity
 @Table(name = "service_setting")
 @XmlRootElement
 @NamedQueries({
-        @NamedQuery(name = ExchangeConstants.SETTING_FIND_BY_SERVICE, query = "SELECT s FROM ServiceSetting s where s.service.serviceClassName =:serviceClassName ") })
+        @NamedQuery(name = ServiceSetting.SETTING_FIND_BY_SERVICE, query = "SELECT s FROM ServiceSetting s where s.service.serviceClassName =:serviceClassName ") })
+
 public class ServiceSetting implements Serializable {
     private static final long serialVersionUID = 1L;
 
+    public static final String SETTING_FIND_BY_SERVICE = "ServiceSetting.findByServiceId";
+
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    @Basic(optional = false)
     @Column(name = "servset_id")
-    private Long id;
+    private UUID id;
 
-    @Basic(optional = false)
     @NotNull
-    @Column(name = "servset_updattim")
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date updatedTime;
+    @Column(name = "servset_updatetime")
+    private Instant updatedTime;
 
-    @Basic(optional = false)
     @NotNull
     @Size(min = 1, max = 60)
     @Column(name = "servset_upuser")
@@ -76,19 +60,25 @@ public class ServiceSetting implements Serializable {
     public ServiceSetting() {
     }
 
-    public Long getId() {
+    @PrePersist
+    @PreUpdate
+    public void preUpdate(){
+        updatedTime = Instant.now();
+    }
+
+    public UUID getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(UUID id) {
         this.id = id;
     }
 
-    public Date getUpdatedTime() {
+    public Instant getUpdatedTime() {
         return updatedTime;
     }
 
-    public void setUpdatedTime(Date updatedTime) {
+    public void setUpdatedTime(Instant updatedTime) {
         this.updatedTime = updatedTime;
     }
 

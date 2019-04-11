@@ -12,8 +12,8 @@
             <column name="serv_desc" value="Inmarsat C device for Eik"/>
             <column name="serv_active" value="true"/>
             <column name="serv_type" value="SATELLITE_RECEIVER"/>
-            <column name="serv_status" value="STARTED"/>
-            <column name="serv_updattim" value="${now}"/>
+            <column name="serv_status" value="true"/>
+            <column name="serv_updatetime" value="${now}"/>
             <column name="serv_upuser" value="jojoha"/>
         </insert>
         <insert tableName="service">
@@ -24,8 +24,8 @@
             <column name="serv_desc" value="Inmarsat C device for Burum"/>
             <column name="serv_active" value="true"/>
             <column name="serv_type" value="SATELLITE_RECEIVER"/>
-            <column name="serv_status" value="STOPPED"/>
-            <column name="serv_updattim" value="${now}"/>
+            <column name="serv_status" value="false"/>
+            <column name="serv_updatetime" value="${now}"/>
             <column name="serv_upuser" value="jojoha"/>
         </insert>
         <insert tableName="service">
@@ -36,8 +36,8 @@
             <column name="serv_desc" value="Flux plugin"/>
             <column name="serv_active" value="true"/>
             <column name="serv_type" value="FLUX"/>
-            <column name="serv_status" value="STARTED"/>
-            <column name="serv_updattim" value="${now}"/>
+            <column name="serv_status" value="true"/>
+            <column name="serv_updatetime" value="${now}"/>
             <column name="serv_upuser" value="jojoha"/>
         </insert>
         <insert tableName="service">
@@ -48,22 +48,10 @@
             <column name="serv_desc" value="Iridium device"/>
             <column name="serv_active" value="true"/>
             <column name="serv_type" value="SATELLITE_RECEIVER"/>
-            <column name="serv_status" value="STARTED"/>
-            <column name="serv_updattim" value="${now}"/>
+            <column name="serv_status" value="true"/>
+            <column name="serv_updatetime" value="${now}"/>
             <column name="serv_upuser" value="jojoha"/>
         </insert>
-        <!--insert tableName="service">
-            <column name="serv_id" value="5"/>
-            <column name="serv_serviceclassname" value="eu.europa.ec.fisheries.uvms.plugins.naf"/>
-            <column name="serv_serviceresponse" value="eu.europa.ec.fisheries.uvms.plugins.nafPLUGIN_RESPONSE"/>
-            <column name="serv_name" value="naf"/>
-            <column name="serv_desc" value="Plugin for sending and recieving data to and from NAF"/>
-            <column name="serv_active" value="true"/>
-            <column name="serv_type" value="NAF"/>
-            <column name="serv_status" value="STARTED"/>
-            <column name="serv_updattim" value="${now}"/>
-            <column name="serv_upuser" value="osdjup"/>
-        </insert-->
         
         <sql dbms="postgresql">
             ALTER SEQUENCE exchange.service_serv_id_seq RESTART WITH 10;

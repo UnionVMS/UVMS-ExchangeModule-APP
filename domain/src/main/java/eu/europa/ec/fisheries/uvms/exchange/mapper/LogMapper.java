@@ -16,8 +16,11 @@ import eu.europa.ec.fisheries.uvms.exchange.entity.exchangelog.ExchangeLog;
 import eu.europa.ec.fisheries.uvms.exchange.entity.exchangelog.ExchangeLogStatus;
 import org.slf4j.MDC;
 
+import java.util.Date;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 public class LogMapper {
 
@@ -66,15 +69,15 @@ public class LogMapper {
         entity.setTodt(log.getTodt());
         entity.setTo(log.getTo());
         entity.setDf(log.getDf());
-        entity.setGuid(log.getGuid());
+        //entity.setGuid(log.getGuid());    //should you really set a primary id somewhere other then the db/entity class?
 
         if (log.getTypeRef() != null) {
-            entity.setTypeRefGuid(log.getTypeRef().getRefGuid());
+            entity.setTypeRefGuid( (log.getTypeRef().getRefGuid() == null) ? null : UUID.fromString(log.getTypeRef().getRefGuid()));
             entity.setTypeRefType(log.getTypeRef().getType());
             entity.setTypeRefMessage(log.getTypeRef().getMessage());
         }
 
-        entity.setDateReceived(log.getDateRecieved());
+        entity.setDateReceived(log.getDateRecieved().toInstant());
         entity.setSenderReceiver(log.getSenderReceiver());
 
         ExchangeLogStatusTypeType status = ExchangeLogStatusTypeType.ISSUED;
@@ -83,12 +86,7 @@ public class LogMapper {
         }
 
         List<ExchangeLogStatus> statusHistory = new ArrayList<>();
-        ExchangeLogStatus statusLog = new ExchangeLogStatus();
-        statusLog.setLog(entity);
-        statusLog.setStatus(status);
-        statusLog.setStatusTimestamp(eu.europa.ec.fisheries.uvms.commons.date.DateUtils.nowUTC().toDate());
-        statusLog.setUpdatedBy(username);
-        statusLog.setUpdateTime(eu.europa.ec.fisheries.uvms.commons.date.DateUtils.nowUTC().toDate());
+        ExchangeLogStatus statusLog = toNewStatusEntity(entity, status, username);
         statusHistory.add(statusLog);
 
         entity.setStatus(status);
@@ -99,7 +97,7 @@ public class LogMapper {
 
         entity.setStatusHistory(statusHistory);
         entity.setUpdatedBy(username);
-        entity.setUpdateTime(eu.europa.ec.fisheries.uvms.commons.date.DateUtils.nowUTC().toDate());
+        entity.setUpdateTime(Instant.now());
         entity.setType(log.getType());
         entity.setDestination(log.getDestination());
         entity.setMdcRequestId(MDC.get("requestId"));
@@ -116,7 +114,7 @@ public class LogMapper {
     private static ExchangeLog toSendMovementEntity(ExchangeLogType log) {
         SendMovementType type = (SendMovementType) log;
         ExchangeLog entity = new ExchangeLog();
-        entity.setFwdDate(type.getFwdDate());
+        entity.setFwdDate(type.getFwdDate().toInstant());
         entity.setFwdRule(type.getFwdRule());
         entity.setRecipient(type.getRecipient());
         entity.setTransferIncoming(false);
@@ -128,7 +126,7 @@ public class LogMapper {
         ExchangeLog entity = new ExchangeLog();
         entity.setTransferIncoming(false);
         entity.setRecipient(type.getRecipient());
-        entity.setFwdDate(type.getFwdDate());
+        entity.setFwdDate(type.getFwdDate().toInstant());
         return entity;
     }
 
@@ -138,7 +136,7 @@ public class LogMapper {
         entity.setTransferIncoming(false);
         entity.setFwdRule(type.getFwdRule());
         entity.setRecipient(type.getRecipient());
-        entity.setFwdDate(type.getFwdDate());
+        entity.setFwdDate(type.getFwdDate().toInstant());
         return entity;
     }
 
@@ -155,28 +153,28 @@ public class LogMapper {
             model = type;
         } else if (logType.equals(LogType.SEND_MOVEMENT)) {
             SendMovementType type = new SendMovementType();
-            type.setFwdDate(entity.getFwdDate());
+            type.setFwdDate(Date.from(entity.getFwdDate()));
             type.setFwdRule(entity.getFwdRule());
             type.setRecipient(entity.getRecipient());
             logType = LogType.SEND_MOVEMENT;
             model = type;
         } else if (logType.equals(LogType.SEND_POLL)) {
             SendPollType type = new SendPollType();
-            type.setFwdDate(entity.getFwdDate());
+            type.setFwdDate(Date.from(entity.getFwdDate()));
             type.setRecipient(entity.getRecipient());
             logType = LogType.SEND_POLL;
             model = type;
         } else if (logType.equals(LogType.SEND_EMAIL)) {
             SendEmailType type = new SendEmailType();
             type.setFwdRule(entity.getFwdRule());
-            type.setFwdDate(entity.getFwdDate());
+            type.setFwdDate(Date.from(entity.getFwdDate()));
             type.setRecipient(entity.getRecipient());
             logType = LogType.SEND_EMAIL;
             model = type;
         }
 
-        model.setDateRecieved(entity.getDateReceived());
-        model.setGuid(entity.getGuid());
+        model.setDateRecieved(Date.from(entity.getDateReceived()));
+        model.setGuid(entity.getId().toString());
         model.setSenderReceiver(entity.getSenderReceiver());
         model.setIncoming(entity.getTransferIncoming());
         model.setStatus(entity.getStatus());
@@ -192,7 +190,7 @@ public class LogMapper {
 
         if (entity.getTypeRefType() != null) {
             LogRefType logRefType = new LogRefType();
-            logRefType.setRefGuid(entity.getTypeRefGuid());
+            logRefType.setRefGuid( (entity.getTypeRefGuid() == null ? null : entity.getTypeRefGuid().toString()) );
             logRefType.setType(entity.getTypeRefType());
             logRefType.setMessage(entity.getTypeRefMessage());
             model.setTypeRef(logRefType);
@@ -205,23 +203,26 @@ public class LogMapper {
         ExchangeLogStatus entity = new ExchangeLogStatus();
         entity.setLog(parent);
         entity.setStatus(status);
-        entity.setStatusTimestamp(eu.europa.ec.fisheries.uvms.commons.date.DateUtils.nowUTC().toDate());
+        entity.setStatusTimestamp(Instant.now());
         entity.setUpdatedBy(username);
-        entity.setUpdateTime(eu.europa.ec.fisheries.uvms.commons.date.DateUtils.nowUTC().toDate());
+        entity.setUpdateTime(Instant.now());
         return entity;
     }
 
 
     public static ExchangeLogStatusType toStatusModel(ExchangeLog exchangeLog) {
+        if(exchangeLog == null){
+            return null;
+        }
         ExchangeLogStatusType model = new ExchangeLogStatusType();
         if (exchangeLog.getType().equals(LogType.SEND_POLL)) {
             model.setIdentifier(exchangeLog.getRecipient());
         }
-        model.setGuid(exchangeLog.getGuid());
+        model.setGuid(exchangeLog.getId().toString());
 
         if (exchangeLog.getTypeRefType() != null) {
             LogRefType logRefType = new LogRefType();
-            logRefType.setRefGuid(exchangeLog.getTypeRefGuid());
+            logRefType.setRefGuid( (exchangeLog.getTypeRefGuid() == null) ? null : exchangeLog.getTypeRefGuid().toString());
             logRefType.setType(exchangeLog.getTypeRefType());
             logRefType.setMessage(exchangeLog.getTypeRefMessage());
             model.setTypeRef(logRefType);
@@ -232,7 +233,7 @@ public class LogMapper {
             for (ExchangeLogStatus history : exchangeLog.getStatusHistory()) {
                 ExchangeLogStatusHistoryType historyModel = new ExchangeLogStatusHistoryType();
                 historyModel.setStatus(history.getStatus());
-                historyModel.setTimestamp(history.getStatusTimestamp());
+                historyModel.setTimestamp(Date.from(history.getStatusTimestamp()));
                 historyModelList.add(historyModel);
             }
             model.getHistory().addAll(historyModelList);

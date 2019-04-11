@@ -11,67 +11,37 @@ copy of the GNU General Public License along with the IFDM Suite. If not, see <h
  */
 package eu.europa.ec.fisheries.uvms.exchange.dao.bean;
 
-import eu.europa.ec.fisheries.uvms.exchange.constant.ExchangeConstants;
 import eu.europa.ec.fisheries.uvms.exchange.dao.Dao;
-import eu.europa.ec.fisheries.uvms.exchange.dao.UnsentMessageDao;
 import eu.europa.ec.fisheries.uvms.exchange.entity.unsent.UnsentMessage;
-import eu.europa.ec.fisheries.uvms.exchange.exception.ExchangeDaoException;
-import eu.europa.ec.fisheries.uvms.exchange.exception.NoEntityFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.ejb.Stateless;
-import javax.persistence.NoResultException;
 import javax.persistence.TypedQuery;
 import java.util.List;
+import java.util.UUID;
 
 @Stateless
-public class UnsentMessageDaoBean extends Dao implements UnsentMessageDao {
+public class UnsentMessageDaoBean extends Dao {
     final static Logger LOG = LoggerFactory.getLogger(UnsentMessageDaoBean.class);
     
-	@Override
-	public UnsentMessage create(UnsentMessage unsentMessage) throws ExchangeDaoException {
-		try {
-			em.persist(unsentMessage);
-			return unsentMessage;
-		}  catch (Exception e) {
-			LOG.error("[ Error when creating unsent message ]" + e.getMessage());
-			throw new ExchangeDaoException("[ Error when creating unsent message ]");
-		}
+	public UnsentMessage create(UnsentMessage unsentMessage) {
+		em.persist(unsentMessage);
+		return unsentMessage;
 	}
 
-	@Override
-	public UnsentMessage remove(UnsentMessage unsentMessage) throws ExchangeDaoException {
-		try {
-			em.remove(unsentMessage);
-			return unsentMessage;
-		}  catch (Exception e) {
-			LOG.error("[ Error when removing unsent message ]" + e.getMessage());
-			throw new ExchangeDaoException("[ Error when removing unsent message ]");
-		}
+	public UnsentMessage remove(UnsentMessage unsentMessage) {
+		em.remove(unsentMessage);
+		return unsentMessage;
 	}
 
-	@Override
-	public List<UnsentMessage> getAll() throws ExchangeDaoException {
-		try {
-            TypedQuery<UnsentMessage> query = em.createNamedQuery(ExchangeConstants.UNSENT_FIND_ALL, UnsentMessage.class);
-            return query.getResultList();
-        } catch (Exception e) {
-            LOG.error("[ Error when getting entity list. ] {}", e.getMessage());
-            throw new ExchangeDaoException("[ Error when getting entity list. ]");
-        }
+	public List<UnsentMessage> getAll() {
+		TypedQuery<UnsentMessage> query = em.createNamedQuery(UnsentMessage.UNSENT_FIND_ALL, UnsentMessage.class);
+		return query.getResultList();
 	}
 
-	@Override
-	public UnsentMessage getByGuid(String guid) throws NoEntityFoundException {
-		try {
-            TypedQuery<UnsentMessage> query = em.createNamedQuery(ExchangeConstants.UNSENT_BY_GUID, UnsentMessage.class);
-            query.setParameter("guid", guid);
-            return query.getSingleResult();
-        } catch (NoResultException e) {
-            LOG.error("[ Error when getting entity by ID. ] {}", e.getMessage());
-            throw new NoEntityFoundException("[ Error when getting entity by ID. ]");
-        }
+	public UnsentMessage getByGuid(UUID guid) {
+		return em.find(UnsentMessage.class, guid);
 	}
 
 }

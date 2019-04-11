@@ -11,10 +11,8 @@ copy of the GNU General Public License along with the IFDM Suite. If not, see <h
  */
 package eu.europa.ec.fisheries.uvms.exchange;
 
-import eu.europa.ec.fisheries.uvms.exchange.constant.ExchangeConstants;
 import eu.europa.ec.fisheries.uvms.exchange.dao.bean.ServiceRegistryDaoBean;
 import eu.europa.ec.fisheries.uvms.exchange.entity.serviceregistry.Service;
-import eu.europa.ec.fisheries.uvms.exchange.exception.ExchangeDaoException;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -27,6 +25,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import static org.junit.Assert.assertSame;
 import static org.mockito.Mockito.mock;
@@ -48,7 +47,7 @@ public class DaoBeanTest {
     }
 
     @Test
-    public void testCreateService() throws ExchangeDaoException {
+    public void testCreateService() {
         Service carrier = new Service();
 
         dao.createEntity(carrier);
@@ -56,8 +55,8 @@ public class DaoBeanTest {
     }
 
     @Test
-    public void testGetServiceById() throws ExchangeDaoException {
-        Long id = 1L;
+    public void testGetServiceById() {
+        UUID id = UUID.randomUUID();
         Service entity = new Service();
         entity.setId(id);
         when(em.find(Service.class, id)).thenReturn(entity);
@@ -69,8 +68,8 @@ public class DaoBeanTest {
     }
 
     @Test
-    public void testUpdateService() throws ExchangeDaoException {
-        Long id = 11L;
+    public void testUpdateService() {
+        UUID id = UUID.randomUUID();
 
         Service myEntity = new Service();
         myEntity.setId(id);
@@ -86,21 +85,21 @@ public class DaoBeanTest {
     }
 
     @Test
-    public void testDeleteService() throws ExchangeDaoException {
+    public void testDeleteService() {
         // em.remove(arg0);
     }
 
     @Test
-    public void testGetServiceList() throws ExchangeDaoException {
+    public void testGetServiceList() {
         TypedQuery<Service> query = mock(TypedQuery.class);
-        when(em.createNamedQuery(ExchangeConstants.SERVICE_FIND_ALL, Service.class)).thenReturn(query);
+        when(em.createNamedQuery(Service.SERVICE_FIND_ALL, Service.class)).thenReturn(query);
 
         List<Service> dummyResult = new ArrayList<Service>();
         when(query.getResultList()).thenReturn(dummyResult);
 
         List<Service> result = dao.getServices();
 
-        verify(em).createNamedQuery(ExchangeConstants.SERVICE_FIND_ALL, Service.class);
+        verify(em).createNamedQuery(Service.SERVICE_FIND_ALL, Service.class);
         verify(query).getResultList();
         assertSame(dummyResult, result);
     }

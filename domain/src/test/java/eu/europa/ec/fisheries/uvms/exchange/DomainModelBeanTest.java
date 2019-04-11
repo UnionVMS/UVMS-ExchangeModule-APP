@@ -11,26 +11,21 @@ copy of the GNU General Public License along with the IFDM Suite. If not, see <h
  */
 package eu.europa.ec.fisheries.uvms.exchange;
 
-import static junit.framework.TestCase.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import eu.europa.ec.fisheries.schema.exchange.service.v1.CapabilityListType;
-import eu.europa.ec.fisheries.schema.exchange.service.v1.ServiceResponseType;
 import eu.europa.ec.fisheries.schema.exchange.service.v1.ServiceType;
 import eu.europa.ec.fisheries.schema.exchange.service.v1.SettingListType;
 import eu.europa.ec.fisheries.uvms.exchange.bean.ServiceRegistryModelBean;
-import eu.europa.ec.fisheries.uvms.exchange.dao.ServiceRegistryDao;
-import eu.europa.ec.fisheries.uvms.exchange.entity.exchangelog.ExchangeLog;
+import eu.europa.ec.fisheries.uvms.exchange.dao.bean.ServiceRegistryDaoBean;
 import eu.europa.ec.fisheries.uvms.exchange.entity.serviceregistry.Service;
 import eu.europa.ec.fisheries.uvms.exchange.entity.serviceregistry.ServiceCapability;
 import eu.europa.ec.fisheries.uvms.exchange.entity.serviceregistry.ServiceSetting;
-import eu.europa.ec.fisheries.uvms.exchange.exception.ExchangeDaoException;
-import eu.europa.ec.fisheries.uvms.exchange.exception.ExchangeDaoMappingException;
-import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelException;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -44,7 +39,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 public class DomainModelBeanTest {
 
     @Mock
-    ServiceRegistryDao dao;
+    ServiceRegistryDaoBean dao;
 
     @InjectMocks
     private ServiceRegistryModelBean model;
@@ -56,10 +51,10 @@ public class DomainModelBeanTest {
 
     @Ignore
     @Test
-    public void testCreateModel() throws ExchangeModelException, ExchangeDaoException, ExchangeDaoMappingException {
-        Long id = 1L;
+    public void testCreateModel() {
+        UUID id = UUID.randomUUID();
 
-        ServiceType serviceType = MockData.getModel(id.intValue());
+        ServiceType serviceType = MockData.getModel((int) id.getLeastSignificantBits());
         CapabilityListType capabilityListType = MockData.getCapabilityList();
         SettingListType settingListType = MockData.getSettingList();
         
@@ -74,19 +69,9 @@ public class DomainModelBeanTest {
         when(dao.getServiceByServiceClassName(any(String.class))).thenReturn(null);
         //when(dao.updateService(any(Service.class))).thenReturn(service);
 
-        ServiceResponseType result = model.registerService(serviceType, capabilityListType, settingListType, "TEST");
+        Service result = model.registerService(service, "TEST");
         
         //assertEquals(id.toString(), result.getId());
     }
 
-    @Test
-    public void testSizeOfGuids(){
-        ExchangeLog exchangeLog = new ExchangeLog();
-        exchangeLog.setTypeRefGuid("367637676376376337863873683763873690282082822908298");
-        exchangeLog.prepersist();
-
-        assertTrue(exchangeLog.getTypeRefGuid().length() > 36);
-        assertTrue(exchangeLog.getGuid().length() == 36);
-
-    }
 }

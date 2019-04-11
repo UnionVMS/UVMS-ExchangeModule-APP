@@ -7,19 +7,19 @@
         <insert tableName="setting">
             <column name="set_id" value="1"/>
             <column name="set_name" value="username"/>
-            <column name="set_updattim" value="${now}"/>
+            <column name="set_updatetime" value="${now}"/>
             <column name="set_upuser" value="jojoha"/>
         </insert>
         <insert tableName="setting">
             <column name="set_id" value="2"/>
             <column name="set_name" value="url"/>
-            <column name="set_updattim" value="${now}"/>
+            <column name="set_updatetime" value="${now}"/>
             <column name="set_upuser" value="jojoha"/>
         </insert>
         <insert tableName="setting">
             <column name="set_id" value="3"/>
             <column name="set_name" value="password"/>
-            <column name="set_updattim" value="${now}"/>
+            <column name="set_updatetime" value="${now}"/>
             <column name="set_upuser" value="jojoha"/>
         </insert>
         <rollback>

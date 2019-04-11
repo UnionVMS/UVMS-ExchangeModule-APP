@@ -5,19 +5,19 @@
     
     <changeSet author="johlyn" id="create the exchange log table">
         <createTable remarks="Table containing the exchange logs in the exchange module" tableName="log_status">
-            <column name="logstatus_id" remarks="Auto id" type="BIGINT">
+            <column name="logstatus_id" remarks="Auto id" type="UUID">
                 <constraints nullable="false" primaryKey="true" primaryKeyName="log_status_pk"/>
             </column>
             <column name="logstatus_status" remarks="The status of the report" type="VARCHAR(50)">
                 <constraints nullable="false"/>
             </column>
-            <column name="logstatus_timestamp" type="timestamp" remarks="Timestamp for status.">
+            <column name="logstatus_timestamp" type="timestamp with time zone" remarks="Timestamp for status.">
                 <constraints nullable="false"/>
             </column>
-            <column name="logstatus_log_id" type="BIGINT" remarks="Fk to log table.">
+            <column name="logstatus_log_id" type="UUID" remarks="Fk to log table.">
                 <constraints nullable="false"/>
             </column>
-            <column name="logstatus_updattim" type="timestamp" remarks="Last updated date time.">
+            <column name="logstatus_updatetime" type="timestamp with time zone" remarks="Last updated date time.">
                 <constraints nullable="false"/>
             </column>
             <column name="logstatus_upuser" type="varchar(60)" remarks="Last update userid.">

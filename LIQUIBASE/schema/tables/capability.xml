@@ -12,7 +12,7 @@
             <column name="cap_name" remarks="The name of the capability" type="VARCHAR(100)">
                 <constraints nullable="false" unique="true"/>
             </column>
-            <column name="cap_updattim" type="timestamp" remarks="Last updated date time.">
+            <column name="cap_updatetime" type="timestamp" remarks="Last updated date time.">
                 <constraints nullable="false"/>
             </column>
             <column name="cap_upuser" type="varchar(60)" remarks="Last update userid.">

@@ -34,7 +34,7 @@ public class RequestFilter implements Filter {
     final static Logger LOG = LoggerFactory.getLogger(RequestFilter.class);
 
     @Override
-    public void init(FilterConfig filterConfig) throws ServletException {
+    public void init(FilterConfig filterConfig) {
         LOG.info("Requstfilter starting up!");
     }
 

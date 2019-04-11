@@ -6,10 +6,10 @@
     <changeSet author="nhily" id="table for linking a service with settings">
         
         <createTable remarks="Table for linking a plugin service with settings" tableName="unsent_message_property">
-            <column name="unsentprop_id" remarks="Id and code for table" type="BIGINT">
+            <column name="unsentprop_id" remarks="Id and code for table" type="UUID">
                 <constraints nullable="false" primaryKey="true" primaryKeyName="unsentprop_pk"/>
             </column>
-            <column name="unsentprop_unsent_id" remarks="Foreign key to the plugin service." type="BIGINT">
+            <column name="unsentprop_unsent_id" remarks="Foreign key to the plugin service." type="UUID">
             </column>
             <column name="unsentprop_key" remarks="The setting key" type="VARCHAR(50)">
             </column>
@@ -22,7 +22,7 @@
             baseTableName="unsent_message_property"
             baseColumnNames="unsentprop_unsent_id"
             referencedTableName="unsent_message"
-            referencedColumnNames="unsent_id"/>
+            referencedColumnNames="unsent_guid"/>
         
         <rollback>
             <dropTable tableName="unsent_message_property" cascadeConstraints="true"/>
@@ -34,7 +34,7 @@
         <createIndex
                 indexName="unsent_message_property_i_1"
                 tableName="unsent_message_property">
-            <column name="unsentprop_unsent_id" type="bigint"/>
+            <column name="unsentprop_unsent_id" type="UUID"/>
         </createIndex>
 
         <rollback>

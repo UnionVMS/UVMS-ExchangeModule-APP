@@ -13,6 +13,7 @@ package eu.europa.ec.fisheries.uvms.exchange.mapper;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -29,8 +30,6 @@ import eu.europa.ec.fisheries.uvms.exchange.MockData;
 import eu.europa.ec.fisheries.uvms.exchange.entity.serviceregistry.Service;
 import eu.europa.ec.fisheries.uvms.exchange.entity.serviceregistry.ServiceCapability;
 import eu.europa.ec.fisheries.uvms.exchange.entity.serviceregistry.ServiceSetting;
-import eu.europa.ec.fisheries.uvms.exchange.exception.ExchangeDaoException;
-import eu.europa.ec.fisheries.uvms.exchange.exception.ExchangeDaoMappingException;
 
 import static org.junit.Assert.*;
 
@@ -50,8 +49,8 @@ public class MapperTest {
     // }
 
     @Test
-    public void testEntityToModel() throws ExchangeDaoException, ExchangeDaoMappingException {
-        Integer id = 1;
+    public void testEntityToModel() {
+        UUID id = UUID.randomUUID();
         Service entity = MockData.getEntity(id);
         List<ServiceCapability> capabilityList = new ArrayList<>();
 		entity.setServiceCapabilityList(capabilityList);
@@ -65,7 +64,7 @@ public class MapperTest {
     }
 
     @Test
-    public void testModelToEntity() throws ExchangeDaoException, ExchangeDaoMappingException {
+    public void testModelToEntity()  {
         Integer id = 1;
         ServiceType model = MockData.getModel(id);
         CapabilityListType capabilityListType = MockData.getCapabilityList();
@@ -79,8 +78,8 @@ public class MapperTest {
     }
 
     @Test
-    public void testEntityAndModelToEntity() throws ExchangeDaoException, ExchangeDaoMappingException {
-        Integer id = 1;
+    public void testEntityAndModelToEntity() {
+        UUID id = UUID.randomUUID();
         Service entity = MockData.getEntity(id);
         ServiceType service = MockData.getModel(1);
         CapabilityListType capabilityListType = MockData.getCapabilityList();
@@ -94,8 +93,8 @@ public class MapperTest {
     }
 
     @Test
-    public void testEntityAndModelToModel() throws ExchangeDaoException, ExchangeDaoMappingException {
-        Service entity = MockData.getEntity(1);
+    public void testEntityAndModelToModel() {
+        Service entity = MockData.getEntity(UUID.randomUUID());
         List<ServiceCapability> capabilityList = new ArrayList<>();
 		entity.setServiceCapabilityList(capabilityList);
         List<ServiceSetting> settingList = new ArrayList<>();
@@ -111,27 +110,27 @@ public class MapperTest {
     public void testUpsert() {
     	String newValue = "NEW_VALUE";
     	
-    	Service entity = MockData.getEntity(1);
+    	Service entity = MockData.getEntity(UUID.randomUUID());
     	entity.setServiceCapabilityList(MockData.getEntityCapabilities(entity));
     	entity.setServiceSettingList(MockData.getEntitySettings(entity));
 
-    	SettingListType updateSettings = new SettingListType();
-    	SettingType updateSetting = new SettingType();
-    	updateSetting.setKey(MockData.SETTING_KEY);
+    	List<ServiceSetting> updateSettings = new ArrayList<>();
+        ServiceSetting updateSetting = new ServiceSetting();
+    	updateSetting.setSetting(MockData.SETTING_KEY);
 		updateSetting.setValue(newValue);
-    	updateSettings.getSetting().add(updateSetting);
+    	updateSettings.add(updateSetting);
     	List<ServiceSetting> list = mapper.mapSettingsList(entity, updateSettings, "TEST");
     	
     	assertFalse(list.isEmpty());
     	for(ServiceSetting setting : list) {
     		assertSame(setting.getValue(), newValue);
     	}
-    	
-    	SettingListType newSettings = new SettingListType();
-    	SettingType newSetting = new SettingType();
-    	newSetting.setKey("NEW.KEY");
+
+        List<ServiceSetting>  newSettings = new ArrayList<>();
+        ServiceSetting newSetting = new ServiceSetting();
+    	newSetting.setSetting("NEW.KEY");
     	newSetting.setValue("NEW.VALUE");
-		newSettings.getSetting().add(newSetting);
+		newSettings.add(newSetting);
 		list = mapper.mapSettingsList(entity, newSettings, "TEST");
 
 		assertTrue(list.size() == 1);

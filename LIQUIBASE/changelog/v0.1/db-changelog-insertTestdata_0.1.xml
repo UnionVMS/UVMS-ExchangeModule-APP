@@ -9,7 +9,7 @@
     <!--include file="\schema\testdata\ServiceRegistry\insertServiceCapability.xml"/-->
     <!--include file="\schema\testdata\ServiceRegistry\insertServiceSettings.xml"/-->
     
-    <include file="\schema\testdata\insertExchangelog.xml"/>
+    <include file="..\..\schema\testdata\insertExchangelog.xml" relativeToChangelogFile="true"/>
     <!--<include file="\schema\testdata\ServiceRegistry\insertServiceParameters.xml"/> --> <!-- insert into parameter -->
     <!--<include file="\schema\testdata\ServiceRegistry\insertServiceMapping.xml"/>-->
    	

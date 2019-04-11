@@ -15,6 +15,7 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 
 import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeListCriteria;
 import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeListPagination;
@@ -22,11 +23,9 @@ import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeListQuery;
 import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogType;
 import eu.europa.ec.fisheries.schema.exchange.v1.TypeRefType;
 import eu.europa.ec.fisheries.uvms.exchange.bean.ExchangeLogModelBean;
-import eu.europa.ec.fisheries.uvms.exchange.dao.ExchangeLogDao;
+import eu.europa.ec.fisheries.uvms.exchange.dao.bean.ExchangeLogDaoBean;
 import eu.europa.ec.fisheries.uvms.exchange.entity.exchangelog.ExchangeLog;
 import eu.europa.ec.fisheries.uvms.exchange.model.dto.ListResponseDto;
-import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelException;
-import lombok.SneakyThrows;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -45,7 +44,7 @@ public class ExchangeLogModelTest {
     private ExchangeLogModelBean exchangeLogModel;
 
     @Mock
-    private ExchangeLogDao logDao;
+    private ExchangeLogDaoBean logDao;
 
     private List<ExchangeLog> logs;
 
@@ -56,21 +55,20 @@ public class ExchangeLogModelTest {
     public void prepare(){
         logs = MockData.getLogEntities();
         refLogs = MockData.getLogEntities();
-        refLogs.get(0).setTypeRefGuid(logs.get(0).getGuid());
-        refLogs.get(0).setTypeRefGuid(logs.get(1).getGuid());
+        refLogs.get(0).setTypeRefGuid(logs.get(0).getId());
+        refLogs.get(0).setTypeRefGuid(logs.get(1).getId());
     }
 
     @Test
-    public void testGetExchangeLogByRefUUIDAndType() throws ExchangeModelException {
-        Mockito.when(logDao.getExchangeLogByTypesRefAndGuid(Mockito.anyString(), Mockito.anyList()))
+    public void testGetExchangeLogByRefUUIDAndType() {
+        Mockito.when(logDao.getExchangeLogByTypesRefAndGuid(Mockito.any(), Mockito.anyList()))
                 .thenReturn(logs);
-        Set<ExchangeLogType> exchangeLogByRefUUIDAndType = exchangeLogModel.getExchangeLogByRefUUIDAndType("refUUID", TypeRefType.FA_QUERY);
+        Set<ExchangeLogType> exchangeLogByRefUUIDAndType = exchangeLogModel.getExchangeLogByRefUUIDAndType(UUID.randomUUID(), TypeRefType.FA_QUERY);
         assertFalse(exchangeLogByRefUUIDAndType.isEmpty());
     }
 
     @Test
-    @SneakyThrows
-    public void testDataEnrichment(){
+    public void testDataEnrichment() throws Exception{
 
         Mockito.when(logDao.getExchangeLogListSearchCount(Mockito.anyString(), Mockito.anyList()))
                 .thenReturn(100L);

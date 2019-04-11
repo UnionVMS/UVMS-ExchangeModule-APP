@@ -11,7 +11,7 @@
             <column name="servset_serv_id" value="1"/>
             <column name="servset_setting" value="eu.europa.plugin.inmarsat.eik.USER"/> 
             <column name="servset_value" value="eikuser"/>
-            <column name="servset_updattim" value="${now}"/>
+            <column name="servset_updatetime" value="${now}"/>
             <column name="servset_upuser" value="jojoha"/>
         </insert>
         <insert tableName="service_setting">
@@ -19,7 +19,7 @@
             <column name="servset_serv_id" value="1"/>
             <column name="servset_setting" value="eu.europa.plugin.inmarsat.eik.URL"/> 
             <column name="servset_value" value="http://test.eiktest"/>
-            <column name="servset_updattim" value="${now}"/>
+            <column name="servset_updatetime" value="${now}"/>
             <column name="servset_upuser" value="jojoha"/>
         </insert>
         
@@ -29,7 +29,7 @@
             <column name="servset_serv_id" value="2"/>
             <column name="servset_setting" value="eu.europa.plugin.inmarsat.burum.USER"/> 
             <column name="servset_value" value="burumuser"/>
-            <column name="servset_updattim" value="${now}"/>
+            <column name="servset_updatetime" value="${now}"/>
             <column name="servset_upuser" value="jojoha"/>
         </insert>
         <insert tableName="service_setting">
@@ -37,7 +37,7 @@
             <column name="servset_serv_id" value="2"/>
             <column name="servset_setting" value="eu.europa.plugin.inmarsat.burum.TIMESPAN"/>
             <column name="servset_value" value="100"/>
-            <column name="servset_updattim" value="${now}"/>
+            <column name="servset_updatetime" value="${now}"/>
             <column name="servset_upuser" value="jojoha"/>
         </insert>
         

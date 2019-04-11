@@ -11,7 +11,7 @@ copy of the GNU General Public License along with the IFDM Suite. If not, see <h
  */
 package eu.europa.ec.fisheries.uvms.exchange.entity.unsent;
 
-import java.util.Date;
+import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
@@ -19,28 +19,23 @@ import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
-import eu.europa.ec.fisheries.uvms.exchange.constant.ExchangeConstants;
-
 @Entity
 @Table(name="unsent_message")
 //@formatter:off
 @NamedQueries({
-	@NamedQuery(name = ExchangeConstants.UNSENT_FIND_ALL, query = "SELECT um FROM UnsentMessage um"),
-	@NamedQuery(name = ExchangeConstants.UNSENT_BY_GUID, query = "SELECT um FROM UnsentMessage um WHERE um.guid = :guid")
+	@NamedQuery(name = UnsentMessage.UNSENT_FIND_ALL, query = "SELECT um FROM UnsentMessage um"),
+	@NamedQuery(name = UnsentMessage.UNSENT_BY_GUID, query = "SELECT um FROM UnsentMessage um WHERE um.guid = :guid")
 })
 //@formatter:on
 public class UnsentMessage {
 
+	public static final String UNSENT_FIND_ALL = "UnsentMessage.findAll";
+	public static final String UNSENT_BY_GUID = "UnsentMessage.findByGuid";
 
 	@Id
-	@Column(name="unsent_id")
 	@GeneratedValue(strategy = GenerationType.AUTO)
-	private Long id;
-	
-	@NotNull
-	@Size(max=36)
-	@Column(name="unsent_guid", unique=true)
-	private String guid;
+	@Column(name="unsent_guid")
+	private UUID guid;
 	
 	@Size(max=100)
 	@Column(name="unsent_senderreceiver")
@@ -51,44 +46,38 @@ public class UnsentMessage {
 	private String recipient;
 	
 	@NotNull
-	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name="unsent_datereceived")
-	private Date dateReceived;
+	private Instant dateReceived;
 	
 	@NotNull
 	@Size(max=8192)
 	@Column(name="unsent_message")
 	private String message;
 	
-	@Temporal(TemporalType.TIMESTAMP)
-	@Column(name="unsent_updattim")
-	private Date updateTime;
+	@Column(name="unsent_updatetime")
+	private Instant updateTime;
 	
 	@Size(max=60)
 	@Column(name="unsent_upuser")
 	private String updatedBy;
 
+	@Column(name="unsent_function")
+	private String function;
+
     @OneToMany(cascade = {CascadeType.PERSIST, CascadeType.REMOVE}, fetch = FetchType.LAZY, mappedBy = "unsentMessage")
     private List<UnsentMessageProperty> properties;
 
+    @PreUpdate
 	@PrePersist
-	public void prepersist() {
-		setGuid(UUID.randomUUID().toString());
+	public void preUpdate(){
+    	updateTime = Instant.now();
 	}
 
-	public Long getId() {
-		return id;
-	}
-
-	public void setId(Long id) {
-		this.id = id;
-	}
-
-	public String getGuid() {
+	public UUID getGuid() {
 		return guid;
 	}
 
-	public void setGuid(String guid) {
+	public void setGuid(UUID guid) {
 		this.guid = guid;
 	}
 
@@ -100,11 +89,11 @@ public class UnsentMessage {
 		this.recipient = recipient;
 	}
 
-	public Date getDateReceived() {
+	public Instant getDateReceived() {
 		return dateReceived;
 	}
 
-	public void setDateReceived(Date dateReceived) {
+	public void setDateReceived(Instant dateReceived) {
 		this.dateReceived = dateReceived;
 	}
 
@@ -116,11 +105,11 @@ public class UnsentMessage {
 		this.message = message;
 	}
 
-	public Date getUpdateTime() {
+	public Instant getUpdateTime() {
 		return updateTime;
 	}
 
-	public void setUpdateTime(Date updateTime) {
+	public void setUpdateTime(Instant updateTime) {
 		this.updateTime = updateTime;
 	}
 
@@ -147,4 +136,12 @@ public class UnsentMessage {
     public void setProperties(List<UnsentMessageProperty> properties) {
         this.properties = properties;
     }
+
+	public String getFunction() {
+		return function;
+	}
+
+	public void setFunction(String function) {
+		this.function = function;
+	}
 }

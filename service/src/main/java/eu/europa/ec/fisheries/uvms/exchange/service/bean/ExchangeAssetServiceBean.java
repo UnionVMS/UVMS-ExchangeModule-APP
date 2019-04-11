@@ -11,50 +11,50 @@ copy of the GNU General Public License along with the IFDM Suite. If not, see <h
  */
 package eu.europa.ec.fisheries.uvms.exchange.service.bean;
 
-import eu.europa.ec.fisheries.uvms.commons.message.api.MessageException;
-import javax.ejb.EJB;
 import javax.ejb.Stateless;
-import javax.jms.TextMessage;
+import javax.inject.Inject;
 
+import eu.europa.ec.fisheries.uvms.asset.client.AssetClient;
+import eu.europa.ec.fisheries.uvms.asset.client.model.AssetDTO;
+import eu.europa.ec.fisheries.uvms.asset.client.model.AssetIdentifier;
+import eu.europa.ec.fisheries.wsdl.asset.types.AssetId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import eu.europa.ec.fisheries.uvms.asset.model.exception.AssetModelMapperException;
-import eu.europa.ec.fisheries.uvms.asset.model.mapper.AssetModuleRequestMapper;
-import eu.europa.ec.fisheries.uvms.asset.model.mapper.AssetModuleResponseMapper;
-import eu.europa.ec.fisheries.uvms.exchange.message.constants.MessageQueue;
-import eu.europa.ec.fisheries.uvms.exchange.message.consumer.ExchangeConsumer;
-import eu.europa.ec.fisheries.uvms.exchange.message.exception.ExchangeMessageException;
-import eu.europa.ec.fisheries.uvms.exchange.message.producer.ExchangeMessageProducer;
-import eu.europa.ec.fisheries.uvms.exchange.service.ExchangeAssetService;
-import eu.europa.ec.fisheries.uvms.exchange.service.exception.ExchangeServiceException;
 import eu.europa.ec.fisheries.wsdl.asset.types.Asset;
 import eu.europa.ec.fisheries.wsdl.asset.types.AssetIdType;
 
 @Stateless
-public class ExchangeAssetServiceBean implements ExchangeAssetService {
+public class ExchangeAssetServiceBean {
 	final static Logger LOG = LoggerFactory.getLogger(ExchangeAssetServiceBean.class);
-	
-	@EJB
-	ExchangeMessageProducer producer;
-	
-	@EJB
-    ExchangeConsumer consumer;
 
-	@Override
-	public Asset getAsset(String assetGuid) throws ExchangeServiceException {
+	@Inject
+	private AssetClient assetClient;
+
+	public Asset getAsset(String assetGuid) {
 		try {
-            String request = AssetModuleRequestMapper.createGetAssetModuleRequest(assetGuid, AssetIdType.GUID);
-            String messageId = producer.sendMessageOnQueue(request, MessageQueue.VESSEL);
-            TextMessage response = consumer.getMessage(messageId, TextMessage.class);
-            return AssetModuleResponseMapper.mapToAssetFromResponse(response, messageId);
-		} catch (ExchangeMessageException | MessageException e) {
-			LOG.error("Couldn't send message to vessel module");
-			throw new ExchangeServiceException("Couldn't send message to vessel module");
-		} catch (AssetModelMapperException e) {
-            LOG.error("Couldn't map asset object by guid:  {}", assetGuid);
-            throw new ExchangeServiceException("Couldn't map asset object by guid:  " + assetGuid);
-        }
+
+			LOG.trace("Asking asset for asset with guid " + assetGuid);
+			AssetDTO assetDTO = assetClient.getAssetById(AssetIdentifier.GUID, assetGuid);
+			return mapToAssetFromAssetDTO(assetDTO);
+
+		}catch (Exception e){
+			throw new RuntimeException(e);		//convert various asset exceptions to runtime
+		}
+	}
+
+	public Asset mapToAssetFromAssetDTO(AssetDTO dto){
+		Asset asset = new Asset();
+		AssetId assetId = new AssetId();
+		assetId.setGuid(dto.getId().toString());
+		assetId.setType(AssetIdType.GUID);
+		assetId.setValue(dto.getId().toString());
+		asset.setAssetId(assetId);
+
+		asset.setName(dto.getName());
+		//Set more stuff in this thing when they are needed
+
+		return asset;
 	}
 
 }

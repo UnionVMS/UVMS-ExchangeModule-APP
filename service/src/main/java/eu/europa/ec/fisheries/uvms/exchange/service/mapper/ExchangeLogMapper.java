@@ -11,9 +11,14 @@ copy of the GNU General Public License along with the IFDM Suite. If not, see <h
  */
 package eu.europa.ec.fisheries.uvms.exchange.service.mapper;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
+import eu.europa.ec.fisheries.uvms.exchange.entity.exchangelog.ExchangeLog;
+import eu.europa.ec.fisheries.uvms.exchange.entity.exchangelog.ExchangeLogStatus;
+import eu.europa.ec.fisheries.uvms.exchange.entity.unsent.UnsentMessageProperty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,40 +33,25 @@ import eu.europa.ec.fisheries.schema.exchange.plugin.types.v1.EmailType;
 import eu.europa.ec.fisheries.schema.exchange.plugin.types.v1.PluginType;
 import eu.europa.ec.fisheries.schema.exchange.plugin.types.v1.PollType;
 import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogStatusTypeType;
-import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogType;
-import eu.europa.ec.fisheries.schema.exchange.v1.LogRefType;
 import eu.europa.ec.fisheries.schema.exchange.v1.LogType;
-import eu.europa.ec.fisheries.schema.exchange.v1.ReceiveMovementType;
-import eu.europa.ec.fisheries.schema.exchange.v1.SendEmailType;
-import eu.europa.ec.fisheries.schema.exchange.v1.SendMovementType;
-import eu.europa.ec.fisheries.schema.exchange.v1.SendPollType;
 import eu.europa.ec.fisheries.schema.exchange.v1.TypeRefType;
-import eu.europa.ec.fisheries.schema.exchange.v1.UnsentMessageTypeProperty;
 import eu.europa.ec.fisheries.schema.exchange.v1.UnsentMessageTypePropertyKey;
 import eu.europa.ec.fisheries.schema.rules.mobileterminal.v1.IdType;
-import eu.europa.ec.fisheries.uvms.exchange.service.exception.ExchangeLogException;
 
 public class ExchangeLogMapper {
 
     final static Logger LOG = LoggerFactory.getLogger(ExchangeLogMapper.class);
 
-    public static ExchangeLogType getReceivedMovementExchangeLog(SetReportMovementType request, String typeRefGuid, String typeRefType,String username) throws ExchangeLogException {
+    public static ExchangeLog getReceivedMovementExchangeLog(SetReportMovementType request, String typeRefGuid, String typeRefType,String username) {
         if (request == null) {
-            throw new ExchangeLogException("No request");
+            throw new IllegalArgumentException("No request");
         }
-        ReceiveMovementType log = new ReceiveMovementType();
-        log.setDateRecieved(request.getTimestamp());
+        ExchangeLog log = new ExchangeLog();
+        log.setDateReceived(request.getTimestamp().toInstant());
         log.setType(LogType.PROCESSED_MOVEMENT);
-        LogRefType logRefType = new LogRefType();
-        logRefType.setRefGuid(typeRefGuid);
-/*        TypeRefType refType = TypeRefType.UNKNOWN;
-        try {
-            refType = TypeRefType.fromValue(typeRefType);
-        } catch (IllegalArgumentException e) {
-            LOG.error("Non existing typeRefType: " + typeRefType);
-        }*/
-        logRefType.setType(TypeRefType.MOVEMENT_RESPONSE);
-        log.setTypeRef(logRefType);
+
+        log.setTypeRefGuid(UUID.fromString(typeRefGuid));
+        log.setTypeRefType(TypeRefType.MOVEMENT_RESPONSE);
         log.setStatus(ExchangeLogStatusTypeType.SUCCESSFUL);
         log.setSenderReceiver(getSenderReceiver(request.getMovement(), request.getPluginType(), request.getPluginName(), username));
         if (request.getMovement().getSource() != null) {
@@ -73,12 +63,12 @@ public class ExchangeLogMapper {
         return log;
     }
 
-    private static String getSenderReceiver(MovementBaseType movement, PluginType pluginType, String pluginName, String username) throws ExchangeLogException {
+    private static String getSenderReceiver(MovementBaseType movement, PluginType pluginType, String pluginName, String username) {
         if (movement == null) {
-            throw new ExchangeLogException("No movement");
+            throw new IllegalArgumentException("No movement");
         }
         if (pluginType == null) {
-            throw new ExchangeLogException("No plugin type");
+            throw new IllegalArgumentException("No plugin type");
         }
         String senderReceiver = null;
         switch (pluginType) {
@@ -98,12 +88,12 @@ public class ExchangeLogMapper {
         return senderReceiver;
     }
 
-    private static String getSenderReceiver(AssetId assetId) throws ExchangeLogException {
+    private static String getSenderReceiver(AssetId assetId) {
         if (assetId == null) {
-            throw new ExchangeLogException("No asset");
+            throw new IllegalArgumentException("No asset");
         }
         if (assetId.getAssetIdList() == null) {
-            throw new ExchangeLogException("No asset id");
+            throw new IllegalArgumentException("No asset id");
         }
         String senderReceiver = null;
         for (AssetIdList idList : assetId.getAssetIdList()) {
@@ -123,12 +113,12 @@ public class ExchangeLogMapper {
         if (senderReceiver != null) {
             return senderReceiver;
         }
-        throw new ExchangeLogException("No asset id value");
+        throw new IllegalArgumentException("No asset id value");
     }
 
-    private static String getRecipientOfPoll(List<KeyValueType> pollReceiverList) throws ExchangeLogException {
+    private static String getRecipientOfPoll(List<KeyValueType> pollReceiverList) {
         if (pollReceiverList == null || pollReceiverList.isEmpty()) {
-            throw new ExchangeLogException("No poll receiver list");
+            throw new IllegalArgumentException("No poll receiver list");
         }
         String dnid = null;
         String memberNumber = null;
@@ -152,7 +142,7 @@ public class ExchangeLogMapper {
         } else if (les != null) {
             return les;
         }
-        throw new ExchangeLogException("No receiver of poll");
+        throw new IllegalArgumentException("No receiver of poll");
     }
 
     public static String getSendMovementSenderReceiver(SendMovementToPluginType sendReport) {
@@ -171,91 +161,114 @@ public class ExchangeLogMapper {
         }
         try {
             senderReceiver = getSenderReceiver(sendReport.getMovement(), sendReport.getPluginType(), sendReport.getPluginName(), null);
-        } catch (ExchangeLogException e) {
+        } catch (Exception e) {
             LOG.debug("Report sent to plugin couldn't map to senderReceiver");
         }
         return senderReceiver;
     }
 
-    public static ExchangeLogType getSendMovementExchangeLog(SendMovementToPluginType sendReport) throws ExchangeLogException {
+    public static ExchangeLog getSendMovementExchangeLog(SendMovementToPluginType sendReport) {
         if (sendReport == null) {
-            throw new ExchangeLogException("No request");
+            throw new IllegalArgumentException("No request");
         }
-        SendMovementType log = new SendMovementType();
-        log.setDateRecieved(sendReport.getTimestamp());
+        ExchangeLog log = new ExchangeLog();
+        log.setDateReceived(sendReport.getTimestamp().toInstant());
         log.setType(LogType.SEND_MOVEMENT);
-        LogRefType logRefType = new LogRefType();
-        logRefType.setRefGuid(sendReport.getMovement().getGuid());
-        logRefType.setType(TypeRefType.MOVEMENT);
-        log.setTypeRef(logRefType);
+
+        log.setTypeRefType(TypeRefType.MOVEMENT);
+        log.setTypeRefGuid(UUID.fromString(sendReport.getMovement().getGuid()));
         String senderReceiver = getSendMovementSenderReceiver(sendReport);
         log.setSenderReceiver(senderReceiver);
 
         //TODO send fwdDate, fwdRule and recipient from Rules
-        log.setFwdDate(sendReport.getFwdDate());
+        log.setFwdDate(sendReport.getFwdDate().toInstant());
         log.setFwdRule(sendReport.getFwdRule());
         log.setRecipient(sendReport.getRecipient());
 
+        log.setUpdatedBy("SYSTEM");
+        log.setStatus(ExchangeLogStatusTypeType.ISSUED);
+
         return log;
     }
 
-    public static ExchangeLogType getSendCommandExchangeLog(CommandType command) throws ExchangeLogException {
+    public static ExchangeLog getSendCommandExchangeLog(CommandType command, String username) {
         if (command == null) {
-            throw new ExchangeLogException("No command");
+            throw new IllegalArgumentException("No command");
         }
         if (command.getCommand() == null) {
-            throw new ExchangeLogException("No command type");
+            throw new IllegalArgumentException("No command type");
         }
         switch (command.getCommand()) {
             case EMAIL:
-                return getSendEmailExchangeLog(command);
+                return getSendEmailExchangeLog(command, username);
             case POLL:
-                return getPollExchangeLog(command);
+                return getPollExchangeLog(command, username);
         }
-        throw new ExchangeLogException("Not implemented command type");
+        throw new IllegalArgumentException("Not implemented command type");
     }
 
-    private static ExchangeLogType getSendEmailExchangeLog(CommandType command) throws ExchangeLogException {
+    private static ExchangeLog getSendEmailExchangeLog(CommandType command, String username) {
         if (command.getEmail() == null) {
-            throw new ExchangeLogException("No email");
+            throw new IllegalArgumentException("No email");
         }
-        SendEmailType log = new SendEmailType();
+        ExchangeLog log = new ExchangeLog();
         log.setType(LogType.SEND_EMAIL);
-        log.setDateRecieved(command.getTimestamp());
+        log.setDateReceived(command.getTimestamp().toInstant());
         log.setSenderReceiver("SYSTEM");
         log.setRecipient(command.getEmail().getTo());
         log.setFwdRule(command.getFwdRule());
-        log.setFwdDate(command.getTimestamp());
-        return log;
+        log.setFwdDate(command.getTimestamp().toInstant());
+        log.setTransferIncoming(false);
+
+        log.setUpdatedBy(username);
+        log.setStatus(ExchangeLogStatusTypeType.ISSUED);
+        return addStatusHistory(log);
     }
 
-    private static ExchangeLogType getPollExchangeLog(CommandType command) throws ExchangeLogException {
+    private static ExchangeLog getPollExchangeLog(CommandType command, String username) {
         if (command.getPoll() == null) {
-            throw new ExchangeLogException("No poll");
+            throw new IllegalArgumentException("No poll");
         }
 
         //TODO fix in mobileterminal
-        SendPollType log = new SendPollType();
+        ExchangeLog log = new ExchangeLog();
         log.setType(LogType.SEND_POLL);
-        log.setDateRecieved(command.getTimestamp());
+        log.setDateReceived(command.getTimestamp().toInstant());
         log.setRecipient(getRecipientOfPoll(command.getPoll().getPollReceiver()));
         log.setSenderReceiver("System");
-        LogRefType logRefType = new LogRefType();
-        logRefType.setRefGuid(command.getPoll().getPollId());
-        logRefType.setType(TypeRefType.POLL);
-        log.setFwdDate(command.getTimestamp());
-        log.setTypeRef(logRefType);
+        log.setFwdDate(command.getTimestamp().toInstant());
+        log.setUpdatedBy(username);
+        log.setTransferIncoming(false);
+
+        log.setTypeRefType(TypeRefType.POLL);
+        log.setTypeRefGuid(UUID.fromString(command.getPoll().getPollId()));
+        log.setStatus(ExchangeLogStatusTypeType.ISSUED);
+        return addStatusHistory(log);
+    }
+
+    public static ExchangeLog addStatusHistory(ExchangeLog log){
+        List<ExchangeLogStatus> statusHistory = new ArrayList<>();
+        ExchangeLogStatus statusLog = new ExchangeLogStatus();
+        statusLog.setLog(log);
+        statusLog.setStatus(log.getStatus() == null ? ExchangeLogStatusTypeType.ISSUED : log.getStatus());
+        statusLog.setStatusTimestamp(Instant.now());
+        statusLog.setUpdatedBy(log.getUpdatedBy());
+        statusLog.setUpdateTime(Instant.now());
+        statusHistory.add(statusLog);
+        log.setStatusHistory(statusHistory);
+
         return log;
     }
 
-    public static List<UnsentMessageTypeProperty> getUnsentMessageProperties(SendMovementToPluginType sendReport) {
 
-        List<UnsentMessageTypeProperty> unsentMessageTypeProperties = new ArrayList<>();
-        UnsentMessageTypeProperty propertyAssetName = new UnsentMessageTypeProperty();
-        UnsentMessageTypeProperty propertyIrcs = new UnsentMessageTypeProperty();
-        UnsentMessageTypeProperty propertyLong = new UnsentMessageTypeProperty();
-        UnsentMessageTypeProperty propertyLat = new UnsentMessageTypeProperty();
-        UnsentMessageTypeProperty propertyPositionTime = new UnsentMessageTypeProperty();
+    public static List<UnsentMessageProperty> getUnsentMessageProperties(SendMovementToPluginType sendReport) {
+
+        List<UnsentMessageProperty> unsentMessageProperties = new ArrayList<>();
+        UnsentMessageProperty propertyAssetName = new UnsentMessageProperty();
+        UnsentMessageProperty propertyIrcs = new UnsentMessageProperty();
+        UnsentMessageProperty propertyLong = new UnsentMessageProperty();
+        UnsentMessageProperty propertyLat = new UnsentMessageProperty();
+        UnsentMessageProperty propertyPositionTime = new UnsentMessageProperty();
 
         propertyAssetName.setKey(UnsentMessageTypePropertyKey.ASSET_NAME);
         propertyAssetName.setValue(sendReport.getAssetName());
@@ -268,34 +281,34 @@ public class ExchangeLogMapper {
         propertyPositionTime.setKey(UnsentMessageTypePropertyKey.POSITION_TIME);
         propertyPositionTime.setValue(sendReport.getMovement().getPositionTime().toString());
 
-        unsentMessageTypeProperties.add(propertyAssetName);
-        unsentMessageTypeProperties.add(propertyIrcs);
-        unsentMessageTypeProperties.add(propertyLong);
-        unsentMessageTypeProperties.add(propertyLat);
-        unsentMessageTypeProperties.add(propertyPositionTime);
-        return unsentMessageTypeProperties;
+        unsentMessageProperties.add(propertyAssetName);
+        unsentMessageProperties.add(propertyIrcs);
+        unsentMessageProperties.add(propertyLong);
+        unsentMessageProperties.add(propertyLat);
+        unsentMessageProperties.add(propertyPositionTime);
+        return unsentMessageProperties;
     }
 
-    public static List<UnsentMessageTypeProperty> getPropertiesForPoll(PollType poll, String assetName) throws ExchangeLogException {
-        List<UnsentMessageTypeProperty> unsentMessageTypeProperties = new ArrayList<>();
-        UnsentMessageTypeProperty propertyAssetName = new UnsentMessageTypeProperty();
+    public static List<UnsentMessageProperty> getPropertiesForPoll(PollType poll, String assetName){
+        List<UnsentMessageProperty> unsentMessageProperties = new ArrayList<>();
+        UnsentMessageProperty propertyAssetName = new UnsentMessageProperty();
         propertyAssetName.setKey(UnsentMessageTypePropertyKey.ASSET_NAME);
         propertyAssetName.setValue(assetName);
-        UnsentMessageTypeProperty pollType = new UnsentMessageTypeProperty();
+        UnsentMessageProperty pollType = new UnsentMessageProperty();
         pollType.setKey(UnsentMessageTypePropertyKey.POLL_TYPE);
         pollType.setValue(poll.getPollTypeType().name());
-        unsentMessageTypeProperties.add(propertyAssetName);
-        unsentMessageTypeProperties.add(pollType);
-        return unsentMessageTypeProperties;
+        unsentMessageProperties.add(propertyAssetName);
+        unsentMessageProperties.add(pollType);
+        return unsentMessageProperties;
     }
 
-    public static List<UnsentMessageTypeProperty> getPropertiesForEmail(EmailType email) throws ExchangeLogException {
-        List<UnsentMessageTypeProperty> unsentMessageTypeProperties = new ArrayList<>();
-        UnsentMessageTypeProperty propertyEmail = new UnsentMessageTypeProperty();
+    public static List<UnsentMessageProperty> getPropertiesForEmail(EmailType email) {
+        List<UnsentMessageProperty> unsentMessageProperties = new ArrayList<>();
+        UnsentMessageProperty propertyEmail = new UnsentMessageProperty();
         propertyEmail.setKey(UnsentMessageTypePropertyKey.EMAIL);
         propertyEmail.setValue(email.getTo());
-        unsentMessageTypeProperties.add(propertyEmail);
-        return unsentMessageTypeProperties;
+        unsentMessageProperties.add(propertyEmail);
+        return unsentMessageProperties;
     }
 
     public static String getConnectId(PollType poll) {
@@ -308,12 +321,12 @@ public class ExchangeLogMapper {
         return null;
     }
 
-    private static String getRecipient(MovementBaseType movementBaseType, PluginType pluginType) throws ExchangeLogException {
+    private static String getRecipient(MovementBaseType movementBaseType, PluginType pluginType) {
         if(movementBaseType== null){
-            throw new ExchangeLogException("Movement is empty");
+            throw new IllegalArgumentException("Movement is empty");
         }
         if(pluginType == null){
-            throw new ExchangeLogException("PluginType is empty");
+            throw new IllegalArgumentException("PluginType is empty");
         }
         String recipient;
         switch (pluginType){

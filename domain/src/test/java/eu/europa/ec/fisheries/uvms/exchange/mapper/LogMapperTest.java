@@ -4,7 +4,10 @@ import eu.europa.ec.fisheries.schema.exchange.v1.*;
 import eu.europa.ec.fisheries.uvms.exchange.entity.exchangelog.ExchangeLog;
 import org.junit.Test;
 
-import java.util.Date;
+
+import java.util.Date;  //leave be
+import java.time.Instant;
+import java.util.UUID;
 
 import static org.junit.Assert.*;
 
@@ -13,9 +16,9 @@ public class LogMapperTest {
     @Test
     public void toNewEntityWhenLogTypeIsReceiveMovement() throws Exception {
         //data set
-        String typeRefGuid = "trg";
+        String typeRefGuid = UUID.randomUUID().toString();;
         TypeRefType typeRefType = TypeRefType.MOVEMENT;
-        Date dateReceived = new Date();
+        Instant dateReceived = Instant.now();
         String senderOrReceiver = "BEL";
         ExchangeLogStatusTypeType status = ExchangeLogStatusTypeType.SUCCESSFUL;
 
@@ -30,7 +33,7 @@ public class LogMapperTest {
         ReceiveMovementType input = new ReceiveMovementType();
         input.setType(LogType.RECEIVE_MOVEMENT);
         input.setTypeRef(logRefType);
-        input.setDateRecieved(dateReceived);
+        input.setDateRecieved(Date.from(dateReceived));
         input.setSenderReceiver(senderOrReceiver);
         input.setStatus(status);
         input.setSource(source);
@@ -41,7 +44,7 @@ public class LogMapperTest {
         ExchangeLog result = LogMapper.toNewEntity(input, username);
 
         //assert
-        assertEquals(typeRefGuid, result.getTypeRefGuid());
+        assertEquals(typeRefGuid, result.getTypeRefGuid().toString());
         assertEquals(typeRefType, result.getTypeRefType());
         assertEquals(dateReceived, result.getDateReceived());
         assertEquals(senderOrReceiver, result.getSenderReceiver());
@@ -62,9 +65,9 @@ public class LogMapperTest {
     @Test
     public void toNewEntityWhenLogTypeIsSendMovement() throws Exception {
         //data set
-        String typeRefGuid = "trg";
+        String typeRefGuid = UUID.randomUUID().toString();;
         TypeRefType typeRefType = TypeRefType.MOVEMENT;
-        Date dateReceived = new Date();
+        Instant dateReceived = Instant.now();
         String senderOrReceiver = "BEL";
         ExchangeLogStatusTypeType status = ExchangeLogStatusTypeType.SUCCESSFUL;
         String message = "<xml></xml>";
@@ -74,17 +77,17 @@ public class LogMapperTest {
         logRefType.setType(typeRefType);
         logRefType.setMessage(message);
 
-        Date fwdDate = new Date();
+        Instant fwdDate = Instant.now();
         String fwdRule = "fantastic rules and where to find them";
         String recipient = "potter@wb.com";
 
         SendMovementType input = new SendMovementType();
         input.setType(LogType.SEND_MOVEMENT);
         input.setTypeRef(logRefType);
-        input.setDateRecieved(dateReceived);
+        input.setDateRecieved(Date.from(dateReceived));
         input.setSenderReceiver(senderOrReceiver);
         input.setStatus(status);
-        input.setFwdDate(fwdDate);
+        input.setFwdDate(Date.from(fwdDate));
         input.setFwdRule(fwdRule);
         input.setRecipient(recipient);
 
@@ -94,7 +97,7 @@ public class LogMapperTest {
         ExchangeLog result = LogMapper.toNewEntity(input, username);
 
         //assert
-        assertEquals(typeRefGuid, result.getTypeRefGuid());
+        assertEquals(typeRefGuid, result.getTypeRefGuid().toString());
         assertEquals(typeRefType, result.getTypeRefType());
         assertEquals(dateReceived, result.getDateReceived());
         assertEquals(senderOrReceiver, result.getSenderReceiver());
@@ -117,9 +120,9 @@ public class LogMapperTest {
     @Test
     public void toNewEntityWhenLogTypeIsSendPoll() throws Exception {
         //data set
-        String typeRefGuid = "trg";
+        String typeRefGuid = UUID.randomUUID().toString();;
         TypeRefType typeRefType = TypeRefType.POLL;
-        Date dateReceived = new Date();
+        Instant dateReceived = Instant.now();
         String senderOrReceiver = "BEL";
         ExchangeLogStatusTypeType status = ExchangeLogStatusTypeType.SUCCESSFUL;
         String message = "<xml></xml>";
@@ -129,16 +132,16 @@ public class LogMapperTest {
         logRefType.setType(typeRefType);
         logRefType.setMessage(message);
 
-        Date fwdDate = new Date();
+        Instant fwdDate = Instant.now();
         String recipient = "potter@wb.com";
 
         SendPollType input = new SendPollType();
         input.setType(LogType.SEND_POLL);
         input.setTypeRef(logRefType);
-        input.setDateRecieved(dateReceived);
+        input.setDateRecieved(Date.from(dateReceived));
         input.setSenderReceiver(senderOrReceiver);
         input.setStatus(status);
-        input.setFwdDate(fwdDate);
+        input.setFwdDate(Date.from(fwdDate));
         input.setRecipient(recipient);
 
         String username = "stainii";
@@ -147,7 +150,7 @@ public class LogMapperTest {
         ExchangeLog result = LogMapper.toNewEntity(input, username);
 
         //assert
-        assertEquals(typeRefGuid, result.getTypeRefGuid());
+        assertEquals(typeRefGuid, result.getTypeRefGuid().toString());
         assertEquals(typeRefType, result.getTypeRefType());
         assertEquals(dateReceived, result.getDateReceived());
         assertEquals(senderOrReceiver, result.getSenderReceiver());
@@ -169,9 +172,9 @@ public class LogMapperTest {
     @Test
     public void toNewEntityWhenLogTypeIsSendEmail() throws Exception {
         //data set
-        String typeRefGuid = "trg";
+        String typeRefGuid = UUID.randomUUID().toString();;
         TypeRefType typeRefType = TypeRefType.UNKNOWN;
-        Date dateReceived = new Date();
+        Instant dateReceived = Instant.now();
         String senderOrReceiver = "BEL";
         ExchangeLogStatusTypeType status = ExchangeLogStatusTypeType.SUCCESSFUL;
         String message = "<xml></xml>";
@@ -181,17 +184,17 @@ public class LogMapperTest {
         logRefType.setType(typeRefType);
         logRefType.setMessage(message);
 
-        Date fwdDate = new Date();
+        Instant fwdDate = Instant.now();
         String fwdRule = "fantastic rules and where to find them";
         String recipient = "potter@wb.com";
 
         SendEmailType input = new SendEmailType();
         input.setType(LogType.SEND_EMAIL);
         input.setTypeRef(logRefType);
-        input.setDateRecieved(dateReceived);
+        input.setDateRecieved(Date.from(dateReceived));
         input.setSenderReceiver(senderOrReceiver);
         input.setStatus(status);
-        input.setFwdDate(fwdDate);
+        input.setFwdDate(Date.from(fwdDate));
         input.setFwdRule(fwdRule);
         input.setRecipient(recipient);
 
@@ -201,7 +204,7 @@ public class LogMapperTest {
         ExchangeLog result = LogMapper.toNewEntity(input, username);
 
         //assert
-        assertEquals(typeRefGuid, result.getTypeRefGuid());
+        assertEquals(typeRefGuid, result.getTypeRefGuid().toString());
         assertEquals(typeRefType, result.getTypeRefType());
         assertEquals(dateReceived, result.getDateReceived());
         assertEquals(senderOrReceiver, result.getSenderReceiver());
@@ -224,9 +227,9 @@ public class LogMapperTest {
     @Test
     public void toNewEntityWhenLogTypeIsReceiveSalesReportAndTypeRefAndStatusAreFilledIn() throws Exception {
         //data set
-        String typeRefGuid = "trg";
+        String typeRefGuid = UUID.randomUUID().toString();;
         TypeRefType typeRefType = TypeRefType.SALES_REPORT;
-        Date dateReceived = new Date();
+        Instant dateReceived = Instant.now();
         String senderOrReceiver = "BEL";
         ExchangeLogStatusTypeType status = ExchangeLogStatusTypeType.SUCCESSFUL;
         String message = "<xml></xml>";
@@ -241,7 +244,7 @@ public class LogMapperTest {
         ExchangeLogType input = new ExchangeLogType();
         input.setType(LogType.RECEIVE_SALES_REPORT);
         input.setTypeRef(logRefType);
-        input.setDateRecieved(dateReceived);
+        input.setDateRecieved(Date.from(dateReceived));
         input.setSenderReceiver(senderOrReceiver);
         input.setStatus(status);
         input.setIncoming(true);
@@ -254,7 +257,7 @@ public class LogMapperTest {
         ExchangeLog result = LogMapper.toNewEntity(input, username);
 
         //assert
-        assertEquals(typeRefGuid, result.getTypeRefGuid());
+        assertEquals(typeRefGuid, result.getTypeRefGuid().toString());
         assertEquals(typeRefType, result.getTypeRefType());
         assertEquals(dateReceived, result.getDateReceived());
         assertEquals(senderOrReceiver, result.getSenderReceiver());
@@ -276,7 +279,7 @@ public class LogMapperTest {
     @Test
     public void toNewEntityWhenLogTypeIsReceiveSalesReportAndTypeRefIsNotFilledIn() throws Exception {
         //data set
-        Date dateReceived = new Date();
+        Instant dateReceived = Instant.now();
         String senderOrReceiver = "BEL";
         ExchangeLogStatusTypeType status = ExchangeLogStatusTypeType.SUCCESSFUL;
         String destination = "destination";
@@ -284,7 +287,7 @@ public class LogMapperTest {
 
         ExchangeLogType input = new ExchangeLogType();
         input.setType(LogType.RECEIVE_SALES_REPORT);
-        input.setDateRecieved(dateReceived);
+        input.setDateRecieved(Date.from(dateReceived));
         input.setSenderReceiver(senderOrReceiver);
         input.setStatus(status);
         input.setIncoming(true);
@@ -317,9 +320,9 @@ public class LogMapperTest {
     @Test
     public void toNewEntityWhenLogTypeIsReceiveSalesReportAndStatusIsNotFilledIn() throws Exception {
         //data set
-        String typeRefGuid = "trg";
+        String typeRefGuid = UUID.randomUUID().toString();;
         TypeRefType typeRefType = TypeRefType.SALES_REPORT;
-        Date dateReceived = new Date();
+        Instant dateReceived = Instant.now();
         String senderOrReceiver = "BEL";
         String message = "<xml></xml>";
         String destination = "destination";
@@ -333,7 +336,7 @@ public class LogMapperTest {
         ExchangeLogType input = new ExchangeLogType();
         input.setType(LogType.RECEIVE_SALES_REPORT);
         input.setTypeRef(logRefType);
-        input.setDateRecieved(dateReceived);
+        input.setDateRecieved(Date.from(dateReceived));
         input.setSenderReceiver(senderOrReceiver);
         input.setIncoming(true);
         input.setDestination(destination);
@@ -345,7 +348,7 @@ public class LogMapperTest {
         ExchangeLog result = LogMapper.toNewEntity(input, username);
 
         //assert
-        assertEquals(typeRefGuid, result.getTypeRefGuid());
+        assertEquals(typeRefGuid, result.getTypeRefGuid().toString());
         assertEquals(typeRefType, result.getTypeRefType());
         assertEquals(dateReceived, result.getDateReceived());
         assertEquals(senderOrReceiver, result.getSenderReceiver());
@@ -368,7 +371,7 @@ public class LogMapperTest {
     @Test
     public void toNewEntityWhenLogTypeIsReceiveSalesReportAndUsernameIsNull() throws Exception {
         //data set
-        Date dateReceived = new Date();
+        Instant dateReceived = Instant.now();
         String senderOrReceiver = "BEL";
         ExchangeLogStatusTypeType status = ExchangeLogStatusTypeType.SUCCESSFUL;
         String destination = "destination";
@@ -376,7 +379,7 @@ public class LogMapperTest {
 
         ExchangeLogType input = new ExchangeLogType();
         input.setType(LogType.RECEIVE_SALES_REPORT);
-        input.setDateRecieved(dateReceived);
+        input.setDateRecieved(Date.from(dateReceived));
         input.setSenderReceiver(senderOrReceiver);
         input.setStatus(status);
         input.setIncoming(true);
@@ -407,9 +410,9 @@ public class LogMapperTest {
     @Test
     public void toNewEntityWhenLogTypeIsReceiveSalesResponse() throws Exception {
         //data set
-        String typeRefGuid = "trg";
+        String typeRefGuid = UUID.randomUUID().toString();;
         TypeRefType typeRefType = TypeRefType.SALES_RESPONSE;
-        Date dateReceived = new Date();
+        Instant dateReceived = Instant.now();
         String senderOrReceiver = "BEL";
         ExchangeLogStatusTypeType status = ExchangeLogStatusTypeType.SUCCESSFUL;
         String message = "<xml></xml>";
@@ -424,7 +427,7 @@ public class LogMapperTest {
         ExchangeLogType input = new ExchangeLogType();
         input.setType(LogType.RECEIVE_SALES_RESPONSE);
         input.setTypeRef(logRefType);
-        input.setDateRecieved(dateReceived);
+        input.setDateRecieved(Date.from(dateReceived));
         input.setSenderReceiver(senderOrReceiver);
         input.setStatus(status);
         input.setIncoming(true);
@@ -437,7 +440,7 @@ public class LogMapperTest {
         ExchangeLog result = LogMapper.toNewEntity(input, username);
 
         //assert
-        assertEquals(typeRefGuid, result.getTypeRefGuid());
+        assertEquals(typeRefGuid, result.getTypeRefGuid().toString());
         assertEquals(typeRefType, result.getTypeRefType());
         assertEquals(dateReceived, result.getDateReceived());
         assertEquals(senderOrReceiver, result.getSenderReceiver());
@@ -459,9 +462,9 @@ public class LogMapperTest {
     @Test
     public void toNewEntityWhenLogTypeIsReceiveSalesQuery() throws Exception {
         //data set
-        String typeRefGuid = "trg";
+        String typeRefGuid = UUID.randomUUID().toString();;
         TypeRefType typeRefType = TypeRefType.SALES_QUERY;
-        Date dateReceived = new Date();
+        Instant dateReceived = Instant.now();
         String senderOrReceiver = "BEL";
         ExchangeLogStatusTypeType status = ExchangeLogStatusTypeType.SUCCESSFUL;
         String message = "<xml></xml>";
@@ -476,7 +479,7 @@ public class LogMapperTest {
         ExchangeLogType input = new ExchangeLogType();
         input.setType(LogType.RECEIVE_SALES_QUERY);
         input.setTypeRef(logRefType);
-        input.setDateRecieved(dateReceived);
+        input.setDateRecieved(Date.from(dateReceived));
         input.setSenderReceiver(senderOrReceiver);
         input.setStatus(status);
         input.setIncoming(true);
@@ -489,7 +492,7 @@ public class LogMapperTest {
         ExchangeLog result = LogMapper.toNewEntity(input, username);
 
         //assert
-        assertEquals(typeRefGuid, result.getTypeRefGuid());
+        assertEquals(typeRefGuid, result.getTypeRefGuid().toString());
         assertEquals(typeRefType, result.getTypeRefType());
         assertEquals(dateReceived, result.getDateReceived());
         assertEquals(senderOrReceiver, result.getSenderReceiver());
@@ -511,9 +514,9 @@ public class LogMapperTest {
     @Test
     public void toNewEntityWhenLogTypeIsSendSalesReport() throws Exception {
         //data set
-        String typeRefGuid = "trg";
+        String typeRefGuid = UUID.randomUUID().toString();;
         TypeRefType typeRefType = TypeRefType.SALES_REPORT;
-        Date dateReceived = new Date();
+        Instant dateReceived = Instant.now();
         String senderOrReceiver = "BEL";
         ExchangeLogStatusTypeType status = ExchangeLogStatusTypeType.SUCCESSFUL;
         String message = "<xml></xml>";
@@ -528,7 +531,7 @@ public class LogMapperTest {
         ExchangeLogType input = new ExchangeLogType();
         input.setType(LogType.SEND_SALES_REPORT);
         input.setTypeRef(logRefType);
-        input.setDateRecieved(dateReceived);
+        input.setDateRecieved(Date.from(dateReceived));
         input.setSenderReceiver(senderOrReceiver);
         input.setStatus(status);
         input.setIncoming(false);
@@ -541,7 +544,7 @@ public class LogMapperTest {
         ExchangeLog result = LogMapper.toNewEntity(input, username);
 
         //assert
-        assertEquals(typeRefGuid, result.getTypeRefGuid());
+        assertEquals(typeRefGuid, result.getTypeRefGuid().toString());
         assertEquals(typeRefType, result.getTypeRefType());
         assertEquals(dateReceived, result.getDateReceived());
         assertEquals(senderOrReceiver, result.getSenderReceiver());
@@ -563,9 +566,9 @@ public class LogMapperTest {
     @Test
     public void toNewEntityWhenLogTypeIsSendSalesResponse() throws Exception {
         //data set
-        String typeRefGuid = "trg";
+        String typeRefGuid = UUID.randomUUID().toString();;
         TypeRefType typeRefType = TypeRefType.SALES_RESPONSE;
-        Date dateReceived = new Date();
+        Instant dateReceived = Instant.now();
         String senderOrReceiver = "BEL";
         ExchangeLogStatusTypeType status = ExchangeLogStatusTypeType.SUCCESSFUL;
         String message = "<xml></xml>";
@@ -580,7 +583,7 @@ public class LogMapperTest {
         ExchangeLogType input = new ExchangeLogType();
         input.setType(LogType.SEND_SALES_RESPONSE);
         input.setTypeRef(logRefType);
-        input.setDateRecieved(dateReceived);
+        input.setDateRecieved(Date.from(dateReceived));
         input.setSenderReceiver(senderOrReceiver);
         input.setStatus(status);
         input.setIncoming(false);
@@ -593,7 +596,7 @@ public class LogMapperTest {
         ExchangeLog result = LogMapper.toNewEntity(input, username);
 
         //assert
-        assertEquals(typeRefGuid, result.getTypeRefGuid());
+        assertEquals(typeRefGuid, result.getTypeRefGuid().toString());
         assertEquals(typeRefType, result.getTypeRefType());
         assertEquals(dateReceived, result.getDateReceived());
         assertEquals(senderOrReceiver, result.getSenderReceiver());
@@ -614,8 +617,8 @@ public class LogMapperTest {
 
     @Test
     public void toModelWhenEntityIsReceiveMovementLog() {
-        Date dateReceived = new Date();
-        String guid = "Paradise";
+        Instant dateReceived = Instant.now();
+        UUID guid = UUID.randomUUID();
         String senderReceiver = "Chris Martin";
         boolean incoming = true;
         ExchangeLogStatusTypeType status = ExchangeLogStatusTypeType.PROBABLY_TRANSMITTED;
@@ -624,7 +627,7 @@ public class LogMapperTest {
 
         ExchangeLog entity = new ExchangeLog();
         entity.setDateReceived(dateReceived);
-        entity.setGuid(guid);
+        entity.setId(guid);
         entity.setSenderReceiver(senderReceiver);
         entity.setTransferIncoming(incoming);
         entity.setStatus(status);
@@ -635,8 +638,8 @@ public class LogMapperTest {
         ExchangeLogType model = LogMapper.toModel(entity);
 
         assertEquals(LogType.RECEIVE_MOVEMENT, model.getType());
-        assertEquals(dateReceived, model.getDateRecieved());
-        assertEquals(guid, model.getGuid());
+        assertEquals(dateReceived, model.getDateRecieved().toInstant());
+        assertEquals(guid.toString(), model.getGuid());
         assertEquals(senderReceiver, model.getSenderReceiver());
         assertEquals(incoming, model.isIncoming());
         assertEquals(status, model.getStatus());
@@ -646,18 +649,18 @@ public class LogMapperTest {
 
     @Test
     public void toModelWhenEntityIsSendMovementLog() {
-        Date dateReceived = new Date();
-        String guid = "Paradise";
+        Instant dateReceived = Instant.now();
+        UUID guid = UUID.randomUUID();
         String senderReceiver = "Chris Martin";
         boolean incoming = true;
         ExchangeLogStatusTypeType status = ExchangeLogStatusTypeType.PROBABLY_TRANSMITTED;
         String fwdRule = "Coldplay";
-        Date fwdDate = new Date();
+        Instant fwdDate = Instant.now();
         String recipient = "Viva la vida";
 
         ExchangeLog entity = new ExchangeLog();
         entity.setDateReceived(dateReceived);
-        entity.setGuid(guid);
+        entity.setId(guid);
         entity.setSenderReceiver(senderReceiver);
         entity.setTransferIncoming(incoming);
         entity.setStatus(status);
@@ -669,29 +672,29 @@ public class LogMapperTest {
         ExchangeLogType model = LogMapper.toModel(entity);
 
         assertEquals(LogType.SEND_MOVEMENT, model.getType());
-        assertEquals(dateReceived, model.getDateRecieved());
-        assertEquals(guid, model.getGuid());
+        assertEquals(dateReceived, model.getDateRecieved().toInstant());
+        assertEquals(guid.toString(), model.getGuid());
         assertEquals(senderReceiver, model.getSenderReceiver());
         assertEquals(incoming, model.isIncoming());
         assertEquals(status, model.getStatus());
         assertEquals(fwdRule, ((SendMovementType) model).getFwdRule());
-        assertEquals(fwdDate, ((SendMovementType) model).getFwdDate());
+        assertEquals(fwdDate, ((SendMovementType) model).getFwdDate().toInstant());
         assertEquals(recipient, ((SendMovementType) model).getRecipient());
     }
 
     @Test
     public void toModelWhenEntityIsPollLog() {
-        Date dateReceived = new Date();
-        String guid = "Paradise";
+        Instant dateReceived = Instant.now();
+        UUID guid = UUID.randomUUID();
         String senderReceiver = "Chris Martin";
         boolean incoming = true;
         ExchangeLogStatusTypeType status = ExchangeLogStatusTypeType.PROBABLY_TRANSMITTED;
-        Date fwdDate = new Date();
+        Instant fwdDate = Instant.now();
         String recipient = "Viva la vida";
 
         ExchangeLog entity = new ExchangeLog();
         entity.setDateReceived(dateReceived);
-        entity.setGuid(guid);
+        entity.setId(guid);
         entity.setSenderReceiver(senderReceiver);
         entity.setTransferIncoming(incoming);
         entity.setStatus(status);
@@ -702,29 +705,29 @@ public class LogMapperTest {
         ExchangeLogType model = LogMapper.toModel(entity);
 
         assertEquals(LogType.SEND_POLL, model.getType());
-        assertEquals(dateReceived, model.getDateRecieved());
-        assertEquals(guid, model.getGuid());
+        assertEquals(dateReceived, model.getDateRecieved().toInstant());
+        assertEquals(guid.toString(), model.getGuid());
         assertEquals(senderReceiver, model.getSenderReceiver());
         assertEquals(incoming, model.isIncoming());
         assertEquals(status, model.getStatus());
-        assertEquals(fwdDate, ((SendPollType) model).getFwdDate());
+        assertEquals(fwdDate, ((SendPollType) model).getFwdDate().toInstant());
         assertEquals(recipient, ((SendPollType) model).getRecipient());
     }
 
     @Test
     public void toModelWhenEntityIsEmailLog() {
-        Date dateReceived = new Date();
-        String guid = "Paradise";
+        Instant dateReceived = Instant.now();
+        UUID guid = UUID.randomUUID();
         String senderReceiver = "Chris Martin";
         boolean incoming = true;
         ExchangeLogStatusTypeType status = ExchangeLogStatusTypeType.PROBABLY_TRANSMITTED;
         String fwdRule = "Coldplay";
-        Date fwdDate = new Date();
+        Instant fwdDate = Instant.now();
         String recipient = "Viva la vida";
 
         ExchangeLog entity = new ExchangeLog();
         entity.setDateReceived(dateReceived);
-        entity.setGuid(guid);
+        entity.setId(guid);
         entity.setSenderReceiver(senderReceiver);
         entity.setTransferIncoming(incoming);
         entity.setStatus(status);
@@ -736,27 +739,27 @@ public class LogMapperTest {
         ExchangeLogType model = LogMapper.toModel(entity);
 
         assertEquals(LogType.SEND_EMAIL, model.getType());
-        assertEquals(dateReceived, model.getDateRecieved());
-        assertEquals(guid, model.getGuid());
+        assertEquals(dateReceived, model.getDateRecieved().toInstant());
+        assertEquals(guid.toString(), model.getGuid());
         assertEquals(senderReceiver, model.getSenderReceiver());
         assertEquals(incoming, model.isIncoming());
         assertEquals(status, model.getStatus());
         assertEquals(fwdRule, ((SendEmailType) model).getFwdRule());
-        assertEquals(fwdDate, ((SendEmailType) model).getFwdDate());
+        assertEquals(fwdDate, ((SendEmailType) model).getFwdDate().toInstant());
         assertEquals(recipient, ((SendEmailType) model).getRecipient());
     }
 
     @Test
     public void toModelWhenEntityIsReceiveSalesQuery() {
-        Date dateReceived = new Date();
-        String guid = "Paradise";
+        Instant dateReceived = Instant.now();
+        UUID guid = UUID.randomUUID();
         String senderReceiver = "Chris Martin";
         boolean incoming = true;
         ExchangeLogStatusTypeType status = ExchangeLogStatusTypeType.PROBABLY_TRANSMITTED;
         String destination = "destination";
         ExchangeLog entity = new ExchangeLog();
         entity.setDateReceived(dateReceived);
-        entity.setGuid(guid);
+        entity.setId(guid);
         entity.setSenderReceiver(senderReceiver);
         entity.setTransferIncoming(incoming);
         entity.setStatus(status);
@@ -766,8 +769,8 @@ public class LogMapperTest {
         ExchangeLogType model = LogMapper.toModel(entity);
 
         assertEquals(LogType.RECEIVE_SALES_QUERY, model.getType());
-        assertEquals(dateReceived, model.getDateRecieved());
-        assertEquals(guid, model.getGuid());
+        assertEquals(dateReceived, model.getDateRecieved().toInstant());
+        assertEquals(guid.toString(), model.getGuid());
         assertEquals(senderReceiver, model.getSenderReceiver());
         assertEquals(incoming, model.isIncoming());
         assertEquals(status, model.getStatus());
@@ -776,8 +779,8 @@ public class LogMapperTest {
 
     @Test
     public void toModelWhenEntityIsReceiveSalesReport() {
-        Date dateReceived = new Date();
-        String guid = "Paradise";
+        Instant dateReceived = Instant.now();
+        UUID guid = UUID.randomUUID();
         String senderReceiver = "Chris Martin";
         boolean incoming = true;
         ExchangeLogStatusTypeType status = ExchangeLogStatusTypeType.PROBABLY_TRANSMITTED;
@@ -785,7 +788,7 @@ public class LogMapperTest {
 
         ExchangeLog entity = new ExchangeLog();
         entity.setDateReceived(dateReceived);
-        entity.setGuid(guid);
+        entity.setId(guid);
         entity.setSenderReceiver(senderReceiver);
         entity.setTransferIncoming(incoming);
         entity.setStatus(status);
@@ -795,8 +798,8 @@ public class LogMapperTest {
         ExchangeLogType model = LogMapper.toModel(entity);
 
         assertEquals(LogType.RECEIVE_SALES_REPORT, model.getType());
-        assertEquals(dateReceived, model.getDateRecieved());
-        assertEquals(guid, model.getGuid());
+        assertEquals(dateReceived, model.getDateRecieved().toInstant());
+        assertEquals(guid.toString(), model.getGuid());
         assertEquals(senderReceiver, model.getSenderReceiver());
         assertEquals(incoming, model.isIncoming());
         assertEquals(status, model.getStatus());
@@ -805,8 +808,8 @@ public class LogMapperTest {
 
     @Test
     public void toModelWhenEntityIsReceiveSalesResponse() {
-        Date dateReceived = new Date();
-        String guid = "Paradise";
+        Instant dateReceived = Instant.now();
+        UUID guid = UUID.randomUUID();
         String senderReceiver = "Chris Martin";
         boolean incoming = true;
         ExchangeLogStatusTypeType status = ExchangeLogStatusTypeType.PROBABLY_TRANSMITTED;
@@ -814,7 +817,7 @@ public class LogMapperTest {
 
         ExchangeLog entity = new ExchangeLog();
         entity.setDateReceived(dateReceived);
-        entity.setGuid(guid);
+        entity.setId(guid);
         entity.setSenderReceiver(senderReceiver);
         entity.setTransferIncoming(incoming);
         entity.setStatus(status);
@@ -824,8 +827,8 @@ public class LogMapperTest {
         ExchangeLogType model = LogMapper.toModel(entity);
 
         assertEquals(LogType.RECEIVE_SALES_RESPONSE, model.getType());
-        assertEquals(dateReceived, model.getDateRecieved());
-        assertEquals(guid, model.getGuid());
+        assertEquals(dateReceived, model.getDateRecieved().toInstant());
+        assertEquals(guid.toString(), model.getGuid());
         assertEquals(senderReceiver, model.getSenderReceiver());
         assertEquals(incoming, model.isIncoming());
         assertEquals(status, model.getStatus());
@@ -834,8 +837,8 @@ public class LogMapperTest {
 
     @Test
     public void toModelWhenEntityIsSendSalesReport() {
-        Date dateReceived = new Date();
-        String guid = "Paradise";
+        Instant dateReceived = Instant.now();
+        UUID guid = UUID.randomUUID();
         String senderReceiver = "Chris Martin";
         boolean incoming = true;
         ExchangeLogStatusTypeType status = ExchangeLogStatusTypeType.PROBABLY_TRANSMITTED;
@@ -843,7 +846,7 @@ public class LogMapperTest {
 
         ExchangeLog entity = new ExchangeLog();
         entity.setDateReceived(dateReceived);
-        entity.setGuid(guid);
+        entity.setId(guid);
         entity.setSenderReceiver(senderReceiver);
         entity.setTransferIncoming(incoming);
         entity.setStatus(status);
@@ -853,8 +856,8 @@ public class LogMapperTest {
         ExchangeLogType model = LogMapper.toModel(entity);
 
         assertEquals(LogType.SEND_SALES_REPORT, model.getType());
-        assertEquals(dateReceived, model.getDateRecieved());
-        assertEquals(guid, model.getGuid());
+        assertEquals(dateReceived, model.getDateRecieved().toInstant());
+        assertEquals(guid.toString(), model.getGuid());
         assertEquals(senderReceiver, model.getSenderReceiver());
         assertEquals(incoming, model.isIncoming());
         assertEquals(status, model.getStatus());
@@ -863,8 +866,8 @@ public class LogMapperTest {
 
     @Test
     public void toModelWhenEntityIsSendSalesResponse() {
-        Date dateReceived = new Date();
-        String guid = "Paradise";
+        Instant dateReceived = Instant.now();
+        UUID guid = UUID.randomUUID();
         String senderReceiver = "Chris Martin";
         boolean incoming = true;
         ExchangeLogStatusTypeType status = ExchangeLogStatusTypeType.PROBABLY_TRANSMITTED;
@@ -872,7 +875,7 @@ public class LogMapperTest {
 
         ExchangeLog entity = new ExchangeLog();
         entity.setDateReceived(dateReceived);
-        entity.setGuid(guid);
+        entity.setId(guid);
         entity.setSenderReceiver(senderReceiver);
         entity.setTransferIncoming(incoming);
         entity.setStatus(status);
@@ -882,8 +885,8 @@ public class LogMapperTest {
         ExchangeLogType model = LogMapper.toModel(entity);
 
         assertEquals(LogType.SEND_SALES_RESPONSE, model.getType());
-        assertEquals(dateReceived, model.getDateRecieved());
-        assertEquals(guid, model.getGuid());
+        assertEquals(dateReceived, model.getDateRecieved().toInstant());
+        assertEquals(guid.toString(), model.getGuid());
         assertEquals(senderReceiver, model.getSenderReceiver());
         assertEquals(incoming, model.isIncoming());
         assertEquals(status, model.getStatus());
@@ -893,9 +896,9 @@ public class LogMapperTest {
     @Test
     public void toNewEntityWhenLogTypeIsRcvFluxFAReportMsg() throws Exception {
         //data set
-        String typeRefGuid = "trg";
+        String typeRefGuid = UUID.randomUUID().toString();
         TypeRefType typeRefType = TypeRefType.FA_REPORT;
-        Date dateReceived = new Date();
+        Instant dateReceived = Instant.now();
         String senderOrReceiver = "BEL";
         ExchangeLogStatusTypeType status = ExchangeLogStatusTypeType.SUCCESSFUL;
         String message = "<xml></xml>";
@@ -910,7 +913,7 @@ public class LogMapperTest {
         ExchangeLogType input = new ExchangeLogType();
         input.setType(LogType.RCV_FLUX_FA_REPORT_MSG);
         input.setTypeRef(logRefType);
-        input.setDateRecieved(dateReceived);
+        input.setDateRecieved(Date.from(dateReceived));
         input.setSenderReceiver(senderOrReceiver);
         input.setStatus(status);
         input.setIncoming(false);
@@ -923,7 +926,7 @@ public class LogMapperTest {
         ExchangeLog result = LogMapper.toNewEntity(input, username);
 
         //assert
-        assertEquals(typeRefGuid, result.getTypeRefGuid());
+        assertEquals(typeRefGuid, result.getTypeRefGuid().toString());
         assertEquals(typeRefType, result.getTypeRefType());
         assertEquals(dateReceived, result.getDateReceived());
         assertEquals(senderOrReceiver, result.getSenderReceiver());
@@ -945,9 +948,9 @@ public class LogMapperTest {
     @Test
     public void toNewEntityWhenLogTypeIsReceiveFAQueryMsg() throws Exception {
         //data set
-        String typeRefGuid = "trg";
+        String typeRefGuid = UUID.randomUUID().toString();;
         TypeRefType typeRefType = TypeRefType.FA_QUERY;
-        Date dateReceived = new Date();
+        Instant dateReceived = Instant.now();
         String senderOrReceiver = "BEL";
         ExchangeLogStatusTypeType status = ExchangeLogStatusTypeType.SUCCESSFUL;
         String message = "<xml></xml>";
@@ -962,7 +965,7 @@ public class LogMapperTest {
         ExchangeLogType input = new ExchangeLogType();
         input.setType(LogType.RECEIVE_FA_QUERY_MSG);
         input.setTypeRef(logRefType);
-        input.setDateRecieved(dateReceived);
+        input.setDateRecieved(Date.from(dateReceived));
         input.setSenderReceiver(senderOrReceiver);
         input.setStatus(status);
         input.setIncoming(false);
@@ -975,7 +978,7 @@ public class LogMapperTest {
         ExchangeLog result = LogMapper.toNewEntity(input, username);
 
         //assert
-        assertEquals(typeRefGuid, result.getTypeRefGuid());
+        assertEquals(typeRefGuid, result.getTypeRefGuid().toString());
         assertEquals(typeRefType, result.getTypeRefType());
         assertEquals(dateReceived, result.getDateReceived());
         assertEquals(senderOrReceiver, result.getSenderReceiver());
@@ -997,9 +1000,9 @@ public class LogMapperTest {
     @Test
     public void toNewEntityWhenLogTypeIsSendFAQueryMsg() throws Exception {
         //data set
-        String typeRefGuid = "trg";
+        String typeRefGuid = UUID.randomUUID().toString();
         TypeRefType typeRefType = TypeRefType.FA_QUERY;
-        Date dateReceived = new Date();
+        Instant dateReceived = Instant.now();
         String senderOrReceiver = "BEL";
         ExchangeLogStatusTypeType status = ExchangeLogStatusTypeType.SUCCESSFUL;
         String message = "<xml></xml>";
@@ -1014,7 +1017,7 @@ public class LogMapperTest {
         ExchangeLogType input = new ExchangeLogType();
         input.setType(LogType.SEND_FA_QUERY_MSG);
         input.setTypeRef(logRefType);
-        input.setDateRecieved(dateReceived);
+        input.setDateRecieved(Date.from(dateReceived));
         input.setSenderReceiver(senderOrReceiver);
         input.setStatus(status);
         input.setIncoming(false);
@@ -1027,7 +1030,7 @@ public class LogMapperTest {
         ExchangeLog result = LogMapper.toNewEntity(input, username);
 
         //assert
-        assertEquals(typeRefGuid, result.getTypeRefGuid());
+        assertEquals(typeRefGuid, result.getTypeRefGuid().toString());
         assertEquals(typeRefType, result.getTypeRefType());
         assertEquals(dateReceived, result.getDateReceived());
         assertEquals(senderOrReceiver, result.getSenderReceiver());
@@ -1049,9 +1052,9 @@ public class LogMapperTest {
     @Test
     public void toNewEntityWhenLogTypeIsSendFluxFAReportMsg() throws Exception {
         //data set
-        String typeRefGuid = "trg";
+        String typeRefGuid = UUID.randomUUID().toString();
         TypeRefType typeRefType = TypeRefType.FA_REPORT;
-        Date dateReceived = new Date();
+        Instant dateReceived = Instant.now();
         String senderOrReceiver = "BEL";
         ExchangeLogStatusTypeType status = ExchangeLogStatusTypeType.SUCCESSFUL;
         String message = "<xml></xml>";
@@ -1066,7 +1069,7 @@ public class LogMapperTest {
         ExchangeLogType input = new ExchangeLogType();
         input.setType(LogType.SEND_FLUX_FA_REPORT_MSG);
         input.setTypeRef(logRefType);
-        input.setDateRecieved(dateReceived);
+        input.setDateRecieved(Date.from(dateReceived));
         input.setSenderReceiver(senderOrReceiver);
         input.setStatus(status);
         input.setIncoming(false);
@@ -1079,7 +1082,7 @@ public class LogMapperTest {
         ExchangeLog result = LogMapper.toNewEntity(input, username);
 
         //assert
-        assertEquals(typeRefGuid, result.getTypeRefGuid());
+        assertEquals(typeRefGuid, result.getTypeRefGuid().toString());
         assertEquals(typeRefType, result.getTypeRefType());
         assertEquals(dateReceived, result.getDateReceived());
         assertEquals(senderOrReceiver, result.getSenderReceiver());
@@ -1101,9 +1104,9 @@ public class LogMapperTest {
     @Test
     public void toNewEntityWhenLogTypeIsSendFluxResponseMsg() throws Exception {
         //data set
-        String typeRefGuid = "trg";
+        String typeRefGuid = UUID.randomUUID().toString();;
         TypeRefType typeRefType = TypeRefType.FA_RESPONSE;
-        Date dateReceived = new Date();
+        Instant dateReceived = Instant.now();
         String senderOrReceiver = "BEL";
         ExchangeLogStatusTypeType status = ExchangeLogStatusTypeType.SUCCESSFUL;
         String message = "<xml></xml>";
@@ -1118,7 +1121,7 @@ public class LogMapperTest {
         ExchangeLogType input = new ExchangeLogType();
         input.setType(LogType.SEND_FLUX_RESPONSE_MSG);
         input.setTypeRef(logRefType);
-        input.setDateRecieved(dateReceived);
+        input.setDateRecieved(Date.from(dateReceived));
         input.setSenderReceiver(senderOrReceiver);
         input.setStatus(status);
         input.setIncoming(false);
@@ -1131,7 +1134,7 @@ public class LogMapperTest {
         ExchangeLog result = LogMapper.toNewEntity(input, username);
 
         //assert
-        assertEquals(typeRefGuid, result.getTypeRefGuid());
+        assertEquals(typeRefGuid, result.getTypeRefGuid().toString());
         assertEquals(typeRefType, result.getTypeRefType());
         assertEquals(dateReceived, result.getDateReceived());
         assertEquals(senderOrReceiver, result.getSenderReceiver());

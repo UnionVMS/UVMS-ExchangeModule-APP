@@ -14,13 +14,11 @@ package eu.europa.ec.fisheries.uvms.exchange.entity.exchangelog;
 import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogStatusTypeType;
 import eu.europa.ec.fisheries.schema.exchange.v1.LogType;
 import eu.europa.ec.fisheries.schema.exchange.v1.TypeRefType;
-import eu.europa.ec.fisheries.uvms.exchange.constant.ExchangeConstants;
-import org.apache.commons.lang3.StringUtils;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
-import java.util.Date;
+import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
@@ -28,24 +26,30 @@ import java.util.UUID;
 @Table(name="log")
 //@formatter:off
 @NamedQueries({
-  @NamedQuery(name = ExchangeConstants.LOG_BY_GUID, query = "SELECT log FROM ExchangeLog log WHERE log.guid = :guid AND ((:typeRefType = null) OR (log.typeRefType = :typeRefType))"),
-  @NamedQuery(name = ExchangeConstants.LOG_BY_TYPE_RANGE_OF_REF_GUIDS, query = "SELECT DISTINCT log FROM ExchangeLog log WHERE log.typeRefGuid IN (:refGuids)"),
-  @NamedQuery(name = ExchangeConstants.LOG_BY_TYPE_REF_AND_GUID, query = "SELECT log FROM ExchangeLog log WHERE log.typeRefGuid = :typeRefGuid AND log.typeRefType in (:typeRefTypes)")
+  @NamedQuery(name = ExchangeLog.LOG_BY_GUID, query = "SELECT log FROM ExchangeLog log WHERE log.id = :guid AND ((:typeRefType = null) OR (log.typeRefType = :typeRefType))"),
+  @NamedQuery(name = ExchangeLog.LOG_BY_TYPE_RANGE_OF_REF_GUIDS, query = "SELECT DISTINCT log FROM ExchangeLog log WHERE log.typeRefGuid IN (:refGuids)"),
+  @NamedQuery(name = ExchangeLog.LOG_BY_TYPE_REF_AND_GUID, query = "SELECT log FROM ExchangeLog log WHERE log.typeRefGuid = :typeRefGuid AND log.typeRefType in (:typeRefTypes)"),
+	@NamedQuery(name = ExchangeLog.LATEST_LOG, query = "SELECT log FROM ExchangeLog log ORDER BY log.updateTime DESC")
 })
 //@formatter:on
 public class ExchangeLog {
 
+	public static final String LOG_BY_GUID = "Log.findByGuid";
+	public static final String LOG_BY_TYPE_RANGE_OF_REF_GUIDS = "Log.findByRangeOfRefGuids";
+	public static final String LOG_BY_TYPE_REF_AND_GUID = "Log.findByTypeRefGuid";
+	public static final String LATEST_LOG = "Log.latestLog";
+
 	@Id
 	@Column(name="log_id")
 	@GeneratedValue(strategy = GenerationType.AUTO)
-	private Long id;
+	private UUID id;
 	
 	@Column(name="log_type")
 	@Enumerated(EnumType.STRING)
 	private LogType type;
 	
 	@Column(name="log_type_ref_guid")
-	private String typeRefGuid;
+	private UUID typeRefGuid;
 	
 	@Enumerated(EnumType.STRING)
 	@Column(name="log_type_ref_type")
@@ -66,11 +70,6 @@ public class ExchangeLog {
 	@Column(name = "log_on")
 	private String on;
 
-	@NotNull(message = "The Guid for the log cannot be empty!")
-	@Size(max=100)
-	@Column(name = "log_guid", unique=true)
-	private String guid;
-	
 	@Column(name = "log_transfer_incoming")
 	private Boolean transferIncoming;
 
@@ -80,19 +79,17 @@ public class ExchangeLog {
 	private String senderReceiver;
 
 	@NotNull(message = "The dateReceived for the log cannot be empty!")
-	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name = "log_daterecieved")
-	private Date dateReceived;
+	private Instant dateReceived;
 
 	@NotNull(message = "The log_status field for the log cannot be empty!")
 	@Enumerated(EnumType.STRING)
 	@Column(name = "log_status")
 	private ExchangeLogStatusTypeType status;
 
-	@NotNull(message = "The log_updattim field for the log cannot be empty!")
-	@Temporal(TemporalType.TIMESTAMP)
-	@Column(name = "log_updattim")
-	private Date updateTime;
+	@NotNull(message = "The log_updatetime field for the log cannot be empty!")
+	@Column(name = "log_updatetime")
+	private Instant updateTime;
 
 	@NotNull(message = "The updatedBy field for the log cannot be empty!")
 	@Size(max=100)
@@ -106,9 +103,8 @@ public class ExchangeLog {
 	@Column(name="log_recipient")
 	private String recipient;
 
-	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name="log_fwddate")
-	private Date fwdDate;
+	private Instant fwdDate;
 
 	@Size(max=100)
 	@Column(name="log_fwdrule")
@@ -130,17 +126,16 @@ public class ExchangeLog {
 	private String businessError;
 
 	@PrePersist
-	public void prepersist() {
-		if(StringUtils.isEmpty(guid)){
-			setGuid(UUID.randomUUID().toString());
-		}
-    }
+	@PreUpdate
+	public void updateTimestampOnCreateAndUpdate(){
+		updateTime = Instant.now();
+	}
 
-	public Long getId() {
+	public UUID getId() {
 		return id;
 	}
 
-	public void setId(Long id) {
+	public void setId(UUID id) {
 		this.id = id;
 	}
 
@@ -152,13 +147,6 @@ public class ExchangeLog {
 		this.type = type;
 	}
 
-	public String getGuid() {
-		return guid;
-	}
-
-	public void setGuid(String guid) {
-		this.guid = guid;
-	}
 
 	public String getSenderReceiver() {
 		return senderReceiver;
@@ -168,11 +156,11 @@ public class ExchangeLog {
 		this.senderReceiver = senderReceiver;
 	}
 
-	public Date getDateReceived() {
+	public Instant getDateReceived() {
 		return dateReceived;
 	}
 
-	public void setDateReceived(Date dateReceived) {
+	public void setDateReceived(Instant dateReceived) {
 		this.dateReceived = dateReceived;
 	}
 
@@ -184,11 +172,11 @@ public class ExchangeLog {
 		this.status = status;
 	}
 
-	public Date getUpdateTime() {
+	public Instant getUpdateTime() {
 		return updateTime;
 	}
 
-	public void setUpdateTime(Date updateTime) {
+	public void setUpdateTime(Instant updateTime) {
 		this.updateTime = updateTime;
 	}
 
@@ -216,11 +204,11 @@ public class ExchangeLog {
 		this.statusHistory = statusHistory;
 	}
 
-	public String getTypeRefGuid() {
+	public UUID getTypeRefGuid() {
 		return typeRefGuid;
 	}
 
-	public void setTypeRefGuid(String typeRefGuid) {
+	public void setTypeRefGuid(UUID typeRefGuid) {
 		this.typeRefGuid = typeRefGuid;
 	}
 
@@ -248,11 +236,11 @@ public class ExchangeLog {
 		this.recipient = recipient;
 	}
 
-	public Date getFwdDate() {
+	public Instant getFwdDate() {
 		return fwdDate;
 	}
 
-	public void setFwdDate(Date fwdDate) {
+	public void setFwdDate(Instant fwdDate) {
 		this.fwdDate = fwdDate;
 	}
 

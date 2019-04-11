@@ -14,9 +14,12 @@ package eu.europa.ec.fisheries.uvms.exchange;
 import eu.europa.ec.fisheries.schema.exchange.v1.LogType;
 import eu.europa.ec.fisheries.schema.exchange.v1.TypeRefType;
 import eu.europa.ec.fisheries.uvms.exchange.entity.exchangelog.ExchangeLog;
+
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.UUID;
 
 import eu.europa.ec.fisheries.schema.exchange.service.v1.CapabilityListType;
 import eu.europa.ec.fisheries.schema.exchange.service.v1.CapabilityType;
@@ -40,7 +43,7 @@ public class MockData {
         return dto;
     }
 
-    public static Service getEntity(long id) {
+    public static Service getEntity(UUID id) {
         Service entity = new Service();
         entity.setId(id);
         entity.setName("Plugin name");
@@ -63,7 +66,7 @@ public class MockData {
 		ServiceCapability capability = new ServiceCapability();
 		capability.setCapability(CapabilityTypeType.POLLABLE);
 		capability.setService(parent);
-		capability.setValue("TRUE");
+		capability.setValue(true);
 		list.add(capability);
 		return list;
 	}
@@ -89,16 +92,18 @@ public class MockData {
 
 	public static List<ExchangeLog> getLogEntities(){
 		ExchangeLog log1 = new ExchangeLog();
+		log1.setDateReceived(Instant.now().minusSeconds(30));
 		log1.setType(LogType.RECEIVE_FA_QUERY_MSG);
-		log1.setTypeRefGuid("SomeRefGuid_1AAA");
+		log1.setTypeRefGuid(UUID.randomUUID());
 		log1.setTransferIncoming(false);
-		log1.setGuid("AAA-BBB-CCC");
+		log1.setId(UUID.randomUUID());
 		log1.setTypeRefType(TypeRefType.FA_QUERY);
 		ExchangeLog log2 = new ExchangeLog();
+		log2.setDateReceived(Instant.now());
 		log2.setType(LogType.RECEIVE_FA_QUERY_MSG);
-		log2.setTypeRefGuid("SomeRefGuid_2BBB");
+		log2.setTypeRefGuid(UUID.randomUUID());
 		log2.setTransferIncoming(true);
-		log2.setGuid("CCC-DDD-EEE");
+		log2.setId(UUID.randomUUID());
 		log2.setTypeRefType(TypeRefType.FA_RESPONSE);
 		return Arrays.asList(log1, log2);
 	}

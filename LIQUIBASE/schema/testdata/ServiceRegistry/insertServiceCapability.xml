@@ -9,7 +9,7 @@
             <column name="servcap_serv_id" value="1"/>
             <column name="servcap_capability" value="POLLABLE"/>
             <column name="servcap_value" value="TRUE"/>
-            <column name="servcap_updattim" value="${now}"/>
+            <column name="servcap_updatetime" value="${now}"/>
             <column name="servcap_upuser" value="johlyn"/>
         </insert>
         <insert tableName="service_capability">
@@ -17,7 +17,7 @@
             <column name="servcap_serv_id" value="1"/>
             <column name="servcap_capability" value="CONFIGURABLE"/>
             <column name="servcap_value" value="TRUE"/>
-            <column name="servcap_updattim" value="${now}"/>
+            <column name="servcap_updatetime" value="${now}"/>
             <column name="servcap_upuser" value="johlyn"/>
         </insert>
         <insert tableName="service_capability">
@@ -25,7 +25,7 @@
             <column name="servcap_serv_id" value="2"/>
             <column name="servcap_capability" value="POLLABLE"/>
             <column name="servcap_value" value="TRUE"/>
-            <column name="servcap_updattim" value="${now}"/>
+            <column name="servcap_updatetime" value="${now}"/>
             <column name="servcap_upuser" value="johlyn"/>
         </insert>
         <insert tableName="service_capability">
@@ -33,7 +33,7 @@
             <column name="servcap_serv_id" value="4"/>
             <column name="servcap_capability" value="POLLABLE"/>
             <column name="servcap_value" value="TRUE"/>
-            <column name="servcap_updattim" value="${now}"/>
+            <column name="servcap_updatetime" value="${now}"/>
             <column name="servcap_upuser" value="johlyn"/>
         </insert>
         <insert tableName="service_capability">
@@ -41,7 +41,7 @@
             <column name="servcap_serv_id" value="4"/>
             <column name="servcap_capability" value="CONFIGURABLE"/>
             <column name="servcap_value" value="TRUE"/>
-            <column name="servcap_updattim" value="${now}"/>
+            <column name="servcap_updatetime" value="${now}"/>
             <column name="servcap_upuser" value="johlyn"/>
         </insert>
         

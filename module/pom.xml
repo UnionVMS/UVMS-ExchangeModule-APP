@@ -5,7 +5,7 @@
     <parent>
         <groupId>eu.europa.ec.fisheries.uvms.exchange</groupId>
         <artifactId>exchange</artifactId>
-        <version>4.0.46-UVMS-SNAPSHOT</version>
+        <version>5.0.0-UVMS-SNAPSHOT</version>
     </parent>
     
     <artifactId>exchange-module</artifactId>
@@ -25,10 +25,6 @@
                             <artifactId>exchange-dbaccess-domain</artifactId>
                             <bundleFileName>exchange-dbaccess-domain.jar</bundleFileName> <!-- TODO:Why?-->
                         </ejbModule>                    	
-                        <ejbModule>
-                            <groupId>${project.groupId}</groupId>   
-                            <artifactId>exchange-message</artifactId>
-                        </ejbModule>
                         <ejbModule>
                             <groupId>${project.groupId}</groupId>  
                             <artifactId>exchange-service</artifactId>
@@ -53,12 +49,6 @@
             <version>${project.version}</version>
             <type>ejb</type>
         </dependency>    
-        <dependency>
-            <groupId>${project.groupId}</groupId>     
-            <artifactId>exchange-message</artifactId>
-            <version>${project.version}</version>
-            <type>ejb</type>
-        </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>  
             <artifactId>exchange-service</artifactId>
