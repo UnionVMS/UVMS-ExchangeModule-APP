@@ -62,9 +62,9 @@ public class ServiceRegistryModelBean {
         return existingService;
     }
 
-    public Service unregisterService(ServiceType serviceType, String username) {
+    public Service unregisterService(String serviceClassName, String username) {
         // Look for existing service
-        Service service = dao.getServiceByServiceClassName(serviceType.getServiceClassName());
+        Service service = dao.getServiceByServiceClassName(serviceClassName);
         if (service != null) {
             service.setActive(false);
             service.setStatus(false);

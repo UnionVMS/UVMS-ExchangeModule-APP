@@ -81,7 +81,7 @@ public class PluginServiceBean {
     @EJB
     private UVMSConfigService configService;
 
-    private boolean checkPluginType(PluginType pluginType, String responseTopicMessageSelector, String messageId) {
+    private boolean checkPluginType(PluginType pluginType, String responseTopicMessageSelector, String serviceClassName, String messageId) {
         LOG.debug("[INFO] CheckPluginType " + pluginType.name());
         if (PluginType.EMAIL == pluginType || PluginType.NAF == pluginType) {
             //Check if type already exists
@@ -92,6 +92,9 @@ public class PluginServiceBean {
                 if (!services.isEmpty()) {
                     for(Service service : services){
                         if(service.getActive()){
+                            if(service.getServiceClassName().equals(serviceClassName)){                                     //If we are trying to register something that is already registred
+                                return true;
+                            }
                             //TODO log to audit log
                             String response = ExchangePluginResponseMapper.mapToRegisterServiceResponseNOK(messageId, "Plugin of " + pluginType + " already registered. Only one is allowed.");
                             eventBusTopicProducer.sendEventBusMessage(response, responseTopicMessageSelector);
@@ -157,7 +160,7 @@ public class PluginServiceBean {
             String messageId = message.getJMSMessageID();
             boolean sendMessage;
             if (register.getService() != null) {
-                sendMessage = checkPluginType(register.getService().getPluginType(), register.getService().getServiceResponseMessageName(), messageId);
+                sendMessage = checkPluginType(register.getService().getPluginType(), register.getService().getServiceResponseMessageName(), register.getService().getServiceClassName(), messageId);
                 if (sendMessage) {      //aka if we should actually register. If it is an email or naf and we already have one of those active then no
                     registerService(register, newService,  messageId);
                 }
@@ -208,7 +211,7 @@ public class PluginServiceBean {
         Service service = null;
         try {
             UnregisterServiceRequest unregister = JAXBMarshaller.unmarshallTextMessage(message, UnregisterServiceRequest.class);
-            service = serviceRegistryModel.unregisterService(unregister.getService(), unregister.getService().getName());
+            service = serviceRegistryModel.unregisterService(unregister.getService().getServiceClassName(), unregister.getService().getName());
             //NO ack back to plugin
             //TODO log to exchange log
         } catch (Exception e) {

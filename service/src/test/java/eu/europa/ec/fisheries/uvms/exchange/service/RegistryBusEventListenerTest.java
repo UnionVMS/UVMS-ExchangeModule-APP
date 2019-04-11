@@ -68,6 +68,45 @@ public class RegistryBusEventListenerTest extends BuildExchangeServiceTestDeploy
 
     }
 
+    @Test
+    @OperateOnDeployment("exchangeservice")
+    public void registerSameNAFServiceTwiceTest() throws Exception{
+        ServiceType service = createBasicService(PluginType.NAF);
+
+        String request = ExchangeModuleRequestMapper.createRegisterServiceRequest(service, createBasicCapabilityList(), createBasicSettingsList());
+
+        jmsHelper.registerSubscriber("ServiceName = '" + service.getServiceResponseMessageName() + "'");
+        jmsHelper.sendMessageOnEventQueue(request);
+        TextMessage message = (TextMessage)jmsHelper.listenOnEventBus("ServiceName = '" + service.getServiceResponseMessageName() + "'", 5000l);
+        RegisterServiceResponse response = JAXBMarshaller.unmarshallTextMessage(message, RegisterServiceResponse.class);
+
+        assertEquals(AcknowledgeTypeType.OK, response.getAck().getType());
+        assertEquals(service.getServiceClassName(), response.getService().getServiceClassName());
+
+        Thread.sleep(1000); //to let it work
+
+        jmsHelper.registerSubscriber("ServiceName = '" + service.getServiceResponseMessageName() + "'");
+        jmsHelper.sendMessageOnEventQueue(request);
+        message = (TextMessage)jmsHelper.listenOnEventBus("ServiceName = '" + service.getServiceResponseMessageName() + "'", 5000l);
+        response = JAXBMarshaller.unmarshallTextMessage(message, RegisterServiceResponse.class);
+
+        assertEquals(AcknowledgeTypeType.OK, response.getAck().getType());
+        assertEquals(service.getServiceClassName(), response.getService().getServiceClassName());
+
+        Thread.sleep(1000); //to let it work some more
+
+        List<Service> serviceList = serviceRegistryDao.getServices();
+        Service newService = serviceList.get(serviceList.size() - 1);
+        assertTrue(newService.getActive());
+        assertEquals(true, newService.getStatus());
+        assertEquals(PluginType.NAF.value(), newService.getType().value());
+        assertEquals(service.getServiceClassName(), newService.getServiceClassName());
+
+        assertEquals(5, serviceRegistryDao.getServiceCapabilities(service.getServiceClassName()).size());
+        assertEquals(4, serviceRegistryDao.getServiceSettings(service.getServiceClassName()).size());
+
+    }
+
 
     @Test
     @OperateOnDeployment("exchangeservice")
