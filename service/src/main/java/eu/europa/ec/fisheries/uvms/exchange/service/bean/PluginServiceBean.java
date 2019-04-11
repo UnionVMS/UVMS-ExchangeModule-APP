@@ -161,7 +161,7 @@ public class PluginServiceBean {
             boolean sendMessage;
             if (register.getService() != null) {
                 sendMessage = checkPluginType(register.getService().getPluginType(), register.getService().getServiceResponseMessageName(), register.getService().getServiceClassName(), messageId);
-                if (sendMessage) {      //aka if we should actually register. If it is an email or naf and we already have one of those active then no
+                if (sendMessage) {      //aka if we should actually register. If it is an email or naf and we already have one of those active (that is not the same as the one we are trying to register) then no
                     registerService(register, newService,  messageId);
                 }
             }
