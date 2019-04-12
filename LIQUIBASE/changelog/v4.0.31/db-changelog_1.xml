@@ -13,7 +13,8 @@
 <databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
                    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
-         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd"
+         logicalFilePath="changelog/v4.0.31/db-changelog_1.xml">
 
     <changeSet author="emrinalgr" id="UNIONVMS-4014">
         <addColumn tableName="log">
