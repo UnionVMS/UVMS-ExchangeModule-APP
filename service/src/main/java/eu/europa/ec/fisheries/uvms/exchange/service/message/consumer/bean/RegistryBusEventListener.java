@@ -85,7 +85,9 @@ public class RegistryBusEventListener implements MessageListener {
 
     private ExchangeRegistryBaseRequest unmarshallExchangeRegistryBaseRequest(TextMessage textMessage) {
         try {
-            return JAXBMarshaller.unmarshallTextMessage(textMessage, ExchangeRegistryBaseRequest.class);
+            ExchangeRegistryBaseRequest retval = JAXBMarshaller.unmarshallTextMessage(textMessage, ExchangeRegistryBaseRequest.class);
+            LOG.info("Using depricated way to get incoming method call in message from: " + retval.getUsername());
+            return retval;
         } catch (RuntimeException e) {
             return null;
         }
