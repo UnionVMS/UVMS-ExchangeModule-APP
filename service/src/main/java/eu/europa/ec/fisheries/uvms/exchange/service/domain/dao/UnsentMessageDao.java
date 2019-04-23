@@ -9,36 +9,23 @@ the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the impl
 FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details. You should have received a
 copy of the GNU General Public License along with the IFDM Suite. If not, see <http://www.gnu.org/licenses/>.
  */
-package eu.europa.ec.fisheries.uvms.exchange.service.bean;
+package eu.europa.ec.fisheries.uvms.exchange.service.domain.dao;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import eu.europa.ec.fisheries.uvms.exchange.service.domain.entity.unsent.UnsentMessage;
+import eu.europa.ec.fisheries.uvms.exchange.service.domain.exception.ExchangeDaoException;
+import eu.europa.ec.fisheries.uvms.exchange.service.domain.exception.NoEntityFoundException;
 
-import javax.annotation.PostConstruct;
-import javax.ejb.Singleton;
-import java.util.concurrent.ConcurrentHashMap;
+import javax.ejb.Local;
+import java.util.List;
 
-@Singleton
-public class ExchangeEventLogCache {
-	final static Logger LOG = LoggerFactory.getLogger(ExchangeEventLogCache.class);
+@Local
+public interface UnsentMessageDao {
+
+	public UnsentMessage create(UnsentMessage unsentMessage) throws ExchangeDaoException;
 	
-	private ConcurrentHashMap<String, String> cache;
+	public UnsentMessage remove(UnsentMessage unsentMessage) throws ExchangeDaoException;
 	
-	@PostConstruct
-	public void init() {
-		cache = new ConcurrentHashMap<String, String>();
-		//TODO set TTL on cached objects
-	}
+	public UnsentMessage getByGuid(String guid) throws NoEntityFoundException;
 	
-	public void put(String messageId, String logGuid) {
-		LOG.info(".put( " + messageId + ", " + logGuid + ")");
-		cache.put(messageId, logGuid);
-	}
-
-	String acknowledged(String messageId) {
-		LOG.info(".acknowledged( " + messageId + ")");
-		return cache.remove(messageId);
-	}
-	
-
+	public List<UnsentMessage> getAll() throws ExchangeDaoException;
 }

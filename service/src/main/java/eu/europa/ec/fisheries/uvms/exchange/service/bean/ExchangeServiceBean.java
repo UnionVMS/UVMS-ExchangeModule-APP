@@ -15,11 +15,11 @@ import eu.europa.ec.fisheries.schema.exchange.plugin.types.v1.PluginType;
 import eu.europa.ec.fisheries.schema.exchange.service.v1.*;
 import eu.europa.ec.fisheries.uvms.audit.model.exception.AuditModelMarshallException;
 import eu.europa.ec.fisheries.uvms.commons.message.api.MessageException;
-import eu.europa.ec.fisheries.uvms.exchange.ServiceRegistryModel;
 import eu.europa.ec.fisheries.uvms.exchange.message.consumer.ExchangeConsumer;
 import eu.europa.ec.fisheries.uvms.exchange.message.producer.bean.ExchangeAuditProducerBean;
 import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelException;
 import eu.europa.ec.fisheries.uvms.exchange.service.ExchangeService;
+import eu.europa.ec.fisheries.uvms.exchange.service.domain.ServiceRegistryModel;
 import eu.europa.ec.fisheries.uvms.exchange.service.exception.ExchangeServiceException;
 import eu.europa.ec.fisheries.uvms.exchange.service.mapper.ExchangeAuditRequestMapper;
 import lombok.extern.slf4j.Slf4j;
@@ -75,7 +75,7 @@ public class ExchangeServiceBean implements ExchangeService {
         log.info("Unregister service invoked in service layer: {} {}",data.getServiceClassName(),username);
         try {
             ServiceResponseType serviceResponseType = serviceRegistryModel.unregisterService(data, username);
-            //sendAuditlogMessageForUnregisterService(compressServiceClassName(serviceResponseType.getServiceClassName()), username);
+            sendAuditlogMessageForUnregisterService(compressServiceClassName(serviceResponseType.getServiceClassName()), username);
             return serviceResponseType;
         } catch (ExchangeModelException ex) {
             throw new ExchangeServiceException(ex.getMessage());

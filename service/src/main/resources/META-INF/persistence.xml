@@ -1,11 +1,44 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<persistence version="2.0" xmlns="http://java.sun.com/xml/ns/persistence" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://java.sun.com/xml/ns/persistence">
-    <persistence-unit name="exchange" transaction-type="JTA">
+<persistence xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             xmlns="http://java.sun.com/xml/ns/persistence"
+             xsi:schemaLocation="http://java.sun.com/xml/ns/persistence http://java.sun.com/xml/ns/persistence/persistence_2_0.xsd"
+             version="2.0">
+
+<persistence-unit name="exchangePU" transaction-type="JTA">
         <provider>org.hibernate.jpa.HibernatePersistenceProvider</provider>
         <jta-data-source>jdbc/uvms_exchange</jta-data-source>
+        <class>eu.europa.ec.fisheries.uvms.exchange.service.domain.entity.serviceregistry.ServiceSetting</class>
+        <class>eu.europa.ec.fisheries.uvms.exchange.service.domain.entity.serviceregistry.ServiceCapability</class>
+        <class>eu.europa.ec.fisheries.uvms.exchange.service.domain.entity.serviceregistry.Service</class>
+<!--        <class>eu.europa.ec.fisheries.uvms.exchange.entity.exchangelog.EmailLog</class>-->
+        <class>eu.europa.ec.fisheries.uvms.exchange.service.domain.entity.exchangelog.ExchangeLog</class>
+        <class>eu.europa.ec.fisheries.uvms.exchange.service.domain.entity.exchangelog.ExchangeLogStatus</class>
+        <class>eu.europa.ec.fisheries.uvms.exchange.service.domain.entity.unsent.UnsentMessage</class>
+        <class>eu.europa.ec.fisheries.uvms.exchange.service.domain.entity.unsent.UnsentMessageProperty</class>
+        <exclude-unlisted-classes>true</exclude-unlisted-classes>
+        <shared-cache-mode>ALL</shared-cache-mode>
+        <properties>
+            <property name="hibernate.dialect" value="org.hibernate.dialect.PostgreSQL94Dialect"/>
+            <property name="hibernate.event.merge.entity_copy_observer" value="allow"/>
+            <property name="hibernate.default_schema" value="exchange"/>
+            <property name="show_sql" value="false"/>
+            <property name="format_sql" value="true"/>
+            <property name="use_sql_comments" value="false"/>
+            <property name="hibernate.cache.use_second_level_cache" value="true"/>
+            <property name="hibernate.generate_statistics" value="false"/>
+            <property name="hibernate.physical_naming_strategy" value="org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl"/>
+            <property name="hibernate.implicit_naming_strategy" value="org.hibernate.boot.model.naming.ImplicitNamingStrategyComponentPathImpl"/>
+        </properties>
+    </persistence-unit>
+
+    <persistence-unit name="configPU" transaction-type="JTA">
+        <provider>org.hibernate.jpa.HibernatePersistenceProvider</provider>
+        <jta-data-source>jdbc/uvms_config</jta-data-source>
         <class>eu.europa.ec.fisheries.uvms.config.service.entity.Parameter</class>
+ <!--       <class>eu.europa.ec.fisheries.uvms.exchange.service.domain.entity.serviceregistry.Parameter</class>-->
         <properties>
             <property name="hibernate.dialect" value="org.hibernate.dialect.PostgreSQL94Dialect"/>
         </properties>
     </persistence-unit>
+
 </persistence>

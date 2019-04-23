@@ -9,36 +9,28 @@ the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the impl
 FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details. You should have received a
 copy of the GNU General Public License along with the IFDM Suite. If not, see <http://www.gnu.org/licenses/>.
  */
-package eu.europa.ec.fisheries.uvms.exchange.service.bean;
+package eu.europa.ec.fisheries.uvms.exchange.service.domain.search;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+/**
+ **/
+public enum SearchTable {
 
-import javax.annotation.PostConstruct;
-import javax.ejb.Singleton;
-import java.util.concurrent.ConcurrentHashMap;
+    LOG("log", "ExchangeLog");
 
-@Singleton
-public class ExchangeEventLogCache {
-	final static Logger LOG = LoggerFactory.getLogger(ExchangeEventLogCache.class);
-	
-	private ConcurrentHashMap<String, String> cache;
-	
-	@PostConstruct
-	public void init() {
-		cache = new ConcurrentHashMap<String, String>();
-		//TODO set TTL on cached objects
-	}
-	
-	public void put(String messageId, String logGuid) {
-		LOG.info(".put( " + messageId + ", " + logGuid + ")");
-		cache.put(messageId, logGuid);
-	}
+    private final String tableNameAlias;
+    private final String tableName;
 
-	String acknowledged(String messageId) {
-		LOG.info(".acknowledged( " + messageId + ")");
-		return cache.remove(messageId);
-	}
-	
+    private SearchTable(String tableNameAlias, String tableName) {
+        this.tableNameAlias = tableNameAlias;
+        this.tableName = tableName;
+    }
+
+    public String getTableName() {
+        return tableName;
+    }
+
+    public String getTableAlias() {
+        return tableNameAlias;
+    }
 
 }

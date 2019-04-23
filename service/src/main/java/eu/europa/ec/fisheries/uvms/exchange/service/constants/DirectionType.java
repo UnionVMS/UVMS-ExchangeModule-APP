@@ -11,6 +11,6 @@
 package eu.europa.ec.fisheries.uvms.exchange.service.constants;
 
 public enum DirectionType {
-
-    ASC, DESC
+    ASC,
+    DESC
 }

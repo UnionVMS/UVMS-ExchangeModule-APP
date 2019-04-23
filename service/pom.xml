@@ -20,13 +20,6 @@
             <scope>provided</scope>
         </dependency>
 
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>exchange-dbaccess-domain</artifactId>
-            <version>${project.version}</version>
-            <scope>provided</scope>
-        </dependency>
-
         <!-- Third party libs -->
         <dependency>
             <groupId>net.sf.dozer</groupId>

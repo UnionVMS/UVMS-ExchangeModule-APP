@@ -25,7 +25,7 @@ import eu.europa.ec.fisheries.uvms.exchange.service.config.ParameterKey;
 @Stateless
 public class ExchangeConfigHelper implements ConfigHelper {
 
-    @PersistenceContext
+    @PersistenceContext(unitName = "configPU")
     protected EntityManager em;
 
     @Override

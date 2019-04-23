@@ -11,6 +11,23 @@ copy of the GNU General Public License along with the IFDM Suite. If not, see <h
  */
 package eu.europa.ec.fisheries.uvms.exchange.service.bean;
 
+import eu.europa.ec.fisheries.schema.exchange.module.v1.ExchangeBaseRequest;
+import eu.europa.ec.fisheries.schema.exchange.v1.*;
+import eu.europa.ec.fisheries.uvms.commons.message.api.MessageException;
+import eu.europa.ec.fisheries.uvms.exchange.message.consumer.ExchangeConsumer;
+import eu.europa.ec.fisheries.uvms.exchange.message.producer.bean.ExchangeToExchangeProducerBean;
+import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelException;
+import eu.europa.ec.fisheries.uvms.exchange.service.ExchangeLogService;
+import eu.europa.ec.fisheries.uvms.exchange.service.domain.ExchangeLogModel;
+import eu.europa.ec.fisheries.uvms.exchange.service.domain.UnsentModel;
+import eu.europa.ec.fisheries.uvms.exchange.service.domain.dao.ExchangeLogDao;
+import eu.europa.ec.fisheries.uvms.exchange.service.event.ExchangeLogEvent;
+import eu.europa.ec.fisheries.uvms.exchange.service.event.ExchangeSendingQueueEvent;
+import eu.europa.ec.fisheries.uvms.exchange.service.exception.ExchangeLogException;
+import eu.europa.ec.fisheries.uvms.longpolling.notifications.NotificationMessage;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
@@ -21,22 +38,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
-import eu.europa.ec.fisheries.schema.exchange.module.v1.ExchangeBaseRequest;
-import eu.europa.ec.fisheries.schema.exchange.v1.*;
-import eu.europa.ec.fisheries.uvms.commons.message.api.MessageException;
-import eu.europa.ec.fisheries.uvms.exchange.ExchangeLogModel;
-import eu.europa.ec.fisheries.uvms.exchange.UnsentModel;
-import eu.europa.ec.fisheries.uvms.exchange.dao.ExchangeLogDao;
-import eu.europa.ec.fisheries.uvms.exchange.message.consumer.ExchangeConsumer;
-import eu.europa.ec.fisheries.uvms.exchange.message.producer.bean.ExchangeToExchangeProducerBean;
-import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelException;
-import eu.europa.ec.fisheries.uvms.exchange.service.ExchangeLogService;
-import eu.europa.ec.fisheries.uvms.exchange.service.event.ExchangeLogEvent;
-import eu.europa.ec.fisheries.uvms.exchange.service.event.ExchangeSendingQueueEvent;
-import eu.europa.ec.fisheries.uvms.exchange.service.exception.ExchangeLogException;
-import eu.europa.ec.fisheries.uvms.longpolling.notifications.NotificationMessage;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 
 @Stateless
 @Slf4j
@@ -257,7 +258,7 @@ public class ExchangeLogServiceBean implements ExchangeLogService {
             if (TypeRefType.FA_RESPONSE.equals(rawMsg.getType())){
                 guid = rawMsg.getRefGuid();
             }
-            validationFromRules = exchangeToRulesSyncMsgBean.getValidationFromRules(guid, rawMsg.getType());
+            validationFromRules = exchangeToRulesSyncMsgBean.getValidationFromRules(guid, rawMsg.getType(), rawMsg.getDataFlow());
             validationFromRules.setMsg(rawMsg.getRawMsg() != null ? rawMsg.getRawMsg() : StringUtils.EMPTY);
         }
         return validationFromRules;

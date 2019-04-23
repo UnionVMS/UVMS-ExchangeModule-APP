@@ -43,7 +43,7 @@ import eu.europa.ec.fisheries.uvms.exchange.service.exception.ExchangeLogExcepti
 
 public class ExchangeLogMapper {
 
-    final static Logger LOG = LoggerFactory.getLogger(ExchangeLogMapper.class);
+    private final static Logger LOG = LoggerFactory.getLogger(ExchangeLogMapper.class);
 
     public static ExchangeLogType getReceivedMovementExchangeLog(SetReportMovementType request, String typeRefGuid, String typeRefType,String username) throws ExchangeLogException {
         if (request == null) {

@@ -45,13 +45,13 @@ public class ExchangeToRulesSyncMsgBean {
 
 
     @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
-    public ExchangeLogWithValidationResults getValidationFromRules(String guid, TypeRefType type) {
+    public ExchangeLogWithValidationResults getValidationFromRules(String guid, TypeRefType type, String dataFlow) {
         if (StringUtils.isEmpty(guid)) {
             return new ExchangeLogWithValidationResults();
         }
         ExchangeLogWithValidationResults resp = new ExchangeLogWithValidationResults();
         try {
-            String getValidationsByGuidRequest = RulesModuleRequestMapper.createGetValidationsByGuidRequest(guid, type == null ? null : type.name());
+            String getValidationsByGuidRequest = RulesModuleRequestMapper.createGetValidationsByGuidRequest(guid, type == null ? null : type.name(), dataFlow);
             String correlationId;
             try {
                 Map<String, String> messageProperties = new HashMap<>();

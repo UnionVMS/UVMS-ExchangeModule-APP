@@ -39,10 +39,10 @@
         <longpolling.version>2.0.13</longpolling.version>
         <!-- Uvms models -->
         <asset.model.version>4.0.12</asset.model.version>
-        <exchange.model.version>4.0.23</exchange.model.version>
+        <exchange.model.version>4.0.34</exchange.model.version>
         <audit.model.version>4.0.8</audit.model.version>
         <movement.model.version>4.0.14</movement.model.version>
-        <rules.model.version>3.0.42</rules.model.version>
+        <rules.model.version>3.0.53-SNAPSHOT</rules.model.version>
         <javaee.version>8.0</javaee.version>
 
         <hibernate.version>5.1.9.Final</hibernate.version>
@@ -291,7 +291,6 @@
     <modules>
         <module>LIQUIBASE</module>
         <module>commons</module>
-        <module>domain</module>
         <module>rest</module>
         <module>service</module>
         <module>message</module>
