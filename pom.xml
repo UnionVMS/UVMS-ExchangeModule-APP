@@ -42,7 +42,7 @@
         <exchange.model.version>4.0.34</exchange.model.version>
         <audit.model.version>4.0.8</audit.model.version>
         <movement.model.version>4.0.14</movement.model.version>
-        <rules.model.version>3.0.53-SNAPSHOT</rules.model.version>
+        <rules.model.version>3.0.56-W14J8-MARE</rules.model.version>
         <javaee.version>8.0</javaee.version>
 
         <hibernate.version>5.1.9.Final</hibernate.version>
