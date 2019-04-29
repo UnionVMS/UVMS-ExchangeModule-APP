@@ -253,7 +253,7 @@ public class PluginServiceBean {
 
                         ServiceSetting setting = new ServiceSetting();
                         setting.setSetting(key);
-                        setting.setSetting(value);
+                        setting.setValue(value);
                         updatePluginSetting(serviceClassName, setting, "UVMS");
                     } else {
                         LOG.error("No key or malformed key sent in settingEvent: key: {}, value: {}", key, value);

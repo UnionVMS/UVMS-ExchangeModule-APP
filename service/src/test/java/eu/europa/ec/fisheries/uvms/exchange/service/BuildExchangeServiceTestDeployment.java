@@ -31,7 +31,7 @@ public abstract class BuildExchangeServiceTestDeployment {
         testWar.deleteClass(UnionVMSMock.class);
 
         testWar.addAsWebInfResource("META-INF/ejb-jar.xml");
-        testWar.addAsResource("META-INF/persistence.xml", "persistence.xml");
+        testWar.addAsResource("META-INF/persistence.xml", "META-INF/persistence.xml");
         testWar.addAsResource("META-INF/beans.xml", "beans.xml");
 
         return testWar;
