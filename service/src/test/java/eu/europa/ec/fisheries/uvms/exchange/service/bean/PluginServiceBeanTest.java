@@ -59,19 +59,20 @@ public class PluginServiceBeanTest extends BuildExchangeServiceTestDeployment {
         String serviceClassName = "eu.europa.ec.fisheries.uvms.plugins.test";
         String key = "setting";
         String value = "APA";
+        String settingKey = serviceClassName + "." + key;
         
         ServiceSetting setting = new ServiceSetting();
-        setting.setSetting(serviceClassName + "." + key);
+        setting.setSetting(settingKey);
         setting.setValue(value);
         setting.setUpdatedTime(Instant.now());
         setting.setUser("Test");
         Service service = createAndPersistBasicService(serviceName, serviceClassName, PluginType.OTHER, Arrays.asList(setting));
         
         // Simulate sync with config
-        parameterService.setStringValue(serviceClassName + "." + key, value, "");
+        parameterService.setStringValue(settingKey, value, "");
         
         SettingType settingType = new SettingType();
-        settingType.setKey(serviceClassName + "." + key);
+        settingType.setKey(settingKey);
         String newValue = "BEPA";
         settingType.setValue(newValue);
         settingType.setDescription("Test");
@@ -84,7 +85,7 @@ public class PluginServiceBeanTest extends BuildExchangeServiceTestDeployment {
         SetConfigRequest configRequest = JAXBMarshaller.unmarshallTextMessage(message, SetConfigRequest.class);
         
         assertThat(configRequest.getConfigurations().getSetting().size(), CoreMatchers.is(1));
-        assertThat(configRequest.getConfigurations().getSetting().get(0).getKey(), CoreMatchers.is(key));
+        assertThat(configRequest.getConfigurations().getSetting().get(0).getKey(), CoreMatchers.is(settingKey));
         assertThat(configRequest.getConfigurations().getSetting().get(0).getValue(), CoreMatchers.is(newValue));
         
         serviceRegistryDao.deleteEntity(service.getId());
