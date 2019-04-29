@@ -16,6 +16,7 @@ import eu.europa.ec.fisheries.schema.exchange.plugin.types.v1.PluginType;
 import eu.europa.ec.fisheries.schema.exchange.registry.v1.RegisterServiceRequest;
 import eu.europa.ec.fisheries.schema.exchange.registry.v1.UnregisterServiceRequest;
 import eu.europa.ec.fisheries.uvms.config.event.ConfigSettingEvent;
+import eu.europa.ec.fisheries.uvms.config.event.ConfigSettingUpdatedEvent;
 import eu.europa.ec.fisheries.uvms.config.exception.ConfigServiceException;
 import eu.europa.ec.fisheries.uvms.config.service.ParameterService;
 import eu.europa.ec.fisheries.uvms.config.service.UVMSConfigService;
@@ -40,6 +41,7 @@ import java.util.Map;
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
 import javax.enterprise.event.Event;
+import javax.enterprise.event.Observes;
 import javax.inject.Inject;
 import javax.jms.TextMessage;
 
@@ -230,7 +232,7 @@ public class PluginServiceBean {
         eventBusTopicProducer.sendEventBusMessage(text, serviceClassName);
     }
     
-    public void setConfig(ConfigSettingEvent settingEvent) {
+    public void setConfig(@Observes @ConfigSettingUpdatedEvent ConfigSettingEvent settingEvent) {
         switch (settingEvent.getType()) {
             case STORE:
                 //ConfigModule and/or Exchange module deployed
