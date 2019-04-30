@@ -126,7 +126,7 @@ public class ExchangeLogServiceBean {
         ExchangeLogStatus exchangeLogStatus = createExchangeLogStatus(logStatus);
         ExchangeLog updatedLog = exchangeLogModel.updateExchangeLogStatus(exchangeLogStatus, username, logGuid);
         // For long polling
-        exchangeLogEvent.fire(new NotificationMessage("guid", updatedLog.getId()));
+        exchangeLogEvent.fire(new NotificationMessage("guid", updatedLog.getId().toString()));
         return updatedLog;
     }
 
