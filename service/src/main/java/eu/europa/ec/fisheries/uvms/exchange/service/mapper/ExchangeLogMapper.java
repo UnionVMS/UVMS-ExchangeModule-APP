@@ -179,6 +179,7 @@ public class ExchangeLogMapper {
         log.setTypeRefGuid(UUID.fromString(sendReport.getMovement().getGuid()));
         String senderReceiver = getSendMovementSenderReceiver(sendReport);
         log.setSenderReceiver(senderReceiver);
+        log.setTransferIncoming(false);
 
         //TODO send fwdDate, fwdRule and recipient from Rules
         log.setFwdDate(sendReport.getFwdDate().toInstant());

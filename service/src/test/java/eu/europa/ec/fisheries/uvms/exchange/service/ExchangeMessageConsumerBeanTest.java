@@ -41,6 +41,7 @@ import eu.europa.ec.fisheries.uvms.exchange.service.bean.ExchangeEventLogCache;
 import eu.europa.ec.fisheries.uvms.exchange.service.constants.ExchangeServiceConstants;
 import eu.europa.ec.fisheries.uvms.exchange.service.model.IncomingMovement;
 import org.apache.commons.lang3.exception.ExceptionUtils;
+import org.hamcrest.CoreMatchers;
 import org.jboss.arquillian.container.test.api.OperateOnDeployment;
 import org.jboss.arquillian.junit.Arquillian;
 import org.junit.Before;
@@ -59,6 +60,7 @@ import javax.persistence.NoResultException;
 
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
@@ -161,7 +163,7 @@ public class ExchangeMessageConsumerBeanTest extends BuildExchangeServiceTestDep
 
         jmsHelper.registerSubscriber("ServiceName = '" + serviceClassName + "'");
         String corrID = jmsHelper.sendExchangeMessage(request, null, "SET_COMMAND");
-        TextMessage message = (TextMessage)jmsHelper.listenOnEventBus("ServiceName = '" + serviceClassName + "'", 5000l);
+        TextMessage message = (TextMessage)jmsHelper.listenOnEventBus(5000l);
         SetCommandRequest response = JAXBMarshaller.unmarshallTextMessage(message, SetCommandRequest.class);
 
         assertNotNull(response);
@@ -239,7 +241,7 @@ public class ExchangeMessageConsumerBeanTest extends BuildExchangeServiceTestDep
 
         jmsHelper.registerSubscriber("ServiceName = '" + serviceClassName + "'");
         String corrID = jmsHelper.sendExchangeMessage(request, null, "SET_COMMAND");
-        TextMessage message = (TextMessage)jmsHelper.listenOnEventBus("ServiceName = '" + serviceClassName + "'", 5000l);
+        TextMessage message = (TextMessage)jmsHelper.listenOnEventBus(5000l);
         SetCommandRequest response = JAXBMarshaller.unmarshallTextMessage(message, SetCommandRequest.class);
 
         assertNotNull(response);
@@ -271,7 +273,7 @@ public class ExchangeMessageConsumerBeanTest extends BuildExchangeServiceTestDep
 
         jmsHelper.registerSubscriber("ServiceName = '" + serviceClassName + "'");
         String corrID = jmsHelper.sendExchangeMessage(request, null, "SEND_REPORT_TO_PLUGIN");
-        TextMessage message = (TextMessage)jmsHelper.listenOnEventBus("ServiceName = '" + serviceClassName + "'", 5000l);
+        TextMessage message = (TextMessage)jmsHelper.listenOnEventBus(5000l);
         SetReportRequest response = JAXBMarshaller.unmarshallTextMessage(message, SetReportRequest.class);
 
          assertEquals(ReportTypeType.MOVEMENT, response.getReport().getType());
@@ -282,6 +284,10 @@ public class ExchangeMessageConsumerBeanTest extends BuildExchangeServiceTestDep
         assertEquals(sizeB4 + 1, unsentMessageDao.getAll().size());
         assertEquals(eventLogSizeB4 + 1, exchangeEventLogCache.size());
 
+        List<ExchangeLog> logs = exchangeLogDao.getExchangeLogByTypesRefAndGuid(UUID.fromString(movementType.getGuid()), Arrays.asList(TypeRefType.MOVEMENT));
+        assertThat(logs.size(), CoreMatchers.is(1));
+        ExchangeLog log = logs.get(0);
+        assertThat(log.getTransferIncoming(), CoreMatchers.is(false));
 
         serviceRegistryDao.deleteEntity(service.getId());
     }
@@ -307,7 +313,7 @@ public class ExchangeMessageConsumerBeanTest extends BuildExchangeServiceTestDep
 
         jmsHelper.registerSubscriber("ServiceName = '" + serviceClassName + "'");
         String corrID = jmsHelper.sendExchangeMessage(request, null, "UPDATE_PLUGIN_SETTING");
-        TextMessage topicMessage = (TextMessage)jmsHelper.listenOnEventBus("ServiceName = '" + serviceClassName + "'", 5000l);
+        TextMessage topicMessage = (TextMessage)jmsHelper.listenOnEventBus(5000l);
         SetConfigRequest response = JAXBMarshaller.unmarshallTextMessage(topicMessage, SetConfigRequest.class);
 
         assertEquals(1, response.getConfigurations().getSetting().size());
@@ -556,7 +562,6 @@ public class ExchangeMessageConsumerBeanTest extends BuildExchangeServiceTestDep
         MovementRefType movementRefType = new MovementRefType();
         movementRefType.setAckResponseMessageID(output.getAckResponseMessageId());
         movementRefType.setType(MovementRefTypeType.ALARM);
-        movementRefType.setMovementRefGuid(logGuid);
         String request = ExchangeModuleRequestMapper.mapToProcessedMovementResponse("Test username", movementRefType);
 
         corrID = jmsHelper.sendExchangeMessage(request, null, "PROCESSED_MOVEMENT");
@@ -716,7 +721,7 @@ public class ExchangeMessageConsumerBeanTest extends BuildExchangeServiceTestDep
 
         jmsHelper.registerSubscriber("ServiceName = '" + serviceClassName + "'");
         String corrID = jmsHelper.sendExchangeMessage(request, null, "SEND_SALES_RESPONSE");
-        TextMessage message = (TextMessage)jmsHelper.listenOnEventBus("ServiceName = '" + serviceClassName + "'", 5000l);
+        TextMessage message = (TextMessage)jmsHelper.listenOnEventBus(5000l);
 
         SendSalesResponseRequest output = JAXBMarshaller.unmarshallTextMessage(message,SendSalesResponseRequest.class);
 
@@ -741,7 +746,7 @@ public class ExchangeMessageConsumerBeanTest extends BuildExchangeServiceTestDep
 
         jmsHelper.registerSubscriber("ServiceName = '" + serviceClassName + "'");
         String corrID = jmsHelper.sendExchangeMessage(request, null, "SEND_SALES_REPORT");
-        TextMessage message = (TextMessage)jmsHelper.listenOnEventBus("ServiceName = '" + serviceClassName + "'", 5000l);
+        TextMessage message = (TextMessage)jmsHelper.listenOnEventBus(5000l);
 
         SendSalesReportRequest output = JAXBMarshaller.unmarshallTextMessage(message,SendSalesReportRequest.class);
 
@@ -762,7 +767,7 @@ public class ExchangeMessageConsumerBeanTest extends BuildExchangeServiceTestDep
 
         jmsHelper.registerSubscriber("ServiceName = '" + ExchangeServiceConstants.MDR_PLUGIN_SERVICE_NAME + "'");
         String corrID = jmsHelper.sendExchangeMessage(request, null, "SET_MDR_SYNC_MESSAGE_REQUEST");
-        TextMessage message = (TextMessage)jmsHelper.listenOnEventBus("ServiceName = '" + ExchangeServiceConstants.MDR_PLUGIN_SERVICE_NAME + "'", 5000l);
+        TextMessage message = (TextMessage)jmsHelper.listenOnEventBus(5000l);
 
         SetMdrPluginRequest output = JAXBMarshaller.unmarshallTextMessage(message, SetMdrPluginRequest.class);
         assertEquals("MDR ReportType", output.getRequest());
@@ -817,7 +822,7 @@ public class ExchangeMessageConsumerBeanTest extends BuildExchangeServiceTestDep
 
         jmsHelper.registerSubscriber("ServiceName = '" + ExchangeServiceConstants.BELGIAN_ACTIVITY_PLUGIN_SERVICE_NAME + "'");
         String corrID = jmsHelper.sendExchangeMessage(request, null, "SEND_FLUX_FA_REPORT_MESSAGE");
-        TextMessage message = (TextMessage)jmsHelper.listenOnEventBus("ServiceName = '" + ExchangeServiceConstants.BELGIAN_ACTIVITY_PLUGIN_SERVICE_NAME + "'", 5000l);
+        TextMessage message = (TextMessage)jmsHelper.listenOnEventBus(5000l);
 
         SetFLUXFAReportRequest output = JAXBMarshaller.unmarshallTextMessage(message, SetFLUXFAReportRequest.class);
         assertEquals(fluxMessage, output.getResponse());
@@ -865,7 +870,7 @@ public class ExchangeMessageConsumerBeanTest extends BuildExchangeServiceTestDep
 
         jmsHelper.registerSubscriber("ServiceName = '" + ExchangeServiceConstants.FLUX_ACTIVITY_PLUGIN_SERVICE_NAME + "'");
         String corrID = jmsHelper.sendExchangeMessage(request, null, "SEND_FA_QUERY_MESSAGE");
-        TextMessage message = (TextMessage)jmsHelper.listenOnEventBus("ServiceName = '" + ExchangeServiceConstants.FLUX_ACTIVITY_PLUGIN_SERVICE_NAME + "'", 5000l);
+        TextMessage message = (TextMessage)jmsHelper.listenOnEventBus(5000l);
 
         SetFLUXFAQueryRequest output = JAXBMarshaller.unmarshallTextMessage(message, SetFLUXFAQueryRequest.class);
         assertEquals(queryMessage, output.getResponse());
@@ -891,7 +896,7 @@ public class ExchangeMessageConsumerBeanTest extends BuildExchangeServiceTestDep
 
         jmsHelper.registerSubscriber("ServiceName = '" + ExchangeServiceConstants.FLUX_ACTIVITY_PLUGIN_SERVICE_NAME + "'");
         String corrID = jmsHelper.sendExchangeMessage(request, null, "SET_FLUX_FA_RESPONSE_MESSAGE");
-        TextMessage message = (TextMessage)jmsHelper.listenOnEventBus("ServiceName = '" + ExchangeServiceConstants.FLUX_ACTIVITY_PLUGIN_SERVICE_NAME + "'", 5000l);
+        TextMessage message = (TextMessage)jmsHelper.listenOnEventBus(5000l);
 
         SetFLUXFAResponseRequest output = JAXBMarshaller.unmarshallTextMessage(message, SetFLUXFAResponseRequest.class);
         assertEquals(responseMessage, output.getResponse());

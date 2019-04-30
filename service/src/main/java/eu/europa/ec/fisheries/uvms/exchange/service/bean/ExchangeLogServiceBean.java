@@ -126,7 +126,7 @@ public class ExchangeLogServiceBean {
         ExchangeLogStatus exchangeLogStatus = createExchangeLogStatus(logStatus);
         ExchangeLog updatedLog = exchangeLogModel.updateExchangeLogStatus(exchangeLogStatus, username, logGuid);
         // For long polling
-        exchangeLogEvent.fire(new NotificationMessage("guid", updatedLog.getId()));
+        exchangeLogEvent.fire(new NotificationMessage("guid", updatedLog.getId().toString()));
         return updatedLog;
     }
 
@@ -224,7 +224,9 @@ public class ExchangeLogServiceBean {
 
     public void updateTypeRef(ExchangeLog exchangeLogStatus, MovementRefType movementRefType){
         exchangeLogStatus.setTypeRefType(TypeRefType.valueOf(movementRefType.getType().value()));
-        exchangeLogStatus.setTypeRefGuid(UUID.fromString(movementRefType.getMovementRefGuid()));
+        if (movementRefType.getMovementRefGuid() != null) {
+            exchangeLogStatus.setTypeRefGuid(UUID.fromString(movementRefType.getMovementRefGuid()));
+        }
     }
 
     public ExchangeLogWithValidationResults getExchangeLogRawMessageAndValidationByGuid(UUID guid) {

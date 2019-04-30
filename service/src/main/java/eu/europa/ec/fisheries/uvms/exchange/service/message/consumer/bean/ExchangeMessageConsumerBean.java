@@ -204,7 +204,7 @@ public class ExchangeMessageConsumerBean implements MessageListener {
             }
         } catch (Exception e){
             try {
-                LOG.error("Error in exchange call to {} : Incoming message is {} . END", exchangeMethod, e, textMessage.getText());
+                LOG.error("Error in exchange call to {} : Incoming message is {} . END", exchangeMethod, textMessage.getText(), e);
 
             throw new RuntimeException("Error in exchange call to " + exchangeMethod + " : Incoming message is " + textMessage.getText() + " .END", e);
             } catch (JMSException e1) {

@@ -97,7 +97,7 @@ public class JMSHelper {
         }
     }
 
-    public Message listenOnEventBus(String selector, Long timeoutInMillis) throws Exception {
+    public Message listenOnEventBus(Long timeoutInMillis) throws Exception {
 
         try {
             return subscriber.receive(timeoutInMillis);

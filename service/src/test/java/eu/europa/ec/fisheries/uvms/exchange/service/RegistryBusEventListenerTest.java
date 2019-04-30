@@ -77,7 +77,7 @@ public class RegistryBusEventListenerTest extends BuildExchangeServiceTestDeploy
 
         jmsHelper.registerSubscriber("ServiceName = '" + service.getServiceResponseMessageName() + "'");
         jmsHelper.sendMessageOnEventQueue(request);
-        TextMessage message = (TextMessage)jmsHelper.listenOnEventBus("ServiceName = '" + service.getServiceResponseMessageName() + "'", 5000l);
+        TextMessage message = (TextMessage)jmsHelper.listenOnEventBus(5000l);
         RegisterServiceResponse response = JAXBMarshaller.unmarshallTextMessage(message, RegisterServiceResponse.class);
 
         assertEquals(AcknowledgeTypeType.OK, response.getAck().getType());
@@ -87,7 +87,7 @@ public class RegistryBusEventListenerTest extends BuildExchangeServiceTestDeploy
 
         jmsHelper.registerSubscriber("ServiceName = '" + service.getServiceResponseMessageName() + "'");
         jmsHelper.sendMessageOnEventQueue(request);
-        message = (TextMessage)jmsHelper.listenOnEventBus("ServiceName = '" + service.getServiceResponseMessageName() + "'", 5000l);
+        message = (TextMessage)jmsHelper.listenOnEventBus(5000l);
         response = JAXBMarshaller.unmarshallTextMessage(message, RegisterServiceResponse.class);
 
         assertEquals(AcknowledgeTypeType.OK, response.getAck().getType());
@@ -117,7 +117,7 @@ public class RegistryBusEventListenerTest extends BuildExchangeServiceTestDeploy
 
         jmsHelper.registerSubscriber("ServiceName = '" + service.getServiceResponseMessageName() + "'");
         jmsHelper.sendMessageOnEventQueue(request);
-        TextMessage message = (TextMessage)jmsHelper.listenOnEventBus("ServiceName = '" + service.getServiceResponseMessageName() + "'", 5000l);
+        TextMessage message = (TextMessage)jmsHelper.listenOnEventBus(5000l);
         RegisterServiceResponse response = JAXBMarshaller.unmarshallTextMessage(message, RegisterServiceResponse.class);
 
         assertEquals(AcknowledgeTypeType.OK, response.getAck().getType());
@@ -146,7 +146,7 @@ public class RegistryBusEventListenerTest extends BuildExchangeServiceTestDeploy
 
         jmsHelper.registerSubscriber("ServiceName = '" + service.getServiceResponseMessageName() + "'");
         jmsHelper.sendMessageOnEventQueue(registerRequest);
-        TextMessage message = (TextMessage)jmsHelper.listenOnEventBus("ServiceName = '" + service.getServiceResponseMessageName() + "'", 5000l);
+        TextMessage message = (TextMessage)jmsHelper.listenOnEventBus(5000l);
         RegisterServiceResponse response = JAXBMarshaller.unmarshallTextMessage(message, RegisterServiceResponse.class);
 
         assertEquals(AcknowledgeTypeType.OK, response.getAck().getType());
