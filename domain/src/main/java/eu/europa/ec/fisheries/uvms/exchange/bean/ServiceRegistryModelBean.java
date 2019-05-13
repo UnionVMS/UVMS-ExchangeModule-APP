@@ -101,7 +101,7 @@ public class ServiceRegistryModelBean {
     		dao.updateService(service);
     		return service;
     	}
-    	throw new IllegalArgumentException("No plugin found when update plugin settings");
+    	throw new IllegalArgumentException("No plugin found when update plugin settings for plugin: " + serviceClassName);
 	}
     
 
