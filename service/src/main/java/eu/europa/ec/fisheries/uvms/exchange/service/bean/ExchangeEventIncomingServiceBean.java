@@ -206,7 +206,7 @@ public class ExchangeEventIncomingServiceBean {
             LOG.info("[INFO] Get plugin config LIST_SERVICE:{}", request.getType());
 
             List<ServiceResponseType> serviceList = ServiceMapper.toServiceModelList(serviceRegistryModel.getPlugins(request.getType()));
-            movementProducer.sendResponseMessageToSender(message, ExchangeModuleResponseMapper.mapServiceListResponse(serviceList));
+            exchangeAssetProducer.sendResponseMessageToSender(message, ExchangeModuleResponseMapper.mapServiceListResponse(serviceList));
         } catch (Exception e) {
             LOG.error("[ Error when getting plugin list from source {}] {}", message, e);
             exchangeErrorEvent.fire(new ExchangeErrorEvent(message,"Excpetion when getting service list"));
@@ -415,7 +415,7 @@ public class ExchangeEventIncomingServiceBean {
             }
 
             String responseAsString = JAXBUtils.marshallJaxBObjectToString(response);
-            movementProducer.sendResponseMessageToSender(event, responseAsString);
+            exchangeAssetProducer.sendResponseMessageToSender(event, responseAsString);
         } catch (MessageException | JAXBException | JMSException e) {
             fireExchangeFault(event, "Could not un-marshall " + LogRefIdByTypeExistsRequest.class, e);
         }
@@ -438,7 +438,7 @@ public class ExchangeEventIncomingServiceBean {
             }
 
             String responseAsString = JAXBUtils.marshallJaxBObjectToString(response);
-            movementProducer.sendResponseMessageToSender(event, responseAsString);
+            exchangeAssetProducer.sendResponseMessageToSender(event, responseAsString);
 
         } catch (MessageException | JAXBException | JMSException e) {
             fireExchangeFault(event, "Could not un-marshall " + LogRefIdByTypeExistsRequest.class, e);
@@ -481,7 +481,7 @@ public class ExchangeEventIncomingServiceBean {
         try {
             PingResponse response = new PingResponse();
             response.setResponse("pong");
-            movementProducer.sendResponseMessageToSender(message, JAXBMarshaller.marshallJaxBObjectToString(response));
+            exchangeAssetProducer.sendResponseMessageToSender(message, JAXBMarshaller.marshallJaxBObjectToString(response));
         } catch (Exception e) {
             LOG.error("[ Error when marshalling ping response ]");
         }

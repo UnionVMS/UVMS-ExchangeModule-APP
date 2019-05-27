@@ -10,42 +10,44 @@ details. You should have received a copy of the GNU General Public License along
 */
 package eu.europa.ec.fisheries.uvms.exchange.service.message.producer.bean;
 
-import eu.europa.ec.fisheries.uvms.commons.message.api.MessageConstants;
-import eu.europa.ec.fisheries.uvms.commons.message.api.MessageException;
-import eu.europa.ec.fisheries.uvms.commons.message.impl.AbstractProducer;
+import javax.annotation.Resource;
+import javax.ejb.Stateless;
+import javax.jms.Connection;
+import javax.jms.ConnectionFactory;
+import javax.jms.JMSException;
+import javax.jms.MessageProducer;
+import javax.jms.Queue;
+import javax.jms.Session;
+import javax.jms.TextMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import javax.annotation.Resource;
-import javax.ejb.LocalBean;
-import javax.ejb.Stateless;
-import javax.jms.Queue;
-import java.util.HashMap;
-import java.util.Map;
+import eu.europa.ec.fisheries.uvms.commons.message.api.MessageConstants;
+import eu.europa.ec.fisheries.uvms.commons.message.context.MappedDiagnosticContext;
 
 @Stateless
-@LocalBean
-public class ExchangeMovementProducer extends AbstractProducer {
+public class ExchangeMovementProducer {
 
-    final static Logger LOG = LoggerFactory.getLogger(ExchangeMovementProducer.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ExchangeMovementProducer.class);
 
-    @Resource(mappedName = "java:/jms/queue/UVMSExchange")
-    private Queue replyToQueue;
+    @Resource(mappedName = "java:/ConnectionFactory")
+    private ConnectionFactory connectionFactory;
 
-    public String sendMovementMessage(String text, String groupId) {
-        try {
-            Map<String, String> properties = new HashMap<>();
-            properties.put(MessageConstants.JMS_FUNCTION_PROPERTY, "CREATE");
-            properties.put(MessageConstants.JMS_MESSAGE_GROUP, groupId);
-            return sendModuleMessageWithProps(text, replyToQueue, properties);
-        } catch (MessageException e) {
+    @Resource(mappedName = "java:/jms/queue/UVMSMovementEvent")
+    private Queue movementQueue;
+
+    public void sendMovementMessage(String text, String groupId) {
+        try (Connection connection = connectionFactory.createConnection();
+                Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
+                MessageProducer producer = session.createProducer(movementQueue)) {
+            TextMessage message = session.createTextMessage();
+            message.setStringProperty(MessageConstants.JMS_FUNCTION_PROPERTY, "CREATE");
+            message.setStringProperty(MessageConstants.JMS_MESSAGE_GROUP, groupId);
+            MappedDiagnosticContext.addThreadMappedDiagnosticContextToMessageProperties(message);
+            message.setText(text);
+            producer.send(message);
+        } catch (JMSException e) {
             LOG.error("[ Error when sending movement message. ] {}", e);
-            throw new RuntimeException("Error when sending movement message.");
+            throw new IllegalStateException("Error when sending movement message.");
         }
-    }
-
-    @Override
-    public String getDestinationName() {
-        return MessageConstants.QUEUE_MODULE_MOVEMENT;
     }
 }
