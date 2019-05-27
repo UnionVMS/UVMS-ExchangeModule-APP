@@ -9,17 +9,25 @@ import org.jboss.shrinkwrap.api.spec.WebArchive;
 import org.jboss.shrinkwrap.resolver.api.maven.Maven;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
+import eu.europa.ec.fisheries.uvms.rest.security.UnionVMSFeature;
+import eu.europa.ec.mare.usm.jwt.JwtTokenHandler;
+import javax.ejb.EJB;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.WebTarget;
 import java.io.File;
+import java.util.Arrays;
 
 
 @ArquillianSuiteDeployment
 public abstract class BuildExchangeRestTestDeployment {
 
     final static Logger LOG = LoggerFactory.getLogger(BuildExchangeRestTestDeployment.class);
+    
+    @EJB
+    private JwtTokenHandler tokenHandler;
+
+    private String token;
 
     @Deployment(name = "exchangeservice", order = 2)
     public static Archive<?> createDeployment() {
@@ -55,7 +63,9 @@ public abstract class BuildExchangeRestTestDeployment {
 
         File[] files = Maven.configureResolver().loadPomFromFile("pom.xml")
                 .resolve("eu.europa.ec.fisheries.uvms.asset:asset-client",
-                        "eu.europa.ec.fisheries.uvms.commons:uvms-commons-message")
+                        "eu.europa.ec.fisheries.uvms:usm4uvms",
+                        "eu.europa.ec.fisheries.uvms.commons:uvms-commons-message",
+                        "eu.europa.ec.fisheries.uvms.commons:uvms-commons-service")
                 .withTransitivity().asFile();
         testWar.addAsLibraries(files);
 
@@ -73,5 +83,15 @@ public abstract class BuildExchangeRestTestDeployment {
         //client.register(new JacksonJaxbJsonProvider(objectMapper, JacksonJaxbJsonProvider.DEFAULT_ANNOTATIONS));
         //return client.target("http://localhost:28080/test/rest");
         return client.target("http://localhost:8080/exchangerest/rest");
+    }
+
+    protected String getToken() {
+        if (token == null) {
+            token = tokenHandler.createToken("user", 
+                    Arrays.asList(UnionVMSFeature.viewExchange.getFeatureId(), 
+                            UnionVMSFeature.manageExchangeTransmissionStatuses.getFeatureId(),
+                            UnionVMSFeature.manageExchangeSendingQueue.getFeatureId()));
+        }
+        return token;
     }
 }

@@ -16,6 +16,7 @@ import org.junit.runner.RunWith;
 
 import javax.inject.Inject;
 import javax.ws.rs.client.Entity;
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -61,6 +62,7 @@ public class ExchangeLogRestResourceTest extends BuildExchangeRestTestDeployment
                 .path("exchange")
                 .path("list")
                 .request(MediaType.APPLICATION_JSON)
+                .header(HttpHeaders.AUTHORIZATION, getToken())
                 .post(Entity.json(query), String.class);
 
         assertNotNull(stringResponse);
@@ -90,6 +92,7 @@ public class ExchangeLogRestResourceTest extends BuildExchangeRestTestDeployment
                 .path("exchange")
                 .path("poll")
                 .request(MediaType.APPLICATION_JSON)
+                .header(HttpHeaders.AUTHORIZATION, getToken())
                 .post(Entity.json(query), String.class);
 
         assertNotNull(stringResponse);
@@ -113,6 +116,7 @@ public class ExchangeLogRestResourceTest extends BuildExchangeRestTestDeployment
                 .path("exchange/poll")
                 .path(exchangeLog.getTypeRefGuid().toString())
                 .request(MediaType.APPLICATION_JSON)
+                .header(HttpHeaders.AUTHORIZATION, getToken())
                 .get(String.class);
 
         assertNotNull(stringResponse);
@@ -135,6 +139,7 @@ public class ExchangeLogRestResourceTest extends BuildExchangeRestTestDeployment
                 .path("exchange/message")
                 .path(exchangeLog.getId().toString())
                 .request(MediaType.APPLICATION_JSON)
+                .header(HttpHeaders.AUTHORIZATION, getToken())
                 .get(String.class);
 
         assertNotNull(stringResponse);
@@ -156,6 +161,7 @@ public class ExchangeLogRestResourceTest extends BuildExchangeRestTestDeployment
                 .path("exchange/validation")
                 .path(exchangeLog.getId().toString())
                 .request(MediaType.APPLICATION_JSON)
+                .header(HttpHeaders.AUTHORIZATION, getToken())
                 .get(String.class);
 
         assertNotNull(stringResponse);
@@ -180,6 +186,7 @@ public class ExchangeLogRestResourceTest extends BuildExchangeRestTestDeployment
                 .path("exchange/")
                 .path(exchangeLog.getId().toString())
                 .request(MediaType.APPLICATION_JSON)
+                .header(HttpHeaders.AUTHORIZATION, getToken())
                 .get(String.class);
 
         assertNotNull(stringResponse);

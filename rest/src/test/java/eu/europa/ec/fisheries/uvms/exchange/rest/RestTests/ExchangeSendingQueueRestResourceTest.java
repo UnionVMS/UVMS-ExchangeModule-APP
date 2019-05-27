@@ -28,6 +28,7 @@ import javax.inject.Inject;
 import javax.jms.ConnectionFactory;
 import javax.jms.TextMessage;
 import javax.ws.rs.client.Entity;
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -61,6 +62,7 @@ public class ExchangeSendingQueueRestResourceTest extends BuildExchangeRestTestD
                 .path("sendingqueue")
                 .path("list")
                 .request(MediaType.APPLICATION_JSON)
+                .header(HttpHeaders.AUTHORIZATION, getToken())
                 .get(String.class);
 
         assertNotNull(stringResponse);
@@ -111,6 +113,7 @@ public class ExchangeSendingQueueRestResourceTest extends BuildExchangeRestTestD
                 .path("sendingqueue")
                 .path("send")
                 .request(MediaType.APPLICATION_JSON)
+                .header(HttpHeaders.AUTHORIZATION, getToken())
                 .put(Entity.json(unsentMessagesIdList), String.class);
 
         TextMessage resentMessage = (TextMessage)jmsHelper.listenOnEventBus("ServiceName = '" + serviceClassName + "'", 5000l);

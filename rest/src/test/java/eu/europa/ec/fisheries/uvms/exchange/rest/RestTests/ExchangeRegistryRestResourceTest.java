@@ -21,6 +21,7 @@ import javax.inject.Inject;
 import javax.jms.ConnectionFactory;
 import javax.jms.TextMessage;
 import javax.ws.rs.client.Entity;
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 
 import java.util.List;
@@ -45,6 +46,7 @@ public class ExchangeRegistryRestResourceTest extends BuildExchangeRestTestDeplo
                 .path("plugin")
                 .path("list")
                 .request(MediaType.APPLICATION_JSON)
+                .header(HttpHeaders.AUTHORIZATION, getToken())
                 .get(String.class);
 
         assertNotNull(stringResponse);
@@ -69,6 +71,7 @@ public class ExchangeRegistryRestResourceTest extends BuildExchangeRestTestDeplo
                 .path("plugin/stop")
                 .path(serviceClassName)
                 .request(MediaType.APPLICATION_JSON)
+                .header(HttpHeaders.AUTHORIZATION, getToken())
                 .put(Entity.json(s), String.class);
 
         assertNotNull(stringResponse);
@@ -93,6 +96,7 @@ public class ExchangeRegistryRestResourceTest extends BuildExchangeRestTestDeplo
                 .path("plugin/start")
                 .path(serviceClassName)
                 .request(MediaType.APPLICATION_JSON)
+                .header(HttpHeaders.AUTHORIZATION, getToken())
                 .put(Entity.json(s), String.class);
 
         assertNotNull(stringResponse);
@@ -110,6 +114,7 @@ public class ExchangeRegistryRestResourceTest extends BuildExchangeRestTestDeplo
                 .path("plugin/stop")
                 .path("Non-valid service")
                 .request(MediaType.APPLICATION_JSON)
+                .header(HttpHeaders.AUTHORIZATION, getToken())
                 .put(Entity.json("test"), String.class);
 
         assertNotNull(stringResponse);
@@ -119,6 +124,7 @@ public class ExchangeRegistryRestResourceTest extends BuildExchangeRestTestDeplo
                 .path("plugin/start")
                 .path("Non-valid service")
                 .request(MediaType.APPLICATION_JSON)
+                .header(HttpHeaders.AUTHORIZATION, getToken())
                 .put(Entity.json("test"), String.class);
 
         assertNotNull(stringResponse);
