@@ -9,7 +9,7 @@ import org.jboss.arquillian.container.test.api.OperateOnDeployment;
 import org.jboss.arquillian.junit.Arquillian;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 
 import static org.junit.Assert.assertTrue;
@@ -24,6 +24,7 @@ public class ConfigRestResourceTest extends BuildExchangeRestTestDeployment {
                 .path("config")
                 .path("searchfields")
                 .request(MediaType.APPLICATION_JSON)
+                .header(HttpHeaders.AUTHORIZATION, getToken())
                 .get(String.class);
 
         for (SearchField s: SearchField.values()) {
@@ -37,6 +38,7 @@ public class ConfigRestResourceTest extends BuildExchangeRestTestDeployment {
         String stringResponse = getWebTarget()
                 .path("config")
                 .request(MediaType.APPLICATION_JSON)
+                .header(HttpHeaders.AUTHORIZATION, getToken())
                 .get(String.class);
 
         for (ExchangeLogStatusTypeType e: ExchangeLogStatusTypeType.values()) {
