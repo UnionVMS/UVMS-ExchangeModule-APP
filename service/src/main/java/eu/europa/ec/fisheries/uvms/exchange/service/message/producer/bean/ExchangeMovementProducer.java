@@ -40,7 +40,7 @@ public class ExchangeMovementProducer extends AbstractProducer {
             return sendModuleMessageWithProps(text, replyToQueue, properties);
         } catch (MessageException e) {
             LOG.error("[ Error when sending movement message. ] {}", e);
-            throw new RuntimeException("Error when sending movement message.");
+            throw new RuntimeException("Error when sending movement message.", e);
         }
     }
 
