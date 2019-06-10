@@ -103,7 +103,7 @@ public class ExchangeLogDaoBean extends Dao {
             return query.getSingleResult();
         } catch (NoResultException ignored) {
             // Don't need to actually do anything when no entity was found!
-            // LOG.error("[ERROR] when getting entity by ID. {}", e.getMessage());
+             LOG.error("Error when getting log by id: {} and type: {}", logGuid, typeRefType);
         }
         return null;
     }
