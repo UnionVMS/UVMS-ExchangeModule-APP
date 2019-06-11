@@ -44,6 +44,7 @@ public class ServiceRegistryDaoBean extends Dao {
      */
     public Service createEntity(Service entity) {
         em.persist(entity);
+        em.flush();
         return entity;
     }
 
