@@ -18,8 +18,6 @@ import eu.europa.ec.fisheries.uvms.config.message.ConfigMessageConsumer;
 import eu.europa.ec.fisheries.uvms.exchange.service.message.consumer.ExchangeConsumer;
 import javax.annotation.Resource;
 import javax.ejb.Stateless;
-import javax.ejb.TransactionAttribute;
-import javax.ejb.TransactionAttributeType;
 import javax.jms.Destination;
 import javax.jms.JMSException;
 import javax.jms.Queue;
@@ -42,7 +40,6 @@ public class ExchangeConsumerBean extends AbstractConsumer implements ExchangeCo
     }
 
     @Override
-    @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
     public <T> T getConfigMessage(String correlationId, Class<T> type) throws ConfigMessageException {
         try {
             return getMessage(correlationId, type, CONFIG_TIMEOUT);
