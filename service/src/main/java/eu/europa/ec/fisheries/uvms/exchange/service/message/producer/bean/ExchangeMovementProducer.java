@@ -12,42 +12,24 @@ package eu.europa.ec.fisheries.uvms.exchange.service.message.producer.bean;
 
 import javax.annotation.Resource;
 import javax.ejb.Stateless;
-import javax.jms.Connection;
-import javax.jms.ConnectionFactory;
+import javax.jms.Destination;
 import javax.jms.JMSException;
-import javax.jms.MessageProducer;
 import javax.jms.Queue;
-import javax.jms.Session;
-import javax.jms.TextMessage;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import eu.europa.ec.fisheries.uvms.commons.message.api.MessageConstants;
-import eu.europa.ec.fisheries.uvms.commons.message.context.MappedDiagnosticContext;
+import eu.europa.ec.fisheries.schema.movement.module.v1.MovementModuleMethod;
+import eu.europa.ec.fisheries.uvms.commons.message.impl.AbstractProducer;
 
 @Stateless
-public class ExchangeMovementProducer {
-
-    private static final Logger LOG = LoggerFactory.getLogger(ExchangeMovementProducer.class);
-
-    @Resource(mappedName = "java:/ConnectionFactory")
-    private ConnectionFactory connectionFactory;
+public class ExchangeMovementProducer extends AbstractProducer {
 
     @Resource(mappedName = "java:/jms/queue/UVMSMovementEvent")
-    private Queue movementQueue;
+    private Queue destination;
 
-    public void sendMovementMessage(String text, String groupId) {
-        try (Connection connection = connectionFactory.createConnection();
-                Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
-                MessageProducer producer = session.createProducer(movementQueue)) {
-            TextMessage message = session.createTextMessage();
-            message.setStringProperty(MessageConstants.JMS_FUNCTION_PROPERTY, "CREATE");
-            message.setStringProperty(MessageConstants.JMS_MESSAGE_GROUP, groupId);
-            MappedDiagnosticContext.addThreadMappedDiagnosticContextToMessageProperties(message);
-            message.setText(text);
-            producer.send(message);
-        } catch (JMSException e) {
-            LOG.error("[ Error when sending movement message. ] {}", e);
-            throw new IllegalStateException("Error when sending movement message.", e);
-        }
+    public void sendMovementMessage(String text, String groupId) throws JMSException {
+        sendMessageToSpecificQueueWithFunction(text, destination, null, MovementModuleMethod.CREATE.toString(), groupId);
+    }
+
+    @Override
+    public Destination getDestination() {
+        return destination;
     }
 }

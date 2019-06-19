@@ -11,12 +11,12 @@ copy of the GNU General Public License along with the IFDM Suite. If not, see <h
  */
 package eu.europa.ec.fisheries.uvms.exchange.service.message.consumer;
 
-import eu.europa.ec.fisheries.uvms.commons.message.api.MessageException;
 import javax.ejb.Local;
+import javax.jms.JMSException;
 
 @Local
 public interface ExchangeConsumer { //leave be for now ;(
 
-    public <T> T getMessage(String correlationId, Class type) throws MessageException;
+    public <T> T getMessage(String correlationId, Class<T> type) throws JMSException;
 
 }

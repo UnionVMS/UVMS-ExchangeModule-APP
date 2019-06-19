@@ -22,13 +22,18 @@ import javax.annotation.Resource;
 import javax.ejb.LocalBean;
 import javax.ejb.Stateless;
 import javax.enterprise.event.Observes;
+import javax.jms.Destination;
 import javax.jms.Queue;
+import javax.jms.Topic;
 
 @Stateless
 @LocalBean
 public class ExchangeEventBusTopicProducer extends AbstractTopicProducer {
 
-    final static Logger LOG = LoggerFactory.getLogger(ExchangeEventBusTopicProducer.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ExchangeEventBusTopicProducer.class);
+
+    @Resource(mappedName =  "java:/" + MessageConstants.EVENT_BUS_TOPIC)
+    private Topic destination;
 
     @Resource(mappedName = "java:/jms/queue/UVMSExchangeEvent")
     private Queue replyToQueue;
@@ -57,7 +62,7 @@ public class ExchangeEventBusTopicProducer extends AbstractTopicProducer {
     }
 
     @Override
-    public String getDestinationName() {
-        return MessageConstants.EVENT_BUS_TOPIC;
+    public Destination getDestination() {
+        return destination;
     }
 }

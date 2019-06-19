@@ -13,7 +13,6 @@ package eu.europa.ec.fisheries.uvms.exchange.service.bean;
 
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
-import javax.inject.Inject;
 
 import eu.europa.ec.fisheries.uvms.asset.client.AssetClient;
 import eu.europa.ec.fisheries.uvms.asset.client.model.AssetDTO;
@@ -27,7 +26,8 @@ import eu.europa.ec.fisheries.wsdl.asset.types.AssetIdType;
 
 @Stateless
 public class ExchangeAssetServiceBean {
-	final static Logger LOG = LoggerFactory.getLogger(ExchangeAssetServiceBean.class);
+
+	private static final Logger LOG = LoggerFactory.getLogger(ExchangeAssetServiceBean.class);
 
 	@EJB
 	private AssetClient assetClient;
