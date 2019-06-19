@@ -42,7 +42,7 @@ import javax.jms.TextMessage;
 //@formatter:on
 public class ExchangeMessageConsumerBean implements MessageListener {
 
-    final static Logger LOG = LoggerFactory.getLogger(ExchangeMessageConsumerBean.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ExchangeMessageConsumerBean.class);
 
     @Inject
     private ExchangeEventIncomingServiceBean incomingServiceBean;

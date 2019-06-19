@@ -48,7 +48,6 @@ import eu.europa.ec.fisheries.schema.exchange.service.v1.StatusType;
 import eu.europa.ec.fisheries.schema.exchange.v1.*;
 import eu.europa.ec.fisheries.schema.rules.module.v1.RulesModuleMethod;
 import eu.europa.ec.fisheries.schema.rules.module.v1.SetFLUXMDRSyncMessageRulesResponse;
-import eu.europa.ec.fisheries.uvms.commons.message.api.MessageException;
 import eu.europa.ec.fisheries.uvms.commons.message.impl.JAXBUtils;
 import eu.europa.ec.fisheries.uvms.exchange.service.message.event.ErrorEvent;
 import eu.europa.ec.fisheries.uvms.exchange.service.message.event.carrier.ExchangeErrorEvent;
@@ -416,7 +415,7 @@ public class ExchangeEventIncomingServiceBean {
 
             String responseAsString = JAXBUtils.marshallJaxBObjectToString(response);
             exchangeAssetProducer.sendResponseMessageToSender(event, responseAsString);
-        } catch (MessageException | JAXBException | JMSException e) {
+        } catch (JAXBException | JMSException e) {
             fireExchangeFault(event, "Could not un-marshall " + LogRefIdByTypeExistsRequest.class, e);
         }
     }
@@ -440,7 +439,7 @@ public class ExchangeEventIncomingServiceBean {
             String responseAsString = JAXBUtils.marshallJaxBObjectToString(response);
             exchangeAssetProducer.sendResponseMessageToSender(event, responseAsString);
 
-        } catch (MessageException | JAXBException | JMSException e) {
+        } catch (JAXBException | JMSException e) {
             fireExchangeFault(event, "Could not un-marshall " + LogRefIdByTypeExistsRequest.class, e);
         }
 

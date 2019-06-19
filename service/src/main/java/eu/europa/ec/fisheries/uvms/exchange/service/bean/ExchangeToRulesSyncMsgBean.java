@@ -38,7 +38,7 @@ import org.slf4j.LoggerFactory;
 @LocalBean
 public class ExchangeToRulesSyncMsgBean {
 
-    private final static Logger LOG = LoggerFactory.getLogger(ExchangeToRulesSyncMsgBean.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ExchangeToRulesSyncMsgBean.class);
 
     @EJB
     private ExchangeConsumer exchangeConsumerBean;
@@ -54,7 +54,7 @@ public class ExchangeToRulesSyncMsgBean {
         ExchangeLogWithValidationResults resp = new ExchangeLogWithValidationResults();
         try {
             String getValidationsByGuidRequest = RulesModuleRequestMapper.createGetValidationsByGuidRequest(guid, type == null ? null : type.name());
-            String correlationId = rulesProducer.sendRulesMessage(getValidationsByGuidRequest, "ValidationResultsByRawGuid");
+            String correlationId = rulesProducer.sendSynchronousRulesMessage(getValidationsByGuidRequest, "ValidationResultsByRawGuid");
             TextMessage validationRespMsg = exchangeConsumerBean.getMessage(correlationId, TextMessage.class);
             ValidationMessageTypeResponse validTypeRespFromRules = JAXBMarshaller.unmarshallTextMessage(validationRespMsg, ValidationMessageTypeResponse.class);
             List<ValidationMessageType> validationsListResponse = validTypeRespFromRules.getValidationsListResponse();

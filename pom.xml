@@ -35,11 +35,11 @@
 
         <!-- Uvms libs -->
         <longpolling.version>2.0.13</longpolling.version>
-        <uvms.commons.version>3.0.32</uvms.commons.version>
-        <uvms.config.version>4.0.3</uvms.config.version>
-        <usm4uvms.version>4.0.18</usm4uvms.version>
+        <uvms.commons.version>4.0.0</uvms.commons.version>
+        <uvms.config.version>4.0.4</uvms.config.version>
+        <usm4uvms.version>4.0.19</usm4uvms.version>
         <uvms-pom-deps.version>1.24</uvms-pom-deps.version>
-        <asset.client.version>6.0.44</asset.client.version>
+        <asset.client.version>6.0.55</asset.client.version>
 
         <!-- Uvms models -->
         <asset.model.version>6.0.44</asset.model.version>

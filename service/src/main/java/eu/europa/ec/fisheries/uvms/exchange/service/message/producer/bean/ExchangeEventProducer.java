@@ -1,7 +1,6 @@
 package eu.europa.ec.fisheries.uvms.exchange.service.message.producer.bean;
 
 import eu.europa.ec.fisheries.uvms.commons.message.api.MessageConstants;
-import eu.europa.ec.fisheries.uvms.commons.message.api.MessageException;
 import eu.europa.ec.fisheries.uvms.commons.message.impl.AbstractProducer;
 import eu.europa.ec.fisheries.uvms.exchange.model.mapper.JAXBMarshaller;
 import eu.europa.ec.fisheries.uvms.exchange.service.message.event.ErrorEvent;
@@ -13,6 +12,8 @@ import javax.annotation.Resource;
 import javax.ejb.LocalBean;
 import javax.ejb.Stateless;
 import javax.enterprise.event.Observes;
+import javax.jms.Destination;
+import javax.jms.JMSException;
 import javax.jms.Queue;
 import java.util.HashMap;
 import java.util.Map;
@@ -21,7 +22,10 @@ import java.util.Map;
 @LocalBean
 public class ExchangeEventProducer extends AbstractProducer {
 
-    final static Logger LOG = LoggerFactory.getLogger(ExchangeEventProducer.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ExchangeEventProducer.class);
+
+    @Resource(mappedName =  "java:/" + MessageConstants.QUEUE_EXCHANGE_EVENT)
+    private Queue destination;
 
     @Resource(mappedName = "java:/jms/queue/UVMSExchange")
     private Queue replyToQueue;
@@ -33,7 +37,7 @@ public class ExchangeEventProducer extends AbstractProducer {
             properties.put(MessageConstants.JMS_FUNCTION_PROPERTY, function);
             return sendModuleMessageWithProps(text, replyToQueue, properties);
 
-        } catch (MessageException e) {
+        } catch (JMSException e) {
             LOG.error("[ Error when sending Asset info message. ] {}", e);
             throw new RuntimeException("Error when sending asset info message.", e);
         }
@@ -50,7 +54,7 @@ public class ExchangeEventProducer extends AbstractProducer {
     }
 
     @Override
-    public String getDestinationName() {
-        return MessageConstants.QUEUE_EXCHANGE_EVENT;
+    public Destination getDestination() {
+        return destination;
     }
 }
