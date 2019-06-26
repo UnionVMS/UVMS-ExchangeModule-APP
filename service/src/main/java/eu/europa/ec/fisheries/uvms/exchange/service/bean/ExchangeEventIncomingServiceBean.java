@@ -67,7 +67,7 @@ import org.slf4j.LoggerFactory;
 @Stateless
 public class ExchangeEventIncomingServiceBean {
 
-    private final static Logger LOG = LoggerFactory.getLogger(ExchangeEventIncomingServiceBean.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ExchangeEventIncomingServiceBean.class);
 
     @Inject
     @ErrorEvent
