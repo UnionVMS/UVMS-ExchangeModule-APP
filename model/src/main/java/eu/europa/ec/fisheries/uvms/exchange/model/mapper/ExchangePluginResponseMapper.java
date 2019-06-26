@@ -26,24 +26,29 @@ import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogStatusTypeType;
  **/
 public class ExchangePluginResponseMapper {
 
-
-    public static AcknowledgeType mapToAcknowlegeType(String messageId, AcknowledgeTypeType ackType) {
+    public static AcknowledgeType mapToAcknowledgeType(AcknowledgeTypeType ackType) {
         AcknowledgeType type = new AcknowledgeType();
-        type.setMessageId(messageId);
         type.setType(ackType);
         return type;
     }
 
-    public static AcknowledgeType mapToAcknowlegeType(String messageId, String unsentMessageGuid, AcknowledgeTypeType ackType) {
+    public static AcknowledgeType mapToAcknowledgeType(String logId, AcknowledgeTypeType ackType) {
         AcknowledgeType type = new AcknowledgeType();
-        type.setMessageId(messageId);
+        type.setLogId(logId);
+        type.setType(ackType);
+        return type;
+    }
+
+    public static AcknowledgeType mapToAcknowledgeType(String logId, String unsentMessageGuid, AcknowledgeTypeType ackType) {
+        AcknowledgeType type = new AcknowledgeType();
+        type.setLogId(logId);
         type.setUnsentMessageGuid(unsentMessageGuid);
         type.setType(ackType);
         return type;
     }
 
-    public static AcknowledgeType mapToAcknowlegeType(String messageId, AcknowledgeTypeType ackType, String message) {
-        AcknowledgeType type = mapToAcknowlegeType(messageId, ackType);
+    public static AcknowledgeType mapToAcknowledgeType(String logId, AcknowledgeTypeType ackType, String message) {
+        AcknowledgeType type = mapToAcknowledgeType(logId, ackType);
         type.setMessage(message);
         return type;
     }
@@ -65,27 +70,6 @@ public class ExchangePluginResponseMapper {
         response.setMethod(ExchangeRegistryMethod.REGISTER_SERVICE);
         response.setAck(mapToAcknowledgeType(messageId, ackType));
         return response;
-    }
-
-    public static AcknowledgeType mapToAcknowledgeType(String messageId, AcknowledgeTypeType ackType) {
-        AcknowledgeType type = new AcknowledgeType();
-        type.setMessageId(messageId);
-        type.setType(ackType);
-        return type;
-    }
-
-    public static AcknowledgeType mapToAcknowledgeType(String messageId, String unsentMessageGuid, AcknowledgeTypeType ackType) {
-        AcknowledgeType type = new AcknowledgeType();
-        type.setMessageId(messageId);
-        type.setUnsentMessageGuid(unsentMessageGuid);
-        type.setType(ackType);
-        return type;
-    }
-
-    public static AcknowledgeType mapToAcknowledgeType(String messageId, AcknowledgeTypeType ackType, String message) {
-        AcknowledgeType type = mapToAcknowledgeType(messageId, ackType);
-        type.setMessage(message);
-        return type;
     }
 
     public static String mapToPingResponse(boolean registered, boolean enabled) {

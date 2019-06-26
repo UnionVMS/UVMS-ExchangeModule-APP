@@ -71,7 +71,7 @@ public class ExchangeMessageConsumerBean implements MessageListener {
             LOG.trace("Request body : ", textMessage.getText());
             String function = textMessage.getStringProperty(MessageConstants.JMS_FUNCTION_PROPERTY);
             exchangeMethod = (function != null) ? ExchangeModuleMethod.valueOf(function) : tryConsumeExchangeBaseRequest(textMessage).getMethod();
-            LOG.info("[INFO] Going to process following message type [ {} ] : ", exchangeMethod);
+            LOG.debug("Going to process following message type [ {} ] : ", exchangeMethod);
             switch (exchangeMethod) {
 
                     /* PLUGIN */

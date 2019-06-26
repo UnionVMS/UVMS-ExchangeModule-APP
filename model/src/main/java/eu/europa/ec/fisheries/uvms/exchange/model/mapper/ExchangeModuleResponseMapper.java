@@ -29,10 +29,10 @@ public class ExchangeModuleResponseMapper {
     	return ackType;
     }
 
-    public static AcknowledgeType mapAcknowledgeTypeNOK(String messageId, String errorMessage) {
+    public static AcknowledgeType mapAcknowledgeTypeNOK(String logId, String errorMessage) {
     	AcknowledgeType ackType = new AcknowledgeType();
     	ackType.setMessage(errorMessage);
-    	ackType.setMessageId(messageId);
+    	ackType.setLogId(logId);
     	ackType.setType(AcknowledgeTypeType.NOK);
     	return ackType;
     }

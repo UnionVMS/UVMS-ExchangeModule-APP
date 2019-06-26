@@ -142,10 +142,10 @@ public class PluginServiceBean {
     private void setServiceStatusOnRegister(Service service) {
         if (service != null) {
             boolean status = service.getStatus();
-            if ((status)) {     //StatusType.STARTED.equals
+            if (status) {     //StatusType.STARTED.equals
                 LOG.info("Starting service {}", service);
                 start(service.getServiceClassName());
-            } else if ((status)) {  //StatusType.STOPPED.equals
+            } else {
                 LOG.info("Stopping service {}", service);
                 stop(service.getServiceClassName());
             }

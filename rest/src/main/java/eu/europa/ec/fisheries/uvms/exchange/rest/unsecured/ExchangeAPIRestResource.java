@@ -7,6 +7,7 @@ import eu.europa.ec.fisheries.uvms.exchange.bean.ServiceRegistryModelBean;
 import eu.europa.ec.fisheries.uvms.exchange.entity.serviceregistry.Service;
 import eu.europa.ec.fisheries.uvms.exchange.mapper.ServiceMapper;
 import eu.europa.ec.fisheries.uvms.exchange.service.bean.ExchangeEventOutgoingServiceBean;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -62,14 +63,11 @@ public class ExchangeAPIRestResource {
     @Path("/pluginCommand")
     public Response sendCommandToPlugin(SetCommandRequest request) {
         try {
-            String validationResult = exchangeEventOutgoingService.sendCommandToPluginFromRest(request);
-            if (validationResult.equals("OK")) {
-                return Response.ok().build();
-            }
-            return Response.status(400, "Incomplete request").entity(validationResult).build();
+            exchangeEventOutgoingService.sendCommandToPluginFromRest(request);
+            return Response.ok().build();
         }catch (Exception e){
             LOG.error(e.getMessage(), e);
-            return Response.status(500).entity(e).build();
+            return Response.status(500).entity(ExceptionUtils.getRootCause(e)).build();
         }
     }
 
