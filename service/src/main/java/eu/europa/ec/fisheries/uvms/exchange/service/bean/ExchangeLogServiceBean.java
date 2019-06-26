@@ -42,11 +42,7 @@ import org.slf4j.LoggerFactory;
 @Stateless
 public class ExchangeLogServiceBean {
 
-    private final static Logger LOG = LoggerFactory.getLogger(ExchangeLogServiceBean.class);
-
-
-    @EJB
-    private ExchangeEventLogCache logCache;
+    private static final Logger LOG = LoggerFactory.getLogger(ExchangeLogServiceBean.class);
 
     @EJB
     private ExchangeToRulesSyncMsgBean exchangeToRulesSyncMsgBean;
@@ -70,14 +66,6 @@ public class ExchangeLogServiceBean {
 
     @Inject
     private ExchangeEventProducer exchangeEventProducer;
-
-
-    public ExchangeLog logAndCache(ExchangeLog log, String pluginMessageId) {
-        ExchangeLog createdLog = log(log);
-        logCache.put(pluginMessageId, createdLog.getId());
-
-        return createdLog;
-    }
 
     public ExchangeLog log(ExchangeLog log) {
         ExchangeLog exchangeLog = exchangeLogDao.createLog(log);
@@ -121,8 +109,8 @@ public class ExchangeLogServiceBean {
         return log(log);
     }
 
-    public ExchangeLog updateStatus(String pluginMessageId, ExchangeLogStatusTypeType logStatus, String username) {
-        UUID logGuid = logCache.acknowledged(pluginMessageId);
+    public ExchangeLog updateStatus(String logId, ExchangeLogStatusTypeType logStatus, String username) {
+        UUID logGuid = UUID.fromString(logId);
         ExchangeLogStatus exchangeLogStatus = createExchangeLogStatus(logStatus);
         ExchangeLog updatedLog = exchangeLogModel.updateExchangeLogStatus(exchangeLogStatus, username, logGuid);
         // For long polling
@@ -261,9 +249,7 @@ public class ExchangeLogServiceBean {
         }
     }
 
-    public PollStatus setPollStatus(String jmsCorrelationId, UUID pollId, ExchangeLogStatusTypeType logStatus, String username) {
-        // Remove the message from cache, because legancy implementation
-        logCache.acknowledged(jmsCorrelationId);
+    public PollStatus setPollStatus(UUID pollId, ExchangeLogStatusTypeType logStatus, String username) {
         PollStatus pollStatus = new PollStatus();
         pollStatus.setPollGuid(pollId.toString());
         pollStatus.setStatus(logStatus);

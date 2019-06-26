@@ -28,11 +28,11 @@
     
     <xsd:complexType name="AcknowledgeType">
         <xsd:sequence>
-            <xsd:element name="messageId" type="xsd:string"/>
+            <xsd:element name="logId" type="xsd:string" minOccurs="0"/>
             <xsd:element name="message" type="xsd:string" minOccurs="0"/>
             <xsd:element name="type" type="common:AcknowledgeTypeType"/>
             <xsd:element name="pollStatus" type="common:PollStatusAcknowledgeType" minOccurs="0" maxOccurs="1"/>
-            <xsd:element name="unsentMessageGuid" type="xsd:string"/>
+            <xsd:element name="unsentMessageGuid" type="xsd:string" minOccurs="0"/>
         </xsd:sequence>
     </xsd:complexType>
 
@@ -54,6 +54,7 @@
             </xsd:choice>
             <xsd:element name="unsentMessageGuid" type="xsd:string" minOccurs="1" maxOccurs="1"/>
             <xsd:element name="fwdRule" type="xsd:string"/>
+            <xsd:element name="logId" type="xsd:string"/>
         </xsd:sequence>
     </xsd:complexType>
     
@@ -77,6 +78,7 @@
                 <!-- <xsd:element name="elog" type="xsd:string"/> -->
             </xsd:choice>
             <xsd:element name="unsentMessageGuid" type="xsd:string" minOccurs="1" maxOccurs="1"/>
+            <xsd:element name="logId" type="xsd:string"/>
         </xsd:sequence>
     </xsd:complexType>
     

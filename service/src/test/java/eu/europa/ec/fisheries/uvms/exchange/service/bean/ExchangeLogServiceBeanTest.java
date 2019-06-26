@@ -2,7 +2,6 @@ package eu.europa.ec.fisheries.uvms.exchange.service.bean;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertSame;
-import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Matchers.isA;
 import static org.mockito.Mockito.doReturn;
@@ -36,9 +35,6 @@ public class ExchangeLogServiceBeanTest {
     private ExchangeLogModelBean exchangeLogModel;
 
     @Mock
-    private ExchangeEventLogCache logCache;
-
-    @Mock
     private Event<NotificationMessage> exchangeLogEvent; //yes this is used
 
     @Rule
@@ -54,7 +50,6 @@ public class ExchangeLogServiceBeanTest {
         ExchangeLogStatusTypeType status = ExchangeLogStatusTypeType.SUCCESSFUL;
 
         //mock
-        doReturn(logGuid).when(logCache).acknowledged(anyString());
         doReturn(expectedUpdatedLog).when(exchangeLogModel).updateExchangeLogStatus(isA(ExchangeLogStatus.class), eq("SYSTEM"), isA(UUID.class));
 
         //execute
@@ -78,7 +73,6 @@ public class ExchangeLogServiceBeanTest {
         UUID id = UUID.randomUUID();
 
         //mock
-        doReturn(id).when(logCache).acknowledged(anyString());
         doThrow(new RuntimeException("noooooooooooooooooooo!!!")).when(exchangeLogModel).updateExchangeLogStatus(isA(ExchangeLogStatus.class), eq("SYSTEM"), isA(UUID.class));
 
         exchangeLogService.updateStatus(id.toString(), ExchangeLogStatusTypeType.FAILED, "SYSTEM");

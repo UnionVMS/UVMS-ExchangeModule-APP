@@ -37,7 +37,6 @@ import eu.europa.ec.fisheries.uvms.exchange.entity.unsent.UnsentMessage;
 import eu.europa.ec.fisheries.uvms.exchange.model.mapper.ExchangeModuleRequestMapper;
 import eu.europa.ec.fisheries.uvms.exchange.model.mapper.ExchangePluginResponseMapper;
 import eu.europa.ec.fisheries.uvms.exchange.model.mapper.JAXBMarshaller;
-import eu.europa.ec.fisheries.uvms.exchange.service.bean.ExchangeEventLogCache;
 import eu.europa.ec.fisheries.uvms.exchange.service.constants.ExchangeServiceConstants;
 import eu.europa.ec.fisheries.uvms.exchange.service.model.IncomingMovement;
 import org.apache.commons.lang3.exception.ExceptionUtils;
@@ -80,9 +79,6 @@ public class ExchangeMessageConsumerBeanTest extends BuildExchangeServiceTestDep
 
     @Inject
     UnsentMessageDaoBean unsentMessageDao;
-
-    @Inject
-    ExchangeEventLogCache exchangeEventLogCache;
 
     @Inject
     ExchangeLogDaoBean exchangeLogDao;
@@ -184,6 +180,7 @@ public class ExchangeMessageConsumerBeanTest extends BuildExchangeServiceTestDep
         String serviceName = "Email Test Service";
         String serviceClassName = "eu.europa.ec.fisheries.uvms.plugins.sweagencyemail";
         int sizeB4 = unsentMessageDao.getAll().size();
+        ExchangeLog latestLogB4 = exchangeLogDao.getLatestLog();
         Service service = createAndPersistBasicService(serviceName, serviceClassName, PluginType.EMAIL);
         service.setStatus(false);
         service = serviceRegistryDao.updateService(service);
@@ -197,15 +194,10 @@ public class ExchangeMessageConsumerBeanTest extends BuildExchangeServiceTestDep
         String request = ExchangeModuleRequestMapper.createSetCommandSendEmailRequest(serviceClassName, email, null);
 
         String corrID = jmsHelper.sendExchangeMessage(request, null, "SET_COMMAND");
-        TextMessage message = (TextMessage)jmsHelper.listenForResponseOnStandardQueue(corrID);
-        SetCommandResponse response = JAXBMarshaller.unmarshallTextMessage(message, SetCommandResponse.class);
-
-        assertNotNull(response);
-        assertEquals("Plugin to send command to is not started", response.getResponse().getMessage());
-        assertEquals(AcknowledgeTypeType.NOK, response.getResponse().getType());
-
         Thread.sleep(1000);     //to allow the db to sync up
+
         assertEquals(sizeB4 + 1, unsentMessageDao.getAll().size());
+        assertEquals(latestLogB4.getId(), exchangeLogDao.getLatestLog().getId()); // No log should have been created
 
         serviceRegistryDao.deleteEntity(service.getId());
 
@@ -220,7 +212,6 @@ public class ExchangeMessageConsumerBeanTest extends BuildExchangeServiceTestDep
         System.out.println("Now");
         String guid = UUID.randomUUID().toString();
         int sizeB4 = unsentMessageDao.getAll().size();
-        int eventLogSizeB4 = exchangeEventLogCache.size();
         Service service = createAndPersistBasicService(serviceName, serviceClassName, PluginType.SATELLITE_RECEIVER);
 
         PollType pollType = new PollType();
@@ -250,7 +241,6 @@ public class ExchangeMessageConsumerBeanTest extends BuildExchangeServiceTestDep
 
         Thread.sleep(1000);     //to allow the db to sync up
         assertEquals(sizeB4 + 1, unsentMessageDao.getAll().size());
-        assertEquals(eventLogSizeB4 + 1, exchangeEventLogCache.size());
 
 
         serviceRegistryDao.deleteEntity(service.getId());
@@ -264,7 +254,6 @@ public class ExchangeMessageConsumerBeanTest extends BuildExchangeServiceTestDep
         String serviceClassName = "eu.europa.ec.fisheries.uvms.plugins.fluxus";
         String recipient = "To whom it may concern";
         int sizeB4 = unsentMessageDao.getAll().size();
-        int eventLogSizeB4 = exchangeEventLogCache.size();
         Service service = createAndPersistBasicService(serviceName, serviceClassName, PluginType.FLUX);
         MovementType movementType = createMovementType();
         List<RecipientInfoType> recipientInfoTypeList = new ArrayList<>();
@@ -282,7 +271,6 @@ public class ExchangeMessageConsumerBeanTest extends BuildExchangeServiceTestDep
 
         Thread.sleep(1000);     //to allow the db to sync up
         assertEquals(sizeB4 + 1, unsentMessageDao.getAll().size());
-        assertEquals(eventLogSizeB4 + 1, exchangeEventLogCache.size());
 
         List<ExchangeLog> logs = exchangeLogDao.getExchangeLogByTypesRefAndGuid(UUID.fromString(movementType.getGuid()), Arrays.asList(TypeRefType.MOVEMENT));
         assertThat(logs.size(), CoreMatchers.is(1));
@@ -392,10 +380,8 @@ public class ExchangeMessageConsumerBeanTest extends BuildExchangeServiceTestDep
         AcknowledgeType ackType = new AcknowledgeType();
         ackType.setType(AcknowledgeTypeType.OK);
         ackType.setUnsentMessageGuid(unsent.getGuid().toString());
-        ackType.setMessageId(exchangeLog.getId().toString());
+        ackType.setLogId(exchangeLog.getId().toString());
         ackType.setMessage("processSetReportAcknowledgeTest message");
-
-        exchangeEventLogCache.put(exchangeLog.getId().toString(),exchangeLog.getId());
 
         String request = ExchangePluginResponseMapper.mapToSetReportResponse("Fake service class name", ackType);
         String corrID = jmsHelper.sendExchangeMessage(request, null, ExchangeModuleMethod.PLUGIN_SET_REPORT_ACK.value());
@@ -429,10 +415,8 @@ public class ExchangeMessageConsumerBeanTest extends BuildExchangeServiceTestDep
         AcknowledgeType ackType = new AcknowledgeType();
         ackType.setType(AcknowledgeTypeType.OK);
         ackType.setUnsentMessageGuid(unsent.getGuid().toString());
-        ackType.setMessageId(exchangeLog.getId().toString());
+        ackType.setLogId(exchangeLog.getId().toString());
         ackType.setMessage("processSetCommandAcknowledgeTest message");
-
-        exchangeEventLogCache.put(exchangeLog.getId().toString(),exchangeLog.getId());
 
         String request = ExchangePluginResponseMapper.mapToSetCommandResponse("Fake service class name", ackType);
         String corrID = jmsHelper.sendExchangeMessage(request, null, ExchangeModuleMethod.PLUGIN_SET_COMMAND_ACK.value());
@@ -468,14 +452,12 @@ public class ExchangeMessageConsumerBeanTest extends BuildExchangeServiceTestDep
         AcknowledgeType ackType = new AcknowledgeType();
         ackType.setType(AcknowledgeTypeType.OK);
         ackType.setUnsentMessageGuid(unsent.getGuid().toString());
-        ackType.setMessageId(exchangeLog.getId().toString());
+        ackType.setLogId(exchangeLog.getId().toString());
         ackType.setMessage("processSetCommandAcknowledgeTest message");
         PollStatusAcknowledgeType pollStatusAcknowledgeType = new PollStatusAcknowledgeType();
         pollStatusAcknowledgeType.setStatus(ExchangeLogStatusTypeType.SUCCESSFUL);
         pollStatusAcknowledgeType.setPollId(exchangeLog.getTypeRefGuid().toString());
         ackType.setPollStatus(pollStatusAcknowledgeType);
-
-        exchangeEventLogCache.put(exchangeLog.getId().toString(),exchangeLog.getId());
 
         String request = ExchangePluginResponseMapper.mapToSetCommandResponse("Fake service class name", ackType);
         String corrID = jmsHelper.sendExchangeMessage(request, null, ExchangeModuleMethod.PLUGIN_SET_COMMAND_ACK.value());
@@ -978,7 +960,7 @@ public class ExchangeMessageConsumerBeanTest extends BuildExchangeServiceTestDep
         exchangeLog.setTypeRefGuid(guid);
         exchangeLog.setTypeRefType(TypeRefType.UNKNOWN);
         exchangeLog = exchangeLogDao.createLog(exchangeLog);
-        String request = ExchangeModuleRequestMapper.createLogRefIdByTypeExistsRequest(exchangeLog.getTypeRefGuid().toString(), new ArrayList<>());
+        String request = ExchangeModuleRequestMapper.createLogRefIdByTypeExistsRequest(exchangeLog.getTypeRefGuid().toString(), Arrays.asList(TypeRefType.ALARM));
         String corrID = jmsHelper.sendExchangeMessage(request, null, "LOG_REF_ID_BY_TYPE_EXISTS");
         TextMessage message = (TextMessage)jmsHelper.listenForResponseOnStandardQueue(corrID);
         LogRefIdByTypeExistsResponse response = JAXBMarshaller.unmarshallTextMessage(message, LogRefIdByTypeExistsResponse.class);

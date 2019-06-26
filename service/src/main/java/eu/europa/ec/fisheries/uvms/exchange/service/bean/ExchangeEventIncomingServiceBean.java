@@ -67,7 +67,7 @@ import org.slf4j.LoggerFactory;
 @Stateless
 public class ExchangeEventIncomingServiceBean {
 
-    private final static Logger LOG = LoggerFactory.getLogger(ExchangeEventIncomingServiceBean.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ExchangeEventIncomingServiceBean.class);
 
     @Inject
     @ErrorEvent
@@ -632,16 +632,12 @@ public class ExchangeEventIncomingServiceBean {
 
         }
 
-        try {
-            ExchangeLog updatedLog = exchangeLogService.updateStatus(ack.getMessageId(), logStatus, serviceClassName);
+        ExchangeLog updatedLog = exchangeLogService.updateStatus(ack.getLogId(), logStatus, serviceClassName);
 
-            // Long polling
-            if (updatedLog.getTypeRefGuid() != null && updatedLog.getTypeRefType() == TypeRefType.POLL) {
-                String pollGuid = updatedLog.getTypeRefGuid().toString();
-                pollEvent.fire(new NotificationMessage("guid", pollGuid));
-            }
-        } catch (Exception e) {
-            LOG.error(e.getMessage());
+        // Long polling
+        if (updatedLog.getTypeRefGuid() != null && updatedLog.getTypeRefType() == TypeRefType.POLL) {
+            String pollGuid = updatedLog.getTypeRefGuid().toString();
+            pollEvent.fire(new NotificationMessage("guid", pollGuid));
         }
     }
 
@@ -652,21 +648,13 @@ public class ExchangeEventIncomingServiceBean {
                 exchangeLogStatus.equals(ExchangeLogStatusTypeType.FAILED)) {
             removeUnsentMessage(ack);
         }
-        try {
-            PollStatus updatedLog = exchangeLogService.setPollStatus(ack.getMessageId(), UUID.fromString(ack.getPollStatus().getPollId()), exchangeLogStatus, serviceClassName);
-            // Long polling
-            pollEvent.fire(new NotificationMessage("guid", updatedLog.getPollGuid()));
-        } catch (Exception e) {
-            LOG.error(e.getMessage());
-        }
+        PollStatus updatedLog = exchangeLogService.setPollStatus(UUID.fromString(ack.getPollStatus().getPollId()), exchangeLogStatus, serviceClassName);
+        // Long polling
+        pollEvent.fire(new NotificationMessage("guid", updatedLog.getPollGuid()));
     }
 
     private void removeUnsentMessage(AcknowledgeType ack) {
-        try {
-            exchangeLogService.removeUnsentMessage(ack.getUnsentMessageGuid());
-        } catch (Exception ex) {
-            LOG.error(ex.getMessage());
-        }
+        exchangeLogService.removeUnsentMessage(ack.getUnsentMessageGuid());
     }
 
     private void handleUpdateServiceAcknowledge(String serviceClassName, AcknowledgeType ack, StatusType status) {

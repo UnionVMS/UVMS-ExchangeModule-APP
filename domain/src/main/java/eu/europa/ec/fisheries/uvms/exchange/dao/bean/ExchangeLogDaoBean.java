@@ -76,7 +76,7 @@ public class ExchangeLogDaoBean extends Dao {
     }
 
     public ExchangeLog getExchangeLogByGuid(UUID logGuid)  {
-        return getExchangeLogByGuid(logGuid, null);
+        return em.find(ExchangeLog.class, logGuid);
     }
 
     private void setQueryParameters(Query query, HashMap<ExchangeSearchField, List<SearchValue>> orderedValues) {

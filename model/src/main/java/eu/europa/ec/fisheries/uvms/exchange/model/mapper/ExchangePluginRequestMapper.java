@@ -26,7 +26,7 @@ import java.util.Date;  //leave be
  **/
 public class ExchangePluginRequestMapper {
 
-    public static String createSetReportRequest(Instant dateReceived, SendMovementToPluginType movement, String unsentMessageGuid) {
+    public static String createSetReportRequest(Instant dateReceived, SendMovementToPluginType movement, String unsentMessageGuid, String logId) {
         SetReportRequest request = new SetReportRequest();
         request.setMethod(ExchangePluginMethod.SET_REPORT);
         ReportType reportType = new ReportType();
@@ -36,6 +36,7 @@ public class ExchangePluginRequestMapper {
         reportType.setTimestamp(Date.from(dateReceived));
         reportType.setType(ReportTypeType.MOVEMENT);
         reportType.setUnsentMessageGuid(unsentMessageGuid);
+        reportType.setLogId(logId);
         request.setReport(reportType);
         return JAXBMarshaller.marshallJaxBObjectToString(request);
     }
