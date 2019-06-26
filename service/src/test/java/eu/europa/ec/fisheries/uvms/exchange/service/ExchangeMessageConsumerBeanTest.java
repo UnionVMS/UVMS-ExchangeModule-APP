@@ -960,7 +960,7 @@ public class ExchangeMessageConsumerBeanTest extends BuildExchangeServiceTestDep
         exchangeLog.setTypeRefGuid(guid);
         exchangeLog.setTypeRefType(TypeRefType.UNKNOWN);
         exchangeLog = exchangeLogDao.createLog(exchangeLog);
-        String request = ExchangeModuleRequestMapper.createLogRefIdByTypeExistsRequest(exchangeLog.getTypeRefGuid().toString(), new ArrayList<>());
+        String request = ExchangeModuleRequestMapper.createLogRefIdByTypeExistsRequest(exchangeLog.getTypeRefGuid().toString(), Arrays.asList(TypeRefType.ALARM));
         String corrID = jmsHelper.sendExchangeMessage(request, null, "LOG_REF_ID_BY_TYPE_EXISTS");
         TextMessage message = (TextMessage)jmsHelper.listenForResponseOnStandardQueue(corrID);
         LogRefIdByTypeExistsResponse response = JAXBMarshaller.unmarshallTextMessage(message, LogRefIdByTypeExistsResponse.class);
