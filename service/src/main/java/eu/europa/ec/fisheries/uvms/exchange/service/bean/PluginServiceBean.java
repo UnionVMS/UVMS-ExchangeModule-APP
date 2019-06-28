@@ -134,7 +134,7 @@ public class PluginServiceBean {
         }
     }
 
-    public void pushSettingsToConfig(@Observes(during = TransactionPhase.AFTER_SUCCESS) Service service) {
+    public void pushSettingsToConfig(@Observes(during = TransactionPhase.AFTER_SUCCESS) Service service) { // Using CDI events to execute this after commit. Config push should be asynchronous.
         // push to config module
         try {
             String serviceClassName = service.getServiceClassName();
