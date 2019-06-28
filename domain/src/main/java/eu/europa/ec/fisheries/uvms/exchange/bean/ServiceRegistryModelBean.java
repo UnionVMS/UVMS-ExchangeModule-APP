@@ -98,7 +98,7 @@ public class ServiceRegistryModelBean {
         if (service != null) {
             for (ServiceSetting setting : service.getServiceSettingList()) {
                 if (setting.getSetting().equals(newSetting.getSetting()) && !setting.getValue().equalsIgnoreCase(newSetting.getValue())) {
-                    setting.setValue(setting.getValue());
+                    setting.setValue(newSetting.getValue());
                     setting.setUpdatedTime(DateUtils.nowUTC());
                     setting.setUser(username);
                 }
