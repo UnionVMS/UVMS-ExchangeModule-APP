@@ -18,6 +18,7 @@ import eu.europa.ec.fisheries.uvms.exchange.entity.serviceregistry.Service;
 import eu.europa.ec.fisheries.uvms.exchange.entity.serviceregistry.ServiceCapability;
 import eu.europa.ec.fisheries.uvms.exchange.entity.serviceregistry.ServiceSetting;
 import eu.europa.ec.fisheries.uvms.exchange.mapper.ServiceMapper;
+import eu.europa.ec.fisheries.uvms.exchange.model.util.DateUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -91,18 +92,23 @@ public class ServiceRegistryModelBean {
         return entityList;
     }
 
-	public Service updatePluginSettings(String serviceClassName, List<ServiceSetting> settings, String username) {
-    	LOG.info("Update plugin settings for " + serviceClassName);
-    	Service service = dao.getServiceByServiceClassName(serviceClassName);
-    	if(service != null) {
-    		List<ServiceSetting> newSettings = ServiceMapper.mapSettingsList(service, settings, username);
-    		service.getServiceSettingList().clear();
-    		service.getServiceSettingList().addAll(newSettings);
-    		dao.updateService(service);
-    		return service;
-    	}
-    	throw new IllegalArgumentException("No plugin found when update plugin settings for plugin: " + serviceClassName);
-	}
+    public Service updatePluginSettings(String serviceClassName, ServiceSetting newSetting, String username) {
+        LOG.info("Update plugin settings for " + serviceClassName);
+        Service service = dao.getServiceByServiceClassName(serviceClassName);
+        if (service != null) {
+            for (ServiceSetting setting : service.getServiceSettingList()) {
+                if (setting.getSetting().equals(newSetting.getSetting()) && !setting.getValue().equalsIgnoreCase(newSetting.getValue())) {
+                    setting.setValue(newSetting.getValue());
+                    setting.setUpdatedTime(DateUtils.nowUTC());
+                    setting.setUser(username);
+                }
+            }
+            dao.updateService(service);
+            return service;
+        }
+        throw new IllegalArgumentException("No plugin found when update plugin settings for plugin: "
+                + serviceClassName);
+    }
     
 
     public Service getPlugin(String serviceClassName) {
