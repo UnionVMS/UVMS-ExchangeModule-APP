@@ -42,6 +42,7 @@ import javax.ejb.EJB;
 import javax.ejb.Stateless;
 import javax.enterprise.event.Event;
 import javax.enterprise.event.Observes;
+import javax.enterprise.event.TransactionPhase;
 import javax.inject.Inject;
 import javax.jms.TextMessage;
 
@@ -53,7 +54,7 @@ import org.slf4j.LoggerFactory;
 @Stateless
 public class PluginServiceBean {
 
-    private final static Logger LOG = LoggerFactory.getLogger(PluginServiceBean.class);
+    private static final Logger LOG = LoggerFactory.getLogger(PluginServiceBean.class);
 
     private static final String PARAMETER_DELIMETER = "\\.";
 
@@ -64,6 +65,9 @@ public class PluginServiceBean {
     @Inject
     @ErrorEvent
     private Event<ExchangeErrorEvent> exchangeErrorEvent;
+
+    @Inject
+    private Event<Service> serviceRegisteredEvent;
 
     @Inject
     ServiceRegistryDaoBean serviceRegistryDao;
@@ -117,16 +121,7 @@ public class PluginServiceBean {
         try {
             overrideSettingsFromConfig(newService);       //aka if config has settings for xyz parameter, use configs version instead
             Service service = serviceRegistryModel.registerService(newService, register.getService().getName());
-            //push to config module
-            try {
-                String serviceClassName = register.getService().getServiceClassName();
-                for (ServiceSetting setting : service.getServiceSettingList()) {
-                    String description = "Plugin " + serviceClassName + " " + setting.getSetting() + " setting";
-                    configService.pushSettingToConfig(SettingTypeMapper.map(setting.getSetting(), setting.getValue(), description), false);
-                }
-            } catch (ConfigServiceException e) {
-                LOG.error("Couldn't register plugin settings in config parameter table");
-            }
+            serviceRegisteredEvent.fire(service);
             //TODO log to exchange log
 
             String response = ExchangePluginResponseMapper.mapToRegisterServiceResponseOK(messageId, ServiceMapper.toServiceModel(service));
@@ -136,6 +131,20 @@ public class PluginServiceBean {
         } catch (Exception e) {
             String response = ExchangePluginResponseMapper.mapToRegisterServiceResponseNOK(messageId, "Exchange service exception when registering plugin [ " + e.getMessage() + " ]");
             eventBusTopicProducer.sendEventBusMessage(response, register.getService().getServiceResponseMessageName());
+        }
+    }
+
+    public void pushSettingsToConfig(@Observes(during = TransactionPhase.AFTER_SUCCESS) Service service) {
+        // push to config module
+        try {
+            String serviceClassName = service.getServiceClassName();
+            for (ServiceSetting setting : service.getServiceSettingList()) {
+                String description = "Plugin " + serviceClassName + " " + setting.getSetting() + " setting";
+                configService.pushSettingToConfig(SettingTypeMapper.map(setting.getSetting(), setting.getValue(),
+                        description), false);
+            }
+        } catch (ConfigServiceException e) {
+            LOG.error("Couldn't register plugin settings in config parameter table");
         }
     }
 
@@ -223,10 +232,7 @@ public class PluginServiceBean {
     }
     
     private void updatePluginSetting(String serviceClassName, ServiceSetting updatedSetting, String username) {
-
-        List<ServiceSetting> settingList = new ArrayList<>();
-        settingList.add(updatedSetting);
-    	Service service = serviceRegistryModel.updatePluginSettings(serviceClassName, settingList, username);
+        Service service = serviceRegistryModel.updatePluginSettings(serviceClassName, updatedSetting, username);
         // Send the plugin settings to the topic where all plugins should listen to
     	String text = ExchangePluginRequestMapper.createSetConfigRequest(ServiceMapper.toSettingListModel(service.getServiceSettingList()));
         eventBusTopicProducer.sendEventBusMessage(text, serviceClassName);
