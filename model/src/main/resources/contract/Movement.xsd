@@ -26,7 +26,7 @@
             <xsd:extension base="movement:ReportMovementType">
                 <xsd:sequence>
                     <xsd:element name="movement" type="movement:MovementBaseType"/>
-                    <xsd:element name="originalDatFile" minOccurs="0" type="xsd:base64Binary"/>
+                    <xsd:element name="originalIncomingMessage" minOccurs="0" type="xsd:string"/>
                 </xsd:sequence>
             </xsd:extension>
         </xsd:complexContent>
