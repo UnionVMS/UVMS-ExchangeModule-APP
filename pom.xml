@@ -37,9 +37,9 @@
         <longpolling.version>2.0.13</longpolling.version>
         <uvms.commons.version>4.0.2</uvms.commons.version>
         <uvms.config.version>4.0.4</uvms.config.version>
-        <usm4uvms.version>4.0.19</usm4uvms.version>
+        <usm4uvms.version>4.0.20</usm4uvms.version>
         <uvms-pom-deps.version>1.24</uvms-pom-deps.version>
-        <asset.client.version>6.0.55</asset.client.version>
+        <asset.client.version>6.0.58</asset.client.version>
 
         <!-- Uvms models -->
         <asset.model.version>6.0.44</asset.model.version>
@@ -87,10 +87,6 @@
                     <exclusion>
                         <groupId>eu.europa.ec.fisheries.uvms.commons</groupId>
                         <artifactId>uvms-commons</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>eu.europa.ec.fisheries.uvms.commons</groupId>
-                        <artifactId>uvms-commons-service</artifactId>
                     </exclusion>
                     <exclusion>
                         <groupId>org.jboss.resteasy</groupId>
