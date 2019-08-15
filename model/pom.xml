@@ -5,7 +5,7 @@
     <parent>
         <groupId>eu.europa.ec.fisheries.uvms.exchange</groupId>
         <artifactId>exchange</artifactId>
-        <version>5.0.11-UVMS</version>
+        <version>5.0.12-UVMS-SNAPSHOT</version>
     </parent>
 
     <artifactId>exchange-model</artifactId>
