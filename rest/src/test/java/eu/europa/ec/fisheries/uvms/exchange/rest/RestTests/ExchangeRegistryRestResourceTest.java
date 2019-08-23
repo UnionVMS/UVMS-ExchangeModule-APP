@@ -4,8 +4,10 @@ import eu.europa.ec.fisheries.schema.exchange.plugin.types.v1.PluginType;
 import eu.europa.ec.fisheries.schema.exchange.plugin.v1.ExchangePluginMethod;
 import eu.europa.ec.fisheries.schema.exchange.plugin.v1.StartRequest;
 import eu.europa.ec.fisheries.schema.exchange.plugin.v1.StopRequest;
+import eu.europa.ec.fisheries.schema.exchange.service.v1.CapabilityTypeType;
 import eu.europa.ec.fisheries.uvms.exchange.dao.bean.ServiceRegistryDaoBean;
 import eu.europa.ec.fisheries.uvms.exchange.entity.serviceregistry.Service;
+import eu.europa.ec.fisheries.uvms.exchange.entity.serviceregistry.ServiceCapability;
 import eu.europa.ec.fisheries.uvms.exchange.model.mapper.JAXBMarshaller;
 import eu.europa.ec.fisheries.uvms.exchange.rest.BuildExchangeRestTestDeployment;
 import eu.europa.ec.fisheries.uvms.exchange.rest.JMSHelper;
@@ -21,9 +23,10 @@ import javax.inject.Inject;
 import javax.jms.ConnectionFactory;
 import javax.jms.TextMessage;
 import javax.ws.rs.client.Entity;
+import javax.ws.rs.core.GenericType;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
-
+import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
@@ -55,6 +58,31 @@ public class ExchangeRegistryRestResourceTest extends BuildExchangeRestTestDeplo
         assertEquals("STARTED", response.get(0).getStatus());
         assertEquals("ManualMovement", response.get(0).getName());
         assertEquals("ManualMovement", response.get(0).getServiceClassName());
+    }
+
+    @Test
+    @OperateOnDeployment("exchangeservice")
+    public void getServiceByCapabilityTest() throws Exception {
+        Service service = RestHelper.createBasicService("Name: " + UUID.randomUUID(), "ClassName: " + UUID.randomUUID(), PluginType.OTHER);
+        ServiceCapability capability = new ServiceCapability();
+        capability.setService(service);
+        capability.setUpdatedBy("Exchange Tests");
+        capability.setUpdatedTime(Instant.now());
+        capability.setCapability(CapabilityTypeType.SEND_REPORT);
+        capability.setValue(true);
+        service.getServiceCapabilityList().add(capability);
+        service = serviceRegistryDao.createEntity(service);
+
+        List<Plugin> plugins = getWebTarget()
+                .path("plugin")
+                .path("capability/SEND_REPORT")
+                .request(MediaType.APPLICATION_JSON)
+                .header(HttpHeaders.AUTHORIZATION, getToken())
+                .get(new GenericType<List<Plugin>>() {});
+
+        assertEquals(1, plugins.size());
+        Plugin plugin = plugins.get(0);
+        assertEquals(service.getName(), plugin.getName());
     }
 
     @Test

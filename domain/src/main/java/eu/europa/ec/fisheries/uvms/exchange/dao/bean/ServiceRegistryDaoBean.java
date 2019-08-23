@@ -23,6 +23,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import eu.europa.ec.fisheries.schema.exchange.plugin.types.v1.PluginType;
+import eu.europa.ec.fisheries.schema.exchange.service.v1.CapabilityTypeType;
 import eu.europa.ec.fisheries.uvms.exchange.entity.serviceregistry.Service;
 import eu.europa.ec.fisheries.uvms.exchange.entity.serviceregistry.ServiceCapability;
 import eu.europa.ec.fisheries.uvms.exchange.entity.serviceregistry.ServiceSetting;
@@ -114,6 +115,17 @@ public class ServiceRegistryDaoBean extends Dao {
             return query.getResultList();
 	}
 
+	/**
+     * Get services depending on capability
+     * @return
+     * @throws
+     */
+    public List<Service> getServicesByCapability(CapabilityTypeType capability) {
+            TypedQuery<Service> query = em.createNamedQuery(Service.SERVICE_FIND_BY_CAPABILITY, Service.class);
+            query.setParameter("capability", capability);
+            return query.getResultList();
+    }
+
     /**
      *
      * Gets all capabilities for a service
@@ -140,6 +152,22 @@ public class ServiceRegistryDaoBean extends Dao {
             TypedQuery<ServiceSetting> query = em.createNamedQuery(ServiceSetting.SETTING_FIND_BY_SERVICE, ServiceSetting.class);
             query.setParameter("serviceClassName", serviceClassName);
             return query.getResultList();
+    }
+
+    /**
+     * Get service by Service Name
+     *
+     * @param serviceName
+     * @return
+     */
+    public Service getServiceByName(String serviceName) {
+        try {
+            TypedQuery<Service> query = em.createNamedQuery(Service.SERVICE_FIND_BY_NAME, Service.class);
+            query.setParameter("name", serviceName);
+            return query.getSingleResult();
+        } catch (NoResultException e) {
+            return null;
+        }
     }
 
     /**

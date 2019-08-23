@@ -11,6 +11,7 @@ copy of the GNU General Public License along with the IFDM Suite. If not, see <h
  */
 package eu.europa.ec.fisheries.uvms.exchange.rest.service;
 
+import java.util.List;
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
@@ -21,9 +22,13 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
-
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
+import eu.europa.ec.fisheries.schema.exchange.service.v1.CapabilityTypeType;
 import eu.europa.ec.fisheries.uvms.exchange.bean.ServiceRegistryModelBean;
+import eu.europa.ec.fisheries.uvms.exchange.entity.serviceregistry.Service;
 import eu.europa.ec.fisheries.uvms.exchange.service.bean.PluginServiceBean;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,7 +43,7 @@ import eu.europa.ec.fisheries.uvms.rest.security.UnionVMSFeature;
 @Stateless
 public class ExchangeRegistryRestResource {
 
-	final static Logger LOG = LoggerFactory
+	private static final Logger LOG = LoggerFactory
 			.getLogger(ExchangeRegistryRestResource.class);
 
 
@@ -70,6 +75,23 @@ public class ExchangeRegistryRestResource {
 			return ErrorHandler.getFault(ex);
 		}
 	}
+
+    @GET
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/capability/{capabilityType}")
+    @RequiresFeature(UnionVMSFeature.viewExchange)
+    public Response getPluginsByCapability(@PathParam(value="capabilityType") String capabilityType) {
+        LOG.info("Get list invoked in rest layer");
+        try {
+            CapabilityTypeType capability = CapabilityTypeType.fromValue(capabilityType.toUpperCase());
+            List<Service> plugins = serviceRegistryModel.getPluginsByCapability(capability);
+            return Response.ok(ServiceMapper.map(plugins)).build();
+        } catch (Exception e) {
+            LOG.error("Error when getting plugins by capability", e);
+            return Response.status(Status.INTERNAL_SERVER_ERROR).entity(ExceptionUtils.getRootCause(e)).build();
+        }
+    }
 
 	/**
 	 * 

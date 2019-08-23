@@ -151,14 +151,18 @@ public class ExchangeEventOutgoingServiceBean {
             }
 
             Service service = null;
-            List<Service> services = serviceRegistryModel.getPlugins(Arrays.asList(sendReport.getPluginType()));
-            for (Service serviceIteration : services) {
-                if (serviceIteration.getStatus()) {       //StatusType.STARTED.equals(serviceIteration.getStatus())
-                    service = serviceIteration;
+            if (sendReport.getPluginName() != null && !sendReport.getPluginName().isEmpty()) {
+                service = serviceRegistryModel.getPluginByName(sendReport.getPluginName());
+            } else {
+                List<Service> services = serviceRegistryModel.getPlugins(Arrays.asList(sendReport.getPluginType()));
+                for (Service serviceIteration : services) {
+                    if (serviceIteration.getStatus()) {       //StatusType.STARTED.equals(serviceIteration.getStatus())
+                        service = serviceIteration;
+                    }
                 }
             }
             
-            if (service != null) {
+            if (service != null && service.getStatus()) {       //StatusType.STARTED.equals(service.getStatus())
                 String serviceName = service.getServiceClassName();
 
                 ExchangeLog log = ExchangeLogMapper.getSendMovementExchangeLog(sendReport);
