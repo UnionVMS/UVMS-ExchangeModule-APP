@@ -14,7 +14,6 @@ package eu.europa.ec.fisheries.uvms.exchange.rest.mapper;
 import java.util.ArrayList;
 import java.util.List;
 
-import eu.europa.ec.fisheries.schema.exchange.service.v1.ServiceResponseType;
 import eu.europa.ec.fisheries.uvms.exchange.entity.serviceregistry.Service;
 import eu.europa.ec.fisheries.uvms.exchange.rest.dto.Plugin;
 

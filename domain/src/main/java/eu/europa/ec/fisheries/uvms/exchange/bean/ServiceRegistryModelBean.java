@@ -25,13 +25,12 @@ import org.slf4j.LoggerFactory;
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
 import java.time.Instant;
-import java.util.ArrayList;
 import java.util.List;
 
 @Stateless
 public class ServiceRegistryModelBean {
 
-    final static Logger LOG = LoggerFactory.getLogger(ServiceRegistryModelBean.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ServiceRegistryModelBean.class);
 
     @EJB
     ServiceRegistryDaoBean dao;
@@ -92,6 +91,10 @@ public class ServiceRegistryModelBean {
         return entityList;
     }
 
+    public List<Service> getPluginsByCapability(CapabilityTypeType capabilityType) {
+        return dao.getServicesByCapability(capabilityType);
+    }
+
     public Service updatePluginSettings(String serviceClassName, ServiceSetting newSetting, String username) {
         LOG.info("Update plugin settings for " + serviceClassName);
         Service service = dao.getServiceByServiceClassName(serviceClassName);
@@ -109,7 +112,10 @@ public class ServiceRegistryModelBean {
         throw new IllegalArgumentException("No plugin found when update plugin settings for plugin: "
                 + serviceClassName);
     }
-    
+
+    public Service getPluginByName(String pluginName) {
+        return dao.getServiceByName(pluginName);
+    }
 
     public Service getPlugin(String serviceClassName) {
             Service service = dao.getServiceByServiceClassName(serviceClassName);

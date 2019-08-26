@@ -42,15 +42,19 @@ import eu.europa.ec.fisheries.schema.exchange.plugin.types.v1.PluginType;
 //@formatter:off
 @NamedQueries({
     @NamedQuery(name = Service.SERVICE_FIND_ALL, query = "SELECT s FROM Service s WHERE s.active = true ORDER BY updated ASC"),
+    @NamedQuery(name = Service.SERVICE_FIND_BY_NAME, query = "SELECT s FROM Service s WHERE s.name = :name"),
     @NamedQuery(name = Service.SERVICE_FIND_BY_SERVICE_CLASS_NAME, query = "SELECT s FROM Service s WHERE s.serviceClassName = :serviceClassName"),
-    @NamedQuery(name = Service.SERVICE_FIND_BY_TYPES, query = "SELECT s FROM Service s WHERE s.type IN :types")
+    @NamedQuery(name = Service.SERVICE_FIND_BY_TYPES, query = "SELECT s FROM Service s WHERE s.type IN :types"),
+    @NamedQuery(name = Service.SERVICE_FIND_BY_CAPABILITY, query = "SELECT s FROM Service s JOIN s.serviceCapabilityList c WHERE c.capability = :capability and c.value = true")
 })
 //@formatter:on
 public class Service implements Serializable {
 
     public static final String SERVICE_FIND_ALL = "Service.findAll";
+    public static final String SERVICE_FIND_BY_NAME = "Service.findByServiceName";
     public static final String SERVICE_FIND_BY_SERVICE_CLASS_NAME = "Service.findByServiceClassName";
     public static final String SERVICE_FIND_BY_TYPES = "Service.findByTypes";
+    public static final String SERVICE_FIND_BY_CAPABILITY = "Service.findByCapability";
 
     private static final long serialVersionUID = 1L;
 

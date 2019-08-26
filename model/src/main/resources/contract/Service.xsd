@@ -61,6 +61,7 @@
             <xsd:enumeration value="MULTIPLE_OCEAN"/>
             <xsd:enumeration value="CONFIGURABLE"/>
             <xsd:enumeration value="SAMPLING"/>
+            <xsd:enumeration value="SEND_REPORT"/>
         </xsd:restriction>
     </xsd:simpleType>
     
