@@ -56,7 +56,6 @@ public class RegistryBusEventListener implements MessageListener {
     @Override
     public void onMessage(Message message) {
         TextMessage textMessage = (TextMessage) message;
-        ServiceType settings = null;
         ExchangeRegistryMethod method = null;
         try {
             String function = textMessage.getStringProperty(MessageConstants.JMS_FUNCTION_PROPERTY);
@@ -64,13 +63,9 @@ public class RegistryBusEventListener implements MessageListener {
             LOG.info("[INFO] Eventbus listener for Exchange Registry (ExchangeModelConstants.EXCHANGE_REGISTER_SERVICE): {} {}", ExchangeModelConstants.EXCHANGE_REGISTER_SERVICE);
             switch (method) {
                 case REGISTER_SERVICE:
-                    RegisterServiceRequest regReq = JAXBMarshaller.unmarshallTextMessage(textMessage, RegisterServiceRequest.class);
-                    settings = regReq.getService();
                     pluginServiceBean.registerService(textMessage);
                     break;
                 case UNREGISTER_SERVICE:
-                    UnregisterServiceRequest unRegReq = JAXBMarshaller.unmarshallTextMessage(textMessage, UnregisterServiceRequest.class);
-                    settings = unRegReq.getService();
                     pluginServiceBean.unregisterService(textMessage);
                     break;
                 default:
@@ -79,6 +74,7 @@ public class RegistryBusEventListener implements MessageListener {
             }
         } catch (Exception e) {
             LOG.error("[ Error when receiving message on topic in exchange: {}] {}",message,e);
+            ServiceType settings = (method == ExchangeRegistryMethod.REGISTER_SERVICE) ?  ((RegisterServiceRequest)JAXBMarshaller.unmarshallTextMessage(textMessage, RegisterServiceRequest.class)).getService() : ((UnregisterServiceRequest)JAXBMarshaller.unmarshallTextMessage(textMessage, UnregisterServiceRequest.class)).getService() ;
             errorEvent.fire(new PluginErrorEventCarrier(textMessage, settings.getServiceResponseMessageName(), "Error when receiving message in exchange " + e.getMessage()));
         }
     }

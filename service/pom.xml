@@ -39,7 +39,7 @@
         <dependency>
             <groupId>eu.europa.ec.fisheries.uvms.asset</groupId>
             <artifactId>asset-client</artifactId>
-            <version>${asset.client.version}</version>
+            <version>${asset.version}</version>
         </dependency>
 
         <!-- Third party libs -->
