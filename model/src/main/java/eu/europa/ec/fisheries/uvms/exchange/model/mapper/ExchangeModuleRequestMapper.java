@@ -251,7 +251,7 @@ public class ExchangeModuleRequestMapper {
     public static SendMovementToPluginType createSendMovementToPluginType(String pluginName, PluginType type, Instant fwdDate, String fwdRule, String recipient, MovementType payload, List<RecipientInfoType> recipientInfoList, String assetName, String ircs, String mmsi, String externalMarking, String flagState) {
         SendMovementToPluginType report = new SendMovementToPluginType();
         mapToMovementType(payload, ircs, mmsi, externalMarking, flagState, assetName);
-        report.setTimestamp(DateUtils.nowUTC().toDate());
+        report.setTimestamp(Date.from(DateUtils.nowUTC()));
         report.setFwdDate(Date.from(fwdDate));
         report.setFwdRule(fwdRule);
         report.setRecipient(recipient);
@@ -288,7 +288,7 @@ public class ExchangeModuleRequestMapper {
         SetCommandRequest request = new SetCommandRequest();
         request.setMethod(ExchangeModuleMethod.SET_COMMAND);
         CommandType commandType = new CommandType();
-        commandType.setTimestamp(DateUtils.nowUTC().toDate());
+        commandType.setTimestamp(Date.from(DateUtils.nowUTC()));
         commandType.setCommand(type);
         commandType.setPluginName(pluginName);
         commandType.setFwdRule(fwdRule);
@@ -447,7 +447,7 @@ public class ExchangeModuleRequestMapper {
         request.setRequest(response);
         request.setFluxDataFlow(df);
         request.setMessageGuid(messageGuid);
-        request.setDate(DateUtils.nowUTC().toDate());
+        request.setDate(Date.from(DateUtils.nowUTC()));
         request.setPluginType(pluginType);
         request.setSenderOrReceiver(fr);
         request.setStatus(status);
@@ -469,7 +469,7 @@ public class ExchangeModuleRequestMapper {
         request.setRequest(response);
         request.setFluxDataFlow(df);
         request.setMessageGuid(messageGuid);
-        request.setDate(DateUtils.nowUTC().toDate());
+        request.setDate(Date.from(DateUtils.nowUTC()));
         request.setPluginType(pluginType);
         request.setSenderOrReceiver(fr);
         request.setStatus(status);
@@ -486,7 +486,7 @@ public class ExchangeModuleRequestMapper {
         request.setRequest(response);
         request.setFluxDataFlow(df);
         request.setMessageGuid(messageGuid);
-        request.setDate(DateUtils.nowUTC().toDate());
+        request.setDate(Date.from(DateUtils.nowUTC()));
         request.setTodt(todt);
         request.setTo(to);
         request.setOnValue(onValue);

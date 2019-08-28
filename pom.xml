@@ -22,32 +22,28 @@
 
         <scm.connection>scm:git:https://github.com/UnionVMS/UVMS-ExchangeModule-APP.git</scm.connection>
 
-        <docker.dev.version>3.32.4.w16</docker.dev.version>
+        <docker.dev.version>3.39.2.w17</docker.dev.version>
         <docker.liquibase.changeLogFile>LIQUIBASE/changelog/db-changelog-master.xml</docker.liquibase.changeLogFile>
         <docker.liquibase.db.user>exchange</docker.liquibase.db.user>
         <docker.liquibase.db.passwd>exchange</docker.liquibase.db.passwd>
 
         <!-- Third party libs -->
-        <mockito.version>1.10.19</mockito.version>
-        <junit.version>4.12</junit.version>
-        <swagger.version>1.3.1</swagger.version>
         <ehcache.version>2.10.6</ehcache.version>
 
         <!-- Uvms libs -->
         <longpolling.version>2.0.13</longpolling.version>
-        <uvms.commons.version>4.0.2</uvms.commons.version>
-        <uvms.config.version>4.0.4</uvms.config.version>
-        <usm4uvms.version>4.0.20</usm4uvms.version>
+        <uvms.commons.version>4.0.4</uvms.commons.version>
+        <uvms.config.version>4.0.5</uvms.config.version>
+        <usm4uvms.version>4.0.23</usm4uvms.version>
         <uvms-pom-deps.version>1.24</uvms-pom-deps.version>
-        <asset.client.version>6.0.58</asset.client.version>
+        <asset.version>6.0.65</asset.version>
 
         <!-- Uvms models -->
-        <asset.model.version>6.0.44</asset.model.version>
-        <audit.model.version>4.0.11</audit.model.version>
-        <movement.model.version>5.1.22-UVMS</movement.model.version>
-        <rules.model.version>3.0.49</rules.model.version>
+        <audit.model.version>4.1.3</audit.model.version>
+        <movement.model.version>5.2.22-UVMS</movement.model.version>
+        <rules.model.version>3.3-MARE </rules.model.version>
+        <movement.rules.model.version>2.1.21</movement.rules.model.version>
 
-        <asset.version>4.0.9</asset.version>
 
     </properties>
 
@@ -133,7 +129,7 @@
             <dependency>
                 <groupId>fish.focus.uvms.maven</groupId>
                 <artifactId>uvms-pom-arquillian-deps</artifactId>
-                <version>1.24</version>
+                <version>${uvms-pom-deps.version}</version>
                 <type>pom</type>
             </dependency>
 
@@ -161,12 +157,12 @@
             <dependency>
                 <groupId>eu.europa.ec.fisheries.uvms.movement-rules</groupId>
                 <artifactId>movement-rules-model</artifactId>
-                <version>2.1.5</version>
+                <version>${movement.rules.model.version}</version>
             </dependency>
             <dependency>
                 <groupId>eu.europa.ec.fisheries.uvms.asset</groupId>
                 <artifactId>asset-model</artifactId>
-                <version>${asset.model.version}</version>
+                <version>${asset.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

@@ -224,7 +224,7 @@ public class ExchangeLogServiceBean {
             if (TypeRefType.FA_RESPONSE.equals(log.getTypeRefType())){
                 guid = log.getTypeRefGuid();
             }
-            validationFromRules = exchangeToRulesSyncMsgBean.getValidationFromRules(guid.toString(), log.getTypeRefType());
+            validationFromRules = exchangeToRulesSyncMsgBean.getValidationFromRules(guid.toString(), log.getTypeRefType(), log.getDf());
             validationFromRules.setMsg(log.getTypeRefMessage() != null ? log.getTypeRefMessage() : StringUtils.EMPTY);
         }
         return validationFromRules;

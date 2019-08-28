@@ -47,13 +47,13 @@ public class ExchangeToRulesSyncMsgBean {
     private ExchangeRulesProducer rulesProducer;
 
 
-    public ExchangeLogWithValidationResults getValidationFromRules(String guid, TypeRefType type) {
+    public ExchangeLogWithValidationResults getValidationFromRules(String guid, TypeRefType type, String dataFlow) {
         if (StringUtils.isEmpty(guid)) {
             return new ExchangeLogWithValidationResults();
         }
         ExchangeLogWithValidationResults resp = new ExchangeLogWithValidationResults();
         try {
-            String getValidationsByGuidRequest = RulesModuleRequestMapper.createGetValidationsByGuidRequest(guid, type == null ? null : type.name());
+            String getValidationsByGuidRequest = RulesModuleRequestMapper.createGetValidationsByGuidRequest(guid, type == null ? null : type.name(), dataFlow);
             String correlationId = rulesProducer.sendSynchronousRulesMessage(getValidationsByGuidRequest, "ValidationResultsByRawGuid");
             TextMessage validationRespMsg = exchangeConsumerBean.getMessage(correlationId, TextMessage.class);
             ValidationMessageTypeResponse validTypeRespFromRules = JAXBMarshaller.unmarshallTextMessage(validationRespMsg, ValidationMessageTypeResponse.class);

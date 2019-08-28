@@ -10,7 +10,6 @@ copy of the GNU General Public License along with the IFDM Suite. If not, see <h
  */
 package eu.europa.ec.fisheries.uvms.exchange.rest;
 
-import eu.europa.ec.fisheries.schema.config.types.v1.PullSettingsStatus;
 import eu.europa.ec.fisheries.schema.config.types.v1.SettingType;
 import eu.europa.ec.fisheries.uvms.config.model.mapper.ModuleResponseMapper;
 import eu.europa.ec.fisheries.uvms.exchange.service.message.producer.bean.ExchangeEventProducer;
@@ -39,7 +38,7 @@ public class ConfigServiceMock implements MessageListener {
             mockSetting.setKey("maxDistance");
             mockSetting.setValue("500");
             mockSetting.setDescription("Set in ConfigServiceMock.java");
-            String response = ModuleResponseMapper.toPullSettingsResponse(Arrays.asList(mockSetting), PullSettingsStatus.OK);
+            String response = ModuleResponseMapper.toSettingsListResponse(Arrays.asList(mockSetting));
             messageProducer.sendResponseMessageToSender((TextMessage) message, response);
         } catch (Exception e) {
         }
