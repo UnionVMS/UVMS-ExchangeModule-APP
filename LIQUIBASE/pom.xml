@@ -4,7 +4,7 @@
     <parent>
         <groupId>eu.europa.ec.fisheries.uvms.exchange</groupId>
         <artifactId>exchange</artifactId>
-        <version>5.0.13-UVMS-SNAPSHOT</version>
+        <version>5.0.13-UVMS</version>
     </parent>
 
     <artifactId>liquibase</artifactId>
