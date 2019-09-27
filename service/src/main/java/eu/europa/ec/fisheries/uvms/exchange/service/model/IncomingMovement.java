@@ -64,7 +64,16 @@ public class IncomingMovement {
 
     private Instant updated;
     private String updatedBy;
-    public Long getId() {
+    
+    private Instant lesDateReceived;
+    
+    public Instant getLesDateReceived() {
+		return lesDateReceived;
+	}
+	public void setLesDateReceived(Instant lesDateReceived) {
+		this.lesDateReceived = lesDateReceived;
+	}
+	public Long getId() {
         return id;
     }
     public void setId(Long id) {
