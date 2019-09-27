@@ -66,6 +66,11 @@ public class MovementMapper {
         incomingMovement.setExternalMarking(movementBaseType.getExternalMarking());
         incomingMovement.setTripNumber(movementBaseType.getTripNumber());
         incomingMovement.setInternalReferenceNumber(movementBaseType.getInternalReferenceNumber());
+        
+        if (movementBaseType.getLesReportTime() != null) {
+        	incomingMovement.setLesDateReceived(movementBaseType.getLesReportTime().toInstant());
+        }
+        
         return incomingMovement;
     }
     
