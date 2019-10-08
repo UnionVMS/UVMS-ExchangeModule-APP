@@ -39,6 +39,25 @@
                 </configuration>
             </plugin>
         </plugins>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.wildfly.plugins</groupId>
+                    <artifactId>wildfly-maven-plugin</artifactId>
+                    <version>2.0.1.Final</version>
+
+                    <configuration>
+                        <filename>${project.build.finalName}.${project.packaging}</filename>
+                        <targetDir>${targetDir}</targetDir>
+                        <hostname>${hostname}</hostname>
+                        <port>${port}</port>
+                        <username>${wildfly-username}</username>
+                        <password>${wildfly-password}</password>
+                        <force>true</force>
+                    </configuration>
+                </plugin>
+            </plugins>
+        </pluginManagement>
     </build>
 
     <dependencies>
@@ -67,52 +86,35 @@
         <profile>
             <id>wildfly-deploy</id>
             <build>
-                <plugins>	
+                <plugins>
                     <plugin>
                         <groupId>org.wildfly.plugins</groupId>
                         <artifactId>wildfly-maven-plugin</artifactId>
-                        <version>1.0.2.Final</version>
-                        <configuration>
-                            <filename>${project.build.finalName}.${project.packaging}</filename>
-                            <targetDir>${project.build.directory}</targetDir>
-                            <hostname>${hostname}</hostname>
-                            <port>${port}</port>
-                            <username>${username}</username>
-                            <password>${password}</password>
-                            <force>true</force>
-                        </configuration>
+                        <executions>
+                            <execution>
+                                <phase>install</phase>
+                                <goals>
+                                    <goal>deploy</goal>
+                                </goals>
+                            </execution>
+                        </executions>
                     </plugin>
                 </plugins>
             </build>
         </profile>
-        <!-- COPY TO FOLDER -->
         <profile>
-            <id>copy-ear</id>
+            <id>wildfly-undeploy</id>
             <build>
                 <plugins>
                     <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-dependency-plugin</artifactId>
-                        <version>3.0.2</version>
+                        <groupId>org.wildfly.plugins</groupId>
+                        <artifactId>wildfly-maven-plugin</artifactId>
                         <executions>
                             <execution>
-                                <id>copy-installed</id>
-                                <phase>install</phase>
+                                <phase>validate</phase>
                                 <goals>
-                                    <goal>copy</goal>
+                                    <goal>undeploy</goal>
                                 </goals>
-                                <configuration>
-                                    <artifactItems>
-                                        <artifactItem>
-                                            <groupId>${project.groupId}</groupId>
-                                            <artifactId>${project.artifactId}</artifactId>
-                                            <version>${project.version}</version>
-                                            <classifier>${envClassifier}</classifier>
-                                            <type>${project.packaging}</type>
-                                        </artifactItem>
-                                    </artifactItems>
-                                    <outputDirectory>C:\dev\WebLogic\domain1213\servers\AdminServer\upload</outputDirectory>
-                                </configuration>
                             </execution>
                         </executions>
                     </plugin>
