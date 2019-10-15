@@ -34,6 +34,7 @@ public class MovementMapper {
             incomingMovement.setMobileTerminalGuid(movementBaseType.getMobileTerminalId().getGuid());
             mapMobileTerminalIdList(movementBaseType.getMobileTerminalId().getMobileTerminalIdList(), incomingMovement);
         }
+        incomingMovement.setSourceSatelliteId(movementBaseType.getSourceSatelliteId() == null ? null : movementBaseType.getSourceSatelliteId().shortValue());
         if (movementBaseType.getComChannelType() != null) {
             incomingMovement.setComChannelType(movementBaseType.getComChannelType().value());
         }

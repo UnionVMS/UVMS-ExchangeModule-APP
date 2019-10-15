@@ -96,6 +96,7 @@
             <xsd:element name="trueHeading" type="xsd:int"    nillable="true"/>
             
             <xsd:element name="lesReportTime" type="xsd:dateTime"/>
+            <xsd:element name="sourceSatelliteId" type="xsd:int"  minOccurs="0"/>
         </xsd:sequence>
     </xsd:complexType>
 
