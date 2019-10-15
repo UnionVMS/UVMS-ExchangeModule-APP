@@ -485,6 +485,7 @@ public class ExchangeMessageConsumerBeanTest extends BuildExchangeServiceTestDep
         Service service = createAndPersistBasicService(serviceName, serviceClassName, PluginType.SATELLITE_RECEIVER);
 
         MovementType movementType = createMovementType();
+        movementType.setSourceSatelliteId(42);
         SetReportMovementType setReportMovementType = new SetReportMovementType();
         setReportMovementType.setMovement(movementType);
         setReportMovementType.setTimestamp(Date.from(Instant.now()));
@@ -501,6 +502,7 @@ public class ExchangeMessageConsumerBeanTest extends BuildExchangeServiceTestDep
         assertEquals(movementType.getMmsi(), output.getAssetMMSI());
         assertEquals(movementType.getPosition().getLongitude(), output.getLongitude(),0);
         assertEquals(movementType.getFlagState(),output.getFlagState());
+        assertEquals(movementType.getSourceSatelliteId().shortValue(), output.getSourceSatelliteId());
 
 
         Thread.sleep(1000);     //to allow the db to sync up
