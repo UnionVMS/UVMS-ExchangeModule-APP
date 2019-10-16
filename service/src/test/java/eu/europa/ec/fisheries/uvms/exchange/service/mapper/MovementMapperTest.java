@@ -23,7 +23,7 @@ public class MovementMapperTest {
    		IncomingMovement incomingMovement = new IncomingMovement();
    		incomingMovement = MovementMapper.mapMovementBaseTypeToRawMovementType(movement);
    		
-   		assertEquals(incomingMovement.getLesDateReceived(), today.toInstant());
+   		assertEquals(incomingMovement.getLesReportTime(), today.toInstant());
     }
 
   
