@@ -69,7 +69,7 @@ public class MovementMapper {
         incomingMovement.setInternalReferenceNumber(movementBaseType.getInternalReferenceNumber());
         
         if (movementBaseType.getLesReportTime() != null) {
-        	incomingMovement.setLesDateReceived(movementBaseType.getLesReportTime().toInstant());
+        	incomingMovement.setLesReportTime(movementBaseType.getLesReportTime().toInstant());
         }
         
         return incomingMovement;

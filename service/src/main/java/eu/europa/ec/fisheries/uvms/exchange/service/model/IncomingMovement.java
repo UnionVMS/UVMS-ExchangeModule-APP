@@ -66,13 +66,13 @@ public class IncomingMovement {
     private Instant updated;
     private String updatedBy;
     
-    private Instant lesDateReceived;
+    private Instant lesReportTime;
     
-    public Instant getLesDateReceived() {
-		return lesDateReceived;
+    public Instant getLesReportTime() {
+		return lesReportTime;
 	}
-	public void setLesDateReceived(Instant lesDateReceived) {
-		this.lesDateReceived = lesDateReceived;
+	public void setLesReportTime(Instant lesReportTime) {
+		this.lesReportTime = lesReportTime;
 	}
 	public Long getId() {
         return id;
