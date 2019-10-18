@@ -58,7 +58,7 @@ public class IncomingMovement {
     private String mobileTerminalLES;
     private String mobileTerminalDNID;
     private String mobileTerminalMemberNumber;
-    private short sourceSatelliteId;
+    private Short sourceSatelliteId;
 
     private String pluginType;
     private boolean active;
@@ -291,11 +291,11 @@ public class IncomingMovement {
         this.mobileTerminalMemberNumber = mobileTerminalMemberNumber;
     }
 
-    public short getSourceSatelliteId() {
+    public Short getSourceSatelliteId() {
         return sourceSatelliteId;
     }
 
-    public void setSourceSatelliteId(short sourceSatelliteId) {
+    public void setSourceSatelliteId(Short sourceSatelliteId) {
         this.sourceSatelliteId = sourceSatelliteId;
     }
 
