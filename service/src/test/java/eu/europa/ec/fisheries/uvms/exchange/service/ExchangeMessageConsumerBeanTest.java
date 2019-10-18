@@ -502,7 +502,7 @@ public class ExchangeMessageConsumerBeanTest extends BuildExchangeServiceTestDep
         assertEquals(movementType.getMmsi(), output.getAssetMMSI());
         assertEquals(movementType.getPosition().getLongitude(), output.getLongitude(),0);
         assertEquals(movementType.getFlagState(),output.getFlagState());
-        assertEquals(movementType.getSourceSatelliteId().shortValue(), output.getSourceSatelliteId());
+        assertEquals(movementType.getSourceSatelliteId().shortValue(), output.getSourceSatelliteId().shortValue());
 
 
         Thread.sleep(1000);     //to allow the db to sync up
