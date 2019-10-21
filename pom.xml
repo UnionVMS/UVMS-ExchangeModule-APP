@@ -1,15 +1,16 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <parent>
-        <groupId>fish.focus.uvms.maven</groupId>
-        <artifactId>uvms-pom</artifactId>
-        <version>1.21</version>
-    </parent>
+  <parent>
+    <groupId>eu.europa.ec.fisheries.uvms</groupId>
+    <artifactId>mare-pom</artifactId>
+    <version>1.6.0-MARE</version>
+    <relativePath />
+  </parent>
 
     <groupId>eu.europa.ec.fisheries.uvms.exchange</groupId>
     <artifactId>exchange</artifactId>
-    <version>4.0.44-SNAPSHOT</version>
+    <version>${uvms.exchange.module.version}</version>
     <packaging>pom</packaging>
     
     <scm>
@@ -31,18 +32,18 @@
         <ehcache.version>2.10.4</ehcache.version>
 
         <!-- Uvms libs -->
-
-    <uvms.config.version>4.2-SNAPSHOT</uvms.config.version>
-    <uvms.commons.version>3.4-SNAPSHOT</uvms.commons.version>
-    <usm4uvms.version>4.0.15.1-SNAPSHOT</usm4uvms.version>
         <uvms-pom-deps.version>1.21</uvms-pom-deps.version>
         <longpolling.version>2.0.13</longpolling.version>
+
+    <uvms.config.version>${uvms.config.library.version}</uvms.config.version>
+    <uvms.commons.version>${uvms.commonsLibrary.version}</uvms.commons.version>
+    <usm4uvms.version>${uvms.uvms4usm.version}</usm4uvms.version>
         <!-- Uvms models -->
-    <asset.model.version>4.0.24-SNAPSHOT</asset.model.version>
-        <exchange.model.version>4.0.34</exchange.model.version>
-        <audit.model.version>4.0.10</audit.model.version>
-    <movement.model.version>5.1.8-SNAPSHOT</movement.model.version>
-        <rules.model.version>3.0.56-W14J8-MARE</rules.model.version>
+    <asset.model.version>${uvms.asset.module.version}</asset.model.version>
+        <exchange.model.version>${uvms.exchange.model.version}</exchange.model.version>
+        <audit.model.version>${uvms.audit.module.version}</audit.model.version>
+    <movement.model.version>${uvms.movement.module.version}</movement.model.version>
+        <rules.model.version>${uvms.rules.module.version}</rules.model.version>
         <javaee.version>8.0</javaee.version>
 
         <hibernate.version>5.1.9.Final</hibernate.version>
