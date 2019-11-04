@@ -3,3 +3,4 @@ target
 logging.properties
 rest/src/main/webapp/apidocs/
 **/.idea
+.flattened-pom.xml
