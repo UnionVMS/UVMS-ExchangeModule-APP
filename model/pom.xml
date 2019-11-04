@@ -40,6 +40,11 @@
             <artifactId>jaxb2-basics</artifactId>
             <version>1.11.1</version>
         </dependency>
+        <dependency>
+            <groupId>fish.focus.uvms.maven</groupId>
+            <artifactId>uvms-pom-java11-deps</artifactId>
+            <type>pom</type>
+        </dependency>
     </dependencies>
 
 
@@ -55,7 +60,7 @@
             <plugin>
                 <groupId>org.apache.cxf</groupId>
                 <artifactId>cxf-codegen-plugin</artifactId>
-                <version>3.1.13</version>
+                <version>3.3.4</version>
                 <executions>
                     <execution>
                         <id>generate-exchange-module</id>
