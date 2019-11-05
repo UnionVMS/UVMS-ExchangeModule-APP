@@ -5,6 +5,7 @@ import eu.europa.ec.fisheries.uvms.exchange.entity.exchangelog.ExchangeLog;
 import org.junit.Test;
 
 
+import java.time.temporal.ChronoUnit;
 import java.util.Date;  //leave be
 import java.time.Instant;
 import java.util.UUID;
@@ -18,7 +19,7 @@ public class LogMapperTest {
         //data set
         String typeRefGuid = UUID.randomUUID().toString();;
         TypeRefType typeRefType = TypeRefType.MOVEMENT;
-        Instant dateReceived = Instant.now();
+        Instant dateReceived = Instant.now().truncatedTo(ChronoUnit.MILLIS);
         String senderOrReceiver = "BEL";
         ExchangeLogStatusTypeType status = ExchangeLogStatusTypeType.SUCCESSFUL;
 
@@ -67,7 +68,7 @@ public class LogMapperTest {
         //data set
         String typeRefGuid = UUID.randomUUID().toString();;
         TypeRefType typeRefType = TypeRefType.MOVEMENT;
-        Instant dateReceived = Instant.now();
+        Instant dateReceived = Instant.now().truncatedTo(ChronoUnit.MILLIS);
         String senderOrReceiver = "BEL";
         ExchangeLogStatusTypeType status = ExchangeLogStatusTypeType.SUCCESSFUL;
         String message = "<xml></xml>";
@@ -77,7 +78,7 @@ public class LogMapperTest {
         logRefType.setType(typeRefType);
         logRefType.setMessage(message);
 
-        Instant fwdDate = Instant.now();
+        Instant fwdDate = Instant.now().truncatedTo(ChronoUnit.MILLIS);
         String fwdRule = "fantastic rules and where to find them";
         String recipient = "potter@wb.com";
 
@@ -122,7 +123,7 @@ public class LogMapperTest {
         //data set
         String typeRefGuid = UUID.randomUUID().toString();;
         TypeRefType typeRefType = TypeRefType.POLL;
-        Instant dateReceived = Instant.now();
+        Instant dateReceived = Instant.now().truncatedTo(ChronoUnit.MILLIS);
         String senderOrReceiver = "BEL";
         ExchangeLogStatusTypeType status = ExchangeLogStatusTypeType.SUCCESSFUL;
         String message = "<xml></xml>";
@@ -132,7 +133,7 @@ public class LogMapperTest {
         logRefType.setType(typeRefType);
         logRefType.setMessage(message);
 
-        Instant fwdDate = Instant.now();
+        Instant fwdDate = Instant.now().truncatedTo(ChronoUnit.MILLIS);
         String recipient = "potter@wb.com";
 
         SendPollType input = new SendPollType();
@@ -174,7 +175,7 @@ public class LogMapperTest {
         //data set
         String typeRefGuid = UUID.randomUUID().toString();;
         TypeRefType typeRefType = TypeRefType.UNKNOWN;
-        Instant dateReceived = Instant.now();
+        Instant dateReceived = Instant.now().truncatedTo(ChronoUnit.MILLIS);
         String senderOrReceiver = "BEL";
         ExchangeLogStatusTypeType status = ExchangeLogStatusTypeType.SUCCESSFUL;
         String message = "<xml></xml>";
@@ -184,7 +185,7 @@ public class LogMapperTest {
         logRefType.setType(typeRefType);
         logRefType.setMessage(message);
 
-        Instant fwdDate = Instant.now();
+        Instant fwdDate = Instant.now().truncatedTo(ChronoUnit.MILLIS);
         String fwdRule = "fantastic rules and where to find them";
         String recipient = "potter@wb.com";
 
@@ -229,7 +230,7 @@ public class LogMapperTest {
         //data set
         String typeRefGuid = UUID.randomUUID().toString();;
         TypeRefType typeRefType = TypeRefType.SALES_REPORT;
-        Instant dateReceived = Instant.now();
+        Instant dateReceived = Instant.now().truncatedTo(ChronoUnit.MILLIS);
         String senderOrReceiver = "BEL";
         ExchangeLogStatusTypeType status = ExchangeLogStatusTypeType.SUCCESSFUL;
         String message = "<xml></xml>";
@@ -279,7 +280,7 @@ public class LogMapperTest {
     @Test
     public void toNewEntityWhenLogTypeIsReceiveSalesReportAndTypeRefIsNotFilledIn() throws Exception {
         //data set
-        Instant dateReceived = Instant.now();
+        Instant dateReceived = Instant.now().truncatedTo(ChronoUnit.MILLIS);
         String senderOrReceiver = "BEL";
         ExchangeLogStatusTypeType status = ExchangeLogStatusTypeType.SUCCESSFUL;
         String destination = "destination";
@@ -322,7 +323,7 @@ public class LogMapperTest {
         //data set
         String typeRefGuid = UUID.randomUUID().toString();;
         TypeRefType typeRefType = TypeRefType.SALES_REPORT;
-        Instant dateReceived = Instant.now();
+        Instant dateReceived = Instant.now().truncatedTo(ChronoUnit.MILLIS);
         String senderOrReceiver = "BEL";
         String message = "<xml></xml>";
         String destination = "destination";
@@ -371,7 +372,7 @@ public class LogMapperTest {
     @Test
     public void toNewEntityWhenLogTypeIsReceiveSalesReportAndUsernameIsNull() throws Exception {
         //data set
-        Instant dateReceived = Instant.now();
+        Instant dateReceived = Instant.now().truncatedTo(ChronoUnit.MILLIS);
         String senderOrReceiver = "BEL";
         ExchangeLogStatusTypeType status = ExchangeLogStatusTypeType.SUCCESSFUL;
         String destination = "destination";
@@ -412,7 +413,7 @@ public class LogMapperTest {
         //data set
         String typeRefGuid = UUID.randomUUID().toString();;
         TypeRefType typeRefType = TypeRefType.SALES_RESPONSE;
-        Instant dateReceived = Instant.now();
+        Instant dateReceived = Instant.now().truncatedTo(ChronoUnit.MILLIS);
         String senderOrReceiver = "BEL";
         ExchangeLogStatusTypeType status = ExchangeLogStatusTypeType.SUCCESSFUL;
         String message = "<xml></xml>";
@@ -464,7 +465,7 @@ public class LogMapperTest {
         //data set
         String typeRefGuid = UUID.randomUUID().toString();;
         TypeRefType typeRefType = TypeRefType.SALES_QUERY;
-        Instant dateReceived = Instant.now();
+        Instant dateReceived = Instant.now().truncatedTo(ChronoUnit.MILLIS);
         String senderOrReceiver = "BEL";
         ExchangeLogStatusTypeType status = ExchangeLogStatusTypeType.SUCCESSFUL;
         String message = "<xml></xml>";
@@ -516,7 +517,7 @@ public class LogMapperTest {
         //data set
         String typeRefGuid = UUID.randomUUID().toString();;
         TypeRefType typeRefType = TypeRefType.SALES_REPORT;
-        Instant dateReceived = Instant.now();
+        Instant dateReceived = Instant.now().truncatedTo(ChronoUnit.MILLIS);
         String senderOrReceiver = "BEL";
         ExchangeLogStatusTypeType status = ExchangeLogStatusTypeType.SUCCESSFUL;
         String message = "<xml></xml>";
@@ -568,7 +569,7 @@ public class LogMapperTest {
         //data set
         String typeRefGuid = UUID.randomUUID().toString();;
         TypeRefType typeRefType = TypeRefType.SALES_RESPONSE;
-        Instant dateReceived = Instant.now();
+        Instant dateReceived = Instant.now().truncatedTo(ChronoUnit.MILLIS);
         String senderOrReceiver = "BEL";
         ExchangeLogStatusTypeType status = ExchangeLogStatusTypeType.SUCCESSFUL;
         String message = "<xml></xml>";
@@ -617,7 +618,7 @@ public class LogMapperTest {
 
     @Test
     public void toModelWhenEntityIsReceiveMovementLog() {
-        Instant dateReceived = Instant.now();
+        Instant dateReceived = Instant.now().truncatedTo(ChronoUnit.MILLIS);
         UUID guid = UUID.randomUUID();
         String senderReceiver = "Chris Martin";
         boolean incoming = true;
@@ -649,13 +650,13 @@ public class LogMapperTest {
 
     @Test
     public void toModelWhenEntityIsSendMovementLog() {
-        Instant dateReceived = Instant.now();
+        Instant dateReceived = Instant.now().truncatedTo(ChronoUnit.MILLIS);
         UUID guid = UUID.randomUUID();
         String senderReceiver = "Chris Martin";
         boolean incoming = true;
         ExchangeLogStatusTypeType status = ExchangeLogStatusTypeType.PROBABLY_TRANSMITTED;
         String fwdRule = "Coldplay";
-        Instant fwdDate = Instant.now();
+        Instant fwdDate = Instant.now().truncatedTo(ChronoUnit.MILLIS);
         String recipient = "Viva la vida";
 
         ExchangeLog entity = new ExchangeLog();
@@ -684,12 +685,12 @@ public class LogMapperTest {
 
     @Test
     public void toModelWhenEntityIsPollLog() {
-        Instant dateReceived = Instant.now();
+        Instant dateReceived = Instant.now().truncatedTo(ChronoUnit.MILLIS);
         UUID guid = UUID.randomUUID();
         String senderReceiver = "Chris Martin";
         boolean incoming = true;
         ExchangeLogStatusTypeType status = ExchangeLogStatusTypeType.PROBABLY_TRANSMITTED;
-        Instant fwdDate = Instant.now();
+        Instant fwdDate = Instant.now().truncatedTo(ChronoUnit.MILLIS);
         String recipient = "Viva la vida";
 
         ExchangeLog entity = new ExchangeLog();
@@ -716,13 +717,13 @@ public class LogMapperTest {
 
     @Test
     public void toModelWhenEntityIsEmailLog() {
-        Instant dateReceived = Instant.now();
+        Instant dateReceived = Instant.now().truncatedTo(ChronoUnit.MILLIS);
         UUID guid = UUID.randomUUID();
         String senderReceiver = "Chris Martin";
         boolean incoming = true;
         ExchangeLogStatusTypeType status = ExchangeLogStatusTypeType.PROBABLY_TRANSMITTED;
         String fwdRule = "Coldplay";
-        Instant fwdDate = Instant.now();
+        Instant fwdDate = Instant.now().truncatedTo(ChronoUnit.MILLIS);
         String recipient = "Viva la vida";
 
         ExchangeLog entity = new ExchangeLog();
@@ -751,7 +752,7 @@ public class LogMapperTest {
 
     @Test
     public void toModelWhenEntityIsReceiveSalesQuery() {
-        Instant dateReceived = Instant.now();
+        Instant dateReceived = Instant.now().truncatedTo(ChronoUnit.MILLIS);
         UUID guid = UUID.randomUUID();
         String senderReceiver = "Chris Martin";
         boolean incoming = true;
@@ -779,7 +780,7 @@ public class LogMapperTest {
 
     @Test
     public void toModelWhenEntityIsReceiveSalesReport() {
-        Instant dateReceived = Instant.now();
+        Instant dateReceived = Instant.now().truncatedTo(ChronoUnit.MILLIS);
         UUID guid = UUID.randomUUID();
         String senderReceiver = "Chris Martin";
         boolean incoming = true;
@@ -808,7 +809,7 @@ public class LogMapperTest {
 
     @Test
     public void toModelWhenEntityIsReceiveSalesResponse() {
-        Instant dateReceived = Instant.now();
+        Instant dateReceived = Instant.now().truncatedTo(ChronoUnit.MILLIS);
         UUID guid = UUID.randomUUID();
         String senderReceiver = "Chris Martin";
         boolean incoming = true;
@@ -837,7 +838,7 @@ public class LogMapperTest {
 
     @Test
     public void toModelWhenEntityIsSendSalesReport() {
-        Instant dateReceived = Instant.now();
+        Instant dateReceived = Instant.now().truncatedTo(ChronoUnit.MILLIS);
         UUID guid = UUID.randomUUID();
         String senderReceiver = "Chris Martin";
         boolean incoming = true;
@@ -866,7 +867,7 @@ public class LogMapperTest {
 
     @Test
     public void toModelWhenEntityIsSendSalesResponse() {
-        Instant dateReceived = Instant.now();
+        Instant dateReceived = Instant.now().truncatedTo(ChronoUnit.MILLIS);
         UUID guid = UUID.randomUUID();
         String senderReceiver = "Chris Martin";
         boolean incoming = true;
@@ -898,7 +899,7 @@ public class LogMapperTest {
         //data set
         String typeRefGuid = UUID.randomUUID().toString();
         TypeRefType typeRefType = TypeRefType.FA_REPORT;
-        Instant dateReceived = Instant.now();
+        Instant dateReceived = Instant.now().truncatedTo(ChronoUnit.MILLIS);
         String senderOrReceiver = "BEL";
         ExchangeLogStatusTypeType status = ExchangeLogStatusTypeType.SUCCESSFUL;
         String message = "<xml></xml>";
@@ -950,7 +951,7 @@ public class LogMapperTest {
         //data set
         String typeRefGuid = UUID.randomUUID().toString();;
         TypeRefType typeRefType = TypeRefType.FA_QUERY;
-        Instant dateReceived = Instant.now();
+        Instant dateReceived = Instant.now().truncatedTo(ChronoUnit.MILLIS);
         String senderOrReceiver = "BEL";
         ExchangeLogStatusTypeType status = ExchangeLogStatusTypeType.SUCCESSFUL;
         String message = "<xml></xml>";
@@ -1002,7 +1003,7 @@ public class LogMapperTest {
         //data set
         String typeRefGuid = UUID.randomUUID().toString();
         TypeRefType typeRefType = TypeRefType.FA_QUERY;
-        Instant dateReceived = Instant.now();
+        Instant dateReceived = Instant.now().truncatedTo(ChronoUnit.MILLIS);
         String senderOrReceiver = "BEL";
         ExchangeLogStatusTypeType status = ExchangeLogStatusTypeType.SUCCESSFUL;
         String message = "<xml></xml>";
@@ -1054,7 +1055,7 @@ public class LogMapperTest {
         //data set
         String typeRefGuid = UUID.randomUUID().toString();
         TypeRefType typeRefType = TypeRefType.FA_REPORT;
-        Instant dateReceived = Instant.now();
+        Instant dateReceived = Instant.now().truncatedTo(ChronoUnit.MILLIS);
         String senderOrReceiver = "BEL";
         ExchangeLogStatusTypeType status = ExchangeLogStatusTypeType.SUCCESSFUL;
         String message = "<xml></xml>";
@@ -1106,7 +1107,7 @@ public class LogMapperTest {
         //data set
         String typeRefGuid = UUID.randomUUID().toString();;
         TypeRefType typeRefType = TypeRefType.FA_RESPONSE;
-        Instant dateReceived = Instant.now();
+        Instant dateReceived = Instant.now().truncatedTo(ChronoUnit.MILLIS);
         String senderOrReceiver = "BEL";
         ExchangeLogStatusTypeType status = ExchangeLogStatusTypeType.SUCCESSFUL;
         String message = "<xml></xml>";
