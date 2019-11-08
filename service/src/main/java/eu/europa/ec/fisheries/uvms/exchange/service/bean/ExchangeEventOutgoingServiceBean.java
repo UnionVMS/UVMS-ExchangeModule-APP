@@ -152,7 +152,7 @@ public class ExchangeEventOutgoingServiceBean {
 
             Service service = null;
             if (sendReport.getPluginName() != null && !sendReport.getPluginName().isEmpty()) {
-                service = serviceRegistryModel.getPluginByName(sendReport.getPluginName());
+                service = serviceRegistryModel.getServiceByServiceClassName(sendReport.getPluginName());
             } else {
                 List<Service> services = serviceRegistryModel.getPlugins(Arrays.asList(sendReport.getPluginType()));
                 for (Service serviceIteration : services) {
