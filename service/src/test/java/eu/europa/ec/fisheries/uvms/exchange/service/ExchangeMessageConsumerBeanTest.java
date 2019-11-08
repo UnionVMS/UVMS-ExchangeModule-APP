@@ -258,7 +258,7 @@ public class ExchangeMessageConsumerBeanTest extends BuildExchangeServiceTestDep
         MovementType movementType = createMovementType();
         List<RecipientInfoType> recipientInfoTypeList = new ArrayList<>();
 
-        String request = ExchangeModuleRequestMapper.createSendReportToPlugin(serviceName, PluginType.FLUX, Instant.now(), null, recipient, movementType, recipientInfoTypeList, movementType.getAssetName(),movementType.getIrcs(), movementType.getMmsi(), movementType.getExternalMarking(), movementType.getFlagState());
+        String request = ExchangeModuleRequestMapper.createSendReportToPlugin(serviceClassName, PluginType.FLUX, Instant.now(), null, recipient, movementType, recipientInfoTypeList, movementType.getAssetName(),movementType.getIrcs(), movementType.getMmsi(), movementType.getExternalMarking(), movementType.getFlagState());
 
         jmsHelper.registerSubscriber("ServiceName = '" + serviceClassName + "'");
         String corrID = jmsHelper.sendExchangeMessage(request, null, "SEND_REPORT_TO_PLUGIN");
