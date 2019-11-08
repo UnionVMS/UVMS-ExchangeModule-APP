@@ -117,6 +117,10 @@ public class ServiceRegistryModelBean {
         return dao.getServiceByName(pluginName);
     }
 
+    public Service getServiceByServiceClassName(String serviceClassName) {
+        return dao.getServiceByServiceClassName(serviceClassName);
+    }
+
     public Service getPlugin(String serviceClassName) {
             Service service = dao.getServiceByServiceClassName(serviceClassName);
             return service;
