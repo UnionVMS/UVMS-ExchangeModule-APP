@@ -12,6 +12,7 @@
     <packaging>ear</packaging>
     
     <build>
+        <finalName>${project.name}</finalName>
         <plugins>
             <!-- This configuration specifies what ends up in application.xml -->
             <plugin>
