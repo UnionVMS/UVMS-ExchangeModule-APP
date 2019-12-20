@@ -47,8 +47,7 @@ public class ListQueryResponse {
     public void setTotalNumberOfPages(int totalNumberOfPages) {
         this.totalNumberOfPages = totalNumberOfPages;
     }
-    public List<ExchangeLogDto> getLogs() {
+    public List<ExchangeLogDto> getLogList() {
         return logList;
     }
-
 }

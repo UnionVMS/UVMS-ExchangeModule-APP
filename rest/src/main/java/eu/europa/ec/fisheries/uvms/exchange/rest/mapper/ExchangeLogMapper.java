@@ -47,7 +47,7 @@ public class ExchangeLogMapper {
         dto.setTotalNumberOfPages(response.getTotalNumberOfPages());
 
         for (ExchangeLogType log : response.getExchangeLog()) {
-            dto.getLogs().add(mapToExchangeLogDto(log));
+            dto.getLogList().add(mapToExchangeLogDto(log));
         }
 
         return dto;
