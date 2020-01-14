@@ -252,22 +252,22 @@ public class ExchangeMessageConsumerBeanTest extends BuildExchangeServiceTestDep
     public void sendReportToPluginTest() throws Exception{
         String serviceName = "Flux Test Service";
         String serviceClassName = "eu.europa.ec.fisheries.uvms.plugins.fluxus";
-        String recipient = "To whom it may concern";
         int sizeB4 = unsentMessageDao.getAll().size();
         Service service = createAndPersistBasicService(serviceName, serviceClassName, PluginType.FLUX);
         MovementType movementType = createMovementType();
         List<RecipientInfoType> recipientInfoTypeList = new ArrayList<>();
 
-        String request = ExchangeModuleRequestMapper.createSendReportToPlugin(serviceClassName, PluginType.FLUX, Instant.now(), null, recipient, movementType, recipientInfoTypeList, movementType.getAssetName(),movementType.getIrcs(), movementType.getMmsi(), movementType.getExternalMarking(), movementType.getFlagState());
+        String request = ExchangeModuleRequestMapper.createSendReportToPlugin(serviceClassName, PluginType.FLUX, Instant.now(), null, "recipient", movementType, recipientInfoTypeList, movementType.getAssetName(),movementType.getIrcs(), movementType.getMmsi(), movementType.getExternalMarking(), movementType.getFlagState());
 
         jmsHelper.registerSubscriber("ServiceName = '" + serviceClassName + "'");
         String corrID = jmsHelper.sendExchangeMessage(request, null, "SEND_REPORT_TO_PLUGIN");
         TextMessage message = (TextMessage)jmsHelper.listenOnEventBus(5000l);
         SetReportRequest response = JAXBMarshaller.unmarshallTextMessage(message, SetReportRequest.class);
 
-         assertEquals(ReportTypeType.MOVEMENT, response.getReport().getType());
-         assertEquals(movementType.getWkt(), response.getReport().getMovement().getWkt());
-         assertEquals(recipient, response.getReport().getRecipient());
+        String expectedRecipient = "UNK"; // From UserRestMock
+        assertEquals(ReportTypeType.MOVEMENT, response.getReport().getType());
+        assertEquals(movementType.getWkt(), response.getReport().getMovement().getWkt());
+        assertEquals(expectedRecipient, response.getReport().getRecipient());
 
         Thread.sleep(1000);     //to allow the db to sync up
         assertEquals(sizeB4 + 1, unsentMessageDao.getAll().size());

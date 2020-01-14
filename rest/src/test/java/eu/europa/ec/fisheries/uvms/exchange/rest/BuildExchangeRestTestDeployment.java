@@ -48,6 +48,7 @@ public abstract class BuildExchangeRestTestDeployment {
         testWar.addAsResource("META-INF/beans.xml", "beans.xml");
 
         testWar.deleteClass(AssetModuleMock.class);
+        testWar.deleteClass(UserRestMock.class);
         testWar.deleteClass(UnionVMSMock.class);
 
         testWar.delete("/WEB-INF/web.xml");
@@ -71,6 +72,7 @@ public abstract class BuildExchangeRestTestDeployment {
 
 
         testWar.addClass(AssetModuleMock.class);
+        testWar.addClass(UserRestMock.class);
         testWar.addClass(UnionVMSMock.class);
 
         return testWar;

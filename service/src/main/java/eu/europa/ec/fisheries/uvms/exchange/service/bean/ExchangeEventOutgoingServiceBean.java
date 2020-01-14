@@ -35,6 +35,7 @@ import eu.europa.ec.fisheries.schema.exchange.common.v1.CommandType;
 import eu.europa.ec.fisheries.schema.exchange.common.v1.CommandTypeType;
 import eu.europa.ec.fisheries.schema.exchange.movement.v1.MovementRefType;
 import eu.europa.ec.fisheries.schema.exchange.movement.v1.MovementRefTypeType;
+import eu.europa.ec.fisheries.schema.exchange.movement.v1.RecipientInfoType;
 import eu.europa.ec.fisheries.schema.exchange.movement.v1.SendMovementToPluginType;
 import eu.europa.ec.fisheries.schema.exchange.movement.v1.SetReportMovementType;
 import eu.europa.ec.fisheries.schema.exchange.plugin.types.v1.PluginType;
@@ -57,6 +58,7 @@ import eu.europa.ec.fisheries.uvms.exchange.service.mapper.ExchangeLogMapper;
 import eu.europa.ec.fisheries.uvms.exchange.service.mapper.ExchangeToMdrRulesMapper;
 import eu.europa.ec.fisheries.uvms.longpolling.notifications.NotificationMessage;
 import eu.europa.ec.fisheries.wsdl.asset.types.Asset;
+import eu.europa.ec.fisheries.wsdl.user.types.Organisation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -94,6 +96,9 @@ public class ExchangeEventOutgoingServiceBean {
 
     @EJB
     private ExchangeEventOutgoingServiceBean exchangeEventOutgoingService;
+    
+    @Inject
+    private ExchangeUserService userService;
 
     /**
      * Sends a Sales response to the FLUX plugin
@@ -160,6 +165,19 @@ public class ExchangeEventOutgoingServiceBean {
                         service = serviceIteration;
                     }
                 }
+            }
+            
+            Organisation organisation = userService.getOrganisation(sendReport.getRecipient());
+            if (organisation != null) {
+                sendReport.setRecipient(organisation.getNation());
+                List<RecipientInfoType> recipientInfo = userService.getRecipientInfoType(organisation);
+                for (RecipientInfoType recipientInfoType : recipientInfo) {
+                    if (recipientInfoType.getKey().contains("FLUXVesselPositionMessage")) {
+                        sendReport.setRecipient(recipientInfoType.getValue());
+                    }
+                }
+                sendReport.getRecipientInfo().clear();
+                sendReport.getRecipientInfo().addAll(recipientInfo);
             }
             
             if (service != null && service.getStatus()) {       //StatusType.STARTED.equals(service.getStatus())

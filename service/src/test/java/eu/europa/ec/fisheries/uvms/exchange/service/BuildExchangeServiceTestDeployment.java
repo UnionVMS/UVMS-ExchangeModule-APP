@@ -8,7 +8,6 @@ import org.jboss.shrinkwrap.api.spec.WebArchive;
 import org.jboss.shrinkwrap.resolver.api.maven.Maven;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import java.io.File;
 
 
@@ -28,6 +27,7 @@ public abstract class BuildExchangeServiceTestDeployment {
         testWar.addPackages(true, "eu.europa.ec.fisheries.uvms.exchange.service");
 
         testWar.deleteClass(AssetModuleMock.class);
+        testWar.deleteClass(UserRestMock.class);
         testWar.deleteClass(UnionVMSMock.class);
 
         testWar.addAsWebInfResource("META-INF/ejb-jar.xml");
@@ -50,6 +50,7 @@ public abstract class BuildExchangeServiceTestDeployment {
 
 
         testWar.addClass(AssetModuleMock.class);
+        testWar.addClass(UserRestMock.class);
         testWar.addClass(UnionVMSMock.class);
 
         return testWar;

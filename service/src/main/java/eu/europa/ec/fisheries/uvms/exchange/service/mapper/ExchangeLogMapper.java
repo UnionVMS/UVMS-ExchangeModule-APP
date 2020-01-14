@@ -181,7 +181,6 @@ public class ExchangeLogMapper {
         log.setSenderReceiver(senderReceiver);
         log.setTransferIncoming(false);
 
-        //TODO send fwdDate, fwdRule and recipient from Rules
         log.setFwdDate(sendReport.getFwdDate().toInstant());
         log.setFwdRule(sendReport.getFwdRule());
         log.setRecipient(sendReport.getRecipient());
