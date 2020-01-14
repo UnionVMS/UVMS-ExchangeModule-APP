@@ -26,15 +26,6 @@
             <scope>provided</scope>
         </dependency>
 
-
-
-        <!-- Third party libs -->
-        <dependency>
-            <groupId>net.sf.ehcache.internal</groupId>
-            <artifactId>ehcache-core</artifactId>
-            
-        </dependency>		
-
         <!-- uvms libs -->
         <dependency>
             <groupId>eu.europa.ec.fisheries.uvms</groupId>
