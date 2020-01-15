@@ -17,8 +17,6 @@
             <groupId>${project.groupId}</groupId>
             <artifactId>exchange-commons</artifactId>
         </dependency>
-        
-        <!-- Third party libs -->
 
         <!-- Models-->
         <dependency>
@@ -26,9 +24,7 @@
             <artifactId>exchange-model</artifactId>
             <version>${project.version}</version>
         </dependency>
-        
     </dependencies>
-
 
     <build>
         <finalName>${project.name}-${project.parent.version}</finalName>
@@ -42,6 +38,5 @@
             </plugin>
         </plugins>
     </build>
-
 
 </project>
