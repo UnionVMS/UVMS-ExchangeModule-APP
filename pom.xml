@@ -38,9 +38,8 @@
         <!-- Uvms models -->
         <audit.model.version>4.1.4</audit.model.version>
         <movement.model.version>5.3.2-UVMS</movement.model.version>
-        <rules.model.version>3.3-MARE </rules.model.version>
-        <movement.rules.model.version>2.1.30</movement.rules.model.version>
-
+        <rules.model.version>3.3-MARE</rules.model.version>
+        <movement.rules.model.version>2.1.31</movement.rules.model.version>
     </properties>
 
     <dependencyManagement>
@@ -94,7 +93,6 @@
                 <version>${uvms.commons.version}</version>
             </dependency>
 
-
             <!-- Deps -->
             <dependency>
                 <groupId>fish.focus.uvms.maven</groupId>
@@ -116,7 +114,6 @@
             </dependency>
 
             <!-- Test Deps -->
-
             <dependency>
                 <groupId>fish.focus.uvms.maven</groupId>
                 <artifactId>uvms-pom-arquillian-deps</artifactId>
