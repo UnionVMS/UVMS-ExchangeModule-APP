@@ -26,6 +26,7 @@ import eu.europa.ec.fisheries.uvms.exchange.rest.service.ExchangeLogRestResource
 import eu.europa.ec.fisheries.uvms.exchange.rest.service.ExchangeRegistryResource;
 import eu.europa.ec.fisheries.uvms.exchange.rest.service.ExchangeSendingQueueResource;
 import eu.europa.ec.fisheries.uvms.rest.security.UnionVMSFeatureFilter;
+import eu.europa.ec.fisheries.uvms.commons.rest.filter.EncodingResponseFilter;
 
 @ApplicationPath(RestConstants.MODULE_REST)
 public class RestActivator extends Application {
@@ -41,6 +42,7 @@ public class RestActivator extends Application {
         set.add(ExchangeSendingQueueResource.class);
         set.add(ConfigResource.class);
         set.add(UnionVMSFeatureFilter.class);
+        set.add(EncodingResponseFilter.class);
         LOG.info(RestConstants.MODULE_NAME + " module starting up");
     }
 
