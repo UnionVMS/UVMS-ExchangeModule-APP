@@ -62,6 +62,11 @@
             <artifactId>uvms-pom-monitoring-deps</artifactId>
             <type>pom</type>
         </dependency>
+        <dependency>
+            <groupId>eu.europa.ec.fisheries.uvms.commons</groupId>
+            <artifactId>uvms-commons-rest</artifactId>
+            <version>${uvms.commons.version}</version>
+        </dependency>
     </dependencies>
         
     <build>
