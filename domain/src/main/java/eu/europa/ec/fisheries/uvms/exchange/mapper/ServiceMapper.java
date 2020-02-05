@@ -17,7 +17,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import eu.europa.ec.fisheries.uvms.exchange.model.util.DateUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,7 +47,7 @@ public class ServiceMapper {
         entity.setDescription(model.getDescription());
         entity.setType(model.getPluginType());
         entity.setSatelliteType(model.getSatelliteType());
-        entity.setUpdated(DateUtils.nowUTC());
+        entity.setUpdated(Instant.now());
         entity.setUpdatedBy(username);
         entity.setServiceCapabilityList(toCapabilitiesEntities(entity, capabilityList, username));
         entity.setServiceSettingList(toSettingsEntities(entity, settingList, username));
@@ -132,7 +131,7 @@ public class ServiceMapper {
         entity.setService(parent);
         entity.setCapability(capability.getType());
         entity.setUpdatedBy(username);
-        entity.setUpdatedTime(DateUtils.nowUTC());
+        entity.setUpdatedTime(Instant.now());
         entity.setValue("TRUE".equals(capability.getValue()));
         return entity;
     }
@@ -142,7 +141,7 @@ public class ServiceMapper {
         entity.setService(parent);
         entity.setCapability(capability.getCapability());
         entity.setUpdatedBy(username);
-        entity.setUpdatedTime(DateUtils.nowUTC());
+        entity.setUpdatedTime(Instant.now());
         entity.setValue(capability.getValue());
         return entity;
     }
@@ -166,7 +165,7 @@ public class ServiceMapper {
             } else {
                 if (!currentSetting.getValue().equalsIgnoreCase(setting.getValue())) {
                     currentSetting.setValue(setting.getValue());
-                    currentSetting.setUpdatedTime(DateUtils.nowUTC());
+                    currentSetting.setUpdatedTime(Instant.now());
                     currentSetting.setUser(username);
                 }
                 newSettings.add(currentSetting);
@@ -197,7 +196,7 @@ public class ServiceMapper {
         ServiceSetting entity = new ServiceSetting();
         entity.setService(parent);
         entity.setSetting(setting.getKey());
-        entity.setUpdatedTime(DateUtils.nowUTC());
+        entity.setUpdatedTime(Instant.now());
         entity.setUser(username);
         entity.setValue(setting.getValue());
         return entity;

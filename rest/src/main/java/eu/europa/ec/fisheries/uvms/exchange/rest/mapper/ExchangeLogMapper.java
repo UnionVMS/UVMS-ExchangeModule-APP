@@ -26,7 +26,7 @@ import eu.europa.ec.fisheries.schema.exchange.v1.SendMovementType;
 import eu.europa.ec.fisheries.schema.exchange.v1.SendPollType;
 import eu.europa.ec.fisheries.schema.exchange.v1.UnsentMessageType;
 import eu.europa.ec.fisheries.schema.exchange.v1.UnsentMessageTypeProperty;
-import eu.europa.ec.fisheries.uvms.exchange.model.util.DateUtils;
+import eu.europa.ec.fisheries.uvms.commons.date.DateUtils;
 import eu.europa.ec.fisheries.uvms.exchange.rest.dto.LogTypeLabel;
 import eu.europa.ec.fisheries.uvms.exchange.rest.dto.exchange.ExchangeLogData;
 import eu.europa.ec.fisheries.uvms.exchange.rest.dto.exchange.ExchangeLogDto;
@@ -67,7 +67,7 @@ public class ExchangeLogMapper {
                 dto.setType(LogTypeLabel.SENT_MOVEMENT.toString());
                 SendMovementType sendLog = (SendMovementType)log;
                 dateFwd = sendLog.getFwdDate().toInstant();
-                dto.setDateFwd(DateUtils.parseInstantToString(dateFwd));
+                dto.setDateFwd(DateUtils.dateToEpochMilliseconds(dateFwd));
                 dto.setRule(sendLog.getFwdRule());
                 dto.setRecipient(sendLog.getRecipient());
                 break;
@@ -77,7 +77,7 @@ public class ExchangeLogMapper {
                 dto.setType(LogTypeLabel.SENT_EMAIL.toString());
                 dto.setRecipient(sendEmail.getRecipient());
                 dto.setRule(sendEmail.getFwdRule());
-                dto.setDateFwd(DateUtils.parseInstantToString(dateFwd));
+                dto.setDateFwd(DateUtils.dateToEpochMilliseconds(dateFwd));
                 break;
             case SEND_POLL:
                 SendPollType sendPoll = (SendPollType)log;
@@ -108,7 +108,7 @@ public class ExchangeLogMapper {
     	}
 
         Instant dateReceived = log.getDateRecieved().toInstant();
-    	dto.setDateRecieved(DateUtils.parseInstantToString(dateReceived));
+    	dto.setDateRecieved(DateUtils.dateToEpochMilliseconds(dateReceived));
     	dto.setId(log.getGuid());
         dto.setDf(log.getDf());
 
@@ -164,7 +164,7 @@ public class ExchangeLogMapper {
 		for(UnsentMessageType message : messages) {
 			SendingLog log = new SendingLog();
             Instant dateRecieved = message.getDateReceived().toInstant();
-			log.setDateRecieved(DateUtils.parseInstantToString(dateRecieved));
+			log.setDateRecieved(DateUtils.dateToEpochMilliseconds(dateRecieved));
 			log.setMessageId(message.getMessageId());
 			log.setSenderRecipient(message.getSenderReceiver());
             log.setProperties(mapProperties(message.getProperties()));

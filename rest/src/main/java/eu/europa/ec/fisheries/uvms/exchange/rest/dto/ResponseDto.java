@@ -11,6 +11,7 @@ copy of the GNU General Public License along with the IFDM Suite. If not, see <h
  */
 package eu.europa.ec.fisheries.uvms.exchange.rest.dto;
 
+import javax.json.bind.annotation.JsonbTransient;
 import java.util.Objects;
 
 /**
@@ -19,7 +20,10 @@ import java.util.Objects;
 public class ResponseDto<T> {
 
     private T data;
-    private final RestResponseCode code;
+    private RestResponseCode code;
+
+    public ResponseDto() {
+    }
 
     public ResponseDto(T data, RestResponseCode code) {
         this.data = data;
@@ -36,6 +40,15 @@ public class ResponseDto<T> {
 
     public int getCode() {
         return code.getCode();
+    }
+
+    public void setData(T data) {
+        this.data = data;
+    }
+
+    @JsonbTransient
+    public void setCode(RestResponseCode code) {
+        this.code = code;
     }
 
     @Override

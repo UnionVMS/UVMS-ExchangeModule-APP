@@ -4,6 +4,7 @@ import eu.europa.ec.fisheries.schema.exchange.common.v1.AcknowledgeTypeType;
 import eu.europa.ec.fisheries.schema.exchange.plugin.types.v1.PluginType;
 import eu.europa.ec.fisheries.schema.exchange.registry.v1.RegisterServiceResponse;
 import eu.europa.ec.fisheries.schema.exchange.service.v1.*;
+import eu.europa.ec.fisheries.uvms.commons.date.JsonBConfigurator;
 import eu.europa.ec.fisheries.uvms.exchange.dao.bean.ServiceRegistryDaoBean;
 import eu.europa.ec.fisheries.uvms.exchange.entity.serviceregistry.Service;
 import eu.europa.ec.fisheries.uvms.exchange.model.mapper.ExchangeModuleRequestMapper;
@@ -19,8 +20,6 @@ import javax.inject.Inject;
 import javax.jms.ConnectionFactory;
 import javax.jms.TextMessage;
 import javax.json.bind.Jsonb;
-import javax.json.bind.JsonbBuilder;
-
 import java.util.List;
 import java.util.UUID;
 
@@ -42,7 +41,7 @@ public class RegistryBusEventListenerTest extends BuildExchangeServiceTestDeploy
     @Before
     public void initialize() throws Exception {
         jmsHelper = new JMSHelper(connectionFactory);
-        jsonb = JsonbBuilder.create();
+        jsonb = new JsonBConfigurator().getContext(null);
     }
 
     @Test

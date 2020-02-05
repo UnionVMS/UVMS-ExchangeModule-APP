@@ -51,4 +51,7 @@ public class ListQueryResponse {
         return logList;
     }
 
+    public void setLogList(List<ExchangeLogDto> logList) {
+        this.logList = logList;
+    }
 }

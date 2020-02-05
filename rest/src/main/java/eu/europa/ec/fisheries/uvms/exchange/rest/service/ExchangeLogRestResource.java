@@ -13,11 +13,11 @@ package eu.europa.ec.fisheries.uvms.exchange.rest.service;
 
 import eu.europa.ec.fisheries.schema.exchange.source.v1.GetLogListByQueryResponse;
 import eu.europa.ec.fisheries.schema.exchange.v1.*;
+import eu.europa.ec.fisheries.uvms.commons.date.DateUtils;
 import eu.europa.ec.fisheries.uvms.exchange.bean.ExchangeLogModelBean;
 import eu.europa.ec.fisheries.uvms.exchange.dao.bean.ExchangeLogDaoBean;
 import eu.europa.ec.fisheries.uvms.exchange.entity.exchangelog.ExchangeLog;
 import eu.europa.ec.fisheries.uvms.exchange.model.dto.ListResponseDto;
-import eu.europa.ec.fisheries.uvms.exchange.model.util.DateUtils;
 import eu.europa.ec.fisheries.uvms.exchange.rest.dto.PollQuery;
 import eu.europa.ec.fisheries.uvms.exchange.rest.dto.ResponseDto;
 import eu.europa.ec.fisheries.uvms.exchange.rest.dto.RestResponseCode;
@@ -96,8 +96,8 @@ public class ExchangeLogRestResource {
     public ResponseDto getPollStatus(PollQuery query) {
         try {
             LOG.info("Get ExchangeLog status for Poll in rest layer:{}", query);
-            Instant from = DateUtils.parseToUTCDateTime(query.getStatusFromDate());
-            Instant to = DateUtils.parseToUTCDateTime(query.getStatusToDate());
+            Instant from = DateUtils.stringToDate(query.getStatusFromDate());
+            Instant to = DateUtils.stringToDate(query.getStatusToDate());
             List<ExchangeLogStatusType> response = serviceLayer.getExchangeStatusHistoryList(query.getStatus(), TypeRefType.POLL, from, to);
             return new ResponseDto(response, RestResponseCode.OK);
         } catch (Exception e) {

@@ -22,14 +22,14 @@
 
         <scm.connection>scm:git:https://github.com/UnionVMS/UVMS-ExchangeModule-APP.git</scm.connection>
 
-        <docker.dev.version>3.40.18.w18</docker.dev.version>
+        <docker.dev.version>3.40.19.w18-JsonBOverJackson</docker.dev.version>
         <docker.liquibase.changeLogFile>LIQUIBASE/changelog/db-changelog-master.xml</docker.liquibase.changeLogFile>
         <docker.liquibase.db.user>exchange</docker.liquibase.db.user>
         <docker.liquibase.db.passwd>exchange</docker.liquibase.db.passwd>
 
         <!-- Uvms libs -->
         <longpolling.version>2.0.13</longpolling.version>
-        <uvms.commons.version>4.0.13</uvms.commons.version>
+        <uvms.commons.version>4.1.0</uvms.commons.version>
         <usm4uvms.version>4.1.0</usm4uvms.version>
         <uvms.config.version>4.1.0</uvms.config.version>
         <uvms-pom-deps.version>3.0</uvms-pom-deps.version>
@@ -90,6 +90,11 @@
             <dependency>
                 <groupId>eu.europa.ec.fisheries.uvms.commons</groupId>
                 <artifactId>uvms-commons-message</artifactId>
+                <version>${uvms.commons.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>eu.europa.ec.fisheries.uvms.commons</groupId>
+                <artifactId>uvms-commons-date</artifactId>
                 <version>${uvms.commons.version}</version>
             </dependency>
 

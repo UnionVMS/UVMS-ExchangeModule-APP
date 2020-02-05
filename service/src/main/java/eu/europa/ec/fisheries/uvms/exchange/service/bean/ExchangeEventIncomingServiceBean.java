@@ -11,30 +11,6 @@
  */
 package eu.europa.ec.fisheries.uvms.exchange.service.bean;
 
-import static eu.europa.ec.fisheries.uvms.commons.message.impl.JAXBUtils.unMarshallMessage;
-import java.util.List;
-import java.util.UUID;
-import javax.ejb.EJB;
-import javax.ejb.Stateless;
-import javax.enterprise.event.Event;
-import javax.inject.Inject;
-import javax.jms.JMSException;
-import javax.jms.TextMessage;
-import javax.json.bind.Jsonb;
-import javax.json.bind.JsonbBuilder;
-import javax.xml.bind.JAXBException;
-
-import eu.europa.ec.fisheries.uvms.exchange.bean.ExchangeLogModelBean;
-import eu.europa.ec.fisheries.uvms.exchange.bean.ServiceRegistryModelBean;
-import eu.europa.ec.fisheries.uvms.exchange.entity.exchangelog.ExchangeLog;
-import eu.europa.ec.fisheries.uvms.exchange.entity.serviceregistry.Service;
-import eu.europa.ec.fisheries.uvms.exchange.mapper.ServiceMapper;
-import eu.europa.ec.fisheries.uvms.exchange.service.message.event.PluginErrorEvent;
-import eu.europa.ec.fisheries.uvms.exchange.service.message.producer.bean.ExchangeAssetProducer;
-import eu.europa.ec.fisheries.uvms.exchange.service.message.producer.bean.ExchangeMovementProducer;
-import eu.europa.ec.fisheries.uvms.exchange.service.message.producer.bean.ExchangeRulesProducer;
-import eu.europa.ec.fisheries.uvms.exchange.service.message.producer.bean.ExchangeSalesProducer;
-import org.apache.commons.collections.CollectionUtils;
 import eu.europa.ec.fisheries.schema.exchange.common.v1.AcknowledgeType;
 import eu.europa.ec.fisheries.schema.exchange.module.v1.*;
 import eu.europa.ec.fisheries.schema.exchange.movement.v1.MovementBaseType;
@@ -48,20 +24,45 @@ import eu.europa.ec.fisheries.schema.exchange.service.v1.StatusType;
 import eu.europa.ec.fisheries.schema.exchange.v1.*;
 import eu.europa.ec.fisheries.schema.rules.module.v1.RulesModuleMethod;
 import eu.europa.ec.fisheries.schema.rules.module.v1.SetFLUXMDRSyncMessageRulesResponse;
+import eu.europa.ec.fisheries.uvms.commons.date.JsonBConfigurator;
 import eu.europa.ec.fisheries.uvms.commons.message.impl.JAXBUtils;
-import eu.europa.ec.fisheries.uvms.exchange.service.message.event.ErrorEvent;
-import eu.europa.ec.fisheries.uvms.exchange.service.message.event.carrier.ExchangeErrorEvent;
-import eu.europa.ec.fisheries.uvms.exchange.service.message.event.carrier.PluginErrorEventCarrier;
+import eu.europa.ec.fisheries.uvms.exchange.bean.ExchangeLogModelBean;
+import eu.europa.ec.fisheries.uvms.exchange.bean.ServiceRegistryModelBean;
+import eu.europa.ec.fisheries.uvms.exchange.entity.exchangelog.ExchangeLog;
+import eu.europa.ec.fisheries.uvms.exchange.entity.serviceregistry.Service;
+import eu.europa.ec.fisheries.uvms.exchange.mapper.ServiceMapper;
 import eu.europa.ec.fisheries.uvms.exchange.model.mapper.ExchangeModuleResponseMapper;
 import eu.europa.ec.fisheries.uvms.exchange.model.mapper.JAXBMarshaller;
 import eu.europa.ec.fisheries.uvms.exchange.service.event.ExchangePluginStatusEvent;
 import eu.europa.ec.fisheries.uvms.exchange.service.event.PollEvent;
 import eu.europa.ec.fisheries.uvms.exchange.service.mapper.MovementMapper;
+import eu.europa.ec.fisheries.uvms.exchange.service.message.event.ErrorEvent;
+import eu.europa.ec.fisheries.uvms.exchange.service.message.event.PluginErrorEvent;
+import eu.europa.ec.fisheries.uvms.exchange.service.message.event.carrier.ExchangeErrorEvent;
+import eu.europa.ec.fisheries.uvms.exchange.service.message.event.carrier.PluginErrorEventCarrier;
+import eu.europa.ec.fisheries.uvms.exchange.service.message.producer.bean.ExchangeAssetProducer;
+import eu.europa.ec.fisheries.uvms.exchange.service.message.producer.bean.ExchangeMovementProducer;
+import eu.europa.ec.fisheries.uvms.exchange.service.message.producer.bean.ExchangeRulesProducer;
+import eu.europa.ec.fisheries.uvms.exchange.service.message.producer.bean.ExchangeSalesProducer;
 import eu.europa.ec.fisheries.uvms.exchange.service.model.IncomingMovement;
 import eu.europa.ec.fisheries.uvms.longpolling.notifications.NotificationMessage;
 import eu.europa.ec.fisheries.uvms.rules.model.mapper.RulesModuleRequestMapper;
+import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import javax.ejb.EJB;
+import javax.ejb.Stateless;
+import javax.enterprise.event.Event;
+import javax.inject.Inject;
+import javax.jms.JMSException;
+import javax.jms.TextMessage;
+import javax.json.bind.Jsonb;
+import javax.xml.bind.JAXBException;
+import java.util.List;
+import java.util.UUID;
+
+import static eu.europa.ec.fisheries.uvms.commons.message.impl.JAXBUtils.unMarshallMessage;
 
 
 @Stateless
@@ -110,7 +111,7 @@ public class ExchangeEventIncomingServiceBean {
     @Inject
     private ExchangeSalesProducer salesProducer;
 
-    private Jsonb jsonb = JsonbBuilder.create();
+    private Jsonb jsonb =  new JsonBConfigurator().getContext(null);
 
     /**
      * Process FLUXFAReportMessage coming from Flux Activity plugin

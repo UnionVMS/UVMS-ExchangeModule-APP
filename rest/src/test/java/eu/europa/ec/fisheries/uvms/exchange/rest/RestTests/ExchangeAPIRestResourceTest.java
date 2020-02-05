@@ -93,7 +93,7 @@ public class ExchangeAPIRestResourceTest extends BuildExchangeRestTestDeployment
 
     @Test
     @OperateOnDeployment("exchangeservice")
-    public void insertServiceAndGetServiceListTest() throws Exception {
+    public void insertServiceAndGetServiceListTest() {
         String serviceClassName = "Service Class Name " + UUID.randomUUID().toString();
         GetServiceListRequest request = new GetServiceListRequest();
         request.getType().add(PluginType.OTHER);

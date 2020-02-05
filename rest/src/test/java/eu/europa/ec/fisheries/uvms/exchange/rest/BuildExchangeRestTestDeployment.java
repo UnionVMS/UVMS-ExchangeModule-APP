@@ -1,6 +1,7 @@
 package eu.europa.ec.fisheries.uvms.exchange.rest;
 
 
+import eu.europa.ec.fisheries.uvms.commons.date.JsonBConfigurator;
 import org.eu.ingwar.tools.arquillian.extension.suite.annotations.ArquillianSuiteDeployment;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.shrinkwrap.api.Archive;
@@ -80,10 +81,8 @@ public abstract class BuildExchangeRestTestDeployment {
 
     protected WebTarget getWebTarget() {
 
-        //ObjectMapper objectMapper = new ObjectMapper();
         Client client = ClientBuilder.newClient();
-        //client.register(new JacksonJaxbJsonProvider(objectMapper, JacksonJaxbJsonProvider.DEFAULT_ANNOTATIONS));
-        //return client.target("http://localhost:28080/test/rest");
+        client.register(JsonBConfigurator.class);
         return client.target("http://localhost:8080/exchangerest/rest");
     }
 

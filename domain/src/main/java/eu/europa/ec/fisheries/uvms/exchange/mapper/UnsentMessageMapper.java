@@ -16,7 +16,6 @@ import eu.europa.ec.fisheries.schema.exchange.v1.UnsentMessageTypeProperty;
 import eu.europa.ec.fisheries.schema.exchange.v1.UnsentMessageTypePropertyKey;
 import eu.europa.ec.fisheries.uvms.exchange.entity.unsent.UnsentMessage;
 import eu.europa.ec.fisheries.uvms.exchange.entity.unsent.UnsentMessageProperty;
-import eu.europa.ec.fisheries.uvms.exchange.model.util.DateUtils;
 
 import java.util.ArrayList;
 import java.util.Date;

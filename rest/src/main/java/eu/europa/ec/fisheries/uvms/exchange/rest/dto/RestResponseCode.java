@@ -11,6 +11,7 @@ copy of the GNU General Public License along with the IFDM Suite. If not, see <h
  */
 package eu.europa.ec.fisheries.uvms.exchange.rest.dto;
 
+
 public enum RestResponseCode {
 	OK(200),
 	
@@ -36,4 +37,18 @@ public enum RestResponseCode {
     public int getCode() {
     	return code;
     }
+
+    public RestResponseCode fromInt(int code){
+		for (RestResponseCode value : RestResponseCode.values()) {
+			if(value.code == code) {
+				return value;
+			}
+		}
+		return null;
+	}
+
+	public RestResponseCode fromString(String code){
+		return fromInt(Integer.parseInt(code));
+	}
+
 }

@@ -19,7 +19,7 @@ import eu.europa.ec.fisheries.schema.exchange.v1.SearchField;
 import eu.europa.ec.fisheries.schema.exchange.v1.SortField;
 import eu.europa.ec.fisheries.schema.exchange.v1.Sorting;
 import eu.europa.ec.fisheries.schema.exchange.v1.TypeRefType;
-import eu.europa.ec.fisheries.uvms.exchange.model.util.DateUtils;
+import eu.europa.ec.fisheries.uvms.commons.date.DateUtils;
 import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -213,7 +213,7 @@ public class SearchFieldMapper {
                     return valueType.cast(Boolean.FALSE);
                 }
             } else if (valueType.isAssignableFrom(Instant.class)) {
-                return valueType.cast(DateUtils.parseToUTCDateTime(entry.getValue()));
+                return valueType.cast(DateUtils.stringToDate(entry.getValue()));
             } else if (valueType.isAssignableFrom(Integer.class)) {
                 return valueType.cast(Integer.valueOf(entry.getValue()));
             }else if(valueType.isAssignableFrom(TypeRefType.class)){
