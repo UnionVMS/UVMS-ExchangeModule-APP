@@ -11,30 +11,6 @@
  */
 package eu.europa.ec.fisheries.uvms.exchange.service.bean;
 
-import static eu.europa.ec.fisheries.uvms.commons.message.impl.JAXBUtils.unMarshallMessage;
-import java.util.List;
-import java.util.UUID;
-import javax.ejb.EJB;
-import javax.ejb.Stateless;
-import javax.enterprise.event.Event;
-import javax.inject.Inject;
-import javax.jms.JMSException;
-import javax.jms.TextMessage;
-import javax.json.bind.Jsonb;
-import javax.json.bind.JsonbBuilder;
-import javax.xml.bind.JAXBException;
-
-import eu.europa.ec.fisheries.uvms.exchange.bean.ExchangeLogModelBean;
-import eu.europa.ec.fisheries.uvms.exchange.bean.ServiceRegistryModelBean;
-import eu.europa.ec.fisheries.uvms.exchange.entity.exchangelog.ExchangeLog;
-import eu.europa.ec.fisheries.uvms.exchange.entity.serviceregistry.Service;
-import eu.europa.ec.fisheries.uvms.exchange.mapper.ServiceMapper;
-import eu.europa.ec.fisheries.uvms.exchange.service.message.event.PluginErrorEvent;
-import eu.europa.ec.fisheries.uvms.exchange.service.message.producer.bean.ExchangeAssetProducer;
-import eu.europa.ec.fisheries.uvms.exchange.service.message.producer.bean.ExchangeMovementProducer;
-import eu.europa.ec.fisheries.uvms.exchange.service.message.producer.bean.ExchangeRulesProducer;
-import eu.europa.ec.fisheries.uvms.exchange.service.message.producer.bean.ExchangeSalesProducer;
-import org.apache.commons.collections.CollectionUtils;
 import eu.europa.ec.fisheries.schema.exchange.common.v1.AcknowledgeType;
 import eu.europa.ec.fisheries.schema.exchange.module.v1.*;
 import eu.europa.ec.fisheries.schema.exchange.movement.v1.MovementBaseType;
@@ -49,20 +25,44 @@ import eu.europa.ec.fisheries.schema.exchange.v1.*;
 import eu.europa.ec.fisheries.schema.rules.module.v1.RulesModuleMethod;
 import eu.europa.ec.fisheries.schema.rules.module.v1.SetFLUXMDRSyncMessageRulesResponse;
 import eu.europa.ec.fisheries.uvms.commons.message.impl.JAXBUtils;
-import eu.europa.ec.fisheries.uvms.exchange.service.message.event.ErrorEvent;
-import eu.europa.ec.fisheries.uvms.exchange.service.message.event.carrier.ExchangeErrorEvent;
-import eu.europa.ec.fisheries.uvms.exchange.service.message.event.carrier.PluginErrorEventCarrier;
+import eu.europa.ec.fisheries.uvms.exchange.bean.ExchangeLogModelBean;
+import eu.europa.ec.fisheries.uvms.exchange.bean.ServiceRegistryModelBean;
+import eu.europa.ec.fisheries.uvms.exchange.entity.exchangelog.ExchangeLog;
+import eu.europa.ec.fisheries.uvms.exchange.entity.serviceregistry.Service;
+import eu.europa.ec.fisheries.uvms.exchange.mapper.ServiceMapper;
 import eu.europa.ec.fisheries.uvms.exchange.model.mapper.ExchangeModuleResponseMapper;
 import eu.europa.ec.fisheries.uvms.exchange.model.mapper.JAXBMarshaller;
 import eu.europa.ec.fisheries.uvms.exchange.service.event.ExchangePluginStatusEvent;
 import eu.europa.ec.fisheries.uvms.exchange.service.event.PollEvent;
 import eu.europa.ec.fisheries.uvms.exchange.service.mapper.MovementMapper;
+import eu.europa.ec.fisheries.uvms.exchange.service.message.event.ErrorEvent;
+import eu.europa.ec.fisheries.uvms.exchange.service.message.event.PluginErrorEvent;
+import eu.europa.ec.fisheries.uvms.exchange.service.message.event.carrier.ExchangeErrorEvent;
+import eu.europa.ec.fisheries.uvms.exchange.service.message.event.carrier.PluginErrorEventCarrier;
+import eu.europa.ec.fisheries.uvms.exchange.service.message.producer.bean.ExchangeAssetProducer;
+import eu.europa.ec.fisheries.uvms.exchange.service.message.producer.bean.ExchangeMovementProducer;
+import eu.europa.ec.fisheries.uvms.exchange.service.message.producer.bean.ExchangeRulesProducer;
+import eu.europa.ec.fisheries.uvms.exchange.service.message.producer.bean.ExchangeSalesProducer;
 import eu.europa.ec.fisheries.uvms.exchange.service.model.IncomingMovement;
 import eu.europa.ec.fisheries.uvms.longpolling.notifications.NotificationMessage;
 import eu.europa.ec.fisheries.uvms.rules.model.mapper.RulesModuleRequestMapper;
+import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.ejb.EJB;
+import javax.ejb.Stateless;
+import javax.enterprise.event.Event;
+import javax.inject.Inject;
+import javax.jms.JMSException;
+import javax.jms.TextMessage;
+import javax.json.bind.Jsonb;
+import javax.json.bind.JsonbBuilder;
+import javax.xml.bind.JAXBException;
+import java.util.List;
+import java.util.UUID;
+
+import static eu.europa.ec.fisheries.uvms.commons.message.impl.JAXBUtils.unMarshallMessage;
 
 @Stateless
 public class ExchangeEventIncomingServiceBean {
@@ -114,6 +114,7 @@ public class ExchangeEventIncomingServiceBean {
 
     /**
      * Process FLUXFAReportMessage coming from Flux Activity plugin
+     *
      * @param message
      */
     public void processFLUXFAReportMessage(TextMessage message) {
@@ -169,16 +170,14 @@ public class ExchangeEventIncomingServiceBean {
         }
     }
 
-    /*
+    /**
      * Method for Observing the @MdrSyncMessageEvent, meaning a message from Activity MDR
      * module has arrived (synchronisation of the mdr).
-     *
-     */
-    /**
      * Process MDR sync response message sent to Flux MDR plugin
+     *
      * @param message
      */
-    public void sendResponseToRulesModule(TextMessage message) {           //and nothing to the exchange log?
+    public void sendResponseToRulesModule(TextMessage message) { // And nothing to the exchange log?
         try {
             SetFLUXMDRSyncMessageExchangeResponse exchangeResponse = JAXBMarshaller.unmarshallTextMessage(message, SetFLUXMDRSyncMessageExchangeResponse.class);
             LOG.debug("[INFO] Received @MdrSyncResponseMessageEvent. Going to send it to Rules now..");
@@ -187,10 +186,9 @@ public class ExchangeEventIncomingServiceBean {
             mdrResponse.setMethod(RulesModuleMethod.GET_FLUX_MDR_SYNC_RESPONSE);
             mdrResponse.setRequest(strRequest);
             String mdrStrReq = JAXBMarshaller.marshallJaxBObjectToString(mdrResponse);
-
             forwardToRules(mdrStrReq);
         } catch (Exception e) {
-            LOG.error("[ERROR] Something strange happend during message conversion {} {}", message, e);         //if something happens, just log it and move on?????
+            LOG.error("[ERROR] Something strange happend during message conversion {} {}", message, e); // If something happens, just log it and move on?
         }
     }
 
@@ -208,7 +206,7 @@ public class ExchangeEventIncomingServiceBean {
             exchangeAssetProducer.sendResponseMessageToSender(message, ExchangeModuleResponseMapper.mapServiceListResponse(serviceList));
         } catch (Exception e) {
             LOG.error("[ Error when getting plugin list from source {}] {}", message, e);
-            exchangeErrorEvent.fire(new ExchangeErrorEvent(message,"Excpetion when getting service list"));
+            exchangeErrorEvent.fire(new ExchangeErrorEvent(message, "Excpetion when getting service list"));
         }
     }
 
@@ -244,11 +242,10 @@ public class ExchangeEventIncomingServiceBean {
      */
     public void processMovement(TextMessage message) {
         try {
-            final TextMessage jmsMessage = message;
-            SetMovementReportRequest request = JAXBMarshaller.unmarshallTextMessage(jmsMessage, SetMovementReportRequest.class);
-            if(request.getUsername() == null){
+            SetMovementReportRequest request = JAXBMarshaller.unmarshallTextMessage(message, SetMovementReportRequest.class);
+            if (request.getUsername() == null) {
                 LOG.error("[ Error when receiving message in exchange, username must be set in the request: ]");
-                exchangeErrorEvent.fire(new ExchangeErrorEvent(message,"Username in the request must be set"));
+                exchangeErrorEvent.fire(new ExchangeErrorEvent(message, "Username in the request must be set"));
                 return;
             }
 
@@ -263,11 +260,10 @@ public class ExchangeEventIncomingServiceBean {
 
             String pluginName = setRepMovType.getPluginName();
             PluginType pluginType = setRepMovType.getPluginType();
-            if (validateMovementReport(setRepMovType, pluginName, jmsMessage)) {
+            if (validateMovementReport(setRepMovType, pluginName, message)) {
                 MovementBaseType baseMovement = setRepMovType.getMovement();
                 IncomingMovement incomingMovement = MovementMapper.mapMovementBaseTypeToRawMovementType(baseMovement);
                 incomingMovement.setPluginType(pluginType.value());
-//                incomingMovement.setPluginName(pluginName);
                 incomingMovement.setDateReceived(setRepMovType.getTimestamp().toInstant());
                 incomingMovement.setUpdatedBy(username);
                 if (!baseMovement.getSource().equals(MovementSourceType.AIS)) {
@@ -278,8 +274,12 @@ public class ExchangeEventIncomingServiceBean {
                 }
 
                 String json = jsonb.toJson(incomingMovement);
-                //combine all possible values into one big grouping string
-                String groupId = incomingMovement.getAssetCFR() + incomingMovement.getAssetIMO() + incomingMovement.getAssetIRCS() + incomingMovement.getAssetMMSI() + incomingMovement.getAssetID() + incomingMovement.getAssetGuid() + incomingMovement.getMobileTerminalDNID() + incomingMovement.getMobileTerminalConnectId() + incomingMovement.getMobileTerminalGuid() + incomingMovement.getMobileTerminalLES() + incomingMovement.getMobileTerminalMemberNumber() + incomingMovement.getMobileTerminalSerialNumber() + "AllOtherThings";
+                // Combine all possible values into one big grouping string
+                String groupId = incomingMovement.getAssetCFR() + incomingMovement.getAssetIMO() + incomingMovement.getAssetIRCS() +
+                        incomingMovement.getAssetMMSI() + incomingMovement.getAssetID() + incomingMovement.getAssetGuid() +
+                        incomingMovement.getMobileTerminalDNID() + incomingMovement.getMobileTerminalConnectId() +
+                        incomingMovement.getMobileTerminalGuid() + incomingMovement.getMobileTerminalLES() +
+                        incomingMovement.getMobileTerminalMemberNumber() + incomingMovement.getMobileTerminalSerialNumber() + "AllOtherThings";
                 movementProducer.sendMovementMessage(json, groupId);
                 LOG.debug("Finished forwarding received movement to movement module.");
             } else {
@@ -288,7 +288,7 @@ public class ExchangeEventIncomingServiceBean {
         } catch (Exception e) {
             LOG.error("Could not process SetMovementReportRequest", e);
             throw new RuntimeException("Could not process SetMovementReportRequest", e);
-        } 
+        }
     }
 
     /**
@@ -369,6 +369,7 @@ public class ExchangeEventIncomingServiceBean {
 
     /**
      * Logs and sends a received sales response through to Rules
+     *
      * @param event
      */
     public void receiveSalesResponse(TextMessage event) {
@@ -399,9 +400,10 @@ public class ExchangeEventIncomingServiceBean {
 
     /**
      * Checks for a reference in log table for a certain type of message
+     *
      * @param event
      */
-    public void logRefIdByTypeExists(TextMessage event) {      //this one has the wierd behavour that it both returns the correct answer AND puts the initial message in DLQ for causing an exception AT THE SAME TIME if the input is an empty list..........
+    public void logRefIdByTypeExists(TextMessage event) { // This one has the weird behaviour that it both returns the correct answer AND puts the initial message in DLQ for causing an exception AT THE SAME TIME if the input is an empty list.
         try {
             LogRefIdByTypeExistsRequest request = unMarshallMessage(event.getText(), LogRefIdByTypeExistsRequest.class);
             UUID refGuid = UUID.fromString(request.getRefGuid());
@@ -422,6 +424,7 @@ public class ExchangeEventIncomingServiceBean {
 
     /**
      * Checks for a guid in log table for a certain type of message
+     *
      * @param event
      */
     public void logIdByTypeExists(TextMessage event) {
@@ -585,7 +588,7 @@ public class ExchangeEventIncomingServiceBean {
             Service service = ((serviceClassName == null) ? null : serviceRegistryModel.getPlugin(serviceClassName));
             pluginErrorEvent.fire(new PluginErrorEventCarrier(messageEvent, service.getServiceResponse(), errorMessage));
         } catch (Exception e) {
-            LOG.error("Unable to send PluginError message due to: {}", e);
+            LOG.error("Unable to send PluginError message due to: {}", e.getMessage(), e);
         }
     }
 
@@ -629,7 +632,6 @@ public class ExchangeEventIncomingServiceBean {
 
         } else if (ack.getType() == eu.europa.ec.fisheries.schema.exchange.common.v1.AcknowledgeTypeType.NOK) {
             LOG.debug(method + " was NOK: " + ack.getMessage());
-
         }
 
         ExchangeLog updatedLog = exchangeLogService.updateStatus(ack.getLogId(), logStatus, serviceClassName);
@@ -682,7 +684,7 @@ public class ExchangeEventIncomingServiceBean {
 
     private TypeRefType extractFaType(ExchangeModuleMethod method) {
         TypeRefType faType = null;
-        switch (method){
+        switch (method) {
             case SET_FLUX_FA_REPORT_MESSAGE:
                 faType = TypeRefType.FA_REPORT;
                 break;
@@ -706,7 +708,6 @@ public class ExchangeEventIncomingServiceBean {
         return logId;
     }
 
-
     private eu.europa.ec.fisheries.schema.rules.exchange.v1.PluginType extractPluginType(ExchangeBaseRequest request) {
         eu.europa.ec.fisheries.schema.rules.exchange.v1.PluginType rulesPluginType;
         switch (request.getPluginType()) {
@@ -722,5 +723,4 @@ public class ExchangeEventIncomingServiceBean {
         }
         return rulesPluginType;
     }
-
 }

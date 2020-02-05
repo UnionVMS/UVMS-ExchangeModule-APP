@@ -14,7 +14,6 @@ package eu.europa.ec.fisheries.uvms.exchange.rest.dto.exchange;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
-import java.util.ArrayList;
 import java.util.List;
 
 @XmlAccessorType(XmlAccessType.FIELD)
@@ -40,5 +39,4 @@ public class PluginType {
     public void setSendingLogList(List<SendingLog> sendingLogList) {
         this.sendingLogList = sendingLogList;
     }
-
 }

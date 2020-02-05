@@ -11,8 +11,6 @@ copy of the GNU General Public License along with the IFDM Suite. If not, see <h
  */
 package eu.europa.ec.fisheries.uvms.exchange.rest.constants;
 
-/**
- **/
 public class RestConstants {
 
     public static final String MODULE_REST = "/rest";

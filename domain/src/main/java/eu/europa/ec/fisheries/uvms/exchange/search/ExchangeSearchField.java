@@ -16,9 +16,6 @@ import eu.europa.ec.fisheries.schema.exchange.v1.TypeRefType;
 
 import java.time.Instant;
 
-
-/**
- **/
 public enum ExchangeSearchField {
 
 	TRANSFER_INCOMING("transferIncoming", "transferIncoming", SearchTable.LOG, Boolean.class),
@@ -33,9 +30,9 @@ public enum ExchangeSearchField {
     private final String fieldName;
     private final String sqlReplacementToken;
     private final SearchTable searchTables;
-    private Class clazz;
+    private final Class<?> clazz;
 
-    private ExchangeSearchField(String fieldName, String sqlReplacementToken, SearchTable searchTables, Class clazz) {
+    ExchangeSearchField(String fieldName, String sqlReplacementToken, SearchTable searchTables, Class<?> clazz) {
         this.fieldName = fieldName;
         this.sqlReplacementToken = sqlReplacementToken;
         this.searchTables = searchTables;
@@ -54,7 +51,7 @@ public enum ExchangeSearchField {
         return sqlReplacementToken;
     }
 
-    public Class getClazz() {
+    public Class<?> getClazz() {
         return clazz;
     }
 

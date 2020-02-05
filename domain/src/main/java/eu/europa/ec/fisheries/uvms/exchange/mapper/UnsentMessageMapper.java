@@ -16,7 +16,6 @@ import eu.europa.ec.fisheries.schema.exchange.v1.UnsentMessageTypeProperty;
 import eu.europa.ec.fisheries.schema.exchange.v1.UnsentMessageTypePropertyKey;
 import eu.europa.ec.fisheries.uvms.exchange.entity.unsent.UnsentMessage;
 import eu.europa.ec.fisheries.uvms.exchange.entity.unsent.UnsentMessageProperty;
-import eu.europa.ec.fisheries.uvms.exchange.model.util.DateUtils;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -24,17 +23,24 @@ import java.util.List;
 
 public class UnsentMessageMapper {
 
-
-    public static UnsentMessageType toModel(UnsentMessage entity) {
-		UnsentMessageType model = new UnsentMessageType();
-		model.setDateReceived(Date.from(entity.getDateReceived()));
-		model.setSenderReceiver(entity.getSenderReceiver());
-		model.setMessageId(entity.getGuid().toString());
-		model.setRecipient(entity.getRecipient());
-		model.setMessage(entity.getMessage());
-        model.getProperties().addAll(mapToUnsentMessagePropertyModel(entity));
-		return model;
+    public static List<UnsentMessageType> toModel(List<UnsentMessage> list) {
+		List<UnsentMessageType> modelList = new ArrayList<>();
+		for(UnsentMessage entity : list) {
+			modelList.add(toModel(entity));
+		}
+		return modelList;
 	}
+
+    private static UnsentMessageType toModel(UnsentMessage entity) {
+        UnsentMessageType model = new UnsentMessageType();
+        model.setDateReceived(Date.from(entity.getDateReceived()));
+        model.setSenderReceiver(entity.getSenderReceiver());
+        model.setMessageId(entity.getGuid().toString());
+        model.setRecipient(entity.getRecipient());
+        model.setMessage(entity.getMessage());
+        model.getProperties().addAll(mapToUnsentMessagePropertyModel(entity));
+        return model;
+    }
 
     private static List<UnsentMessageTypeProperty> mapToUnsentMessagePropertyModel(UnsentMessage entity) {
         List<UnsentMessageProperty> properties = entity.getProperties();
@@ -47,12 +53,4 @@ public class UnsentMessageMapper {
         }
         return unsentMessageTypeProperties;
     }
-
-    public static List<UnsentMessageType> toModel(List<UnsentMessage> list) {
-		List<UnsentMessageType> modelList = new ArrayList<>();
-		for(UnsentMessage entity : list) {
-			modelList.add(toModel(entity));
-		}
-		return modelList;
-	}
 }

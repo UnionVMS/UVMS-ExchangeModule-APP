@@ -16,7 +16,7 @@ import eu.europa.ec.fisheries.uvms.exchange.rest.dto.RestResponseCode;
 
 public class ErrorHandler {
 
-	public static ResponseDto getFault(Exception e) {
+	public static ResponseDto<?> getFault(Exception e) {
 		return new ResponseDto<>(e.getMessage(), RestResponseCode.UNDEFINED_ERROR);
 	}
 }

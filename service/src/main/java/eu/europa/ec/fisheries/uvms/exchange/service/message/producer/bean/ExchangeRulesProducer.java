@@ -39,21 +39,15 @@ public class ExchangeRulesProducer extends AbstractProducer {
     private Queue replyToQueue;
 
     public String sendRulesMessage(String text, String messageSelector) {
-        try {
-            Map<String, String> messageProperties = new HashMap<>();
-            if (messageSelector != null) {
-                messageProperties.put("messageSelector", messageSelector);
-            }
-            return sendModuleMessageWithProps(text, replyToQueue, messageProperties);
-
-        } catch (JMSException e) {
-            LOG.error("[ Error when sending rules message. ] {}", e.getMessage());
-            throw new RuntimeException("Error when sending rules message.");
-        }
+        return sendMessage(text, messageSelector);
     }
 
     @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
     public String sendSynchronousRulesMessage(String text, String messageSelector) {
+        return sendMessage(text, messageSelector);
+    }
+
+    private String sendMessage(String text, String messageSelector) {
         try {
             Map<String, String> messageProperties = new HashMap<>();
             if (messageSelector != null) {

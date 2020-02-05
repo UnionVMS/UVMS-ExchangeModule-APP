@@ -25,19 +25,20 @@ import eu.europa.ec.fisheries.uvms.exchange.dao.bean.ServiceRegistryDaoBean;
 import eu.europa.ec.fisheries.uvms.exchange.entity.serviceregistry.Service;
 import eu.europa.ec.fisheries.uvms.exchange.entity.serviceregistry.ServiceSetting;
 import eu.europa.ec.fisheries.uvms.exchange.mapper.ServiceMapper;
-import eu.europa.ec.fisheries.uvms.exchange.service.message.event.ErrorEvent;
-import eu.europa.ec.fisheries.uvms.exchange.service.message.event.PluginErrorEvent;
-import eu.europa.ec.fisheries.uvms.exchange.service.message.event.carrier.ExchangeErrorEvent;
-import eu.europa.ec.fisheries.uvms.exchange.service.message.event.carrier.PluginErrorEventCarrier;
 import eu.europa.ec.fisheries.uvms.exchange.model.mapper.ExchangeModuleResponseMapper;
 import eu.europa.ec.fisheries.uvms.exchange.model.mapper.ExchangePluginRequestMapper;
 import eu.europa.ec.fisheries.uvms.exchange.model.mapper.ExchangePluginResponseMapper;
 import eu.europa.ec.fisheries.uvms.exchange.model.mapper.JAXBMarshaller;
 import eu.europa.ec.fisheries.uvms.exchange.service.mapper.SettingTypeMapper;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import eu.europa.ec.fisheries.uvms.exchange.service.message.event.ErrorEvent;
+import eu.europa.ec.fisheries.uvms.exchange.service.message.event.PluginErrorEvent;
+import eu.europa.ec.fisheries.uvms.exchange.service.message.event.carrier.ExchangeErrorEvent;
+import eu.europa.ec.fisheries.uvms.exchange.service.message.event.carrier.PluginErrorEventCarrier;
+import eu.europa.ec.fisheries.uvms.exchange.service.message.producer.bean.ExchangeEventBusTopicProducer;
+import eu.europa.ec.fisheries.uvms.exchange.service.message.producer.bean.ExchangeEventProducer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
 import javax.enterprise.event.Event;
@@ -45,11 +46,10 @@ import javax.enterprise.event.Observes;
 import javax.enterprise.event.TransactionPhase;
 import javax.inject.Inject;
 import javax.jms.TextMessage;
-
-import eu.europa.ec.fisheries.uvms.exchange.service.message.producer.bean.ExchangeEventBusTopicProducer;
-import eu.europa.ec.fisheries.uvms.exchange.service.message.producer.bean.ExchangeEventProducer;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @Stateless
 public class PluginServiceBean {
@@ -98,7 +98,7 @@ public class PluginServiceBean {
                 if (!services.isEmpty()) {
                     for(Service service : services){
                         if(service.getActive()){
-                            if(service.getServiceClassName().equals(serviceClassName)){                                     //If we are trying to register something that is already registred
+                            if(service.getServiceClassName().equals(serviceClassName)){ // If we are trying to register something that is already registered.
                                 return true;
                             }
                             //TODO log to audit log
@@ -119,7 +119,7 @@ public class PluginServiceBean {
 
     private void registerService(RegisterServiceRequest register, Service newService, String messageId) {
         try {
-            overrideSettingsFromConfig(newService);       //aka if config has settings for xyz parameter, use configs version instead
+            overrideSettingsFromConfig(newService); // Aka if config has settings for xyz parameter, use configs version instead
             Service service = serviceRegistryModel.registerService(newService, register.getService().getName());
             serviceRegisteredEvent.fire(service);
             //TODO log to exchange log
@@ -172,7 +172,7 @@ public class PluginServiceBean {
             boolean sendMessage;
             if (register.getService() != null) {
                 sendMessage = checkPluginType(register.getService().getPluginType(), register.getService().getServiceResponseMessageName(), register.getService().getServiceClassName(), messageId);
-                if (sendMessage) {      //aka if we should actually register. If it is an email or naf and we already have one of those active (that is not the same as the one we are trying to register) then no
+                if (sendMessage) { // Aka if we should actually register. If it is an email or naf and we already have one of those active (that is not the same as the one we are trying to register) then no
                     registerService(register, newService,  messageId);
                 }
             }
@@ -276,8 +276,7 @@ public class PluginServiceBean {
 
 	public void updatePluginSetting(TextMessage settingEvent) {
 		try {
-			TextMessage jmsMessage = settingEvent;
-			UpdatePluginSettingRequest request = JAXBMarshaller.unmarshallTextMessage(jmsMessage, UpdatePluginSettingRequest.class);
+            UpdatePluginSettingRequest request = JAXBMarshaller.unmarshallTextMessage(settingEvent, UpdatePluginSettingRequest.class);
             if(request.getUsername() == null){
                 LOG.error("[ Error when receiving message in exchange, username must be set in the request: ]");
                 exchangeErrorEvent.fire(new ExchangeErrorEvent(settingEvent, "Username in the request must be set"));
@@ -293,8 +292,6 @@ public class PluginServiceBean {
             ExchangeErrorEvent event = new ExchangeErrorEvent(settingEvent, "Couldn't update plugin setting");
 			exchangeErrorEvent.fire(event);
 		}
-		
-		
 	}
     
     public boolean start(String serviceClassName) {

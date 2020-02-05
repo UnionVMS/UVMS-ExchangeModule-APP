@@ -13,7 +13,8 @@ import eu.europa.ec.fisheries.uvms.exchange.model.mapper.JAXBMarshaller;
 public class ExchangeToMdrRulesMapper {
 
     public static String mapExchangeToMdrPluginRequest(TextMessage requestMessage) {
-        SetFLUXMDRSyncMessageExchangeRequest exchangeRequest = JAXBMarshaller.unmarshallTextMessage(requestMessage, SetFLUXMDRSyncMessageExchangeRequest.class);
+        SetFLUXMDRSyncMessageExchangeRequest exchangeRequest = JAXBMarshaller
+                .unmarshallTextMessage(requestMessage, SetFLUXMDRSyncMessageExchangeRequest.class);
         SetMdrPluginRequest pluginRequest = new SetMdrPluginRequest();
         pluginRequest.setMethod(ExchangePluginMethod.SET_MDR_REQUEST);
         pluginRequest.setRequest(exchangeRequest.getRequest());
