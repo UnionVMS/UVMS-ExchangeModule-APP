@@ -13,7 +13,7 @@ public class TransactionalTests extends BuildExchangeServiceTestDeployment {
     @Inject
     private UserTransaction userTransaction;
 
-    @PersistenceContext
+    @PersistenceContext(unitName = "exchange")
     protected EntityManager em;
 
     @Before

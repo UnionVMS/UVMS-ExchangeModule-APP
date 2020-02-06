@@ -12,9 +12,9 @@ copy of the GNU General Public License along with the IFDM Suite. If not, see <h
 package eu.europa.ec.fisheries.uvms.exchange.rest.service;
 
 import eu.europa.ec.fisheries.schema.exchange.v1.UnsentMessageType;
-import eu.europa.ec.fisheries.uvms.exchange.dao.bean.UnsentMessageDaoBean;
-import eu.europa.ec.fisheries.uvms.exchange.entity.unsent.UnsentMessage;
-import eu.europa.ec.fisheries.uvms.exchange.mapper.UnsentMessageMapper;
+import eu.europa.ec.fisheries.uvms.exchange.service.dao.UnsentMessageDaoBean;
+import eu.europa.ec.fisheries.uvms.exchange.service.entity.unsent.UnsentMessage;
+import eu.europa.ec.fisheries.uvms.exchange.service.mapper.UnsentMessageMapper;
 import eu.europa.ec.fisheries.uvms.exchange.rest.dto.ResponseDto;
 import eu.europa.ec.fisheries.uvms.exchange.rest.dto.RestResponseCode;
 import eu.europa.ec.fisheries.uvms.exchange.rest.dto.exchange.SendingGroupLog;
