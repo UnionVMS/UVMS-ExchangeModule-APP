@@ -46,7 +46,7 @@ public class ExchangeRegistryRestResource {
     private ServiceRegistryModelBean serviceRegistryModel;
 
     @EJB
-    PluginServiceBean pluginService;
+    private PluginServiceBean pluginService;
 
     @GET
     @Path("/list")

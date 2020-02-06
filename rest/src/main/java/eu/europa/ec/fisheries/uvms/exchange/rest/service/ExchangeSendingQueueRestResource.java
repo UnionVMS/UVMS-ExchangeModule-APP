@@ -44,7 +44,7 @@ public class ExchangeSendingQueueRestResource {
     final static Logger LOG = LoggerFactory.getLogger(ExchangeSendingQueueRestResource.class);
 
     @EJB
-    ExchangeLogServiceBean serviceLayer;
+    private ExchangeLogServiceBean serviceLayer;
 
     @Inject
     private UnsentMessageDaoBean unsentMessageDao;

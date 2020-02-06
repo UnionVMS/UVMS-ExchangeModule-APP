@@ -20,11 +20,6 @@
                 <extensions>true</extensions>
                 <configuration>
                     <modules>
-<!--                    	<ejbModule>-->
-<!--                            <groupId>${project.groupId}</groupId>-->
-<!--                            <artifactId>exchange-dbaccess-domain</artifactId>-->
-<!--                            <bundleFileName>exchange-dbaccess-domain.jar</bundleFileName> &lt;!&ndash; TODO:Why?&ndash;&gt;-->
-<!--                        </ejbModule>                    	-->
                         <ejbModule>
                             <groupId>${project.groupId}</groupId>  
                             <artifactId>exchange-service</artifactId>

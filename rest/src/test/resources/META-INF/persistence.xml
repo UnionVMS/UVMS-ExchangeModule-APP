@@ -6,7 +6,6 @@
         <class>eu.europa.ec.fisheries.uvms.config.service.entity.Parameter</class>
         <properties>
             <property name="hibernate.dialect" value="org.hibernate.dialect.PostgreSQLDialect"/>
-            <property name="wildfly.jpa.default-unit" value="true"/>
         </properties>
     </persistence-unit>
 </persistence>
