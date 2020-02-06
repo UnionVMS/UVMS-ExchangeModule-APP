@@ -43,12 +43,11 @@ public class JMSHelper {
         subscriber = session.createConsumer(eventBus, selector, true);
     }
 
-    public String sendMessageOnEventQueue(String text) throws Exception{
+    public String sendMessageOnEventQueue(String text) throws Exception {
         Connection connection = connectionFactory.createConnection();
         try {
             Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
             Topic eventTopic = session.createTopic(MessageConstants.EVENT_BUS_TOPIC_NAME);
-
 
             TextMessage message = session.createTextMessage();
             message.setStringProperty(ExchangeModelConstants.SERVICE_NAME, ExchangeModelConstants.EXCHANGE_REGISTER_SERVICE);
@@ -98,7 +97,6 @@ public class JMSHelper {
     }
 
     public Message listenOnEventBus(Long timeoutInMillis) throws Exception {
-
         try {
             return subscriber.receive(timeoutInMillis);
         } finally {
@@ -112,9 +110,7 @@ public class JMSHelper {
             connection.start();
             Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
             Queue responseQueue = session.createQueue(queue);
-
-            return session.createConsumer(responseQueue)
-                    .receive(TIMEOUT);
+            return session.createConsumer(responseQueue).receive(TIMEOUT);
         } finally {
             connection.close();
         }
@@ -131,7 +127,7 @@ public class JMSHelper {
             QueueBrowser browser = session.createBrowser(responseQueue);
 
             Enumeration enumeration = browser.getEnumeration();
-            while(enumeration.hasMoreElements()) {
+            while (enumeration.hasMoreElements()) {
                 enumeration.nextElement();
                 messages++;
             }
@@ -149,8 +145,7 @@ public class JMSHelper {
             Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
             Queue responseQueue = session.createQueue(queue);
             consumer = session.createConsumer(responseQueue);
-
-            while (consumer.receive(10L) != null);
+            while (consumer.receive(10L) != null) ;
         } finally {
             connection.close();
         }

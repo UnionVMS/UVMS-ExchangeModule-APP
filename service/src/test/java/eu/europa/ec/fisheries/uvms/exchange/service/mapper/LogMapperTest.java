@@ -4,10 +4,9 @@ import eu.europa.ec.fisheries.schema.exchange.v1.*;
 import eu.europa.ec.fisheries.uvms.exchange.service.entity.exchangelog.ExchangeLog;
 import org.junit.Test;
 
-
-import java.time.temporal.ChronoUnit;
-import java.util.Date;  //leave be
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
+import java.util.Date;
 import java.util.UUID;
 
 import static org.junit.Assert.*;
@@ -15,9 +14,10 @@ import static org.junit.Assert.*;
 public class LogMapperTest {
 
     @Test
-    public void toNewEntityWhenLogTypeIsReceiveMovement() throws Exception {
+    public void toNewEntityWhenLogTypeIsReceiveMovement() {
         //data set
-        String typeRefGuid = UUID.randomUUID().toString();;
+        String typeRefGuid = UUID.randomUUID().toString();
+        ;
         TypeRefType typeRefType = TypeRefType.MOVEMENT;
         Instant dateReceived = Instant.now().truncatedTo(ChronoUnit.MILLIS);
         String senderOrReceiver = "BEL";
@@ -64,9 +64,10 @@ public class LogMapperTest {
     }
 
     @Test
-    public void toNewEntityWhenLogTypeIsSendMovement() throws Exception {
+    public void toNewEntityWhenLogTypeIsSendMovement() {
         //data set
-        String typeRefGuid = UUID.randomUUID().toString();;
+        String typeRefGuid = UUID.randomUUID().toString();
+        ;
         TypeRefType typeRefType = TypeRefType.MOVEMENT;
         Instant dateReceived = Instant.now().truncatedTo(ChronoUnit.MILLIS);
         String senderOrReceiver = "BEL";
@@ -119,9 +120,10 @@ public class LogMapperTest {
     }
 
     @Test
-    public void toNewEntityWhenLogTypeIsSendPoll() throws Exception {
+    public void toNewEntityWhenLogTypeIsSendPoll() {
         //data set
-        String typeRefGuid = UUID.randomUUID().toString();;
+        String typeRefGuid = UUID.randomUUID().toString();
+        ;
         TypeRefType typeRefType = TypeRefType.POLL;
         Instant dateReceived = Instant.now().truncatedTo(ChronoUnit.MILLIS);
         String senderOrReceiver = "BEL";
@@ -171,9 +173,10 @@ public class LogMapperTest {
     }
 
     @Test
-    public void toNewEntityWhenLogTypeIsSendEmail() throws Exception {
+    public void toNewEntityWhenLogTypeIsSendEmail() {
         //data set
-        String typeRefGuid = UUID.randomUUID().toString();;
+        String typeRefGuid = UUID.randomUUID().toString();
+        ;
         TypeRefType typeRefType = TypeRefType.UNKNOWN;
         Instant dateReceived = Instant.now().truncatedTo(ChronoUnit.MILLIS);
         String senderOrReceiver = "BEL";
@@ -226,9 +229,10 @@ public class LogMapperTest {
     }
 
     @Test
-    public void toNewEntityWhenLogTypeIsReceiveSalesReportAndTypeRefAndStatusAreFilledIn() throws Exception {
+    public void toNewEntityWhenLogTypeIsReceiveSalesReportAndTypeRefAndStatusAreFilledIn() {
         //data set
-        String typeRefGuid = UUID.randomUUID().toString();;
+        String typeRefGuid = UUID.randomUUID().toString();
+        ;
         TypeRefType typeRefType = TypeRefType.SALES_REPORT;
         Instant dateReceived = Instant.now().truncatedTo(ChronoUnit.MILLIS);
         String senderOrReceiver = "BEL";
@@ -278,7 +282,7 @@ public class LogMapperTest {
     }
 
     @Test
-    public void toNewEntityWhenLogTypeIsReceiveSalesReportAndTypeRefIsNotFilledIn() throws Exception {
+    public void toNewEntityWhenLogTypeIsReceiveSalesReportAndTypeRefIsNotFilledIn() {
         //data set
         Instant dateReceived = Instant.now().truncatedTo(ChronoUnit.MILLIS);
         String senderOrReceiver = "BEL";
@@ -319,9 +323,10 @@ public class LogMapperTest {
     }
 
     @Test
-    public void toNewEntityWhenLogTypeIsReceiveSalesReportAndStatusIsNotFilledIn() throws Exception {
+    public void toNewEntityWhenLogTypeIsReceiveSalesReportAndStatusIsNotFilledIn() {
         //data set
-        String typeRefGuid = UUID.randomUUID().toString();;
+        String typeRefGuid = UUID.randomUUID().toString();
+        ;
         TypeRefType typeRefType = TypeRefType.SALES_REPORT;
         Instant dateReceived = Instant.now().truncatedTo(ChronoUnit.MILLIS);
         String senderOrReceiver = "BEL";
@@ -368,9 +373,8 @@ public class LogMapperTest {
         assertEquals(source, result.getSource());
     }
 
-
     @Test
-    public void toNewEntityWhenLogTypeIsReceiveSalesReportAndUsernameIsNull() throws Exception {
+    public void toNewEntityWhenLogTypeIsReceiveSalesReportAndUsernameIsNull() {
         //data set
         Instant dateReceived = Instant.now().truncatedTo(ChronoUnit.MILLIS);
         String senderOrReceiver = "BEL";
@@ -409,9 +413,10 @@ public class LogMapperTest {
     }
 
     @Test
-    public void toNewEntityWhenLogTypeIsReceiveSalesResponse() throws Exception {
+    public void toNewEntityWhenLogTypeIsReceiveSalesResponse() {
         //data set
-        String typeRefGuid = UUID.randomUUID().toString();;
+        String typeRefGuid = UUID.randomUUID().toString();
+        ;
         TypeRefType typeRefType = TypeRefType.SALES_RESPONSE;
         Instant dateReceived = Instant.now().truncatedTo(ChronoUnit.MILLIS);
         String senderOrReceiver = "BEL";
@@ -461,9 +466,10 @@ public class LogMapperTest {
     }
 
     @Test
-    public void toNewEntityWhenLogTypeIsReceiveSalesQuery() throws Exception {
+    public void toNewEntityWhenLogTypeIsReceiveSalesQuery() {
         //data set
-        String typeRefGuid = UUID.randomUUID().toString();;
+        String typeRefGuid = UUID.randomUUID().toString();
+        ;
         TypeRefType typeRefType = TypeRefType.SALES_QUERY;
         Instant dateReceived = Instant.now().truncatedTo(ChronoUnit.MILLIS);
         String senderOrReceiver = "BEL";
@@ -513,9 +519,10 @@ public class LogMapperTest {
     }
 
     @Test
-    public void toNewEntityWhenLogTypeIsSendSalesReport() throws Exception {
+    public void toNewEntityWhenLogTypeIsSendSalesReport() {
         //data set
-        String typeRefGuid = UUID.randomUUID().toString();;
+        String typeRefGuid = UUID.randomUUID().toString();
+        ;
         TypeRefType typeRefType = TypeRefType.SALES_REPORT;
         Instant dateReceived = Instant.now().truncatedTo(ChronoUnit.MILLIS);
         String senderOrReceiver = "BEL";
@@ -565,9 +572,10 @@ public class LogMapperTest {
     }
 
     @Test
-    public void toNewEntityWhenLogTypeIsSendSalesResponse() throws Exception {
+    public void toNewEntityWhenLogTypeIsSendSalesResponse() {
         //data set
-        String typeRefGuid = UUID.randomUUID().toString();;
+        String typeRefGuid = UUID.randomUUID().toString();
+        ;
         TypeRefType typeRefType = TypeRefType.SALES_RESPONSE;
         Instant dateReceived = Instant.now().truncatedTo(ChronoUnit.MILLIS);
         String senderOrReceiver = "BEL";
@@ -783,7 +791,6 @@ public class LogMapperTest {
         Instant dateReceived = Instant.now().truncatedTo(ChronoUnit.MILLIS);
         UUID guid = UUID.randomUUID();
         String senderReceiver = "Chris Martin";
-        boolean incoming = true;
         ExchangeLogStatusTypeType status = ExchangeLogStatusTypeType.PROBABLY_TRANSMITTED;
         String destination = "destination";
 
@@ -791,7 +798,7 @@ public class LogMapperTest {
         entity.setDateReceived(dateReceived);
         entity.setId(guid);
         entity.setSenderReceiver(senderReceiver);
-        entity.setTransferIncoming(incoming);
+        entity.setTransferIncoming(true);
         entity.setStatus(status);
         entity.setType(LogType.RECEIVE_SALES_REPORT);
         entity.setDestination(destination);
@@ -802,7 +809,7 @@ public class LogMapperTest {
         assertEquals(dateReceived, model.getDateRecieved().toInstant());
         assertEquals(guid.toString(), model.getGuid());
         assertEquals(senderReceiver, model.getSenderReceiver());
-        assertEquals(incoming, model.isIncoming());
+        assertTrue(model.isIncoming());
         assertEquals(status, model.getStatus());
         assertEquals(destination, model.getDestination());
     }
@@ -895,7 +902,7 @@ public class LogMapperTest {
     }
 
     @Test
-    public void toNewEntityWhenLogTypeIsRcvFluxFAReportMsg() throws Exception {
+    public void toNewEntityWhenLogTypeIsRcvFluxFAReportMsg() {
         //data set
         String typeRefGuid = UUID.randomUUID().toString();
         TypeRefType typeRefType = TypeRefType.FA_REPORT;
@@ -947,9 +954,10 @@ public class LogMapperTest {
     }
 
     @Test
-    public void toNewEntityWhenLogTypeIsReceiveFAQueryMsg() throws Exception {
+    public void toNewEntityWhenLogTypeIsReceiveFAQueryMsg() {
         //data set
-        String typeRefGuid = UUID.randomUUID().toString();;
+        String typeRefGuid = UUID.randomUUID().toString();
+        ;
         TypeRefType typeRefType = TypeRefType.FA_QUERY;
         Instant dateReceived = Instant.now().truncatedTo(ChronoUnit.MILLIS);
         String senderOrReceiver = "BEL";
@@ -999,7 +1007,7 @@ public class LogMapperTest {
     }
 
     @Test
-    public void toNewEntityWhenLogTypeIsSendFAQueryMsg() throws Exception {
+    public void toNewEntityWhenLogTypeIsSendFAQueryMsg() {
         //data set
         String typeRefGuid = UUID.randomUUID().toString();
         TypeRefType typeRefType = TypeRefType.FA_QUERY;
@@ -1051,7 +1059,7 @@ public class LogMapperTest {
     }
 
     @Test
-    public void toNewEntityWhenLogTypeIsSendFluxFAReportMsg() throws Exception {
+    public void toNewEntityWhenLogTypeIsSendFluxFAReportMsg() {
         //data set
         String typeRefGuid = UUID.randomUUID().toString();
         TypeRefType typeRefType = TypeRefType.FA_REPORT;
@@ -1103,9 +1111,10 @@ public class LogMapperTest {
     }
 
     @Test
-    public void toNewEntityWhenLogTypeIsSendFluxResponseMsg() throws Exception {
+    public void toNewEntityWhenLogTypeIsSendFluxResponseMsg() {
         //data set
-        String typeRefGuid = UUID.randomUUID().toString();;
+        String typeRefGuid = UUID.randomUUID().toString();
+        ;
         TypeRefType typeRefType = TypeRefType.FA_RESPONSE;
         Instant dateReceived = Instant.now().truncatedTo(ChronoUnit.MILLIS);
         String senderOrReceiver = "BEL";

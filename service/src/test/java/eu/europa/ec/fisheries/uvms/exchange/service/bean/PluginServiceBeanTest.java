@@ -3,6 +3,7 @@ package eu.europa.ec.fisheries.uvms.exchange.service.bean;
 import static org.junit.Assert.assertThat;
 import java.time.Instant;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import javax.annotation.Resource;
 import javax.inject.Inject;
@@ -34,21 +35,18 @@ public class PluginServiceBeanTest extends BuildExchangeServiceTestDeployment {
 
     @Resource(mappedName = "java:/ConnectionFactory")
     private ConnectionFactory connectionFactory;
-
-    @Inject
-    PluginServiceBean pluginService;
     
     @Inject
-    UVMSConfigService uvmsConfigService;
+    private UVMSConfigService uvmsConfigService;
 
     @Inject
-    ServiceRegistryDaoBean serviceRegistryDao;
+    private ServiceRegistryDaoBean serviceRegistryDao;
     
     @Inject
-    ParameterService parameterService;
+    private ParameterService parameterService;
     
     @Before
-    public void initialize() throws Exception {
+    public void initialize() {
         jmsHelper = new JMSHelper(connectionFactory);
     }
 
@@ -66,7 +64,7 @@ public class PluginServiceBeanTest extends BuildExchangeServiceTestDeployment {
         setting.setValue(value);
         setting.setUpdatedTime(Instant.now());
         setting.setUser("Test");
-        Service service = createAndPersistBasicService(serviceName, serviceClassName, PluginType.OTHER, Arrays.asList(setting));
+        Service service = createAndPersistBasicService(serviceName, serviceClassName, PluginType.OTHER, Collections.singletonList(setting));
         
         // Simulate sync with config
         parameterService.setStringValue(settingKey, value, "");
@@ -81,7 +79,7 @@ public class PluginServiceBeanTest extends BuildExchangeServiceTestDeployment {
         
         uvmsConfigService.updateSetting(settingType, SettingEventType.SET);
         
-        TextMessage message = (TextMessage) jmsHelper.listenOnEventBus(5000l);
+        TextMessage message = (TextMessage) jmsHelper.listenOnEventBus(5000L);
         SetConfigRequest configRequest = JAXBMarshaller.unmarshallTextMessage(message, SetConfigRequest.class);
         
         assertThat(configRequest.getConfigurations().getSetting().size(), CoreMatchers.is(1));
@@ -91,7 +89,7 @@ public class PluginServiceBeanTest extends BuildExchangeServiceTestDeployment {
         serviceRegistryDao.deleteEntity(service.getId());
     }
     
-    private Service createAndPersistBasicService(String name, String serviceClassName, PluginType pluginType, List<ServiceSetting> settings) throws Exception{
+    private Service createAndPersistBasicService(String name, String serviceClassName, PluginType pluginType, List<ServiceSetting> settings) {
         Service service = serviceRegistryDao.getServiceByServiceClassName(serviceClassName);
         if(service != null){
             serviceRegistryDao.deleteEntity(service.getId());

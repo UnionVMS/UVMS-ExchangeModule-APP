@@ -8,8 +8,8 @@ import org.jboss.shrinkwrap.api.spec.WebArchive;
 import org.jboss.shrinkwrap.resolver.api.maven.Maven;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import java.io.File;
 
+import java.io.File;
 
 @ArquillianSuiteDeployment
 public abstract class BuildExchangeServiceTestDeployment {
@@ -47,7 +47,6 @@ public abstract class BuildExchangeServiceTestDeployment {
                         "eu.europa.ec.fisheries.uvms.commons:uvms-commons-message")
                 .withTransitivity().asFile();
         testWar.addAsLibraries(files);
-
 
         testWar.addClass(AssetModuleMock.class);
         testWar.addClass(UserRestMock.class);

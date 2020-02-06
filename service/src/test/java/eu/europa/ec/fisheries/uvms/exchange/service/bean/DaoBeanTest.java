@@ -34,7 +34,7 @@ import static org.mockito.Mockito.*;
 public class DaoBeanTest {
 
     @Mock
-    EntityManager em;
+    private EntityManager em;
 
     @InjectMocks
     private ServiceRegistryDaoBean dao;
@@ -84,7 +84,13 @@ public class DaoBeanTest {
 
     @Test
     public void testDeleteService() {
-        // em.remove(arg0);
+        Service carrier = new Service();
+        dao.createEntity(carrier);
+        verify(em).persist(carrier);
+
+        dao.deleteEntity(carrier.getId());
+        em.remove(carrier);
+        verify(em).remove(carrier);
     }
 
     @Test
@@ -101,5 +107,4 @@ public class DaoBeanTest {
         verify(query).getResultList();
         assertSame(dummyResult, result);
     }
-
 }

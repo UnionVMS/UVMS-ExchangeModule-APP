@@ -1,35 +1,34 @@
 package eu.europa.ec.fisheries.uvms.exchange.service.mapper;
 
-import static org.junit.Assert.assertEquals;
-
+import eu.europa.ec.fisheries.schema.exchange.plugin.types.v1.PluginType;
 import org.junit.Test;
 
-import eu.europa.ec.fisheries.schema.exchange.plugin.types.v1.PluginType;
+import static org.junit.Assert.assertEquals;
 
 public class PluginTypeMapperTest {
 
     @Test
-    public void mapWhenEmail() throws Exception {
+    public void mapWhenEmail() {
         assertMapping(PluginType.EMAIL, eu.europa.ec.fisheries.schema.movementrules.exchange.v1.PluginType.EMAIL);
     }
 
     @Test
-    public void mapWhenFLUX() throws Exception {
+    public void mapWhenFLUX() {
         assertMapping(PluginType.FLUX, eu.europa.ec.fisheries.schema.movementrules.exchange.v1.PluginType.FLUX);
     }
 
     @Test
-    public void mapWhenSatelliteReceiver() throws Exception {
+    public void mapWhenSatelliteReceiver() {
         assertMapping(PluginType.SATELLITE_RECEIVER, eu.europa.ec.fisheries.schema.movementrules.exchange.v1.PluginType.SATELLITE_RECEIVER);
     }
 
     @Test
-    public void mapWhenNAF() throws Exception {
+    public void mapWhenNAF() {
         assertMapping(PluginType.NAF, eu.europa.ec.fisheries.schema.movementrules.exchange.v1.PluginType.NAF);
     }
 
     @Test
-    public void mapWhenOther() throws Exception {
+    public void mapWhenOther() {
         assertMapping(PluginType.OTHER, eu.europa.ec.fisheries.schema.movementrules.exchange.v1.PluginType.OTHER);
     }
 

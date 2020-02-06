@@ -65,7 +65,6 @@ public class ExchangeLogModelTest {
 
     @Test
     public void testDataEnrichment() {
-
         Mockito.when(logDao.getExchangeLogListSearchCount(Mockito.anyString(), Mockito.anyList()))
                 .thenReturn(100L);
         Mockito.when(logDao.getExchangeLogListPaginated(Mockito.any(Integer.class), Mockito.any(Integer.class), Mockito.anyString(), Mockito.anyList()))

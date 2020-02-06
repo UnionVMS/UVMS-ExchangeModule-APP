@@ -20,10 +20,7 @@ import eu.europa.ec.fisheries.uvms.exchange.service.entity.serviceregistry.Servi
 import eu.europa.ec.fisheries.uvms.exchange.service.entity.serviceregistry.ServiceSetting;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
 import org.mockito.MockitoAnnotations;
-import org.mockito.junit.MockitoJUnitRunner;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,20 +28,12 @@ import java.util.UUID;
 
 import static org.junit.Assert.*;
 
-@RunWith(MockitoJUnitRunner.class)
 public class MapperTest {
-
-    @InjectMocks
-    private ServiceMapper mapper;
 
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
     }
-
-    // private void mockDaoToEntity() throws ExchangeDaoException {
-    // when(enumDao.getMyEntityEnum(any(MyEntityEnumSource.class))).thenReturn(MyEntityEnum.VALUE_1);
-    // }
 
     @Test
     public void testEntityToModel() {
@@ -55,7 +44,7 @@ public class MapperTest {
         List<ServiceSetting> settingList = new ArrayList<>();
         entity.setServiceSettingList(settingList);
         // mockDaoToEntity();
-        ServiceType result = mapper.toServiceModel(entity);
+        ServiceType result = ServiceMapper.toServiceModel(entity);
 
         assertSame(entity.getName(), result.getName());
         assertSame(entity.getServiceClassName(), result.getServiceClassName());
@@ -63,13 +52,13 @@ public class MapperTest {
 
     @Test
     public void testModelToEntity() {
-        Integer id = 1;
+        int id = 1;
         ServiceType model = MockData.getModel(id);
         CapabilityListType capabilityListType = MockData.getCapabilityList();
         SettingListType settingListType = MockData.getSettingList();
         // mockDaoToEntity();
 
-        Service result = mapper.toServiceEntity(model, capabilityListType, settingListType, "TEST");
+        Service result = ServiceMapper.toServiceEntity(model, capabilityListType, settingListType, "TEST");
 
         assertSame(model.getName(), result.getName());
         assertSame(model.getServiceClassName(), result.getServiceClassName());
@@ -84,7 +73,7 @@ public class MapperTest {
         SettingListType settingListType = MockData.getSettingList();
         // mockDaoToEntity();
 
-        Service result = mapper.toServiceEntity(entity, service, capabilityListType, settingListType, "TEST");
+        Service result = ServiceMapper.toServiceEntity(entity, service, capabilityListType, settingListType, "TEST");
 
         assertSame(entity.getName(), result.getName());
         assertSame(entity.getServiceClassName(), result.getServiceClassName());
@@ -98,7 +87,7 @@ public class MapperTest {
         List<ServiceSetting> settingList = new ArrayList<>();
         entity.setServiceSettingList(settingList);
         // mockDaoToEntity();
-        ServiceType result = mapper.toServiceModel(entity);
+        ServiceType result = ServiceMapper.toServiceModel(entity);
 
         assertSame(entity.getName(), result.getName());
         assertSame(entity.getServiceClassName(), result.getServiceClassName());
@@ -117,7 +106,7 @@ public class MapperTest {
         updateSetting.setSetting(MockData.SETTING_KEY);
         updateSetting.setValue(newValue);
         updateSettings.add(updateSetting);
-        List<ServiceSetting> list = mapper.mapSettingsList(entity, updateSettings, "TEST");
+        List<ServiceSetting> list = ServiceMapper.mapSettingsList(entity, updateSettings, "TEST");
 
         assertFalse(list.isEmpty());
         for (ServiceSetting setting : list) {
@@ -129,10 +118,8 @@ public class MapperTest {
         newSetting.setSetting("NEW.KEY");
         newSetting.setValue("NEW.VALUE");
         newSettings.add(newSetting);
-        list = mapper.mapSettingsList(entity, newSettings, "TEST");
+        list = ServiceMapper.mapSettingsList(entity, newSettings, "TEST");
 
-        assertTrue(list.size() == 1);
-
+        assertEquals(1, list.size());
     }
-
 }
