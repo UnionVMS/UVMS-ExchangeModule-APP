@@ -5,9 +5,9 @@ import eu.europa.ec.fisheries.schema.exchange.plugin.v1.ExchangePluginMethod;
 import eu.europa.ec.fisheries.schema.exchange.plugin.v1.StartRequest;
 import eu.europa.ec.fisheries.schema.exchange.plugin.v1.StopRequest;
 import eu.europa.ec.fisheries.schema.exchange.service.v1.CapabilityTypeType;
-import eu.europa.ec.fisheries.uvms.exchange.dao.bean.ServiceRegistryDaoBean;
-import eu.europa.ec.fisheries.uvms.exchange.entity.serviceregistry.Service;
-import eu.europa.ec.fisheries.uvms.exchange.entity.serviceregistry.ServiceCapability;
+import eu.europa.ec.fisheries.uvms.exchange.service.dao.ServiceRegistryDaoBean;
+import eu.europa.ec.fisheries.uvms.exchange.service.entity.serviceregistry.Service;
+import eu.europa.ec.fisheries.uvms.exchange.service.entity.serviceregistry.ServiceCapability;
 import eu.europa.ec.fisheries.uvms.exchange.model.mapper.JAXBMarshaller;
 import eu.europa.ec.fisheries.uvms.exchange.rest.BuildExchangeRestTestDeployment;
 import eu.europa.ec.fisheries.uvms.exchange.rest.JMSHelper;
@@ -62,8 +62,15 @@ public class ExchangeRegistryRestResourceTest extends BuildExchangeRestTestDeplo
 
     @Test
     @OperateOnDeployment("exchangeservice")
-    public void getServiceByCapabilityTest() throws Exception {
-        Service service = RestHelper.createBasicService("Name: " + UUID.randomUUID(), "ClassName: " + UUID.randomUUID(), PluginType.OTHER);
+    public void getServiceByCapabilityTest() {
+        List<Plugin> before = getWebTarget()
+                .path("plugin")
+                .path("capability/SEND_REPORT")
+                .request(MediaType.APPLICATION_JSON)
+                .header(HttpHeaders.AUTHORIZATION, getToken())
+                .get(new GenericType<>() {});
+
+        Service service = RestHelper.createBasicService("Test Service Name " + UUID.randomUUID(), "Service Class Name " + UUID.randomUUID(), PluginType.OTHER);
         ServiceCapability capability = new ServiceCapability();
         capability.setService(service);
         capability.setUpdatedBy("Exchange Tests");
@@ -73,15 +80,15 @@ public class ExchangeRegistryRestResourceTest extends BuildExchangeRestTestDeplo
         service.getServiceCapabilityList().add(capability);
         service = serviceRegistryDao.createEntity(service);
 
-        List<Plugin> plugins = getWebTarget()
+        List<Plugin> after = getWebTarget()
                 .path("plugin")
                 .path("capability/SEND_REPORT")
                 .request(MediaType.APPLICATION_JSON)
                 .header(HttpHeaders.AUTHORIZATION, getToken())
-                .get(new GenericType<List<Plugin>>() {});
+                .get(new GenericType<>() {});
 
-        assertEquals(1, plugins.size());
-        Plugin plugin = plugins.get(0);
+        assertEquals(before.size() + 1, after.size());
+        Plugin plugin = after.get(after.size()-1);
         assertEquals(service.getName(), plugin.getName());
     }
 
@@ -91,7 +98,7 @@ public class ExchangeRegistryRestResourceTest extends BuildExchangeRestTestDeplo
         JMSHelper jmsHelper = new JMSHelper(connectionFactory);
         String serviceClassName = "Service Class Name " + UUID.randomUUID().toString();
 
-        Service s = RestHelper.createBasicService("Test Service Name:" + UUID.randomUUID().toString(), serviceClassName, PluginType.OTHER);
+        Service s = RestHelper.createBasicService("Test Service Name " + UUID.randomUUID().toString(), serviceClassName, PluginType.OTHER);
         s = serviceRegistryDao.createEntity(s);
 
         jmsHelper.registerSubscriber("ServiceName = '" + serviceClassName + "'");
@@ -116,7 +123,7 @@ public class ExchangeRegistryRestResourceTest extends BuildExchangeRestTestDeplo
         JMSHelper jmsHelper = new JMSHelper(connectionFactory);
         String serviceClassName = "Service Class Name " + UUID.randomUUID().toString();
 
-        Service s = RestHelper.createBasicService("Test Service Name:" + UUID.randomUUID().toString(), serviceClassName, PluginType.OTHER);
+        Service s = RestHelper.createBasicService("Test Service Name " + UUID.randomUUID().toString(), serviceClassName, PluginType.OTHER);
         s = serviceRegistryDao.createEntity(s);
 
         jmsHelper.registerSubscriber("ServiceName = '" + serviceClassName + "'");

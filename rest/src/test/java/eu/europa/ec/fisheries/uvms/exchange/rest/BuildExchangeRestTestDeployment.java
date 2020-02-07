@@ -1,6 +1,7 @@
 package eu.europa.ec.fisheries.uvms.exchange.rest;
 
 
+import eu.europa.ec.fisheries.uvms.exchange.service.dao.ExchangeLogDaoBean;
 import org.eu.ingwar.tools.arquillian.extension.suite.annotations.ArquillianSuiteDeployment;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.shrinkwrap.api.Archive;
@@ -50,6 +51,7 @@ public abstract class BuildExchangeRestTestDeployment {
         testWar.deleteClass(AssetModuleMock.class);
         testWar.deleteClass(UserRestMock.class);
         testWar.deleteClass(UnionVMSMock.class);
+        testWar.deleteClass(ExchangeLogDaoBean.class);
 
         testWar.delete("/WEB-INF/web.xml");
         testWar.addAsWebInfResource("mock-web.xml", "web.xml");

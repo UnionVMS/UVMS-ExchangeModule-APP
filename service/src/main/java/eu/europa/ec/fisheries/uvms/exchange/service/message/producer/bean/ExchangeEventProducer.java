@@ -32,20 +32,19 @@ public class ExchangeEventProducer extends AbstractProducer {
 
     public String sendExchangeEventMessage(String text, String function){
         try {
-
             Map<String, String> properties = new HashMap<>();
             properties.put(MessageConstants.JMS_FUNCTION_PROPERTY, function);
             return sendModuleMessageWithProps(text, replyToQueue, properties);
-
         } catch (JMSException e) {
-            LOG.error("[ Error when sending Asset info message. ] {}", e);
+            LOG.error("[ Error when sending Asset info message. ]", e);
             throw new RuntimeException("Error when sending asset info message.", e);
         }
     }
 
     public void sendModuleErrorResponseMessage(@Observes @ErrorEvent ExchangeErrorEvent message) {
         try {
-            LOG.debug("Sending error message back from Exchange module to recipient om JMS Queue with correlationID: {} ", message.getJmsMessage().getJMSMessageID());
+            LOG.debug("Sending error message back from Exchange module to recipient om JMS Queue with correlationID: {}",
+                    message.getJmsMessage().getJMSMessageID());
             String data = JAXBMarshaller.marshallJaxBObjectToString(message.getErrorFault());
             this.sendResponseMessageToSender(message.getJmsMessage(), data);
         } catch (Exception e) {

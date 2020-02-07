@@ -13,11 +13,7 @@ package eu.europa.ec.fisheries.uvms.exchange.rest.dto;
 
 import java.util.Objects;
 
-/**
- * @param <T>
- */
 public class ResponseDto<T> {
-
     private T data;
     private final RestResponseCode code;
 
@@ -68,5 +64,4 @@ public class ResponseDto<T> {
     public String toString() {
         return "ResponseDto{" + "data=" + data + ", code=" + code + '}';
     }
-
 }

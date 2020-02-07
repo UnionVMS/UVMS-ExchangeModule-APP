@@ -11,19 +11,19 @@ copy of the GNU General Public License along with the IFDM Suite. If not, see <h
  */
 package eu.europa.ec.fisheries.uvms.exchange.rest;
 
-import java.util.HashSet;
-import java.util.Set;
-
-import javax.ws.rs.ApplicationPath;
-import javax.ws.rs.core.Application;
-
-import eu.europa.ec.fisheries.uvms.exchange.rest.service.*;
-import eu.europa.ec.fisheries.uvms.exchange.rest.unsecured.ExchangeAPIRestResource;
+import eu.europa.ec.fisheries.uvms.exchange.rest.constants.RestConstants;
+import eu.europa.ec.fisheries.uvms.exchange.rest.service.ConfigRestResource;
+import eu.europa.ec.fisheries.uvms.exchange.rest.service.ExchangeLogRestResource;
+import eu.europa.ec.fisheries.uvms.exchange.rest.service.ExchangeRegistryRestResource;
+import eu.europa.ec.fisheries.uvms.exchange.rest.service.ExchangeSendingQueueRestResource;
+import eu.europa.ec.fisheries.uvms.rest.security.UnionVMSFeatureFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import eu.europa.ec.fisheries.uvms.exchange.rest.constants.RestConstants;
-import eu.europa.ec.fisheries.uvms.rest.security.UnionVMSFeatureFilter;
+import javax.ws.rs.ApplicationPath;
+import javax.ws.rs.core.Application;
+import java.util.HashSet;
+import java.util.Set;
 
 @ApplicationPath(RestConstants.MODULE_REST)
 public class RestActivator extends Application {
@@ -51,5 +51,4 @@ public class RestActivator extends Application {
     public Set<Object> getSingletons() {
         return singletons;
     }
-
 }

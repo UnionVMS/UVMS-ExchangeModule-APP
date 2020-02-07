@@ -21,6 +21,7 @@ import javax.jms.Message;
 import javax.jms.MessageListener;
 import javax.jms.TextMessage;
 import java.util.Arrays;
+import java.util.Collections;
 
 @MessageDriven(mappedName = "jms/queue/UVMSConfigEvent", activationConfig = {
         @ActivationConfigProperty(propertyName = "messagingType", propertyValue = "javax.jms.MessageListener"), 
@@ -29,7 +30,7 @@ import java.util.Arrays;
 public class ConfigServiceMock implements MessageListener {
     
     @Inject
-    ExchangeEventProducer messageProducer;
+    private ExchangeEventProducer messageProducer;
 
     @Override
     public void onMessage(Message message) {
@@ -38,9 +39,10 @@ public class ConfigServiceMock implements MessageListener {
             mockSetting.setKey("maxDistance");
             mockSetting.setValue("500");
             mockSetting.setDescription("Set in ConfigServiceMock.java");
-            String response = ModuleResponseMapper.toSettingsListResponse(Arrays.asList(mockSetting));
+            String response = ModuleResponseMapper.toSettingsListResponse(Collections.singletonList(mockSetting));
             messageProducer.sendResponseMessageToSender((TextMessage) message, response);
         } catch (Exception e) {
+            // Not implemented
         }
     }
 }

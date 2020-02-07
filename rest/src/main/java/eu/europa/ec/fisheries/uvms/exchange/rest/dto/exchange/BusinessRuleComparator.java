@@ -14,7 +14,6 @@ import java.util.Comparator;
 
 import eu.europa.ec.fisheries.schema.exchange.v1.LogValidationResult;
 
-
 public class BusinessRuleComparator implements Comparator<LogValidationResult> {
 
     @Override public int compare(LogValidationResult obj1, LogValidationResult obj2) {
