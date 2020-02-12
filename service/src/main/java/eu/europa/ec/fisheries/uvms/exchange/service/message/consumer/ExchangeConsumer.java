@@ -16,7 +16,5 @@ import javax.jms.JMSException;
 
 @Local
 public interface ExchangeConsumer { //leave be for now ;(
-
-    public <T> T getMessage(String correlationId, Class<T> type) throws JMSException;
-
+    <T> T getMessage(String correlationId, Class<T> type) throws JMSException;
 }

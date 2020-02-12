@@ -43,7 +43,7 @@ public class RequestFilter implements Filter {
 
     @Override
     public void init(FilterConfig filterConfig) {
-        LOG.info("Requstfilter starting up!");
+        LOG.info("RequestFilter starting up!");
     }
 
     @Override
@@ -73,7 +73,7 @@ public class RequestFilter implements Filter {
 
     @Override
     public void destroy() {
-        LOG.info("Requstfilter shuting down!");
+        LOG.info("RequestFilter shutting down!");
     }
 
 }

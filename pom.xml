@@ -33,11 +33,11 @@
         <usm4uvms.version>4.1.0</usm4uvms.version>
         <uvms.config.version>4.1.0</uvms.config.version>
         <uvms-pom-deps.version>3.0</uvms-pom-deps.version>
-        <asset.version>6.4.2-SNAPSHOT</asset.version>
+        <asset.version>6.5.1</asset.version>
 
         <!-- Uvms models -->
         <audit.model.version>4.2.0</audit.model.version>
-        <movement.model.version>5.3.4-UVMS</movement.model.version>
+        <movement.model.version>5.4.0-UVMS</movement.model.version>
         <rules.model.version>3.3-MARE</rules.model.version>
         <movement.rules.model.version>2.2.0</movement.rules.model.version>
     </properties>
@@ -220,7 +220,6 @@
         <module>LIQUIBASE</module>
         <module>model</module>
         <module>commons</module>
-        <module>domain</module>
         <module>rest</module>
         <module>service</module>
         <module>module</module>

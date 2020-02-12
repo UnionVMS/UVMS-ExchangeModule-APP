@@ -2,6 +2,9 @@ package eu.europa.ec.fisheries.uvms.exchange.rest;
 
 
 import eu.europa.ec.fisheries.uvms.commons.date.JsonBConfigurator;
+import eu.europa.ec.fisheries.uvms.exchange.service.dao.ExchangeLogDaoBean;
+import eu.europa.ec.fisheries.uvms.rest.security.UnionVMSFeature;
+import eu.europa.ec.mare.usm.jwt.JwtTokenHandler;
 import org.eu.ingwar.tools.arquillian.extension.suite.annotations.ArquillianSuiteDeployment;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.shrinkwrap.api.Archive;
@@ -10,8 +13,7 @@ import org.jboss.shrinkwrap.api.spec.WebArchive;
 import org.jboss.shrinkwrap.resolver.api.maven.Maven;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import eu.europa.ec.fisheries.uvms.rest.security.UnionVMSFeature;
-import eu.europa.ec.mare.usm.jwt.JwtTokenHandler;
+
 import javax.ejb.EJB;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
@@ -51,6 +53,7 @@ public abstract class BuildExchangeRestTestDeployment {
         testWar.deleteClass(AssetModuleMock.class);
         testWar.deleteClass(UserRestMock.class);
         testWar.deleteClass(UnionVMSMock.class);
+        testWar.deleteClass(ExchangeLogDaoBean.class);
 
         testWar.delete("/WEB-INF/web.xml");
         testWar.addAsWebInfResource("mock-web.xml", "web.xml");

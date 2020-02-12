@@ -11,16 +11,18 @@ copy of the GNU General Public License along with the IFDM Suite. If not, see <h
  */
 package eu.europa.ec.fisheries.uvms.exchange.service.mapper;
 
-import java.util.List;
 import eu.europa.ec.fisheries.schema.exchange.movement.asset.v1.AssetIdList;
 import eu.europa.ec.fisheries.schema.exchange.movement.mobileterminal.v1.IdList;
 import eu.europa.ec.fisheries.schema.exchange.movement.v1.MovementBaseType;
 import eu.europa.ec.fisheries.uvms.exchange.service.model.IncomingMovement;
 
+import java.util.List;
+
 public class MovementMapper {
 
-    private MovementMapper() {}
-    
+    private MovementMapper() {
+    }
+
     public static IncomingMovement mapMovementBaseTypeToRawMovementType(MovementBaseType movementBaseType) {
         IncomingMovement incomingMovement = new IncomingMovement();
         if (movementBaseType.getAssetId() != null) {
@@ -34,7 +36,8 @@ public class MovementMapper {
             incomingMovement.setMobileTerminalGuid(movementBaseType.getMobileTerminalId().getGuid());
             mapMobileTerminalIdList(movementBaseType.getMobileTerminalId().getMobileTerminalIdList(), incomingMovement);
         }
-        incomingMovement.setSourceSatelliteId(movementBaseType.getSourceSatelliteId() == null ? null : movementBaseType.getSourceSatelliteId().shortValue());
+        incomingMovement.setSourceSatelliteId(movementBaseType.getSourceSatelliteId() == null ?
+                null : movementBaseType.getSourceSatelliteId().shortValue());
         if (movementBaseType.getComChannelType() != null) {
             incomingMovement.setComChannelType(movementBaseType.getComChannelType().value());
         }
@@ -67,14 +70,13 @@ public class MovementMapper {
         incomingMovement.setExternalMarking(movementBaseType.getExternalMarking());
         incomingMovement.setTripNumber(movementBaseType.getTripNumber());
         incomingMovement.setInternalReferenceNumber(movementBaseType.getInternalReferenceNumber());
-        
+
         if (movementBaseType.getLesReportTime() != null) {
-        	incomingMovement.setLesReportTime(movementBaseType.getLesReportTime().toInstant());
+            incomingMovement.setLesReportTime(movementBaseType.getLesReportTime().toInstant());
         }
-        
         return incomingMovement;
     }
-    
+
     public static void mapAssetIdList(List<AssetIdList> inList, IncomingMovement incomingMovement) {
         for (AssetIdList inAssetId : inList) {
             switch (inAssetId.getIdType()) {
@@ -118,5 +120,4 @@ public class MovementMapper {
             }
         }
     }
-    
 }

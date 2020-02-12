@@ -14,11 +14,7 @@ package eu.europa.ec.fisheries.uvms.exchange.rest.dto;
 import javax.json.bind.annotation.JsonbTransient;
 import java.util.Objects;
 
-/**
- * @param <T>
- */
 public class ResponseDto<T> {
-
     private T data;
     private RestResponseCode code;
 
@@ -81,5 +77,4 @@ public class ResponseDto<T> {
     public String toString() {
         return "ResponseDto{" + "data=" + data + ", code=" + code + '}';
     }
-
 }

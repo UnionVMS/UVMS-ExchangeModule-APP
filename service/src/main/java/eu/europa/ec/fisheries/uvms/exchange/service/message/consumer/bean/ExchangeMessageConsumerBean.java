@@ -16,12 +16,12 @@ import eu.europa.ec.fisheries.schema.exchange.module.v1.ExchangeModuleMethod;
 import eu.europa.ec.fisheries.schema.exchange.module.v1.SetCommandRequest;
 import eu.europa.ec.fisheries.uvms.commons.message.api.MessageConstants;
 import eu.europa.ec.fisheries.uvms.commons.message.context.MappedDiagnosticContext;
+import eu.europa.ec.fisheries.uvms.exchange.model.mapper.JAXBMarshaller;
 import eu.europa.ec.fisheries.uvms.exchange.service.bean.ExchangeEventIncomingServiceBean;
 import eu.europa.ec.fisheries.uvms.exchange.service.bean.ExchangeEventOutgoingServiceBean;
 import eu.europa.ec.fisheries.uvms.exchange.service.bean.PluginServiceBean;
-import eu.europa.ec.fisheries.uvms.exchange.service.message.event.*;
+import eu.europa.ec.fisheries.uvms.exchange.service.message.event.ErrorEvent;
 import eu.europa.ec.fisheries.uvms.exchange.service.message.event.carrier.ExchangeErrorEvent;
-import eu.europa.ec.fisheries.uvms.exchange.model.mapper.JAXBMarshaller;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -68,13 +68,13 @@ public class ExchangeMessageConsumerBean implements MessageListener {
 
         ExchangeModuleMethod exchangeMethod = null;
         try {
-            LOG.trace("Request body : ", textMessage.getText());
+            LOG.trace("Request body : {}", textMessage.getText());
             String function = textMessage.getStringProperty(MessageConstants.JMS_FUNCTION_PROPERTY);
             exchangeMethod = (function != null) ? ExchangeModuleMethod.valueOf(function) : tryConsumeExchangeBaseRequest(textMessage).getMethod();
             LOG.debug("Going to process following message type [ {} ] : ", exchangeMethod);
             switch (exchangeMethod) {
 
-                    /* PLUGIN */
+                /* PLUGIN */
 
                 case LIST_SERVICES:
                     incomingServiceBean.getPluginListByTypes(textMessage);
@@ -108,7 +108,7 @@ public class ExchangeMessageConsumerBean implements MessageListener {
                     incomingServiceBean.processPluginPing(textMessage);
                     break;
 
-                    /* MOVEMENTS */
+                /* MOVEMENTS */
 
                 case SET_MOVEMENT_REPORT:
                     incomingServiceBean.processMovement(textMessage);
@@ -123,7 +123,7 @@ public class ExchangeMessageConsumerBean implements MessageListener {
                     outgoingServiceBean.handleProcessedMovementBatch(textMessage);
                     break;
 
-                    /* SALES */
+                /* SALES */
 
                 case RECEIVE_SALES_REPORT:
                     incomingServiceBean.receiveSalesReport(textMessage);
@@ -147,7 +147,7 @@ public class ExchangeMessageConsumerBean implements MessageListener {
                     incomingServiceBean.ping(textMessage);
                     break;
 
-                    /* MDR */
+                /* MDR */
 
                 case SET_MDR_SYNC_MESSAGE_REQUEST:
                     outgoingServiceBean.forwardMdrSyncMessageToPlugin(textMessage);
@@ -156,7 +156,7 @@ public class ExchangeMessageConsumerBean implements MessageListener {
                     incomingServiceBean.sendResponseToRulesModule(textMessage);
                     break;
 
-                    /* FLUX */
+                /* FLUX */
 
                 case SET_FLUX_FA_REPORT_MESSAGE:
                 case UNKNOWN:
@@ -178,7 +178,7 @@ public class ExchangeMessageConsumerBean implements MessageListener {
                     incomingServiceBean.processFluxFAResponseMessage(textMessage);
                     break;
 
-                    /* LOG */
+                /* LOG */
 
                 case UPDATE_LOG_STATUS:
                     outgoingServiceBean.updateLogStatus(textMessage);
@@ -193,48 +193,46 @@ public class ExchangeMessageConsumerBean implements MessageListener {
                     incomingServiceBean.logIdByTypeExists(textMessage);
                     break;
 
-                    /* ASSET */
+                /* ASSET */
 
                 case RECEIVE_ASSET_INFORMATION:
-                        incomingServiceBean.receiveAssetInformation(textMessage);
+                    incomingServiceBean.receiveAssetInformation(textMessage);
                     break;
                 default:
                     LOG.error("[ Not implemented method consumed: {} ] ", exchangeMethod);
                     errorEvent.fire(new ExchangeErrorEvent(textMessage, "Method not implemented"));
             }
-        } catch (Exception e){
+        } catch (Exception e) {
             try {
                 LOG.error("Error in exchange call to {} : Incoming message is {} . END", exchangeMethod, textMessage.getText(), e);
-
-            throw new RuntimeException("Error in exchange call to " + exchangeMethod + " : Incoming message is " + textMessage.getText() + " .END", e);
-            } catch (JMSException e1) {
-                LOG.error("Can not get text from text message in exchange message consumer bean");
+                throw new RuntimeException("Error in exchange call to " + exchangeMethod + " : Incoming message is " + textMessage.getText() + " .END", e);
+            } catch (JMSException jmse) {
+                LOG.error("Can not get text from text message in exchange message consumer bean", jmse);
             }
         }
     }
 
-
     private ExchangeBaseRequest tryConsumeExchangeBaseRequest(TextMessage textMessage) {
         try {
-            if(textMessage.getText().startsWith("<ns2:AcknowledgeResponse xmlns:ns2=\"urn:plugin.exchange.schema.fisheries.ec.europa.eu:v1\">")){
-                LOG.info("Recieved depricated plugin Ack response with message " + textMessage.getText());
+            if (textMessage.getText().startsWith("<ns2:AcknowledgeResponse xmlns:ns2=\"urn:plugin.exchange.schema.fisheries.ec.europa.eu:v1\">")) {
+                LOG.info("Received deprecated plugin Ack response with message " + textMessage.getText());
                 ExchangeBaseRequest plugin = new SetCommandRequest();
-                plugin.setMethod(ExchangeModuleMethod.PLUGIN_SET_COMMAND_ACK);                  //they all go to the same place so this does not matter, also this is really ugly ;(
+                // They all go to the same place so this does not matter, also this is really ugly ;(
+                plugin.setMethod(ExchangeModuleMethod.PLUGIN_SET_COMMAND_ACK);
                 return plugin;
             }
             ExchangeBaseRequest retVal = JAXBMarshaller.unmarshallTextMessage(textMessage, ExchangeBaseRequest.class);
-            LOG.info("Using depricated way to get incoming method call in message from: " + retVal.getUsername());
+            LOG.info("Using deprecated way to get incoming method call in message from: " + retVal.getUsername());
             return retVal;
         } catch (Exception e) {
+            LOG.error("Error when consuming ExchangeBaseRequest", e);
             return null;
         }
     }
 
-
     private int getTimesRedelivered(Message message) {
         try {
             return (message.getIntProperty("JMSXDeliveryCount") - 1);
-
         } catch (Exception e) {
             return 0;
         }

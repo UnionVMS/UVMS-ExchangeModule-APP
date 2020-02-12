@@ -11,21 +11,8 @@ copy of the GNU General Public License along with the IFDM Suite. If not, see <h
  */
 package eu.europa.ec.fisheries.uvms.exchange.service.mapper;
 
-import java.time.Instant;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
-
-import eu.europa.ec.fisheries.uvms.exchange.entity.exchangelog.ExchangeLog;
-import eu.europa.ec.fisheries.uvms.exchange.entity.exchangelog.ExchangeLogStatus;
-import eu.europa.ec.fisheries.uvms.exchange.entity.unsent.UnsentMessageProperty;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import eu.europa.ec.fisheries.schema.exchange.common.v1.CommandType;
 import eu.europa.ec.fisheries.schema.exchange.common.v1.KeyValueType;
-import eu.europa.ec.fisheries.schema.exchange.movement.asset.v1.AssetId;
-import eu.europa.ec.fisheries.schema.exchange.movement.asset.v1.AssetIdList;
 import eu.europa.ec.fisheries.schema.exchange.movement.v1.MovementBaseType;
 import eu.europa.ec.fisheries.schema.exchange.movement.v1.SendMovementToPluginType;
 import eu.europa.ec.fisheries.schema.exchange.movement.v1.SetReportMovementType;
@@ -37,12 +24,22 @@ import eu.europa.ec.fisheries.schema.exchange.v1.LogType;
 import eu.europa.ec.fisheries.schema.exchange.v1.TypeRefType;
 import eu.europa.ec.fisheries.schema.exchange.v1.UnsentMessageTypePropertyKey;
 import eu.europa.ec.fisheries.schema.rules.mobileterminal.v1.IdType;
+import eu.europa.ec.fisheries.uvms.exchange.service.entity.exchangelog.ExchangeLog;
+import eu.europa.ec.fisheries.uvms.exchange.service.entity.exchangelog.ExchangeLogStatus;
+import eu.europa.ec.fisheries.uvms.exchange.service.entity.unsent.UnsentMessageProperty;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
 
 public class ExchangeLogMapper {
 
     final static Logger LOG = LoggerFactory.getLogger(ExchangeLogMapper.class);
 
-    public static ExchangeLog getReceivedMovementExchangeLog(SetReportMovementType request, String typeRefGuid, String typeRefType,String username) {
+    public static ExchangeLog getReceivedMovementExchangeLog(SetReportMovementType request, String typeRefGuid, String typeRefType, String username) {
         if (request == null) {
             throw new IllegalArgumentException("No request");
         }
@@ -73,7 +70,7 @@ public class ExchangeLogMapper {
         String senderReceiver = null;
         switch (pluginType) {
             case MANUAL:
-                senderReceiver = username!=null ? username : "Unknown";
+                senderReceiver = username != null ? username : "Unknown";
                 break;
             case SATELLITE_RECEIVER:
             case FLUX:
@@ -86,34 +83,6 @@ public class ExchangeLogMapper {
                 break;
         }
         return senderReceiver;
-    }
-
-    private static String getSenderReceiver(AssetId assetId) {
-        if (assetId == null) {
-            throw new IllegalArgumentException("No asset");
-        }
-        if (assetId.getAssetIdList() == null) {
-            throw new IllegalArgumentException("No asset id");
-        }
-        String senderReceiver = null;
-        for (AssetIdList idList : assetId.getAssetIdList()) {
-            switch (idList.getIdType()) {
-                case IRCS:
-                    senderReceiver = idList.getValue();
-                    return senderReceiver;
-                case CFR:
-                case GUID:
-                case ID:
-                case IMO:
-                case MMSI:
-                default:
-                    senderReceiver = idList.getValue();
-            }
-        }
-        if (senderReceiver != null) {
-            return senderReceiver;
-        }
-        throw new IllegalArgumentException("No asset id value");
     }
 
     private static String getRecipientOfPoll(List<KeyValueType> pollReceiverList) {
@@ -230,7 +199,7 @@ public class ExchangeLogMapper {
             throw new IllegalArgumentException("No poll");
         }
 
-        //TODO fix in mobileterminal
+        //TODO fix in MobileTerminal
         ExchangeLog log = new ExchangeLog();
         log.setType(LogType.SEND_POLL);
         log.setDateReceived(command.getTimestamp().toInstant());
@@ -246,7 +215,7 @@ public class ExchangeLogMapper {
         return addStatusHistory(log);
     }
 
-    public static ExchangeLog addStatusHistory(ExchangeLog log){
+    public static ExchangeLog addStatusHistory(ExchangeLog log) {
         List<ExchangeLogStatus> statusHistory = new ArrayList<>();
         ExchangeLogStatus statusLog = new ExchangeLogStatus();
         statusLog.setLog(log);
@@ -256,13 +225,10 @@ public class ExchangeLogMapper {
         statusLog.setUpdateTime(Instant.now());
         statusHistory.add(statusLog);
         log.setStatusHistory(statusHistory);
-
         return log;
     }
 
-
     public static List<UnsentMessageProperty> getUnsentMessageProperties(SendMovementToPluginType sendReport) {
-
         List<UnsentMessageProperty> unsentMessageProperties = new ArrayList<>();
         UnsentMessageProperty propertyAssetName = new UnsentMessageProperty();
         UnsentMessageProperty propertyIrcs = new UnsentMessageProperty();
@@ -289,7 +255,7 @@ public class ExchangeLogMapper {
         return unsentMessageProperties;
     }
 
-    public static List<UnsentMessageProperty> getPropertiesForPoll(PollType poll, String assetName){
+    public static List<UnsentMessageProperty> getPropertiesForPoll(PollType poll, String assetName) {
         List<UnsentMessageProperty> unsentMessageProperties = new ArrayList<>();
         UnsentMessageProperty propertyAssetName = new UnsentMessageProperty();
         propertyAssetName.setKey(UnsentMessageTypePropertyKey.ASSET_NAME);
@@ -322,14 +288,14 @@ public class ExchangeLogMapper {
     }
 
     private static String getRecipient(MovementBaseType movementBaseType, PluginType pluginType) {
-        if(movementBaseType== null){
+        if (movementBaseType == null) {
             throw new IllegalArgumentException("Movement is empty");
         }
-        if(pluginType == null){
+        if (pluginType == null) {
             throw new IllegalArgumentException("PluginType is empty");
         }
         String recipient;
-        switch (pluginType){
+        switch (pluginType) {
             case MANUAL:
             case FLUX:
             case NAF:

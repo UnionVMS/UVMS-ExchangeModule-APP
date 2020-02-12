@@ -11,77 +11,60 @@ copy of the GNU General Public License along with the IFDM Suite. If not, see <h
  */
 package eu.europa.ec.fisheries.uvms.exchange.rest.service;
 
-import java.util.List;
-import javax.ejb.EJB;
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.GET;
-import javax.ws.rs.PUT;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
 import eu.europa.ec.fisheries.schema.exchange.service.v1.CapabilityTypeType;
-import eu.europa.ec.fisheries.uvms.exchange.bean.ServiceRegistryModelBean;
-import eu.europa.ec.fisheries.uvms.exchange.entity.serviceregistry.Service;
-import eu.europa.ec.fisheries.uvms.exchange.service.bean.PluginServiceBean;
-import org.apache.commons.lang3.exception.ExceptionUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
+import eu.europa.ec.fisheries.uvms.exchange.service.bean.ServiceRegistryModelBean;
+import eu.europa.ec.fisheries.uvms.exchange.service.entity.serviceregistry.Service;
 import eu.europa.ec.fisheries.uvms.exchange.rest.dto.ResponseDto;
 import eu.europa.ec.fisheries.uvms.exchange.rest.dto.RestResponseCode;
 import eu.europa.ec.fisheries.uvms.exchange.rest.error.ErrorHandler;
 import eu.europa.ec.fisheries.uvms.exchange.rest.mapper.ServiceMapper;
+import eu.europa.ec.fisheries.uvms.exchange.service.bean.PluginServiceBean;
 import eu.europa.ec.fisheries.uvms.rest.security.RequiresFeature;
 import eu.europa.ec.fisheries.uvms.rest.security.UnionVMSFeature;
+import org.apache.commons.lang3.exception.ExceptionUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-@Path("/plugin")
+import javax.ejb.EJB;
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+import javax.ws.rs.*;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
+import java.util.List;
+
 @Stateless
+@Path("/plugin")
+@Consumes(value = {MediaType.APPLICATION_JSON})
+@Produces(value = {MediaType.APPLICATION_JSON})
 public class ExchangeRegistryRestResource {
 
-	private static final Logger LOG = LoggerFactory
-			.getLogger(ExchangeRegistryRestResource.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ExchangeRegistryRestResource.class);
 
+    @Inject
+    private ServiceRegistryModelBean serviceRegistryModel;
 
-	@Inject
-	private ServiceRegistryModelBean serviceRegistryModel;
-
-	@EJB
-	PluginServiceBean pluginService;
-	
-	/**
-	 * 
-	 * @responseMessage 200 [Success]
-	 * @responseMessage 500 [Error]
-	 * 
-	 * @summary Get a list of all registered and active services
-	 * 
-	 */
-	@GET
-	@Consumes(value = { MediaType.APPLICATION_JSON })
-	@Produces(value = { MediaType.APPLICATION_JSON })
-	@Path("/list")
-	@RequiresFeature(UnionVMSFeature.viewExchange)
-	public ResponseDto getList() {
-		LOG.info("Get list invoked in rest layer");
-		try {
-			return new ResponseDto(ServiceMapper.map(serviceRegistryModel.getPlugins(null)), RestResponseCode.OK);
-		} catch (Exception ex) {
-			LOG.error("[ Error when geting list. ] {} ", ex.getMessage());
-			return ErrorHandler.getFault(ex);
-		}
-	}
+    @EJB
+    private PluginServiceBean pluginService;
 
     @GET
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/list")
+    @RequiresFeature(UnionVMSFeature.viewExchange)
+    public ResponseDto<?> getList() {
+        LOG.info("Get list invoked in rest layer");
+        try {
+            return new ResponseDto<>(ServiceMapper.map(serviceRegistryModel.getPlugins(null)), RestResponseCode.OK);
+        } catch (Exception ex) {
+            LOG.error("[ Error when geting list. ] {} ", ex.getMessage());
+            return ErrorHandler.getFault(ex);
+        }
+    }
+
+    @GET
     @Path("/capability/{capabilityType}")
     @RequiresFeature(UnionVMSFeature.viewExchange)
-    public Response getPluginsByCapability(@PathParam(value="capabilityType") String capabilityType) {
+    public Response getPluginsByCapability(@PathParam(value = "capabilityType") String capabilityType) {
         LOG.info("Get list invoked in rest layer");
         try {
             CapabilityTypeType capability = CapabilityTypeType.fromValue(capabilityType.toUpperCase());
@@ -93,49 +76,29 @@ public class ExchangeRegistryRestResource {
         }
     }
 
-	/**
-	 * 
-	 * @responseMessage 200 [Success]
-	 * @responseMessage 500 [Error]
-	 * 
-	 * @summary Start a service
-	 * 
-	 */
-	@PUT
-	@Consumes(value = { MediaType.APPLICATION_JSON })
-	@Produces(value = { MediaType.APPLICATION_JSON })
-	@Path("/start/{serviceClassName}")
-	@RequiresFeature(UnionVMSFeature.manageExchangeTransmissionStatuses)
-	public ResponseDto startService(@PathParam(value="serviceClassName") String serviceClassName) {			//why is this a put????		And this returns true or an exception???
-		LOG.info("Start service invoked in rest layer:{}",serviceClassName);
-		try {
-			return new ResponseDto(pluginService.start(serviceClassName), RestResponseCode.OK);
-		} catch (Exception ex) {
-			LOG.error("[ Error when starting service {}] {}",serviceClassName,ex);
-			return ErrorHandler.getFault(ex);
-		}
-	}
+    @PUT
+    @Path("/start/{serviceClassName}")
+    @RequiresFeature(UnionVMSFeature.manageExchangeTransmissionStatuses)
+    public ResponseDto<?> startService(@PathParam(value = "serviceClassName") String serviceClassName) { // Why is this a put? And this returns true or an exception?
+        LOG.info("Start service invoked in rest layer:{}", serviceClassName);
+        try {
+            return new ResponseDto<>(pluginService.start(serviceClassName), RestResponseCode.OK);
+        } catch (Exception ex) {
+            LOG.error("[ Error when starting service {}] {}", serviceClassName, ex);
+            return ErrorHandler.getFault(ex);
+        }
+    }
 
-	/**
-	 * 
-	 * @responseMessage 200 [Success]
-	 * @responseMessage 500 [Error]
-	 * 
-	 * @summary Stop a service
-	 * 
-	 */
-	@PUT
-	@Consumes(value = { MediaType.APPLICATION_JSON })
-	@Produces(value = { MediaType.APPLICATION_JSON })
-	@Path("/stop/{serviceClassName}")
-	@RequiresFeature(UnionVMSFeature.manageExchangeTransmissionStatuses)
-	public ResponseDto stopService(@PathParam(value="serviceClassName") String serviceClassName) {		//why is this a put????
-		LOG.info("Stop service invoked in rest layer:{}",serviceClassName);
-		try {
-			return new ResponseDto(pluginService.stop(serviceClassName), RestResponseCode.OK);
-		} catch (Exception ex) {
-			LOG.error("[ Error when stopping service {} ] {} ",serviceClassName, ex.getMessage());
-			return ErrorHandler.getFault(ex);
-		}
-	}
+    @PUT
+    @Path("/stop/{serviceClassName}")
+    @RequiresFeature(UnionVMSFeature.manageExchangeTransmissionStatuses)
+    public ResponseDto<?> stopService(@PathParam(value = "serviceClassName") String serviceClassName) { // Why is this a put?
+        LOG.info("Stop service invoked in rest layer:{}", serviceClassName);
+        try {
+            return new ResponseDto<>(pluginService.stop(serviceClassName), RestResponseCode.OK);
+        } catch (Exception ex) {
+            LOG.error("[ Error when stopping service {} ] {} ", serviceClassName, ex.getMessage());
+            return ErrorHandler.getFault(ex);
+        }
+    }
 }

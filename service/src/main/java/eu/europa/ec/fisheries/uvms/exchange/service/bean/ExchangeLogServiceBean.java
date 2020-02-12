@@ -22,14 +22,13 @@ import java.util.*;
 import eu.europa.ec.fisheries.schema.exchange.module.v1.ExchangeBaseRequest;
 import eu.europa.ec.fisheries.schema.exchange.movement.v1.MovementRefType;
 import eu.europa.ec.fisheries.schema.exchange.v1.*;
-import eu.europa.ec.fisheries.uvms.exchange.bean.ExchangeLogModelBean;
-import eu.europa.ec.fisheries.uvms.exchange.dao.bean.ExchangeLogDaoBean;
-import eu.europa.ec.fisheries.uvms.exchange.dao.bean.UnsentMessageDaoBean;
-import eu.europa.ec.fisheries.uvms.exchange.entity.exchangelog.ExchangeLog;
-import eu.europa.ec.fisheries.uvms.exchange.entity.exchangelog.ExchangeLogStatus;
-import eu.europa.ec.fisheries.uvms.exchange.entity.unsent.UnsentMessage;
-import eu.europa.ec.fisheries.uvms.exchange.entity.unsent.UnsentMessageProperty;
-import eu.europa.ec.fisheries.uvms.exchange.mapper.LogMapper;
+import eu.europa.ec.fisheries.uvms.exchange.service.dao.ExchangeLogDaoBean;
+import eu.europa.ec.fisheries.uvms.exchange.service.dao.UnsentMessageDaoBean;
+import eu.europa.ec.fisheries.uvms.exchange.service.entity.exchangelog.ExchangeLog;
+import eu.europa.ec.fisheries.uvms.exchange.service.entity.exchangelog.ExchangeLogStatus;
+import eu.europa.ec.fisheries.uvms.exchange.service.entity.unsent.UnsentMessage;
+import eu.europa.ec.fisheries.uvms.exchange.service.entity.unsent.UnsentMessageProperty;
+import eu.europa.ec.fisheries.uvms.exchange.service.mapper.LogMapper;
 import eu.europa.ec.fisheries.uvms.exchange.service.mapper.ExchangeLogMapper;
 import eu.europa.ec.fisheries.uvms.exchange.service.event.ExchangeLogEvent;
 import eu.europa.ec.fisheries.uvms.exchange.service.event.ExchangeSendingQueueEvent;
@@ -180,6 +179,8 @@ public class ExchangeLogServiceBean {
         unsentMessage.setProperties(new ArrayList<>());
         unsentMessage.getProperties().addAll(properties);
 
+        properties.forEach( p -> p.setUnsentMessage(unsentMessage));
+
         unsentMessage.setFunction(function);
 
         String createdUnsentMessageId = unsentMessageDao.create(unsentMessage).getGuid().toString();
@@ -203,7 +204,6 @@ public class ExchangeLogServiceBean {
         } else {
             LOG.error("[ No message with id {} to remove ]", unsentMessageId);
             return;
-            //throw new IllegalArgumentException("[ No message with id " + unsentMessageId + " to remove ]");   //if there, for some reason, is no unsent message to remove the the old way is to throw an exception, but that stops the system from doing anything else, and I dont know if that is correct behaviour
         }
 
         List<String> removedMessageIds = Collections.singletonList(removeMessageId);
@@ -232,9 +232,8 @@ public class ExchangeLogServiceBean {
 
     public void resend(List<String> messageIdList, String username) {
         LOG.debug("resend in service layer:{} {}",messageIdList,username);
-        List<UnsentMessage> unsentMessageList;
-        unsentMessageList = getAndRemoveUnsentMessagesFromDB(messageIdList);
-        if (unsentMessageList != null && !unsentMessageList.isEmpty()) {
+        List<UnsentMessage> unsentMessageList = getAndRemoveUnsentMessagesFromDB(messageIdList);
+        if (!unsentMessageList.isEmpty()) {
             sendingQueueEvent.fire(new NotificationMessage("messageIds", messageIdList));
 
             for (UnsentMessage unsentMessage : unsentMessageList) {

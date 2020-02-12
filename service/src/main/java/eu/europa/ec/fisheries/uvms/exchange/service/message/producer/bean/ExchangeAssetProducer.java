@@ -34,7 +34,7 @@ public class ExchangeAssetProducer extends AbstractProducer {
             return sendModuleMessageWithProps(text, replyToQueue, properties);
 
         } catch (JMSException e) {
-            LOG.error("[ Error when sending Asset info message. ] {}", e);
+            LOG.error("[ Error when sending Asset info message. ]", e);
             throw new RuntimeException("Error when sending asset info message.", e);
         }
     }

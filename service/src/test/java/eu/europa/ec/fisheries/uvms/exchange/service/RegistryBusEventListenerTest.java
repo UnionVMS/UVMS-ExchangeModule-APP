@@ -5,10 +5,10 @@ import eu.europa.ec.fisheries.schema.exchange.plugin.types.v1.PluginType;
 import eu.europa.ec.fisheries.schema.exchange.registry.v1.RegisterServiceResponse;
 import eu.europa.ec.fisheries.schema.exchange.service.v1.*;
 import eu.europa.ec.fisheries.uvms.commons.date.JsonBConfigurator;
-import eu.europa.ec.fisheries.uvms.exchange.dao.bean.ServiceRegistryDaoBean;
-import eu.europa.ec.fisheries.uvms.exchange.entity.serviceregistry.Service;
 import eu.europa.ec.fisheries.uvms.exchange.model.mapper.ExchangeModuleRequestMapper;
 import eu.europa.ec.fisheries.uvms.exchange.model.mapper.JAXBMarshaller;
+import eu.europa.ec.fisheries.uvms.exchange.service.dao.ServiceRegistryDaoBean;
+import eu.europa.ec.fisheries.uvms.exchange.service.entity.serviceregistry.Service;
 import org.jboss.arquillian.container.test.api.OperateOnDeployment;
 import org.jboss.arquillian.junit.Arquillian;
 import org.junit.Before;
@@ -28,28 +28,29 @@ import static org.junit.Assert.*;
 @RunWith(Arquillian.class)
 public class RegistryBusEventListenerTest extends BuildExchangeServiceTestDeployment {
 
-    JMSHelper jmsHelper;
+    private JMSHelper jmsHelper;
+
+    Jsonb jsonb;
 
     @Resource(mappedName = "java:/ConnectionFactory")
     private ConnectionFactory connectionFactory;
 
     @Inject
-    ServiceRegistryDaoBean serviceRegistryDao;
-
-    private Jsonb jsonb;
+    private ServiceRegistryDaoBean serviceRegistryDao;
 
     @Before
-    public void initialize() throws Exception {
+    public void initialize() {
         jmsHelper = new JMSHelper(connectionFactory);
         jsonb = new JsonBConfigurator().getContext(null);
     }
 
     @Test
     @OperateOnDeployment("exchangeservice")
-    public void registerEmailServiceTest() throws Exception{
+    public void registerEmailServiceTest() throws Exception {
         ServiceType service = createBasicService(PluginType.EMAIL);
 
-        String request = ExchangeModuleRequestMapper.createRegisterServiceRequest(service, createBasicCapabilityList(), createBasicSettingsList());
+        String request = ExchangeModuleRequestMapper.createRegisterServiceRequest(
+                service, createBasicCapabilityList(), createBasicSettingsList());
 
         jmsHelper.sendMessageOnEventQueue(request);
 
@@ -58,25 +59,25 @@ public class RegistryBusEventListenerTest extends BuildExchangeServiceTestDeploy
         List<Service> serviceList = serviceRegistryDao.getServices();
         Service newService = serviceList.get(serviceList.size() - 1);
         assertTrue(newService.getActive());
-        assertEquals(true, newService.getStatus());
+        assertTrue(newService.getStatus());
         assertEquals(PluginType.EMAIL.value(), newService.getType().value());
         assertEquals(service.getServiceClassName(), newService.getServiceClassName());
 
         assertEquals(5, serviceRegistryDao.getServiceCapabilities(service.getServiceClassName()).size());
         assertEquals(4, serviceRegistryDao.getServiceSettings(service.getServiceClassName()).size());
-
     }
 
     @Test
     @OperateOnDeployment("exchangeservice")
-    public void registerSameNAFServiceTwiceTest() throws Exception{
+    public void registerSameNAFServiceTwiceTest() throws Exception {
         ServiceType service = createBasicService(PluginType.NAF);
 
-        String request = ExchangeModuleRequestMapper.createRegisterServiceRequest(service, createBasicCapabilityList(), createBasicSettingsList());
+        String request = ExchangeModuleRequestMapper.createRegisterServiceRequest(
+                service, createBasicCapabilityList(), createBasicSettingsList());
 
         jmsHelper.registerSubscriber("ServiceName = '" + service.getServiceResponseMessageName() + "'");
         jmsHelper.sendMessageOnEventQueue(request);
-        TextMessage message = (TextMessage)jmsHelper.listenOnEventBus(5000l);
+        TextMessage message = (TextMessage) jmsHelper.listenOnEventBus(5000L);
         RegisterServiceResponse response = JAXBMarshaller.unmarshallTextMessage(message, RegisterServiceResponse.class);
 
         assertEquals(AcknowledgeTypeType.OK, response.getAck().getType());
@@ -86,7 +87,7 @@ public class RegistryBusEventListenerTest extends BuildExchangeServiceTestDeploy
 
         jmsHelper.registerSubscriber("ServiceName = '" + service.getServiceResponseMessageName() + "'");
         jmsHelper.sendMessageOnEventQueue(request);
-        message = (TextMessage)jmsHelper.listenOnEventBus(5000l);
+        message = (TextMessage) jmsHelper.listenOnEventBus(5000L);
         response = JAXBMarshaller.unmarshallTextMessage(message, RegisterServiceResponse.class);
 
         assertEquals(AcknowledgeTypeType.OK, response.getAck().getType());
@@ -97,26 +98,25 @@ public class RegistryBusEventListenerTest extends BuildExchangeServiceTestDeploy
         List<Service> serviceList = serviceRegistryDao.getServices();
         Service newService = serviceList.get(serviceList.size() - 1);
         assertTrue(newService.getActive());
-        assertEquals(true, newService.getStatus());
+        assertTrue(newService.getStatus());
         assertEquals(PluginType.NAF.value(), newService.getType().value());
         assertEquals(service.getServiceClassName(), newService.getServiceClassName());
 
         assertEquals(5, serviceRegistryDao.getServiceCapabilities(service.getServiceClassName()).size());
         assertEquals(4, serviceRegistryDao.getServiceSettings(service.getServiceClassName()).size());
-
     }
-
 
     @Test
     @OperateOnDeployment("exchangeservice")
-    public void registerManualServiceTest() throws Exception{
+    public void registerManualServiceTest() throws Exception {
         ServiceType service = createBasicService(PluginType.MANUAL);
 
-        String request = ExchangeModuleRequestMapper.createRegisterServiceRequest(service, createBasicCapabilityList(), createBasicSettingsList());
+        String request = ExchangeModuleRequestMapper.createRegisterServiceRequest(
+                service, createBasicCapabilityList(), createBasicSettingsList());
 
         jmsHelper.registerSubscriber("ServiceName = '" + service.getServiceResponseMessageName() + "'");
         jmsHelper.sendMessageOnEventQueue(request);
-        TextMessage message = (TextMessage)jmsHelper.listenOnEventBus(5000l);
+        TextMessage message = (TextMessage) jmsHelper.listenOnEventBus(5000L);
         RegisterServiceResponse response = JAXBMarshaller.unmarshallTextMessage(message, RegisterServiceResponse.class);
 
         assertEquals(AcknowledgeTypeType.OK, response.getAck().getType());
@@ -127,25 +127,25 @@ public class RegistryBusEventListenerTest extends BuildExchangeServiceTestDeploy
         List<Service> serviceList = serviceRegistryDao.getServices();
         Service newService = serviceList.get(serviceList.size() - 1);
         assertTrue(newService.getActive());
-        assertEquals(true, newService.getStatus());
+        assertTrue(newService.getStatus());
         assertEquals(PluginType.MANUAL.value(), newService.getType().value());
         assertEquals(service.getServiceClassName(), newService.getServiceClassName());
 
         assertEquals(5, serviceRegistryDao.getServiceCapabilities(service.getServiceClassName()).size());
         assertEquals(4, serviceRegistryDao.getServiceSettings(service.getServiceClassName()).size());
-
     }
 
     @Test
     @OperateOnDeployment("exchangeservice")
-    public void registerAndUnregisterManualServiceTest() throws Exception{
+    public void registerAndUnregisterManualServiceTest() throws Exception {
         ServiceType service = createBasicService(PluginType.MANUAL);
 
-        String registerRequest = ExchangeModuleRequestMapper.createRegisterServiceRequest(service, createBasicCapabilityList(), createBasicSettingsList());
+        String registerRequest = ExchangeModuleRequestMapper.createRegisterServiceRequest(
+                service, createBasicCapabilityList(), createBasicSettingsList());
 
         jmsHelper.registerSubscriber("ServiceName = '" + service.getServiceResponseMessageName() + "'");
         jmsHelper.sendMessageOnEventQueue(registerRequest);
-        TextMessage message = (TextMessage)jmsHelper.listenOnEventBus(5000l);
+        TextMessage message = (TextMessage) jmsHelper.listenOnEventBus(5000L);
         RegisterServiceResponse response = JAXBMarshaller.unmarshallTextMessage(message, RegisterServiceResponse.class);
 
         assertEquals(AcknowledgeTypeType.OK, response.getAck().getType());
@@ -159,12 +159,11 @@ public class RegistryBusEventListenerTest extends BuildExchangeServiceTestDeploy
         Service unregistredService = serviceRegistryDao.getServiceByServiceClassName(service.getServiceClassName());
         assertEquals(service.getServiceClassName(), unregistredService.getServiceClassName());
         assertFalse(unregistredService.getActive());
-        assertEquals(false, unregistredService.getStatus());
+        assertFalse(unregistredService.getStatus());
         assertEquals(PluginType.MANUAL.value(), unregistredService.getType().value());
     }
 
     private ServiceType createBasicService(PluginType pluginType) {
-
         ServiceType service = new ServiceType();
         UUID random = UUID.randomUUID();
         service.setDescription("Register service test service " + pluginType.value());
@@ -177,7 +176,7 @@ public class RegistryBusEventListenerTest extends BuildExchangeServiceTestDeploy
         return service;
     }
 
-    private CapabilityListType createBasicCapabilityList(){
+    private CapabilityListType createBasicCapabilityList() {
         CapabilityListType capabilityList = new CapabilityListType();
         CapabilityType capabilityType = new CapabilityType();
         capabilityType.setType(CapabilityTypeType.CONFIGURABLE);
@@ -207,7 +206,7 @@ public class RegistryBusEventListenerTest extends BuildExchangeServiceTestDeploy
         return capabilityList;
     }
 
-    private SettingListType createBasicSettingsList(){
+    private SettingListType createBasicSettingsList() {
         SettingListType settingListType = new SettingListType();
         SettingType settingType = new SettingType();
         settingType.setKey("Password");

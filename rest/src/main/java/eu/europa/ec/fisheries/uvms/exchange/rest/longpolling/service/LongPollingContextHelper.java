@@ -11,13 +11,12 @@ copy of the GNU General Public License along with the IFDM Suite. If not, see <h
  */
 package eu.europa.ec.fisheries.uvms.exchange.rest.longpolling.service;
 
+import javax.ejb.*;
+import javax.servlet.AsyncContext;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import javax.ejb.*;
-import javax.servlet.AsyncContext;
 
 @Singleton
 @ConcurrencyManagement(ConcurrencyManagementType.CONTAINER)
@@ -27,24 +26,19 @@ public class LongPollingContextHelper {
 
     /**
      * Adds an async context, associated with the given path.
-     * 
+     *
      * @param ctx an asynchronous context
      * @param longPollingPath a long-polling path
      */
     @Lock(LockType.WRITE)
     public void add(AsyncContext ctx, String longPollingPath) {
-        List<AsyncContext> ctxs = asyncContexts.get(longPollingPath);
-        if (ctxs == null) {
-            ctxs = new ArrayList<>();
-            asyncContexts.put(longPollingPath, ctxs);
-        }
-
+        List<AsyncContext> ctxs = asyncContexts.computeIfAbsent(longPollingPath, k -> new ArrayList<>());
         ctxs.add(ctx);
     }
 
     /**
      * Removes and returns the first async context, for a path.
-     * 
+     *
      * @param longPollingPath a path
      * @return the first context for this path, or null if none exist
      */
@@ -54,7 +48,6 @@ public class LongPollingContextHelper {
         if (ctxs == null || ctxs.isEmpty()) {
             return null;
         }
-
         return ctxs.remove(0);
     }
 
@@ -67,5 +60,4 @@ public class LongPollingContextHelper {
             }
         }
     }
-
 }

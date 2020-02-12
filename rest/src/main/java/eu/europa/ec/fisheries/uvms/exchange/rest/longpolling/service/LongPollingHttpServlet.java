@@ -11,8 +11,12 @@ copy of the GNU General Public License along with the IFDM Suite. If not, see <h
  */
 package eu.europa.ec.fisheries.uvms.exchange.rest.longpolling.service;
 
-import java.io.IOException;
-import java.util.List;
+import eu.europa.ec.fisheries.uvms.exchange.rest.longpolling.constants.LongPollingConstants;
+import eu.europa.ec.fisheries.uvms.exchange.service.event.ExchangeLogEvent;
+import eu.europa.ec.fisheries.uvms.exchange.service.event.ExchangePluginStatusEvent;
+import eu.europa.ec.fisheries.uvms.exchange.service.event.ExchangeSendingQueueEvent;
+import eu.europa.ec.fisheries.uvms.exchange.service.event.PollEvent;
+import eu.europa.ec.fisheries.uvms.longpolling.notifications.NotificationMessage;
 
 import javax.ejb.EJB;
 import javax.enterprise.event.Observes;
@@ -21,42 +25,38 @@ import javax.json.JsonArrayBuilder;
 import javax.servlet.AsyncContext;
 import javax.servlet.AsyncEvent;
 import javax.servlet.AsyncListener;
-import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.util.List;
 
-import eu.europa.ec.fisheries.uvms.exchange.rest.longpolling.constants.LongPollingConstants;
-import eu.europa.ec.fisheries.uvms.exchange.service.event.ExchangeLogEvent;
-import eu.europa.ec.fisheries.uvms.exchange.service.event.ExchangePluginStatusEvent;
-import eu.europa.ec.fisheries.uvms.exchange.service.event.ExchangeSendingQueueEvent;
-import eu.europa.ec.fisheries.uvms.exchange.service.event.PollEvent;
-import eu.europa.ec.fisheries.uvms.longpolling.notifications.NotificationMessage;
-
-@WebServlet(asyncSupported = true, urlPatterns = {LongPollingConstants.EXCHANGE_LOG_PATH, LongPollingConstants.PLUGIN_STATUS_PATH, LongPollingConstants.SENDING_QUEUE_PATH, LongPollingConstants.POLL_PATH})
+@WebServlet(asyncSupported = true,
+        urlPatterns = {
+                LongPollingConstants.EXCHANGE_LOG_PATH,
+                LongPollingConstants.PLUGIN_STATUS_PATH,
+                LongPollingConstants.SENDING_QUEUE_PATH,
+                LongPollingConstants.POLL_PATH
+        })
 public class LongPollingHttpServlet extends HttpServlet {
-
     private static final long serialVersionUID = 1L;
 
     @EJB
-    LongPollingContextHelper asyncContexts;
+    private LongPollingContextHelper asyncContexts;
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) {
         AsyncContext ctx = req.startAsync(req, resp);
         ctx.setTimeout(LongPollingConstants.ASYNC_TIMEOUT);
         ctx.addListener(new LongPollingAsyncListener() {
-
             @Override
             public void onTimeout(AsyncEvent event) throws IOException {
                 AsyncContext ctx = event.getAsyncContext();
                 asyncContexts.remove(ctx);
                 completePoll(ctx, createJsonMessage(null));
             }
-
         });
-
         asyncContexts.add(ctx, req.getServletPath());
     }
 
@@ -82,21 +82,20 @@ public class LongPollingHttpServlet extends HttpServlet {
     }
 
     private String createJsonMessageFromList(List<String> guidList) {
-    	JsonArrayBuilder array = Json.createArrayBuilder();
+        JsonArrayBuilder array = Json.createArrayBuilder();
         if (guidList != null) {
-        	for (String guid : guidList) {
-        		array.add(guid);
-			}
+            for (String guid : guidList) {
+                array.add(guid);
+            }
         }
         return Json.createObjectBuilder().add("ids", array).build().toString();
     }
-    
+
     private String createJsonMessage(String guid) {
         JsonArrayBuilder array = Json.createArrayBuilder();
         if (guid != null) {
             array.add(guid);
         }
-
         return Json.createObjectBuilder().add("ids", array).build().toString();
     }
 

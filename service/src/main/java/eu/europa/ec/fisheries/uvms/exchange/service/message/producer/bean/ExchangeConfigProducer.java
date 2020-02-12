@@ -32,7 +32,7 @@ public class ExchangeConfigProducer extends AbstractProducer implements ConfigMe
         try{
             return sendModuleMessage(text, replyToQueue);
         } catch (JMSException e) {
-            LOG.error("[ Error when sending Asset info message. ] {}", e);
+            LOG.error("[ Error when sending Asset info message. ]", e);
             throw new RuntimeException("Error when sending asset info message.", e);
         }
     }

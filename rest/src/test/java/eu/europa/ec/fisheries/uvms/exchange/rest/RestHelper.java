@@ -4,9 +4,9 @@ import eu.europa.ec.fisheries.schema.exchange.plugin.types.v1.PluginType;
 import eu.europa.ec.fisheries.schema.exchange.service.v1.CapabilityTypeType;
 import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogStatusType;
 import eu.europa.ec.fisheries.uvms.commons.date.JsonBConfigurator;
-import eu.europa.ec.fisheries.uvms.exchange.entity.serviceregistry.Service;
-import eu.europa.ec.fisheries.uvms.exchange.entity.serviceregistry.ServiceCapability;
 import eu.europa.ec.fisheries.uvms.exchange.rest.dto.ResponseDto;
+import eu.europa.ec.fisheries.uvms.exchange.service.entity.serviceregistry.Service;
+import eu.europa.ec.fisheries.uvms.exchange.service.entity.serviceregistry.ServiceCapability;
 
 import javax.json.Json;
 import javax.json.JsonArray;
