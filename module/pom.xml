@@ -38,12 +38,6 @@
     </build>
 
     <dependencies>
-         <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>exchange-dbaccess-domain</artifactId>
-            <version>${project.version}</version>
-            <type>ejb</type>
-        </dependency>    
         <dependency>
             <groupId>${project.groupId}</groupId>  
             <artifactId>exchange-service</artifactId>
