@@ -2,9 +2,7 @@ package eu.europa.ec.fisheries.uvms.exchange.rest;
 
 import eu.europa.ec.fisheries.schema.exchange.plugin.types.v1.PluginType;
 import eu.europa.ec.fisheries.schema.exchange.service.v1.CapabilityTypeType;
-import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogStatusType;
 import eu.europa.ec.fisheries.uvms.commons.date.JsonBConfigurator;
-import eu.europa.ec.fisheries.uvms.exchange.rest.dto.ResponseDto;
 import eu.europa.ec.fisheries.uvms.exchange.service.entity.serviceregistry.Service;
 import eu.europa.ec.fisheries.uvms.exchange.service.entity.serviceregistry.ServiceCapability;
 
@@ -23,9 +21,6 @@ public class RestHelper {
     private static Jsonb jsonb = new JsonBConfigurator().getContext(null);
 
     public static <T> List<T> readResponseDtoList(String response, Class<T> clazz) {
-
-        ResponseDto<ExchangeLogStatusType> test = jsonb.fromJson(response, ResponseDto.class);
-
         JsonReader jsonReader = Json.createReader(new StringReader(response));
         JsonObject responseDto = jsonReader.readObject();
         JsonArray data = responseDto.getJsonArray("data");
