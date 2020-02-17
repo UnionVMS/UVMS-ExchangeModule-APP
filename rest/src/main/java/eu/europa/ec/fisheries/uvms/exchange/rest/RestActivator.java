@@ -11,6 +11,7 @@ copy of the GNU General Public License along with the IFDM Suite. If not, see <h
  */
 package eu.europa.ec.fisheries.uvms.exchange.rest;
 
+import eu.europa.ec.fisheries.uvms.commons.date.JsonBConfigurator;
 import eu.europa.ec.fisheries.uvms.exchange.rest.constants.RestConstants;
 import eu.europa.ec.fisheries.uvms.exchange.rest.service.ConfigRestResource;
 import eu.europa.ec.fisheries.uvms.exchange.rest.service.ExchangeLogRestResource;
@@ -39,6 +40,7 @@ public class RestActivator extends Application {
         set.add(ExchangeSendingQueueRestResource.class);
         set.add(ConfigRestResource.class);
         set.add(UnionVMSFeatureFilter.class);
+        set.add(JsonBConfigurator.class);
         LOG.info(RestConstants.MODULE_NAME + " module starting up");
     }
 

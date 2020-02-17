@@ -1,7 +1,10 @@
 package eu.europa.ec.fisheries.uvms.exchange.rest;
 
 
+import eu.europa.ec.fisheries.uvms.commons.date.JsonBConfigurator;
 import eu.europa.ec.fisheries.uvms.exchange.service.dao.ExchangeLogDaoBean;
+import eu.europa.ec.fisheries.uvms.rest.security.UnionVMSFeature;
+import eu.europa.ec.mare.usm.jwt.JwtTokenHandler;
 import org.eu.ingwar.tools.arquillian.extension.suite.annotations.ArquillianSuiteDeployment;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.shrinkwrap.api.Archive;
@@ -10,8 +13,7 @@ import org.jboss.shrinkwrap.api.spec.WebArchive;
 import org.jboss.shrinkwrap.resolver.api.maven.Maven;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import eu.europa.ec.fisheries.uvms.rest.security.UnionVMSFeature;
-import eu.europa.ec.mare.usm.jwt.JwtTokenHandler;
+
 import javax.ejb.EJB;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
@@ -82,10 +84,8 @@ public abstract class BuildExchangeRestTestDeployment {
 
     protected WebTarget getWebTarget() {
 
-        //ObjectMapper objectMapper = new ObjectMapper();
         Client client = ClientBuilder.newClient();
-        //client.register(new JacksonJaxbJsonProvider(objectMapper, JacksonJaxbJsonProvider.DEFAULT_ANNOTATIONS));
-        //return client.target("http://localhost:28080/test/rest");
+        client.register(JsonBConfigurator.class);
         return client.target("http://localhost:8080/exchangerest/rest");
     }
 

@@ -25,6 +25,7 @@ import eu.europa.ec.fisheries.schema.rules.module.v1.ReceiveSalesReportRequest;
 import eu.europa.ec.fisheries.schema.rules.module.v1.ReceiveSalesResponseRequest;
 import eu.europa.ec.fisheries.schema.rules.module.v1.SetFLUXFAReportMessageRequest;
 import eu.europa.ec.fisheries.schema.rules.module.v1.*;
+import eu.europa.ec.fisheries.uvms.commons.date.JsonBConfigurator;
 import eu.europa.ec.fisheries.uvms.commons.message.api.MessageConstants;
 import eu.europa.ec.fisheries.uvms.exchange.model.mapper.ExchangeModuleRequestMapper;
 import eu.europa.ec.fisheries.uvms.exchange.model.mapper.ExchangePluginResponseMapper;
@@ -52,7 +53,6 @@ import javax.inject.Inject;
 import javax.jms.ConnectionFactory;
 import javax.jms.TextMessage;
 import javax.json.bind.Jsonb;
-import javax.json.bind.JsonbBuilder;
 import java.time.Instant;
 import java.util.*;
 
@@ -80,7 +80,7 @@ public class ExchangeMessageConsumerBeanTest extends BuildExchangeServiceTestDep
         jmsHelper.clearQueue("UVMSAssetEvent");
         jmsHelper.clearQueue(JMSHelper.RESPONSE_QUEUE);
         jmsHelper.clearQueue(JMSHelper.EXCHANGE_QUEUE);
-        jsonb = JsonbBuilder.create();
+        jsonb =  new JsonBConfigurator().getContext(null);
     }
 
     @Test
@@ -206,6 +206,8 @@ public class ExchangeMessageConsumerBeanTest extends BuildExchangeServiceTestDep
 
         String request = ExchangeModuleRequestMapper.createSetCommandSendPollRequest(serviceClassName, pollType, "Test User", null);
 
+
+        //Thread.sleep(5 * 60 * 1000);
         jmsHelper.registerSubscriber("ServiceName = '" + serviceClassName + "'");
         String corrID = jmsHelper.sendExchangeMessage(request, null, "SET_COMMAND");
         TextMessage message = (TextMessage) jmsHelper.listenOnEventBus(5000L);

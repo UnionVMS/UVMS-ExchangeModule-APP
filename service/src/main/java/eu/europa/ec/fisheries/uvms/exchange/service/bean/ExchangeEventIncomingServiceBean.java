@@ -24,15 +24,16 @@ import eu.europa.ec.fisheries.schema.exchange.service.v1.StatusType;
 import eu.europa.ec.fisheries.schema.exchange.v1.*;
 import eu.europa.ec.fisheries.schema.rules.module.v1.RulesModuleMethod;
 import eu.europa.ec.fisheries.schema.rules.module.v1.SetFLUXMDRSyncMessageRulesResponse;
+import eu.europa.ec.fisheries.uvms.commons.date.JsonBConfigurator;
 import eu.europa.ec.fisheries.uvms.commons.message.impl.JAXBUtils;
-import eu.europa.ec.fisheries.uvms.exchange.service.entity.exchangelog.ExchangeLog;
-import eu.europa.ec.fisheries.uvms.exchange.service.entity.serviceregistry.Service;
-import eu.europa.ec.fisheries.uvms.exchange.service.mapper.ServiceMapper;
 import eu.europa.ec.fisheries.uvms.exchange.model.mapper.ExchangeModuleResponseMapper;
 import eu.europa.ec.fisheries.uvms.exchange.model.mapper.JAXBMarshaller;
+import eu.europa.ec.fisheries.uvms.exchange.service.entity.exchangelog.ExchangeLog;
+import eu.europa.ec.fisheries.uvms.exchange.service.entity.serviceregistry.Service;
 import eu.europa.ec.fisheries.uvms.exchange.service.event.ExchangePluginStatusEvent;
 import eu.europa.ec.fisheries.uvms.exchange.service.event.PollEvent;
 import eu.europa.ec.fisheries.uvms.exchange.service.mapper.MovementMapper;
+import eu.europa.ec.fisheries.uvms.exchange.service.mapper.ServiceMapper;
 import eu.europa.ec.fisheries.uvms.exchange.service.message.event.ErrorEvent;
 import eu.europa.ec.fisheries.uvms.exchange.service.message.event.PluginErrorEvent;
 import eu.europa.ec.fisheries.uvms.exchange.service.message.event.carrier.ExchangeErrorEvent;
@@ -55,12 +56,12 @@ import javax.inject.Inject;
 import javax.jms.JMSException;
 import javax.jms.TextMessage;
 import javax.json.bind.Jsonb;
-import javax.json.bind.JsonbBuilder;
 import javax.xml.bind.JAXBException;
 import java.util.List;
 import java.util.UUID;
 
 import static eu.europa.ec.fisheries.uvms.commons.message.impl.JAXBUtils.unMarshallMessage;
+
 
 @Stateless
 public class ExchangeEventIncomingServiceBean {
@@ -108,7 +109,7 @@ public class ExchangeEventIncomingServiceBean {
     @Inject
     private ExchangeSalesProducer salesProducer;
 
-    private Jsonb jsonb = JsonbBuilder.create();
+    private Jsonb jsonb =  new JsonBConfigurator().getContext(null);
 
     /**
      * Process FLUXFAReportMessage coming from Flux Activity plugin

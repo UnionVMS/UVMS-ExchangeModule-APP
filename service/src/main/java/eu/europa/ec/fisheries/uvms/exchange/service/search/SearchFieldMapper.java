@@ -12,7 +12,7 @@ copy of the GNU General Public License along with the IFDM Suite. If not, see <h
 package eu.europa.ec.fisheries.uvms.exchange.service.search;
 
 import eu.europa.ec.fisheries.schema.exchange.v1.*;
-import eu.europa.ec.fisheries.uvms.exchange.model.util.DateUtils;
+import eu.europa.ec.fisheries.uvms.commons.date.DateUtils;
 import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -196,7 +196,7 @@ public class SearchFieldMapper {
                     return valueType.cast(Boolean.FALSE);
                 }
             } else if (valueType.isAssignableFrom(Instant.class)) {
-                return valueType.cast(DateUtils.parseToUTCDateTime(entry.getValue()));
+                return valueType.cast(DateUtils.stringToDate(entry.getValue()));
             } else if (valueType.isAssignableFrom(Integer.class)) {
                 return valueType.cast(Integer.valueOf(entry.getValue()));
             } else if (valueType.isAssignableFrom(TypeRefType.class)) {

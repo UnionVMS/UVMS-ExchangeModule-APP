@@ -13,7 +13,7 @@ package eu.europa.ec.fisheries.uvms.exchange.rest.mapper;
 
 import eu.europa.ec.fisheries.schema.exchange.source.v1.GetLogListByQueryResponse;
 import eu.europa.ec.fisheries.schema.exchange.v1.*;
-import eu.europa.ec.fisheries.uvms.exchange.model.util.DateUtils;
+import eu.europa.ec.fisheries.uvms.commons.date.DateUtils;
 import eu.europa.ec.fisheries.uvms.exchange.rest.dto.LogTypeLabel;
 import eu.europa.ec.fisheries.uvms.exchange.rest.dto.exchange.*;
 
@@ -23,6 +23,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ **/
 public class ExchangeLogMapper {
 
     public static ListQueryResponse mapToQueryResponse(GetLogListByQueryResponse response) {
@@ -48,7 +50,7 @@ public class ExchangeLogMapper {
                 dto.setType(LogTypeLabel.SENT_MOVEMENT.toString());
                 SendMovementType sendLog = (SendMovementType) log;
                 dateFwd = sendLog.getFwdDate().toInstant();
-                dto.setDateFwd(DateUtils.parseInstantToString(dateFwd));
+                dto.setDateFwd(DateUtils.dateToEpochMilliseconds(dateFwd));
                 dto.setRule(sendLog.getFwdRule());
                 dto.setRecipient(sendLog.getRecipient());
                 break;
@@ -58,7 +60,7 @@ public class ExchangeLogMapper {
                 dto.setType(LogTypeLabel.SENT_EMAIL.toString());
                 dto.setRecipient(sendEmail.getRecipient());
                 dto.setRule(sendEmail.getFwdRule());
-                dto.setDateFwd(DateUtils.parseInstantToString(dateFwd));
+                dto.setDateFwd(DateUtils.dateToEpochMilliseconds(dateFwd));
                 break;
             case SEND_POLL:
                 SendPollType sendPoll = (SendPollType) log;
@@ -89,8 +91,8 @@ public class ExchangeLogMapper {
         }
 
         Instant dateReceived = log.getDateRecieved().toInstant();
-        dto.setDateRecieved(DateUtils.parseInstantToString(dateReceived));
-        dto.setId(log.getGuid());
+    	dto.setDateRecieved(DateUtils.dateToEpochMilliseconds(dateReceived));
+    	dto.setId(log.getGuid());
         dto.setDf(log.getDf());
 
         dto.setIncoming(log.isIncoming());
@@ -135,17 +137,17 @@ public class ExchangeLogMapper {
             groupLog.setPluginList(mapPluginTypeList(groupMap.get(recipient)));
             sendingGroupList.add(groupLog);
         }
-        return sendingGroupList;
-    }
-
-    private static List<SendingLog> mapSendingLog(List<UnsentMessageType> messages) {
-        List<SendingLog> sendingLog = new ArrayList<>();
-        for (UnsentMessageType message : messages) {
-            SendingLog log = new SendingLog();
-            Instant dateReceived = message.getDateReceived().toInstant();
-            log.setDateRecieved(DateUtils.parseInstantToString(dateReceived));
-            log.setMessageId(message.getMessageId());
-            log.setSenderRecipient(message.getSenderReceiver());
+		return sendingGroupList;
+	}
+	
+	private static List<SendingLog> mapSendingLog(List<UnsentMessageType> messages) {
+		List<SendingLog> sendingLog = new ArrayList<>();
+		for(UnsentMessageType message : messages) {
+			SendingLog log = new SendingLog();
+            Instant dateRecieved = message.getDateReceived().toInstant();
+			log.setDateRecieved(DateUtils.dateToEpochMilliseconds(dateRecieved));
+			log.setMessageId(message.getMessageId());
+			log.setSenderRecipient(message.getSenderReceiver());
             log.setProperties(mapProperties(message.getProperties()));
             sendingLog.add(log);
         }

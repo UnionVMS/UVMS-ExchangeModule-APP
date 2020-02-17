@@ -48,7 +48,7 @@ public class ConfigRestResourceTest extends BuildExchangeRestTestDeployment {
             assertTrue(stringResponse.contains(e.value()));
         }
         for (SourceType e: SourceType.values()) {
-            assertTrue(stringResponse.contains(e.value()));
+            assertTrue(e.name(), stringResponse.contains(e.name()));
         }
     }
 

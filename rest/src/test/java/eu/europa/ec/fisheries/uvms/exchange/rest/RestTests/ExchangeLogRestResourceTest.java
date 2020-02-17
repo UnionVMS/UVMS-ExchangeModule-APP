@@ -1,14 +1,17 @@
 package eu.europa.ec.fisheries.uvms.exchange.rest.RestTests;
 
 import eu.europa.ec.fisheries.schema.exchange.v1.*;
+import eu.europa.ec.fisheries.uvms.commons.date.DateUtils;
+import eu.europa.ec.fisheries.uvms.exchange.rest.BuildExchangeRestTestDeployment;
+import eu.europa.ec.fisheries.uvms.exchange.rest.RestHelper;
+import eu.europa.ec.fisheries.uvms.exchange.rest.TestExchangeLogWithValidationResults;
+import eu.europa.ec.fisheries.uvms.exchange.rest.dto.PollQuery;
+import eu.europa.ec.fisheries.uvms.exchange.rest.dto.ResponseDto;
+import eu.europa.ec.fisheries.uvms.exchange.rest.dto.TestExchangeLogStatusType;
+import eu.europa.ec.fisheries.uvms.exchange.rest.dto.exchange.ListQueryResponse;
 import eu.europa.ec.fisheries.uvms.exchange.service.dao.ExchangeLogDaoBean;
 import eu.europa.ec.fisheries.uvms.exchange.service.entity.exchangelog.ExchangeLog;
 import eu.europa.ec.fisheries.uvms.exchange.service.entity.exchangelog.ExchangeLogStatus;
-import eu.europa.ec.fisheries.uvms.exchange.model.util.DateUtils;
-import eu.europa.ec.fisheries.uvms.exchange.rest.BuildExchangeRestTestDeployment;
-import eu.europa.ec.fisheries.uvms.exchange.rest.RestHelper;
-import eu.europa.ec.fisheries.uvms.exchange.rest.dto.PollQuery;
-import eu.europa.ec.fisheries.uvms.exchange.rest.dto.exchange.ListQueryResponse;
 import org.jboss.arquillian.container.test.api.OperateOnDeployment;
 import org.jboss.arquillian.junit.Arquillian;
 import org.junit.Test;
@@ -16,6 +19,7 @@ import org.junit.runner.RunWith;
 
 import javax.inject.Inject;
 import javax.ws.rs.client.Entity;
+import javax.ws.rs.core.GenericType;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import java.time.Instant;
@@ -39,7 +43,7 @@ public class ExchangeLogRestResourceTest extends BuildExchangeRestTestDeployment
 
     @Test
     @OperateOnDeployment("exchangeservice")
-    public void getLogListByCriteriaTest() throws Exception {
+    public void getLogListByCriteriaTest() {
         ExchangeLog exchangeLog = createBasicLog();
         exchangeLog.setTypeRefType(TypeRefType.UNKNOWN);
         exchangeLog = exchangeLogDao.createLog(exchangeLog);
@@ -69,18 +73,18 @@ public class ExchangeLogRestResourceTest extends BuildExchangeRestTestDeployment
         ListQueryResponse response = RestHelper.readResponseDto(stringResponse, ListQueryResponse.class);
         assertFalse(response.getLogList().isEmpty());
         assertEquals(exchangeLog.getId().toString(), response.getLogList().get(0).getId());
-        assertEquals(DateUtils.parseInstantToString(exchangeLog.getDateReceived()), response.getLogList().get(0).getDateRecieved());
+        assertEquals(DateUtils.dateToEpochMilliseconds(exchangeLog.getDateReceived()), response.getLogList().get(0).getDateRecieved());
 
     }
 
     @Test
     @OperateOnDeployment("exchangeservice")
-    public void getPollStatusTest() throws Exception {
+    public void getPollStatusTest() {
         Instant now = Instant.now();
         PollQuery query = new PollQuery();
         query.setStatus(ExchangeLogStatusTypeType.PROBABLY_TRANSMITTED);
-        query.setStatusFromDate(DateUtils.parseInstantToString(now));
-        query.setStatusToDate(DateUtils.parseInstantToString(now.plusSeconds(5)));
+        query.setStatusFromDate(DateUtils.dateToEpochMilliseconds(now));
+        query.setStatusToDate(DateUtils.dateToEpochMilliseconds(now.plusSeconds(5)));
 
         ExchangeLog exchangeLog = createBasicLog();
         exchangeLog.setTypeRefType(TypeRefType.POLL);
@@ -88,17 +92,17 @@ public class ExchangeLogRestResourceTest extends BuildExchangeRestTestDeployment
         addLogStatusToLog(exchangeLog,ExchangeLogStatusTypeType.PROBABLY_TRANSMITTED);
         exchangeLog = exchangeLogDao.createLog(exchangeLog);
 
-        String stringResponse = getWebTarget()
+        ResponseDto<List<TestExchangeLogStatusType>> responseDto = getWebTarget()
                 .path("exchange")
                 .path("poll")
                 .request(MediaType.APPLICATION_JSON)
                 .header(HttpHeaders.AUTHORIZATION, getToken())
-                .post(Entity.json(query), String.class);
+                .post(Entity.json(query), new GenericType<ResponseDto<List<TestExchangeLogStatusType>>>() {});
 
-        assertNotNull(stringResponse);
-        List<ExchangeLogStatusType> response = RestHelper.readResponseDtoList(stringResponse, ExchangeLogStatusType.class);
+        assertNotNull(responseDto);
+        List<TestExchangeLogStatusType> response = responseDto.getData();
         assertFalse(response.isEmpty());
-        ExchangeLogStatusType output = response.get(0);
+        TestExchangeLogStatusType output = response.get(0);
         assertEquals(exchangeLog.getId().toString(), output.getGuid());
     }
 
@@ -165,7 +169,7 @@ public class ExchangeLogRestResourceTest extends BuildExchangeRestTestDeployment
                 .get(String.class);
 
         assertNotNull(stringResponse);
-        ExchangeLogWithValidationResults response = RestHelper.readResponseDto(stringResponse, ExchangeLogWithValidationResults.class);
+        TestExchangeLogWithValidationResults response = RestHelper.readResponseDto(stringResponse, TestExchangeLogWithValidationResults.class);
         assertEquals(exchangeLog.getTypeRefMessage(), response.getMsg());
         assertEquals("Rules Mock Expression", response.getValidationList().get(0).getExpression());          //values from RulesModuleMock
         assertEquals("Rules Mock Message", response.getValidationList().get(0).getMessage());

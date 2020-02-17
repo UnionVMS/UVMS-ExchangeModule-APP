@@ -20,7 +20,6 @@ import eu.europa.ec.fisheries.uvms.exchange.service.entity.serviceregistry.Servi
 import eu.europa.ec.fisheries.uvms.exchange.service.entity.serviceregistry.ServiceCapability;
 import eu.europa.ec.fisheries.uvms.exchange.service.entity.serviceregistry.ServiceSetting;
 import eu.europa.ec.fisheries.uvms.exchange.service.mapper.ServiceMapper;
-import eu.europa.ec.fisheries.uvms.exchange.model.util.DateUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -100,7 +99,7 @@ public class ServiceRegistryModelBean {
             for (ServiceSetting setting : service.getServiceSettingList()) {
                 if (setting.getSetting().equals(newSetting.getSetting()) && !setting.getValue().equalsIgnoreCase(newSetting.getValue())) {
                     setting.setValue(newSetting.getValue());
-                    setting.setUpdatedTime(DateUtils.nowUTC());
+                    setting.setUpdatedTime(Instant.now());
                     setting.setUser(username);
                 }
             }

@@ -13,6 +13,8 @@ import eu.europa.ec.fisheries.uvms.exchange.rest.BuildExchangeRestTestDeployment
 import eu.europa.ec.fisheries.uvms.exchange.rest.JMSHelper;
 import eu.europa.ec.fisheries.uvms.exchange.rest.RestHelper;
 import eu.europa.ec.fisheries.uvms.exchange.rest.dto.Plugin;
+import eu.europa.ec.fisheries.uvms.exchange.rest.dto.ResponseDto;
+import eu.europa.ec.fisheries.uvms.exchange.rest.dto.TestExchangeLogStatusType;
 import org.jboss.arquillian.container.test.api.OperateOnDeployment;
 import org.jboss.arquillian.junit.Arquillian;
 import org.junit.Test;
@@ -45,15 +47,15 @@ public class ExchangeRegistryRestResourceTest extends BuildExchangeRestTestDeplo
     @OperateOnDeployment("exchangeservice")
     public void getServiceListTest() throws Exception {
 
-        String stringResponse = getWebTarget()
+        ResponseDto<List<Plugin>> responseDto = getWebTarget()
                 .path("plugin")
                 .path("list")
                 .request(MediaType.APPLICATION_JSON)
                 .header(HttpHeaders.AUTHORIZATION, getToken())
-                .get(String.class);
+                .get(new GenericType<ResponseDto<List<Plugin>>>() {});
 
-        assertNotNull(stringResponse);
-        List<Plugin> response = RestHelper.readResponseDtoList(stringResponse, Plugin.class);
+        assertNotNull(responseDto);
+        List<Plugin> response = responseDto.getData();
         assertFalse(response.isEmpty());
         assertEquals("STARTED", response.get(0).getStatus());
         assertEquals("ManualMovement", response.get(0).getName());
