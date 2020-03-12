@@ -31,6 +31,7 @@ import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.transaction.Transactional;
+import java.sql.Date;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -154,7 +155,7 @@ public class ExchangeLogRestServiceBean {
         if (CollectionUtils.isNotEmpty(criteria)){
             for (ExchangeListCriteriaPair criterion : criteria) {
                 if ("DATE_RECEIVED_FROM".equals(criterion.getKey().value())) {
-                    paramsMap.put("DATE_RECEIVED_FROM", DateUtil.parseToUTCDate(criterion.getValue()));
+                    paramsMap.put("DATE_RECEIVED_FROM", Date.from(DateUtil.parseToUTCDate(criterion.getValue())));
                 }
                 else if ("MESSAGE_DIRECTION".equals(criterion.getKey().value())) {
                     if ("OUTGOING".equals(criterion.getValue())){
@@ -165,7 +166,7 @@ public class ExchangeLogRestServiceBean {
                     }
                 }
                 else if ("DATE_RECEIVED_TO".equals(criterion.getKey().value())) {
-                    paramsMap.put("DATE_RECEIVED_TO", DateUtil.parseToUTCDate(criterion.getValue()));
+                    paramsMap.put("DATE_RECEIVED_TO", Date.from(DateUtil.parseToUTCDate(criterion.getValue())));
                 }
                 else if ("SOURCE".equals(criterion.getKey().value())){
                     paramsMap.put("SOURCE", criterion.getValue());
