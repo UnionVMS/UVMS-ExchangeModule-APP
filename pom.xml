@@ -31,7 +31,7 @@
         <longpolling.version>2.0.13</longpolling.version>
         <uvms.commons.version>4.1.6</uvms.commons.version>
         <usm4uvms.version>4.1.0</usm4uvms.version>
-        <uvms.config.version>4.1.0</uvms.config.version>
+        <uvms.config.version>4.1.1</uvms.config.version>
         <uvms-pom-deps.version>3.0</uvms-pom-deps.version>
         <asset.version>6.6.2</asset.version>
 
