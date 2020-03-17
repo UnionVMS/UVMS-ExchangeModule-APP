@@ -25,6 +25,8 @@ import org.slf4j.LoggerFactory;
 
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 import java.time.Instant;
 import java.util.List;
 
@@ -36,6 +38,7 @@ public class ServiceRegistryModelBean {
     @EJB
     private ServiceRegistryDaoBean dao;
 
+    @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
     public Service registerService(Service newService, String username) {
         // Look for existing service
         Service existingService = dao.getServiceByServiceClassName(newService.getServiceClassName());
