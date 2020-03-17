@@ -66,9 +66,6 @@ public class PluginServiceBean {
     private Event<ExchangeErrorEvent> exchangeErrorEvent;
 
     @Inject
-    private Event<Service> serviceRegisteredEvent;
-
-    @Inject
     ServiceRegistryDaoBean serviceRegistryDao;
 
     @Inject
@@ -120,7 +117,12 @@ public class PluginServiceBean {
         try {
             overrideSettingsFromConfig(newService); // Aka if config has settings for xyz parameter, use configs version instead
             Service service = serviceRegistryModel.registerService(newService, register.getService().getName());
-            serviceRegisteredEvent.fire(service);
+            String serviceClassName = service.getServiceClassName();
+            for (ServiceSetting setting : service.getServiceSettingList()) {
+                String description = "Plugin " + serviceClassName + " " + setting.getSetting() + " setting";
+                configService.pushSettingToConfig(SettingTypeMapper.map(setting.getSetting(), setting.getValue(),
+                        description), false);
+            }
             //TODO log to exchange log
 
             String response = ExchangePluginResponseMapper.mapToRegisterServiceResponseOK(messageId, ServiceMapper.toServiceModel(service));
@@ -130,20 +132,6 @@ public class PluginServiceBean {
         } catch (Exception e) {
             String response = ExchangePluginResponseMapper.mapToRegisterServiceResponseNOK(messageId, "Exchange service exception when registering plugin [ " + e.getMessage() + " ]");
             eventBusTopicProducer.sendEventBusMessage(response, register.getService().getServiceResponseMessageName());
-        }
-    }
-
-    public void pushSettingsToConfig(@Observes(during = TransactionPhase.AFTER_SUCCESS) Service service) { // Using CDI events to execute this after commit. Config push should be asynchronous.
-        // push to config module
-        try {
-            String serviceClassName = service.getServiceClassName();
-            for (ServiceSetting setting : service.getServiceSettingList()) {
-                String description = "Plugin " + serviceClassName + " " + setting.getSetting() + " setting";
-                configService.pushSettingToConfig(SettingTypeMapper.map(setting.getSetting(), setting.getValue(),
-                        description), false);
-            }
-        } catch (ConfigServiceException e) {
-            LOG.error("Couldn't register plugin settings in config parameter table");
         }
     }
 
