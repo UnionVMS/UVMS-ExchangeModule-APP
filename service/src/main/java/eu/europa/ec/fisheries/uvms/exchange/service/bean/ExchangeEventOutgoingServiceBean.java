@@ -38,6 +38,7 @@ import eu.europa.ec.fisheries.uvms.exchange.message.producer.bean.ExchangeAuditP
 import eu.europa.ec.fisheries.uvms.exchange.message.producer.bean.ExchangeEventBusTopicProducerBean;
 import eu.europa.ec.fisheries.uvms.exchange.model.constant.FaultCode;
 import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeException;
+import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelException;
 import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelMarshallException;
 import eu.europa.ec.fisheries.uvms.exchange.model.mapper.ExchangeModuleResponseMapper;
 import eu.europa.ec.fisheries.uvms.exchange.model.mapper.ExchangePluginRequestMapper;
@@ -290,7 +291,8 @@ public class ExchangeEventOutgoingServiceBean implements ExchangeEventOutgoingSe
             SetFLUXFAResponseMessageRequest request = JAXBMarshaller.unmarshallTextMessage(message.getJmsMessage(), SetFLUXFAResponseMessageRequest.class);
             log.debug("[INFO] Got FLUXFAResponse in exchange with destination :" + request.getDestination());
             String text = ExchangePluginRequestMapper.createSetFLUXFAResponseRequestWithOn(
-                    request.getRequest(), request.getDestination(), request.getFluxDataFlow(), request.getSenderOrReceiver(), request.getOnValue());
+                    request.getRequest(), request.getDestination(), request.getFluxDataFlow(), request.getSenderOrReceiver(), request.getOnValue(),request.getResponseMessageGuid());
+            request.setOnValue(null); //a value should be assigned later from bridge for response messages
             final ExchangeLogType logType = exchangeLogService.log(request, LogType.SEND_FLUX_RESPONSE_MSG, request.getStatus(), TypeRefType.FA_RESPONSE, request.getRequest(), false);
             if(!logType.getStatus().equals(ExchangeLogStatusTypeType.FAILED)){ // Send response only if it is NOT FAILED
                 log.debug("[START] Sending FLUXFAResponse to Flux Activity Plugin..");
@@ -311,11 +313,12 @@ public class ExchangeEventOutgoingServiceBean implements ExchangeEventOutgoingSe
             SetFAQueryMessageRequest request = JAXBMarshaller.unmarshallTextMessage(message.getJmsMessage(), SetFAQueryMessageRequest.class);
             log.debug("Got SetFAQueryMessageRequest in exchange : " + request.getRequest());
             String text = ExchangePluginRequestMapper.createSendFLUXFAQueryRequest(
-                    request.getRequest(), request.getDestination(), request.getFluxDataFlow(), request.getSenderOrReceiver());
+                    request.getRequest(), request.getDestination(), request.getFluxDataFlow(), request.getSenderOrReceiver(),request.getResponseMessageGuid());
             log.debug("Message to plugin {}", text);
             String pluginMessageId = sendEventBusMessage(text, ((request.getPluginType() == BELGIAN_ACTIVITY)
                     ? ExchangeServiceConstants.BELGIAN_ACTIVITY_PLUGIN_SERVICE_NAME : ExchangeServiceConstants.FLUX_ACTIVITY_PLUGIN_SERVICE_NAME));
             log.info("Message sent to Flux ERS Plugin :" + pluginMessageId);
+            request.setOnValue(null); //a value should be assigned later from bridge for response messages
             exchangeLogService.log(request, LogType.SEND_FA_QUERY_MSG, ExchangeLogStatusTypeType.SENT, TypeRefType.FA_QUERY, request.getRequest(), false);
         } catch (ExchangeModelMarshallException | ExchangeMessageException | ExchangeLogException e) {
             log.error("Unable to send FLUXFAQuery to plugin.", e);
@@ -328,11 +331,12 @@ public class ExchangeEventOutgoingServiceBean implements ExchangeEventOutgoingSe
             SetFLUXFAReportMessageRequest request = JAXBMarshaller.unmarshallTextMessage(message.getJmsMessage(), SetFLUXFAReportMessageRequest.class);
             log.debug("Got SetFAQueryMessageRequest in exchange : " + request.getRequest());
             String text = ExchangePluginRequestMapper.createSendFLUXFAReportRequest(
-                    request.getRequest(), request.getDestination(), request.getFluxDataFlow(), request.getSenderOrReceiver());
+                    request.getRequest(), request.getDestination(), request.getFluxDataFlow(), request.getSenderOrReceiver(),request.getResponseMessageGuid());
             log.debug("Message to plugin {}", text);
             String pluginMessageId = sendEventBusMessage(text, ((request.getPluginType() == BELGIAN_ACTIVITY)
                     ? ExchangeServiceConstants.BELGIAN_ACTIVITY_PLUGIN_SERVICE_NAME : ExchangeServiceConstants.FLUX_ACTIVITY_PLUGIN_SERVICE_NAME));
             log.info("Message sent to Flux ERS Plugin :" + pluginMessageId);
+            request.setOnValue(null); //a value should be assigned later from bridge for response messages
             exchangeLogService.log(request, LogType.SEND_FLUX_FA_REPORT_MSG, ExchangeLogStatusTypeType.SENT, TypeRefType.FA_REPORT, request.getRequest(), false);
         } catch (ExchangeModelMarshallException | ExchangeMessageException | ExchangeLogException e) {
             log.error("Unable to send FLUX FA Report to plugin.", e);
@@ -433,6 +437,19 @@ public class ExchangeEventOutgoingServiceBean implements ExchangeEventOutgoingSe
         } catch (ExchangeLogException | ExchangeModelMarshallException e) {
             fireExchangeFault(message, "Could not unmarshall the incoming UpdateLogStatus message", e);
         }
+    }
+
+    @Override
+    public void updateOnValue(@Observes @UpdateOnResponseValueEvent ExchangeMessageEvent message){
+        try {
+            UpdateOnMessageRequest request = JAXBMarshaller.unmarshallTextMessage(message.getJmsMessage(), UpdateOnMessageRequest.class);
+            String onValue = request.getOnValue();
+            String responseGuid = request.getResponseMessageGuid();
+            exchangeLogService.updateExchangeResponseOnMessage(onValue,responseGuid);
+        } catch ( ExchangeModelException e) {
+            fireExchangeFault(message, "Could not update the UpdateOnMessageRequest entity ", e);
+        }
+
     }
 
     @Override

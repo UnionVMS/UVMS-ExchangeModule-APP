@@ -21,6 +21,7 @@ import eu.europa.ec.fisheries.uvms.exchange.service.domain.entity.exchangelog.Ex
 import eu.europa.ec.fisheries.uvms.exchange.service.domain.exception.ExchangeDaoException;
 import eu.europa.ec.fisheries.uvms.exchange.service.domain.mapper.LogMapper;
 import eu.europa.ec.fisheries.uvms.exchange.service.domain.search.SearchFieldMapper;
+import eu.europa.ec.fisheries.uvms.exchange.service.exception.ExchangeLogException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 
@@ -185,6 +186,20 @@ public class ExchangeLogModelBean implements ExchangeLogModel {
             throw new ExchangeModelException("Error when getting status history of Exchange log ");
         }
         return null;
+    }
+
+    @Override
+    public ExchangeLog getExchangeLogByResponseGuid(String responseGuid) throws ExchangeModelException {
+        if (responseGuid == null ) {
+            throw new ExchangeModelException("Non valid arguments for getExchangeLogByResponseGuid. responseGuid is null ");
+        }
+        return logDao.getExchangeLogByGuid( responseGuid);
+    }
+
+    @Override
+    public ExchangeLog updateExchangeLogOnMessage(String onMessage, ExchangeLog exchangeLog) throws ExchangeModelException {
+       exchangeLog.setOnValue(onMessage);
+       return logDao.updateLog(exchangeLog);
     }
 
     @Override

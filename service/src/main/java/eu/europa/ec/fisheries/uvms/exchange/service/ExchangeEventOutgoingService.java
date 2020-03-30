@@ -97,6 +97,8 @@ public interface ExchangeEventOutgoingService {
 
     void updateLogBusinessError(@Observes @UpdateLogBusinessErrorEvent ExchangeMessageEvent message);
 
+    void updateOnValue(@Observes @UpdateOnResponseValueEvent ExchangeMessageEvent message);
+
     /**
      * Async response handler for processed movements
      *

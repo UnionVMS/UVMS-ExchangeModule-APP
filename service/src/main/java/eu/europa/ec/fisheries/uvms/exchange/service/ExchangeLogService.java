@@ -25,6 +25,8 @@ import eu.europa.ec.fisheries.schema.exchange.v1.PollStatus;
 import eu.europa.ec.fisheries.schema.exchange.v1.TypeRefType;
 import eu.europa.ec.fisheries.schema.exchange.v1.UnsentMessageType;
 import eu.europa.ec.fisheries.schema.exchange.v1.UnsentMessageTypeProperty;
+import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelException;
+import eu.europa.ec.fisheries.uvms.exchange.service.domain.entity.exchangelog.ExchangeLog;
 import eu.europa.ec.fisheries.uvms.exchange.service.exception.ExchangeLogException;
 
 @Local
@@ -70,6 +72,8 @@ public interface ExchangeLogService {
     String createUnsentMessage(String senderReceiver, Date timestamp, String recipient, String message, List<UnsentMessageTypeProperty> properties, String username) throws ExchangeLogException;
 
     ExchangeLogWithValidationResults getExchangeLogRawMessageAndValidationByGuid(String guid);
+
+    ExchangeLog updateExchangeResponseOnMessage(String onValue, String responseGuid) throws ExchangeModelException;
 
     void resend(List<String> messageIdList, String username) throws ExchangeLogException;
 

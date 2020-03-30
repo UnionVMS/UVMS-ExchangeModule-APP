@@ -12,6 +12,7 @@ copy of the GNU General Public License along with the IFDM Suite. If not, see <h
 package eu.europa.ec.fisheries.uvms.exchange.service.domain.dao.bean;
 
 import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeHistoryListQuery;
+import eu.europa.ec.fisheries.schema.exchange.v1.LogType;
 import eu.europa.ec.fisheries.schema.exchange.v1.TypeRefType;
 import eu.europa.ec.fisheries.uvms.exchange.service.domain.constant.ExchangeConstants;
 import eu.europa.ec.fisheries.uvms.exchange.service.domain.dao.Dao;

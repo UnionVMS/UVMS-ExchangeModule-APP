@@ -13,6 +13,7 @@ package eu.europa.ec.fisheries.uvms.exchange.service.domain;
 
 import eu.europa.ec.fisheries.schema.exchange.v1.*;
 import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelException;
+import eu.europa.ec.fisheries.uvms.exchange.service.domain.entity.exchangelog.ExchangeLog;
 
 import javax.ejb.Local;
 import java.util.List;
@@ -42,6 +43,10 @@ public interface ExchangeLogModel {
     Set<ExchangeLogType> getExchangeLogByRefUUIDAndType(String refUUID, TypeRefType typeRefType) throws ExchangeModelException;
 
     ExchangeLogType setPollStatus(PollStatus pollStatus, String username) throws ExchangeModelException;
+
+    ExchangeLog getExchangeLogByResponseGuid(String responseGuid) throws ExchangeModelException;
+
+    ExchangeLog updateExchangeLogOnMessage(String onMessage, ExchangeLog exchangeLog) throws ExchangeModelException;
 
     LogWithRawMsgAndType getExchangeLogRawXmlByGuid(String guid);
 }

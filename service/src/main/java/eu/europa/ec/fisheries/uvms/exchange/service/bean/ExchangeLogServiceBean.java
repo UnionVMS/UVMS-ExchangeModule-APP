@@ -21,6 +21,7 @@ import eu.europa.ec.fisheries.uvms.exchange.service.ExchangeLogService;
 import eu.europa.ec.fisheries.uvms.exchange.service.domain.ExchangeLogModel;
 import eu.europa.ec.fisheries.uvms.exchange.service.domain.UnsentModel;
 import eu.europa.ec.fisheries.uvms.exchange.service.domain.dao.ExchangeLogDao;
+import eu.europa.ec.fisheries.uvms.exchange.service.domain.entity.exchangelog.ExchangeLog;
 import eu.europa.ec.fisheries.uvms.exchange.service.event.ExchangeLogEvent;
 import eu.europa.ec.fisheries.uvms.exchange.service.event.ExchangeSendingQueueEvent;
 import eu.europa.ec.fisheries.uvms.exchange.service.exception.ExchangeLogException;
@@ -168,6 +169,18 @@ public class ExchangeLogServiceBean implements ExchangeLogService {
         } catch (ExchangeModelException e) {
             throw new ExchangeLogException("Couldn't update the status of the exchange log with guid " + logGuid, e);
         }
+    }
+
+    @Override
+    public ExchangeLog updateExchangeResponseOnMessage(String onValue, String responseGuid) throws ExchangeModelException {
+
+        ExchangeLog exchangeLogByOnMessageAndLogType = exchangeLogModel.getExchangeLogByResponseGuid(responseGuid);
+        if(exchangeLogByOnMessageAndLogType == null ) {
+            log.error("Could not update on value for guid : "+ responseGuid);
+            return null;
+        }
+
+        return exchangeLogModel.updateExchangeLogOnMessage(onValue,exchangeLogByOnMessageAndLogType);
     }
 
     @Override
