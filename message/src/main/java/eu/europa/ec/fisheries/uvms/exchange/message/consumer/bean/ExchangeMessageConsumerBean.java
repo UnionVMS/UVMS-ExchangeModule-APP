@@ -183,7 +183,7 @@ public class ExchangeMessageConsumerBean implements MessageListener {
         ExchangeBaseRequest request = tryConsumeExchangeBaseRequest(textMessage);
         LOG.debug("Message received in Exchange Message MDB. Times redelivered: {}", getTimesRedelivered(message));
         LOG.debug("Request body : {}", request);
-        final ExchangeMessageEvent messageEventWrapper = new ExchangeMessageEvent(textMessage);
+        final ExchangeMessageEvent messageEventWrapper = new ExchangeMessageEvent(textMessage,request);
         if (request == null) {
             LOG.warn("[ERROR] ExchangeBaseRequest is null!! Check the message sent...");
             try {
