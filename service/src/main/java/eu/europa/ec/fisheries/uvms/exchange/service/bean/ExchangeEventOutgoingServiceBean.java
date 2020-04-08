@@ -136,7 +136,7 @@ public class ExchangeEventOutgoingServiceBean implements ExchangeEventOutgoingSe
     @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
     public void sendReportToPlugin(@Observes @SendReportToPluginEvent ExchangeMessageEvent message) {
         try {
-            SendMovementToPluginRequest request = JAXBMarshaller.unmarshallTextMessage(message.getJmsMessage(), SendMovementToPluginRequest.class);
+            SendMovementToPluginRequest request = (SendMovementToPluginRequest) message.getExchangeBaseRequest();
             log.info("Send report to plugin: {}",request);
             SendMovementToPluginType sendReport = request.getReport();
 
@@ -242,7 +242,7 @@ public class ExchangeEventOutgoingServiceBean implements ExchangeEventOutgoingSe
     public void sendCommandToPlugin(@Observes @SendCommandToPluginEvent ExchangeMessageEvent message) {
         SetCommandRequest request = new SetCommandRequest();
         try {
-            request = JAXBMarshaller.unmarshallTextMessage(message.getJmsMessage(), SetCommandRequest.class);
+            request = (SetCommandRequest) message.getExchangeBaseRequest();
             log.info("Send command to plugin:{}",request);
             String pluginName = request.getCommand().getPluginName();
             CommandType commandType = request.getCommand();
@@ -288,7 +288,7 @@ public class ExchangeEventOutgoingServiceBean implements ExchangeEventOutgoingSe
     @Override
     public void sendFLUXFAResponseToPlugin(@Observes @SendFLUXFAResponseToPluginEvent ExchangeMessageEvent message) {
         try {
-            SetFLUXFAResponseMessageRequest request = JAXBMarshaller.unmarshallTextMessage(message.getJmsMessage(), SetFLUXFAResponseMessageRequest.class);
+            SetFLUXFAResponseMessageRequest request = (SetFLUXFAResponseMessageRequest) message.getExchangeBaseRequest();
             log.debug("[INFO] Got FLUXFAResponse in exchange with destination :" + request.getDestination());
             String text = ExchangePluginRequestMapper.createSetFLUXFAResponseRequestWithOn(
                     request.getRequest(), request.getDestination(), request.getFluxDataFlow(), request.getSenderOrReceiver(), request.getOnValue(),request.getResponseMessageGuid());
@@ -310,7 +310,7 @@ public class ExchangeEventOutgoingServiceBean implements ExchangeEventOutgoingSe
     @Override
     public void sendFLUXFAQueryToPlugin(@Observes @SendFaQueryToPluginEvent ExchangeMessageEvent message) {
         try {
-            SetFAQueryMessageRequest request = JAXBMarshaller.unmarshallTextMessage(message.getJmsMessage(), SetFAQueryMessageRequest.class);
+            SetFAQueryMessageRequest request = (SetFAQueryMessageRequest) message.getExchangeBaseRequest();
             log.debug("Got SetFAQueryMessageRequest in exchange : " + request.getRequest());
             String text = ExchangePluginRequestMapper.createSendFLUXFAQueryRequest(
                     request.getRequest(), request.getDestination(), request.getFluxDataFlow(), request.getSenderOrReceiver(),request.getResponseMessageGuid());
@@ -328,7 +328,7 @@ public class ExchangeEventOutgoingServiceBean implements ExchangeEventOutgoingSe
     @Override
     public void sendFLUXFAReportToPlugin(@Observes @SendFaReportToPluginEvent ExchangeMessageEvent message) {
         try {
-            SetFLUXFAReportMessageRequest request = JAXBMarshaller.unmarshallTextMessage(message.getJmsMessage(), SetFLUXFAReportMessageRequest.class);
+            SetFLUXFAReportMessageRequest request = (SetFLUXFAReportMessageRequest) message.getExchangeBaseRequest();
             log.debug("Got SetFAQueryMessageRequest in exchange : " + request.getRequest());
             String text = ExchangePluginRequestMapper.createSendFLUXFAReportRequest(
                     request.getRequest(), request.getDestination(), request.getFluxDataFlow(), request.getSenderOrReceiver(),request.getResponseMessageGuid());
@@ -346,7 +346,7 @@ public class ExchangeEventOutgoingServiceBean implements ExchangeEventOutgoingSe
     @Override
     public void sendSalesResponse(@Observes @SendSalesResponseEvent ExchangeMessageEvent message) {
         try {
-            eu.europa.ec.fisheries.schema.exchange.module.v1.SendSalesResponseRequest request = JAXBMarshaller.unmarshallTextMessage(message.getJmsMessage(), eu.europa.ec.fisheries.schema.exchange.module.v1.SendSalesResponseRequest.class);
+            eu.europa.ec.fisheries.schema.exchange.module.v1.SendSalesResponseRequest request = (eu.europa.ec.fisheries.schema.exchange.module.v1.SendSalesResponseRequest) message.getExchangeBaseRequest();
             ExchangeLogStatusTypeType validationStatus = request.getValidationStatus();
             exchangeLogService.log(request, LogType.SEND_SALES_RESPONSE, validationStatus, TypeRefType.SALES_RESPONSE, request.getResponse(), false);
             if (validationStatus == ExchangeLogStatusTypeType.SUCCESSFUL || validationStatus == ExchangeLogStatusTypeType.SUCCESSFUL_WITH_WARNINGS) {
@@ -368,7 +368,7 @@ public class ExchangeEventOutgoingServiceBean implements ExchangeEventOutgoingSe
     @Override
     public void sendSalesReport(@Observes @SendSalesReportEvent ExchangeMessageEvent message) {
         try {
-            eu.europa.ec.fisheries.schema.exchange.module.v1.SendSalesReportRequest request = JAXBMarshaller.unmarshallTextMessage(message.getJmsMessage(), eu.europa.ec.fisheries.schema.exchange.module.v1.SendSalesReportRequest.class);
+            eu.europa.ec.fisheries.schema.exchange.module.v1.SendSalesReportRequest request = (eu.europa.ec.fisheries.schema.exchange.module.v1.SendSalesReportRequest) message.getExchangeBaseRequest();
             ExchangeLogStatusTypeType validationStatus = request.getValidationStatus();
             exchangeLogService.log(request, LogType.SEND_SALES_REPORT, validationStatus, TypeRefType.SALES_REPORT, request.getReport(), false);
             if (validationStatus == ExchangeLogStatusTypeType.SUCCESSFUL || validationStatus == ExchangeLogStatusTypeType.SUCCESSFUL_WITH_WARNINGS) {
@@ -393,7 +393,7 @@ public class ExchangeEventOutgoingServiceBean implements ExchangeEventOutgoingSe
     @Override
     public void sendAssetInformation(@Observes @SendAssetInformationEvent ExchangeMessageEvent event) {
         try {
-            SendAssetInformationRequest incomingRequest = JAXBMarshaller.unmarshallTextMessage(event.getJmsMessage(), SendAssetInformationRequest.class);
+            SendAssetInformationRequest incomingRequest = (SendAssetInformationRequest) event.getExchangeBaseRequest();
             String message = incomingRequest.getAssets();
             String destination = incomingRequest.getDestination();
             String senderOrReceiver = incomingRequest.getSenderOrReceiver();
@@ -416,25 +416,23 @@ public class ExchangeEventOutgoingServiceBean implements ExchangeEventOutgoingSe
     @Override
     public void updateLogStatus(@Observes @UpdateLogStatusEvent ExchangeMessageEvent message) {
         try {
-            UpdateLogStatusRequest request = JAXBMarshaller.unmarshallTextMessage(message.getJmsMessage(), UpdateLogStatusRequest.class);
+            UpdateLogStatusRequest request = (UpdateLogStatusRequest) message.getExchangeBaseRequest();
             String logGuid = request.getLogGuid();
             ExchangeLogStatusTypeType status = request.getNewStatus();
             exchangeLogService.updateStatus(logGuid, status);
         } catch (ExchangeLogException e) {
             fireExchangeFault(message, "Could not update the status of a message log.", e);
-        } catch (ExchangeModelMarshallException e) {
-            fireExchangeFault(message, "Could not unmarshall the incoming UpdateLogStatus message", e);
         }
     }
 
     @Override
     public void updateLogBusinessError(@Observes @UpdateLogBusinessErrorEvent ExchangeMessageEvent message) {
         try {
-            UpdateLogStatusRequest request = JAXBMarshaller.unmarshallTextMessage(message.getJmsMessage(), UpdateLogStatusRequest.class);
+            UpdateLogStatusRequest request = (UpdateLogStatusRequest)message.getExchangeBaseRequest();
             String exchangeLogGuid = request.getLogGuid();
             String businessModuleExceptionMessage = request.getBusinessModuleExceptionMessage();
             exchangeLogService.updateExchangeLogBusinessError(exchangeLogGuid, businessModuleExceptionMessage);
-        } catch (ExchangeLogException | ExchangeModelMarshallException e) {
+        } catch (ExchangeLogException e) {
             fireExchangeFault(message, "Could not unmarshall the incoming UpdateLogStatus message", e);
         }
     }
@@ -455,7 +453,7 @@ public class ExchangeEventOutgoingServiceBean implements ExchangeEventOutgoingSe
     @Override
     public void handleProcessedMovement(@Observes @HandleProcessedMovementEvent ExchangeMessageEvent message) {
         try {
-            ProcessedMovementResponse request = JAXBMarshaller.unmarshallTextMessage(message.getJmsMessage(), ProcessedMovementResponse.class);
+            ProcessedMovementResponse request = (ProcessedMovementResponse) message.getExchangeBaseRequest();
             log.debug("Received processed movement from Rules:{}", request);
             String username;
             MovementRefType movementRefType = request.getMovementRefType();
@@ -472,7 +470,7 @@ public class ExchangeEventOutgoingServiceBean implements ExchangeEventOutgoingSe
                 String pollGuid = logTypeRef.getRefGuid();
                 pollEvent.fire(new NotificationMessage("guid", pollGuid));
             }
-        } catch (ExchangeLogException | ExchangeModelMarshallException e) {
+        } catch (ExchangeLogException e) {
             log.error(e.getMessage());
         }
     }
@@ -480,7 +478,7 @@ public class ExchangeEventOutgoingServiceBean implements ExchangeEventOutgoingSe
     @Override
     public void handleProcessedMovementBatch(@Observes @ProcessedMovementBatch ExchangeMessageEvent message) {
         try {
-            ProcessedMovementResponseBatch request = JAXBMarshaller.unmarshallTextMessage(message.getJmsMessage(), ProcessedMovementResponseBatch.class);
+            ProcessedMovementResponseBatch request = (ProcessedMovementResponseBatch) message.getExchangeBaseRequest();
             log.debug("Received processed movement from Rules:{}", request);
             String username;
             MovementRefType movementRefType = request.getMovementRefType();
@@ -494,7 +492,7 @@ public class ExchangeEventOutgoingServiceBean implements ExchangeEventOutgoingSe
             username = request.getUsername();
             ExchangeLogType log = ExchangeLogMapper.getReceivedMovementExchangeLog(setReportMovementType, movementRefType.getMovementRefGuid(), movementRefType.getType().value(), username);
             exchangeLogService.log(log, username);
-        } catch (ExchangeLogException | ExchangeModelMarshallException e) {
+        } catch (ExchangeLogException e) {
             log.error(e.getMessage());
         }
     }

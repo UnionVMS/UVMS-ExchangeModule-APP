@@ -14,6 +14,7 @@ package eu.europa.ec.fisheries.uvms.exchange.message.event.carrier;
 import javax.jms.TextMessage;
 
 import eu.europa.ec.fisheries.schema.exchange.common.v1.ExchangeFault;
+import eu.europa.ec.fisheries.schema.exchange.module.v1.ExchangeBaseRequest;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
@@ -23,15 +24,26 @@ public class ExchangeMessageEvent {
 
     private TextMessage jmsMessage;
     private ExchangeFault fault;
+    private ExchangeBaseRequest exchangeBaseRequest;
 
     public ExchangeMessageEvent(TextMessage jmsMessage) {
         this.jmsMessage = jmsMessage;
+    }
+
+    public ExchangeMessageEvent(TextMessage jmsMessage, ExchangeBaseRequest exchangeBaseRequest) {
+        this.jmsMessage = jmsMessage;
+        this.exchangeBaseRequest = exchangeBaseRequest;
     }
 
     public ExchangeMessageEvent(TextMessage jmsMessage, ExchangeFault fault) {
         this.jmsMessage = jmsMessage;
         this.fault = fault;
     }
+
+    public ExchangeBaseRequest getExchangeBaseRequest() {
+        return exchangeBaseRequest;
+    }
+
 
     public ExchangeFault getErrorFault() {
         return fault;
