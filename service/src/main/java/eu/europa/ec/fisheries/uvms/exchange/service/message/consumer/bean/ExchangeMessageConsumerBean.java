@@ -37,7 +37,7 @@ import javax.jms.TextMessage;
 //@formatter:off
 @MessageDriven(activationConfig = {
         @ActivationConfigProperty(propertyName = MessageConstants.DESTINATION_TYPE_STR, propertyValue = MessageConstants.DESTINATION_TYPE_QUEUE),
-        @ActivationConfigProperty(propertyName = MessageConstants.DESTINATION_STR, propertyValue = MessageConstants.QUEUE_EXCHANGE_EVENT),
+        @ActivationConfigProperty(propertyName = MessageConstants.DESTINATION_LOOKUP_STR, propertyValue = MessageConstants.QUEUE_EXCHANGE_EVENT),
 })
 //@formatter:on
 public class ExchangeMessageConsumerBean implements MessageListener {
