@@ -44,7 +44,8 @@ public abstract class BuildExchangeServiceTestDeployment {
 
         File[] files = Maven.configureResolver().loadPomFromFile("pom.xml")
                 .resolve("eu.europa.ec.fisheries.uvms.asset:asset-client",
-                        "eu.europa.ec.fisheries.uvms.commons:uvms-commons-message")
+                        "eu.europa.ec.fisheries.uvms.commons:uvms-commons-message",
+                        "eu.europa.ec.fisheries.uvms:usm4uvms")
                 .withTransitivity().asFile();
         testWar.addAsLibraries(files);
 
