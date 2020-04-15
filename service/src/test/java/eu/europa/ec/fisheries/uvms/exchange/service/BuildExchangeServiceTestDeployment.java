@@ -24,6 +24,10 @@ public abstract class BuildExchangeServiceTestDeployment {
                 .importRuntimeAndTestDependencies().resolve().withTransitivity().asFile();
         testWar.addAsLibraries(files);
 
+        testWar.addAsLibraries(Maven.configureResolver().loadPomFromFile("pom.xml")
+                .resolve("eu.europa.ec.fisheries.uvms:usm4uvms")
+                .withTransitivity().asFile());
+
         testWar.addPackages(true, "eu.europa.ec.fisheries.uvms.exchange.service");
 
         testWar.deleteClass(AssetModuleMock.class);
