@@ -75,40 +75,6 @@
                 </plugins>
             </build>
         </profile>
-        <!-- COPY TO FOLDER -->
-        <profile>
-            <id>copy-ear</id>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-dependency-plugin</artifactId>
-                        <version>3.1.2</version>
-                        <executions>
-                            <execution>
-                                <id>copy-installed</id>
-                                <phase>install</phase>
-                                <goals>
-                                    <goal>copy</goal>
-                                </goals>
-                                <configuration>
-                                    <artifactItems>
-                                        <artifactItem>
-                                            <groupId>${project.groupId}</groupId>
-                                            <artifactId>${project.artifactId}</artifactId>
-                                            <version>${project.version}</version>
-                                            <classifier>${envClassifier}</classifier>
-                                            <type>${project.packaging}</type>
-                                        </artifactItem>
-                                    </artifactItems>
-                                    <outputDirectory>C:\dev\WebLogic\domain1213\servers\AdminServer\upload</outputDirectory>
-                                </configuration>
-                            </execution>
-                        </executions>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
     </profiles>  
     
 </project>

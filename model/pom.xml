@@ -12,18 +12,13 @@
     <packaging>ejb</packaging>
 
     <properties>
-        <scm.url>scm:git:https://github.com/UnionVMS/UVMS-ExchangeModule-MODEL.git</scm.url>
-        <scm.connection>${scm.url}</scm.connection>
         <exchange.api.check.against.version>4.0.0</exchange.api.check.against.version>
         <wsdl.contract.name>ExchangeModuleService</wsdl.contract.name>
         <wsdl.source.name>ExchangeDataSourceService</wsdl.source.name>
         <wsdl.plugin.name>ExchangePluginService</wsdl.plugin.name>
         <wsdl.registry.name>ExchangeRegistryService</wsdl.registry.name>
-        <project.scm.id>github</project.scm.id>
         <binding.xml>binding-date.xml</binding.xml>
-
     </properties>
-
 
     <dependencies>
         <dependency>

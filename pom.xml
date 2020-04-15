@@ -36,6 +36,7 @@
         <asset.version>6.7.5</asset.version>
 
         <!-- Uvms models -->
+        <user.model.version>2.1.3</user.model.version>
         <audit.model.version>4.3.3</audit.model.version>
         <movement.model.version>5.5.3-UVMS</movement.model.version>
         <rules.model.version>3.3-MARE</rules.model.version>
@@ -133,6 +134,11 @@
                 <version>${project.version}</version>
             </dependency>
             <dependency>
+                <groupId>eu.europa.ec.fisheries.uvms.user</groupId>
+                <artifactId>user-model</artifactId>
+                <version>${user.model.version}</version>
+            </dependency>
+            <dependency>
                 <groupId>eu.europa.ec.fisheries.uvms.audit</groupId>
                 <artifactId>audit-model</artifactId>
                 <version>${audit.model.version}</version>
@@ -146,6 +152,12 @@
                 <groupId>eu.europa.ec.fisheries.uvms.rules</groupId>
                 <artifactId>rules-model</artifactId>
                 <version>${rules.model.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>*</groupId>
+                        <artifactId>*</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
             <dependency>
                 <groupId>eu.europa.ec.fisheries.uvms.movement-rules</groupId>
@@ -167,54 +179,6 @@
             <scope>provided</scope>
         </dependency>
     </dependencies>
-
-    <profiles>
-        <profile>
-            <id>belgium-local</id>
-            <distributionManagement>
-                <snapshotRepository>
-                    <id>lv-snapshots</id>
-                    <url>https://apjenp01.dg3.be/nexus/repository/maven-snapshots/</url>
-                </snapshotRepository>
-            </distributionManagement>
-            <properties>
-                <focus-pom.java.version>1.8</focus-pom.java.version>
-            </properties>
-        </profile>
-        <profile>
-            <id>dg-mare</id>
-            <distributionManagement>
-                <repository>
-                    <id>digit-releases</id>
-                    <name>DG DIGIT Repository</name>
-                    <url>https://webgate.ec.europa.eu/CITnet/nexus/content/repositories/mare/</url>
-                </repository>
-                <snapshotRepository>
-                    <id>digit-snapshots</id>
-                    <name>DG DIGIT Snapshot Repository</name>
-                    <url>https://webgate.ec.europa.eu/CITnet/nexus/content/repositories/mare-snapshots/</url>
-                </snapshotRepository>
-            </distributionManagement>
-
-            <properties>
-                <scm.connection>scm:git:https://emserveje@webgate.ec.europa.eu/CITnet/stash/scm/unionvms/uvms-exchangemodule-app.git</scm.connection>
-                <release.branch.name>uvms-3.0.5-C3PO</release.branch.name>
-            </properties>
-        </profile>
-    </profiles>
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-plugin-plugin</artifactId>
-                <version>3.6.0</version>
-                <configuration>
-                    <goalPrefix>plugin</goalPrefix>
-                    <outputDirectory>target/dir</outputDirectory>
-                </configuration>
-            </plugin>
-        </plugins>
-    </build>
 
     <modules>
         <module>LIQUIBASE</module>

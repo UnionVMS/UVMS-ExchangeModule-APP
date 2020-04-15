@@ -28,6 +28,12 @@
             <groupId>eu.europa.ec.fisheries.uvms.asset</groupId>
             <artifactId>asset-client</artifactId>
             <version>${asset.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>eu.europa.ec.fisheries.uvms</groupId>
+                    <artifactId>usm4uvms</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <!-- Third party libs -->
@@ -58,6 +64,10 @@
             <version>${project.version}</version>
         </dependency>
         <dependency>
+            <groupId>eu.europa.ec.fisheries.uvms.user</groupId>
+            <artifactId>user-model</artifactId>
+        </dependency>
+        <dependency>
             <groupId>eu.europa.ec.fisheries.uvms.audit</groupId>
             <artifactId>audit-model</artifactId>
         </dependency>
@@ -84,13 +94,6 @@
             <groupId>fish.focus.uvms.maven</groupId>
             <artifactId>uvms-pom-arquillian-deps</artifactId>
             <type>pom</type>
-            <scope>test</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>com.google.guava</groupId>
-            <artifactId>guava</artifactId>
-            <version>29.0-jre</version>
             <scope>test</scope>
         </dependency>
 
