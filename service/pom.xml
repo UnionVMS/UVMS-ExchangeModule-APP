@@ -28,12 +28,6 @@
             <groupId>eu.europa.ec.fisheries.uvms.asset</groupId>
             <artifactId>asset-client</artifactId>
             <version>${asset.version}</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>eu.europa.ec.fisheries.uvms</groupId>
-                    <artifactId>usm4uvms</artifactId>
-                </exclusion>
-            </exclusions>
         </dependency>
 
         <!-- Third party libs -->
