@@ -12,24 +12,17 @@ copy of the GNU General Public License along with the IFDM Suite. If not, see <h
 package eu.europa.ec.fisheries.uvms.exchange.service.mapper;
 
 import eu.europa.ec.fisheries.schema.exchange.v1.UnsentMessageType;
-import eu.europa.ec.fisheries.schema.exchange.v1.UnsentMessageTypeProperty;
-import eu.europa.ec.fisheries.schema.exchange.v1.UnsentMessageTypePropertyKey;
 import eu.europa.ec.fisheries.uvms.exchange.service.entity.unsent.UnsentMessage;
-import eu.europa.ec.fisheries.uvms.exchange.service.entity.unsent.UnsentMessageProperty;
 
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class UnsentMessageMapper {
 
     public static List<UnsentMessageType> toModel(List<UnsentMessage> list) {
-		List<UnsentMessageType> modelList = new ArrayList<>();
-		for(UnsentMessage entity : list) {
-			modelList.add(toModel(entity));
-		}
-		return modelList;
-	}
+        return list.stream().map(UnsentMessageMapper::toModel).collect(Collectors.toList());
+    }
 
     private static UnsentMessageType toModel(UnsentMessage entity) {
         UnsentMessageType model = new UnsentMessageType();
@@ -38,19 +31,6 @@ public class UnsentMessageMapper {
         model.setMessageId(entity.getGuid().toString());
         model.setRecipient(entity.getRecipient());
         model.setMessage(entity.getMessage());
-        model.getProperties().addAll(mapToUnsentMessagePropertyModel(entity));
         return model;
-    }
-
-    private static List<UnsentMessageTypeProperty> mapToUnsentMessagePropertyModel(UnsentMessage entity) {
-        List<UnsentMessageProperty> properties = entity.getProperties();
-        List<UnsentMessageTypeProperty> unsentMessageTypeProperties = new ArrayList<>();
-        for(UnsentMessageProperty property : properties){
-            UnsentMessageTypeProperty unsentMessageTypeProperty = new UnsentMessageTypeProperty();
-            unsentMessageTypeProperty.setKey(UnsentMessageTypePropertyKey.fromValue(property.getKey().value()));
-            unsentMessageTypeProperty.setValue(property.getValue());
-            unsentMessageTypeProperties.add(unsentMessageTypeProperty);
-        }
-        return unsentMessageTypeProperties;
     }
 }

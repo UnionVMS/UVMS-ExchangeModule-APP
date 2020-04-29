@@ -12,7 +12,6 @@
         <class>eu.europa.ec.fisheries.uvms.exchange.service.entity.exchangelog.ExchangeLog</class>
         <class>eu.europa.ec.fisheries.uvms.exchange.service.entity.exchangelog.ExchangeLogStatus</class>
         <class>eu.europa.ec.fisheries.uvms.exchange.service.entity.unsent.UnsentMessage</class>
-        <class>eu.europa.ec.fisheries.uvms.exchange.service.entity.unsent.UnsentMessageProperty</class>
         <exclude-unlisted-classes>true</exclude-unlisted-classes>
         <shared-cache-mode>ALL</shared-cache-mode>
         <properties>

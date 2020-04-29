@@ -23,8 +23,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-/**
- **/
 public class ExchangeLogMapper {
 
     public static ListQueryResponse mapToQueryResponse(GetLogListByQueryResponse response) {
@@ -91,8 +89,8 @@ public class ExchangeLogMapper {
         }
 
         Instant dateReceived = log.getDateRecieved().toInstant();
-    	dto.setDateRecieved(DateUtils.dateToEpochMilliseconds(dateReceived));
-    	dto.setId(log.getGuid());
+        dto.setDateRecieved(DateUtils.dateToEpochMilliseconds(dateReceived));
+        dto.setId(log.getGuid());
         dto.setDf(log.getDf());
 
         dto.setIncoming(log.isIncoming());
@@ -137,29 +135,20 @@ public class ExchangeLogMapper {
             groupLog.setPluginList(mapPluginTypeList(groupMap.get(recipient)));
             sendingGroupList.add(groupLog);
         }
-		return sendingGroupList;
-	}
-	
-	private static List<SendingLog> mapSendingLog(List<UnsentMessageType> messages) {
-		List<SendingLog> sendingLog = new ArrayList<>();
-		for(UnsentMessageType message : messages) {
-			SendingLog log = new SendingLog();
+        return sendingGroupList;
+    }
+
+    private static List<SendingLog> mapSendingLog(List<UnsentMessageType> messages) {
+        List<SendingLog> sendingLog = new ArrayList<>();
+        for (UnsentMessageType message : messages) {
+            SendingLog log = new SendingLog();
             Instant dateRecieved = message.getDateReceived().toInstant();
-			log.setDateRecieved(DateUtils.dateToEpochMilliseconds(dateRecieved));
-			log.setMessageId(message.getMessageId());
-			log.setSenderRecipient(message.getSenderReceiver());
-            log.setProperties(mapProperties(message.getProperties()));
+            log.setDateRecieved(DateUtils.dateToEpochMilliseconds(dateRecieved));
+            log.setMessageId(message.getMessageId());
+            log.setSenderRecipient(message.getSenderReceiver());
             sendingLog.add(log);
         }
         return sendingLog;
-    }
-
-    private static Map<String, String> mapProperties(List<UnsentMessageTypeProperty> properties) {
-        Map<String, String> map = new HashMap<>();
-        for (UnsentMessageTypeProperty property : properties) {
-            map.put(property.getKey().name(), property.getValue());
-        }
-        return map;
     }
 
     private static List<PluginType> mapPluginTypeList(List<UnsentMessageType> unsentMessageList) {

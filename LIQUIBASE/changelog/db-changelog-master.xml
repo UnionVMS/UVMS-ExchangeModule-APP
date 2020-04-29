@@ -6,7 +6,7 @@
          logicalFilePath="changelog/db-changelog-master.xml">
 
     <include file="properties.xml" relativeToChangelogFile="true"/>
-    
+
     <include file="\v0.1\db-changelog-createTables_0.1.xml" relativeToChangelogFile="true"/>
     <include file="\v0.2\db-changelog-createTables_0.2.xml" relativeToChangelogFile="true"/>
     <include file="\v0.1\db-changelog-insertInitdata_0.1.xml" relativeToChangelogFile="true"/>
@@ -15,6 +15,6 @@
 
     <include file="\v0.3\db-changelog-modify_log_table_0.3.xml" relativeToChangelogFile="true"/>
     <include file="\v4.0.31\db-changelog_1.xml" relativeToChangelogFile="true"/>
-
+    <include file="\v5.2.8\remove-unsentmessageproperty-table.xml" relativeToChangelogFile="true"/>
 
 </databaseChangeLog>

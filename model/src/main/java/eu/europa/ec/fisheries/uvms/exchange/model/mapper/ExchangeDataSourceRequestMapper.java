@@ -14,39 +14,38 @@ Det här är en licenstext
  */
 package eu.europa.ec.fisheries.uvms.exchange.model.mapper;
 
-import java.time.Instant;
-import java.util.ArrayList;
-import java.util.Date;  //leave be
-import java.util.List;
-
-import eu.europa.ec.fisheries.schema.exchange.source.v1.*;
-import eu.europa.ec.fisheries.schema.exchange.v1.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import eu.europa.ec.fisheries.schema.exchange.plugin.types.v1.PluginType;
 import eu.europa.ec.fisheries.schema.exchange.service.v1.CapabilityListType;
 import eu.europa.ec.fisheries.schema.exchange.service.v1.ServiceType;
 import eu.europa.ec.fisheries.schema.exchange.service.v1.SettingListType;
 import eu.europa.ec.fisheries.schema.exchange.service.v1.StatusType;
+import eu.europa.ec.fisheries.schema.exchange.source.v1.*;
+import eu.europa.ec.fisheries.schema.exchange.v1.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 
 public class ExchangeDataSourceRequestMapper {
 
     final static Logger LOG = LoggerFactory.getLogger(ExchangeDataSourceRequestMapper.class);
 
     public static String mapCreateExchangeLogToString(ExchangeLogType log, String username) {
-            CreateLogRequest request = new CreateLogRequest();
-            request.setMethod(ExchangeDataSourceMethod.CREATE_LOG);
-            request.setExchangeLog(log);
-            request.setUsername(username);
-            return JAXBMarshaller.marshallJaxBObjectToString(request);
+        CreateLogRequest request = new CreateLogRequest();
+        request.setMethod(ExchangeDataSourceMethod.CREATE_LOG);
+        request.setExchangeLog(log);
+        request.setUsername(username);
+        return JAXBMarshaller.marshallJaxBObjectToString(request);
     }
 
     public static String mapGetExchageLogListByQueryToString(ExchangeListQuery query) {
-            GetLogListByQueryRequest request = new GetLogListByQueryRequest();
-            request.setMethod(ExchangeDataSourceMethod.GET_LOG_BY_QUERY);
-            request.setQuery(query);
-            return JAXBMarshaller.marshallJaxBObjectToString(request);
+        GetLogListByQueryRequest request = new GetLogListByQueryRequest();
+        request.setMethod(ExchangeDataSourceMethod.GET_LOG_BY_QUERY);
+        request.setQuery(query);
+        return JAXBMarshaller.marshallJaxBObjectToString(request);
     }
 
     public static String mapGetServiceListToString(List<PluginType> pluginTypes) {
@@ -59,75 +58,73 @@ public class ExchangeDataSourceRequestMapper {
     }
 
     public static String mapGetServiceToString(String serviceId) {
-            GetServiceRequest request = new GetServiceRequest();
-            request.setMethod(ExchangeDataSourceMethod.GET_SERVICE);
-            request.setServiceId(serviceId);
-            return JAXBMarshaller.marshallJaxBObjectToString(request);
+        GetServiceRequest request = new GetServiceRequest();
+        request.setMethod(ExchangeDataSourceMethod.GET_SERVICE);
+        request.setServiceId(serviceId);
+        return JAXBMarshaller.marshallJaxBObjectToString(request);
     }
 
     public static String mapRegisterServiceToString(ServiceType service, CapabilityListType capabilityList, SettingListType settingList, String username) {
-            RegisterServiceRequest request = new RegisterServiceRequest();
-            request.setMethod(ExchangeDataSourceMethod.REGISTER_SERVICE);
-            request.setUsername(username);
+        RegisterServiceRequest request = new RegisterServiceRequest();
+        request.setMethod(ExchangeDataSourceMethod.REGISTER_SERVICE);
+        request.setUsername(username);
 
-            if (service == null) {
-                throw new IllegalArgumentException("ServiceType cannot be null in RegisterServiceRequest!");
-            } else {
+        if (service == null) {
+            throw new IllegalArgumentException("ServiceType cannot be null in RegisterServiceRequest!");
+        } else {
 
-                if (service.getServiceResponseMessageName() == null || service.getServiceResponseMessageName().isEmpty()) {
-                    throw new IllegalArgumentException("Service response message name in ServiceType cannot be null or empty!");
-                }
-
-                if (service.getServiceClassName() == null || service.getServiceResponseMessageName().isEmpty()) {
-                    throw new IllegalArgumentException("Service classname ServiceType cannot be null or empty!");
-                }
-
+            if (service.getServiceResponseMessageName() == null || service.getServiceResponseMessageName().isEmpty()) {
+                throw new IllegalArgumentException("Service response message name in ServiceType cannot be null or empty!");
             }
 
-            request.setService(service);
-            request.setCapabilityList(capabilityList);
-            request.setSettingList(settingList);
-            return JAXBMarshaller.marshallJaxBObjectToString(request);
+            if (service.getServiceClassName() == null || service.getServiceResponseMessageName().isEmpty()) {
+                throw new IllegalArgumentException("Service classname ServiceType cannot be null or empty!");
+            }
+        }
+        request.setService(service);
+        request.setCapabilityList(capabilityList);
+        request.setSettingList(settingList);
+        return JAXBMarshaller.marshallJaxBObjectToString(request);
     }
 
     public static String mapUnregisterServiceToString(ServiceType service, String username) {
-            UnregisterServiceRequest request = new UnregisterServiceRequest();
-            request.setService(service);
-            request.setMethod(ExchangeDataSourceMethod.UNREGISTER_SERVICE);
-            request.setUsername(username);
-            return JAXBMarshaller.marshallJaxBObjectToString(request);
+        UnregisterServiceRequest request = new UnregisterServiceRequest();
+        request.setService(service);
+        request.setMethod(ExchangeDataSourceMethod.UNREGISTER_SERVICE);
+        request.setUsername(username);
+        return JAXBMarshaller.marshallJaxBObjectToString(request);
     }
 
     public static String mapGetServiceSettingsToString(String serviceClassName) {
-            GetServiceSettingsRequest request = new GetServiceSettingsRequest();
-            request.setServiceName(serviceClassName);
-            request.setMethod(ExchangeDataSourceMethod.GET_SETTINGS);
-            return JAXBMarshaller.marshallJaxBObjectToString(request);
+        GetServiceSettingsRequest request = new GetServiceSettingsRequest();
+        request.setServiceName(serviceClassName);
+        request.setMethod(ExchangeDataSourceMethod.GET_SETTINGS);
+        return JAXBMarshaller.marshallJaxBObjectToString(request);
     }
 
     public static String mapGetServiceCapabilitiesToString(String serviceClassName) {
-            GetServiceCapabilitiesRequest request = new GetServiceCapabilitiesRequest();
-            request.setServiceName(serviceClassName);
-            request.setMethod(ExchangeDataSourceMethod.GET_CAPABILITIES);
-            return JAXBMarshaller.marshallJaxBObjectToString(request);
+        GetServiceCapabilitiesRequest request = new GetServiceCapabilitiesRequest();
+        request.setServiceName(serviceClassName);
+        request.setMethod(ExchangeDataSourceMethod.GET_CAPABILITIES);
+        return JAXBMarshaller.marshallJaxBObjectToString(request);
     }
 
     public static String mapSetSettingsToString(String serviceClassName, SettingListType settingListType, String username) {
-            SetServiceSettingsRequest request = new SetServiceSettingsRequest();
-            request.setMethod(ExchangeDataSourceMethod.SET_SETTINGS);
-            request.setServiceName(serviceClassName);
-            request.setSettings(settingListType);
-            request.setUsername(username);
-            return JAXBMarshaller.marshallJaxBObjectToString(request);
+        SetServiceSettingsRequest request = new SetServiceSettingsRequest();
+        request.setMethod(ExchangeDataSourceMethod.SET_SETTINGS);
+        request.setServiceName(serviceClassName);
+        request.setSettings(settingListType);
+        request.setUsername(username);
+        return JAXBMarshaller.marshallJaxBObjectToString(request);
     }
 
     public static String mapSetServiceStatus(String serviceClassName, StatusType status, String username) {
-            SetServiceStatusRequest request = new SetServiceStatusRequest();
-            request.setMethod(ExchangeDataSourceMethod.SET_SERVICE_STATUS);
-            request.setServiceName(serviceClassName);
-            request.setStatus(status);
-            request.setUsername(username);
-            return JAXBMarshaller.marshallJaxBObjectToString(request);
+        SetServiceStatusRequest request = new SetServiceStatusRequest();
+        request.setMethod(ExchangeDataSourceMethod.SET_SERVICE_STATUS);
+        request.setServiceName(serviceClassName);
+        request.setStatus(status);
+        request.setUsername(username);
+        return JAXBMarshaller.marshallJaxBObjectToString(request);
     }
 
     public static String mapGetLogStatusHistoryRequest(String guid, TypeRefType typeRefType, String userName) {
@@ -169,7 +166,7 @@ public class ExchangeDataSourceRequestMapper {
         return JAXBMarshaller.marshallJaxBObjectToString(request);
     }
 
-    public static String mapCreateUnsentMessage(Instant dateReceived, String senderReceiver, String recipient, String messageText, List<UnsentMessageTypeProperty> properties, String username) {
+    public static String mapCreateUnsentMessage(Instant dateReceived, String senderReceiver, String recipient, String messageText, String username) {
         CreateUnsentMessageRequest request = new CreateUnsentMessageRequest();
         request.setMethod(ExchangeDataSourceMethod.CREATE_UNSENT_MESSAGE);
         UnsentMessageType unsentMessage = new UnsentMessageType();
@@ -177,7 +174,6 @@ public class ExchangeDataSourceRequestMapper {
         unsentMessage.setSenderReceiver(senderReceiver);
         unsentMessage.setRecipient(recipient);
         unsentMessage.setMessage(messageText);
-        unsentMessage.getProperties().addAll(properties);
         request.setMessage(unsentMessage);
         request.setUsername(username);
         return JAXBMarshaller.marshallJaxBObjectToString(request);

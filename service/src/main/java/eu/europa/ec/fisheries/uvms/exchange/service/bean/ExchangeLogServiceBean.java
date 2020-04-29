@@ -11,14 +11,6 @@ copy of the GNU General Public License along with the IFDM Suite. If not, see <h
  */
 package eu.europa.ec.fisheries.uvms.exchange.service.bean;
 
-import javax.ejb.EJB;
-import javax.ejb.Stateless;
-import javax.enterprise.event.Event;
-import javax.inject.Inject;
-import javax.persistence.NoResultException;
-import java.time.Instant;
-import java.util.*;
-
 import eu.europa.ec.fisheries.schema.exchange.module.v1.ExchangeBaseRequest;
 import eu.europa.ec.fisheries.schema.exchange.movement.v1.MovementRefType;
 import eu.europa.ec.fisheries.schema.exchange.v1.*;
@@ -27,16 +19,23 @@ import eu.europa.ec.fisheries.uvms.exchange.service.dao.UnsentMessageDaoBean;
 import eu.europa.ec.fisheries.uvms.exchange.service.entity.exchangelog.ExchangeLog;
 import eu.europa.ec.fisheries.uvms.exchange.service.entity.exchangelog.ExchangeLogStatus;
 import eu.europa.ec.fisheries.uvms.exchange.service.entity.unsent.UnsentMessage;
-import eu.europa.ec.fisheries.uvms.exchange.service.entity.unsent.UnsentMessageProperty;
-import eu.europa.ec.fisheries.uvms.exchange.service.mapper.LogMapper;
-import eu.europa.ec.fisheries.uvms.exchange.service.mapper.ExchangeLogMapper;
 import eu.europa.ec.fisheries.uvms.exchange.service.event.ExchangeLogEvent;
 import eu.europa.ec.fisheries.uvms.exchange.service.event.ExchangeSendingQueueEvent;
+import eu.europa.ec.fisheries.uvms.exchange.service.mapper.ExchangeLogMapper;
+import eu.europa.ec.fisheries.uvms.exchange.service.mapper.LogMapper;
 import eu.europa.ec.fisheries.uvms.exchange.service.message.producer.bean.ExchangeEventProducer;
 import eu.europa.ec.fisheries.uvms.longpolling.notifications.NotificationMessage;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import javax.ejb.EJB;
+import javax.ejb.Stateless;
+import javax.enterprise.event.Event;
+import javax.inject.Inject;
+import javax.persistence.NoResultException;
+import java.time.Instant;
+import java.util.*;
 
 @Stateless
 public class ExchangeLogServiceBean {
@@ -70,25 +69,26 @@ public class ExchangeLogServiceBean {
         ExchangeLog exchangeLog = exchangeLogDao.createLog(log);
         String guid = exchangeLog.getId().toString();
         exchangeLogEvent.fire(new NotificationMessage("guid", guid));
-        LOG.debug("[INFO] Logging message with guid : [ "+guid+" ] was successful.");
+        LOG.debug("[INFO] Logging message with guid : [ " + guid + " ] was successful.");
         return exchangeLog;
     }
 
     /**
      * Create a new log entry.
-     * @param request the incoming exchange request
-     * @param logType the type of the log
-     * @param status the status of the message (does it needs to be validated, is it valid, ...)
+     *
+     * @param request     the incoming exchange request
+     * @param logType     the type of the log
+     * @param status      the status of the message (does it needs to be validated, is it valid, ...)
      * @param messageType the type of the message
      * @param messageText XML representation of the incoming/outgoing message
-     * @param incoming is this an incoming message (then true) or an outgoing message (then false)?
+     * @param incoming    is this an incoming message (then true) or an outgoing message (then false)?
      * @return the created log entry
      */
     public ExchangeLog log(ExchangeBaseRequest request, LogType logType, ExchangeLogStatusTypeType status, TypeRefType messageType, String messageText, boolean incoming) {
         ExchangeLog log = new ExchangeLog();
         log.setTypeRefType(messageType);
         log.setTypeRefMessage(messageText);
-        log.setTypeRefGuid( (request.getMessageGuid() == null || request.getMessageGuid().isEmpty()) ? null : UUID.fromString(request.getMessageGuid()));
+        log.setTypeRefGuid((request.getMessageGuid() == null || request.getMessageGuid().isEmpty()) ? null : UUID.fromString(request.getMessageGuid()));
 
         log.setSenderReceiver(request.getSenderOrReceiver());
         log.setDateReceived(request.getDate().toInstant());
@@ -127,11 +127,11 @@ public class ExchangeLogServiceBean {
 
     /**
      * Adds a new log status to a log with the specified log guid.
-     *
+     * <p>
      * Since the guid is not something that an end user will have to, this method is assumed to be used by the system.
      * Therefore, the logged username will be "SYSTEM".
      *
-     * @param logGuid guid of the log. Notice that this is NOT the internal id.
+     * @param logGuid   guid of the log. Notice that this is NOT the internal id.
      * @param logStatus the next status
      * @return the updated log
      * @when something goes wrong
@@ -141,9 +141,8 @@ public class ExchangeLogServiceBean {
         return exchangeLogModel.updateExchangeLogStatus(exchangeLogStatus, "SYSTEM", logGuid);
     }
 
-
     public List<ExchangeLogStatusType> getExchangeStatusHistoryList(ExchangeLogStatusTypeType status, TypeRefType type, Instant from, Instant to) {
-        LOG.info("Get pollstatus list in service layer:{}",status);
+        LOG.info("Get pollstatus list in service layer:{}", status);
         List<ExchangeLogStatusTypeType> statusList = new ArrayList<>();
         if (status != null) {
             statusList.add(status);
@@ -165,33 +164,27 @@ public class ExchangeLogServiceBean {
             logStatusHistoryList.add(statusType);
         }
 
-        return  logStatusHistoryList;
+        return logStatusHistoryList;
     }
 
-    public String createUnsentMessage(String senderReceiver, Instant timestamp, String recipient, String message, List<UnsentMessageProperty> properties, String username, String function) {
-        LOG.debug("[INFO] CreateUnsentMessage in service layer:{}",message);
+    public String createUnsentMessage(String senderReceiver, Instant timestamp, String recipient, String message, String username, String function) {
+        LOG.debug("[INFO] CreateUnsentMessage in service layer:{}", message);
         UnsentMessage unsentMessage = new UnsentMessage();
         unsentMessage.setDateReceived(timestamp);
         unsentMessage.setSenderReceiver(senderReceiver);
         unsentMessage.setRecipient(recipient);
         unsentMessage.setMessage(message);
         unsentMessage.setUpdatedBy(username);
-        unsentMessage.setProperties(new ArrayList<>());
-        unsentMessage.getProperties().addAll(properties);
-
-        properties.forEach( p -> p.setUnsentMessage(unsentMessage));
-
         unsentMessage.setFunction(function);
 
         String createdUnsentMessageId = unsentMessageDao.create(unsentMessage).getGuid().toString();
-
         List<String> unsentMessageIds = Collections.singletonList(createdUnsentMessageId);
         sendingQueueEvent.fire(new NotificationMessage("messageIds", unsentMessageIds));
         return createdUnsentMessageId;
     }
 
     public void removeUnsentMessage(String unsentMessageId) {
-        LOG.trace("removeUnsentMessage in service layer:{}",unsentMessageId);
+        LOG.trace("removeUnsentMessage in service layer:{}", unsentMessageId);
         if (unsentMessageId == null) {
             throw new IllegalArgumentException("No message to remove");
         }
@@ -210,7 +203,7 @@ public class ExchangeLogServiceBean {
         sendingQueueEvent.fire(new NotificationMessage("messageIds", removedMessageIds));
     }
 
-    public void updateTypeRef(ExchangeLog exchangeLogStatus, MovementRefType movementRefType){
+    public void updateTypeRef(ExchangeLog exchangeLogStatus, MovementRefType movementRefType) {
         exchangeLogStatus.setTypeRefType(TypeRefType.valueOf(movementRefType.getType().value()));
         if (movementRefType.getMovementRefGuid() != null) {
             exchangeLogStatus.setTypeRefGuid(UUID.fromString(movementRefType.getMovementRefGuid()));
@@ -220,8 +213,8 @@ public class ExchangeLogServiceBean {
     public ExchangeLogWithValidationResults getExchangeLogRawMessageAndValidationByGuid(UUID guid) {
         ExchangeLog log = exchangeLogDao.getExchangeLogByGuid(guid);
         ExchangeLogWithValidationResults validationFromRules = new ExchangeLogWithValidationResults();
-        if (log.getTypeRefType() != null){
-            if (TypeRefType.FA_RESPONSE.equals(log.getTypeRefType())){
+        if (log.getTypeRefType() != null) {
+            if (TypeRefType.FA_RESPONSE.equals(log.getTypeRefType())) {
                 guid = log.getTypeRefGuid();
             }
             validationFromRules = exchangeToRulesSyncMsgBean.getValidationFromRules(guid.toString(), log.getTypeRefType(), log.getDf());
@@ -231,7 +224,7 @@ public class ExchangeLogServiceBean {
     }
 
     public void resend(List<String> messageIdList, String username) {
-        LOG.debug("resend in service layer:{} {}",messageIdList,username);
+        LOG.debug("resend in service layer:{} {}", messageIdList, username);
         List<UnsentMessage> unsentMessageList = getAndRemoveUnsentMessagesFromDB(messageIdList);
         if (!unsentMessageList.isEmpty()) {
             sendingQueueEvent.fire(new NotificationMessage("messageIds", messageIdList));
@@ -242,7 +235,7 @@ public class ExchangeLogServiceBean {
                     //TextMessage unsentResponse = consumer.getMessage(unsentMessageId, TextMessage.class);
                     //ExchangeModuleResponseMapper.validateResponse(unsentResponse, unsentMessageId);
                 } catch (Exception e) {
-                    LOG.error("Error when sending/receiving message {} {}",messageIdList, e);
+                    LOG.error("Error when sending/receiving message {} {}", messageIdList, e);
                 }
             }
         }
