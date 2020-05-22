@@ -633,6 +633,10 @@ public class ExchangeEventIncomingServiceBean {
             LOG.debug(method + " was NOK: " + ack.getMessage());
         }
 
+        if (ack.getMessage() != null) {
+            exchangeLogService.updateLogMessage(ack.getLogId(), ack.getMessage());
+        }
+
         ExchangeLog updatedLog = exchangeLogService.updateStatus(ack.getLogId(), logStatus, serviceClassName);
 
         // Long polling

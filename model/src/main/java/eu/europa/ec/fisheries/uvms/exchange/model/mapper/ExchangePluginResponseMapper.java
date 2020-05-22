@@ -53,6 +53,12 @@ public class ExchangePluginResponseMapper {
         return type;
     }
 
+    public static AcknowledgeType mapToAcknowledgeType(String logId, String unsentMessageGuid, AcknowledgeTypeType ackType, String message) {
+        AcknowledgeType type = mapToAcknowledgeType(logId, unsentMessageGuid, ackType);
+        type.setMessage(message);
+        return type;
+    }
+
     public static String mapToRegisterServiceResponseOK(String messageId, ServiceResponseType service)  {
         RegisterServiceResponse response = mapToRegisterServiceResponse(messageId, AcknowledgeTypeType.OK);
         response.setService(service);
