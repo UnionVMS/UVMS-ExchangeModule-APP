@@ -108,6 +108,11 @@ public class ExchangeLogServiceBean {
         return log(log);
     }
 
+    public void updateLogMessage(String logId, String message) {
+        ExchangeLog log = exchangeLogDao.getExchangeLogByGuid(UUID.fromString(logId));
+        log.setTypeRefMessage(message);
+    }
+
     public ExchangeLog updateStatus(String logId, ExchangeLogStatusTypeType logStatus, String username) {
         UUID logGuid = UUID.fromString(logId);
         ExchangeLogStatus exchangeLogStatus = createExchangeLogStatus(logStatus);
