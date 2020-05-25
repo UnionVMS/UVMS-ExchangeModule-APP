@@ -142,20 +142,6 @@ public class ExchangeEventOutgoingServiceBean {
         LOG.info("Send report to plugin: {}", request);
         SendMovementToPluginType sendReport = request.getReport();
 
-        String unsentMessageGuid;
-        try {
-            List<UnsentMessageProperty> unsentMessageProperties = ExchangeLogMapper.getUnsentMessageProperties(sendReport);
-            unsentMessageGuid = exchangeLogService.createUnsentMessage(
-                    sendReport.getRecipient(),
-                    sendReport.getTimestamp().toInstant(),
-                    ExchangeLogMapper.getSendMovementSenderReceiver(sendReport),
-                    message.getText(), unsentMessageProperties,
-                    request.getUsername(),
-                    ExchangeModuleMethod.SEND_REPORT_TO_PLUGIN.value());
-        } catch (Exception e) {
-            throw new IllegalStateException("Could not create unsent message ", e);
-        }
-
         Service service = null;
         if (sendReport.getPluginName() != null && !sendReport.getPluginName().isEmpty()) {
             service = serviceRegistryModel.getServiceByServiceClassName(sendReport.getPluginName());
@@ -166,6 +152,20 @@ public class ExchangeEventOutgoingServiceBean {
                     service = serviceIteration;
                 }
             }
+        }
+
+        String unsentMessageGuid;
+        try {
+            List<UnsentMessageProperty> unsentMessageProperties = ExchangeLogMapper.getUnsentMessageProperties(sendReport);
+            unsentMessageGuid = exchangeLogService.createUnsentMessage(
+                    service != null ? service.getName() : ExchangeLogMapper.getSendMovementSenderReceiver(sendReport),
+                    sendReport.getTimestamp().toInstant(),
+                    sendReport.getRecipient(),
+                    message.getText(), unsentMessageProperties,
+                    request.getUsername(),
+                    ExchangeModuleMethod.SEND_REPORT_TO_PLUGIN.value());
+        } catch (Exception e) {
+            throw new IllegalStateException("Could not create unsent message ", e);
         }
 
         Organisation organisation = userService.getOrganisation(sendReport.getRecipient());
