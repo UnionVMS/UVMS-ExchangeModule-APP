@@ -29,7 +29,7 @@ public class ExchangeAPIRestResourceUnsecuredTest extends BuildExchangeRestTestD
         request.getType().add(PluginType.OTHER);
         Client client = ClientBuilder.newClient();
 
-        GetServiceListResponse response = client.target("http://localhost:8080/exchangerest/unsecured/rest")
+        GetServiceListResponse response = client.target("http://localhost:8080/exchangerest/rest/unsecured")
                 .path("api")
                 .path("serviceList")
                 .request(MediaType.APPLICATION_JSON)
