@@ -14,7 +14,7 @@ package eu.europa.ec.fisheries.uvms.exchange.rest.constants;
 public class RestConstants {
 
     public static final String MODULE_REST = "/rest";
-    public static final String MODULE_UNSECURED_REST = "/unsecured/rest";
+    public static final String MODULE_UNSECURED_REST = "rest/unsecured/";
     public static final String MODULE_NAME = "/exchange";
 
     public static final String ACCESS_CONTROL_ALLOW_ORIGIN = "Access-Control-Allow-Origin";
