@@ -9,7 +9,10 @@
 	</filter>
 	<filter-mapping>
 		<filter-name>AuthenticationFilter</filter-name>
-		<url-pattern>/rest/*</url-pattern>
+		<url-pattern>/rest/config/*</url-pattern>
+		<url-pattern>/rest/exchange/*</url-pattern>
+		<url-pattern>/rest/plugin/*</url-pattern>
+		<url-pattern>/rest/sendingqueue/*</url-pattern>
 	</filter-mapping>
 
 </web-app>
