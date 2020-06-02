@@ -14,9 +14,6 @@ package eu.europa.ec.fisheries.uvms.exchange.rest.service;
 import eu.europa.ec.fisheries.schema.exchange.service.v1.CapabilityTypeType;
 import eu.europa.ec.fisheries.uvms.exchange.service.bean.ServiceRegistryModelBean;
 import eu.europa.ec.fisheries.uvms.exchange.service.entity.serviceregistry.Service;
-import eu.europa.ec.fisheries.uvms.exchange.rest.dto.ResponseDto;
-import eu.europa.ec.fisheries.uvms.exchange.rest.dto.RestResponseCode;
-import eu.europa.ec.fisheries.uvms.exchange.rest.error.ErrorHandler;
 import eu.europa.ec.fisheries.uvms.exchange.rest.mapper.ServiceMapper;
 import eu.europa.ec.fisheries.uvms.exchange.service.bean.PluginServiceBean;
 import eu.europa.ec.fisheries.uvms.rest.security.RequiresFeature;
@@ -51,13 +48,13 @@ public class ExchangeRegistryRestResource {
     @GET
     @Path("/list")
     @RequiresFeature(UnionVMSFeature.viewExchange)
-    public ResponseDto<?> getList() {
+    public Response getList() {
         LOG.info("Get list invoked in rest layer");
         try {
-            return new ResponseDto<>(ServiceMapper.map(serviceRegistryModel.getPlugins(null)), RestResponseCode.OK);
+            return Response.ok(ServiceMapper.map(serviceRegistryModel.getPlugins(null))).build();
         } catch (Exception ex) {
             LOG.error("[ Error when geting list. ] {} ", ex.getMessage());
-            return ErrorHandler.getFault(ex);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(ExceptionUtils.getRootCause(ex)).build();
         }
     }
 
@@ -79,26 +76,26 @@ public class ExchangeRegistryRestResource {
     @PUT
     @Path("/start/{serviceClassName}")
     @RequiresFeature(UnionVMSFeature.manageExchangeTransmissionStatuses)
-    public ResponseDto<?> startService(@PathParam(value = "serviceClassName") String serviceClassName) { // Why is this a put? And this returns true or an exception?
+    public Response startService(@PathParam(value = "serviceClassName") String serviceClassName) { // Why is this a put? And this returns true or an exception?
         LOG.info("Start service invoked in rest layer:{}", serviceClassName);
         try {
-            return new ResponseDto<>(pluginService.start(serviceClassName), RestResponseCode.OK);
+            return Response.ok(pluginService.start(serviceClassName)).build();
         } catch (Exception ex) {
             LOG.error("[ Error when starting service {}] {}", serviceClassName, ex);
-            return ErrorHandler.getFault(ex);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(ExceptionUtils.getRootCause(ex)).build();
         }
     }
 
     @PUT
     @Path("/stop/{serviceClassName}")
     @RequiresFeature(UnionVMSFeature.manageExchangeTransmissionStatuses)
-    public ResponseDto<?> stopService(@PathParam(value = "serviceClassName") String serviceClassName) { // Why is this a put?
+    public Response stopService(@PathParam(value = "serviceClassName") String serviceClassName) { // Why is this a put?
         LOG.info("Stop service invoked in rest layer:{}", serviceClassName);
         try {
-            return new ResponseDto<>(pluginService.stop(serviceClassName), RestResponseCode.OK);
+            return Response.ok(pluginService.stop(serviceClassName)).build();
         } catch (Exception ex) {
             LOG.error("[ Error when stopping service {} ] {} ", serviceClassName, ex.getMessage());
-            return ErrorHandler.getFault(ex);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(ExceptionUtils.getRootCause(ex)).build();
         }
     }
 }

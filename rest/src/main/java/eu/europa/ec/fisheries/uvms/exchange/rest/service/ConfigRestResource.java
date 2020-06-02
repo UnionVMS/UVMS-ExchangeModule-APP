@@ -12,12 +12,10 @@ copy of the GNU General Public License along with the IFDM Suite. If not, see <h
 package eu.europa.ec.fisheries.uvms.exchange.rest.service;
 
 import eu.europa.ec.fisheries.schema.exchange.v1.SearchField;
-import eu.europa.ec.fisheries.uvms.exchange.rest.dto.ResponseDto;
-import eu.europa.ec.fisheries.uvms.exchange.rest.dto.RestResponseCode;
-import eu.europa.ec.fisheries.uvms.exchange.rest.error.ErrorHandler;
 import eu.europa.ec.fisheries.uvms.exchange.rest.mock.ExchangeMock;
 import eu.europa.ec.fisheries.uvms.rest.security.RequiresFeature;
 import eu.europa.ec.fisheries.uvms.rest.security.UnionVMSFeature;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,6 +25,7 @@ import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 import java.util.List;
 import java.util.Map;
 
@@ -41,24 +40,24 @@ public class ConfigRestResource {
 
     @GET
     @Path(value = "/searchfields")
-    public ResponseDto<?> getConfigSearchFields() {
+    public Response getConfigSearchFields() {
         try {
-            return new ResponseDto<>(SearchField.values(), RestResponseCode.OK);
+            return Response.ok(SearchField.values()).build();
         } catch (Exception e) {
             LOG.error("[ Error when getting config search fields. ] {}", e.getMessage());
-            return ErrorHandler.getFault(e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(ExceptionUtils.getRootCause(e)).build();
         }
     }
 
     @GET
     @Path(value = "/")
-    public ResponseDto<?> getConfiguration() {
+    public Response getConfiguration() {
         try {
             Map<String, List> configuration = ExchangeMock.mockConfiguration();
-            return new ResponseDto<>(configuration, RestResponseCode.OK);
+            return Response.ok(configuration).build();
         } catch (Exception e) {
             LOG.error("[ Error when getting config configuration. ] {}", e.getMessage());
-            return ErrorHandler.getFault(e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(ExceptionUtils.getRootCause(e)).build();
         }
     }
 }

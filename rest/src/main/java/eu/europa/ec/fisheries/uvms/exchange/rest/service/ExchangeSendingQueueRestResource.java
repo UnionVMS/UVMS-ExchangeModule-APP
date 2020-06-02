@@ -15,14 +15,12 @@ import eu.europa.ec.fisheries.schema.exchange.v1.UnsentMessageType;
 import eu.europa.ec.fisheries.uvms.exchange.service.dao.UnsentMessageDaoBean;
 import eu.europa.ec.fisheries.uvms.exchange.service.entity.unsent.UnsentMessage;
 import eu.europa.ec.fisheries.uvms.exchange.service.mapper.UnsentMessageMapper;
-import eu.europa.ec.fisheries.uvms.exchange.rest.dto.ResponseDto;
-import eu.europa.ec.fisheries.uvms.exchange.rest.dto.RestResponseCode;
 import eu.europa.ec.fisheries.uvms.exchange.rest.dto.exchange.SendingGroupLog;
-import eu.europa.ec.fisheries.uvms.exchange.rest.error.ErrorHandler;
 import eu.europa.ec.fisheries.uvms.exchange.rest.mapper.ExchangeLogMapper;
 import eu.europa.ec.fisheries.uvms.exchange.service.bean.ExchangeLogServiceBean;
 import eu.europa.ec.fisheries.uvms.rest.security.RequiresFeature;
 import eu.europa.ec.fisheries.uvms.rest.security.UnionVMSFeature;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,6 +31,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 import java.util.List;
 
 @Path("/sendingqueue")
@@ -55,31 +54,31 @@ public class ExchangeSendingQueueRestResource {
     @GET
     @Path("/list")
     @RequiresFeature(UnionVMSFeature.viewExchange)
-    public ResponseDto<?> getSendingQueue() {
+    public Response getSendingQueue() {
         LOG.info("Get list invoked in rest layer");
         try {
             List<UnsentMessage> unsentMessageList = unsentMessageDao.getAll();
             List<UnsentMessageType> unsentMessageTypeList = UnsentMessageMapper.toModel(unsentMessageList);
             List<SendingGroupLog> sendingQueue = ExchangeLogMapper.mapToSendingQueue(unsentMessageTypeList);
-            return new ResponseDto<>(sendingQueue, RestResponseCode.OK);
+            return Response.ok(sendingQueue).build();
         } catch (Exception ex) {
             LOG.error("[ Error when getting log list. ] {} ", ex.getMessage());
-            return ErrorHandler.getFault(ex);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(ExceptionUtils.getRootCause(ex)).build();
         }
     }
 
     @PUT
     @Path("/send")
     @RequiresFeature(UnionVMSFeature.manageExchangeSendingQueue)
-    public ResponseDto<?> send(final List<String> messageIdList) {
+    public Response send(final List<String> messageIdList) {
         LOG.info("Get list invoked in rest layer:{}", messageIdList);
         try {
             //TODO swaggerize messageIdList
             serviceLayer.resend(messageIdList, request.getRemoteUser());
-            return new ResponseDto<>(true, RestResponseCode.OK);
+            return Response.ok(true).build();
         } catch (Exception ex) {
             LOG.error("[ Error when getting log list. {} ] {} ", messageIdList, ex.getMessage());
-            return ErrorHandler.getFault(ex);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(ExceptionUtils.getRootCause(ex)).build();
         }
     }
 }

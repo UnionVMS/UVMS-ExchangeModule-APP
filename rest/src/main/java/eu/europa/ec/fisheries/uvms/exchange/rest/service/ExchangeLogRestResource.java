@@ -19,10 +19,7 @@ import eu.europa.ec.fisheries.schema.exchange.v1.TypeRefType;
 import eu.europa.ec.fisheries.uvms.commons.date.DateUtils;
 import eu.europa.ec.fisheries.uvms.exchange.model.dto.ListResponseDto;
 import eu.europa.ec.fisheries.uvms.exchange.rest.dto.PollQuery;
-import eu.europa.ec.fisheries.uvms.exchange.rest.dto.ResponseDto;
-import eu.europa.ec.fisheries.uvms.exchange.rest.dto.RestResponseCode;
 import eu.europa.ec.fisheries.uvms.exchange.rest.dto.exchange.BusinessRuleComparator;
-import eu.europa.ec.fisheries.uvms.exchange.rest.error.ErrorHandler;
 import eu.europa.ec.fisheries.uvms.exchange.rest.mapper.ExchangeLogMapper;
 import eu.europa.ec.fisheries.uvms.exchange.service.bean.ExchangeLogModelBean;
 import eu.europa.ec.fisheries.uvms.exchange.service.bean.ExchangeLogServiceBean;
@@ -31,6 +28,7 @@ import eu.europa.ec.fisheries.uvms.exchange.service.entity.exchangelog.ExchangeL
 import eu.europa.ec.fisheries.uvms.rest.security.RequiresFeature;
 import eu.europa.ec.fisheries.uvms.rest.security.UnionVMSFeature;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,6 +39,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
@@ -68,7 +67,7 @@ public class ExchangeLogRestResource {
 
     @POST
     @Path("/list")
-    public ResponseDto<?> getLogListByCriteria(final ExchangeListQuery query) {
+    public Response getLogListByCriteria(final ExchangeListQuery query) {
         LOG.info("Get list invoked in rest layer.");
         try {
             //TODO query in swagger
@@ -78,80 +77,80 @@ public class ExchangeLogRestResource {
             response.setTotalNumberOfPages(exchangeLogList.getTotalNumberOfPages());
             response.getExchangeLog().addAll(exchangeLogList.getExchangeLogList());
 
-            return new ResponseDto<>(ExchangeLogMapper.mapToQueryResponse(response), RestResponseCode.OK);
+            return Response.ok(ExchangeLogMapper.mapToQueryResponse(response)).build();
         } catch (Exception ex) {
             LOG.error("[ Error when geting log list. {} ] {} ", query, ex.getMessage());
-            return ErrorHandler.getFault(ex);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(ExceptionUtils.getRootCause(ex)).build();
         }
     }
 
     @POST
     @Path(value = "/poll")
-    public ResponseDto<?> getPollStatus(PollQuery query) {
+    public Response getPollStatus(PollQuery query) {
         try {
             LOG.info("Get ExchangeLog status for Poll in rest layer:{}", query);
             Instant from = DateUtils.stringToDate(query.getStatusFromDate());
             Instant to = DateUtils.stringToDate(query.getStatusToDate());
             List<ExchangeLogStatusType> response = serviceLayer.getExchangeStatusHistoryList(query.getStatus(), TypeRefType.POLL, from, to);
-            return new ResponseDto<>(response, RestResponseCode.OK);
+            return Response.ok(response).build();
         } catch (Exception e) {
             LOG.error("[ Error when getting config search fields. {}] {}", query, e.getMessage());
-            return ErrorHandler.getFault(e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(ExceptionUtils.getRootCause(e)).build();
         }
     }
 
     @GET
     @Path(value = "/poll/{typeRefGuid}")
-    public ResponseDto<?> getPollStatus(@PathParam("typeRefGuid") String typeRefGuid) {
+    public Response getPollStatus(@PathParam("typeRefGuid") String typeRefGuid) {
         try {
             LOG.info("Get ExchangeLog status for Poll by typeRefGuid : {}", typeRefGuid);
             if (typeRefGuid == null) {
                 throw new IllegalArgumentException("Invalid id");
             }
             ExchangeLogStatusType response = exchangeLogModel.getExchangeLogStatusHistory(UUID.fromString(typeRefGuid), TypeRefType.POLL);
-            return new ResponseDto<>(response, RestResponseCode.OK);
+            return Response.ok(response).build();
         } catch (Exception e) {
             LOG.error("[ Error when getting config search fields. {} ] {}", typeRefGuid, e.getMessage());
-            return ErrorHandler.getFault(e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(ExceptionUtils.getRootCause(e)).build();
         }
     }
 
     @GET
     @Path("/message/{guid}")
-    public ResponseDto<?> getExchangeLogRawXMLByGuid(@PathParam("guid") String guid) {
+    public Response getExchangeLogRawXMLByGuid(@PathParam("guid") String guid) {
         try {
 
             ExchangeLog exchangeLog = logDao.getExchangeLogByGuid(UUID.fromString(guid));
-            return new ResponseDto<>(exchangeLog.getTypeRefMessage(), RestResponseCode.OK);
+            return Response.ok(exchangeLog.getTypeRefMessage()).build();
         } catch (Exception e) {
             LOG.error("[ Error when getting exchange log by GUID. ] {}", e.getMessage());
-            return ErrorHandler.getFault(e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(ExceptionUtils.getRootCause(e)).build();
         }
     }
 
     @GET
     @Path("/validation/{guid}")
-    public ResponseDto<?> getExchangeLogRawXMLAndValidationByGuid(@PathParam("guid") String guid) {
+    public Response getExchangeLogRawXMLAndValidationByGuid(@PathParam("guid") String guid) {
         try {
             ExchangeLogWithValidationResults results = serviceLayer.getExchangeLogRawMessageAndValidationByGuid(UUID.fromString(guid));
             if (results != null && CollectionUtils.isNotEmpty(results.getValidationList())) {
                 results.getValidationList().sort(new BusinessRuleComparator());
             }
-            return new ResponseDto<>(results, RestResponseCode.OK);
+            return Response.ok(results).build();
         } catch (Exception e) {
             LOG.error("[ Error when getting exchange log by GUID. ] {}", e.getMessage());
-            return ErrorHandler.getFault(e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(ExceptionUtils.getRootCause(e)).build();
         }
     }
 
     @GET
     @Path("/{guid}")
-    public ResponseDto<?> getExchangeLogByUUID(@PathParam("guid") String guid) {
+    public Response getExchangeLogByUUID(@PathParam("guid") String guid) {
         try {
-            return new ResponseDto<>(exchangeLogModel.getExchangeLogByGuid(UUID.fromString(guid)), RestResponseCode.OK);
+            return Response.ok(exchangeLogModel.getExchangeLogByGuid(UUID.fromString(guid))).build();
         } catch (Exception e) {
             LOG.error("[ Error when getting exchange log by GUID. ] {}", e.getMessage());
-            return ErrorHandler.getFault(e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(ExceptionUtils.getRootCause(e)).build();
         }
     }
 

@@ -5,16 +5,14 @@ import eu.europa.ec.fisheries.schema.exchange.plugin.v1.ExchangePluginMethod;
 import eu.europa.ec.fisheries.schema.exchange.plugin.v1.StartRequest;
 import eu.europa.ec.fisheries.schema.exchange.plugin.v1.StopRequest;
 import eu.europa.ec.fisheries.schema.exchange.service.v1.CapabilityTypeType;
-import eu.europa.ec.fisheries.uvms.exchange.service.dao.ServiceRegistryDaoBean;
-import eu.europa.ec.fisheries.uvms.exchange.service.entity.serviceregistry.Service;
-import eu.europa.ec.fisheries.uvms.exchange.service.entity.serviceregistry.ServiceCapability;
 import eu.europa.ec.fisheries.uvms.exchange.model.mapper.JAXBMarshaller;
 import eu.europa.ec.fisheries.uvms.exchange.rest.BuildExchangeRestTestDeployment;
 import eu.europa.ec.fisheries.uvms.exchange.rest.JMSHelper;
 import eu.europa.ec.fisheries.uvms.exchange.rest.RestHelper;
 import eu.europa.ec.fisheries.uvms.exchange.rest.dto.Plugin;
-import eu.europa.ec.fisheries.uvms.exchange.rest.dto.ResponseDto;
-import eu.europa.ec.fisheries.uvms.exchange.rest.dto.TestExchangeLogStatusType;
+import eu.europa.ec.fisheries.uvms.exchange.service.dao.ServiceRegistryDaoBean;
+import eu.europa.ec.fisheries.uvms.exchange.service.entity.serviceregistry.Service;
+import eu.europa.ec.fisheries.uvms.exchange.service.entity.serviceregistry.ServiceCapability;
 import org.jboss.arquillian.container.test.api.OperateOnDeployment;
 import org.jboss.arquillian.junit.Arquillian;
 import org.junit.Test;
@@ -28,6 +26,7 @@ import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.GenericType;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
@@ -47,19 +46,18 @@ public class ExchangeRegistryRestResourceTest extends BuildExchangeRestTestDeplo
     @OperateOnDeployment("exchangeservice")
     public void getServiceListTest() throws Exception {
 
-        ResponseDto<List<Plugin>> responseDto = getWebTarget()
+        List<Plugin> responseDto = getWebTarget()
                 .path("plugin")
                 .path("list")
                 .request(MediaType.APPLICATION_JSON)
                 .header(HttpHeaders.AUTHORIZATION, getToken())
-                .get(new GenericType<ResponseDto<List<Plugin>>>() {});
+                .get(new GenericType<List<Plugin>>() {});
 
         assertNotNull(responseDto);
-        List<Plugin> response = responseDto.getData();
-        assertFalse(response.isEmpty());
-        assertEquals("STARTED", response.get(0).getStatus());
-        assertEquals("ManualMovement", response.get(0).getName());
-        assertEquals("ManualMovement", response.get(0).getServiceClassName());
+        assertFalse(responseDto.isEmpty());
+        assertEquals("STARTED", responseDto.get(0).getStatus());
+        assertEquals("ManualMovement", responseDto.get(0).getName());
+        assertEquals("ManualMovement", responseDto.get(0).getServiceClassName());
     }
 
     @Test
@@ -146,23 +144,29 @@ public class ExchangeRegistryRestResourceTest extends BuildExchangeRestTestDeplo
 
     @Test
     @OperateOnDeployment("exchangeservice")
-    public void serviceStopAndStartNonexistantServiceTest() throws Exception {
-        String stringResponse = getWebTarget()
+    public void serviceStopAndStartNonexistantServiceTest() {
+        Response response = getWebTarget()
                 .path("plugin/stop")
                 .path("Non-valid service")
                 .request(MediaType.APPLICATION_JSON)
                 .header(HttpHeaders.AUTHORIZATION, getToken())
-                .put(Entity.json("test"), String.class);
+                .put(Entity.json("test"), Response.class);
+
+        assertEquals(500, response.getStatus());
+        String stringResponse = response.readEntity(String.class);
 
         assertNotNull(stringResponse);
         assertTrue(stringResponse.contains("Service with service class name: Non-valid service does not exist"));
 
-        stringResponse = getWebTarget()
+        response = getWebTarget()
                 .path("plugin/start")
                 .path("Non-valid service")
                 .request(MediaType.APPLICATION_JSON)
                 .header(HttpHeaders.AUTHORIZATION, getToken())
-                .put(Entity.json("test"), String.class);
+                .put(Entity.json("test"), Response.class);
+
+        assertEquals(500, response.getStatus());
+        stringResponse = response.readEntity(String.class);
 
         assertNotNull(stringResponse);
         assertTrue(stringResponse.contains("Service with service class name: Non-valid service does not exist"));
