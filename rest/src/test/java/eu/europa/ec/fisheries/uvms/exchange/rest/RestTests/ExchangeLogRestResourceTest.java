@@ -6,7 +6,6 @@ import eu.europa.ec.fisheries.uvms.exchange.rest.BuildExchangeRestTestDeployment
 import eu.europa.ec.fisheries.uvms.exchange.rest.RestHelper;
 import eu.europa.ec.fisheries.uvms.exchange.rest.TestExchangeLogWithValidationResults;
 import eu.europa.ec.fisheries.uvms.exchange.rest.dto.PollQuery;
-import eu.europa.ec.fisheries.uvms.exchange.rest.dto.ResponseDto;
 import eu.europa.ec.fisheries.uvms.exchange.rest.dto.TestExchangeLogStatusType;
 import eu.europa.ec.fisheries.uvms.exchange.rest.dto.exchange.ListQueryResponse;
 import eu.europa.ec.fisheries.uvms.exchange.service.dao.ExchangeLogDaoBean;
@@ -92,17 +91,16 @@ public class ExchangeLogRestResourceTest extends BuildExchangeRestTestDeployment
         addLogStatusToLog(exchangeLog,ExchangeLogStatusTypeType.PROBABLY_TRANSMITTED);
         exchangeLog = exchangeLogDao.createLog(exchangeLog);
 
-        ResponseDto<List<TestExchangeLogStatusType>> responseDto = getWebTarget()
+        List<TestExchangeLogStatusType> responseDto = getWebTarget()
                 .path("exchange")
                 .path("poll")
                 .request(MediaType.APPLICATION_JSON)
                 .header(HttpHeaders.AUTHORIZATION, getToken())
-                .post(Entity.json(query), new GenericType<ResponseDto<List<TestExchangeLogStatusType>>>() {});
+                .post(Entity.json(query), new GenericType<List<TestExchangeLogStatusType>>() {});
 
         assertNotNull(responseDto);
-        List<TestExchangeLogStatusType> response = responseDto.getData();
-        assertFalse(response.isEmpty());
-        TestExchangeLogStatusType output = response.get(0);
+        assertFalse(responseDto.isEmpty());
+        TestExchangeLogStatusType output = responseDto.get(0);
         assertEquals(exchangeLog.getId().toString(), output.getGuid());
     }
 
@@ -130,7 +128,7 @@ public class ExchangeLogRestResourceTest extends BuildExchangeRestTestDeployment
 
     @Test
     @OperateOnDeployment("exchangeservice")
-    public void getExchangeLogRawXMLByGuidTest() throws Exception {
+    public void getExchangeLogRawXMLByGuidTest() {
         ExchangeLog exchangeLog = createBasicLog();
         exchangeLog.setTypeRefGuid(UUID.randomUUID());
         exchangeLog.setTypeRefMessage(UUID.randomUUID().toString());
