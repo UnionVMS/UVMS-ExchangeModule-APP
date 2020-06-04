@@ -80,7 +80,7 @@ public class ExchangeLogRestResource {
             return Response.ok(ExchangeLogMapper.mapToQueryResponse(response)).build();
         } catch (Exception ex) {
             LOG.error("[ Error when geting log list. {} ] {} ", query, ex.getMessage());
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(ExceptionUtils.getRootCause(ex)).build();
+            throw ex;
         }
     }
 
@@ -95,7 +95,7 @@ public class ExchangeLogRestResource {
             return Response.ok(response).build();
         } catch (Exception e) {
             LOG.error("[ Error when getting config search fields. {}] {}", query, e.getMessage());
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(ExceptionUtils.getRootCause(e)).build();
+            throw e;
         }
     }
 
@@ -111,7 +111,7 @@ public class ExchangeLogRestResource {
             return Response.ok(response).build();
         } catch (Exception e) {
             LOG.error("[ Error when getting config search fields. {} ] {}", typeRefGuid, e.getMessage());
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(ExceptionUtils.getRootCause(e)).build();
+            throw e;
         }
     }
 
@@ -124,7 +124,7 @@ public class ExchangeLogRestResource {
             return Response.ok(exchangeLog.getTypeRefMessage()).build();
         } catch (Exception e) {
             LOG.error("[ Error when getting exchange log by GUID. ] {}", e.getMessage());
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(ExceptionUtils.getRootCause(e)).build();
+            throw e;
         }
     }
 
@@ -139,7 +139,7 @@ public class ExchangeLogRestResource {
             return Response.ok(results).build();
         } catch (Exception e) {
             LOG.error("[ Error when getting exchange log by GUID. ] {}", e.getMessage());
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(ExceptionUtils.getRootCause(e)).build();
+            throw e;
         }
     }
 
@@ -150,7 +150,7 @@ public class ExchangeLogRestResource {
             return Response.ok(exchangeLogModel.getExchangeLogByGuid(UUID.fromString(guid))).build();
         } catch (Exception e) {
             LOG.error("[ Error when getting exchange log by GUID. ] {}", e.getMessage());
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(ExceptionUtils.getRootCause(e)).build();
+            throw e;
         }
     }
 

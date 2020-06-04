@@ -45,7 +45,7 @@ public class ConfigRestResource {
             return Response.ok(SearchField.values()).build();
         } catch (Exception e) {
             LOG.error("[ Error when getting config search fields. ] {}", e.getMessage());
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(ExceptionUtils.getRootCause(e)).build();
+            throw e;
         }
     }
 
@@ -57,7 +57,7 @@ public class ConfigRestResource {
             return Response.ok(configuration).build();
         } catch (Exception e) {
             LOG.error("[ Error when getting config configuration. ] {}", e.getMessage());
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(ExceptionUtils.getRootCause(e)).build();
+            throw e;
         }
     }
 }

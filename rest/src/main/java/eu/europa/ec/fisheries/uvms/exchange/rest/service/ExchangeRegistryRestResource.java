@@ -54,7 +54,7 @@ public class ExchangeRegistryRestResource {
             return Response.ok(ServiceMapper.map(serviceRegistryModel.getPlugins(null))).build();
         } catch (Exception ex) {
             LOG.error("[ Error when geting list. ] {} ", ex.getMessage());
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(ExceptionUtils.getRootCause(ex)).build();
+            throw ex;
         }
     }
 
@@ -69,7 +69,7 @@ public class ExchangeRegistryRestResource {
             return Response.ok(ServiceMapper.map(plugins)).build();
         } catch (Exception e) {
             LOG.error("Error when getting plugins by capability", e);
-            return Response.status(Status.INTERNAL_SERVER_ERROR).entity(ExceptionUtils.getRootCause(e)).build();
+            throw e;
         }
     }
 
@@ -82,7 +82,7 @@ public class ExchangeRegistryRestResource {
             return Response.ok(pluginService.start(serviceClassName)).build();
         } catch (Exception ex) {
             LOG.error("[ Error when starting service {}] {}", serviceClassName, ex);
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(ExceptionUtils.getRootCause(ex)).build();
+            throw ex;
         }
     }
 
@@ -95,7 +95,7 @@ public class ExchangeRegistryRestResource {
             return Response.ok(pluginService.stop(serviceClassName)).build();
         } catch (Exception ex) {
             LOG.error("[ Error when stopping service {} ] {} ", serviceClassName, ex.getMessage());
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(ExceptionUtils.getRootCause(ex)).build();
+            throw ex;
         }
     }
 }
