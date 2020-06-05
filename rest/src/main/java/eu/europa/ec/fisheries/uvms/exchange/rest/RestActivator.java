@@ -13,6 +13,7 @@ package eu.europa.ec.fisheries.uvms.exchange.rest;
 
 import eu.europa.ec.fisheries.uvms.commons.date.JsonBConfigurator;
 import eu.europa.ec.fisheries.uvms.exchange.rest.constants.RestConstants;
+import eu.europa.ec.fisheries.uvms.exchange.rest.filter.ExchangeRestExceptionMapper;
 import eu.europa.ec.fisheries.uvms.exchange.rest.service.ConfigRestResource;
 import eu.europa.ec.fisheries.uvms.exchange.rest.service.ExchangeLogRestResource;
 import eu.europa.ec.fisheries.uvms.exchange.rest.service.ExchangeRegistryRestResource;
@@ -41,6 +42,7 @@ public class RestActivator extends Application {
         set.add(ConfigRestResource.class);
         set.add(UnionVMSFeatureFilter.class);
         set.add(JsonBConfigurator.class);
+        set.add(ExchangeRestExceptionMapper.class);
         LOG.info(RestConstants.MODULE_NAME + " module starting up");
     }
 

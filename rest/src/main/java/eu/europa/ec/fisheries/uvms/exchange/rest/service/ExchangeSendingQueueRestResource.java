@@ -78,7 +78,7 @@ public class ExchangeSendingQueueRestResource {
             return Response.ok(true).build();
         } catch (Exception ex) {
             LOG.error("[ Error when getting log list. {} ] {} ", messageIdList, ex.getMessage());
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(ExceptionUtils.getRootCause(ex)).build();
+            throw ex;
         }
     }
 }

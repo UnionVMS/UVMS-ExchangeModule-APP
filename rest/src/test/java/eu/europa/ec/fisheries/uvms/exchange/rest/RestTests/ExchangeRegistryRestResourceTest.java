@@ -10,6 +10,7 @@ import eu.europa.ec.fisheries.uvms.exchange.rest.BuildExchangeRestTestDeployment
 import eu.europa.ec.fisheries.uvms.exchange.rest.JMSHelper;
 import eu.europa.ec.fisheries.uvms.exchange.rest.RestHelper;
 import eu.europa.ec.fisheries.uvms.exchange.rest.dto.Plugin;
+import eu.europa.ec.fisheries.uvms.exchange.rest.filter.AppError;
 import eu.europa.ec.fisheries.uvms.exchange.service.dao.ServiceRegistryDaoBean;
 import eu.europa.ec.fisheries.uvms.exchange.service.entity.serviceregistry.Service;
 import eu.europa.ec.fisheries.uvms.exchange.service.entity.serviceregistry.ServiceCapability;
@@ -152,9 +153,11 @@ public class ExchangeRegistryRestResourceTest extends BuildExchangeRestTestDeplo
                 .header(HttpHeaders.AUTHORIZATION, getToken())
                 .put(Entity.json("test"), Response.class);
 
-        assertEquals(500, response.getStatus());
-        String stringResponse = response.readEntity(String.class);
+        assertEquals(200, response.getStatus());
+        AppError appError = response.readEntity(AppError.class);
+        assertEquals(500, appError.code.intValue());
 
+        String stringResponse = appError.description;
         assertNotNull(stringResponse);
         assertTrue(stringResponse.contains("Service with service class name: Non-valid service does not exist"));
 
@@ -165,8 +168,10 @@ public class ExchangeRegistryRestResourceTest extends BuildExchangeRestTestDeplo
                 .header(HttpHeaders.AUTHORIZATION, getToken())
                 .put(Entity.json("test"), Response.class);
 
-        assertEquals(500, response.getStatus());
-        stringResponse = response.readEntity(String.class);
+        assertEquals(200, response.getStatus());
+        appError = response.readEntity(AppError.class);
+        assertEquals(500, appError.code.intValue());
+        stringResponse = appError.description;
 
         assertNotNull(stringResponse);
         assertTrue(stringResponse.contains("Service with service class name: Non-valid service does not exist"));
