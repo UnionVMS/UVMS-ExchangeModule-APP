@@ -40,7 +40,7 @@
         <audit.model.version>4.3.5</audit.model.version>
         <movement.model.version>5.5.10-UVMS</movement.model.version>
         <rules.model.version>3.3-MARE</rules.model.version>
-        <movement.rules.model.version>2.3.10</movement.rules.model.version>
+        <movement.rules.model.version>2.3.11</movement.rules.model.version>
     </properties>
 
     <dependencyManagement>
