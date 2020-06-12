@@ -87,6 +87,7 @@ public class ExchangeLogRestResourceTest extends BuildExchangeRestTestDeployment
 
         ExchangeLog exchangeLog = createBasicLog();
         exchangeLog.setTypeRefType(TypeRefType.POLL);
+        exchangeLog.setType(LogType.SEND_POLL);
         exchangeLog.setStatus(ExchangeLogStatusTypeType.PROBABLY_TRANSMITTED);
         exchangeLog.setTypeRefMessage("get poll status test");
         addLogStatusToLog(exchangeLog,ExchangeLogStatusTypeType.PROBABLY_TRANSMITTED);
