@@ -253,13 +253,14 @@ public class ExchangeLogServiceBean {
         }
     }
 
-    public PollStatus setPollStatus(UUID pollId, ExchangeLogStatusTypeType logStatus, String username) {
+    public PollStatus setPollStatus(UUID pollId, ExchangeLogStatusTypeType logStatus, String username, String refMessage) {
         PollStatus pollStatus = new PollStatus();
         pollStatus.setPollGuid(pollId.toString());
         pollStatus.setStatus(logStatus);
 
-        ExchangeLogType exchangeLogType = exchangeLogModel.setPollStatus(pollStatus, username);
+        ExchangeLogType exchangeLogType = exchangeLogModel.setPollStatus(pollStatus, username, refMessage);
         pollStatus.setExchangeLogGuid(exchangeLogType.getGuid());
+
         // For long polling
         exchangeLogEvent.fire(new NotificationMessage("guid", pollStatus.getExchangeLogGuid()));
         return pollStatus;

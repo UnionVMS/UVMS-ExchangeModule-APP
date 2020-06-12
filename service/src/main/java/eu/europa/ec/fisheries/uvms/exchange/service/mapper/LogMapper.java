@@ -217,6 +217,7 @@ public class LogMapper {
         ExchangeLogStatusType model = new ExchangeLogStatusType();
         if (exchangeLog.getType().equals(LogType.SEND_POLL)) {
             model.setIdentifier(exchangeLog.getRecipient());
+            model.setRefMessage(exchangeLog.getTypeRefMessage());
         }
         model.setGuid(exchangeLog.getId().toString());
 

@@ -184,6 +184,7 @@
             <xsd:element name="history" type="exchange:ExchangeLogStatusHistoryType" minOccurs="1" maxOccurs="unbounded"/>
             <xsd:element name="identifier" type="xsd:string"/>
             <xsd:element name="businessModuleExceptionMessage" type="xsd:string"/>
+            <xsd:element name="refMessage" type="xsd:string"/>
         </xsd:sequence>
     </xsd:complexType>
 
