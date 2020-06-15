@@ -16,6 +16,8 @@ import eu.europa.ec.fisheries.schema.exchange.module.v1.ExchangeModuleMethod;
 import eu.europa.ec.fisheries.schema.exchange.plugin.v1.AcknowledgeResponse;
 import eu.europa.ec.fisheries.schema.exchange.plugin.v1.PingResponse;
 import eu.europa.ec.fisheries.uvms.commons.message.api.MessageConstants;
+import eu.europa.ec.fisheries.uvms.commons.message.context.FluxEnvelopePropagatedData;
+import eu.europa.ec.fisheries.uvms.commons.message.context.FluxEnvelopeStack;
 import eu.europa.ec.fisheries.uvms.commons.message.context.MappedDiagnosticContext;
 import eu.europa.ec.fisheries.uvms.exchange.message.event.*;
 import eu.europa.ec.fisheries.uvms.exchange.message.event.carrier.ExchangeMessageEvent;
@@ -175,6 +177,9 @@ public class ExchangeMessageConsumerBean implements MessageListener {
     @LogIdByTypeExists
     private Event<ExchangeMessageEvent> logIdByTyeExists;
 
+    @Inject
+    private FluxEnvelopeStack fluxEnvelopeStack;
+
 
     @Override
     public void onMessage(Message message) {
@@ -199,102 +204,106 @@ public class ExchangeMessageConsumerBean implements MessageListener {
                     updateStateEvent.fire(messageEventWrapper);
                 }
             }
-        } else if (!checkUsernameShouldBeProvided(request)) {
-            LOG.error("[ Error when receiving message in exchange, username must be set in the request: ]");
-            errorEvent.fire(new ExchangeMessageEvent(textMessage, ExchangeModuleResponseMapper.createFaultMessage(FaultCode.EXCHANGE_MESSAGE, "Username in the request must be set")));
         } else {
-            ExchangeModuleMethod exchangeMethod = request.getMethod();
-            LOG.info("[INFO] Going to process following message type [ {} ] : ", exchangeMethod);
-            switch (exchangeMethod) {
-                case LIST_SERVICES:
-                    pluginConfigEvent.fire(messageEventWrapper);
-                    break;
-                case SET_COMMAND:
-                    sendCommandToPluginEvent.fire(messageEventWrapper);
-                    break;
-                case SEND_REPORT_TO_PLUGIN:
-                    sendMessageToPluginEvent.fire(messageEventWrapper);
-                    break;
-                case SET_MOVEMENT_REPORT: // @Deprecated TODO To be removed when ready..
-                    processMovementEvent.fire(messageEventWrapper);
-                    break;
-                case RECEIVE_MOVEMENT_REPORT_BATCH:
-                    receiveMovementBatchEvent.fire(messageEventWrapper);
-                    break;
-                case RECEIVE_SALES_REPORT:
-                    receiveSalesReportEvent.fire(messageEventWrapper);
-                    break;
-                case RECEIVE_SALES_QUERY:
-                    receiveSalesQueryEvent.fire(messageEventWrapper);
-                    break;
-                case RECEIVE_SALES_RESPONSE:
-                    receiveSalesResponseEvent.fire(messageEventWrapper);
-                    break;
-                case RECEIVE_INVALID_SALES_MESSAGE:
-                    receiveInvalidSalesMessageEvent.fire(messageEventWrapper);
-                    break;
-                case SEND_SALES_RESPONSE:
-                    sendSalesResponseEvent.fire(messageEventWrapper);
-                    break;
-                case SEND_SALES_REPORT:
-                    sendSalesReportEvent.fire(messageEventWrapper);
-                    break;
-                case UPDATE_PLUGIN_SETTING:
-                    updatePluginSettingEvent.fire(messageEventWrapper);
-                    break;
-                case PING:
-                    pingEvent.fire(messageEventWrapper);
-                    break;
-                case PROCESSED_MOVEMENT:
-                    processedMovementEvent.fire(messageEventWrapper);
-                    break;
-                case PROCESSED_MOVEMENT_BATCH:
-                    processedMovementBatch.fire(messageEventWrapper);
-                    break;
-                case SET_MDR_SYNC_MESSAGE_REQUEST:
-                    mdrSyncRequestMessageEvent.fire(messageEventWrapper);
-                    break;
-                case SET_MDR_SYNC_MESSAGE_RESPONSE:
-                    mdrSyncResponseMessageEvent.fire(messageEventWrapper);
-                    break;
-                case SET_FLUX_FA_REPORT_MESSAGE:
-                case UNKNOWN :
-                    processFLUXFAReportMessageEvent.fire(messageEventWrapper);
-                    break;
-                case SEND_FLUX_FA_REPORT_MESSAGE:
-                    sendFaReportToPluginMessageEvent.fire(messageEventWrapper);
-                    break;
-                case SET_FA_QUERY_MESSAGE:
-                    receivedFaQueryFromFlux.fire(messageEventWrapper);
-                    break;
-                case SEND_FA_QUERY_MESSAGE:
-                    sendFaQueryToPluginEvent.fire(messageEventWrapper);
-                    break;
-                case SET_FLUX_FA_RESPONSE_MESSAGE:
-                    processFLUXFAResponseMessageEvent.fire(messageEventWrapper);
-                    break;
-                case RCV_FLUX_FA_RESPONSE_MESSAGE:
-                    receivedFLUXFAResponseMessageEvent.fire(messageEventWrapper);
-                    break;
-                case UPDATE_LOG_STATUS:
-                    updateLogStatusEvent.fire(messageEventWrapper);
-                    break;
-                case UPDATE_ON_RESPONSE_MESSAGE:
-                    updateOnMessageEvent.fire(messageEventWrapper);
-                    break;
-                case UPDATE_LOG_BUSINESS_ERROR:
-                    updateLogBusinessErrorEvent.fire(messageEventWrapper);
-                    break;
-                case LOG_REF_ID_BY_TYPE_EXISTS:
-                    logRefIdByTyeExists.fire(messageEventWrapper);
-                    break;
-                case LOG_ID_BY_TYPE_EXISTS:
-                    logIdByTyeExists.fire(messageEventWrapper);
-                    break;
-                default:
-                    LOG.error("[ Not implemented method consumed: {} ] ", exchangeMethod);
-                    errorEvent.fire(new ExchangeMessageEvent(textMessage, ExchangeModuleResponseMapper.createFaultMessage(FaultCode.EXCHANGE_MESSAGE, "Method not implemented")));
-            }
+            fluxEnvelopeStack.withContext(extractFluxEnvelopePropagatedData(request), fluxEnvelopePropagatedData -> {
+                if (!checkUsernameShouldBeProvided(request)) {
+                    LOG.error("[ Error when receiving message in exchange, username must be set in the request: ]");
+                    errorEvent.fire(new ExchangeMessageEvent(textMessage, ExchangeModuleResponseMapper.createFaultMessage(FaultCode.EXCHANGE_MESSAGE, "Username in the request must be set")));
+                } else {
+                    ExchangeModuleMethod exchangeMethod = request.getMethod();
+                    LOG.info("[INFO] Going to process following message type [ {} ] : ", exchangeMethod);
+                    switch (exchangeMethod) {
+                        case LIST_SERVICES:
+                            pluginConfigEvent.fire(messageEventWrapper);
+                            break;
+                        case SET_COMMAND:
+                            sendCommandToPluginEvent.fire(messageEventWrapper);
+                            break;
+                        case SEND_REPORT_TO_PLUGIN:
+                            sendMessageToPluginEvent.fire(messageEventWrapper);
+                            break;
+                        case SET_MOVEMENT_REPORT: // @Deprecated TODO To be removed when ready..
+                            processMovementEvent.fire(messageEventWrapper);
+                            break;
+                        case RECEIVE_MOVEMENT_REPORT_BATCH:
+                            receiveMovementBatchEvent.fire(messageEventWrapper);
+                            break;
+                        case RECEIVE_SALES_REPORT:
+                            receiveSalesReportEvent.fire(messageEventWrapper);
+                            break;
+                        case RECEIVE_SALES_QUERY:
+                            receiveSalesQueryEvent.fire(messageEventWrapper);
+                            break;
+                        case RECEIVE_SALES_RESPONSE:
+                            receiveSalesResponseEvent.fire(messageEventWrapper);
+                            break;
+                        case RECEIVE_INVALID_SALES_MESSAGE:
+                            receiveInvalidSalesMessageEvent.fire(messageEventWrapper);
+                            break;
+                        case SEND_SALES_RESPONSE:
+                            sendSalesResponseEvent.fire(messageEventWrapper);
+                            break;
+                        case SEND_SALES_REPORT:
+                            sendSalesReportEvent.fire(messageEventWrapper);
+                            break;
+                        case UPDATE_PLUGIN_SETTING:
+                            updatePluginSettingEvent.fire(messageEventWrapper);
+                            break;
+                        case PING:
+                            pingEvent.fire(messageEventWrapper);
+                            break;
+                        case PROCESSED_MOVEMENT:
+                            processedMovementEvent.fire(messageEventWrapper);
+                            break;
+                        case PROCESSED_MOVEMENT_BATCH:
+                            processedMovementBatch.fire(messageEventWrapper);
+                            break;
+                        case SET_MDR_SYNC_MESSAGE_REQUEST:
+                            mdrSyncRequestMessageEvent.fire(messageEventWrapper);
+                            break;
+                        case SET_MDR_SYNC_MESSAGE_RESPONSE:
+                            mdrSyncResponseMessageEvent.fire(messageEventWrapper);
+                            break;
+                        case SET_FLUX_FA_REPORT_MESSAGE:
+                        case UNKNOWN :
+                            processFLUXFAReportMessageEvent.fire(messageEventWrapper);
+                            break;
+                        case SEND_FLUX_FA_REPORT_MESSAGE:
+                            sendFaReportToPluginMessageEvent.fire(messageEventWrapper);
+                            break;
+                        case SET_FA_QUERY_MESSAGE:
+                            receivedFaQueryFromFlux.fire(messageEventWrapper);
+                            break;
+                        case SEND_FA_QUERY_MESSAGE:
+                            sendFaQueryToPluginEvent.fire(messageEventWrapper);
+                            break;
+                        case SET_FLUX_FA_RESPONSE_MESSAGE:
+                            processFLUXFAResponseMessageEvent.fire(messageEventWrapper);
+                            break;
+                        case RCV_FLUX_FA_RESPONSE_MESSAGE:
+                            receivedFLUXFAResponseMessageEvent.fire(messageEventWrapper);
+                            break;
+                        case UPDATE_LOG_STATUS:
+                            updateLogStatusEvent.fire(messageEventWrapper);
+                            break;
+                        case UPDATE_ON_RESPONSE_MESSAGE:
+                            updateOnMessageEvent.fire(messageEventWrapper);
+                            break;
+                        case UPDATE_LOG_BUSINESS_ERROR:
+                            updateLogBusinessErrorEvent.fire(messageEventWrapper);
+                            break;
+                        case LOG_REF_ID_BY_TYPE_EXISTS:
+                            logRefIdByTyeExists.fire(messageEventWrapper);
+                            break;
+                        case LOG_ID_BY_TYPE_EXISTS:
+                            logIdByTyeExists.fire(messageEventWrapper);
+                            break;
+                        default:
+                            LOG.error("[ Not implemented method consumed: {} ] ", exchangeMethod);
+                            errorEvent.fire(new ExchangeMessageEvent(textMessage, ExchangeModuleResponseMapper.createFaultMessage(FaultCode.EXCHANGE_MESSAGE, "Method not implemented")));
+                    }
+                }
+            });
         }
     }
 
@@ -322,6 +331,17 @@ public class ExchangeMessageConsumerBean implements MessageListener {
         try {
             return JAXBMarshaller.unmarshallTextMessage(textMessage, ExchangeBaseRequest.class);
         } catch (ExchangeModelMarshallException e) {
+            return null;
+        }
+    }
+
+    private FluxEnvelopePropagatedData extractFluxEnvelopePropagatedData(ExchangeBaseRequest request) {
+        String messageGuid = request.getMessageGuid();
+        String dataflow = request.getDf() != null ? request.getDf() : request.getFluxDataFlow();
+        String senderOrReceiver = request.getSenderOrReceiver();
+        if (messageGuid != null || dataflow != null || senderOrReceiver != null) {
+            return new FluxEnvelopePropagatedData(messageGuid, dataflow, senderOrReceiver);
+        } else {
             return null;
         }
     }
