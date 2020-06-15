@@ -87,7 +87,9 @@ public class ExchangeLogRestResourceTest extends BuildExchangeRestTestDeployment
 
         ExchangeLog exchangeLog = createBasicLog();
         exchangeLog.setTypeRefType(TypeRefType.POLL);
+        exchangeLog.setType(LogType.SEND_POLL);
         exchangeLog.setStatus(ExchangeLogStatusTypeType.PROBABLY_TRANSMITTED);
+        exchangeLog.setTypeRefMessage("get poll status test");
         addLogStatusToLog(exchangeLog,ExchangeLogStatusTypeType.PROBABLY_TRANSMITTED);
         exchangeLog = exchangeLogDao.createLog(exchangeLog);
 
@@ -102,6 +104,7 @@ public class ExchangeLogRestResourceTest extends BuildExchangeRestTestDeployment
         assertFalse(responseDto.isEmpty());
         TestExchangeLogStatusType output = responseDto.get(0);
         assertEquals(exchangeLog.getId().toString(), output.getGuid());
+        assertEquals(exchangeLog.getTypeRefMessage(), output.getRefMessage());
     }
 
     @Test

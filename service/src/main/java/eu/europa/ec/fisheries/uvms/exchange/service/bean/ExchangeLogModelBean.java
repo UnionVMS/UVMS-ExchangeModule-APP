@@ -204,7 +204,7 @@ public class ExchangeLogModelBean {
         return logStatusTypeList;
     }
 
-    public ExchangeLogType setPollStatus(PollStatus pollStatus, String username) {
+    public ExchangeLogType setPollStatus(PollStatus pollStatus, String username, String refMessage) {
         ExchangeLogType logType = null;
         if (pollStatus == null || pollStatus.getPollGuid() == null) {
             throw new IllegalArgumentException("No poll id to update status");
@@ -215,6 +215,7 @@ public class ExchangeLogModelBean {
             List<ExchangeLogStatus> statusList = log.getStatusHistory();
             statusList.add(LogMapper.toNewStatusEntity(log, pollStatus.getStatus(), username));
             log.setStatus(pollStatus.getStatus());
+            log.setTypeRefMessage(refMessage);
             ExchangeLog retEntity = logDao.updateLog(log);
             logType = LogMapper.toModel(retEntity);
         }

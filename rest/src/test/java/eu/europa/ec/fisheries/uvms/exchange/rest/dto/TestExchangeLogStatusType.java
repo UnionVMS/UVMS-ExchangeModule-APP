@@ -16,6 +16,7 @@ public class TestExchangeLogStatusType implements Serializable
     protected List<ExchangeLogStatusHistoryType> history;
     protected String identifier;
     protected String businessModuleExceptionMessage;
+    protected String refMessage;
 
     public String getGuid() {
         return guid;
@@ -58,5 +59,13 @@ public class TestExchangeLogStatusType implements Serializable
 
     public void setBusinessModuleExceptionMessage(String value) {
         this.businessModuleExceptionMessage = value;
+    }
+
+    public String getRefMessage() {
+        return refMessage;
+    }
+
+    public void setRefMessage(String refMessage) {
+        this.refMessage = refMessage;
     }
 }

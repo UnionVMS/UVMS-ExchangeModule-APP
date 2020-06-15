@@ -446,6 +446,7 @@ public class ExchangeMessageConsumerBeanTest extends BuildExchangeServiceTestDep
         ExchangeLog updatedExchangeLog = exchangeLogDao.getExchangeLogByGuid(exchangeLog.getId());
         assertEquals(ExchangeLogStatusTypeType.SUCCESSFUL, updatedExchangeLog.getStatus());
         assertEquals(1, updatedExchangeLog.getStatusHistory().size());
+        assertEquals(ackType.getMessage(), updatedExchangeLog.getTypeRefMessage());
     }
 
     /* -- MOVEMENT -- */

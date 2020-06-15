@@ -653,7 +653,7 @@ public class ExchangeEventIncomingServiceBean {
                 exchangeLogStatus.equals(ExchangeLogStatusTypeType.FAILED)) {
             removeUnsentMessage(ack);
         }
-        PollStatus updatedLog = exchangeLogService.setPollStatus(UUID.fromString(ack.getPollStatus().getPollId()), exchangeLogStatus, serviceClassName);
+        PollStatus updatedLog = exchangeLogService.setPollStatus(UUID.fromString(ack.getPollStatus().getPollId()), exchangeLogStatus, serviceClassName, ack.getMessage());
         // Long polling
         pollEvent.fire(new NotificationMessage("guid", updatedLog.getPollGuid()));
     }
