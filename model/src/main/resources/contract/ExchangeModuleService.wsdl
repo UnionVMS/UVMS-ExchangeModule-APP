@@ -39,6 +39,7 @@
                     <xsd:enumeration value="RECEIVE_ASSET_INFORMATION"/>
                     <xsd:enumeration value="SEND_ASSET_INFORMATION"/>
                     <xsd:enumeration value="QUERY_ASSET_INFORMATION"/>
+                    <xsd:enumeration value="EFR_SAVE_REPORT"/>
 
                     <!-- plugin commands Ack-->
                     <xsd:enumeration value="PLUGIN_SET_CONFIG_ACK"/>
@@ -92,6 +93,9 @@
 
                     <!-- FLUX UNKNOWN message received -->
                     <xsd:enumeration value="UNKNOWN"/>
+
+                    <!-- EFR Report saved, ack from Activity -->
+                    <xsd:enumeration value="EFR_REPORT_SAVED"/>
 
                     <!-- report back to exchange what the validation status of a received message was, to update the log -->
                     <xsd:enumeration value="UPDATE_LOG_STATUS" />
@@ -465,6 +469,16 @@
                                 <xsd:element name="orgRequest" type="movement:SetReportMovementType" minOccurs="1" maxOccurs="unbounded"/>
                                 <xsd:element name="movementRefType" type="movement:MovementRefType" minOccurs="1" maxOccurs="1"/>
                             </xsd:sequence>
+                        </xsd:extension>
+                    </xsd:complexContent>
+                </xsd:complexType>
+            </xsd:element>
+
+            <!-- Asynch EfrSaveReport response -->
+            <xsd:element name="EfrReportSaved">
+                <xsd:complexType>
+                    <xsd:complexContent>
+                        <xsd:extension base="module:ExchangeBaseRequest">
                         </xsd:extension>
                     </xsd:complexContent>
                 </xsd:complexType>
