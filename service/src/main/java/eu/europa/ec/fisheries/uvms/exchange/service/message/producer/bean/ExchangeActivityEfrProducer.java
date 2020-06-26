@@ -11,10 +11,12 @@ import javax.jms.JMSException;
 import javax.jms.Queue;
 import java.util.Map;
 
+import static eu.europa.ec.fisheries.uvms.exchange.model.constant.ExchangeModelConstants.ACTIVITY_EVENT_QUEUE;
+
 @Stateless
 public class ExchangeActivityEfrProducer extends AbstractProducer {
 
-    @Resource(mappedName = "java:/jms/queue/EfrExchangeToActivity")
+    @Resource(mappedName = "java:/" + ACTIVITY_EVENT_QUEUE)
     private Queue destination;
 
     @Override
