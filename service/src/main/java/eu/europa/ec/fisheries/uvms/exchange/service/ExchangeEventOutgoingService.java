@@ -107,4 +107,6 @@ public interface ExchangeEventOutgoingService {
     void handleProcessedMovement(@Observes @HandleProcessedMovementEvent ExchangeMessageEvent message);
 
     void handleProcessedMovementBatch(@Observes @ProcessedMovementBatch ExchangeMessageEvent message);
+
+    void sendMovementReportToFLUX(String marshalledRequest, String serviceName) throws ExchangeMessageException;
 }

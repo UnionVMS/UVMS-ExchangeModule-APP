@@ -44,6 +44,13 @@ public interface ExchangeEventIncomingService {
     void processMovement(@Observes @SetMovementEvent ExchangeMessageEvent message);
 
     /**
+     * Send a Movement Report
+     *
+     * @param message
+     */
+    void sendMovementReport(@Observes @SendMovementReportEvent ExchangeMessageEvent message);
+
+    /**
      * Logs and sends a received asset information to Asset
      *
      * @param message received asset information message

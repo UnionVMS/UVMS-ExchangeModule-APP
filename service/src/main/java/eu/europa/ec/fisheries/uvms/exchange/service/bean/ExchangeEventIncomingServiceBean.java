@@ -45,12 +45,14 @@ import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeException;
 import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelException;
 import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelMarshallException;
 import eu.europa.ec.fisheries.uvms.exchange.model.mapper.ExchangeModuleResponseMapper;
+import eu.europa.ec.fisheries.uvms.exchange.model.mapper.ExchangePluginRequestMapper;
 import eu.europa.ec.fisheries.uvms.exchange.model.mapper.ExchangePluginResponseMapper;
 import eu.europa.ec.fisheries.uvms.exchange.model.mapper.JAXBMarshaller;
 import eu.europa.ec.fisheries.uvms.exchange.service.ExchangeEventIncomingService;
 import eu.europa.ec.fisheries.uvms.exchange.service.ExchangeEventOutgoingService;
 import eu.europa.ec.fisheries.uvms.exchange.service.ExchangeLogService;
 import eu.europa.ec.fisheries.uvms.exchange.service.ExchangeService;
+import eu.europa.ec.fisheries.uvms.exchange.service.constants.ExchangeServiceConstants;
 import eu.europa.ec.fisheries.uvms.exchange.service.domain.ExchangeLogModel;
 import eu.europa.ec.fisheries.uvms.exchange.service.event.ExchangePluginStatusEvent;
 import eu.europa.ec.fisheries.uvms.exchange.service.event.PollEvent;
@@ -60,6 +62,7 @@ import eu.europa.ec.fisheries.uvms.exchange.service.mapper.MovementMapper;
 import eu.europa.ec.fisheries.uvms.exchange.service.mapper.PluginTypeMapper;
 import eu.europa.ec.fisheries.uvms.longpolling.notifications.NotificationMessage;
 import eu.europa.ec.fisheries.uvms.movement.model.mapper.MovementModuleResponseMapper;
+import eu.europa.ec.fisheries.uvms.movement.model.util.DateUtil;
 import eu.europa.ec.fisheries.uvms.rules.model.exception.RulesModelMapperException;
 import eu.europa.ec.fisheries.uvms.rules.model.exception.RulesModelMarshallException;
 import eu.europa.ec.fisheries.uvms.rules.model.mapper.RulesModuleRequestMapper;
@@ -76,6 +79,7 @@ import javax.inject.Inject;
 import javax.jms.JMSException;
 import javax.jms.TextMessage;
 import javax.xml.bind.JAXBException;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -305,6 +309,36 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
             log.error("[ERROR] Failed to build Rules momvent request:{} {}", message, e);
         } catch (ExchangeLogException e) {
             log.error("[ERROR] Failed to log momvent request : {} {}", message, e);
+        }
+    }
+
+    @Override
+    @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
+    public void sendMovementReport(@Observes @SendMovementReportEvent ExchangeMessageEvent message) {
+        try {
+            SendFLUXMovementReportRequest request = (SendFLUXMovementReportRequest) message.getExchangeBaseRequest();
+            log.info("[INFO] Processing Movement Report: {}", request.getRefGuid());
+            request.setDate(Date.from(DateUtil.nowUTC()));
+
+            log.info("[INFO] Logging movement report.");
+            ExchangeLogType logResponse = exchangeLog.log(request, LogType.SEND_MOVEMENT_REPORT, ExchangeLogStatusTypeType.ISSUED, TypeRefType.MOVEMENT_REPORT, JAXBMarshaller.marshallJaxBObjectToString(request), false);
+
+            String pluginRequest = ExchangePluginRequestMapper.createSendFLUXMovementReportRequest(
+                    request.getRequest(),
+                    request.getDestination(),
+                    request.getSenderOrReceiver(),
+                    request.getFluxDataFlow(),
+                    request.getMessageGuid());
+            exchangeEventOutgoingService.sendMovementReportToFLUX(pluginRequest, ExchangeServiceConstants.MOVEMENT_PLUGIN_SERVICE_NAME);
+
+            exchangeLog.updateStatus(logResponse.getGuid(), ExchangeLogStatusTypeType.SUCCESSFUL);
+
+        } catch (ExchangeModelMarshallException e) {
+            log.error("[ERROR] Couldn't map to SetMovementReportRequest when processing send movement report from plugin:{} {}", message, e);
+        } catch (ExchangeLogException e) {
+            log.error("[ERROR] Failed to log forward movement report request : {} {}", message, e);
+        } catch (ExchangeMessageException e) {
+            log.error("[ERROR] Failed to send forward movement report to FLUX : {} {}", message, e);
         }
     }
 
