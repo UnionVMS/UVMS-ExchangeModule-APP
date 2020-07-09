@@ -62,6 +62,10 @@ public class ExchangeMessageConsumerBean implements MessageListener {
     private Event<ExchangeMessageEvent> processMovementEvent;
 
     @Inject
+    @SendMovementReportEvent
+    private Event<ExchangeMessageEvent> sendMovementReportEvent;
+
+    @Inject
     @ReceivedMovementBatchEvent
     private Event<ExchangeMessageEvent> receiveMovementBatchEvent;
 
@@ -224,6 +228,9 @@ public class ExchangeMessageConsumerBean implements MessageListener {
                             break;
                         case SET_MOVEMENT_REPORT: // @Deprecated TODO To be removed when ready..
                             processMovementEvent.fire(messageEventWrapper);
+                            break;
+                        case SEND_MOVEMENT_REPORT:
+                            sendMovementReportEvent.fire(messageEventWrapper);
                             break;
                         case RECEIVE_MOVEMENT_REPORT_BATCH:
                             receiveMovementBatchEvent.fire(messageEventWrapper);

@@ -497,6 +497,11 @@ public class ExchangeEventOutgoingServiceBean implements ExchangeEventOutgoingSe
         }
     }
 
+    @Override
+    public void sendMovementReportToFLUX(String marshalledRequest, String serviceName) throws ExchangeMessageException {
+        sendEventBusMessage(marshalledRequest, serviceName); // todo check the transactional on private method works on EJB/
+    }
+
     @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
     private String sendEventBusMessage(String marshalledRequest, String serviceName) throws ExchangeMessageException {
         try {

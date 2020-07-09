@@ -24,4 +24,5 @@ public class ExchangeServiceConstants {
     public static final String BELGIAN_AUCTION_SALES_PLUGIN_SERVICE_NAME = "eu.europa.ec.fisheries.uvms.plugins.belgianauction.sales";
     public static final String MDR_PLUGIN_SERVICE_NAME = "eu.europa.ec.fisheries.uvms.plugins.mdr";
     public static final String FLUX_VESSEL_PLUGIN_SERVICE_NAME = "eu.europa.ec.fisheries.uvms.plugins.flux.vessel";
+    public static final String MOVEMENT_PLUGIN_SERVICE_NAME = "eu.europa.ec.fisheries.uvms.plugins.flux.movement";
 }
