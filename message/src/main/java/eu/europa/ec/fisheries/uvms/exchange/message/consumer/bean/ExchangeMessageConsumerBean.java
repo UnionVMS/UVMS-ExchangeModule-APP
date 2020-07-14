@@ -35,6 +35,8 @@ import javax.inject.Inject;
 import javax.jms.Message;
 import javax.jms.MessageListener;
 import javax.jms.TextMessage;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 
 //@formatter:off
 @MessageDriven(mappedName = MessageConstants.QUEUE_EXCHANGE_EVENT, activationConfig = {
@@ -347,7 +349,7 @@ public class ExchangeMessageConsumerBean implements MessageListener {
         String dataflow = request.getDf() != null ? request.getDf() : request.getFluxDataFlow();
         String senderOrReceiver = request.getSenderOrReceiver();
         if (messageGuid != null || dataflow != null || senderOrReceiver != null) {
-            return new FluxEnvelopePropagatedData(messageGuid, dataflow, senderOrReceiver);
+            return new FluxEnvelopePropagatedData(messageGuid, dataflow, senderOrReceiver, ZonedDateTime.now(ZoneId.of("UTC")));
         } else {
             return null;
         }
