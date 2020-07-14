@@ -328,10 +328,10 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
                     request.getDestination(),
                     request.getSenderOrReceiver(),
                     request.getFluxDataFlow(),
-                    request.getMessageGuid());
+                    logResponse.getGuid());
             exchangeEventOutgoingService.sendMovementReportToFLUX(pluginRequest, ExchangeServiceConstants.MOVEMENT_PLUGIN_SERVICE_NAME);
 
-            exchangeLog.updateStatus(logResponse.getGuid(), ExchangeLogStatusTypeType.SUCCESSFUL);
+            exchangeLog.updateStatus(logResponse.getGuid(), ExchangeLogStatusTypeType.SENT);
 
         } catch (ExchangeModelMarshallException e) {
             log.error("[ERROR] Couldn't map to SetMovementReportRequest when processing send movement report from plugin:{} {}", message, e);
