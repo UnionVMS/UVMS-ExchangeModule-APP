@@ -187,6 +187,7 @@
         <module>rest</module>
         <module>service</module>
         <module>module</module>
+        <module>client</module>
     </modules>
 
 </project>

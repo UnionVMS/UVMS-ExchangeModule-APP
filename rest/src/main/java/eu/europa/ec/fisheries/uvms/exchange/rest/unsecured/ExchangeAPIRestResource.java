@@ -3,6 +3,9 @@ package eu.europa.ec.fisheries.uvms.exchange.rest.unsecured;
 import eu.europa.ec.fisheries.schema.exchange.module.v1.GetServiceListRequest;
 import eu.europa.ec.fisheries.schema.exchange.module.v1.GetServiceListResponse;
 import eu.europa.ec.fisheries.schema.exchange.module.v1.SetCommandRequest;
+import eu.europa.ec.fisheries.schema.exchange.plugin.types.v1.EmailType;
+import eu.europa.ec.fisheries.schema.exchange.plugin.types.v1.PluginType;
+import eu.europa.ec.fisheries.uvms.exchange.model.mapper.ExchangeModuleRequestMapper;
 import eu.europa.ec.fisheries.uvms.exchange.service.bean.ServiceRegistryModelBean;
 import eu.europa.ec.fisheries.uvms.exchange.service.entity.serviceregistry.Service;
 import eu.europa.ec.fisheries.uvms.exchange.service.mapper.ServiceMapper;
@@ -20,6 +23,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import java.util.Arrays;
 import java.util.List;
 
 @Path("/api")
@@ -49,6 +53,31 @@ public class ExchangeAPIRestResource {
             LOG.error("Call failed", ex);
         }
         return getServiceListResponse;
+    }
+
+    @POST
+    @Path("/sendEmail")
+    public Response sendEmail(EmailType email) {
+        try {
+            List<Service> serviceList = serviceRegistryModel.getPlugins(Arrays.asList(PluginType.EMAIL));
+            if(serviceList.isEmpty()){
+                LOG.warn("Trying to send an email while there is no email plugin registred. Throwing away the email.");
+                return Response.ok().build();
+            }
+            String pluginName = null;
+            for (Service service : serviceList) {
+                pluginName = service.getServiceClassName();
+                if(service.getStatus()){
+                    break;
+                }
+            }
+
+            SetCommandRequest sendEmailCommand = ExchangeModuleRequestMapper.createSetCommandSendEmailRequest(pluginName, email, email.getFrom());
+            return sendCommandToPlugin(sendEmailCommand);
+        } catch (Exception e) {
+            LOG.error("Error while creating a send email command {} ", e.getMessage(), e);
+            return Response.status(500).entity(ExceptionUtils.getRootCause(e)).build();
+        }
     }
 
     @POST

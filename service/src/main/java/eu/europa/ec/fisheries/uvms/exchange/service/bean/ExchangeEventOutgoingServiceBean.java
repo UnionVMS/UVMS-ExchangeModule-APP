@@ -466,7 +466,7 @@ public class ExchangeEventOutgoingServiceBean {
     private void sendCommandToPlugin(SetCommandRequest request, Service service, String originalJMSText) {
         CommandType commandType = request.getCommand();
 
-        List<UnsentMessageProperty> setUnsentMessagePropertiesForPoll = getSetUnsentMessageTypePropertiesForPoll(commandType);
+        List<UnsentMessageProperty> setUnsentMessagePropertiesForPoll = getSetUnsentMessageTypePropertiesForPollOrEmail(commandType);
         String unsentMessageGuid = exchangeLogService.createUnsentMessage(
                                                                         service.getName(),
                                                                         commandType.getTimestamp().toInstant(),
@@ -489,7 +489,7 @@ public class ExchangeEventOutgoingServiceBean {
         }
     }
 
-    private List<UnsentMessageProperty> getSetUnsentMessageTypePropertiesForPoll(CommandType commandType) {
+    private List<UnsentMessageProperty> getSetUnsentMessageTypePropertiesForPollOrEmail(CommandType commandType) {
         List<UnsentMessageProperty> properties = new ArrayList<>();
         if (commandType.getPoll() != null) {
             String connectId = ExchangeLogMapper.getConnectId(commandType.getPoll());

@@ -135,7 +135,7 @@ public class ExchangeMessageConsumerBeanTest extends BuildExchangeServiceTestDep
         email.setTo("TestExecuter@exchange.uvms");
         email.setSubject("Test subject");
 
-        String request = ExchangeModuleRequestMapper.createSetCommandSendEmailRequest(serviceClassName, email, null);
+        String request = ExchangeModuleRequestMapper.createMarshalledSetCommandSendEmailRequest(serviceClassName, email, null);
 
         jmsHelper.registerSubscriber("ServiceName = '" + serviceClassName + "'");
         String corrID = jmsHelper.sendExchangeMessage(request, null, "SET_COMMAND");
@@ -169,7 +169,7 @@ public class ExchangeMessageConsumerBeanTest extends BuildExchangeServiceTestDep
         email.setTo("TestExecuter@exchange.uvms");
         email.setSubject("Test subject");
 
-        String request = ExchangeModuleRequestMapper.createSetCommandSendEmailRequest(serviceClassName, email, null);
+        String request = ExchangeModuleRequestMapper.createMarshalledSetCommandSendEmailRequest(serviceClassName, email, null);
 
         String corrID = jmsHelper.sendExchangeMessage(request, null, "SET_COMMAND");
         Thread.sleep(1000); // To allow the db to sync up
