@@ -59,20 +59,7 @@ public class ExchangeAPIRestResource {
     @Path("/sendEmail")
     public Response sendEmail(EmailType email) {
         try {
-            List<Service> serviceList = serviceRegistryModel.getPlugins(Arrays.asList(PluginType.EMAIL));
-            if(serviceList.isEmpty()){
-                LOG.warn("Trying to send an email while there is no email plugin registred. Throwing away the email.");
-                return Response.ok().build();
-            }
-            String pluginName = null;
-            for (Service service : serviceList) {
-                pluginName = service.getServiceClassName();
-                if(service.getStatus()){
-                    break;
-                }
-            }
-
-            SetCommandRequest sendEmailCommand = ExchangeModuleRequestMapper.createSetCommandSendEmailRequest(pluginName, email, email.getFrom());
+            SetCommandRequest sendEmailCommand = ExchangeModuleRequestMapper.createSetCommandSendEmailRequest(null, email, email.getFrom());
             return sendCommandToPlugin(sendEmailCommand);
         } catch (Exception e) {
             LOG.error("Error while creating a send email command {} ", e.getMessage(), e);

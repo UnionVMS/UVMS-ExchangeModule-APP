@@ -244,8 +244,6 @@ public class ExchangeLogServiceBean {
             for (UnsentMessage unsentMessage : unsentMessageList) {
                 try {
                     String unsentMessageId = exchangeEventProducer.sendExchangeEventMessage(unsentMessage.getMessage(), unsentMessage.getFunction());
-                    //TextMessage unsentResponse = consumer.getMessage(unsentMessageId, TextMessage.class);
-                    //ExchangeModuleResponseMapper.validateResponse(unsentResponse, unsentMessageId);
                 } catch (Exception e) {
                     LOG.error("Error when sending/receiving message {} {}",messageIdList, e);
                 }

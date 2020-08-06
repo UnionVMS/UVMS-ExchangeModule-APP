@@ -43,7 +43,7 @@ public class ExchangeClientTest extends AbstractClientTest {
 
     @Test
     @OperateOnDeployment("normal")
-    public void getServiceListTest() throws Exception{
+    public void getServiceListTest() {
         GetServiceListRequest request = new GetServiceListRequest();
         request.getType().add(PluginType.OTHER);
         request.getType().add(PluginType.BELGIAN_ACTIVITY);
@@ -54,14 +54,14 @@ public class ExchangeClientTest extends AbstractClientTest {
 
     @Test
     @OperateOnDeployment("normal")
-    public void sendEmailTest() throws Exception{
+    public void sendEmailTest() {
         exchangeRestClient.sendEmail(new EmailType());  //just testing that we reach the endpoint
 
     }
 
     @Test
     @OperateOnDeployment("normal")
-    public void sendCommandTest() throws Exception{
+    public void sendCommandTest() {
         try {
             exchangeRestClient.sendCommandToPlugin(new SetCommandRequest());  //just testing that we reach the endpoint
 
