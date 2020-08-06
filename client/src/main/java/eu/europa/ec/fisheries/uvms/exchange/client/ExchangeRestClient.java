@@ -58,13 +58,16 @@ public class ExchangeRestClient {
 
     public GetServiceListResponse getServiceList(GetServiceListRequest request) {
 
-        GetServiceListResponse response = webTarget
+        Response response = webTarget
                 .path("serviceList")
                 .request(MediaType.APPLICATION_JSON)
                 .header(HttpHeaders.AUTHORIZATION, internalRestTokenHandler.createAndFetchToken("user"))
-                .post(Entity.json(request), GetServiceListResponse.class);
+                .post(Entity.json(request), Response.class);
 
-        return response;
+        if(response.getStatus() != 200) {
+            throw new RuntimeException("Errormessage from exchange: " + response.readEntity(String.class));
+        }
+        return response.readEntity(GetServiceListResponse.class);
     }
 
     public void sendEmail(EmailType email) {
@@ -74,6 +77,10 @@ public class ExchangeRestClient {
                 .request(MediaType.APPLICATION_JSON)
                 .header(HttpHeaders.AUTHORIZATION, internalRestTokenHandler.createAndFetchToken("user"))
                 .post(Entity.json(email));
+
+        if(response.getStatus() != 200) {
+            throw new RuntimeException("Errormessage from exchange: " + response.readEntity(String.class));
+        }
     }
 
     public void sendCommandToPlugin(SetCommandRequest request) {
@@ -83,6 +90,10 @@ public class ExchangeRestClient {
                 .request(MediaType.APPLICATION_JSON)
                 .header(HttpHeaders.AUTHORIZATION, internalRestTokenHandler.createAndFetchToken("user"))
                 .post(Entity.json(request));
+
+        if(response.getStatus() != 200) {
+            throw new RuntimeException("Errormessage from exchange: " + response.readEntity(String.class));
+        }
     }
 
 

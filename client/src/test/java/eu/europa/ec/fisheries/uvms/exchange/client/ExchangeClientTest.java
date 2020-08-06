@@ -62,8 +62,12 @@ public class ExchangeClientTest extends AbstractClientTest {
     @Test
     @OperateOnDeployment("normal")
     public void sendCommandTest() throws Exception{
-        exchangeRestClient.sendCommandToPlugin(new SetCommandRequest());  //just testing that we reach the endpoint
+        try {
+            exchangeRestClient.sendCommandToPlugin(new SetCommandRequest());  //just testing that we reach the endpoint
 
+        }catch (RuntimeException e){
+            assertTrue(e.getMessage().startsWith("java.lang.RuntimeException: Errormessage from exchange:"));
+        }
     }
 
 }

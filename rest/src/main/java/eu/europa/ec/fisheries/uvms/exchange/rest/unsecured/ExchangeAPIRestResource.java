@@ -88,7 +88,7 @@ public class ExchangeAPIRestResource {
             return Response.ok().build();
         } catch (Exception e) {
             LOG.error(e.getMessage(), e);
-            return Response.status(500).entity(ExceptionUtils.getRootCause(e)).build();
+            return Response.status(500).entity(ExceptionUtils.getRootCause(e).getMessage()).build();
         }
     }
 
