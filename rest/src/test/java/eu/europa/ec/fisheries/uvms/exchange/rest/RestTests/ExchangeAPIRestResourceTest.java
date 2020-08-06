@@ -33,6 +33,7 @@ import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.time.Instant;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
@@ -152,9 +153,17 @@ public class ExchangeAPIRestResourceTest extends BuildExchangeRestTestDeployment
     @Test
     @OperateOnDeployment("exchangeservice")
     public void sendEmailTest() throws Exception {
-        String serviceClassName = "Service Class Name " + UUID.randomUUID().toString();
-        Service s = RestHelper.createBasicService("Test Service Name:" + UUID.randomUUID().toString(), serviceClassName, PluginType.EMAIL);
-        s = serviceRegistryDao.createEntity(s);
+        List<Service> emailService = serviceRegistryDao.getServicesByTypes(Arrays.asList(PluginType.EMAIL));
+        String serviceClassName = null;
+        Service s;
+        if(emailService.isEmpty()) {
+            serviceClassName = "Service Class Name " + UUID.randomUUID().toString();
+            s = RestHelper.createBasicService("Test Service Name:" + UUID.randomUUID().toString(), serviceClassName, PluginType.EMAIL);
+            s = serviceRegistryDao.createEntity(s);
+        }else{
+            s = emailService.get(0);
+            serviceClassName = s.getServiceClassName();
+        }
         JMSHelper jmsHelper = new JMSHelper(connectionFactory);
 
         EmailType emailType = new EmailType();
