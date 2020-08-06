@@ -5,6 +5,7 @@ import eu.europa.ec.fisheries.schema.exchange.module.v1.GetServiceListResponse;
 import eu.europa.ec.fisheries.schema.exchange.module.v1.SetCommandRequest;
 import eu.europa.ec.fisheries.schema.exchange.plugin.types.v1.EmailType;
 import eu.europa.ec.fisheries.schema.exchange.plugin.types.v1.PluginType;
+import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogStatusType;
 import eu.europa.ec.fisheries.uvms.asset.client.AssetClient;
 import eu.europa.ec.fisheries.uvms.asset.client.model.*;
 import eu.europa.ec.fisheries.uvms.asset.client.model.search.SearchBranch;
@@ -30,7 +31,7 @@ import java.util.UUID;
 import static org.junit.Assert.*;
 
 @RunWith(Arquillian.class)
-public class ExchangeClientTest extends AbstractClientTest {
+public class ExchangeRestClientTest extends AbstractClientTest {
 
     @Inject
     ExchangeRestClient exchangeRestClient;
@@ -68,6 +69,14 @@ public class ExchangeClientTest extends AbstractClientTest {
         }catch (RuntimeException e){
             assertTrue(e.getMessage().startsWith("java.lang.RuntimeException: Errormessage from exchange:"));
         }
+    }
+
+    @Test
+    @OperateOnDeployment("normal")
+    public void getPollStatusTest() {
+        ExchangeLogStatusType pollStatus = exchangeRestClient.getPollStatus(UUID.randomUUID().toString());//just testing that we reach the endpoint
+        assertNull(pollStatus);
+
     }
 
 }

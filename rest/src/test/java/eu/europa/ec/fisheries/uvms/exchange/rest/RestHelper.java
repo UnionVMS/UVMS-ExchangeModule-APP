@@ -2,7 +2,11 @@ package eu.europa.ec.fisheries.uvms.exchange.rest;
 
 import eu.europa.ec.fisheries.schema.exchange.plugin.types.v1.PluginType;
 import eu.europa.ec.fisheries.schema.exchange.service.v1.CapabilityTypeType;
+import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogStatusTypeType;
+import eu.europa.ec.fisheries.schema.exchange.v1.LogType;
 import eu.europa.ec.fisheries.uvms.commons.date.JsonBConfigurator;
+import eu.europa.ec.fisheries.uvms.exchange.service.entity.exchangelog.ExchangeLog;
+import eu.europa.ec.fisheries.uvms.exchange.service.entity.exchangelog.ExchangeLogStatus;
 import eu.europa.ec.fisheries.uvms.exchange.service.entity.serviceregistry.Service;
 import eu.europa.ec.fisheries.uvms.exchange.service.entity.serviceregistry.ServiceCapability;
 
@@ -52,5 +56,32 @@ public class RestHelper {
         s.setServiceSettingList(new ArrayList<>());
 
         return s;
+    }
+
+
+
+    public static ExchangeLog createBasicLog(){
+        ExchangeLog exchangeLog = new ExchangeLog();
+        exchangeLog.setType(LogType.PROCESSED_MOVEMENT);
+        exchangeLog.setStatus(ExchangeLogStatusTypeType.UNKNOWN);
+        exchangeLog.setUpdatedBy("Tester");
+        exchangeLog.setUpdateTime(Instant.now());
+        exchangeLog.setDateReceived(Instant.now());
+        exchangeLog.setSenderReceiver("Test sender/receiver");
+        exchangeLog.setTransferIncoming(false);
+        exchangeLog.setStatusHistory(new ArrayList<ExchangeLogStatus>());
+
+        return exchangeLog;
+    }
+
+    public static void addLogStatusToLog(ExchangeLog exchangeLog, ExchangeLogStatusTypeType statusType){
+        ExchangeLogStatus status = new ExchangeLogStatus();
+        status.setLog(exchangeLog);
+        status.setStatus(statusType);
+        status.setStatusTimestamp(Instant.now());
+        status.setUpdatedBy("Status updater");
+        status.setUpdateTime(Instant.now());
+
+        exchangeLog.getStatusHistory().add(status);
     }
 }

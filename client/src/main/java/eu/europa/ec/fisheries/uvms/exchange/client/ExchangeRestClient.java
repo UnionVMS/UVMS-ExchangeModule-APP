@@ -5,6 +5,7 @@ import eu.europa.ec.fisheries.schema.exchange.module.v1.GetServiceListRequest;
 import eu.europa.ec.fisheries.schema.exchange.module.v1.GetServiceListResponse;
 import eu.europa.ec.fisheries.schema.exchange.module.v1.SetCommandRequest;
 import eu.europa.ec.fisheries.schema.exchange.plugin.types.v1.EmailType;
+import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogStatusType;
 import eu.europa.ec.fisheries.uvms.commons.date.JsonBConfigurator;
 import eu.europa.ec.fisheries.uvms.rest.security.InternalRestTokenHandler;
 
@@ -94,6 +95,24 @@ public class ExchangeRestClient {
         if(response.getStatus() != 200) {
             throw new RuntimeException("Errormessage from exchange: " + response.readEntity(String.class));
         }
+    }
+
+    public ExchangeLogStatusType getPollStatus(String uuid) {
+
+        Response response = webTarget
+                .path("poll")
+                .path(uuid)
+                .request(MediaType.APPLICATION_JSON)
+                .header(HttpHeaders.AUTHORIZATION, internalRestTokenHandler.createAndFetchToken("user"))
+                .get(Response.class);
+
+        if(response.getStatus() != 200) {
+            throw new RuntimeException("Errormessage from exchange: " + response.readEntity(String.class));
+        }
+        if(response.getLength() == 0){
+            return null;
+        }
+        return response.readEntity(ExchangeLogStatusType.class);
     }
 
 

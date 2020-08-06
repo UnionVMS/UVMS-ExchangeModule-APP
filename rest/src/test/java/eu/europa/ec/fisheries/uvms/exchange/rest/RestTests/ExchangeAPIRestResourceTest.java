@@ -12,12 +12,17 @@ import eu.europa.ec.fisheries.schema.exchange.plugin.types.v1.PollType;
 import eu.europa.ec.fisheries.schema.exchange.plugin.types.v1.PollTypeType;
 import eu.europa.ec.fisheries.schema.exchange.plugin.v1.ExchangePluginMethod;
 import eu.europa.ec.fisheries.schema.exchange.service.v1.ServiceResponseType;
-import eu.europa.ec.fisheries.uvms.exchange.service.dao.ServiceRegistryDaoBean;
-import eu.europa.ec.fisheries.uvms.exchange.service.entity.serviceregistry.Service;
+import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogStatusType;
+import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogStatusTypeType;
+import eu.europa.ec.fisheries.schema.exchange.v1.TypeRefType;
 import eu.europa.ec.fisheries.uvms.exchange.model.mapper.JAXBMarshaller;
 import eu.europa.ec.fisheries.uvms.exchange.rest.BuildExchangeRestTestDeployment;
 import eu.europa.ec.fisheries.uvms.exchange.rest.JMSHelper;
 import eu.europa.ec.fisheries.uvms.exchange.rest.RestHelper;
+import eu.europa.ec.fisheries.uvms.exchange.service.dao.ExchangeLogDaoBean;
+import eu.europa.ec.fisheries.uvms.exchange.service.dao.ServiceRegistryDaoBean;
+import eu.europa.ec.fisheries.uvms.exchange.service.entity.exchangelog.ExchangeLog;
+import eu.europa.ec.fisheries.uvms.exchange.service.entity.serviceregistry.Service;
 import org.jboss.arquillian.container.test.api.OperateOnDeployment;
 import org.jboss.arquillian.junit.Arquillian;
 import org.junit.Test;
@@ -30,6 +35,7 @@ import javax.jms.TextMessage;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Entity;
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.time.Instant;
@@ -39,13 +45,15 @@ import java.util.List;
 import java.util.UUID;
 
 import static org.junit.Assert.*;
-import static org.junit.Assert.assertEquals;
 
 @RunWith(Arquillian.class)
 public class ExchangeAPIRestResourceTest extends BuildExchangeRestTestDeployment {
 
     @Inject
     ServiceRegistryDaoBean serviceRegistryDao;
+
+    @Inject
+    ExchangeLogDaoBean exchangeLogDao;
 
     @Resource(mappedName = "java:/ConnectionFactory")
     private ConnectionFactory connectionFactory;
@@ -244,5 +252,30 @@ public class ExchangeAPIRestResourceTest extends BuildExchangeRestTestDeployment
         assertEquals(ExchangePluginMethod.SET_COMMAND, pollCommand.getMethod());
 
         serviceRegistryDao.deleteEntity(s.getId());
+    }
+
+
+
+    @Test
+    @OperateOnDeployment("exchangeservice")
+    public void getPollStatusByRefIdTest() throws Exception {
+        ExchangeLog exchangeLog = RestHelper.createBasicLog();
+        exchangeLog.setTypeRefGuid(UUID.randomUUID());
+        exchangeLog.setTypeRefType(TypeRefType.POLL);
+        exchangeLog.setStatus(ExchangeLogStatusTypeType.PROBABLY_TRANSMITTED);
+        RestHelper.addLogStatusToLog(exchangeLog,ExchangeLogStatusTypeType.PROBABLY_TRANSMITTED);
+        exchangeLog = exchangeLogDao.createLog(exchangeLog);
+
+        Client client = ClientBuilder.newClient();
+        String stringResponse = client.target("http://localhost:8080/exchangerest/rest/unsecured")
+                .path("api/poll")
+                .path(exchangeLog.getTypeRefGuid().toString())
+                .request(MediaType.APPLICATION_JSON)
+                .header(HttpHeaders.AUTHORIZATION, getToken())
+                .get(String.class);
+
+        assertNotNull(stringResponse);
+        ExchangeLogStatusType response = RestHelper.readResponseDto(stringResponse, ExchangeLogStatusType.class);
+        assertEquals(exchangeLog.getId().toString(), response.getGuid());
     }
 }
