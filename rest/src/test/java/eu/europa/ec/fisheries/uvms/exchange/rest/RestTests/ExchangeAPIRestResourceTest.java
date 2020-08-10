@@ -12,12 +12,17 @@ import eu.europa.ec.fisheries.schema.exchange.plugin.types.v1.PollType;
 import eu.europa.ec.fisheries.schema.exchange.plugin.types.v1.PollTypeType;
 import eu.europa.ec.fisheries.schema.exchange.plugin.v1.ExchangePluginMethod;
 import eu.europa.ec.fisheries.schema.exchange.service.v1.ServiceResponseType;
-import eu.europa.ec.fisheries.uvms.exchange.service.dao.ServiceRegistryDaoBean;
-import eu.europa.ec.fisheries.uvms.exchange.service.entity.serviceregistry.Service;
+import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogStatusType;
+import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogStatusTypeType;
+import eu.europa.ec.fisheries.schema.exchange.v1.TypeRefType;
 import eu.europa.ec.fisheries.uvms.exchange.model.mapper.JAXBMarshaller;
 import eu.europa.ec.fisheries.uvms.exchange.rest.BuildExchangeRestTestDeployment;
 import eu.europa.ec.fisheries.uvms.exchange.rest.JMSHelper;
 import eu.europa.ec.fisheries.uvms.exchange.rest.RestHelper;
+import eu.europa.ec.fisheries.uvms.exchange.service.dao.ExchangeLogDaoBean;
+import eu.europa.ec.fisheries.uvms.exchange.service.dao.ServiceRegistryDaoBean;
+import eu.europa.ec.fisheries.uvms.exchange.service.entity.exchangelog.ExchangeLog;
+import eu.europa.ec.fisheries.uvms.exchange.service.entity.serviceregistry.Service;
 import org.jboss.arquillian.container.test.api.OperateOnDeployment;
 import org.jboss.arquillian.junit.Arquillian;
 import org.junit.Test;
@@ -30,21 +35,25 @@ import javax.jms.TextMessage;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Entity;
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.time.Instant;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
 import static org.junit.Assert.*;
-import static org.junit.Assert.assertEquals;
 
 @RunWith(Arquillian.class)
 public class ExchangeAPIRestResourceTest extends BuildExchangeRestTestDeployment {
 
     @Inject
     ServiceRegistryDaoBean serviceRegistryDao;
+
+    @Inject
+    ExchangeLogDaoBean exchangeLogDao;
 
     @Resource(mappedName = "java:/ConnectionFactory")
     private ConnectionFactory connectionFactory;
@@ -56,27 +65,6 @@ public class ExchangeAPIRestResourceTest extends BuildExchangeRestTestDeployment
         request.getType().add(PluginType.OTHER);
         Client client = ClientBuilder.newClient();
 
-        GetServiceListResponse response = client.target("http://localhost:8080/exchangerest/rest/unsecured")
-                .path("api")
-                .path("serviceList")
-                .request(MediaType.APPLICATION_JSON)
-                .post(Entity.json(request), GetServiceListResponse.class);
-
-        assertNotNull(response);
-        List<ServiceResponseType> responseList = response.getService();
-        assertFalse(responseList.isEmpty());
-        assertEquals("STARTED", responseList.get(0).getStatus().value());
-        assertEquals("ManualMovement", responseList.get(0).getName());
-        assertEquals("ManualMovement", responseList.get(0).getServiceClassName());
-    }
-
-    @Test
-    @OperateOnDeployment("exchangeservice")
-    public void getServiceListTestFromTheSecurePart() throws Exception {
-        GetServiceListRequest request = new GetServiceListRequest();
-        request.getType().add(PluginType.OTHER);
-
-        Client client = ClientBuilder.newClient();
         GetServiceListResponse response = client.target("http://localhost:8080/exchangerest/rest/unsecured")
                 .path("api")
                 .path("serviceList")
@@ -172,6 +160,49 @@ public class ExchangeAPIRestResourceTest extends BuildExchangeRestTestDeployment
 
     @Test
     @OperateOnDeployment("exchangeservice")
+    public void sendEmailTest() throws Exception {
+        List<Service> emailService = serviceRegistryDao.getServicesByTypes(Arrays.asList(PluginType.EMAIL));
+        String serviceClassName = null;
+        Service s;
+        if(emailService.isEmpty()) {
+            serviceClassName = "Service Class Name " + UUID.randomUUID().toString();
+            s = RestHelper.createBasicService("Test Service Name:" + UUID.randomUUID().toString(), serviceClassName, PluginType.EMAIL);
+            s = serviceRegistryDao.createEntity(s);
+        }else{
+            s = emailService.get(0);
+            serviceClassName = s.getServiceClassName();
+        }
+        JMSHelper jmsHelper = new JMSHelper(connectionFactory);
+
+        EmailType emailType = new EmailType();
+        emailType.setTo("TestEmailTo@test.test");
+        emailType.setFrom("TestEmailFrom@test.test");
+        emailType.setBody("Test EMail Body");
+        emailType.setSubject("Test Email Subject");
+
+        Client client = ClientBuilder.newClient();
+        jmsHelper.registerSubscriber("ServiceName = '" + serviceClassName + "'");
+        Response response = client.target("http://localhost:8080/exchangerest/rest/unsecured")
+                .path("api")
+                .path("sendEmail")
+                .request(MediaType.APPLICATION_JSON)
+                .post(Entity.json(emailType));
+
+        assertEquals(200, response.getStatus());
+        TextMessage message = (TextMessage)jmsHelper.listenOnEventBus("ServiceName = '" + serviceClassName + "'", 5000l);
+        eu.europa.ec.fisheries.schema.exchange.plugin.v1.SetCommandRequest emailCommand = JAXBMarshaller.unmarshallTextMessage(message, eu.europa.ec.fisheries.schema.exchange.plugin.v1.SetCommandRequest.class);
+
+        assertEquals(serviceClassName, emailCommand.getCommand().getPluginName());
+        assertEquals(emailType.getTo(), emailCommand.getCommand().getEmail().getTo());
+        assertEquals(emailType.getFrom(), emailCommand.getCommand().getFwdRule());
+        assertEquals(ExchangePluginMethod.SET_COMMAND, emailCommand.getMethod());
+
+        serviceRegistryDao.deleteEntity(s.getId());
+    }
+
+
+    @Test
+    @OperateOnDeployment("exchangeservice")
     public void sendCommandToPollPluginTest() throws Exception {
         String serviceClassName = "Service Class Name " + UUID.randomUUID().toString();
         String guid = UUID.randomUUID().toString();
@@ -221,5 +252,30 @@ public class ExchangeAPIRestResourceTest extends BuildExchangeRestTestDeployment
         assertEquals(ExchangePluginMethod.SET_COMMAND, pollCommand.getMethod());
 
         serviceRegistryDao.deleteEntity(s.getId());
+    }
+
+
+
+    @Test
+    @OperateOnDeployment("exchangeservice")
+    public void getPollStatusByRefIdTest() throws Exception {
+        ExchangeLog exchangeLog = RestHelper.createBasicLog();
+        exchangeLog.setTypeRefGuid(UUID.randomUUID());
+        exchangeLog.setTypeRefType(TypeRefType.POLL);
+        exchangeLog.setStatus(ExchangeLogStatusTypeType.PROBABLY_TRANSMITTED);
+        RestHelper.addLogStatusToLog(exchangeLog,ExchangeLogStatusTypeType.PROBABLY_TRANSMITTED);
+        exchangeLog = exchangeLogDao.createLog(exchangeLog);
+
+        Client client = ClientBuilder.newClient();
+        String stringResponse = client.target("http://localhost:8080/exchangerest/rest/unsecured")
+                .path("api/poll")
+                .path(exchangeLog.getTypeRefGuid().toString())
+                .request(MediaType.APPLICATION_JSON)
+                .header(HttpHeaders.AUTHORIZATION, getToken())
+                .get(String.class);
+
+        assertNotNull(stringResponse);
+        ExchangeLogStatusType response = RestHelper.readResponseDto(stringResponse, ExchangeLogStatusType.class);
+        assertEquals(exchangeLog.getId().toString(), response.getGuid());
     }
 }

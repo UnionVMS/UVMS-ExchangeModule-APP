@@ -278,10 +278,16 @@ public class ExchangeModuleRequestMapper {
         return JAXBMarshaller.marshallJaxBObjectToString(request);
     }
 
-    public static String createSetCommandSendEmailRequest(String pluginName, EmailType email, String fwdRule) {
+    public static String createMarshalledSetCommandSendEmailRequest(String pluginName, EmailType email, String fwdRule) {
         SetCommandRequest request = createSetCommandRequest(pluginName, CommandTypeType.EMAIL, "UVMS", fwdRule);
         request.getCommand().setEmail(email);
         return JAXBMarshaller.marshallJaxBObjectToString(request);
+    }
+
+    public static SetCommandRequest createSetCommandSendEmailRequest(String pluginName, EmailType email, String fwdRule) {
+        SetCommandRequest request = createSetCommandRequest(pluginName, CommandTypeType.EMAIL, "UVMS", fwdRule);
+        request.getCommand().setEmail(email);
+        return request;
     }
 
     private static SetCommandRequest createSetCommandRequest(String pluginName, CommandTypeType type, String username, String fwdRule) {

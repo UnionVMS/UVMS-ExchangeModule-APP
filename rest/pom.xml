@@ -12,12 +12,7 @@
     <name>${project.parent.artifactId}-rest</name>
     <packaging>war</packaging>
 
-    <properties>
-        <docker.dev.stop.phase>verify</docker.dev.stop.phase>
-        <docker.dev.prestop.phase>install</docker.dev.prestop.phase>
-    </properties>
-
-    <dependencies>     
+    <dependencies>
         <!-- project modules--> 
         <dependency>
             <groupId>${project.groupId}</groupId>

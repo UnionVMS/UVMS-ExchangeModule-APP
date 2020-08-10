@@ -43,7 +43,7 @@ public class ExchangeLogRestResourceTest extends BuildExchangeRestTestDeployment
     @Test
     @OperateOnDeployment("exchangeservice")
     public void getLogListByCriteriaTest() {
-        ExchangeLog exchangeLog = createBasicLog();
+        ExchangeLog exchangeLog = RestHelper.createBasicLog();
         exchangeLog.setTypeRefType(TypeRefType.UNKNOWN);
         exchangeLog = exchangeLogDao.createLog(exchangeLog);
 
@@ -85,12 +85,12 @@ public class ExchangeLogRestResourceTest extends BuildExchangeRestTestDeployment
         query.setStatusFromDate(DateUtils.dateToEpochMilliseconds(now));
         query.setStatusToDate(DateUtils.dateToEpochMilliseconds(now.plusSeconds(5)));
 
-        ExchangeLog exchangeLog = createBasicLog();
+        ExchangeLog exchangeLog = RestHelper.createBasicLog();
         exchangeLog.setTypeRefType(TypeRefType.POLL);
         exchangeLog.setType(LogType.SEND_POLL);
         exchangeLog.setStatus(ExchangeLogStatusTypeType.PROBABLY_TRANSMITTED);
         exchangeLog.setTypeRefMessage("get poll status test");
-        addLogStatusToLog(exchangeLog,ExchangeLogStatusTypeType.PROBABLY_TRANSMITTED);
+        RestHelper.addLogStatusToLog(exchangeLog,ExchangeLogStatusTypeType.PROBABLY_TRANSMITTED);
         exchangeLog = exchangeLogDao.createLog(exchangeLog);
 
         List<TestExchangeLogStatusType> responseDto = getWebTarget()
@@ -110,11 +110,11 @@ public class ExchangeLogRestResourceTest extends BuildExchangeRestTestDeployment
     @Test
     @OperateOnDeployment("exchangeservice")
     public void getPollStatusByRefIdTest() throws Exception {
-        ExchangeLog exchangeLog = createBasicLog();
+        ExchangeLog exchangeLog = RestHelper.createBasicLog();
         exchangeLog.setTypeRefGuid(UUID.randomUUID());
         exchangeLog.setTypeRefType(TypeRefType.POLL);
         exchangeLog.setStatus(ExchangeLogStatusTypeType.PROBABLY_TRANSMITTED);
-        addLogStatusToLog(exchangeLog,ExchangeLogStatusTypeType.PROBABLY_TRANSMITTED);
+        RestHelper.addLogStatusToLog(exchangeLog,ExchangeLogStatusTypeType.PROBABLY_TRANSMITTED);
         exchangeLog = exchangeLogDao.createLog(exchangeLog);
 
         String stringResponse = getWebTarget()
@@ -132,12 +132,12 @@ public class ExchangeLogRestResourceTest extends BuildExchangeRestTestDeployment
     @Test
     @OperateOnDeployment("exchangeservice")
     public void getExchangeLogRawXMLByGuidTest() {
-        ExchangeLog exchangeLog = createBasicLog();
+        ExchangeLog exchangeLog = RestHelper.createBasicLog();
         exchangeLog.setTypeRefGuid(UUID.randomUUID());
         exchangeLog.setTypeRefMessage(UUID.randomUUID().toString());
         exchangeLog.setTypeRefType(TypeRefType.POLL);
         exchangeLog.setStatus(ExchangeLogStatusTypeType.PROBABLY_TRANSMITTED);
-        addLogStatusToLog(exchangeLog,ExchangeLogStatusTypeType.PROBABLY_TRANSMITTED);
+        RestHelper.addLogStatusToLog(exchangeLog,ExchangeLogStatusTypeType.PROBABLY_TRANSMITTED);
         exchangeLog = exchangeLogDao.createLog(exchangeLog);
 
         String stringResponse = getWebTarget()
@@ -154,12 +154,12 @@ public class ExchangeLogRestResourceTest extends BuildExchangeRestTestDeployment
     @Test
     @OperateOnDeployment("exchangeservice")
     public void getExchangeLogRawXMLAndValidationByGuidTest() throws Exception {
-        ExchangeLog exchangeLog = createBasicLog();
+        ExchangeLog exchangeLog = RestHelper.createBasicLog();
         exchangeLog.setTypeRefGuid(UUID.randomUUID());
         exchangeLog.setTypeRefMessage(UUID.randomUUID().toString());
         exchangeLog.setTypeRefType(TypeRefType.FA_RESPONSE);
         exchangeLog.setStatus(ExchangeLogStatusTypeType.PROBABLY_TRANSMITTED);
-        addLogStatusToLog(exchangeLog,ExchangeLogStatusTypeType.PROBABLY_TRANSMITTED);
+        RestHelper.addLogStatusToLog(exchangeLog,ExchangeLogStatusTypeType.PROBABLY_TRANSMITTED);
         exchangeLog = exchangeLogDao.createLog(exchangeLog);
 
         String stringResponse = getWebTarget()
@@ -179,12 +179,12 @@ public class ExchangeLogRestResourceTest extends BuildExchangeRestTestDeployment
     @Test
     @OperateOnDeployment("exchangeservice")
     public void getExchangeLogByUUIDTest() throws Exception {
-        ExchangeLog exchangeLog = createBasicLog();
+        ExchangeLog exchangeLog = RestHelper.createBasicLog();
         exchangeLog.setTypeRefGuid(UUID.randomUUID());
         exchangeLog.setTypeRefMessage(UUID.randomUUID().toString());
         exchangeLog.setTypeRefType(TypeRefType.FA_RESPONSE);
         exchangeLog.setStatus(ExchangeLogStatusTypeType.PROBABLY_TRANSMITTED);
-        addLogStatusToLog(exchangeLog,ExchangeLogStatusTypeType.PROBABLY_TRANSMITTED);
+        RestHelper.addLogStatusToLog(exchangeLog,ExchangeLogStatusTypeType.PROBABLY_TRANSMITTED);
         exchangeLog = exchangeLogDao.createLog(exchangeLog);
 
         String stringResponse = getWebTarget()
@@ -203,29 +203,4 @@ public class ExchangeLogRestResourceTest extends BuildExchangeRestTestDeployment
 
 
 
-
-    private ExchangeLog createBasicLog(){
-        ExchangeLog exchangeLog = new ExchangeLog();
-        exchangeLog.setType(LogType.PROCESSED_MOVEMENT);
-        exchangeLog.setStatus(ExchangeLogStatusTypeType.UNKNOWN);
-        exchangeLog.setUpdatedBy("Tester");
-        exchangeLog.setUpdateTime(Instant.now());
-        exchangeLog.setDateReceived(Instant.now());
-        exchangeLog.setSenderReceiver("Test sender/receiver");
-        exchangeLog.setTransferIncoming(false);
-        exchangeLog.setStatusHistory(new ArrayList<ExchangeLogStatus>());
-
-        return exchangeLog;
-    }
-
-    private void addLogStatusToLog(ExchangeLog exchangeLog, ExchangeLogStatusTypeType statusType){
-        ExchangeLogStatus status = new ExchangeLogStatus();
-        status.setLog(exchangeLog);
-        status.setStatus(statusType);
-        status.setStatusTimestamp(Instant.now());
-        status.setUpdatedBy("Status updater");
-        status.setUpdateTime(Instant.now());
-
-        exchangeLog.getStatusHistory().add(status);
-    }
 }
