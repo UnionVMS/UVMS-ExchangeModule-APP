@@ -97,6 +97,7 @@
             
             <xsd:element name="lesReportTime" type="xsd:dateTime"/>
             <xsd:element name="sourceSatelliteId" type="xsd:int"  minOccurs="0"/>
+            <xsd:element name="aisPositionAccuracy" type="xsd:short"  minOccurs="0"/>
         </xsd:sequence>
     </xsd:complexType>
 

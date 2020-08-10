@@ -67,6 +67,7 @@ public class IncomingMovement {
     private String updatedBy;
     
     private Instant lesReportTime;
+    private Short aisPositionAccuracy;
     
     public Instant getLesReportTime() {
 		return lesReportTime;
@@ -322,5 +323,13 @@ public class IncomingMovement {
     }
     public void setUpdatedBy(String updatedBy) {
         this.updatedBy = updatedBy;
+    }
+
+    public Short getAisPositionAccuracy() {
+        return aisPositionAccuracy;
+    }
+
+    public void setAisPositionAccuracy(Short aisPositionAccuracy) {
+        this.aisPositionAccuracy = aisPositionAccuracy;
     }
 }
