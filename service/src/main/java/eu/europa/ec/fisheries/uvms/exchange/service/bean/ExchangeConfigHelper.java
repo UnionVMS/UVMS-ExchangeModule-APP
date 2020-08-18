@@ -31,7 +31,7 @@ public class ExchangeConfigHelper implements ConfigHelper {
     @Inject
     private PropertiesBean propertiesBean;
 
-    @PersistenceContext(unitName = "configPU")
+    @PersistenceContext(unitName = "exchangePU")
     protected EntityManager em;
 
     @Override

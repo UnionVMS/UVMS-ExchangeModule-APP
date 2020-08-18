@@ -15,7 +15,9 @@
         <class>eu.europa.ec.fisheries.uvms.exchange.service.domain.entity.exchangelog.ExchangeLogStatus</class>
         <class>eu.europa.ec.fisheries.uvms.exchange.service.domain.entity.unsent.UnsentMessage</class>
         <class>eu.europa.ec.fisheries.uvms.exchange.service.domain.entity.unsent.UnsentMessageProperty</class>
-        <exclude-unlisted-classes>true</exclude-unlisted-classes>
+        <class>eu.europa.ec.fisheries.uvms.config.service.entity.Parameter</class>
+
+    <exclude-unlisted-classes>true</exclude-unlisted-classes>
         <shared-cache-mode>ALL</shared-cache-mode>
         <properties>
             <property name="hibernate.dialect" value="org.hibernate.dialect.PostgreSQL94Dialect"/>
@@ -30,15 +32,4 @@
             <property name="hibernate.implicit_naming_strategy" value="org.hibernate.boot.model.naming.ImplicitNamingStrategyComponentPathImpl"/>
         </properties>
     </persistence-unit>
-
-    <persistence-unit name="configPU" transaction-type="JTA">
-        <provider>org.hibernate.jpa.HibernatePersistenceProvider</provider>
-        <jta-data-source>jdbc/uvms_config</jta-data-source>
-        <class>eu.europa.ec.fisheries.uvms.config.service.entity.Parameter</class>
- <!--       <class>eu.europa.ec.fisheries.uvms.exchange.service.domain.entity.serviceregistry.Parameter</class>-->
-        <properties>
-            <property name="hibernate.dialect" value="org.hibernate.dialect.PostgreSQL94Dialect"/>
-        </properties>
-    </persistence-unit>
-
 </persistence>
