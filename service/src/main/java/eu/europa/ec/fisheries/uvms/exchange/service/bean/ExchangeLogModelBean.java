@@ -13,11 +13,11 @@ package eu.europa.ec.fisheries.uvms.exchange.service.bean;
 
 import eu.europa.ec.fisheries.schema.exchange.v1.*;
 import eu.europa.ec.fisheries.uvms.exchange.model.contract.search.ExchangeSearchBranch;
+import eu.europa.ec.fisheries.uvms.exchange.model.dto.ListResponseDto;
 import eu.europa.ec.fisheries.uvms.exchange.service.dao.ExchangeLogDaoBean;
 import eu.europa.ec.fisheries.uvms.exchange.service.entity.exchangelog.ExchangeLog;
 import eu.europa.ec.fisheries.uvms.exchange.service.entity.exchangelog.ExchangeLogStatus;
 import eu.europa.ec.fisheries.uvms.exchange.service.mapper.LogMapper;
-import eu.europa.ec.fisheries.uvms.exchange.model.dto.ListResponseDto;
 import eu.europa.ec.fisheries.uvms.exchange.service.search.SearchFieldMapper;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -138,8 +138,7 @@ public class ExchangeLogModelBean {
         if (query == null) {
             throw new IllegalArgumentException("Exchange status list query is null");
         }
-        String sql = SearchFieldMapper.createSearchSql(query);
-        return logDao.getExchangeLogStatusHistory(sql, query);
+        return logDao.getExchangeLogStatusHistory(query);
     }
 
     public ExchangeLog updateExchangeLogStatus(ExchangeLogStatus status, String username, UUID logId) {

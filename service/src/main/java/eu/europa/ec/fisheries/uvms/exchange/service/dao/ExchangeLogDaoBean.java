@@ -31,10 +31,7 @@ import org.slf4j.LoggerFactory;
 import javax.ejb.Stateless;
 import javax.persistence.NoResultException;
 import javax.persistence.TypedQuery;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
+import javax.persistence.criteria.*;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
@@ -45,24 +42,43 @@ public class ExchangeLogDaoBean extends AbstractDao {
 
     private final static Logger LOG = LoggerFactory.getLogger(ExchangeLogDaoBean.class);
 
-    public List<ExchangeLogStatus> getExchangeLogStatusHistory(String sql, ExchangeHistoryListQuery searchQuery) {
-        LOG.debug("SQL query for status history " + sql);
-        TypedQuery<ExchangeLogStatus> query = em.createQuery(sql, ExchangeLogStatus.class);
-        if (searchQuery.getStatus() != null && !searchQuery.getStatus().isEmpty()) {
-            query.setParameter("status", searchQuery.getStatus());
+    public List<ExchangeLogStatus> getExchangeLogStatusHistory(ExchangeHistoryListQuery searchQuery) {
+        CriteriaBuilder criteriaBuilder = em.getCriteriaBuilder();
+        CriteriaQuery<ExchangeLogStatus> cq = criteriaBuilder.createQuery(ExchangeLogStatus.class);
+        Root<ExchangeLogStatus> logStatusRoot = cq.from(ExchangeLogStatus.class);
+        Join<ExchangeLogStatus, ExchangeLog> logJoin = logStatusRoot.join("log");
+
+        List<Predicate> predicates = new ArrayList<>();
+        if(searchQuery.getStatus() != null && !searchQuery.getStatus().isEmpty()){
+            CriteriaBuilder.In<Object> in = criteriaBuilder.in(logStatusRoot.get("status"));
+            for (ExchangeLogStatusTypeType value : searchQuery.getStatus()) {
+                in.value(value);
+            }
+            predicates.add(in);
         }
-        if (searchQuery.getType() != null && !searchQuery.getType().isEmpty()) {
-            query.setParameter("type", searchQuery.getType());
+
+        if(searchQuery.getType() != null && !searchQuery.getType().isEmpty()){
+            CriteriaBuilder.In<Object> in = criteriaBuilder.in(logJoin.get("typeRefType"));
+            for (TypeRefType value : searchQuery.getType()) {
+                in.value(value);
+            }
+            predicates.add(in);
         }
-        if (searchQuery.getTypeRefDateFrom() != null) {
-            Instant from = searchQuery.getTypeRefDateFrom().toInstant();
-            query.setParameter("from", from);
+
+        if(searchQuery.getTypeRefDateFrom() != null){
+            Instant value = searchQuery.getTypeRefDateFrom().toInstant();
+            predicates.add(criteriaBuilder.greaterThanOrEqualTo(logStatusRoot.get("statusTimestamp"), value));
         }
-        if (searchQuery.getTypeRefDateTo() != null) {
-            Instant to = searchQuery.getTypeRefDateTo().toInstant();
-            query.setParameter("to", to);
+
+        if(searchQuery.getTypeRefDateTo() != null){
+            Instant value = searchQuery.getTypeRefDateTo().toInstant();
+            predicates.add(criteriaBuilder.lessThanOrEqualTo(logStatusRoot.get("statusTimestamp"), value));
         }
-        return query.getResultList();
+
+        Predicate predicate = criteriaBuilder.and(predicates.stream().toArray(Predicate[]::new));
+        cq.where(predicate);
+
+        return em.createQuery(cq).getResultList();
     }
 
     public Long getLogCount(ExchangeSearchBranch queryTree) {

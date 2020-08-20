@@ -11,14 +11,15 @@ copy of the GNU General Public License along with the IFDM Suite. If not, see <h
  */
 package eu.europa.ec.fisheries.uvms.exchange.service.search;
 
-import eu.europa.ec.fisheries.schema.exchange.v1.*;
-import eu.europa.ec.fisheries.uvms.commons.date.DateUtils;
+import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeListCriteriaPair;
+import eu.europa.ec.fisheries.schema.exchange.v1.MessageDirection;
+import eu.europa.ec.fisheries.schema.exchange.v1.SearchField;
+import eu.europa.ec.fisheries.schema.exchange.v1.SortField;
 import eu.europa.ec.fisheries.uvms.exchange.model.contract.search.ExchangeSearchBranch;
 import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.time.Instant;
 import java.util.*;
 
 public class SearchFieldMapper {
@@ -160,55 +161,4 @@ public class SearchFieldMapper {
                 throw new IllegalArgumentException("No field found: " + key.name());
         }
     }
-
-    public static String createSearchSql(ExchangeHistoryListQuery query) {
-        StringBuilder builder = new StringBuilder();
-        builder.append("SELECT els FROM ExchangeLogStatus els ");
-        builder.append("INNER JOIN FETCH els.log log ");
-        boolean status = query.getStatus() != null && !query.getStatus().isEmpty();
-        boolean type = query.getType() != null && !query.getType().isEmpty();
-        if (status || type || query.getTypeRefDateFrom() != null || query.getTypeRefDateTo() != null) {
-            builder.append(" WHERE ");
-        }
-        boolean first = true;
-        if (query.getStatus() != null && !query.getStatus().isEmpty()) {
-            String sqlStatus = " els.status IN :status ";
-            if (first) {
-                builder.append(sqlStatus);
-                first = false;
-            } else {
-                builder.append(" AND ").append(sqlStatus);
-            }
-        }
-        if (query.getType() != null && !query.getType().isEmpty()) {
-            String sqlType = " log.typeRefType IN :type ";
-            if (first) {
-                builder.append(sqlType);
-                first = false;
-            } else {
-                builder.append(" AND ").append(sqlType);
-            }
-        }
-        if (query.getTypeRefDateFrom() != null) {
-            String from = " els.statusTimestamp >= :from ";
-            if (first) {
-                builder.append(from);
-                first = false;
-            } else {
-                builder.append(" AND ").append(from);
-            }
-        }
-        if (query.getTypeRefDateTo() != null) {
-            String to = " els.statusTimestamp <= :to ";
-            if (first) {
-                builder.append(to);
-                first = false;
-            } else {
-                builder.append(" AND ").append(to);
-            }
-        }
-
-        return builder.toString();
-    }
-
 }
