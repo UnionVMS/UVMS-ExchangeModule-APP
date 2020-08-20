@@ -68,7 +68,7 @@ public class ExchangeLogModelTest {
     public void testDataEnrichment() {
         Mockito.when(logDao.getLogCount(Mockito.any(ExchangeSearchBranch.class)))
                 .thenReturn(100L);
-        Mockito.when(logDao.getLogListSearchPaginated(Mockito.any(Integer.class), Mockito.any(Integer.class), Mockito.any(ExchangeSearchBranch.class), Mockito.any(Sorting.class)))
+        Mockito.when(logDao.getLogListSearchPaginated(Mockito.any(Integer.class), Mockito.any(Integer.class), Mockito.any(ExchangeSearchBranch.class), Mockito.isNull()))
                 .thenReturn(logs);
         Mockito.when(logDao.getExchangeLogByRangeOfRefGuids(Mockito.anyList()))
                 .thenReturn(refLogs);
@@ -76,6 +76,7 @@ public class ExchangeLogModelTest {
         ExchangeListQuery query = new ExchangeListQuery();
         ExchangeListPagination pagin = new ExchangeListPagination();
         ExchangeListCriteria exchCrit = new ExchangeListCriteria();
+        exchCrit.setIsDynamic(true);
         query.setPagination(pagin);
         pagin.setListSize(10);
         query.setExchangeSearchCriteria(exchCrit);
