@@ -18,24 +18,22 @@ import java.time.Instant;
 
 public enum ExchangeSearchField {
 
-	TRANSFER_INCOMING("transferIncoming", "transferIncoming", SearchTable.LOG, Boolean.class),
-    FROM_DATE("dateReceived", "fromDate", SearchTable.LOG, Instant.class),
-    TO_DATE("dateReceived", "toDate", SearchTable.LOG, Instant.class),
-    SENDER_RECEIVER("senderReceiver", "senderReceiver", SearchTable.LOG, String.class),
-    RECIPIENT("recipient", "recipient", SearchTable.LOG, String.class),
-    STATUS("status", "status", SearchTable.LOG, ExchangeLogStatusTypeType.class),
-    TYPE("typeRefType","typeRefType", SearchTable.LOG, TypeRefType.class),
-    SOURCE("source","source", SearchTable.LOG, String.class);
+	TRANSFER_INCOMING("transferIncoming", "transferIncoming", Boolean.class),
+    FROM_DATE("dateReceived", "fromDate", Instant.class),
+    TO_DATE("dateReceived", "toDate", Instant.class),
+    SENDER_RECEIVER("senderReceiver", "senderReceiver", String.class),
+    RECIPIENT("recipient", "recipient", String.class),
+    STATUS("status", "status", ExchangeLogStatusTypeType.class),
+    TYPE("typeRefType","typeRefType", TypeRefType.class),
+    SOURCE("source","source", String.class);
 
     private final String fieldName;
     private final String sqlReplacementToken;
-    private final SearchTable searchTables;
     private final Class<?> clazz;
 
-    ExchangeSearchField(String fieldName, String sqlReplacementToken, SearchTable searchTables, Class<?> clazz) {
+    ExchangeSearchField(String fieldName, String sqlReplacementToken, Class<?> clazz) {
         this.fieldName = fieldName;
         this.sqlReplacementToken = sqlReplacementToken;
-        this.searchTables = searchTables;
         this.clazz = clazz;
     }
 
@@ -43,9 +41,6 @@ public enum ExchangeSearchField {
         return fieldName;
     }
 
-    public SearchTable getSearchTables() {
-        return searchTables;
-    }
 
     public String getSQLReplacementToken() {
         return sqlReplacementToken;

@@ -12,22 +12,33 @@ copy of the GNU General Public License along with the IFDM Suite. If not, see <h
 package eu.europa.ec.fisheries.uvms.exchange.service.dao;
 
 import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeHistoryListQuery;
+import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogStatusTypeType;
+import eu.europa.ec.fisheries.schema.exchange.v1.Sorting;
 import eu.europa.ec.fisheries.schema.exchange.v1.TypeRefType;
+import eu.europa.ec.fisheries.uvms.commons.date.DateUtils;
+import eu.europa.ec.fisheries.uvms.exchange.model.contract.search.ExchangeSearchBranch;
+import eu.europa.ec.fisheries.uvms.exchange.model.contract.search.ExchangeSearchInterface;
+import eu.europa.ec.fisheries.uvms.exchange.model.contract.search.ExchangeSearchLeaf;
 import eu.europa.ec.fisheries.uvms.exchange.service.entity.exchangelog.ExchangeLog;
 import eu.europa.ec.fisheries.uvms.exchange.service.entity.exchangelog.ExchangeLogStatus;
 import eu.europa.ec.fisheries.uvms.exchange.service.search.ExchangeSearchField;
 import eu.europa.ec.fisheries.uvms.exchange.service.search.SearchFieldMapper;
-import eu.europa.ec.fisheries.uvms.exchange.service.search.SearchValue;
+import eu.europa.ec.fisheries.uvms.exchange.service.search.SortFieldMapperEnum;
 import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.ejb.Stateless;
 import javax.persistence.NoResultException;
-import javax.persistence.Query;
 import javax.persistence.TypedQuery;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
 import java.time.Instant;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
 
 @Stateless
 public class ExchangeLogDaoBean extends AbstractDao {
@@ -54,36 +65,97 @@ public class ExchangeLogDaoBean extends AbstractDao {
         return query.getResultList();
     }
 
-    public List<ExchangeLog> getExchangeLogListPaginated(Integer page, Integer listSize, String sql, List<SearchValue> searchKeyValues) {
-        LOG.debug("SQL QUERY IN LIST PAGINATED: " + sql);
-        TypedQuery<ExchangeLog> query = em.createQuery(sql, ExchangeLog.class);
-        HashMap<ExchangeSearchField, List<SearchValue>> orderedValues = SearchFieldMapper.combineSearchFields(searchKeyValues);
-        setQueryParameters(query, orderedValues);
-        query.setFirstResult(listSize * (page - 1));
-        query.setMaxResults(listSize);
+    public Long getLogCount(ExchangeSearchBranch queryTree) {
+        CriteriaBuilder criteriaBuilder = em.getCriteriaBuilder();
+        CriteriaQuery<Long> cq = criteriaBuilder.createQuery(Long.class);
+        Root<ExchangeLog> logRoot = cq.from(ExchangeLog.class);
+
+        cq.select(criteriaBuilder.count(logRoot));
+        Predicate predicateQuery = queryBuilderPredicate(queryTree, criteriaBuilder, logRoot);
+
+        if (predicateQuery != null) {
+            cq.where(predicateQuery);
+        }
+
+        return em.createQuery(cq).getSingleResult();
+    }
+
+    public List<ExchangeLog> getLogListSearchPaginated(Integer pageNumber, Integer pageSize, ExchangeSearchBranch searchBranch, Sorting sorting) {
+        CriteriaBuilder criteriaBuilder = em.getCriteriaBuilder();
+        CriteriaQuery<ExchangeLog> cq = criteriaBuilder.createQuery(ExchangeLog.class);
+        Root<ExchangeLog> log = cq.from(ExchangeLog.class);
+
+        Predicate predicateQuery = queryBuilderPredicate(searchBranch, criteriaBuilder, log);
+        if (predicateQuery != null) {
+            cq.where(predicateQuery);
+        }
+
+        if (sorting != null && sorting.getSortBy() != null) {
+            SortFieldMapperEnum sortField = SearchFieldMapper.mapSortField(sorting.getSortBy());
+            if (sorting.isReversed()) {
+                cq.orderBy(criteriaBuilder.desc(log.get(sortField.getFieldName())));
+            } else {
+                cq.orderBy(criteriaBuilder.asc(log.get(sortField.getFieldName())));
+            }
+        }else {
+            cq.orderBy((criteriaBuilder.desc(log.get("updateTime"))));
+        }
+        TypedQuery<ExchangeLog> query = em.createQuery(cq);
+        query.setFirstResult(pageSize * (pageNumber - 1)); // offset
+        query.setMaxResults(pageSize); // limit
         return query.getResultList();
     }
 
-    public Long getExchangeLogListSearchCount(String countSql, List<SearchValue> searchKeyValues) {
-        LOG.debug("SQL QUERY IN LIST COUNT: " + countSql);
-        TypedQuery<Long> query = em.createQuery(countSql, Long.class);
-        HashMap<ExchangeSearchField, List<SearchValue>> orderedValues = SearchFieldMapper.combineSearchFields(searchKeyValues);
-        setQueryParameters(query, orderedValues);
-        return query.getSingleResult();
+    private Predicate queryBuilderPredicate(ExchangeSearchBranch searchBranch, CriteriaBuilder criteriaBuilder, Root<ExchangeLog> logRoot) {
+        if (searchBranch.getFields() == null || searchBranch.getFields().isEmpty() || searchBranch.getFields().size() < 1) {
+            return null;
+        }
+        List<Predicate> predicates = new ArrayList<>();
+
+        for (ExchangeSearchInterface field : searchBranch.getFields()) {
+            if (!field.isLeaf()) {
+                if (!((ExchangeSearchBranch) field).getFields().isEmpty()) {
+                    predicates.add(queryBuilderPredicate((ExchangeSearchBranch) field, criteriaBuilder, logRoot));
+                }
+            } else {
+                ExchangeSearchLeaf leaf = (ExchangeSearchLeaf) field;
+                ExchangeSearchField exchangeSearchField = SearchFieldMapper.mapCriteria(leaf.getSearchField());
+                if (leaf.getSearchValue().contains("*")) {
+                    predicates.add(criteriaBuilder.like(
+                            criteriaBuilder.lower(
+                                    logRoot.get(
+                                            exchangeSearchField.getFieldName()
+                                    )
+                            ), "%" + leaf.getSearchValue().replace("*", "%").toLowerCase() + "%"
+                        )
+                    );
+                } else if (exchangeSearchField.getClazz().equals(Boolean.class)) {
+                    predicates.add(criteriaBuilder.equal(logRoot.get(exchangeSearchField.getFieldName()), Boolean.valueOf(leaf.getSearchValue())));
+                } else if (exchangeSearchField.getClazz().equals(Instant.class)) {
+                    Instant value = DateUtils.stringToDate(leaf.getSearchValue());
+                    if(exchangeSearchField.equals(ExchangeSearchField.FROM_DATE)){
+                        predicates.add(criteriaBuilder.greaterThanOrEqualTo(logRoot.get(exchangeSearchField.getFieldName()), value));
+                    }else if(exchangeSearchField.equals(ExchangeSearchField.TO_DATE)){
+                        predicates.add(criteriaBuilder.lessThanOrEqualTo(logRoot.get(exchangeSearchField.getFieldName()), value));
+                    }
+                } else if (exchangeSearchField.getClazz().equals(String.class)) {
+                    predicates.add(criteriaBuilder.equal(logRoot.get(exchangeSearchField.getFieldName()), leaf.getSearchValue()));
+                } else if (exchangeSearchField.getClazz().equals(ExchangeLogStatusTypeType.class)) {
+                    predicates.add(criteriaBuilder.equal(logRoot.get(exchangeSearchField.getFieldName()), ExchangeLogStatusTypeType.fromValue(leaf.getSearchValue())));
+                } else if (exchangeSearchField.getClazz().equals(TypeRefType.class)) {
+                    predicates.add(criteriaBuilder.equal(logRoot.get(exchangeSearchField.getFieldName()), TypeRefType.fromValue(leaf.getSearchValue())));
+                }
+            }
+        }
+        if (searchBranch.isLogicalAnd()) {
+            return criteriaBuilder.and(predicates.stream().toArray(Predicate[]::new));
+        } else {
+            return criteriaBuilder.or(predicates.stream().toArray(Predicate[]::new));
+        }
     }
 
     public ExchangeLog getExchangeLogByGuid(UUID logGuid) {
         return em.find(ExchangeLog.class, logGuid);
-    }
-
-    private void setQueryParameters(Query query, HashMap<ExchangeSearchField, List<SearchValue>> orderedValues) {
-        for (Map.Entry<ExchangeSearchField, List<SearchValue>> criteria : orderedValues.entrySet()) {
-            if (criteria.getValue().size() > 1) {
-                query.setParameter(criteria.getKey().getSQLReplacementToken(), criteria.getValue());
-            } else {
-                query.setParameter(criteria.getKey().getSQLReplacementToken(), SearchFieldMapper.buildValueFromClassType(criteria.getValue().get(0), criteria.getKey().getClazz()));
-            }
-        }
     }
 
     public ExchangeLog createLog(ExchangeLog log) {

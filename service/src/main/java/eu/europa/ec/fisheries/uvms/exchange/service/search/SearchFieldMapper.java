@@ -13,11 +13,11 @@ package eu.europa.ec.fisheries.uvms.exchange.service.search;
 
 import eu.europa.ec.fisheries.schema.exchange.v1.*;
 import eu.europa.ec.fisheries.uvms.commons.date.DateUtils;
+import eu.europa.ec.fisheries.uvms.exchange.model.contract.search.ExchangeSearchBranch;
 import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.text.ParseException;
 import java.time.Instant;
 import java.util.*;
 
@@ -26,264 +26,77 @@ public class SearchFieldMapper {
     private static final Logger LOG = LoggerFactory.getLogger(SearchFieldMapper.class);
 
     /**
-     * Creates a search SQL based on the search fields
-     *
-     * @param searchFields
-     * @param isDynamic
-     * @return
-     * @throws ParseException
-     */
-    public static String createSelectSearchSql(List<SearchValue> searchFields, boolean isDynamic, Sorting sorting) {
-        StringBuilder selectBuffer = new StringBuilder();
-        selectBuffer.append("SELECT DISTINCT ")
-                .append(SearchTable.LOG.getTableAlias())
-                .append(" FROM ")
-                .append(SearchTable.LOG.getTableName())
-                .append(" ")
-                .append(SearchTable.LOG.getTableAlias())
-                .append(" ");
-        if (searchFields != null) {
-            selectBuffer.append(createSearchSql(searchFields, isDynamic));
-        }
-        getSortingString(sorting, selectBuffer);
-        LOG.debug("[ SQL: ] " + selectBuffer.toString());
-        return selectBuffer.toString();
-    }
-
-    private static void getSortingString(Sorting sorting, StringBuilder selectBuffer) {
-        if (sorting != null && sorting.getSortBy() != null) {
-            SortField sortField = sorting.getSortBy();
-            SortFieldMapper sortFieldMapper = null;
-            if (sortField != null) {
-                sortFieldMapper = mapSortField(sortField);
-            }
-            String fieldName = sortFieldMapper.getFieldName();
-            String sortingDirection = "ASC";
-            if (sorting.isReversed()) {
-                sortingDirection = "DESC";
-            }
-            selectBuffer.append(" order by " + SearchTable.LOG.getTableAlias() + ".").append(fieldName).append(" ").append(sortingDirection);
-        } else {
-            selectBuffer.append(" order by " + SearchTable.LOG.getTableAlias() + ".updateTime desc ");
-        }
-    }
-
-    /**
-     * Creates a JPQL count query based on the search fields. This is used for
-     * when paginating lists
-     *
-     * @param searchFields
-     * @param isDynamic
-     * @return
-     * @throws ParseException
-     */
-    public static String createCountSearchSql(List<SearchValue> searchFields, boolean isDynamic) {
-        StringBuilder countBuffer = new StringBuilder();
-        countBuffer.append("SELECT COUNT(").append(SearchTable.LOG.getTableAlias()).append(") FROM ")
-                .append(SearchTable.LOG.getTableName())
-                .append(" ")
-                .append(SearchTable.LOG.getTableAlias())
-                .append(" ");
-        if (searchFields != null) {
-            countBuffer.append(createSearchSql(searchFields, isDynamic));
-        }
-        LOG.debug("[ COUNT SQL: ]" + countBuffer.toString());
-        return countBuffer.toString();
-    }
-
-    /**
-     * Created the complete search SQL with joins and sets the values based on
-     * the criterias
-     *
-     * @param criterias
-     * @param dynamic
-     * @return
-     * @throws ParseException
-     */
-    private static String createSearchSql(List<SearchValue> criterias, boolean dynamic) {
-
-        String OPERATOR = " OR ";
-        if (dynamic) {
-            OPERATOR = " AND ";
-        }
-
-        StringBuilder builder = new StringBuilder();
-        HashMap<ExchangeSearchField, List<SearchValue>> orderedValues = combineSearchFields(criterias);
-
-        if (!orderedValues.isEmpty()) {
-
-            builder.append("WHERE ");
-
-            boolean first = true;
-            for (Map.Entry<ExchangeSearchField, List<SearchValue>> criteria : orderedValues.entrySet()) {
-
-                if (first) {
-                    first = false;
-                } else {
-                    builder.append(OPERATOR);
-                }
-
-                if (criteria.getValue().size() == 1) {
-                    SearchValue searchValue = criteria.getValue().get(0);
-                    builder
-                            .append(" ( ")
-                            .append(buildTableAliasname(searchValue.getField()))
-                            .append(setParameter(searchValue))
-                            .append(" ) ");
-                } else if (criteria.getValue().size() > 1) {
-                    builder
-                            .append(" ( ")
-                            .append(buildTableAliasname(criteria.getKey())).append(" IN (:").append(criteria.getKey().getSQLReplacementToken()).append(") ")
-                            .append(" ) ");
-                }
-            }
-        }
-
-        return builder.toString();
-    }
-
-    private static String setParameter(SearchValue entry) {
-        StringBuilder builder = new StringBuilder();
-        if (entry.getField().getClazz().isAssignableFrom(Instant.class)) {
-            switch (entry.getField()) {
-                case FROM_DATE:
-                    builder.append(" >= ").append(":").append(entry.getField().getSQLReplacementToken());
-                    break;
-                case TO_DATE:
-                    builder.append(" <= ").append(":").append(entry.getField().getSQLReplacementToken());
-                    break;
-                default:
-                    builder.append(" = ").append(":").append(entry.getField().getSQLReplacementToken());
-                    break;
-            }
-        } else {
-            builder.append(" = ").append(":").append(entry.getField().getSQLReplacementToken());
-        }
-
-        return builder.toString();
-    }
-
-    /**
-     * Builds a table alias for the query based on the search field
-     * <p>
-     * EG [ theTableAlias.theColumnName ]
-     *
-     * @param field
-     * @return
-     */
-    private static String buildTableAliasname(ExchangeSearchField field) {
-        return field.getSearchTables().getTableAlias() + "." + field.getFieldName();
-    }
-
-    public static <T> T buildValueFromClassType(SearchValue entry, Class<T> valueType) {
-        StringBuilder builder = new StringBuilder();
-
-        try {
-
-            if (valueType.isAssignableFrom(String.class)) {
-                if (entry.getValue().contains("*")) {
-                    String value = entry.getValue().replace("*", "%");
-                    builder.append("'").append(value).append("'");
-                } else {
-                    builder.append(entry.getValue());
-                }
-
-                return valueType.cast(builder.toString());
-            } else if (valueType.isAssignableFrom(Boolean.class)) {
-                if ("TRUE".equalsIgnoreCase(entry.getValue()) || "T".equalsIgnoreCase(entry.getValue())) {
-                    return valueType.cast(Boolean.TRUE);
-                } else {
-                    return valueType.cast(Boolean.FALSE);
-                }
-            } else if (valueType.isAssignableFrom(Instant.class)) {
-                return valueType.cast(DateUtils.stringToDate(entry.getValue()));
-            } else if (valueType.isAssignableFrom(Integer.class)) {
-                return valueType.cast(Integer.valueOf(entry.getValue()));
-            } else if (valueType.isAssignableFrom(TypeRefType.class)) {
-                return valueType.cast(TypeRefType.valueOf(entry.getValue()));
-            } else if (valueType.isAssignableFrom(ExchangeLogStatusTypeType.class)) {
-                return valueType.cast(ExchangeLogStatusTypeType.valueOf(entry.getValue()));
-            }
-
-            return valueType.cast(entry.getValue());
-        } catch (ClassCastException cce) {
-            LOG.error("Error casting parameter: " + entry.getField().getFieldName() + " having value: " + entry.getValue(), cce);
-            return null;
-        }
-    }
-
-    /**
      * Takes all the search values and categorizes them in lists to a key
      * according to the SearchField
      *
-     * @param searchValues
      * @return
      */
-    public static HashMap<ExchangeSearchField, List<SearchValue>> combineSearchFields(List<SearchValue> searchValues) {
-        HashMap<ExchangeSearchField, List<SearchValue>> values = new HashMap<>();
-        for (SearchValue search : searchValues) {
-            if (values.containsKey(search.getField())) {
-                values.get(search.getField()).add(search);
+    public static HashMap<SearchField, List<ExchangeListCriteriaPair>> combineSearchFields(List<ExchangeListCriteriaPair> listCriterias) {
+        HashMap<SearchField, List<ExchangeListCriteriaPair>> values = new HashMap<>();
+        for (ExchangeListCriteriaPair pair : listCriterias) {
+            if (values.containsKey(pair.getKey())) {
+                values.get(pair.getKey()).add(pair);
             } else {
-                values.put(search.getField(), new ArrayList<SearchValue>(Collections.singletonList(search)));
+                values.put(pair.getKey(), new ArrayList<ExchangeListCriteriaPair>(Collections.singletonList(pair)));
             }
         }
         return values;
     }
 
     /**
-     * Converts List<ListCriteria> to List<SearchValue> so that a JPQL query can
+     * Converts List<ListCriteria> to ExchangeSearchBranch so that a JPQL query can
      * be built based on the criterias
      *
      * @param listCriterias
      * @return
      * @throws
      */
-    public static List<SearchValue> mapSearchField(List<ExchangeListCriteriaPair> listCriterias) {
+    public static ExchangeSearchBranch mapSearchField(List<ExchangeListCriteriaPair> listCriterias, boolean logicalAnd) {
 
         if (CollectionUtils.isEmpty(listCriterias)) {
-            LOG.debug(" Non valid search criteria when mapping ListCriterias to SearchValue, List is null or empty");
-            return new ArrayList<>();
+            LOG.debug(" Non valid search criteria when mapping ListCriterias to ExchangeSearchLeaf, List is null or empty");
+            return new ExchangeSearchBranch();
         }
 
-        List<SearchValue> searchFields = new ArrayList<>();
-        for (ExchangeListCriteriaPair criteria : listCriterias) {
+        HashMap<SearchField, List<ExchangeListCriteriaPair>> combinedSearchFields = combineSearchFields(listCriterias);
+
+        ExchangeSearchBranch mainBranch = new ExchangeSearchBranch();
+        mainBranch.setLogicalAnd(logicalAnd);
+        for (Map.Entry<SearchField, List<ExchangeListCriteriaPair>> criteria : combinedSearchFields.entrySet()) {
             try {
-                if (SearchField.MESSAGE_DIRECTION.equals(criteria.getKey())) {
-                    SearchValue searchValue = getSearchValueForMessageDirection(criteria);
-                    if (searchValue == null) {
-                        continue;
+                ExchangeSearchBranch subBranch = new ExchangeSearchBranch();
+                subBranch.setLogicalAnd(false);
+                for (ExchangeListCriteriaPair pair : criteria.getValue()) {
+                    if (SearchField.MESSAGE_DIRECTION.equals(criteria.getKey())) {
+                        setSearchValueForMessageDirection(pair);
                     }
-                    searchFields.add(searchValue);
-                } else {
-                    ExchangeSearchField field = mapCriteria(criteria.getKey());
-                    searchFields.add(new SearchValue(field, criteria.getValue()));
+                    subBranch.addNewSearchLeaf(criteria.getKey(), pair.getValue());
                 }
+                mainBranch.getFields().add(subBranch);
 
             } catch (IllegalArgumentException ex) {
-                LOG.debug("[ Error when mapping to search field.. continuing with other criterias ]");
+                LOG.error("[ Error when mapping to search field.. continuing with other criterias ]");
             }
         }
 
-        return searchFields;
+        return mainBranch;
     }
 
-    private static SearchValue getSearchValueForMessageDirection(ExchangeListCriteriaPair criteria) {
+    private static void setSearchValueForMessageDirection(ExchangeListCriteriaPair criteria) {
         if (!SearchField.MESSAGE_DIRECTION.equals(criteria.getKey()) || criteria.getValue() == null) {
-            return null;
+            throw new IllegalArgumentException("SearchField message direction has no value, aborting");
         }
+        //Message direction does not really exist in log and is implemented as transfer incoming for some reason
         MessageDirection messageDirection = MessageDirection.valueOf(criteria.getValue());
-        SearchValue searchValue = null;
+        criteria.setKey(SearchField.TRANSFER_INCOMING);
         switch (messageDirection) {
             case INCOMING:
-                searchValue = new SearchValue(ExchangeSearchField.TRANSFER_INCOMING, "true");
+                criteria.setValue("true");
                 break;
             case OUTGOING:
-                searchValue = new SearchValue(ExchangeSearchField.TRANSFER_INCOMING, "false");
+                criteria.setValue("false");
                 break;
         }
-        return searchValue;
-
     }
 
     /**
@@ -325,24 +138,24 @@ public class SearchFieldMapper {
      * @return
      * @throws
      */
-    public static SortFieldMapper mapSortField(SortField key) {
+    public static SortFieldMapperEnum mapSortField(SortField key) {
         switch (key) {
             case DATE_RECEIVED:
-                return SortFieldMapper.DATE_RECEIVED;
+                return SortFieldMapperEnum.DATE_RECEIVED;
             case SOURCE:
-                return SortFieldMapper.SOURCE;
+                return SortFieldMapperEnum.SOURCE;
             case TYPE:
-                return SortFieldMapper.TYPE;
+                return SortFieldMapperEnum.TYPE;
             case SENDER_RECEIVER:
-                return SortFieldMapper.SENDER_RECEIVER;
+                return SortFieldMapperEnum.SENDER_RECEIVER;
             case RULE:
-                return SortFieldMapper.RULE;
+                return SortFieldMapperEnum.RULE;
             case RECEPIENT:
-                return SortFieldMapper.RECEPIENT;
+                return SortFieldMapperEnum.RECEPIENT;
             case STATUS:
-                return SortFieldMapper.STATUS;
+                return SortFieldMapperEnum.STATUS;
             case DATE_FORWARDED:
-                return SortFieldMapper.DATE_FORWARDED;
+                return SortFieldMapperEnum.DATE_FORWARDED;
             default:
                 throw new IllegalArgumentException("No field found: " + key.name());
         }

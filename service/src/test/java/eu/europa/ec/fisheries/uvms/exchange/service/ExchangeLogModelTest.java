@@ -11,6 +11,7 @@ details. You should have received a copy of the GNU General Public License along
 package eu.europa.ec.fisheries.uvms.exchange.service;
 
 import eu.europa.ec.fisheries.schema.exchange.v1.*;
+import eu.europa.ec.fisheries.uvms.exchange.model.contract.search.ExchangeSearchBranch;
 import eu.europa.ec.fisheries.uvms.exchange.model.dto.ListResponseDto;
 import eu.europa.ec.fisheries.uvms.exchange.service.bean.ExchangeLogModelBean;
 import eu.europa.ec.fisheries.uvms.exchange.service.dao.ExchangeLogDaoBean;
@@ -65,9 +66,9 @@ public class ExchangeLogModelTest {
 
     @Test
     public void testDataEnrichment() {
-        Mockito.when(logDao.getExchangeLogListSearchCount(Mockito.anyString(), Mockito.anyList()))
+        Mockito.when(logDao.getLogCount(Mockito.any(ExchangeSearchBranch.class)))
                 .thenReturn(100L);
-        Mockito.when(logDao.getExchangeLogListPaginated(Mockito.any(Integer.class), Mockito.any(Integer.class), Mockito.anyString(), Mockito.anyList()))
+        Mockito.when(logDao.getLogListSearchPaginated(Mockito.any(Integer.class), Mockito.any(Integer.class), Mockito.any(ExchangeSearchBranch.class), Mockito.any(Sorting.class)))
                 .thenReturn(logs);
         Mockito.when(logDao.getExchangeLogByRangeOfRefGuids(Mockito.anyList()))
                 .thenReturn(refLogs);

@@ -12,13 +12,13 @@ copy of the GNU General Public License along with the IFDM Suite. If not, see <h
 package eu.europa.ec.fisheries.uvms.exchange.service.bean;
 
 import eu.europa.ec.fisheries.schema.exchange.v1.*;
+import eu.europa.ec.fisheries.uvms.exchange.model.contract.search.ExchangeSearchBranch;
 import eu.europa.ec.fisheries.uvms.exchange.service.dao.ExchangeLogDaoBean;
 import eu.europa.ec.fisheries.uvms.exchange.service.entity.exchangelog.ExchangeLog;
 import eu.europa.ec.fisheries.uvms.exchange.service.entity.exchangelog.ExchangeLogStatus;
 import eu.europa.ec.fisheries.uvms.exchange.service.mapper.LogMapper;
 import eu.europa.ec.fisheries.uvms.exchange.model.dto.ListResponseDto;
 import eu.europa.ec.fisheries.uvms.exchange.service.search.SearchFieldMapper;
-import eu.europa.ec.fisheries.uvms.exchange.service.search.SearchValue;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -92,15 +92,10 @@ public class ExchangeLogModelBean {
         Integer page = query.getPagination().getPage();
         Integer listSize = query.getPagination().getListSize();
 
-        List<SearchValue> searchKeyValues = SearchFieldMapper.mapSearchField(query.getExchangeSearchCriteria().getCriterias());
+        ExchangeSearchBranch mainBranch = SearchFieldMapper.mapSearchField(query.getExchangeSearchCriteria().getCriterias(), query.getExchangeSearchCriteria().isIsDynamic());
+        Long numberMatches = logDao.getLogCount(mainBranch);
 
-        String sql = SearchFieldMapper.createSelectSearchSql(searchKeyValues, true, query.getSorting());
-        LOG.debug("sql:" + sql);
-        String countSql = SearchFieldMapper.createCountSearchSql(searchKeyValues, true);
-        LOG.debug("countSql:" + countSql);
-        Long numberMatches = logDao.getExchangeLogListSearchCount(countSql, searchKeyValues);
-
-        List<ExchangeLog> exchangeLogEntityList = logDao.getExchangeLogListPaginated(page, listSize, sql, searchKeyValues);
+        List<ExchangeLog> exchangeLogEntityList = logDao.getLogListSearchPaginated(page, listSize, mainBranch, query.getSorting());
         for (ExchangeLog entity : exchangeLogEntityList) {
             exchLogTypes.add(LogMapper.toModel(entity));
         }

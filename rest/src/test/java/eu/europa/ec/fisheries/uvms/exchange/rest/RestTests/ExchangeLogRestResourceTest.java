@@ -40,41 +40,6 @@ public class ExchangeLogRestResourceTest extends BuildExchangeRestTestDeployment
         assertTrue(true);
     }
 
-    @Test
-    @OperateOnDeployment("exchangeservice")
-    public void getLogListByCriteriaTest() {
-        ExchangeLog exchangeLog = RestHelper.createBasicLog();
-        exchangeLog.setTypeRefType(TypeRefType.UNKNOWN);
-        exchangeLog = exchangeLogDao.createLog(exchangeLog);
-
-        ExchangeListQuery query = new ExchangeListQuery();
-        ExchangeListPagination exchangeListPagination = new ExchangeListPagination();
-        exchangeListPagination.setListSize(10);
-        exchangeListPagination.setPage(1);
-        query.setPagination(exchangeListPagination);
-        ExchangeListCriteria exchangeListCriteria = new ExchangeListCriteria();
-        exchangeListCriteria.setIsDynamic(true);
-        ExchangeListCriteriaPair exchangeListCriteriaPair = new ExchangeListCriteriaPair();
-        exchangeListCriteriaPair.setKey(SearchField.TYPE);
-        exchangeListCriteriaPair.setValue(TypeRefType.UNKNOWN.value());
-        exchangeListCriteria.getCriterias().add(exchangeListCriteriaPair);
-        query.setExchangeSearchCriteria(exchangeListCriteria);
-
-
-        String stringResponse = getWebTarget()
-                .path("exchange")
-                .path("list")
-                .request(MediaType.APPLICATION_JSON)
-                .header(HttpHeaders.AUTHORIZATION, getToken())
-                .post(Entity.json(query), String.class);
-
-        assertNotNull(stringResponse);
-        ListQueryResponse response = RestHelper.readResponseDto(stringResponse, ListQueryResponse.class);
-        assertFalse(response.getLogList().isEmpty());
-        assertEquals(exchangeLog.getId().toString(), response.getLogList().get(0).getId());
-        assertEquals(DateUtils.dateToEpochMilliseconds(exchangeLog.getDateReceived()), response.getLogList().get(0).getDateRecieved());
-
-    }
 
     @Test
     @OperateOnDeployment("exchangeservice")
