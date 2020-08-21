@@ -26,7 +26,7 @@ public class ExchangeConfigConsumerBean extends AbstractConsumer implements Conf
         try {
             return getMessage(correlationId, type);
         } catch (MessageException e) {
-            LOG.error("Error while trying to get config!");
+            LOG.error("Error while trying to get config!",e);
         }
         return null;
     }

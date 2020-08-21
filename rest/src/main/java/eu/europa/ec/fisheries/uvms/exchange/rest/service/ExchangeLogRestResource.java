@@ -68,7 +68,7 @@ public class ExchangeLogRestResource {
             ListQueryResponse exchangeLogList = ExchangeLogMapper.mapToQueryResponse(response);
             return new ResponseDto(exchangeLogList, RestResponseCode.OK);
         } catch (Exception ex) {
-            log.error("[ Error when geting log list. {} ] {} ", query, ex.getMessage());
+            log.error("Error when geting log list. " + query, ex);
             return ErrorHandler.getFault(ex);
         }
     }
@@ -81,7 +81,7 @@ public class ExchangeLogRestResource {
         try {
             return new ResponseDto(logRestServiceBean.getExchangeLogRawMessage(guid), RestResponseCode.OK);
         } catch (Exception e) {
-            log.error("[ Error when getting exchange log by GUID. ] {}", e.getMessage());
+            log.error("Error when getting exchange log by GUID.", e);
             return ErrorHandler.getFault(e);
         }
     }
@@ -95,7 +95,7 @@ public class ExchangeLogRestResource {
             logRestServiceBean.remove(messageUuid);
             return new ResponseDto(RestResponseCode.OK);
         } catch (Exception e) {
-            log.error("[ Error when deleting exchange log by MessageUuid. ] {}", e.getMessage());
+            log.error("Error when deleting exchange log by MessageUuid.", e);
             return ErrorHandler.getFault(e);
         }
     }
@@ -112,7 +112,7 @@ public class ExchangeLogRestResource {
             }
             return new ResponseDto(results, RestResponseCode.OK);
         } catch (Exception e) {
-            log.error("[ Error when getting exchange log by GUID. ] {}", e.getMessage());
+            log.error("Error when getting exchange log by GUID.", e);
             return ErrorHandler.getFault(e);
         }
     }
@@ -125,7 +125,7 @@ public class ExchangeLogRestResource {
         try {
             return new ResponseDto(logRestServiceBean.getExchangeLogByGuid(guid), RestResponseCode.OK);
         } catch (Exception e) {
-            log.error("[ Error when getting exchange log by GUID. ] {}", e.getMessage());
+            log.error("Error when getting exchange log by GUID. ", e);
             return ErrorHandler.getFault(e);
         }
     }
@@ -143,7 +143,7 @@ public class ExchangeLogRestResource {
             List<ExchangeLogStatusType> response = serviceLayer.getExchangeStatusHistoryList(query.getStatus(), TypeRefType.POLL, from, to);
             return new ResponseDto(response, RestResponseCode.OK);
         } catch (Exception e) {
-            log.error("[ Error when getting config search fields. {}] {}", query, e.getMessage());
+            log.error("Error when getting config search fields." + query, e);
             return ErrorHandler.getFault(e);
         }
     }
@@ -159,7 +159,7 @@ public class ExchangeLogRestResource {
             ExchangeLogStatusType response = serviceLayer.getExchangeStatusHistory(TypeRefType.POLL, typeRefGuid, request.getRemoteUser());
             return new ResponseDto(response, RestResponseCode.OK);
         } catch (Exception e) {
-            log.error("[ Error when getting config search fields. {} ] {}", typeRefGuid, e.getMessage());
+            log.error("Error when getting config search fields. " + typeRefGuid, e);
             return ErrorHandler.getFault(e);
         }
     }

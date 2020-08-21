@@ -89,7 +89,7 @@ public class ExchangeLogServiceBean implements ExchangeLogService {
             log.debug("[INFO] Logging message with guid : [ "+guid+" ] was successful.");
             return exchangeLog;
         } catch (ExchangeModelException e) {
-            throw new ExchangeLogException("Couldn't create log exchange log.");
+            throw new ExchangeLogException("Couldn't create log exchange log.",e);
         }
     }
 
@@ -189,7 +189,7 @@ public class ExchangeLogServiceBean implements ExchangeLogService {
         try {
             return unsentModel.getMessageList();
         } catch (ExchangeModelException e) {
-            throw new ExchangeLogException("Couldn't get unsent message list.");
+            throw new ExchangeLogException("Couldn't get unsent message list.",e);
         }
     }
 
@@ -212,7 +212,7 @@ public class ExchangeLogServiceBean implements ExchangeLogService {
             query.getType().addAll(typeList);
             return  exchangeLogModel.getExchangeLogStatusHistoryByQuery(query);
         } catch (ExchangeModelException e) {
-            throw new ExchangeLogException("Couldn't get exchange status history list.");
+            throw new ExchangeLogException("Couldn't get exchange status history list.",e);
         }
     }
 
@@ -225,7 +225,7 @@ public class ExchangeLogServiceBean implements ExchangeLogService {
         try {
             return exchangeLogModel.getExchangeLogStatusHistory(typeRefGuid, type);
         } catch (ExchangeModelException e) {
-            throw new ExchangeLogException("Couldn't get exchange status history list.");
+            throw new ExchangeLogException("Couldn't get exchange status history list.",e);
         }
     }
 
@@ -245,8 +245,7 @@ public class ExchangeLogServiceBean implements ExchangeLogService {
             sendingQueueEvent.fire(new NotificationMessage("messageIds", unsentMessageIds));
             return createdUnsentMessageId;
         } catch (ExchangeModelException e) {
-            log.error("Couldn't add message to unsent list: {} {}",message,e);
-            throw new ExchangeLogException("Couldn't add message to unsent list");
+            throw new ExchangeLogException("Couldn't add message to unsent list " + message,e);
         }
     }
 
@@ -258,8 +257,7 @@ public class ExchangeLogServiceBean implements ExchangeLogService {
             List<String> removedMessageIds = Collections.singletonList(removeMessageId);
             sendingQueueEvent.fire(new NotificationMessage("messageIds", removedMessageIds));
         } catch (ExchangeModelException e) {
-            log.error("Couldn't add message to unsent list {} {}",unsentMessageId,e);
-            throw new ExchangeLogException("Couldn't add message to unsent list");
+            throw new ExchangeLogException("Couldn't add message to unsent list " + unsentMessageId,e);
         }
     }
 
@@ -285,8 +283,7 @@ public class ExchangeLogServiceBean implements ExchangeLogService {
         try {
             unsentMessageList = unsentModel.resend(messageIdList);
         } catch (ExchangeModelException e) {
-            log.error("Couldn't read unsent messages", e);
-            throw new ExchangeLogException("Couldn't read unsent messages");
+            throw new ExchangeLogException("Couldn't read unsent messages",e);
         }
         if (unsentMessageList != null && !unsentMessageList.isEmpty()) {
             sendingQueueEvent.fire(new NotificationMessage("messageIds", messageIdList));
@@ -297,7 +294,7 @@ public class ExchangeLogServiceBean implements ExchangeLogService {
                     //TextMessage unsentResponse = exchangeConsumer.getMessage(unsentMessageId, TextMessage.class);
                     //ExchangeModuleResponseMapper.validateResponse(unsentResponse, unsentMessageId);
                 } catch (MessageException e) {
-                    log.error("Error when sending/receiving message {} {}",messageIdList, e);
+                    log.error("Error when sending/receiving message " + messageIdList, e);
                 }
             }
         }
@@ -318,7 +315,7 @@ public class ExchangeLogServiceBean implements ExchangeLogService {
             exchangeLogEvent.fire(new NotificationMessage("guid", pollStatus.getExchangeLogGuid()));
             return pollStatus;
         } catch (ExchangeModelException e) {
-            throw new ExchangeLogException("Couldn't update status of exchange log");
+            throw new ExchangeLogException("Couldn't update status of exchange log ",e);
         }
     }
 }

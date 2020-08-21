@@ -114,7 +114,7 @@ public class SearchFieldMapper {
                 }
 
             } catch (ExchangeSearchMapperException ex) {
-                LOG.debug("[ Error when mapping to search field.. continuing with other criterias ]");
+                LOG.debug("Error when mapping to search field.. continuing with other criterias ",ex);
             }
         }
 

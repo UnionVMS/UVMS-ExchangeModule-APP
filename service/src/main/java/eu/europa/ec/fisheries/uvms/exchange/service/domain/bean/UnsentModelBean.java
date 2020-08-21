@@ -48,8 +48,7 @@ public class UnsentModelBean implements UnsentModel {
             UnsentMessageType model = UnsentMessageMapper.toModel(persistedEntity);
             return model.getMessageId();
         } catch (ExchangeDaoException ex) {
-            LOG.error("[ Error when creating unsent message ] {}", ex.getMessage());
-            throw new ExchangeModelException("Error when creating unsent message ");
+            throw new ExchangeModelException("Error when creating unsent message ",ex);
         }
     }
 
@@ -70,8 +69,7 @@ public class UnsentModelBean implements UnsentModel {
                 throw new ExchangeModelException("Error when removing unsent message ");
             }
         } catch (ExchangeDaoException ex) {
-            LOG.error("[ Error when creating unsent message ] {}", ex.getMessage());
-            throw new ExchangeModelException("Error when creating unsent message ");
+            throw new ExchangeModelException("Error when creating unsent message ",ex);
         }
     }
 
@@ -81,8 +79,7 @@ public class UnsentModelBean implements UnsentModel {
             List<UnsentMessage> list = dao.getAll();
             return UnsentMessageMapper.toModel(list);
         } catch (ExchangeDaoException ex) {
-            LOG.error("[ Error when getting unsent message list ] {}", ex.getMessage());
-            throw new ExchangeModelException("Error when getting unsent message list");
+            throw new ExchangeModelException("Error when getting unsent message list ",ex);
         }
     }
 
@@ -100,13 +97,12 @@ public class UnsentModelBean implements UnsentModel {
                     UnsentMessage removedMessage = dao.remove(message);
                     unsentMessageList.add(UnsentMessageMapper.toModel(removedMessage));
                 } catch (NoEntityFoundException e) {
-                    LOG.error("Couldn't find message to resend with guid: " + messageId);
+                    LOG.error("Couldn't find message to resend with guid: " + messageId,e);
                 }
             }
             return unsentMessageList;
         } catch (ExchangeDaoException ex) {
-            LOG.error("[ Error when resending message message list ] {}", ex.getMessage());
-            throw new ExchangeModelException("Error when resending unsent message list");
+            throw new ExchangeModelException("Error when resending unsent message list",ex);
         }
     }
 }

@@ -145,8 +145,7 @@ public class ServiceRegistryModelBean implements ServiceRegistryModel {
             }
 
         } catch (ExchangeDaoException e) {
-            LOG.error("[ Error when getting list. {}] {}", serviceClassName, e.getMessage());
-            throw new ExchangeModelException("[ Error when getting list. ]");
+            throw new ExchangeModelException("Error when getting list. " + serviceClassName,e);
         }
 
         return settings;
@@ -167,8 +166,7 @@ public class ServiceRegistryModelBean implements ServiceRegistryModel {
             
 
         } catch (ExchangeDaoException e) {
-            LOG.error("[ Error when getting list.{} ] {}",serviceClassName, e.getMessage());
-            throw new ExchangeModelException("[ Error when getting list. ]");
+            throw new ExchangeModelException("Error when getting list." + serviceClassName, e);
         }
         return capabilities;
     }
@@ -180,8 +178,7 @@ public class ServiceRegistryModelBean implements ServiceRegistryModel {
             return ServiceMapper.toServiceModel(service);
 
         } catch (NullPointerException e) {
-            LOG.error("[ Error when getting Service. {} ] {}",serviceClassName,  e.getMessage());
-            throw new ExchangeModelException("[ Error when getting service. ]");
+            throw new ExchangeModelException("Error when getting Service." + serviceClassName, e);
         }
     }
 

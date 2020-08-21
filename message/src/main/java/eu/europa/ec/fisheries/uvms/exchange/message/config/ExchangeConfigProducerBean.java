@@ -35,8 +35,7 @@ public class ExchangeConfigProducerBean extends AbstractProducer implements Conf
         try {
             return sendModuleMessage(text, exchangeINQueue);
         } catch (MessageException e) {
-            LOG.error("[ERROR] Error when sending config message!", e);
-            throw new ConfigMessageException("Error when sending config message.");
+            throw new ConfigMessageException("Error when sending config message.",e);
         }
     }
 

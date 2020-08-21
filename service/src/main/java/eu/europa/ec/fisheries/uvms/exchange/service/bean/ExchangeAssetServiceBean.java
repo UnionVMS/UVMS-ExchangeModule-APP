@@ -48,11 +48,9 @@ public class ExchangeAssetServiceBean implements ExchangeAssetService {
             TextMessage response = exchangeConsumer.getMessage(messageId, TextMessage.class);
             return AssetModuleResponseMapper.mapToAssetFromResponse(response, messageId);
 		} catch (MessageException e) {
-			log.error("Couldn't send message to vessel module");
-			throw new ExchangeServiceException("Couldn't send message to vessel module");
+			throw new ExchangeServiceException("Couldn't send message to vessel module",e);
 		} catch (AssetModelMapperException e) {
-			log.error("Couldn't map asset object by guid:  {}", assetGuid);
-            throw new ExchangeServiceException("Couldn't map asset object by guid:  " + assetGuid);
+            throw new ExchangeServiceException("Couldn't map asset object by guid:  " + assetGuid,e);
         }
 	}
 

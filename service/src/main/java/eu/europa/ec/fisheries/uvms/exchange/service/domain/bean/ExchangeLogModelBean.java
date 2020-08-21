@@ -45,7 +45,7 @@ public class ExchangeLogModelBean implements ExchangeLogModel {
             ExchangeLog exchangeLog = logDao.getExchangeLogByGuid(guid, null);
             exchangeLogType = LogMapper.toModel(exchangeLog);
         } catch (Exception e) {
-            log.error("[ERROR] when getting exchange log by GUID. {} {}", guid, e.getMessage());
+            log.error("[ERROR] when getting exchange log by GUID. " + guid, e);
             exchangeLogType = null;
         }
         return exchangeLogType;
@@ -57,7 +57,7 @@ public class ExchangeLogModelBean implements ExchangeLogModel {
             ExchangeLog exchangeLogByGuid = logDao.getExchangeLogByGuid(guid, typeRefType);
             return LogMapper.toModel(exchangeLogByGuid);
         } catch (Exception e) {
-            log.error("[ERROR] when getting exchange log by GUID. {}] {}", guid, e.getMessage());
+            log.error("[ERROR] when getting exchange log by GUID." + guid, e);
         }
         return null;
     }
@@ -73,7 +73,7 @@ public class ExchangeLogModelBean implements ExchangeLogModel {
                 }
             }
         } catch (Exception e) {
-            log.error("[ERROR] when getting exchange log by refUUID. {}] {}", refUUID, e.getMessage());
+            log.error("[ERROR] when getting exchange log by refUUID. " + refUUID, e);
             exchangeLogTypeSet = null;
         }
         return exchangeLogTypeSet;
@@ -106,8 +106,7 @@ public class ExchangeLogModelBean implements ExchangeLogModel {
 
             return logStatusHistoryList;
         } catch (ExchangeDaoException e) {
-            log.error("[ERROR] when get Exchange log status history {}] {} ", query, e.getMessage());
-            throw new ExchangeModelException("Error when get Exchange log status history ");
+            throw new ExchangeModelException("Error when get Exchange log status history " + query ,e);
         }
     }
 
@@ -147,8 +146,7 @@ public class ExchangeLogModelBean implements ExchangeLogModel {
             ExchangeLog retEntity = logDao.updateLog(exchangeLog);
             return LogMapper.toModel(retEntity);
         } catch (ExchangeDaoException ex) {
-            log.error("[ERROR] when update status of Exchange log {} {}] {}", status, username, ex.getMessage());
-            throw new ExchangeModelException("Error when update status of Exchange log", ex);
+            throw new ExchangeModelException("Error when update status of Exchange log for status: " + status + " username: " + username , ex);
         }
     }
 
@@ -163,8 +161,7 @@ public class ExchangeLogModelBean implements ExchangeLogModel {
             ExchangeLog retEntity = logDao.updateLog(exchangeLog);
             return LogMapper.toModel(retEntity);
         } catch (ExchangeDaoException ex) {
-            log.error("[ERROR] when update status of Exchange log {}] {}", status, ex.getMessage());
-            throw new ExchangeModelException("Error when update status of Exchange log", ex);
+            throw new ExchangeModelException("Error when update status of Exchange log " + status, ex);
         }
     }
 
@@ -182,8 +179,7 @@ public class ExchangeLogModelBean implements ExchangeLogModel {
                 }
             }
         } catch (ExchangeDaoException e) {
-            log.error("[ERROR] when getting status history Exchange log {} {}] {}", guid, typeRefType, e.getMessage());
-            throw new ExchangeModelException("Error when getting status history of Exchange log ");
+            throw new ExchangeModelException("Error when getting status history of Exchange log for guid: " + guid + " and TypeRef: "+ typeRefType,e);
         }
         return null;
     }
@@ -213,7 +209,7 @@ public class ExchangeLogModelBean implements ExchangeLogModel {
                 }
             }
         } catch (Exception e) {
-            log.error("[ERROR] when getting status history Exchange log {} {}] {}", guid, typeRefType, e.getMessage());
+            log.error("[ERROR] when getting status history Exchange log for guid: " + guid + " and TypeRef: "+ typeRefType,e);
             return logStatusTypeList;
         }
         return logStatusTypeList;
@@ -236,8 +232,7 @@ public class ExchangeLogModelBean implements ExchangeLogModel {
                 logType = LogMapper.toModel(retEntity);
             }
         } catch (ExchangeDaoException ex) {
-            log.error("[ERROR] when set poll status {} {}] {}", pollStatus, username, ex.getMessage());
-            throw new ExchangeModelException("Error when update status of Exchange log ");
+            throw new ExchangeModelException("Error when update status of Exchange log with pollStatus: " + pollStatus + " and username: " + username,ex);
         }
         return logType;
     }
@@ -254,7 +249,7 @@ public class ExchangeLogModelBean implements ExchangeLogModel {
                 logWrapper.setDataFlow(exchangeLog.getDf());
             }
         } catch (ExchangeDaoException e) {
-            log.error("[ERROR] Couldn't find Log with the following GUID : [[" + guid + "]]", e);
+            log.error("[ERROR] Couldn't find Log with the following GUID : " + guid , e);
         }
         return logWrapper;
     }

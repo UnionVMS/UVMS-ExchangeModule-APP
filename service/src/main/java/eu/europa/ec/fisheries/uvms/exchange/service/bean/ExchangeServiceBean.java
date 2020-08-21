@@ -60,7 +60,7 @@ public class ExchangeServiceBean implements ExchangeService {
             sendAuditlogMessageForRegisterService(compressServiceClassName(serviceResponseType.getServiceClassName()), username);
             return serviceResponseType;
         } catch (ExchangeModelException e) {
-            throw new ExchangeServiceException(e.getMessage());
+            throw new ExchangeServiceException(e.getMessage(),e);
         }
     }
 
@@ -78,7 +78,7 @@ public class ExchangeServiceBean implements ExchangeService {
             sendAuditlogMessageForUnregisterService(compressServiceClassName(serviceResponseType.getServiceClassName()), username);
             return serviceResponseType;
         } catch (ExchangeModelException ex) {
-            throw new ExchangeServiceException(ex.getMessage());
+            throw new ExchangeServiceException(ex.getMessage(),ex);
         }
     }
 
@@ -95,7 +95,7 @@ public class ExchangeServiceBean implements ExchangeService {
             List<ServiceResponseType> plugins = serviceRegistryModel.getPlugins(pluginTypes);
             return plugins;
         } catch (ExchangeModelException e) {
-            throw new ExchangeServiceException(e.getMessage());
+            throw new ExchangeServiceException(e.getMessage(),e);
         }
     }
 
@@ -130,7 +130,7 @@ public class ExchangeServiceBean implements ExchangeService {
             ServiceResponseType plugin = serviceRegistryModel.getPlugin(serviceId);
             return plugin;
         } catch (ExchangeModelException e) {
-            throw new ExchangeServiceException(e.getMessage());
+            throw new ExchangeServiceException(e.getMessage(),e);
         }
     }
 
@@ -143,7 +143,7 @@ public class ExchangeServiceBean implements ExchangeService {
             //sendAuditlogMessageForUpdateServiceStatus(serviceClassName, status, username);
             return updatedServiceStatus;
         } catch (ExchangeModelException e) {
-            throw new ExchangeServiceException(e.getMessage());
+            throw new ExchangeServiceException(e.getMessage(),e);
         }
     }
 
@@ -153,7 +153,7 @@ public class ExchangeServiceBean implements ExchangeService {
             String request = ExchangeAuditRequestMapper.mapRegisterService(serviceName, username);
             auditProducer.sendModuleMessage(request, exchangeConsumer.getDestination());
         } catch (AuditModelMarshallException | MessageException e) {
-            log.error("Could not send audit log message. Exchange registered service: " + serviceName );
+            log.error("Could not send audit log message. Exchange registered service: " + serviceName,e );
         }
     }
 
@@ -163,7 +163,7 @@ public class ExchangeServiceBean implements ExchangeService {
             String request = ExchangeAuditRequestMapper.mapUnregisterService(serviceName, username);
             auditProducer.sendModuleMessage(request, exchangeConsumer.getDestination());
         } catch (AuditModelMarshallException | MessageException e) {
-            log.error("Could not send audit log message. Exchange unregistered service: " + serviceName );
+            log.error("Could not send audit log message. Exchange unregistered service: " + serviceName,e );
         }
     }
 
@@ -173,7 +173,7 @@ public class ExchangeServiceBean implements ExchangeService {
             String request = ExchangeAuditRequestMapper.mapServiceStatusStopped(serviceName, username);
             auditProducer.sendModuleMessage(request, exchangeConsumer.getDestination());
         } catch (AuditModelMarshallException | MessageException e) {
-            log.error("Could not send audit log message. Exchange stopped service: " + serviceName );
+            log.error("Could not send audit log message. Exchange stopped service: " + serviceName,e );
         }
     }
 
@@ -183,7 +183,7 @@ public class ExchangeServiceBean implements ExchangeService {
             String request = ExchangeAuditRequestMapper.mapServiceStatusUnknown(serviceName, username);
             auditProducer.sendModuleMessage(request, exchangeConsumer.getDestination());
         } catch (AuditModelMarshallException | MessageException e) {
-            log.error("Could not send audit log message. Exchange set service: " + serviceName +"status to unknown" );
+            log.error("Could not send audit log message. Exchange set service: " + serviceName +"status to unknown",e );
         }
     }
 
@@ -193,7 +193,7 @@ public class ExchangeServiceBean implements ExchangeService {
             String request = ExchangeAuditRequestMapper.mapServiceStatusStarted(serviceName, username);
             auditProducer.sendModuleMessage(request, exchangeConsumer.getDestination());
         } catch (AuditModelMarshallException | MessageException e) {
-            log.error("Could not send audit log message. Exchange started service: " + serviceName );
+            log.error("Could not send audit log message. Exchange started service: " + serviceName,e );
         }
     }
 
@@ -203,7 +203,7 @@ public class ExchangeServiceBean implements ExchangeService {
             String request = ExchangeAuditRequestMapper.mapUpdateService(serviceName, username);
             auditProducer.sendModuleMessage(request, exchangeConsumer.getDestination());
         } catch (AuditModelMarshallException | MessageException e) {
-            log.error("Could not send audit log message. Exchange started service: " + serviceName );
+            log.error("Could not send audit log message. Exchange started service: " + serviceName,e );
         }
     }
 
