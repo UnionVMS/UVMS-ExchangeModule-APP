@@ -50,7 +50,7 @@ public class ConfigResource {
         try {
             return new ResponseDto(SearchField.values(), RestResponseCode.OK);
         } catch (Exception e) {
-            LOG.error("[ Error when getting config search fields. ]", e.getMessage());
+            LOG.error("Error when getting config search fields.", e);
             return ErrorHandler.getFault(e);
         }
     }
@@ -65,7 +65,7 @@ public class ConfigResource {
         	Map<String, List> configuration = ExchangeMock.mockConfiguration();
             return new ResponseDto(configuration, RestResponseCode.OK);
         } catch (Exception e) {
-            LOG.error("[ Error when getting config configuration. ] ", e.getMessage());
+            LOG.error("Error when getting config configuration. ", e);
             return ErrorHandler.getFault(e);
         }
     }

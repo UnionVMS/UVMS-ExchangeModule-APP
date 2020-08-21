@@ -46,7 +46,7 @@ public class ExchangeMessageProducerBean {
             String data = JAXBMarshaller.marshallJaxBObjectToString(message.getErrorFault());
             exchangeProdcerBean.sendResponseMessageToSender(message.getJmsMessage(), data, 600000, DeliveryMode.NON_PERSISTENT);
         } catch (ExchangeModelMapperException | JMSException | MessageException e) {
-            LOG.error("Error when returning Error message to recipient");
+            LOG.error("Error when returning Error message to recipient ",e);
         }
     }
 
@@ -59,7 +59,7 @@ public class ExchangeMessageProducerBean {
             eventBusProducer.sendEventBusMessageWithSpecificIds(data, serviceName, null, null, jmsMessageID, 60000, DeliveryMode.NON_PERSISTENT);
             LOG.debug("Sending error message back from Exchange module to recipient om JMS Topic with correlationID: {} ", jmsMessageID);
         } catch (ExchangeModelMapperException | JMSException | MessageException e) {
-            LOG.error("Error when returning Error message to recipient", e);
+            LOG.error("Error when returning Error message to recipient ", e);
         }
     }
 

@@ -42,14 +42,11 @@ public class ServiceRegistryDaoBean extends Dao implements ServiceRegistryDao {
             em.persist(entity);
             return entity;
         } catch (EntityExistsException e) {
-            LOG.error("[ Error when creating. ] {}", e.getMessage());
-            throw new ExchangeDaoException("[ Error when creating. Service already exists. ] ");
+            throw new ExchangeDaoException("Error when creating. Service already exists. ",e);
         } catch (IllegalArgumentException e) {
-            LOG.error("[ Error when creating. ] {}", e.getMessage());
-            throw new ExchangeDaoException("[ Error when creating. Illegal input. ]");
+            throw new ExchangeDaoException("Error when creating. Illegal input.",e);
         } catch (Exception e) {
-            LOG.error("[ Error when creating. ] {}", e.getMessage());
-            throw new ExchangeDaoException("[ Error when creating. ]");
+            throw new ExchangeDaoException("Error when creating.",e);
         }
     }
 
@@ -58,8 +55,7 @@ public class ServiceRegistryDaoBean extends Dao implements ServiceRegistryDao {
         try {
             return em.find(Service.class, new Long(id));
         } catch (Exception e) {
-            LOG.error("[ Error when getting entity by ID. ] {}", e.getMessage());
-            throw new ExchangeDaoException("[ Error when getting entity by ID. ] " + id);
+            throw new ExchangeDaoException("Error when getting entity by ID. " + id,e);
         }
     }
 
@@ -70,8 +66,7 @@ public class ServiceRegistryDaoBean extends Dao implements ServiceRegistryDao {
             em.flush();
             return entity;
         } catch (Exception e) {
-            LOG.error("[ Error when updating entity ] {} Entity : {} Description : {}", e.getMessage(), entity.toString(), entity.getDescription());
-            throw new ExchangeDaoException("[ Error when updating entity ]");
+            throw new ExchangeDaoException("[ Error when updating entity Entity " + entity.toString() + " Description: " + entity.getDescription(),e);
         }
     }
 
@@ -87,8 +82,7 @@ public class ServiceRegistryDaoBean extends Dao implements ServiceRegistryDao {
             TypedQuery<Service> query = em.createNamedQuery(ExchangeConstants.SERVICE_FIND_ALL, Service.class);
             return query.getResultList();
         } catch (Exception e) {
-            LOG.error("[ Error when getting service list ] {}", e.getMessage());
-            throw new ExchangeDaoException("[ Error when getting service list ] ");
+            throw new ExchangeDaoException("Error when getting service list ",e);
         }
     }
 
@@ -99,11 +93,9 @@ public class ServiceRegistryDaoBean extends Dao implements ServiceRegistryDao {
             query.setParameter("types", pluginTypes);
             return query.getResultList();
         } catch (IllegalArgumentException e) {
-            LOG.error("[ Error when getting service list by types ] {}", e.getMessage());
-            throw new ExchangeDaoException("[ Error when getting service list by types ] ");
+            throw new ExchangeDaoException("Error when getting service list by types ",e);
         } catch (Exception e) {
-            LOG.error("[ Error when getting service list by types ] {}", e.getMessage());
-            throw new ExchangeDaoException("[ Error when getting service list by types] ");
+            throw new ExchangeDaoException("Error when getting service list by types ",e);
         }
 	}
     
@@ -114,8 +106,7 @@ public class ServiceRegistryDaoBean extends Dao implements ServiceRegistryDao {
             query.setParameter(SERVICE_CLASS_NAME_PARAMETER, serviceClassName);
             return query.getResultList();
         } catch (Exception e) {
-            LOG.error("[ Error when getting capabilities ] {}", e.getMessage());
-            throw new ExchangeDaoException("[ Error when getting capabilities ] ");
+            throw new ExchangeDaoException("Error when getting capabilities ",e);
         }
     }
 
@@ -126,8 +117,7 @@ public class ServiceRegistryDaoBean extends Dao implements ServiceRegistryDao {
             query.setParameter("serviceClassName", serviceClassName);
             return query.getResultList();
         } catch (Exception e) {
-            LOG.error("[ Error when getting settings ] {}", e.getMessage());
-            throw new ExchangeDaoException("[ Error when getting settings ] ");
+            throw new ExchangeDaoException("Error when getting settings ",e);
         }
     }
 
@@ -138,6 +128,7 @@ public class ServiceRegistryDaoBean extends Dao implements ServiceRegistryDao {
             query.setParameter(SERVICE_CLASS_NAME_PARAMETER, serviceClassName);
             return query.getSingleResult();
         } catch (NoResultException e) {
+            LOG.info("Did not find single result",e);
             return null;
         }
     }
@@ -149,6 +140,7 @@ public class ServiceRegistryDaoBean extends Dao implements ServiceRegistryDao {
             query.setParameter(SERVICE_MAP_NAME_PARAMETER, mappedServiceName);
             return query.getSingleResult();
         } catch (NoResultException e) {
+            LOG.info("Did not find single result",e);
             return null;
         }
     }

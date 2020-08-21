@@ -69,7 +69,7 @@ public class ExchangeSendingQueueResource {
 			List<SendingGroupLog> sendingQueue = ExchangeLogMapper.mapToSendingQueue(unsentMessageList);
 			return new ResponseDto(sendingQueue, RestResponseCode.OK);
 		} catch (Exception ex) {
-			LOG.error("[ Error when geting log list. ] {} ", ex.getMessage());
+			LOG.error("Error when geting log list. ", ex);
 			return ErrorHandler.getFault(ex);
 		}
 	}
@@ -95,7 +95,7 @@ public class ExchangeSendingQueueResource {
 			serviceLayer.resend(messageIdList, request.getRemoteUser());
 			return new ResponseDto(true, RestResponseCode.OK);
 		} catch (Exception ex) {
-			LOG.error("[ Error when geting log list. {} ] {} ",messageIdList, ex.getMessage());
+			LOG.error("Error when geting log list. " + messageIdList, ex);
 			return ErrorHandler.getFault(ex);
 		}
 	}

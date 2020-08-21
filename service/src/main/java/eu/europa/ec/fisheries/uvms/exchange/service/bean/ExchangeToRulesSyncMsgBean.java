@@ -58,7 +58,6 @@ public class ExchangeToRulesSyncMsgBean {
                 messageProperties.put("messageSelector", "ValidationResultsByRawGuid");
                 correlationId = rulesProducer.sendModuleMessageWithProps(getValidationsByGuidRequest, exchangeConsumer.getDestination(), messageProperties);
             } catch (MessageException e) {
-                log.error("[ Error when sending rules message. ] {}", e.getMessage());
                 throw new ExchangeMessageException("Error when sending rules message.", e);
             }
 
@@ -82,7 +81,7 @@ public class ExchangeToRulesSyncMsgBean {
         try {
             logResult.setLevel(RuleValidationLevel.fromValue(validMsgFromRules.getLevel()));
         } catch (IllegalArgumentException ex){
-            log.error("[ERROR] The validation level "+validMsgFromRules.getLevel()+" doesn't exist in RuleValidationLevel class..");
+            log.error("[ERROR] The validation level "+validMsgFromRules.getLevel()+" doesn't exist in RuleValidationLevel class..",ex);
         }
         logResult.setStatus(EnumUtils.getEnum(RuleValidationStatus.class, validMsgFromRules.getErrorType().toString()));
         logResult.setXpaths(StringUtils.join(validMsgFromRules.getXpaths(), ','));

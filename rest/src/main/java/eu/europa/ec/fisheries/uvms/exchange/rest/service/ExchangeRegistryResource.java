@@ -65,7 +65,7 @@ public class ExchangeRegistryResource {
 		try {
 			return new ResponseDto(ServiceMapper.map(serviceLayer.getServiceList(null)), RestResponseCode.OK);
 		} catch (ExchangeServiceException | NullPointerException ex) {
-			LOG.error("[ Error when geting list. ] {} ", ex.getMessage());
+			LOG.error("Error when geting list.", ex);
 			return ErrorHandler.getFault(ex);
 		}
 	}
@@ -88,7 +88,7 @@ public class ExchangeRegistryResource {
 		try {
 			return new ResponseDto(pluginService.start(serviceClassName), RestResponseCode.OK);
 		} catch (ExchangeServiceException ex) {
-			LOG.error("[ Error when starting service {}] {}",serviceClassName,ex);
+			LOG.error("Error when starting service: " + serviceClassName,ex);
 			return ErrorHandler.getFault(ex);
 		}
 	}
@@ -111,7 +111,7 @@ public class ExchangeRegistryResource {
 		try {
 			return new ResponseDto(pluginService.stop(serviceClassName), RestResponseCode.OK);
 		} catch (ExchangeServiceException | NullPointerException ex) {
-			LOG.error("[ Error when stopping service {} ] {} ",serviceClassName, ex.getMessage());
+			LOG.error("Error when stopping service " + serviceClassName, ex);
 			return ErrorHandler.getFault(ex);
 		}
 	}

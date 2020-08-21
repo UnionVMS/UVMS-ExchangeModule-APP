@@ -61,8 +61,7 @@ public class ExchangeLogRestServiceBean {
         try {
             return exchangeLogModel.getExchangeLogByGuid(guid);
         } catch (ExchangeModelException e) {
-            log.error("[ Error when getting exchange log by GUID. {}] {}",guid, e.getMessage());
-            throw new ExchangeLogException("Error when getting exchange log by GUID.");
+            throw new ExchangeLogException("Error when getting exchange log by GUID." + guid,e);
         }
     }
 

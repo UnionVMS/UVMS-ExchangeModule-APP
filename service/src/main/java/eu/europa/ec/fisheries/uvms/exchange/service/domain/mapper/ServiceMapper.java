@@ -16,8 +16,6 @@ import eu.europa.ec.fisheries.uvms.exchange.model.util.DateUtils;
 import eu.europa.ec.fisheries.uvms.exchange.service.domain.entity.serviceregistry.Service;
 import eu.europa.ec.fisheries.uvms.exchange.service.domain.entity.serviceregistry.ServiceCapability;
 import eu.europa.ec.fisheries.uvms.exchange.service.domain.entity.serviceregistry.ServiceSetting;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -25,8 +23,6 @@ import java.util.List;
 import java.util.Map;
 
 public class ServiceMapper {
-    
-    final static Logger LOG = LoggerFactory.getLogger(ServiceMapper.class);
     
     public static Service toServiceEntity(ServiceType model, CapabilityListType capabilityList, SettingListType settingList, String username) {
         Service entity = new Service();

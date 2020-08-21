@@ -160,7 +160,7 @@ public class ExchangeEventOutgoingServiceBean implements ExchangeEventOutgoingSe
                         ExchangeLogType log = ExchangeLogMapper.getSendMovementExchangeLog(sendReport);
                         exchangeLogService.logAndCache(log, pluginMessageId, request.getUsername());
                     } catch (ExchangeLogException e) {
-                        log.error(e.getMessage());
+                        log.error(e.getMessage(),e);
                     }
                     AcknowledgeType ackType = ExchangeModuleResponseMapper.mapAcknowledgeTypeOK();
                     String moduleResponse = ExchangeModuleResponseMapper.mapSendMovementToPluginResponse(ackType);
@@ -170,10 +170,10 @@ public class ExchangeEventOutgoingServiceBean implements ExchangeEventOutgoingSe
                 }
             }
         } catch (ExchangeException  | MessageException e) {
-            log.error("[ Error when sending report to plugin {} ] {}",message,e);
+            log.error("Error when sending report to plugin " + message,e);
 
         } catch (JMSException ex) {
-            log.error("[ Error when creating unsent movement {}] {}",message,ex);
+            log.error("Error when creating unsent movement " + message,ex);
         }
     }
 
@@ -192,7 +192,7 @@ public class ExchangeEventOutgoingServiceBean implements ExchangeEventOutgoingSe
             String marshalledReq = ExchangeToMdrRulesMapper.mapExchangeToMdrPluginRequest(requestMessage);
             sendEventBusMessage(marshalledReq, ExchangeServiceConstants.MDR_PLUGIN_SERVICE_NAME);
         } catch (Exception e) {
-            log.error("[ERROR] Something strange happend during message conversion {} {}",message,e);
+            log.error("[ERROR] Something strange happend during message conversion " + message,e);
         }
     }
 
@@ -206,7 +206,7 @@ public class ExchangeEventOutgoingServiceBean implements ExchangeEventOutgoingSe
                 List<UnsentMessageTypeProperty> unsentMessageProperties = ExchangeLogMapper.getUnsentMessageProperties(sendReport);
                 exchangeLogService.createUnsentMessage(sendReport.getRecipient(), sendReport.getTimestamp(), ExchangeLogMapper.getSendMovementSenderReceiver(sendReport), origin.getText(), unsentMessageProperties, username);
             } catch (ExchangeLogException | JMSException e) {
-                log.error("Couldn't create unsent message " + e.getMessage());
+                log.error("Couldn't create unsent message " + e.getMessage(),e);
             }
             return false;
         } else if (!sendReport.getPluginType().equals(service.getPluginType())) {
@@ -222,7 +222,7 @@ public class ExchangeEventOutgoingServiceBean implements ExchangeEventOutgoingSe
                 List<UnsentMessageTypeProperty> unsentMessageProperties = ExchangeLogMapper.getUnsentMessageProperties(sendReport);
                 exchangeLogService.createUnsentMessage(sendReport.getRecipient(), sendReport.getTimestamp(), ExchangeLogMapper.getSendMovementSenderReceiver(sendReport), origin.getText(), unsentMessageProperties, username);
             } catch (ExchangeLogException | JMSException e) {
-                log.error("Couldn't create unsent message " + e.getMessage());
+                log.error("Couldn't create unsent message " + e.getMessage(),e);
             }
 
             try {
@@ -230,7 +230,7 @@ public class ExchangeEventOutgoingServiceBean implements ExchangeEventOutgoingSe
                 String moduleResponse = ExchangeModuleResponseMapper.mapSendMovementToPluginResponse(ackType);
                 auditProducer.sendResponseMessageToSender(origin, moduleResponse);
             } catch (JMSException | ExchangeModelMarshallException | MessageException e) {
-                log.error("Plugin not started, couldn't send module response: " + e.getMessage());
+                log.error("Plugin not started, couldn't send module response: " + e.getMessage(),e);
             }
             return false;
         }
@@ -260,7 +260,7 @@ public class ExchangeEventOutgoingServiceBean implements ExchangeEventOutgoingSe
                     ExchangeLogType log = ExchangeLogMapper.getSendCommandExchangeLog(request.getCommand());
                     exchangeLogService.logAndCache(log, pluginMessageId, request.getUsername());
                 } catch (ExchangeLogException e) {
-                    log.error(e.getMessage());
+                    log.error(e.getMessage(),e);
                 }
                 CommandTypeType x = request.getCommand().getCommand();
 
@@ -276,11 +276,11 @@ public class ExchangeEventOutgoingServiceBean implements ExchangeEventOutgoingSe
 
         } catch (NullPointerException | ExchangeException | MessageException e) {
             if (request.getCommand().getCommand() != CommandTypeType.EMAIL) {
-                log.error("[ Error when sending command to plugin {} ]", e.getMessage());
+                log.error("Error when sending command to plugin " + e.getMessage(),e);
                 exchangeErrorEvent.fire(new ExchangeMessageEvent(message.getJmsMessage(), ExchangeModuleResponseMapper.createFaultMessage(FaultCode.EXCHANGE_EVENT_SERVICE, "Exception when sending command to plugin")));
             }
         } catch (JMSException ex) {
-            log.error("[ Error when creating unsent message {} ]", ex.getMessage());
+            log.error("Error when creating unsent message " + ex.getMessage(),ex);
         }
     }
 
@@ -471,7 +471,7 @@ public class ExchangeEventOutgoingServiceBean implements ExchangeEventOutgoingSe
                 pollEvent.fire(new NotificationMessage("guid", pollGuid));
             }
         } catch (ExchangeLogException e) {
-            log.error(e.getMessage());
+            log.error(e.getMessage(),e);
         }
     }
 
@@ -493,7 +493,7 @@ public class ExchangeEventOutgoingServiceBean implements ExchangeEventOutgoingSe
             ExchangeLogType log = ExchangeLogMapper.getReceivedMovementExchangeLog(setReportMovementType, movementRefType.getMovementRefGuid(), movementRefType.getType().value(), username);
             exchangeLogService.log(log, username);
         } catch (ExchangeLogException e) {
-            log.error(e.getMessage());
+            log.error(e.getMessage(),e);
         }
     }
 
@@ -508,7 +508,7 @@ public class ExchangeEventOutgoingServiceBean implements ExchangeEventOutgoingSe
             log.debug("Sending event bus message from Exchange module to recipient om JMS Topic to: {} ", serviceName);
             return eventBusProducer.sendEventBusMessage(marshalledRequest, serviceName);
         } catch (MessageException e) {
-            log.error("[ Error when sending message. ] ", e);
+            log.error("Error when sending message. ", e);
             throw new ExchangeMessageException("[ Error when sending message. ]", e);
         }
     }
@@ -546,7 +546,7 @@ public class ExchangeEventOutgoingServiceBean implements ExchangeEventOutgoingSe
                 List<UnsentMessageTypeProperty> setUnsentMessageTypePropertiesForPoll = getSetUnsentMessageTypePropertiesForPoll(commandType);
                 exchangeLogService.createUnsentMessage(service.getName(), command.getTimestamp(), command.getCommand().name(), origin.getText(), setUnsentMessageTypePropertiesForPoll, username);
             } catch (ExchangeLogException | JMSException e) {
-                log.error("Couldn't create unsentMessage " + e.getMessage());
+                log.error("Couldn't create unsentMessage " + e.getMessage(),e);
             }
             return false;
         } else if (command.getTimestamp() == null) {
@@ -559,7 +559,7 @@ public class ExchangeEventOutgoingServiceBean implements ExchangeEventOutgoingSe
                 List<UnsentMessageTypeProperty> setUnsentMessageTypePropertiesForPoll = getSetUnsentMessageTypePropertiesForPoll(commandType);
                 exchangeLogService.createUnsentMessage(service.getName(), command.getTimestamp(), command.getCommand().name(), origin.getText(), setUnsentMessageTypePropertiesForPoll, username);
             } catch (ExchangeLogException | JMSException e) {
-                log.error("Couldn't create unsentMessage " + e.getMessage());
+                log.error("Couldn't create unsentMessage " + e.getMessage(),e);
             }
 
             try {
@@ -567,7 +567,7 @@ public class ExchangeEventOutgoingServiceBean implements ExchangeEventOutgoingSe
                 String moduleResponse = ExchangeModuleResponseMapper.mapSetCommandResponse(ackType);
                 auditProducer.sendResponseMessageToSender(origin, moduleResponse);
             } catch (JMSException | ExchangeModelMarshallException | MessageException e) {
-                log.error("Plugin not started, couldn't send module response: " + e.getMessage());
+                log.error("Plugin not started, couldn't send module response: " + e.getMessage(),e);
             }
 
             return false;
@@ -580,8 +580,7 @@ public class ExchangeEventOutgoingServiceBean implements ExchangeEventOutgoingSe
         try {
             asset = exchangeAssetService.getAsset(connectId);
         } catch (ExchangeServiceException e) {
-            log.error("Couldn't create unsentMessage " + e.getMessage());
-            throw new ExchangeLogException(e.getMessage());
+            throw new ExchangeLogException("Couldn't create unsentMessage " + e.getMessage(),e);
         }
         return asset;
     }

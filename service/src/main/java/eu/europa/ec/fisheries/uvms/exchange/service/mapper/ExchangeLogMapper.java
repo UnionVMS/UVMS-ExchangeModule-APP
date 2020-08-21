@@ -172,7 +172,7 @@ public class ExchangeLogMapper {
         try {
             senderReceiver = getSenderReceiver(sendReport.getMovement(), sendReport.getPluginType(), sendReport.getPluginName(), null);
         } catch (ExchangeLogException e) {
-            LOG.debug("Report sent to plugin couldn't map to senderReceiver");
+            LOG.debug("Report sent to plugin couldn't map to senderReceiver",e);
         }
         return senderReceiver;
     }

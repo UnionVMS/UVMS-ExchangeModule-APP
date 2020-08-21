@@ -366,7 +366,6 @@ public class ExchangeMessageConsumerBean implements MessageListener {
     private int getTimesRedelivered(Message message) {
         try {
             return (message.getIntProperty("JMSXDeliveryCount") - 1);
-
         } catch (Exception e) {
             return 0;
         }
