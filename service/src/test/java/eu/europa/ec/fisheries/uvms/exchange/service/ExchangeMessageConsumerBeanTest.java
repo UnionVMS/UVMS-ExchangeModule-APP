@@ -987,7 +987,7 @@ public class ExchangeMessageConsumerBeanTest extends BuildExchangeServiceTestDep
     public void receiveAssetInformationTest() throws Exception { // RECEIVE_ASSET_INFORMATION
         String assets = "ReceiveAssetInformation assets";
         String guid = UUID.randomUUID().toString();
-        String request = ExchangeModuleRequestMapper.createReceiveAssetInformation(assets, "ReceiveAssetInformation assets username", PluginType.OTHER);
+        String request = ExchangeModuleRequestMapper.createReceiveAssetInformation(assets, "ReceiveAssetInformation assets username", PluginType.OTHER, "ais");
         String corrID = jmsHelper.sendExchangeMessage(request, null, "RECEIVE_ASSET_INFORMATION");
         TextMessage message = (TextMessage) jmsHelper.listenOnQueue("UVMSAssetEvent");
         String response = message.getText();
@@ -1001,6 +1001,7 @@ public class ExchangeMessageConsumerBeanTest extends BuildExchangeServiceTestDep
         assertEquals(LogType.RECEIVE_ASSET_INFORMATION, exchangeLog.getType());
         assertEquals(ExchangeLogStatusTypeType.SUCCESSFUL, exchangeLog.getStatus());
         assertEquals(TypeRefType.ASSETS, exchangeLog.getTypeRefType());
+        assertEquals("ais", exchangeLog.getSenderReceiver());
     }
 
     private Service createAndPersistBasicService(String name, String serviceClassName, PluginType pluginType) throws Exception {

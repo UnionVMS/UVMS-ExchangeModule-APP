@@ -83,12 +83,12 @@ public class ExchangeModuleRequestMapper {
     }
 
 
-    public static String createReceiveAssetInformation(String assets, String username, PluginType pluginType) {
+    public static String createReceiveAssetInformation(String assets, String username, PluginType pluginType, String source) {
         ReceiveAssetInformationRequest request = new ReceiveAssetInformationRequest();
         request.setAssets(assets);
         request.setUsername(username);
         request.setMethod(RECEIVE_ASSET_INFORMATION);
-        request.setSenderOrReceiver(FLUX_VESSEL_PLUGIN);
+        request.setSenderOrReceiver(source);
         request.setDate(new Date());
         request.setPluginType(pluginType);
         return JAXBMarshaller.marshallJaxBObjectToString(request);
