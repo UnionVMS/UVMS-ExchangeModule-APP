@@ -13,8 +13,21 @@ package eu.europa.ec.fisheries.uvms.exchange.service.bean;
 
 import eu.europa.ec.fisheries.schema.exchange.common.v1.CommandType;
 import eu.europa.ec.fisheries.schema.exchange.common.v1.CommandTypeType;
-import eu.europa.ec.fisheries.schema.exchange.module.v1.*;
-import eu.europa.ec.fisheries.schema.exchange.movement.v1.*;
+import eu.europa.ec.fisheries.schema.exchange.module.v1.ExchangeModuleMethod;
+import eu.europa.ec.fisheries.schema.exchange.module.v1.ProcessedMovementResponse;
+import eu.europa.ec.fisheries.schema.exchange.module.v1.ProcessedMovementResponseBatch;
+import eu.europa.ec.fisheries.schema.exchange.module.v1.SendAssetInformationRequest;
+import eu.europa.ec.fisheries.schema.exchange.module.v1.SendMovementToPluginRequest;
+import eu.europa.ec.fisheries.schema.exchange.module.v1.SetCommandRequest;
+import eu.europa.ec.fisheries.schema.exchange.module.v1.SetFAQueryMessageRequest;
+import eu.europa.ec.fisheries.schema.exchange.module.v1.SetFLUXFAReportMessageRequest;
+import eu.europa.ec.fisheries.schema.exchange.module.v1.SetFLUXFAResponseMessageRequest;
+import eu.europa.ec.fisheries.schema.exchange.module.v1.UpdateLogStatusRequest;
+import eu.europa.ec.fisheries.schema.exchange.movement.v1.MovementRefType;
+import eu.europa.ec.fisheries.schema.exchange.movement.v1.MovementRefTypeType;
+import eu.europa.ec.fisheries.schema.exchange.movement.v1.RecipientInfoType;
+import eu.europa.ec.fisheries.schema.exchange.movement.v1.SendMovementToPluginType;
+import eu.europa.ec.fisheries.schema.exchange.movement.v1.SetReportMovementType;
 import eu.europa.ec.fisheries.schema.exchange.plugin.types.v1.PluginType;
 import eu.europa.ec.fisheries.schema.exchange.plugin.v1.ExchangePluginMethod;
 import eu.europa.ec.fisheries.schema.exchange.plugin.v1.PluginBaseRequest;
@@ -24,12 +37,12 @@ import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogStatusTypeType;
 import eu.europa.ec.fisheries.schema.exchange.v1.LogType;
 import eu.europa.ec.fisheries.schema.exchange.v1.TypeRefType;
 import eu.europa.ec.fisheries.uvms.commons.message.api.MessageConstants;
-import eu.europa.ec.fisheries.uvms.exchange.service.entity.exchangelog.ExchangeLog;
-import eu.europa.ec.fisheries.uvms.exchange.service.entity.serviceregistry.Service;
-import eu.europa.ec.fisheries.uvms.exchange.service.entity.unsent.UnsentMessageProperty;
 import eu.europa.ec.fisheries.uvms.exchange.model.mapper.ExchangePluginRequestMapper;
 import eu.europa.ec.fisheries.uvms.exchange.model.mapper.JAXBMarshaller;
 import eu.europa.ec.fisheries.uvms.exchange.service.constants.ExchangeServiceConstants;
+import eu.europa.ec.fisheries.uvms.exchange.service.entity.exchangelog.ExchangeLog;
+import eu.europa.ec.fisheries.uvms.exchange.service.entity.serviceregistry.Service;
+import eu.europa.ec.fisheries.uvms.exchange.service.entity.unsent.UnsentMessageProperty;
 import eu.europa.ec.fisheries.uvms.exchange.service.event.PollEvent;
 import eu.europa.ec.fisheries.uvms.exchange.service.mapper.ExchangeLogMapper;
 import eu.europa.ec.fisheries.uvms.exchange.service.mapper.ExchangeToMdrRulesMapper;
@@ -49,6 +62,7 @@ import javax.ejb.EJB;
 import javax.ejb.Stateless;
 import javax.enterprise.event.Event;
 import javax.inject.Inject;
+import javax.jms.JMSException;
 import javax.jms.TextMessage;
 import java.util.*;
 
@@ -453,6 +467,10 @@ public class ExchangeEventOutgoingServiceBean {
         } catch (Exception e) {
             LOG.error(e.getMessage(), e);
         }
+    }
+
+    public void sendEfrReportSavedToPlugin(TextMessage message) throws JMSException {
+        eventBusTopicProducer.sendEventBusMessage(message.getText(), ExchangeServiceConstants.EFR_PLUGIN_SERVICE_NAME);
     }
 
     private void fireExchangeFault(TextMessage messageEvent, String errorMessage, Throwable exception) {

@@ -198,6 +198,16 @@ public class ExchangeMessageConsumerBean implements MessageListener {
                 case RECEIVE_ASSET_INFORMATION:
                     incomingServiceBean.receiveAssetInformation(textMessage);
                     break;
+
+                /* ELECTRONIC FISHING REPORTING, EFR */
+
+                case EFR_SAVE_REPORT:
+                    incomingServiceBean.processEfrSaveReport(textMessage);
+                    break;
+                case EFR_REPORT_SAVED:
+                    outgoingServiceBean.sendEfrReportSavedToPlugin(textMessage);
+                    break;
+
                 default:
                     LOG.error("[ Not implemented method consumed: {} ] ", exchangeMethod);
                     errorEvent.fire(new ExchangeErrorEvent(textMessage, "Method not implemented"));
