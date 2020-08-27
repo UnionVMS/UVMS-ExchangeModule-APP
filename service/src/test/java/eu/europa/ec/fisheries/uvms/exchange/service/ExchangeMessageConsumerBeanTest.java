@@ -135,7 +135,7 @@ public class ExchangeMessageConsumerBeanTest extends BuildExchangeServiceTestDep
         email.setTo("TestExecuter@exchange.uvms");
         email.setSubject("Test subject");
 
-        String request = ExchangeModuleRequestMapper.createSetCommandSendEmailRequest(serviceClassName, email, null);
+        String request = ExchangeModuleRequestMapper.createMarshalledSetCommandSendEmailRequest(serviceClassName, email, null);
 
         jmsHelper.registerSubscriber("ServiceName = '" + serviceClassName + "'");
         String corrID = jmsHelper.sendExchangeMessage(request, null, "SET_COMMAND");
@@ -169,7 +169,7 @@ public class ExchangeMessageConsumerBeanTest extends BuildExchangeServiceTestDep
         email.setTo("TestExecuter@exchange.uvms");
         email.setSubject("Test subject");
 
-        String request = ExchangeModuleRequestMapper.createSetCommandSendEmailRequest(serviceClassName, email, null);
+        String request = ExchangeModuleRequestMapper.createMarshalledSetCommandSendEmailRequest(serviceClassName, email, null);
 
         String corrID = jmsHelper.sendExchangeMessage(request, null, "SET_COMMAND");
         Thread.sleep(1000); // To allow the db to sync up
@@ -462,6 +462,7 @@ public class ExchangeMessageConsumerBeanTest extends BuildExchangeServiceTestDep
 
         MovementType movementType = createMovementType();
         movementType.setSourceSatelliteId(42);
+        movementType.setAisPositionAccuracy((short)42);
         SetReportMovementType setReportMovementType = new SetReportMovementType();
         setReportMovementType.setMovement(movementType);
         setReportMovementType.setTimestamp(Date.from(Instant.now()));
@@ -480,6 +481,7 @@ public class ExchangeMessageConsumerBeanTest extends BuildExchangeServiceTestDep
         assertEquals(movementType.getPosition().getLongitude(), output.getLongitude(), 0);
         assertEquals(movementType.getFlagState(), output.getFlagState());
         assertEquals(movementType.getSourceSatelliteId().shortValue(), output.getSourceSatelliteId().shortValue());
+        assertEquals(movementType.getAisPositionAccuracy(), output.getAisPositionAccuracy());
 
 
         Thread.sleep(1000); // To allow the db to sync up
@@ -985,7 +987,7 @@ public class ExchangeMessageConsumerBeanTest extends BuildExchangeServiceTestDep
     public void receiveAssetInformationTest() throws Exception { // RECEIVE_ASSET_INFORMATION
         String assets = "ReceiveAssetInformation assets";
         String guid = UUID.randomUUID().toString();
-        String request = ExchangeModuleRequestMapper.createReceiveAssetInformation(assets, "ReceiveAssetInformation assets username", PluginType.OTHER);
+        String request = ExchangeModuleRequestMapper.createReceiveAssetInformation(assets, "ReceiveAssetInformation assets username", PluginType.OTHER, "ais");
         String corrID = jmsHelper.sendExchangeMessage(request, null, "RECEIVE_ASSET_INFORMATION");
         TextMessage message = (TextMessage) jmsHelper.listenOnQueue("UVMSAssetEvent");
         String response = message.getText();
@@ -999,6 +1001,7 @@ public class ExchangeMessageConsumerBeanTest extends BuildExchangeServiceTestDep
         assertEquals(LogType.RECEIVE_ASSET_INFORMATION, exchangeLog.getType());
         assertEquals(ExchangeLogStatusTypeType.SUCCESSFUL, exchangeLog.getStatus());
         assertEquals(TypeRefType.ASSETS, exchangeLog.getTypeRefType());
+        assertEquals("ais", exchangeLog.getSenderReceiver());
     }
 
     private Service createAndPersistBasicService(String name, String serviceClassName, PluginType pluginType) throws Exception {

@@ -83,12 +83,12 @@ public class ExchangeModuleRequestMapper {
     }
 
 
-    public static String createReceiveAssetInformation(String assets, String username, PluginType pluginType) {
+    public static String createReceiveAssetInformation(String assets, String username, PluginType pluginType, String source) {
         ReceiveAssetInformationRequest request = new ReceiveAssetInformationRequest();
         request.setAssets(assets);
         request.setUsername(username);
         request.setMethod(RECEIVE_ASSET_INFORMATION);
-        request.setSenderOrReceiver(FLUX_VESSEL_PLUGIN);
+        request.setSenderOrReceiver(source);
         request.setDate(new Date());
         request.setPluginType(pluginType);
         return JAXBMarshaller.marshallJaxBObjectToString(request);
@@ -278,10 +278,16 @@ public class ExchangeModuleRequestMapper {
         return JAXBMarshaller.marshallJaxBObjectToString(request);
     }
 
-    public static String createSetCommandSendEmailRequest(String pluginName, EmailType email, String fwdRule) {
+    public static String createMarshalledSetCommandSendEmailRequest(String pluginName, EmailType email, String fwdRule) {
         SetCommandRequest request = createSetCommandRequest(pluginName, CommandTypeType.EMAIL, "UVMS", fwdRule);
         request.getCommand().setEmail(email);
         return JAXBMarshaller.marshallJaxBObjectToString(request);
+    }
+
+    public static SetCommandRequest createSetCommandSendEmailRequest(String pluginName, EmailType email, String fwdRule) {
+        SetCommandRequest request = createSetCommandRequest(pluginName, CommandTypeType.EMAIL, "UVMS", fwdRule);
+        request.getCommand().setEmail(email);
+        return request;
     }
 
     private static SetCommandRequest createSetCommandRequest(String pluginName, CommandTypeType type, String username, String fwdRule) {

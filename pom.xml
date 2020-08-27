@@ -4,12 +4,12 @@
     <parent>
         <groupId>fish.focus.uvms.maven</groupId>
         <artifactId>uvms-pom</artifactId>
-        <version>3.2</version>
+        <version>3.3</version>
     </parent>
 
     <groupId>eu.europa.ec.fisheries.uvms.exchange</groupId>
     <artifactId>exchange</artifactId>
-    <version>5.2.13-UVMS-SNAPSHOT</version>
+    <version>5.3.3-UVMS-SNAPSHOT</version>
     <packaging>pom</packaging>
     
     <scm>
@@ -30,17 +30,17 @@
         <!-- Uvms libs -->
         <longpolling.version>2.0.13</longpolling.version>
         <uvms.commons.version>4.1.7</uvms.commons.version>
-        <usm4uvms.version>4.1.0</usm4uvms.version>
+        <usm4uvms.version>4.1.1</usm4uvms.version>
         <uvms.config.version>4.1.2</uvms.config.version>
-        <uvms-pom-deps.version>3.2</uvms-pom-deps.version>
-        <asset.version>6.7.14</asset.version>
+        <uvms-pom-deps.version>3.3</uvms-pom-deps.version>
+        <asset.version>6.7.19</asset.version>
 
         <!-- Uvms models -->
         <user.model.version>2.1.5</user.model.version>
         <audit.model.version>4.3.5</audit.model.version>
-        <movement.model.version>5.5.10-UVMS</movement.model.version>
+        <movement.model.version>5.5.15-UVMS</movement.model.version>
         <rules.model.version>3.3-MARE</rules.model.version>
-        <movement.rules.model.version>2.3.12</movement.rules.model.version>
+        <movement.rules.model.version>2.3.16</movement.rules.model.version>
     </properties>
 
     <dependencyManagement>
@@ -187,6 +187,7 @@
         <module>rest</module>
         <module>service</module>
         <module>module</module>
+        <module>client</module>
     </modules>
 
 </project>

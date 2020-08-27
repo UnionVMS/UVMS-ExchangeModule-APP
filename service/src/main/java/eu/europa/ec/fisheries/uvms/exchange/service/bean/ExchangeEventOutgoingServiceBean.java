@@ -64,10 +64,7 @@ import javax.enterprise.event.Event;
 import javax.inject.Inject;
 import javax.jms.JMSException;
 import javax.jms.TextMessage;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 import static eu.europa.ec.fisheries.schema.exchange.plugin.types.v1.PluginType.BELGIAN_ACTIVITY;
 
@@ -484,30 +481,49 @@ public class ExchangeEventOutgoingServiceBean {
     private void sendCommandToPlugin(SetCommandRequest request, Service service, String originalJMSText) {
         CommandType commandType = request.getCommand();
 
-        List<UnsentMessageProperty> setUnsentMessagePropertiesForPoll = getSetUnsentMessageTypePropertiesForPoll(commandType);
+        if(service == null && commandType.getEmail() != null){
+            service = findActiveEmailService();
+        }
+        List<UnsentMessageProperty> setUnsentMessagePropertiesForPoll = getSetUnsentMessageTypePropertiesForPollOrEmail(commandType);
         String unsentMessageGuid = exchangeLogService.createUnsentMessage(
-                service.getName(),
-                commandType.getTimestamp().toInstant(),
-                commandType.getCommand().name(),
-                originalJMSText,
-                setUnsentMessagePropertiesForPoll,
-                request.getUsername(),
-                ExchangeModuleMethod.SET_COMMAND.value());
+                                                                        service != null ? service.getName() : null,
+                                                                        commandType.getTimestamp().toInstant(),
+                                                                        commandType.getCommand().name(),
+                                                                        originalJMSText,
+                                                                        setUnsentMessagePropertiesForPoll,
+                                                                        request.getUsername(),
+                                                                        ExchangeModuleMethod.SET_COMMAND.value());
 
-        if (service.getStatus()) {
+        if (service != null && service.getStatus()) {
             ExchangeLog log = ExchangeLogMapper.getSendCommandExchangeLog(commandType, request.getUsername());
             exchangeLogService.log(log);
 
             commandType.setUnsentMessageGuid(unsentMessageGuid);
             commandType.setLogId(log.getId().toString());
+            commandType.setPluginName(service.getServiceClassName());
+
             String text = ExchangePluginRequestMapper.createSetCommandRequest(commandType);
-            eventBusTopicProducer.sendEventBusMessage(text, commandType.getPluginName());
+            eventBusTopicProducer.sendEventBusMessage(text, service.getServiceClassName());
         } else {
-            LOG.warn("Command was sent to a stopped plugin: {}", service.getName());
+            if(service == null){
+                LOG.warn("Command was sent to a nonexistant plugin and no alternative exists");
+            } else {
+                LOG.warn("Command was sent to a stopped plugin: {}", service.getName());
+            }
         }
     }
 
-    private List<UnsentMessageProperty> getSetUnsentMessageTypePropertiesForPoll(CommandType commandType) {
+    private Service findActiveEmailService(){
+        List<Service> emailPlugins = serviceRegistryModel.getPlugins(Arrays.asList(PluginType.EMAIL));
+        for (Service emailPlugin : emailPlugins) {
+            if(emailPlugin.getStatus()){
+                return emailPlugin;
+            }
+        }
+        return null;
+    }
+
+    private List<UnsentMessageProperty> getSetUnsentMessageTypePropertiesForPollOrEmail(CommandType commandType) {
         List<UnsentMessageProperty> properties = new ArrayList<>();
         if (commandType.getPoll() != null) {
             String connectId = ExchangeLogMapper.getConnectId(commandType.getPoll());

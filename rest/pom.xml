@@ -5,19 +5,14 @@
     <parent>
         <groupId>eu.europa.ec.fisheries.uvms.exchange</groupId>
         <artifactId>exchange</artifactId>
-        <version>5.2.13-UVMS-SNAPSHOT</version>
+        <version>5.3.3-UVMS-SNAPSHOT</version>
     </parent>
 
     <artifactId>exchange-rest</artifactId>
     <name>${project.parent.artifactId}-rest</name>
     <packaging>war</packaging>
 
-    <properties>
-        <docker.dev.stop.phase>verify</docker.dev.stop.phase>
-        <docker.dev.prestop.phase>install</docker.dev.prestop.phase>
-    </properties>
-
-    <dependencies>     
+    <dependencies>
         <!-- project modules--> 
         <dependency>
             <groupId>${project.groupId}</groupId>
