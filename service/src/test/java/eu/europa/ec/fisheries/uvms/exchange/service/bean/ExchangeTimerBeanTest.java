@@ -38,11 +38,12 @@ public class ExchangeTimerBeanTest extends TransactionalTests {
         exchangeLog.setTypeRefGuid(UUID.randomUUID());
         exchangeLog.setType(LogType.SEND_POLL);
         exchangeLog.setStatus(ExchangeLogStatusTypeType.PENDING);
+        exchangeLog.setDateReceived(Instant.now().minus(2, ChronoUnit.HOURS));
         exchangeLog.setTypeRefMessage("poll response timer test");
 
         TestHelper.addLogStatusToLog(exchangeLog,ExchangeLogStatusTypeType.PENDING);
         ExchangeLogStatus exchangeLogStatus = exchangeLog.getStatusHistory().get(0);
-        exchangeLogStatus.setStatusTimestamp(Instant.now().minus(2, ChronoUnit.HOURS));
+        exchangeLogStatus.setStatusTimestamp(Instant.now());
         exchangeLog = exchangeLogDao.createLog(exchangeLog);
 
         exchangeTimerBean.pollResponseTimer();

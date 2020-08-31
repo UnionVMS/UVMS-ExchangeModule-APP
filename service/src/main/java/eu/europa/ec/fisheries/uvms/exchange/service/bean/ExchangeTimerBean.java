@@ -13,21 +13,21 @@ package eu.europa.ec.fisheries.uvms.exchange.service.bean;
 
 import eu.europa.ec.fisheries.schema.exchange.v1.*;
 import eu.europa.ec.fisheries.uvms.commons.date.DateUtils;
+import eu.europa.ec.fisheries.uvms.exchange.model.dto.ListResponseDto;
 import eu.europa.ec.fisheries.uvms.exchange.service.dao.ExchangeLogDaoBean;
 import eu.europa.ec.fisheries.uvms.exchange.service.entity.exchangelog.ExchangeLog;
 import eu.europa.ec.fisheries.uvms.exchange.service.entity.exchangelog.ExchangeLogStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.ejb.EJB;
-import javax.ejb.Schedule;
-import javax.ejb.Singleton;
-import javax.ejb.Startup;
+import javax.annotation.PostConstruct;
+import javax.ejb.*;
 import javax.inject.Inject;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
 import java.util.List;
+import java.util.UUID;
 
 @Startup
 @Singleton
@@ -36,6 +36,10 @@ public class ExchangeTimerBean {
     private static final Logger LOG = LoggerFactory.getLogger(ExchangeTimerBean.class);
 
     private static final int POLL_TIMEOUT_TIME_IN_MINUTES = 90;
+
+    private ExchangeListQuery query;
+
+    private ExchangeListCriteriaPair dateCriteria;
 
     @Inject
     private ExchangeLogModelBean exchangeLogModelBean;
@@ -46,32 +50,59 @@ public class ExchangeTimerBean {
     @EJB
     private ExchangeLogDaoBean logDao;
 
+    @PostConstruct
+    public void init(){
+
+        ExchangeListPagination pagination = new ExchangeListPagination();
+        pagination.setListSize(1000);
+        pagination.setPage(1);
+
+        query = new ExchangeListQuery();
+        query.setPagination(pagination);
+
+
+        ExchangeListCriteria criteria = new ExchangeListCriteria();
+        criteria.setIsDynamic(true);
+        ExchangeListCriteriaPair pair = new ExchangeListCriteriaPair();
+        pair.setKey(SearchField.STATUS);
+        pair.setValue(ExchangeLogStatusTypeType.PENDING.value());
+        criteria.getCriterias().add(pair);
+
+        pair = new ExchangeListCriteriaPair();
+        pair.setKey(SearchField.TYPE);
+        //pair.setValue(LogType.SEND_POLL.value());
+        pair.setValue("POLL");
+        criteria.getCriterias().add(pair);
+
+        pair = new ExchangeListCriteriaPair();
+        pair.setKey(SearchField.DATE_RECEIVED_FROM);
+        pair.setValue(DateUtils.dateToEpochMilliseconds(Instant.now()));
+        criteria.getCriterias().add(pair);
+
+        query.setExchangeSearchCriteria(criteria);
+        dateCriteria = pair;
+    }
+
     @Schedule(minute = "*/5", hour = "*", persistent = false)
     public void pollResponseTimer() {
         try {
-            Instant to = Instant.now();
-            Instant from = to.minus( 1, ChronoUnit.DAYS);
+            Instant from = Instant.now().minus( 1, ChronoUnit.DAYS);
+            dateCriteria.setValue(DateUtils.dateToEpochMilliseconds(from));
 
-            ExchangeHistoryListQuery query = new ExchangeHistoryListQuery();
-            query.setTypeRefDateFrom(Date.from(from));
-            query.setTypeRefDateTo(Date.from(to));
-            query.getStatus().add(ExchangeLogStatusTypeType.PENDING);
-            query.getType().add(TypeRefType.POLL);
-
-            List<ExchangeLogStatus> logList = exchangeLogModel.getExchangeLogStatusHistoryByQuery(query);
-            for (ExchangeLogStatus exchangeLogStatus : logList) {
-                if(exchangeLogStatus.getStatusTimestamp().isBefore(Instant.now().minus(POLL_TIMEOUT_TIME_IN_MINUTES, ChronoUnit.MINUTES))) {
+            ListResponseDto logList = exchangeLogModel.getExchangeLogListByQuery(query);
+            for (ExchangeLogType exchangeLog : logList.getExchangeLogList()) {
+                if(exchangeLog.getDateRecieved().toInstant().isBefore(Instant.now().minus(POLL_TIMEOUT_TIME_IN_MINUTES, ChronoUnit.MINUTES))) {
 
                     PollStatus pollStatus = new PollStatus();
                     pollStatus.setStatus(ExchangeLogStatusTypeType.TIMED_OUT);
-                    pollStatus.setExchangeLogGuid(exchangeLogStatus.getLog().getId().toString());
-                    pollStatus.setPollGuid(exchangeLogStatus.getLog().getTypeRefGuid().toString());
+                    pollStatus.setExchangeLogGuid(exchangeLog.getGuid());
+                    pollStatus.setPollGuid(exchangeLog.getTypeRef().getRefGuid());
 
-                    ExchangeLog exchangeLogByGuid = logDao.getExchangeLogByGuid(exchangeLogStatus.getId());
+                    ExchangeLog exchangeLogByGuid = logDao.getExchangeLogByGuid(UUID.fromString(exchangeLog.getGuid()));
                     exchangeLogByGuid.setStatus(ExchangeLogStatusTypeType.TIMED_OUT);
                     logDao.updateLog(exchangeLogByGuid);
 
-                    LOG.info("No response for poll {} for 90 minutes. Setting status timed out", exchangeLogStatus.getLog().getTypeRefGuid());
+                    LOG.info("No response for poll {} for 90 minutes. Setting status timed out", exchangeLog.getTypeRef().getRefGuid());
                     exchangeLogModelBean.setPollStatus(pollStatus, "Poll Response Timer", "No response to poll in 90 minutes, setting as timed out");
                 }
             }
