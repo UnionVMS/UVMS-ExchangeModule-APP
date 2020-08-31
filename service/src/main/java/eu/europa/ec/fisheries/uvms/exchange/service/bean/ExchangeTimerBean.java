@@ -70,7 +70,7 @@ public class ExchangeTimerBean {
 
         pair = new ExchangeListCriteriaPair();
         pair.setKey(SearchField.TYPE);
-        //pair.setValue(LogType.SEND_POLL.value());
+        //pair.setValue(LogType.SEND_POLL.value());   //what is known as 'send poll' in one place is 'poll' in another.....
         pair.setValue("POLL");
         criteria.getCriterias().add(pair);
 
