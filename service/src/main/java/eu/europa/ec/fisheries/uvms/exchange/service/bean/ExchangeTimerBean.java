@@ -13,6 +13,8 @@ package eu.europa.ec.fisheries.uvms.exchange.service.bean;
 
 import eu.europa.ec.fisheries.schema.exchange.v1.*;
 import eu.europa.ec.fisheries.uvms.commons.date.DateUtils;
+import eu.europa.ec.fisheries.uvms.exchange.service.dao.ExchangeLogDaoBean;
+import eu.europa.ec.fisheries.uvms.exchange.service.entity.exchangelog.ExchangeLog;
 import eu.europa.ec.fisheries.uvms.exchange.service.entity.exchangelog.ExchangeLogStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,6 +43,9 @@ public class ExchangeTimerBean {
     @Inject
     private ExchangeLogModelBean exchangeLogModel;
 
+    @EJB
+    private ExchangeLogDaoBean logDao;
+
     @Schedule(minute = "*/5", hour = "*", persistent = false)
     public void pollResponseTimer() {
         try {
@@ -61,6 +66,10 @@ public class ExchangeTimerBean {
                     pollStatus.setStatus(ExchangeLogStatusTypeType.TIMED_OUT);
                     pollStatus.setExchangeLogGuid(exchangeLogStatus.getLog().getId().toString());
                     pollStatus.setPollGuid(exchangeLogStatus.getLog().getTypeRefGuid().toString());
+
+                    ExchangeLog exchangeLogByGuid = logDao.getExchangeLogByGuid(exchangeLogStatus.getId());
+                    exchangeLogByGuid.setStatus(ExchangeLogStatusTypeType.TIMED_OUT);
+                    logDao.updateLog(exchangeLogByGuid);
 
                     LOG.info("No response for poll {} for 90 minutes. Setting status timed out", exchangeLogStatus.getLog().getTypeRefGuid());
                     exchangeLogModelBean.setPollStatus(pollStatus, "Poll Response Timer", "No response to poll in 90 minutes, setting as timed out");
