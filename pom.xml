@@ -38,7 +38,7 @@
         <!-- Uvms models -->
         <user.model.version>2.1.5</user.model.version>
         <audit.model.version>4.3.5</audit.model.version>
-        <movement.model.version>5.5.16-UVMS</movement.model.version>
+        <movement.model.version>5.5.17-UVMS</movement.model.version>
         <rules.model.version>3.3-MARE</rules.model.version>
         <movement.rules.model.version>2.3.17</movement.rules.model.version>
     </properties>
