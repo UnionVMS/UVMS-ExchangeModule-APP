@@ -321,7 +321,7 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
             request.setDate(Date.from(DateUtil.nowUTC()));
 
             log.info("[INFO] Logging movement report.");
-            ExchangeLogType logResponse = exchangeLog.log(request, LogType.SEND_MOVEMENT_REPORT, ExchangeLogStatusTypeType.ISSUED, TypeRefType.MOVEMENT_REPORT, JAXBMarshaller.marshallJaxBObjectToString(request), false);
+            ExchangeLogType logResponse = exchangeLog.log(request, LogType.SEND_MOVEMENT_REPORT, ExchangeLogStatusTypeType.ISSUED, TypeRefType.MOVEMENT_REPORT,request.getRequest(), false);
 
             String pluginRequest = ExchangePluginRequestMapper.createSendFLUXMovementReportRequest(
                     request.getRequest(),
