@@ -45,13 +45,6 @@
 
     <dependencyManagement>
         <dependencies>
-            <!-- Project modules-->
-             <dependency>
-                <groupId>${project.groupId}</groupId>
-                <artifactId>exchange-commons</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-
             <!-- Third party libs -->
             <dependency>
                 <groupId>eu.europa.ec.fisheries.uvms</groupId>

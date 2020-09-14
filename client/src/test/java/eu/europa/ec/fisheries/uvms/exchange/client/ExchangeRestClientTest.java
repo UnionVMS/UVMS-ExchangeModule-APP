@@ -56,7 +56,7 @@ public class ExchangeRestClientTest extends AbstractClientTest {
             exchangeRestClient.sendCommandToPlugin(new SetCommandRequest());  //just testing that we reach the endpoint
 
         }catch (RuntimeException e){
-            assertTrue(e.getMessage().startsWith("java.lang.RuntimeException: Errormessage from exchange:"));
+            assertTrue(e.getMessage().startsWith("Errormessage from exchange:"));
         }
     }
 

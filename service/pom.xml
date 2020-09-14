@@ -19,10 +19,6 @@
  
     <dependencies>
         <!-- Project modules-->
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>exchange-commons</artifactId>
-        </dependency>
 
         <dependency>
             <groupId>eu.europa.ec.fisheries.uvms.asset</groupId>
