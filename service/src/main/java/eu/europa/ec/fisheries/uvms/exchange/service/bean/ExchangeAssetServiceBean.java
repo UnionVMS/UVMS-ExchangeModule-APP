@@ -11,9 +11,8 @@ copy of the GNU General Public License along with the IFDM Suite. If not, see <h
  */
 package eu.europa.ec.fisheries.uvms.exchange.service.bean;
 
-import javax.ejb.EJB;
 import javax.ejb.Stateless;
-
+import javax.inject.Inject;
 import eu.europa.ec.fisheries.uvms.asset.client.AssetClient;
 import eu.europa.ec.fisheries.uvms.asset.client.model.AssetDTO;
 import eu.europa.ec.fisheries.uvms.asset.client.model.AssetIdentifier;
@@ -29,7 +28,7 @@ public class ExchangeAssetServiceBean {
 
 	private static final Logger LOG = LoggerFactory.getLogger(ExchangeAssetServiceBean.class);
 
-	@EJB
+	@Inject
 	private AssetClient assetClient;
 
 	public Asset getAsset(String assetGuid) {

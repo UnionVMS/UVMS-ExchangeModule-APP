@@ -1,6 +1,5 @@
 package eu.europa.ec.fisheries.uvms.exchange.client;
 
-
 import eu.europa.ec.fisheries.schema.exchange.module.v1.GetServiceListRequest;
 import eu.europa.ec.fisheries.schema.exchange.module.v1.GetServiceListResponse;
 import eu.europa.ec.fisheries.schema.exchange.module.v1.SetCommandRequest;
@@ -11,29 +10,22 @@ import eu.europa.ec.fisheries.uvms.rest.security.InternalRestTokenHandler;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
-import javax.ejb.Stateless;
+import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
-import javax.json.bind.Jsonb;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.WebTarget;
-import javax.ws.rs.core.GenericType;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import java.time.Instant;
-import java.util.List;
-import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
-@Stateless
+@RequestScoped
 public class ExchangeRestClient {
 
     private WebTarget webTarget;
     
-    private Jsonb jsonb;
-
     @Resource(name = "java:global/exchange_endpoint")
     private String exchangeEndpoint;
 
@@ -51,8 +43,6 @@ public class ExchangeRestClient {
 
         client.register(JsonBConfigurator.class);
         webTarget = client.target(url);
-        
-        jsonb = new JsonBConfigurator().getContext(null);
     }
 
 
