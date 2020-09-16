@@ -328,7 +328,8 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
                     request.getDestination(),
                     request.getSenderOrReceiver(),
                     request.getFluxDataFlow(),
-                    logResponse.getGuid());
+                    logResponse.getGuid(),
+                    request.getAd());
             exchangeEventOutgoingService.sendMovementReportToFLUX(pluginRequest, ExchangeServiceConstants.MOVEMENT_PLUGIN_SERVICE_NAME);
 
             exchangeLog.updateStatus(logResponse.getGuid(), ExchangeLogStatusTypeType.SENT);
