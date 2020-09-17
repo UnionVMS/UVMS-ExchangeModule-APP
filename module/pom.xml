@@ -32,7 +32,6 @@
                     </modules>
                     <skinnyWars>true</skinnyWars>
                     <defaultLibBundleDir>APP-INF/lib</defaultLibBundleDir>
-                    <includeLibInApplicationXml>true</includeLibInApplicationXml>
                     <archive>
                         <manifestEntries>
                             <Logging-Profile>exchange</Logging-Profile>
