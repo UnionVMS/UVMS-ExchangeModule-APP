@@ -24,8 +24,8 @@ public class ExchangeActivityEfrProducer extends AbstractProducer {
         return destination;
     }
 
-    public void sendEfrSaveReport(String text) throws JMSException {
-        final Map<String, String> jmsFunctionProperty = Map.of(MessageConstants.JMS_FUNCTION_PROPERTY, ExchangeModuleMethod.EFR_SAVE_REPORT.name());
+    public void sendEfrSaveActivity(String text) throws JMSException {
+        final Map<String, String> jmsFunctionProperty = Map.of(MessageConstants.JMS_FUNCTION_PROPERTY, ExchangeModuleMethod.EFR_SAVE_ACTIVITY.name());
         sendModuleMessageWithProps(text, destination, jmsFunctionProperty);
     }
 }

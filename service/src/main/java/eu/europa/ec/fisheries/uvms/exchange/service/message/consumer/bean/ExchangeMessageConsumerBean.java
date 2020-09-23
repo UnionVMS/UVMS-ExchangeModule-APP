@@ -201,11 +201,11 @@ public class ExchangeMessageConsumerBean implements MessageListener {
 
                 /* ELECTRONIC FISHING REPORTING, EFR */
 
-                case EFR_SAVE_REPORT:
-                    incomingServiceBean.processEfrSaveReport(textMessage);
+                case EFR_SAVE_ACTIVITY:
+                    incomingServiceBean.processEfrSaveActivity(textMessage);
                     break;
-                case EFR_REPORT_SAVED:
-                    outgoingServiceBean.sendEfrReportSavedToPlugin(textMessage);
+                case EFR_ACTIVITY_SAVED:
+                    outgoingServiceBean.sendEfrActivitySavedToPlugin(textMessage);
                     break;
 
                 default:
