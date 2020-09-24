@@ -469,7 +469,7 @@ public class ExchangeEventOutgoingServiceBean {
         }
     }
 
-    public void sendEfrReportSavedToPlugin(TextMessage message) throws JMSException {
+    public void sendEfrActivitySavedToPlugin(TextMessage message) throws JMSException {
         eventBusTopicProducer.sendEventBusMessage(message.getText(), ExchangeServiceConstants.EFR_PLUGIN_SERVICE_NAME);
     }
 

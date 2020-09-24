@@ -318,12 +318,12 @@ public class ExchangeEventIncomingServiceBean {
         }
     }
 
-    public void processEfrSaveReport(TextMessage textMessage) {
+    public void processEfrSaveActivity(TextMessage textMessage) {
         try {
-            LOG.debug("Received EFR Save Report-message");
-            exchangeActivityEfrProducer.sendEfrSaveReport(textMessage.getText());
+            LOG.debug("Received EFR Save Activity-message");
+            exchangeActivityEfrProducer.sendEfrSaveActivity(textMessage.getText());
         } catch (JMSException e) {
-            final String ERROR_MESSAGE = "Could not process EfrSaveReport";
+            final String ERROR_MESSAGE = "Could not process EfrSaveActivity";
             LOG.error(ERROR_MESSAGE, e);
             throw new RuntimeException(ERROR_MESSAGE, e);
         }

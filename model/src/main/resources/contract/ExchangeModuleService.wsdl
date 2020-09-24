@@ -39,7 +39,7 @@
                     <xsd:enumeration value="RECEIVE_ASSET_INFORMATION"/>
                     <xsd:enumeration value="SEND_ASSET_INFORMATION"/>
                     <xsd:enumeration value="QUERY_ASSET_INFORMATION"/>
-                    <xsd:enumeration value="EFR_SAVE_REPORT"/>
+                    <xsd:enumeration value="EFR_SAVE_ACTIVITY"/>
 
                     <!-- plugin commands Ack-->
                     <xsd:enumeration value="PLUGIN_SET_CONFIG_ACK"/>
@@ -94,8 +94,8 @@
                     <!-- FLUX UNKNOWN message received -->
                     <xsd:enumeration value="UNKNOWN"/>
 
-                    <!-- EFR Report saved, ack from Activity -->
-                    <xsd:enumeration value="EFR_REPORT_SAVED"/>
+                    <!-- EFR fishing activity saved, ack from Activity module -->
+                    <xsd:enumeration value="EFR_ACTIVITY_SAVED"/>
 
                     <!-- report back to exchange what the validation status of a received message was, to update the log -->
                     <xsd:enumeration value="UPDATE_LOG_STATUS" />
@@ -474,8 +474,8 @@
                 </xsd:complexType>
             </xsd:element>
 
-            <!-- Asynch EfrSaveReport response -->
-            <xsd:element name="EfrReportSaved">
+            <!-- Asynch EfrSaveActivity response -->
+            <xsd:element name="EfrActivitySaved">
                 <xsd:complexType>
                     <xsd:complexContent>
                         <xsd:extension base="module:ExchangeBaseRequest">
