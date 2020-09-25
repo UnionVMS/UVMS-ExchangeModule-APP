@@ -235,6 +235,7 @@
             <xsd:enumeration value="SENDER_RECEIVER"/>
             <xsd:enumeration value="RECIPIENT"/>
             <xsd:enumeration value="TYPE"/>
+            <xsd:enumeration value="TYPE_GUID"/>
             <xsd:enumeration value="STATUS"/>
             <xsd:enumeration value="SOURCE"/>
             <xsd:enumeration value="MESSAGE_DIRECTION"/>

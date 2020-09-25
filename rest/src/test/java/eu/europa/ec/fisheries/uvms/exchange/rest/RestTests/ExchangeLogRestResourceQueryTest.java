@@ -19,6 +19,8 @@ import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import java.util.UUID;
+
 import static org.junit.Assert.*;
 import static org.junit.Assert.assertEquals;
 
@@ -51,7 +53,29 @@ public class ExchangeLogRestResourceQueryTest extends BuildExchangeRestTestDeplo
     }
 
     @Test
-    @Ignore("query can not handle isDynamic being false")
+    @OperateOnDeployment("exchangeservice")
+    public void getLogListByCriteriaTestSearchForTypeId() {
+        ExchangeLog exchangeLog = RestHelper.createBasicLog();
+        exchangeLog.setTypeRefType(TypeRefType.UNKNOWN);
+        exchangeLog.setTypeRefGuid(UUID.randomUUID());
+        exchangeLog = exchangeLogDao.createLog(exchangeLog);
+
+        ExchangeListQuery query = getBasicQuery();
+
+        ExchangeListCriteria exchangeListCriteria = new ExchangeListCriteria();
+        exchangeListCriteria.setIsDynamic(true);
+        exchangeListCriteria.getCriterias().add(getCriteriaPair(SearchField.TYPE_GUID, exchangeLog.getTypeRefGuid().toString()));
+        query.setExchangeSearchCriteria(exchangeListCriteria);
+
+        ListQueryResponse response = sendListQuery(query);
+
+        assertFalse(response.getLogList().isEmpty());
+        assertEquals(exchangeLog.getId().toString(), response.getLogList().get(0).getId());
+        assertEquals(DateUtils.dateToEpochMilliseconds(exchangeLog.getDateReceived()), response.getLogList().get(0).getDateRecieved());
+
+    }
+
+    @Test
     @OperateOnDeployment("exchangeservice")
     public void getLogListTwoTypeCriteriaTest() {
         ExchangeLog exchangeLog = RestHelper.createBasicLog();
@@ -75,7 +99,6 @@ public class ExchangeLogRestResourceQueryTest extends BuildExchangeRestTestDeplo
     }
 
     @Test
-    @Ignore("query can not handle searching two non-string values")
     @OperateOnDeployment("exchangeservice")
     public void getLogListTwoTypeCriteriaTwoLogs() {
         ExchangeLog exchangeLog = RestHelper.createBasicLog();
@@ -197,7 +220,6 @@ public class ExchangeLogRestResourceQueryTest extends BuildExchangeRestTestDeplo
     }
 
     @Test
-    @Ignore("query can not handle isDynamic being false")
     @OperateOnDeployment("exchangeservice")
     public void getLogListWithTypeOrSourceTwoLogsGetBoth() {
         ExchangeLog exchangeLog = RestHelper.createBasicLog();
