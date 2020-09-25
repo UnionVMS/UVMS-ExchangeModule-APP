@@ -94,9 +94,9 @@ public class ExchangeLogModelBean {
 
         List<SearchValue> searchKeyValues = SearchFieldMapper.mapSearchField(query.getExchangeSearchCriteria().getCriterias());
 
-        String sql = SearchFieldMapper.createSelectSearchSql(searchKeyValues, true, query.getSorting());
+        String sql = SearchFieldMapper.createSelectSearchSql(searchKeyValues, query.getExchangeSearchCriteria().isIsDynamic(), query.getSorting());
         LOG.debug("sql:" + sql);
-        String countSql = SearchFieldMapper.createCountSearchSql(searchKeyValues, true);
+        String countSql = SearchFieldMapper.createCountSearchSql(searchKeyValues, query.getExchangeSearchCriteria().isIsDynamic());
         LOG.debug("countSql:" + countSql);
         Long numberMatches = logDao.getExchangeLogListSearchCount(countSql, searchKeyValues);
 

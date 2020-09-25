@@ -68,6 +68,8 @@ public class RestHelper {
         exchangeLog.setUpdateTime(Instant.now());
         exchangeLog.setDateReceived(Instant.now());
         exchangeLog.setSenderReceiver("Test sender/receiver");
+        exchangeLog.setRecipient("Test recipient");
+        exchangeLog.setSource("Test source");
         exchangeLog.setTransferIncoming(false);
         exchangeLog.setStatusHistory(new ArrayList<ExchangeLogStatus>());
 

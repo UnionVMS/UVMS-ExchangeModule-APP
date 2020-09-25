@@ -12,12 +12,16 @@ copy of the GNU General Public License along with the IFDM Suite. If not, see <h
 package eu.europa.ec.fisheries.uvms.exchange.service.dao;
 
 import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeHistoryListQuery;
+import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogStatusTypeType;
+import eu.europa.ec.fisheries.schema.exchange.v1.Sorting;
 import eu.europa.ec.fisheries.schema.exchange.v1.TypeRefType;
+import eu.europa.ec.fisheries.uvms.commons.date.DateUtils;
 import eu.europa.ec.fisheries.uvms.exchange.service.entity.exchangelog.ExchangeLog;
 import eu.europa.ec.fisheries.uvms.exchange.service.entity.exchangelog.ExchangeLogStatus;
 import eu.europa.ec.fisheries.uvms.exchange.service.search.ExchangeSearchField;
 import eu.europa.ec.fisheries.uvms.exchange.service.search.SearchFieldMapper;
 import eu.europa.ec.fisheries.uvms.exchange.service.search.SearchValue;
+import eu.europa.ec.fisheries.uvms.exchange.service.search.SortFieldMapperEnum;
 import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,8 +30,13 @@ import javax.ejb.Stateless;
 import javax.persistence.NoResultException;
 import javax.persistence.Query;
 import javax.persistence.TypedQuery;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
 import java.time.Instant;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Stateless
 public class ExchangeLogDaoBean extends AbstractDao {
@@ -62,6 +71,102 @@ public class ExchangeLogDaoBean extends AbstractDao {
         query.setFirstResult(listSize * (page - 1));
         query.setMaxResults(listSize);
         return query.getResultList();
+    }
+
+    private CriteriaQuery<ExchangeLog> queryBuilderPredicate(List<SearchValue> searchKeyValues, Sorting sorting, boolean logicalAnd){
+        CriteriaBuilder criteriaBuilder = em.getCriteriaBuilder();
+        CriteriaQuery<ExchangeLog> cq = criteriaBuilder.createQuery(ExchangeLog.class);
+        Root<ExchangeLog> log = cq.from(ExchangeLog.class);
+
+        HashMap<ExchangeSearchField, List<SearchValue>> orderedValues = SearchFieldMapper.combineSearchFields(searchKeyValues);
+        List<Predicate> predicates = new ArrayList<>();
+
+        for (ExchangeSearchField searchField : orderedValues.keySet()) {
+            List<SearchValue> searchValues = orderedValues.get(searchField);
+            boolean multipleSearchValuesForField = searchValues.size() > 1;
+            boolean containsWildcard = searchValues.stream().anyMatch(searchValue -> searchValue.getValue().contains("*"));
+
+            if (multipleSearchValuesForField) {
+                if (containsWildcard) {
+                    predicates.add(criteriaBuilder.like(
+                            criteriaBuilder.lower(
+                                    log.get(
+                                            searchField.getFieldName()
+                                    )
+                            ), "%" + leaf.getSearchValue().replace("*", "%").toLowerCase() + "%"
+                            )
+                    );
+                } else if (searchField.getClazz().equals(Boolean.class)) {
+                    List<Boolean> collect = searchValues.stream().map(SearchValue::getValue).map(Boolean::valueOf).collect(Collectors.toList());
+                    predicates.add(criteriaBuilder.in(log.get(searchField.getFieldName())).value(collect));
+                } else if (searchField.getClazz().equals(Instant.class)) {
+                    throw new IllegalArgumentException("Having several from or to dates in a search makes no sense and is not supported");
+                } else if (searchField.getClazz().equals(String.class)) {
+                    List<String> collect = searchValues.stream().map(SearchValue::getValue).collect(Collectors.toList());
+                    predicates.add(criteriaBuilder.in(log.get(searchField.getFieldName())).value(collect));
+                } else if (searchField.getClazz().equals(ExchangeLogStatusTypeType.class)) {
+                    List<ExchangeLogStatusTypeType> collect = searchValues.stream().map(SearchValue::getValue).map(ExchangeLogStatusTypeType::fromValue).collect(Collectors.toList());
+                    predicates.add(criteriaBuilder.in(log.get(searchField.getFieldName())).value(collect));
+                } else if (searchField.getClazz().equals(TypeRefType.class)) {
+                    List<TypeRefType> collect = searchValues.stream().map(SearchValue::getValue).map(TypeRefType::fromValue).collect(Collectors.toList());
+                    predicates.add(criteriaBuilder.in(log.get(searchField.getFieldName())).value(collect));
+                } else if (searchField.getClazz().equals(UUID.class)) {
+                    List<UUID> collect = searchValues.stream().map(SearchValue::getValue).map(UUID::fromString).collect(Collectors.toList());
+                    predicates.add(criteriaBuilder.in(log.get(searchField.getFieldName())).value(collect));
+                }
+
+            } else {
+
+                SearchValue searchValue = searchValues.get(0);
+                if (containsWildcard) {
+                    predicates.add(criteriaBuilder.like(
+                            criteriaBuilder.lower(
+                                    log.get(
+                                            searchField.getFieldName()
+                                    )
+                            ), "%" + searchValue.getValue().replace("*", "%").toLowerCase() + "%"
+                            )
+                    );
+                } else if (searchField.getClazz().equals(Boolean.class)) {
+                    predicates.add(criteriaBuilder.equal(log.get(searchField.getFieldName()), Boolean.valueOf(searchValue.getValue())));
+                } else if (searchField.getClazz().equals(Instant.class)) {
+                    Instant value = DateUtils.stringToDate(searchValue.getValue());
+                    if (searchField.equals(ExchangeSearchField.FROM_DATE)) {
+                        predicates.add(criteriaBuilder.greaterThanOrEqualTo(log.get(searchField.getFieldName()), value));
+                    } else if (searchField.equals(ExchangeSearchField.TO_DATE)) {
+                        predicates.add(criteriaBuilder.lessThanOrEqualTo(log.get(searchField.getFieldName()), value));
+                    }
+                } else if (searchField.getClazz().equals(String.class)) {
+                    predicates.add(criteriaBuilder.equal(log.get(searchField.getFieldName()), searchValue.getValue()));
+                } else if (searchField.getClazz().equals(ExchangeLogStatusTypeType.class)) {
+                    predicates.add(criteriaBuilder.equal(log.get(searchField.getFieldName()), ExchangeLogStatusTypeType.fromValue(searchValue.getValue())));
+                } else if (searchField.getClazz().equals(TypeRefType.class)) {
+                    predicates.add(criteriaBuilder.equal(log.get(searchField.getFieldName()), TypeRefType.fromValue(searchValue.getValue())));
+                } else if (searchField.getClazz().equals(UUID.class)) {
+                    predicates.add(criteriaBuilder.equal(log.get(searchField.getFieldName()), UUID.fromString(searchValue.getValue())));
+                }
+            }
+        }
+
+        if (logicalAnd) {
+            cq.where(criteriaBuilder.and(predicates.stream().toArray(Predicate[]::new)));
+        } else {
+            cq.where(criteriaBuilder.or(predicates.stream().toArray(Predicate[]::new)));
+        }
+
+
+        if (sorting != null && sorting.getSortBy() != null) {
+            SortFieldMapperEnum sortField = SearchFieldMapper.mapSortField(sorting.getSortBy());
+            if (sorting.isReversed()) {
+                cq.orderBy(criteriaBuilder.desc(log.get(sortField.getFieldName())));
+            } else {
+                cq.orderBy(criteriaBuilder.asc(log.get(sortField.getFieldName())));
+            }
+        }else {
+            cq.orderBy((criteriaBuilder.desc(log.get("updateTime"))));
+        }
+
+        return cq;
     }
 
     public Long getExchangeLogListSearchCount(String countSql, List<SearchValue> searchKeyValues) {

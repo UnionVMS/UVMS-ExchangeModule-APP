@@ -53,11 +53,11 @@ public class SearchFieldMapper {
     private static void getSortingString(Sorting sorting, StringBuilder selectBuffer) {
         if (sorting != null && sorting.getSortBy() != null) {
             SortField sortField = sorting.getSortBy();
-            SortFieldMapper sortFieldMapper = null;
+            SortFieldMapperEnum sortFieldMapperEnum = null;
             if (sortField != null) {
-                sortFieldMapper = mapSortField(sortField);
+                sortFieldMapperEnum = mapSortField(sortField);
             }
-            String fieldName = sortFieldMapper.getFieldName();
+            String fieldName = sortFieldMapperEnum.getFieldName();
             String sortingDirection = "ASC";
             if (sorting.isReversed()) {
                 sortingDirection = "DESC";
@@ -203,6 +203,8 @@ public class SearchFieldMapper {
                 return valueType.cast(TypeRefType.valueOf(entry.getValue()));
             } else if (valueType.isAssignableFrom(ExchangeLogStatusTypeType.class)) {
                 return valueType.cast(ExchangeLogStatusTypeType.valueOf(entry.getValue()));
+            } else if (valueType.isAssignableFrom(UUID.class)){
+                return valueType.cast(UUID.fromString(entry.getValue()));
             }
 
             return valueType.cast(entry.getValue());
@@ -325,24 +327,24 @@ public class SearchFieldMapper {
      * @return
      * @throws
      */
-    public static SortFieldMapper mapSortField(SortField key) {
+    public static SortFieldMapperEnum mapSortField(SortField key) {
         switch (key) {
             case DATE_RECEIVED:
-                return SortFieldMapper.DATE_RECEIVED;
+                return SortFieldMapperEnum.DATE_RECEIVED;
             case SOURCE:
-                return SortFieldMapper.SOURCE;
+                return SortFieldMapperEnum.SOURCE;
             case TYPE:
-                return SortFieldMapper.TYPE;
+                return SortFieldMapperEnum.TYPE;
             case SENDER_RECEIVER:
-                return SortFieldMapper.SENDER_RECEIVER;
+                return SortFieldMapperEnum.SENDER_RECEIVER;
             case RULE:
-                return SortFieldMapper.RULE;
+                return SortFieldMapperEnum.RULE;
             case RECEPIENT:
-                return SortFieldMapper.RECEPIENT;
+                return SortFieldMapperEnum.RECEPIENT;
             case STATUS:
-                return SortFieldMapper.STATUS;
+                return SortFieldMapperEnum.STATUS;
             case DATE_FORWARDED:
-                return SortFieldMapper.DATE_FORWARDED;
+                return SortFieldMapperEnum.DATE_FORWARDED;
             default:
                 throw new IllegalArgumentException("No field found: " + key.name());
         }
