@@ -19,32 +19,26 @@ import java.util.UUID;
 
 public enum ExchangeSearchField {
 
-	TRANSFER_INCOMING("transferIncoming", "transferIncoming", Boolean.class),
-    FROM_DATE("dateReceived", "fromDate", Instant.class),
-    TO_DATE("dateReceived", "toDate", Instant.class),
-    SENDER_RECEIVER("senderReceiver", "senderReceiver", String.class),
-    RECIPIENT("recipient", "recipient", String.class),
-    STATUS("status", "status", ExchangeLogStatusTypeType.class),
-    TYPE("typeRefType","typeRefType", TypeRefType.class),
-    TYPE_GUID("typeRefGuid","typeRefGuid", UUID.class),
-    SOURCE("source","source", String.class);
+	TRANSFER_INCOMING("transferIncoming", Boolean.class),
+    FROM_DATE("dateReceived", Instant.class),
+    TO_DATE("dateReceived", Instant.class),
+    SENDER_RECEIVER("senderReceiver", String.class),
+    RECIPIENT("recipient", String.class),
+    STATUS("status", ExchangeLogStatusTypeType.class),
+    TYPE("typeRefType", TypeRefType.class),
+    TYPE_GUID("typeRefGuid", UUID.class),
+    SOURCE("source", String.class);
 
     private final String fieldName;
-    private final String sqlReplacementToken;
     private final Class<?> clazz;
 
-    ExchangeSearchField(String fieldName, String sqlReplacementToken, Class<?> clazz) {
+    ExchangeSearchField(String fieldName, Class<?> clazz) {
         this.fieldName = fieldName;
-        this.sqlReplacementToken = sqlReplacementToken;
         this.clazz = clazz;
     }
 
     public String getFieldName() {
         return fieldName;
-    }
-
-    public String getSQLReplacementToken() {
-        return sqlReplacementToken;
     }
 
     public Class<?> getClazz() {
