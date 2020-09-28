@@ -15,40 +15,30 @@ import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogStatusTypeType;
 import eu.europa.ec.fisheries.schema.exchange.v1.TypeRefType;
 
 import java.time.Instant;
+import java.util.UUID;
 
 public enum ExchangeSearchField {
 
-	TRANSFER_INCOMING("transferIncoming", "transferIncoming", SearchTable.LOG, Boolean.class),
-    FROM_DATE("dateReceived", "fromDate", SearchTable.LOG, Instant.class),
-    TO_DATE("dateReceived", "toDate", SearchTable.LOG, Instant.class),
-    SENDER_RECEIVER("senderReceiver", "senderReceiver", SearchTable.LOG, String.class),
-    RECIPIENT("recipient", "recipient", SearchTable.LOG, String.class),
-    STATUS("status", "status", SearchTable.LOG, ExchangeLogStatusTypeType.class),
-    TYPE("typeRefType","typeRefType", SearchTable.LOG, TypeRefType.class),
-    SOURCE("source","source", SearchTable.LOG, String.class);
+	TRANSFER_INCOMING("transferIncoming", Boolean.class),
+    FROM_DATE("dateReceived", Instant.class),
+    TO_DATE("dateReceived", Instant.class),
+    SENDER_RECEIVER("senderReceiver", String.class),
+    RECIPIENT("recipient", String.class),
+    STATUS("status", ExchangeLogStatusTypeType.class),
+    TYPE("typeRefType", TypeRefType.class),
+    TYPE_GUID("typeRefGuid", UUID.class),
+    SOURCE("source", String.class);
 
     private final String fieldName;
-    private final String sqlReplacementToken;
-    private final SearchTable searchTables;
     private final Class<?> clazz;
 
-    ExchangeSearchField(String fieldName, String sqlReplacementToken, SearchTable searchTables, Class<?> clazz) {
+    ExchangeSearchField(String fieldName, Class<?> clazz) {
         this.fieldName = fieldName;
-        this.sqlReplacementToken = sqlReplacementToken;
-        this.searchTables = searchTables;
         this.clazz = clazz;
     }
 
     public String getFieldName() {
         return fieldName;
-    }
-
-    public SearchTable getSearchTables() {
-        return searchTables;
-    }
-
-    public String getSQLReplacementToken() {
-        return sqlReplacementToken;
     }
 
     public Class<?> getClazz() {

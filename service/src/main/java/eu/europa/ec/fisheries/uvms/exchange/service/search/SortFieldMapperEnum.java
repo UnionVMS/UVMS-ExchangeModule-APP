@@ -19,24 +19,22 @@ import java.time.Instant;
 /**
  * Created by sanera on 30/11/2017.
  */
-public enum SortFieldMapper {
-    DATE_RECEIVED("dateReceived", SearchTable.LOG, Instant.class),
-    SOURCE("source",  SearchTable.LOG, String.class),
-    TYPE("typeRefType", SearchTable.LOG, TypeRefType.class),
-    SENDER_RECEIVER("senderReceiver",  SearchTable.LOG, String.class),
-    RULE("fwdRule",  SearchTable.LOG, String.class),
-    RECEPIENT("recipient",  SearchTable.LOG, String.class),
-    STATUS("status",SearchTable.LOG, ExchangeLogStatusTypeType.class),
-    DATE_FORWARDED("fwdDate",SearchTable.LOG, Instant.class);
+public enum SortFieldMapperEnum {
+    DATE_RECEIVED("dateReceived", Instant.class),
+    SOURCE("source", String.class),
+    TYPE("typeRefType", TypeRefType.class),
+    SENDER_RECEIVER("senderReceiver", String.class),
+    RULE("fwdRule", String.class),
+    RECEPIENT("recipient", String.class),
+    STATUS("status", ExchangeLogStatusTypeType.class),
+    DATE_FORWARDED("fwdDate", Instant.class);
 
     private final String fieldName;
-    private final SearchTable searchTables;
     private Class<?> clazz;
 
-    SortFieldMapper(String fieldName, SearchTable searchTables, Class<?> clazz) {
+    SortFieldMapperEnum(String fieldName, Class<?> clazz) {
         this.fieldName = fieldName;
 
-        this.searchTables = searchTables;
         this.clazz = clazz;
     }
 
@@ -44,9 +42,6 @@ public enum SortFieldMapper {
         return fieldName;
     }
 
-    public SearchTable getSearchTables() {
-        return searchTables;
-    }
 
 
     public Class<?> getClazz() {

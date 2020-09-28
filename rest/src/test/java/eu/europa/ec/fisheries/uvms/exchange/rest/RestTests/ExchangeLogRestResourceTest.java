@@ -7,10 +7,8 @@ import eu.europa.ec.fisheries.uvms.exchange.rest.RestHelper;
 import eu.europa.ec.fisheries.uvms.exchange.rest.TestExchangeLogWithValidationResults;
 import eu.europa.ec.fisheries.uvms.exchange.rest.dto.PollQuery;
 import eu.europa.ec.fisheries.uvms.exchange.rest.dto.TestExchangeLogStatusType;
-import eu.europa.ec.fisheries.uvms.exchange.rest.dto.exchange.ListQueryResponse;
 import eu.europa.ec.fisheries.uvms.exchange.service.dao.ExchangeLogDaoBean;
 import eu.europa.ec.fisheries.uvms.exchange.service.entity.exchangelog.ExchangeLog;
-import eu.europa.ec.fisheries.uvms.exchange.service.entity.exchangelog.ExchangeLogStatus;
 import org.jboss.arquillian.container.test.api.OperateOnDeployment;
 import org.jboss.arquillian.junit.Arquillian;
 import org.junit.Test;
@@ -22,7 +20,6 @@ import javax.ws.rs.core.GenericType;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import java.time.Instant;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -40,41 +37,6 @@ public class ExchangeLogRestResourceTest extends BuildExchangeRestTestDeployment
         assertTrue(true);
     }
 
-    @Test
-    @OperateOnDeployment("exchangeservice")
-    public void getLogListByCriteriaTest() {
-        ExchangeLog exchangeLog = RestHelper.createBasicLog();
-        exchangeLog.setTypeRefType(TypeRefType.UNKNOWN);
-        exchangeLog = exchangeLogDao.createLog(exchangeLog);
-
-        ExchangeListQuery query = new ExchangeListQuery();
-        ExchangeListPagination exchangeListPagination = new ExchangeListPagination();
-        exchangeListPagination.setListSize(10);
-        exchangeListPagination.setPage(1);
-        query.setPagination(exchangeListPagination);
-        ExchangeListCriteria exchangeListCriteria = new ExchangeListCriteria();
-        exchangeListCriteria.setIsDynamic(true);
-        ExchangeListCriteriaPair exchangeListCriteriaPair = new ExchangeListCriteriaPair();
-        exchangeListCriteriaPair.setKey(SearchField.TYPE);
-        exchangeListCriteriaPair.setValue(TypeRefType.UNKNOWN.value());
-        exchangeListCriteria.getCriterias().add(exchangeListCriteriaPair);
-        query.setExchangeSearchCriteria(exchangeListCriteria);
-
-
-        String stringResponse = getWebTarget()
-                .path("exchange")
-                .path("list")
-                .request(MediaType.APPLICATION_JSON)
-                .header(HttpHeaders.AUTHORIZATION, getToken())
-                .post(Entity.json(query), String.class);
-
-        assertNotNull(stringResponse);
-        ListQueryResponse response = RestHelper.readResponseDto(stringResponse, ListQueryResponse.class);
-        assertFalse(response.getLogList().isEmpty());
-        assertEquals(exchangeLog.getId().toString(), response.getLogList().get(0).getId());
-        assertEquals(DateUtils.dateToEpochMilliseconds(exchangeLog.getDateReceived()), response.getLogList().get(0).getDateRecieved());
-
-    }
 
     @Test
     @OperateOnDeployment("exchangeservice")
@@ -89,9 +51,9 @@ public class ExchangeLogRestResourceTest extends BuildExchangeRestTestDeployment
         exchangeLog.setTypeRefType(TypeRefType.POLL);
         exchangeLog.setType(LogType.SEND_POLL);
         exchangeLog.setStatus(ExchangeLogStatusTypeType.PROBABLY_TRANSMITTED);
-        exchangeLog.setTypeRefMessage("get poll status test");
+        exchangeLog.setTypeRefMessage(UUID.randomUUID().toString());
         RestHelper.addLogStatusToLog(exchangeLog,ExchangeLogStatusTypeType.PROBABLY_TRANSMITTED);
-        exchangeLog = exchangeLogDao.createLog(exchangeLog);
+        ExchangeLog createdLog = exchangeLogDao.createLog(exchangeLog);
 
         List<TestExchangeLogStatusType> responseDto = getWebTarget()
                 .path("exchange")
@@ -102,9 +64,135 @@ public class ExchangeLogRestResourceTest extends BuildExchangeRestTestDeployment
 
         assertNotNull(responseDto);
         assertFalse(responseDto.isEmpty());
-        TestExchangeLogStatusType output = responseDto.get(0);
-        assertEquals(exchangeLog.getId().toString(), output.getGuid());
-        assertEquals(exchangeLog.getTypeRefMessage(), output.getRefMessage());
+        assertEquals(1, responseDto.size());
+        assertTrue(responseDto.stream().anyMatch(logStatusType -> logStatusType.getGuid().equals(createdLog.getId().toString())));
+        assertTrue(responseDto.stream().anyMatch(logStatusType -> createdLog.getTypeRefMessage().equals(logStatusType.getRefMessage())));
+    }
+
+    @Test
+    @OperateOnDeployment("exchangeservice")
+    public void getPollStatusTwoLogsOnlyGetOne() {
+        Instant now = Instant.now();
+        PollQuery query = new PollQuery();
+        query.setStatus(ExchangeLogStatusTypeType.PROBABLY_TRANSMITTED);
+        query.setStatusFromDate(DateUtils.dateToEpochMilliseconds(now));
+        query.setStatusToDate(DateUtils.dateToEpochMilliseconds(now.plusSeconds(5)));
+
+        ExchangeLog exchangeLog = RestHelper.createBasicLog();
+        exchangeLog.setTypeRefType(TypeRefType.POLL);
+        exchangeLog.setType(LogType.SEND_POLL);
+        exchangeLog.setStatus(ExchangeLogStatusTypeType.PROBABLY_TRANSMITTED);
+        exchangeLog.setTypeRefMessage(UUID.randomUUID().toString());
+        RestHelper.addLogStatusToLog(exchangeLog,ExchangeLogStatusTypeType.PROBABLY_TRANSMITTED);
+        ExchangeLog createdLog1 = exchangeLogDao.createLog(exchangeLog);
+
+        exchangeLog = RestHelper.createBasicLog();
+        exchangeLog.setTypeRefType(TypeRefType.POLL);
+        exchangeLog.setType(LogType.SEND_POLL);
+        exchangeLog.setStatus(ExchangeLogStatusTypeType.SUCCESSFUL_WITH_WARNINGS);
+        exchangeLog.setTypeRefMessage(UUID.randomUUID().toString());
+        RestHelper.addLogStatusToLog(exchangeLog,ExchangeLogStatusTypeType.SUCCESSFUL_WITH_WARNINGS);
+        ExchangeLog createdLog2 = exchangeLogDao.createLog(exchangeLog);
+
+        List<TestExchangeLogStatusType> responseDto = getWebTarget()
+                .path("exchange")
+                .path("poll")
+                .request(MediaType.APPLICATION_JSON)
+                .header(HttpHeaders.AUTHORIZATION, getToken())
+                .post(Entity.json(query), new GenericType<List<TestExchangeLogStatusType>>() {});
+
+        assertNotNull(responseDto);
+        assertFalse(responseDto.isEmpty());
+        assertEquals(1, responseDto.size());
+        assertTrue(responseDto.stream().anyMatch(logStatusType -> logStatusType.getGuid().equals(createdLog1.getId().toString())));
+        assertTrue(responseDto.stream().anyMatch(logStatusType -> createdLog1.getTypeRefMessage().equals(logStatusType.getRefMessage())));
+
+        assertFalse(responseDto.stream().anyMatch(logStatusType -> logStatusType.getGuid().equals(createdLog2.getId().toString())));
+        assertFalse(responseDto.stream().anyMatch(logStatusType -> createdLog2.getTypeRefMessage().equals(logStatusType.getRefMessage())));
+    }
+
+    @Test
+    @OperateOnDeployment("exchangeservice")
+    public void getPollStatusTwoLogsOnlyOneIsPoll() {
+        Instant now = Instant.now();
+        PollQuery query = new PollQuery();
+        query.setStatus(ExchangeLogStatusTypeType.PROBABLY_TRANSMITTED);
+        query.setStatusFromDate(DateUtils.dateToEpochMilliseconds(now));
+        query.setStatusToDate(DateUtils.dateToEpochMilliseconds(now.plusSeconds(5)));
+
+        ExchangeLog exchangeLog = RestHelper.createBasicLog();
+        exchangeLog.setTypeRefType(TypeRefType.POLL);
+        exchangeLog.setType(LogType.SEND_POLL);
+        exchangeLog.setStatus(ExchangeLogStatusTypeType.PROBABLY_TRANSMITTED);
+        exchangeLog.setTypeRefMessage(UUID.randomUUID().toString());
+        RestHelper.addLogStatusToLog(exchangeLog,ExchangeLogStatusTypeType.PROBABLY_TRANSMITTED);
+        ExchangeLog createdLog1 = exchangeLogDao.createLog(exchangeLog);
+
+        exchangeLog = RestHelper.createBasicLog();
+        exchangeLog.setTypeRefType(TypeRefType.SALES_RESPONSE);
+        exchangeLog.setType(LogType.RECEIVE_SALES_RESPONSE);
+        exchangeLog.setStatus(ExchangeLogStatusTypeType.PROBABLY_TRANSMITTED);
+        exchangeLog.setTypeRefMessage(UUID.randomUUID().toString());
+        RestHelper.addLogStatusToLog(exchangeLog,ExchangeLogStatusTypeType.PROBABLY_TRANSMITTED);
+        ExchangeLog createdLog2 = exchangeLogDao.createLog(exchangeLog);
+
+        List<TestExchangeLogStatusType> responseDto = getWebTarget()
+                .path("exchange")
+                .path("poll")
+                .request(MediaType.APPLICATION_JSON)
+                .header(HttpHeaders.AUTHORIZATION, getToken())
+                .post(Entity.json(query), new GenericType<List<TestExchangeLogStatusType>>() {});
+
+        assertNotNull(responseDto);
+        assertFalse(responseDto.isEmpty());
+        assertEquals(1, responseDto.size());
+        assertTrue(responseDto.stream().anyMatch(logStatusType -> logStatusType.getGuid().equals(createdLog1.getId().toString())));
+        assertTrue(responseDto.stream().anyMatch(logStatusType -> createdLog1.getTypeRefMessage().equals(logStatusType.getRefMessage())));
+
+        assertFalse(responseDto.stream().anyMatch(logStatusType -> logStatusType.getGuid().equals(createdLog2.getId().toString())));
+        assertFalse(responseDto.stream().anyMatch(logStatusType -> createdLog2.getTypeRefMessage().equals(logStatusType.getRefMessage())));
+    }
+
+    @Test
+    @OperateOnDeployment("exchangeservice")
+    public void getPollStatusTwoLogsOnlyGetOneOneLogIsToEarly() {
+        ExchangeLog exchangeLog = RestHelper.createBasicLog();
+        exchangeLog.setTypeRefType(TypeRefType.POLL);
+        exchangeLog.setType(LogType.SEND_POLL);
+        exchangeLog.setStatus(ExchangeLogStatusTypeType.PROBABLY_TRANSMITTED);
+        exchangeLog.setTypeRefMessage(UUID.randomUUID().toString());
+        RestHelper.addLogStatusToLog(exchangeLog,ExchangeLogStatusTypeType.PROBABLY_TRANSMITTED);
+        ExchangeLog createdLog1 = exchangeLogDao.createLog(exchangeLog);
+
+        Instant now = Instant.now();
+        PollQuery query = new PollQuery();
+        query.setStatus(ExchangeLogStatusTypeType.PROBABLY_TRANSMITTED);
+        query.setStatusFromDate(DateUtils.dateToEpochMilliseconds(now));
+        query.setStatusToDate(DateUtils.dateToEpochMilliseconds(now.plusSeconds(5)));
+
+        exchangeLog = RestHelper.createBasicLog();
+        exchangeLog.setTypeRefType(TypeRefType.POLL);
+        exchangeLog.setType(LogType.SEND_POLL);
+        exchangeLog.setStatus(ExchangeLogStatusTypeType.PROBABLY_TRANSMITTED);
+        exchangeLog.setTypeRefMessage(UUID.randomUUID().toString());
+        RestHelper.addLogStatusToLog(exchangeLog,ExchangeLogStatusTypeType.PROBABLY_TRANSMITTED);
+        ExchangeLog createdLog2 = exchangeLogDao.createLog(exchangeLog);
+
+        List<TestExchangeLogStatusType> responseDto = getWebTarget()
+                .path("exchange")
+                .path("poll")
+                .request(MediaType.APPLICATION_JSON)
+                .header(HttpHeaders.AUTHORIZATION, getToken())
+                .post(Entity.json(query), new GenericType<List<TestExchangeLogStatusType>>() {});
+
+        assertNotNull(responseDto);
+        assertFalse(responseDto.isEmpty());
+        assertEquals(1, responseDto.size());
+        assertFalse(responseDto.stream().anyMatch(logStatusType -> logStatusType.getGuid().equals(createdLog1.getId().toString())));
+        assertFalse(responseDto.stream().anyMatch(logStatusType -> createdLog1.getTypeRefMessage().equals(logStatusType.getRefMessage())));
+
+        assertTrue(responseDto.stream().anyMatch(logStatusType -> logStatusType.getGuid().equals(createdLog2.getId().toString())));
+        assertTrue(responseDto.stream().anyMatch(logStatusType -> createdLog2.getTypeRefMessage().equals(logStatusType.getRefMessage())));
     }
 
     @Test

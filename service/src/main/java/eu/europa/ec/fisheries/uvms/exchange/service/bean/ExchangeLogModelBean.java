@@ -94,13 +94,10 @@ public class ExchangeLogModelBean {
 
         List<SearchValue> searchKeyValues = SearchFieldMapper.mapSearchField(query.getExchangeSearchCriteria().getCriterias());
 
-        String sql = SearchFieldMapper.createSelectSearchSql(searchKeyValues, true, query.getSorting());
-        LOG.debug("sql:" + sql);
-        String countSql = SearchFieldMapper.createCountSearchSql(searchKeyValues, true);
-        LOG.debug("countSql:" + countSql);
-        Long numberMatches = logDao.getExchangeLogListSearchCount(countSql, searchKeyValues);
+        Long numberMatches = logDao.getExchangeLogListSearchCount(searchKeyValues, query.getExchangeSearchCriteria().isIsDynamic());
 
-        List<ExchangeLog> exchangeLogEntityList = logDao.getExchangeLogListPaginated(page, listSize, sql, searchKeyValues);
+        List<ExchangeLog> exchangeLogEntityList = logDao.getExchangeLogListPaginated(page, listSize, searchKeyValues, query.getSorting(), query.getExchangeSearchCriteria().isIsDynamic());
+
         for (ExchangeLog entity : exchangeLogEntityList) {
             exchLogTypes.add(LogMapper.toModel(entity));
         }
