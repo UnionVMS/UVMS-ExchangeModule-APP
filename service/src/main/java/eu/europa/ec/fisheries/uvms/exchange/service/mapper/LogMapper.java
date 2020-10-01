@@ -229,6 +229,13 @@ public class LogMapper {
             model.setTypeRef(logRefType);
         }
 
+        if (exchangeLog.getRelatedRefType() != null) {
+            LogRefType relatedRefType = new LogRefType();
+            relatedRefType.setRefGuid(exchangeLog.getRelatedRefGuid().toString());
+            relatedRefType.setType(exchangeLog.getRelatedRefType());
+            model.setRelatedLogData(relatedRefType);
+        }
+
         if (exchangeLog.getStatusHistory() != null) {
             List<ExchangeLogStatusHistoryType> historyModelList = new ArrayList<>();
             for (ExchangeLogStatus history : exchangeLog.getStatusHistory()) {

@@ -58,6 +58,13 @@ public class ExchangeLog {
 	@Column(name = "log_type_ref_message")
 	private String typeRefMessage;
 
+	@Column(name="log_related_ref_guid")
+	private UUID relatedRefGuid;
+
+	@Enumerated(EnumType.STRING)
+	@Column(name="log_related_ref_type")
+	private TypeRefType relatedRefType;
+
 	@Column(name = "log_to")
 	private String to;
 
@@ -228,7 +235,23 @@ public class ExchangeLog {
 		this.typeRefMessage = typeRefMessage;
 	}
 
-	public String getRecipient() {
+    public UUID getRelatedRefGuid() {
+        return relatedRefGuid;
+    }
+
+    public void setRelatedRefGuid(UUID relatedRefGuid) {
+        this.relatedRefGuid = relatedRefGuid;
+    }
+
+    public TypeRefType getRelatedRefType() {
+        return relatedRefType;
+    }
+
+    public void setRelatedRefType(TypeRefType relatedRefType) {
+        this.relatedRefType = relatedRefType;
+    }
+
+    public String getRecipient() {
 		return recipient;
 	}
 

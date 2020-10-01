@@ -565,6 +565,57 @@ public class ExchangeMessageConsumerBeanTest extends BuildExchangeServiceTestDep
         serviceRegistryDao.deleteEntity(service.getId());
     }
 
+    @Test
+    @OperateOnDeployment("exchangeservice")
+    public void processMovementPollRequest() throws Exception {
+        UUID pollRefId = UUID.randomUUID();
+
+        // Create poll log
+        ExchangeLog exchangeLog = createBasicLog();
+        exchangeLog.setType(LogType.SEND_POLL);
+        exchangeLog.setTypeRefGuid(pollRefId);
+        exchangeLog.setTypeRefType(TypeRefType.POLL);
+        exchangeLog = exchangeLogDao.createLog(exchangeLog);
+
+        // Create incoming position with reference to poll
+        String serviceName = "Iridium Test Service";
+        String serviceClassName = "eu.europa.ec.fisheries.uvms.plugins.Iridium";
+
+        Service service = createAndPersistBasicService(serviceName, serviceClassName, PluginType.SATELLITE_RECEIVER);
+
+        MovementType movementType = createMovementType();
+        SetReportMovementType setReportMovementType = new SetReportMovementType();
+        setReportMovementType.setMovement(movementType);
+        setReportMovementType.setTimestamp(Date.from(Instant.now()));
+        setReportMovementType.setPluginType(PluginType.SATELLITE_RECEIVER);
+        setReportMovementType.setPluginName(serviceClassName);
+        setReportMovementType.setPollRef(pollRefId.toString());
+        String setupRequest = ExchangeModuleRequestMapper.createSetMovementReportRequest(setReportMovementType,
+                "Test User", null, Instant.now(), PluginType.OTHER, "IRIDIUM", "OnValue?");
+
+        jmsHelper.sendExchangeMessage(setupRequest, null, "SET_MOVEMENT_REPORT");
+        TextMessage message = (TextMessage) jmsHelper.listenOnQueue(MessageConstants.COMPONENT_MESSAGE_IN_QUEUE_NAME);
+        IncomingMovement output = jsonb.fromJson(message.getText(), IncomingMovement.class);
+
+        // Send processed movement request
+        UUID movementId = UUID.randomUUID();
+        MovementRefType movementRefType = new MovementRefType();
+        movementRefType.setAckResponseMessageID(output.getAckResponseMessageId());
+        movementRefType.setType(MovementRefTypeType.MOVEMENT);
+        movementRefType.setMovementRefGuid(movementId.toString());
+        String request = ExchangeModuleRequestMapper.mapToProcessedMovementResponse("Test username", movementRefType);
+
+        jmsHelper.sendExchangeMessage(request, null, "PROCESSED_MOVEMENT");
+        Thread.sleep(1000); //to let it work
+
+        // Poll log should be referencing the position
+        ExchangeLog log = exchangeLogDao.getExchangeLogByGuid(exchangeLog.getId());
+        assertThat(log.getRelatedRefType(), CoreMatchers.is(TypeRefType.MOVEMENT));
+        assertThat(log.getRelatedRefGuid(), CoreMatchers.is(movementId));
+
+        serviceRegistryDao.deleteEntity(service.getId());
+    }
+
     /* -- SALES -- */
 
     @Test

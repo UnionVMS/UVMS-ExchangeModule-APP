@@ -33,6 +33,7 @@ import eu.europa.ec.fisheries.schema.exchange.plugin.v1.ExchangePluginMethod;
 import eu.europa.ec.fisheries.schema.exchange.plugin.v1.PluginBaseRequest;
 import eu.europa.ec.fisheries.schema.exchange.plugin.v1.SendSalesReportRequest;
 import eu.europa.ec.fisheries.schema.exchange.plugin.v1.SendSalesResponseRequest;
+import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogStatusType;
 import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogStatusTypeType;
 import eu.europa.ec.fisheries.schema.exchange.v1.LogType;
 import eu.europa.ec.fisheries.schema.exchange.v1.TypeRefType;
@@ -446,6 +447,11 @@ public class ExchangeEventOutgoingServiceBean {
         ExchangeLog updatedLog = exchangeLogService.updateStatus(UUID.fromString(movementRefType.getAckResponseMessageID()), statusType);
         exchangeLogService.updateTypeRef(updatedLog, movementRefType);
 
+        if (TypeRefType.POLL.equals(updatedLog.getRelatedRefType()) && ExchangeLogStatusTypeType.SUCCESSFUL.equals(statusType)) {
+            ExchangeLog pollLog = exchangeLogService.getLogByRefGuidAndType(updatedLog.getRelatedRefGuid(), updatedLog.getRelatedRefType());
+            pollLog.setRelatedRefGuid(UUID.fromString(movementRefType.getMovementRefGuid()));
+            pollLog.setRelatedRefType(TypeRefType.MOVEMENT);
+        }
     }
 
     public void handleProcessedMovementBatch(TextMessage message) {
