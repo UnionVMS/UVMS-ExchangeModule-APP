@@ -688,10 +688,7 @@ public class ExchangeEventIncomingServiceBean {
     private void handleSetPollStatusAcknowledge(ExchangePluginMethod method, String serviceClassName, AcknowledgeType ack) {
         LOG.debug(method + " was acknowledged in " + serviceClassName);
         ExchangeLogStatusTypeType exchangeLogStatus = ack.getPollStatus().getStatus();
-        if (exchangeLogStatus.equals(ExchangeLogStatusTypeType.SUCCESSFUL) ||
-                exchangeLogStatus.equals(ExchangeLogStatusTypeType.FAILED)) {
-            removeUnsentMessage(ack);
-        }
+        removeUnsentMessage(ack);
         PollStatus updatedLog = exchangeLogService.setPollStatus(UUID.fromString(ack.getPollStatus().getPollId()), exchangeLogStatus, serviceClassName, ack.getMessage());
         // Long polling
         pollEvent.fire(new NotificationMessage("guid", updatedLog.getPollGuid()));
