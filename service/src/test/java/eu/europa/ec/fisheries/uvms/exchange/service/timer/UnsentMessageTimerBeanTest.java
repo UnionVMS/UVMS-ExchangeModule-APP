@@ -6,6 +6,7 @@ import javax.inject.Inject;
 import org.hamcrest.CoreMatchers;
 import org.jboss.arquillian.container.test.api.OperateOnDeployment;
 import org.jboss.arquillian.junit.Arquillian;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import eu.europa.ec.fisheries.uvms.config.exception.ConfigServiceException;
@@ -27,6 +28,11 @@ public class UnsentMessageTimerBeanTest extends TransactionalTests {
     @Inject
     ParameterService parameterService;
 
+    @Before
+    public void clearAll() {
+        unsentMessageDao.getAll().stream().forEach(unsentMessageDao::remove);
+    }
+
     @Test
     @OperateOnDeployment("exchangeservice")
     public void unsentMessageTimerTest() throws ConfigServiceException {
@@ -34,6 +40,7 @@ public class UnsentMessageTimerBeanTest extends TransactionalTests {
 
         UnsentMessage unsentMessage = new UnsentMessage();
         unsentMessage.setDateReceived(Instant.now());
+        unsentMessage.setUpdatedBy("test");
         unsentMessage.setMessage("Message");
         unsentMessageDao.create(unsentMessage);
         int before = unsentMessageDao.getAll().size();
@@ -51,6 +58,7 @@ public class UnsentMessageTimerBeanTest extends TransactionalTests {
 
         UnsentMessage unsentMessage = new UnsentMessage();
         unsentMessage.setDateReceived(Instant.now());
+        unsentMessage.setUpdatedBy("test");
         unsentMessage.setMessage("Message");
         unsentMessageDao.create(unsentMessage);
         int before = unsentMessageDao.getAll().size();
