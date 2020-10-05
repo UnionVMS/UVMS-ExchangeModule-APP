@@ -108,6 +108,14 @@ public class ExchangeLogServiceBean {
         return log(log);
     }
 
+    public ExchangeLog getLogByRefGuidAndType(UUID refGuid, TypeRefType type) {
+        List<ExchangeLog> logs = exchangeLogDao.getExchangeLogByTypesRefAndGuid(refGuid, Collections.singletonList(type));
+        if (!logs.isEmpty()) {
+            return logs.get(0);
+        }
+        return null;
+    }
+
     public void updateLogMessage(String logId, String message) {
         ExchangeLog log = exchangeLogDao.getExchangeLogByGuid(UUID.fromString(logId));
         log.setTypeRefMessage(message);

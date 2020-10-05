@@ -297,6 +297,10 @@ public class ExchangeEventIncomingServiceBean {
                     LOG.debug("Logging received movement.");
                     ExchangeLog createdLog = exchangeLogService.log(request, LogType.RECEIVE_MOVEMENT, ExchangeLogStatusTypeType.ISSUED, TypeRefType.MOVEMENT,
                             message.getText(), true);
+                    if (setRepMovType.getPollRef() != null) {
+                        createdLog.setRelatedRefGuid(UUID.fromString(setRepMovType.getPollRef()));
+                        createdLog.setRelatedRefType(TypeRefType.POLL);
+                    }
                     incomingMovement.setAckResponseMessageId(createdLog.getId().toString());
                 }
 

@@ -181,6 +181,7 @@
         <xsd:sequence>
             <xsd:element name="guid" type="xsd:string"/>
             <xsd:element name="typeRef" type="exchange:LogRefType"/>
+            <xsd:element name="relatedLogData" type="exchange:LogRefType"/>
             <xsd:element name="history" type="exchange:ExchangeLogStatusHistoryType" minOccurs="1" maxOccurs="unbounded"/>
             <xsd:element name="identifier" type="xsd:string"/>
             <xsd:element name="businessModuleExceptionMessage" type="xsd:string"/>
