@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+  Developed by the European Commission - Directorate General for Maritime Affairs and Fisheries @ European Union, 2015-2016.
+
+  This file is part of the Integrated Fisheries Data Management (IFDM) Suite. The IFDM Suite is free software: you can redistribute it
+  and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of
+  the License, or any later version. The IFDM Suite is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+  without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
+  details. You should have received a copy of the GNU General Public License along with the IFDM Suite. If not, see <http://www.gnu.org/licenses/>.
+  -->
+
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd"
+         logicalFilePath="changelog/v5.3.8/db-changelog_add_unsent_message_resend_parameter.xml">
+
+    <changeSet author="peerik" id="add_unsent_message_resend_parameter">
+        <insert tableName="parameter">
+            <column name='param_description' value='Minutes until unsent messages are retried. Disabled = 0'/>
+            <column name='param_id' value='UNSENT_MESSAGE_THRESHOLD'/>
+            <column name='param_value' value='0'/>
+        </insert>
+    </changeSet>
+
+</databaseChangeLog>

@@ -9,14 +9,14 @@ the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the impl
 FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details. You should have received a
 copy of the GNU General Public License along with the IFDM Suite. If not, see <http://www.gnu.org/licenses/>.
  */
-package eu.europa.ec.fisheries.uvms.exchange.service.bean;
+package eu.europa.ec.fisheries.uvms.exchange.service.timer;
 
 import eu.europa.ec.fisheries.schema.exchange.v1.*;
 import eu.europa.ec.fisheries.uvms.commons.date.DateUtils;
 import eu.europa.ec.fisheries.uvms.exchange.model.dto.ListResponseDto;
+import eu.europa.ec.fisheries.uvms.exchange.service.bean.ExchangeLogModelBean;
 import eu.europa.ec.fisheries.uvms.exchange.service.dao.ExchangeLogDaoBean;
 import eu.europa.ec.fisheries.uvms.exchange.service.entity.exchangelog.ExchangeLog;
-import eu.europa.ec.fisheries.uvms.exchange.service.entity.exchangelog.ExchangeLogStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,15 +25,13 @@ import javax.ejb.*;
 import javax.inject.Inject;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
-import java.util.Date;
-import java.util.List;
 import java.util.UUID;
 
 @Startup
 @Singleton
-public class ExchangeTimerBean {
+public class ExchangePollResponseTimerBean {
 
-    private static final Logger LOG = LoggerFactory.getLogger(ExchangeTimerBean.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ExchangePollResponseTimerBean.class);
 
     private static final int POLL_TIMEOUT_TIME_IN_MINUTES = 90;
 
