@@ -1,4 +1,4 @@
-package eu.europa.ec.fisheries.uvms.exchange.service.bean;
+package eu.europa.ec.fisheries.uvms.exchange.service.timer;
 
 import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogStatusTypeType;
 import eu.europa.ec.fisheries.schema.exchange.v1.LogType;
@@ -8,6 +8,7 @@ import eu.europa.ec.fisheries.uvms.exchange.service.TransactionalTests;
 import eu.europa.ec.fisheries.uvms.exchange.service.dao.ExchangeLogDaoBean;
 import eu.europa.ec.fisheries.uvms.exchange.service.entity.exchangelog.ExchangeLog;
 import eu.europa.ec.fisheries.uvms.exchange.service.entity.exchangelog.ExchangeLogStatus;
+import eu.europa.ec.fisheries.uvms.exchange.service.timer.ExchangePollResponseTimerBean;
 import org.jboss.arquillian.container.test.api.OperateOnDeployment;
 import org.jboss.arquillian.junit.Arquillian;
 import org.junit.Test;
@@ -22,13 +23,13 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 @RunWith(Arquillian.class)
-public class ExchangeTimerBeanTest extends TransactionalTests {
+public class ExchangePollResponseTimerBeanTest extends TransactionalTests {
 
     @Inject
     ExchangeLogDaoBean exchangeLogDao;
 
     @Inject
-    ExchangeTimerBean exchangeTimerBean;
+    ExchangePollResponseTimerBean exchangeTimerBean;
 
     @Test
     @OperateOnDeployment("exchangeservice")

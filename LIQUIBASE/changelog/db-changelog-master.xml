@@ -17,5 +17,6 @@
     <include file="\v4.0.31\db-changelog_1.xml" relativeToChangelogFile="true"/>
     <include file="\v5.2.13\db-changelog_add_index_to_log_type_ref_guid.xml" relativeToChangelogFile="true"/>
     <include file="\v5.3.8\db-changelog_add_additional_ref_to_log.xml" relativeToChangelogFile="true"/>
+    <include file="\v5.3.8\db-changelog_add_unsent_message_resend_parameter.xml" relativeToChangelogFile="true"/>
 
 </databaseChangeLog>

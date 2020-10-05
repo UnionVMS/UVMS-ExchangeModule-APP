@@ -13,9 +13,7 @@ package eu.europa.ec.fisheries.uvms.exchange.service.config;
 
 public enum ParameterKey {
 
-    KEY("exchange.key.attribute"),
-    KEY2("exchange.key.otherSetting"),
-    KEY3("aGlobalSetting");
+    UNSENT_MESSAGE_THRESHOLD("UNSENT_MESSAGE_THRESHOLD");
 
     private final String key;
 
