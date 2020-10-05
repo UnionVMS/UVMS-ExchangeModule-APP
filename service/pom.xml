@@ -33,12 +33,7 @@
             <groupId>eu.europa.ec.fisheries.uvms</groupId>
             <artifactId>uvms-longpolling</artifactId>
         </dependency>
-        <dependency>
-            <groupId>fish.focus.uvms.maven</groupId>
-            <artifactId>uvms-pom-monitoring-deps</artifactId>
-            <type>pom</type>
-        </dependency>
-                
+
         <!-- Models -->
         <dependency>
             <groupId>${project.groupId}</groupId>
