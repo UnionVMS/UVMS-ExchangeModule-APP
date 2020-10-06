@@ -176,8 +176,6 @@
     <modules>
         <module>LIQUIBASE</module>
         <module>model</module>
-        <module>rest</module>
-        <module>service</module>
         <module>module</module>
         <module>client</module>
     </modules>
