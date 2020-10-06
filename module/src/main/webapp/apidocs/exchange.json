@@ -1,0 +1,196 @@
+{
+  "apiVersion" : "4.0.36-SNAPSHOT",
+  "swaggerVersion" : "1.2",
+  "basePath" : "/exchange/rest",
+  "resourcePath" : "/exchange",
+  "apis" : [ {
+    "path" : "/exchange/list",
+    "operations" : [ {
+      "method" : "POST",
+      "nickname" : "getLogListByCriteria",
+      "type" : "ResponseDto",
+      "parameters" : [ {
+        "type" : "ExchangeListQuery",
+        "paramType" : "body",
+        "name" : "query",
+        "required" : true
+      } ],
+      "summary" : "Get a list of all exchangeLogs by search criterias",
+      "responseMessages" : [ {
+        "code" : 200,
+        "message" : "[Success]"
+      }, {
+        "code" : 500,
+        "message" : "[Error]"
+      } ],
+      "consumes" : [ "application/json" ],
+      "produces" : [ "application/json" ]
+    } ]
+  }, {
+    "path" : "/exchange/message/{guid}",
+    "operations" : [ {
+      "method" : "GET",
+      "nickname" : "getExchangeLogRawXMLByGuid",
+      "type" : "ResponseDto",
+      "parameters" : [ {
+        "type" : "string",
+        "paramType" : "path",
+        "name" : "guid",
+        "required" : true
+      } ],
+      "produces" : [ "application/json" ]
+    } ]
+  }, {
+    "path" : "/exchange/poll",
+    "operations" : [ {
+      "method" : "POST",
+      "nickname" : "getPollStatus",
+      "type" : "ResponseDto",
+      "parameters" : [ {
+        "type" : "PollQuery",
+        "paramType" : "body",
+        "name" : "query",
+        "required" : true
+      } ],
+      "consumes" : [ "application/json" ],
+      "produces" : [ "application/json" ]
+    } ]
+  }, {
+    "path" : "/exchange/poll/{typeRefGuid}",
+    "operations" : [ {
+      "method" : "GET",
+      "nickname" : "getPollStatus",
+      "type" : "ResponseDto",
+      "parameters" : [ {
+        "type" : "string",
+        "paramType" : "path",
+        "name" : "typeRefGuid",
+        "required" : true
+      } ],
+      "consumes" : [ "application/json" ],
+      "produces" : [ "application/json" ]
+    } ]
+  }, {
+    "path" : "/exchange/validation/{guid}",
+    "operations" : [ {
+      "method" : "GET",
+      "nickname" : "getExchangeLogRawXMLAndValidationByGuid",
+      "type" : "ResponseDto",
+      "parameters" : [ {
+        "type" : "string",
+        "paramType" : "path",
+        "name" : "guid",
+        "required" : true
+      } ],
+      "produces" : [ "application/json" ]
+    } ]
+  }, {
+    "path" : "/exchange/{guid}",
+    "operations" : [ {
+      "method" : "GET",
+      "nickname" : "getExchangeLogByUUID",
+      "type" : "ResponseDto",
+      "parameters" : [ {
+        "type" : "string",
+        "paramType" : "path",
+        "name" : "guid",
+        "required" : true
+      } ],
+      "produces" : [ "application/json" ]
+    } ]
+  } ],
+  "models" : {
+    "ExchangeListCriteria" : {
+      "id" : "ExchangeListCriteria",
+      "properties" : {
+        "isDynamic" : {
+          "type" : "boolean"
+        },
+        "criterias" : {
+          "type" : "array",
+          "items" : {
+            "$ref" : "ExchangeListCriteriaPair"
+          }
+        }
+      }
+    },
+    "PollQuery" : {
+      "id" : "PollQuery",
+      "properties" : {
+        "statusFromDate" : {
+          "type" : "string"
+        },
+        "statusToDate" : {
+          "type" : "string"
+        },
+        "status" : {
+          "type" : "string",
+          "enum" : [ "ISSUED", "FAILED", "SUCCESSFUL_WITH_WARNINGS", "SUCCESSFUL", "PENDING", "PROBABLY_TRANSMITTED", "UNPROCESSED", "UNKNOWN", "OK", "WARN", "ERROR", "SENT" ]
+        }
+      }
+    },
+    "ResponseDto" : {
+      "id" : "ResponseDto",
+      "properties" : {
+        "data" : {
+          "type" : "T"
+        },
+        "code" : {
+          "type" : "integer",
+          "format" : "int32"
+        }
+      }
+    },
+    "ExchangeListCriteriaPair" : {
+      "id" : "ExchangeListCriteriaPair",
+      "properties" : {
+        "key" : {
+          "type" : "string",
+          "enum" : [ "TRANSFER_INCOMING", "DATE_RECEIVED_FROM", "DATE_RECEIVED_TO", "SENDER_RECEIVER", "RECIPIENT", "TYPE", "STATUS", "SOURCE", "MESSAGE_DIRECTION" ]
+        },
+        "value" : {
+          "type" : "string"
+        }
+      }
+    },
+    "ExchangeListQuery" : {
+      "id" : "ExchangeListQuery",
+      "properties" : {
+        "pagination" : {
+          "type" : "ExchangeListPagination"
+        },
+        "exchangeSearchCriteria" : {
+          "type" : "ExchangeListCriteria"
+        },
+        "sorting" : {
+          "type" : "Sorting"
+        }
+      }
+    },
+    "ExchangeListPagination" : {
+      "id" : "ExchangeListPagination",
+      "properties" : {
+        "page" : {
+          "type" : "integer",
+          "format" : "int32"
+        },
+        "listSize" : {
+          "type" : "integer",
+          "format" : "int32"
+        }
+      }
+    },
+    "Sorting" : {
+      "id" : "Sorting",
+      "properties" : {
+        "sortBy" : {
+          "type" : "string",
+          "enum" : [ "DATE_RECEIVED", "SOURCE", "TYPE", "SENDER_RECEIVER", "RULE", "RECEPIENT", "STATUS", "DATE_FORWARDED", "GUID", "REF_GUID" ]
+        },
+        "reversed" : {
+          "type" : "boolean"
+        }
+      }
+    }
+  }
+}

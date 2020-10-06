@@ -1,0 +1,39 @@
+{
+  "apiVersion" : "4.0.36-SNAPSHOT",
+  "swaggerVersion" : "1.2",
+  "basePath" : "/exchange/rest",
+  "resourcePath" : "/config",
+  "apis" : [ {
+    "path" : "/config",
+    "operations" : [ {
+      "method" : "GET",
+      "nickname" : "getConfiguration",
+      "type" : "ResponseDto",
+      "consumes" : [ "application/json" ],
+      "produces" : [ "application/json" ]
+    } ]
+  }, {
+    "path" : "/config/searchfields",
+    "operations" : [ {
+      "method" : "GET",
+      "nickname" : "getConfigSearchFields",
+      "type" : "ResponseDto",
+      "consumes" : [ "application/json" ],
+      "produces" : [ "application/json" ]
+    } ]
+  } ],
+  "models" : {
+    "ResponseDto" : {
+      "id" : "ResponseDto",
+      "properties" : {
+        "data" : {
+          "type" : "T"
+        },
+        "code" : {
+          "type" : "integer",
+          "format" : "int32"
+        }
+      }
+    }
+  }
+}

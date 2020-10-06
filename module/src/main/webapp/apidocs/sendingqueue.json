@@ -1,0 +1,64 @@
+{
+  "apiVersion" : "4.0.36-SNAPSHOT",
+  "swaggerVersion" : "1.2",
+  "basePath" : "/exchange/rest",
+  "resourcePath" : "/sendingqueue",
+  "apis" : [ {
+    "path" : "/sendingqueue/list",
+    "operations" : [ {
+      "method" : "GET",
+      "nickname" : "getSendingQueue",
+      "type" : "ResponseDto",
+      "summary" : "Get a list of all exchangeLogs by search criterias",
+      "responseMessages" : [ {
+        "code" : 200,
+        "message" : "[Success]"
+      }, {
+        "code" : 500,
+        "message" : "[Error]"
+      } ],
+      "consumes" : [ "application/json" ],
+      "produces" : [ "application/json" ]
+    } ]
+  }, {
+    "path" : "/sendingqueue/send",
+    "operations" : [ {
+      "method" : "PUT",
+      "nickname" : "send",
+      "type" : "ResponseDto",
+      "parameters" : [ {
+        "type" : "array",
+        "items" : {
+          "type" : "string"
+        },
+        "paramType" : "body",
+        "name" : "messageIdList",
+        "required" : true
+      } ],
+      "summary" : "Get a list of all exchangeLogs by search criterias",
+      "responseMessages" : [ {
+        "code" : 200,
+        "message" : "[Success]"
+      }, {
+        "code" : 500,
+        "message" : "[Error]"
+      } ],
+      "consumes" : [ "application/json" ],
+      "produces" : [ "application/json" ]
+    } ]
+  } ],
+  "models" : {
+    "ResponseDto" : {
+      "id" : "ResponseDto",
+      "properties" : {
+        "data" : {
+          "type" : "T"
+        },
+        "code" : {
+          "type" : "integer",
+          "format" : "int32"
+        }
+      }
+    }
+  }
+}
