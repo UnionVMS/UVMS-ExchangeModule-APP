@@ -10,14 +10,13 @@ copy of the GNU General Public License along with the IFDM Suite. If not, see <h
  */
 package eu.europa.ec.fisheries.uvms.exchange.client;
 
+import java.io.File;
 import org.eu.ingwar.tools.arquillian.extension.suite.annotations.ArquillianSuiteDeployment;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.shrinkwrap.api.Archive;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
 import org.jboss.shrinkwrap.resolver.api.maven.Maven;
-
-import java.io.File;
 
 @ArquillianSuiteDeployment
 public abstract class AbstractClientTest {
@@ -26,14 +25,9 @@ public abstract class AbstractClientTest {
     public static Archive<?> createDeployment() {
 
         WebArchive testWar = ShrinkWrap.create(WebArchive.class, "exchange.war");
-        testWar.merge(ShrinkWrap.createFromZipFile(WebArchive.class, 
-                Maven.configureResolver().loadPomFromFile("pom.xml")
-                    .resolve("eu.europa.ec.fisheries.uvms.exchange:exchange-rest:war:?")
-                    .withoutTransitivity().asSingleFile()));
-        
         File[] files = Maven.configureResolver().loadPomFromFile("pom.xml")
-                .resolve("eu.europa.ec.fisheries.uvms.exchange:exchange-service")
-                .withTransitivity().asFile();
+                    .resolve("eu.europa.ec.fisheries.uvms.exchange:exchange-module:jar:classes:?")
+                    .withTransitivity().asFile();
         testWar.addAsLibraries(files);
 
         testWar.addPackages(true, "eu.europa.ec.fisheries.uvms.exchange.client");
