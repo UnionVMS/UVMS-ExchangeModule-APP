@@ -56,6 +56,9 @@ public class ExchangeAPIRestResourceTest extends BuildExchangeRestTestDeployment
     @Inject
     ExchangeLogDaoBean exchangeLogDao;
 
+    @Inject
+    ExchangeLogServiceBean exchangeLogServiceBean;
+
     @Resource(mappedName = "java:/ConnectionFactory")
     private ConnectionFactory connectionFactory;
 
@@ -255,9 +258,6 @@ public class ExchangeAPIRestResourceTest extends BuildExchangeRestTestDeployment
         serviceRegistryDao.deleteEntity(s.getId());
     }
 
-
-    @Inject
-    ExchangeLogServiceBean exchangeLogServiceBean;
 
     @Test
     @OperateOnDeployment("exchangeservice")
