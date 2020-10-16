@@ -19,6 +19,7 @@ import eu.europa.ec.fisheries.uvms.exchange.model.mapper.JAXBMarshaller;
 import eu.europa.ec.fisheries.uvms.exchange.rest.BuildExchangeRestTestDeployment;
 import eu.europa.ec.fisheries.uvms.exchange.rest.JMSHelper;
 import eu.europa.ec.fisheries.uvms.exchange.rest.RestHelper;
+import eu.europa.ec.fisheries.uvms.exchange.service.bean.ExchangeLogServiceBean;
 import eu.europa.ec.fisheries.uvms.exchange.service.dao.ExchangeLogDaoBean;
 import eu.europa.ec.fisheries.uvms.exchange.service.dao.ServiceRegistryDaoBean;
 import eu.europa.ec.fisheries.uvms.exchange.service.entity.exchangelog.ExchangeLog;
@@ -54,6 +55,9 @@ public class ExchangeAPIRestResourceTest extends BuildExchangeRestTestDeployment
 
     @Inject
     ExchangeLogDaoBean exchangeLogDao;
+
+    @Inject
+    ExchangeLogServiceBean exchangeLogServiceBean;
 
     @Resource(mappedName = "java:/ConnectionFactory")
     private ConnectionFactory connectionFactory;
@@ -255,7 +259,6 @@ public class ExchangeAPIRestResourceTest extends BuildExchangeRestTestDeployment
     }
 
 
-
     @Test
     @OperateOnDeployment("exchangeservice")
     public void getPollStatusByRefIdTest() throws Exception {
@@ -265,6 +268,10 @@ public class ExchangeAPIRestResourceTest extends BuildExchangeRestTestDeployment
         exchangeLog.setStatus(ExchangeLogStatusTypeType.PROBABLY_TRANSMITTED);
         RestHelper.addLogStatusToLog(exchangeLog,ExchangeLogStatusTypeType.PROBABLY_TRANSMITTED);
         exchangeLog = exchangeLogDao.createLog(exchangeLog);
+
+        exchangeLogServiceBean.updateStatus(exchangeLog.getId().toString(), ExchangeLogStatusTypeType.PENDING, "Tester");
+        exchangeLogServiceBean.updateStatus(exchangeLog.getId().toString(), ExchangeLogStatusTypeType.PROBABLY_TRANSMITTED, "Tester");
+        exchangeLogServiceBean.updateStatus(exchangeLog.getId().toString(), ExchangeLogStatusTypeType.SUCCESSFUL_WITH_WARNINGS, "Tester");
 
         Client client = ClientBuilder.newClient();
         String stringResponse = client.target("http://localhost:8080/exchangeservice/rest/unsecured")

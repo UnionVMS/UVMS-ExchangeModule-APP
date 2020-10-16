@@ -16,11 +16,8 @@ import eu.europa.ec.fisheries.uvms.exchange.service.entity.exchangelog.ExchangeL
 import eu.europa.ec.fisheries.uvms.exchange.service.entity.exchangelog.ExchangeLogStatus;
 import org.slf4j.MDC;
 
-import java.util.Date;
+import java.util.*;
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
 
 public class LogMapper {
 
@@ -244,6 +241,7 @@ public class LogMapper {
                 historyModel.setTimestamp(Date.from(history.getStatusTimestamp()));
                 historyModelList.add(historyModel);
             }
+            historyModelList.sort(Comparator.comparing(ExchangeLogStatusHistoryType::getTimestamp).reversed());
             model.getHistory().addAll(historyModelList);
         }
         return model;
