@@ -600,19 +600,4 @@ public class ExchangeEventIncomingServiceBean {
         return logId;
     }
 
-    /*private eu.europa.ec.fisheries.schema.rules.exchange.v1.PluginType extractPluginType(ExchangeBaseRequest request) {
-        eu.europa.ec.fisheries.schema.rules.exchange.v1.PluginType rulesPluginType;
-        switch (request.getPluginType()) {
-            case MANUAL:
-                rulesPluginType = eu.europa.ec.fisheries.schema.rules.exchange.v1.PluginType.MANUAL;
-                break;
-            case BELGIAN_ACTIVITY:
-                rulesPluginType = eu.europa.ec.fisheries.schema.rules.exchange.v1.PluginType.BELGIAN_ACTIVITY;
-                break;
-            default:
-                rulesPluginType = eu.europa.ec.fisheries.schema.rules.exchange.v1.PluginType.FLUX;
-                break;
-        }
-        return rulesPluginType;
-    }*/
 }
