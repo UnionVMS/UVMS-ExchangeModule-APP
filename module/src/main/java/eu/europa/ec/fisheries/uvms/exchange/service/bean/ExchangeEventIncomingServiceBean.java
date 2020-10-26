@@ -12,26 +12,7 @@
 package eu.europa.ec.fisheries.uvms.exchange.service.bean;
 
 import eu.europa.ec.fisheries.schema.exchange.common.v1.AcknowledgeType;
-import eu.europa.ec.fisheries.schema.exchange.module.v1.ExchangeBaseRequest;
-import eu.europa.ec.fisheries.schema.exchange.module.v1.ExchangeModuleMethod;
-import eu.europa.ec.fisheries.schema.exchange.module.v1.GetServiceListRequest;
-import eu.europa.ec.fisheries.schema.exchange.module.v1.LogIdByTypeExistsRequest;
-import eu.europa.ec.fisheries.schema.exchange.module.v1.LogIdByTypeExistsResponse;
-import eu.europa.ec.fisheries.schema.exchange.module.v1.LogRefIdByTypeExistsRequest;
-import eu.europa.ec.fisheries.schema.exchange.module.v1.LogRefIdByTypeExistsResponse;
-import eu.europa.ec.fisheries.schema.exchange.module.v1.PingResponse;
-import eu.europa.ec.fisheries.schema.exchange.module.v1.QueryAssetInformationRequest;
-import eu.europa.ec.fisheries.schema.exchange.module.v1.RcvFLUXFaResponseMessageRequest;
-import eu.europa.ec.fisheries.schema.exchange.module.v1.ReceiveAssetInformationRequest;
-import eu.europa.ec.fisheries.schema.exchange.module.v1.ReceiveInvalidSalesMessage;
-import eu.europa.ec.fisheries.schema.exchange.module.v1.ReceiveSalesQueryRequest;
-import eu.europa.ec.fisheries.schema.exchange.module.v1.ReceiveSalesReportRequest;
-import eu.europa.ec.fisheries.schema.exchange.module.v1.ReceiveSalesResponseRequest;
-import eu.europa.ec.fisheries.schema.exchange.module.v1.SetFAQueryMessageRequest;
-import eu.europa.ec.fisheries.schema.exchange.module.v1.SetFLUXFAReportMessageRequest;
-import eu.europa.ec.fisheries.schema.exchange.module.v1.SetFLUXMDRSyncMessageExchangeResponse;
-import eu.europa.ec.fisheries.schema.exchange.module.v1.SetFLUXMovementReportRequest;
-import eu.europa.ec.fisheries.schema.exchange.module.v1.SetMovementReportRequest;
+import eu.europa.ec.fisheries.schema.exchange.module.v1.*;
 import eu.europa.ec.fisheries.schema.exchange.movement.v1.MovementBaseType;
 import eu.europa.ec.fisheries.schema.exchange.movement.v1.MovementSourceType;
 import eu.europa.ec.fisheries.schema.exchange.movement.v1.SetReportMovementType;
@@ -40,14 +21,7 @@ import eu.europa.ec.fisheries.schema.exchange.plugin.v1.AcknowledgeResponse;
 import eu.europa.ec.fisheries.schema.exchange.plugin.v1.ExchangePluginMethod;
 import eu.europa.ec.fisheries.schema.exchange.service.v1.ServiceResponseType;
 import eu.europa.ec.fisheries.schema.exchange.service.v1.StatusType;
-import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogStatusType;
-import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogStatusTypeType;
-import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogType;
-import eu.europa.ec.fisheries.schema.exchange.v1.LogType;
-import eu.europa.ec.fisheries.schema.exchange.v1.PollStatus;
-import eu.europa.ec.fisheries.schema.exchange.v1.TypeRefType;
-import eu.europa.ec.fisheries.schema.rules.module.v1.RulesModuleMethod;
-import eu.europa.ec.fisheries.schema.rules.module.v1.SetFLUXMDRSyncMessageRulesResponse;
+import eu.europa.ec.fisheries.schema.exchange.v1.*;
 import eu.europa.ec.fisheries.uvms.commons.date.JsonBConfigurator;
 import eu.europa.ec.fisheries.uvms.commons.message.impl.JAXBUtils;
 import eu.europa.ec.fisheries.uvms.exchange.model.mapper.ExchangeModuleResponseMapper;
@@ -62,15 +36,11 @@ import eu.europa.ec.fisheries.uvms.exchange.service.message.event.ErrorEvent;
 import eu.europa.ec.fisheries.uvms.exchange.service.message.event.PluginErrorEvent;
 import eu.europa.ec.fisheries.uvms.exchange.service.message.event.carrier.ExchangeErrorEvent;
 import eu.europa.ec.fisheries.uvms.exchange.service.message.event.carrier.PluginErrorEventCarrier;
-import eu.europa.ec.fisheries.uvms.exchange.service.message.producer.bean.ExchangeActivityEfrProducer;
-import eu.europa.ec.fisheries.uvms.exchange.service.message.producer.bean.ExchangeAssetProducer;
-import eu.europa.ec.fisheries.uvms.exchange.service.message.producer.bean.ExchangeMovementProducer;
-import eu.europa.ec.fisheries.uvms.exchange.service.message.producer.bean.ExchangeRulesProducer;
-import eu.europa.ec.fisheries.uvms.exchange.service.message.producer.bean.ExchangeSalesProducer;
+import eu.europa.ec.fisheries.uvms.exchange.service.message.producer.bean.*;
 import eu.europa.ec.fisheries.uvms.exchange.service.model.IncomingMovement;
 import eu.europa.ec.fisheries.uvms.longpolling.notifications.NotificationMessage;
-import eu.europa.ec.fisheries.uvms.rules.model.mapper.RulesModuleRequestMapper;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.NotImplementedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -145,56 +115,15 @@ public class ExchangeEventIncomingServiceBean {
      * @param message
      */
     public void processFLUXFAReportMessage(TextMessage message) {
-        try {
-            SetFLUXFAReportMessageRequest request = JAXBMarshaller.unmarshallTextMessage(message, SetFLUXFAReportMessageRequest.class);
-            String onValue = request.getOnValue();
-            String username = request.getUsername();
-            String fluxDataFlow = request.getFluxDataFlow();
-            String senderOrReceiver = request.getSenderOrReceiver();
-            LOG.debug("Got FLUXFAReportMessage in exchange :" + request.getRequest());
-
-            ExchangeLog exchangeLog = exchangeLogService.log(request, LogType.RCV_FLUX_FA_REPORT_MSG, ExchangeLogStatusTypeType.ISSUED
-                    , extractFaType(request.getMethod()), request.getRequest(), true);
-            String msg = RulesModuleRequestMapper.createSetFLUXFAReportMessageRequest(extractPluginType(request), request.getRequest()
-                    , username, extractLogId(message, exchangeLog), fluxDataFlow, senderOrReceiver, onValue);
-
-            forwardToRules(msg);
-        } catch (Exception e) {
-            LOG.error("Couldn't map to SetFLUXFAReportMessageRequest when processing FLUXFAReportMessage coming from fa-plugin!", e);
-        }
+        throw new NotImplementedException("Rules has been removed since it is not in use and is not being maintained");
     }
 
     public void processFAQueryMessage(TextMessage message) {
-        try {
-            SetFAQueryMessageRequest request = JAXBMarshaller.unmarshallTextMessage(message, SetFAQueryMessageRequest.class);
-            LOG.debug("Got FAQueryMessage in exchange :" + request.getRequest());
-
-            ExchangeLog exchangeLog = exchangeLogService.log(request, LogType.RECEIVE_FA_QUERY_MSG, ExchangeLogStatusTypeType.ISSUED
-                    , TypeRefType.FA_QUERY, request.getRequest(), true);
-            String msg = RulesModuleRequestMapper.createSetFaQueryMessageRequest(extractPluginType(request), request.getRequest(),
-                    request.getUsername(), extractLogId(message, exchangeLog), request.getFluxDataFlow(), request.getSenderOrReceiver(), request.getOnValue());
-
-            forwardToRules(msg);
-        } catch (Exception e) {
-            LOG.error("Couldn't map to SetFAQueryMessageRequest when processing FAQueryMessage coming from fa-plugin!", e);
-        }
+        throw new NotImplementedException("Rules has been removed since it is not in use and is not being maintained");
     }
 
     public void processFluxFAResponseMessage(TextMessage message) {
-        try {
-            RcvFLUXFaResponseMessageRequest request = JAXBMarshaller.unmarshallTextMessage(message, RcvFLUXFaResponseMessageRequest.class);
-            LOG.debug("Got FLUXResponseMessage in exchange :" + request.getRequest());
-
-            ExchangeLog exchangeLog = exchangeLogService.log(request, LogType.RECEIVE_FLUX_RESPONSE_MSG, ExchangeLogStatusTypeType.ISSUED
-                    , TypeRefType.FA_RESPONSE, request.getRequest(), true);
-            String msg = RulesModuleRequestMapper.createRcvFluxFaResponseMessageRequest(extractPluginType(request)
-                    , request.getRequest(), request.getUsername(), extractLogId(message, exchangeLog), request.getFluxDataFlow()
-                    , request.getSenderOrReceiver(), request.getOnValue());
-
-            forwardToRules(msg);
-        } catch (Exception e) {
-            LOG.error("Couldn't map to RcvFLUXFaResponseMessageRequest when processing FLUXResponseMessage coming from fa-plugin!", e);
-        }
+        throw new NotImplementedException("Rules has been removed since it is not in use and is not being maintained");
     }
 
     /**
@@ -205,18 +134,7 @@ public class ExchangeEventIncomingServiceBean {
      * @param message
      */
     public void sendResponseToRulesModule(TextMessage message) { // And nothing to the exchange log?
-        try {
-            SetFLUXMDRSyncMessageExchangeResponse exchangeResponse = JAXBMarshaller.unmarshallTextMessage(message, SetFLUXMDRSyncMessageExchangeResponse.class);
-            LOG.debug("[INFO] Received @MdrSyncResponseMessageEvent. Going to send it to Rules now..");
-            String strRequest = exchangeResponse.getRequest();
-            SetFLUXMDRSyncMessageRulesResponse mdrResponse = new SetFLUXMDRSyncMessageRulesResponse();
-            mdrResponse.setMethod(RulesModuleMethod.GET_FLUX_MDR_SYNC_RESPONSE);
-            mdrResponse.setRequest(strRequest);
-            String mdrStrReq = JAXBMarshaller.marshallJaxBObjectToString(mdrResponse);
-            forwardToRules(mdrStrReq);
-        } catch (Exception e) {
-            LOG.error("[ERROR] Something strange happend during message conversion {} {}", message, e); // If something happens, just log it and move on?
-        }
+        throw new NotImplementedException("Rules has been removed since it is not in use and is not being maintained");
     }
 
     /**
@@ -238,28 +156,7 @@ public class ExchangeEventIncomingServiceBean {
     }
 
     public void processReceivedMovementBatch(TextMessage message) {
-        try {
-            // Log it.
-            SetFLUXMovementReportRequest request = JAXBMarshaller.unmarshallTextMessage(message, SetFLUXMovementReportRequest.class);
-            ExchangeLog exchangeLog = exchangeLogService.log(request, LogType.RECEIVE_MOVEMENT, ExchangeLogStatusTypeType.ISSUED, TypeRefType.MOVEMENT, request.getRequest(), true);
-
-            // Send to rules.
-            String onValue = request.getOnValue();
-            String username = request.getUsername();
-            String fluxDataFlow = request.getFluxDataFlow();
-            String senderOrReceiver = request.getSenderOrReceiver();
-            String registeredClassName = request.getRegisteredClassName();
-            String ad = request.getAd();
-            String to = request.getTo();
-            String todt = request.getTodt();
-            String msg = RulesModuleRequestMapper.createSetFLUXMovementReportRequest(extractPluginType(request), request.getRequest(),
-                    username, extractLogId(message, exchangeLog), fluxDataFlow, senderOrReceiver, onValue,
-                    registeredClassName, ad, to, todt);
-
-            forwardToRules(msg);
-        } catch (Exception e) {
-            LOG.error("Couldn't map to SetFLUXMovementReportRequest when processing FLUXMovementReport coming from movement-plugin!", e);
-        }
+        throw new NotImplementedException("Rules has been removed since it is not in use and is not being maintained");
     }
 
     /**
@@ -360,25 +257,7 @@ public class ExchangeEventIncomingServiceBean {
      * @param event received sales report
      */
     public void receiveSalesReport(TextMessage event) {
-        try {
-            ReceiveSalesReportRequest request = JAXBMarshaller.unmarshallTextMessage(event, ReceiveSalesReportRequest.class);
-            LOG.debug("Receive sales report in Exchange module : {}", request.getReport());
-            String report = request.getReport();
-            PluginType plugin = request.getPluginType();
-            String sender = request.getSenderOrReceiver();
-            String messageGuid = request.getMessageGuid();
-            ExchangeLog log = exchangeLogService.log(request, LogType.RECEIVE_SALES_REPORT, ExchangeLogStatusTypeType.ISSUED, TypeRefType.SALES_REPORT, report, true);
-
-            String receiveSalesReportRequest = RulesModuleRequestMapper.createReceiveSalesReportRequest(report, messageGuid, plugin.name(), log.getId().toString(), sender, request.getOnValue());
-            String messageSelector = "ReceiveSalesReportRequest";
-            forwardToRules(receiveSalesReportRequest, messageSelector);
-        } catch (Exception e) {
-            try {
-                firePluginFault(event, "Couldn't map to SetSalesReportRequest when processing sales report from plugin. The event was " + event.getText(), e, null);
-            } catch (JMSException e1) {
-                firePluginFault(event, "Couldn't map to SetSalesReportRequest when processing sales report from plugin.", e, null);
-            }
-        }
+        throw new NotImplementedException("Rules has been removed since it is not in use and is not being maintained");
     }
 
     /**
@@ -387,26 +266,7 @@ public class ExchangeEventIncomingServiceBean {
      * @param event received sales query
      */
     public void receiveSalesQuery(TextMessage event) {
-        try {
-            ReceiveSalesQueryRequest request = JAXBMarshaller.unmarshallTextMessage(event, ReceiveSalesQueryRequest.class);
-            LOG.info("Process sales query in Exchange module:{}", request);
-            String query = request.getQuery();
-            PluginType plugin = request.getPluginType();
-            String sender = request.getSenderOrReceiver();
-            String messageGuid = request.getMessageGuid();
-
-            ExchangeLog log = exchangeLogService.log(request, LogType.RECEIVE_SALES_QUERY, ExchangeLogStatusTypeType.ISSUED, TypeRefType.SALES_QUERY, query, true);
-            String receiveSalesQueryRequest = RulesModuleRequestMapper.createReceiveSalesQueryRequest(query, messageGuid, plugin.name(), log.getId().toString(), sender, request.getOnValue());
-            String messageSelector = "ReceiveSalesQueryRequest";
-
-            forwardToRules(receiveSalesQueryRequest, messageSelector);
-        } catch (Exception e) {
-            try {
-                firePluginFault(event, "Couldn't map to SalesQueryRequest when processing sales query from plugin. The message was " + event.getText(), e, null);
-            } catch (JMSException e1) {
-                firePluginFault(event, "Couldn't map to SalesQueryRequest when processing sales query from plugin.", e, null);
-            }
-        }
+        throw new NotImplementedException("Rules has been removed since it is not in use and is not being maintained");
     }
 
     /**
@@ -415,18 +275,7 @@ public class ExchangeEventIncomingServiceBean {
      * @param event
      */
     public void receiveSalesResponse(TextMessage event) {
-        try {
-            ReceiveSalesResponseRequest request = JAXBMarshaller.unmarshallTextMessage(event, ReceiveSalesResponseRequest.class);
-            String response = request.getResponse();
-            ExchangeLog log = exchangeLogService.log(request, LogType.RECEIVE_SALES_RESPONSE, ExchangeLogStatusTypeType.ISSUED, TypeRefType.SALES_RESPONSE, response, true);
-
-            String receiveSalesResponseRequest = RulesModuleRequestMapper.createReceiveSalesResponseRequest(response, log.getId().toString(), request.getSenderOrReceiver());
-            String messageSelector = "ReceiveSalesResponseRequest";
-
-            forwardToRules(receiveSalesResponseRequest, messageSelector);
-        } catch (Exception e) {
-            firePluginFault(event, "Error when receiving a Sales response from FLUX", e, null);
-        }
+        throw new NotImplementedException("Rules has been removed since it is not in use and is not being maintained");
     }
 
 
@@ -751,7 +600,7 @@ public class ExchangeEventIncomingServiceBean {
         return logId;
     }
 
-    private eu.europa.ec.fisheries.schema.rules.exchange.v1.PluginType extractPluginType(ExchangeBaseRequest request) {
+    /*private eu.europa.ec.fisheries.schema.rules.exchange.v1.PluginType extractPluginType(ExchangeBaseRequest request) {
         eu.europa.ec.fisheries.schema.rules.exchange.v1.PluginType rulesPluginType;
         switch (request.getPluginType()) {
             case MANUAL:
@@ -765,5 +614,5 @@ public class ExchangeEventIncomingServiceBean {
                 break;
         }
         return rulesPluginType;
-    }
+    }*/
 }

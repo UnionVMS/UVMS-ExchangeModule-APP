@@ -23,10 +23,10 @@ import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogStatusTypeType;
 import eu.europa.ec.fisheries.schema.exchange.v1.LogType;
 import eu.europa.ec.fisheries.schema.exchange.v1.TypeRefType;
 import eu.europa.ec.fisheries.schema.exchange.v1.UnsentMessageTypePropertyKey;
-import eu.europa.ec.fisheries.schema.rules.mobileterminal.v1.IdType;
 import eu.europa.ec.fisheries.uvms.exchange.service.entity.exchangelog.ExchangeLog;
 import eu.europa.ec.fisheries.uvms.exchange.service.entity.exchangelog.ExchangeLogStatus;
 import eu.europa.ec.fisheries.uvms.exchange.service.entity.unsent.UnsentMessageProperty;
+import org.apache.commons.lang3.NotImplementedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -86,32 +86,7 @@ public class ExchangeLogMapper {
     }
 
     private static String getRecipientOfPoll(List<KeyValueType> pollReceiverList) {
-        if (pollReceiverList == null || pollReceiverList.isEmpty()) {
-            throw new IllegalArgumentException("No poll receiver list");
-        }
-        String dnid = null;
-        String memberNumber = null;
-        String satelliteNumber = null;
-        String les = null;
-        for (KeyValueType pollReceiver : pollReceiverList) {
-            if (IdType.DNID.name().equalsIgnoreCase(pollReceiver.getKey())) {
-                dnid = pollReceiver.getValue();
-            } else if (IdType.MEMBER_NUMBER.name().equalsIgnoreCase(pollReceiver.getKey())) {
-                memberNumber = pollReceiver.getValue();
-            } else if (IdType.SERIAL_NUMBER.name().equalsIgnoreCase(pollReceiver.getKey())) {
-                satelliteNumber = pollReceiver.getValue();
-            } else if (IdType.LES.name().equalsIgnoreCase(pollReceiver.getKey())) {
-                les = pollReceiver.getValue();
-            }
-        }
-        if (dnid != null && memberNumber != null) {
-            return dnid + "." + memberNumber;
-        } else if (satelliteNumber != null) {
-            return satelliteNumber;
-        } else if (les != null) {
-            return les;
-        }
-        throw new IllegalArgumentException("No receiver of poll");
+        throw new NotImplementedException("Rules has been removed since it is not in use and is not being maintained");
     }
 
     public static String getSendMovementSenderReceiver(SendMovementToPluginType sendReport) {
