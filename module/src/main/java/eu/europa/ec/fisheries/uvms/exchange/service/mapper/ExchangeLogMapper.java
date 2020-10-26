@@ -13,6 +13,7 @@ package eu.europa.ec.fisheries.uvms.exchange.service.mapper;
 
 import eu.europa.ec.fisheries.schema.exchange.common.v1.CommandType;
 import eu.europa.ec.fisheries.schema.exchange.common.v1.KeyValueType;
+import eu.europa.ec.fisheries.schema.exchange.movement.mobileterminal.v1.IdType;
 import eu.europa.ec.fisheries.schema.exchange.movement.v1.MovementBaseType;
 import eu.europa.ec.fisheries.schema.exchange.movement.v1.SendMovementToPluginType;
 import eu.europa.ec.fisheries.schema.exchange.movement.v1.SetReportMovementType;
@@ -86,7 +87,32 @@ public class ExchangeLogMapper {
     }
 
     private static String getRecipientOfPoll(List<KeyValueType> pollReceiverList) {
-        throw new NotImplementedException("Rules has been removed since it is not in use and is not being maintained");
+        if (pollReceiverList == null || pollReceiverList.isEmpty()) {
+            throw new IllegalArgumentException("No poll receiver list");
+        }
+        String dnid = null;
+        String memberNumber = null;
+        String satelliteNumber = null;
+        String les = null;
+        for (KeyValueType pollReceiver : pollReceiverList) {
+            if (IdType.DNID.name().equalsIgnoreCase(pollReceiver.getKey())) {
+                dnid = pollReceiver.getValue();
+            } else if (IdType.MEMBER_NUMBER.name().equalsIgnoreCase(pollReceiver.getKey())) {
+                memberNumber = pollReceiver.getValue();
+            } else if (IdType.SERIAL_NUMBER.name().equalsIgnoreCase(pollReceiver.getKey())) {
+                satelliteNumber = pollReceiver.getValue();
+            } else if (IdType.LES.name().equalsIgnoreCase(pollReceiver.getKey())) {
+                les = pollReceiver.getValue();
+            }
+        }
+        if (dnid != null && memberNumber != null) {
+            return dnid + "." + memberNumber;
+        } else if (satelliteNumber != null) {
+            return satelliteNumber;
+        } else if (les != null) {
+            return les;
+        }
+        throw new IllegalArgumentException("No receiver of poll");
     }
 
     public static String getSendMovementSenderReceiver(SendMovementToPluginType sendReport) {
