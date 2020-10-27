@@ -241,31 +241,6 @@ public class ExchangeLogRestResourceTest extends BuildExchangeRestTestDeployment
 
     @Test
     @OperateOnDeployment("exchangeservice")
-    public void getExchangeLogRawXMLAndValidationByGuidTest() throws Exception {
-        ExchangeLog exchangeLog = RestHelper.createBasicLog();
-        exchangeLog.setTypeRefGuid(UUID.randomUUID());
-        exchangeLog.setTypeRefMessage(UUID.randomUUID().toString());
-        exchangeLog.setTypeRefType(TypeRefType.FA_RESPONSE);
-        exchangeLog.setStatus(ExchangeLogStatusTypeType.PROBABLY_TRANSMITTED);
-        RestHelper.addLogStatusToLog(exchangeLog,ExchangeLogStatusTypeType.PROBABLY_TRANSMITTED);
-        exchangeLog = exchangeLogDao.createLog(exchangeLog);
-
-        String stringResponse = getWebTarget()
-                .path("exchange/validation")
-                .path(exchangeLog.getId().toString())
-                .request(MediaType.APPLICATION_JSON)
-                .header(HttpHeaders.AUTHORIZATION, getToken())
-                .get(String.class);
-
-        assertNotNull(stringResponse);
-        TestExchangeLogWithValidationResults response = RestHelper.readResponseDto(stringResponse, TestExchangeLogWithValidationResults.class);
-        assertEquals(exchangeLog.getTypeRefMessage(), response.getMsg());
-        assertEquals("Rules Mock Expression", response.getValidationList().get(0).getExpression());          //values from RulesModuleMock
-        assertEquals("Rules Mock Message", response.getValidationList().get(0).getMessage());
-    }
-
-    @Test
-    @OperateOnDeployment("exchangeservice")
     public void getExchangeLogByUUIDTest() throws Exception {
         ExchangeLog exchangeLog = RestHelper.createBasicLog();
         exchangeLog.setTypeRefGuid(UUID.randomUUID());

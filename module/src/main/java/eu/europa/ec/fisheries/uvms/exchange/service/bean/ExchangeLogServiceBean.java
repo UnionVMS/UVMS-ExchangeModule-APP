@@ -34,6 +34,7 @@ import eu.europa.ec.fisheries.uvms.exchange.service.event.ExchangeLogEvent;
 import eu.europa.ec.fisheries.uvms.exchange.service.event.ExchangeSendingQueueEvent;
 import eu.europa.ec.fisheries.uvms.exchange.service.message.producer.bean.ExchangeEventProducer;
 import eu.europa.ec.fisheries.uvms.longpolling.notifications.NotificationMessage;
+import org.apache.commons.lang3.NotImplementedException;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -231,16 +232,7 @@ public class ExchangeLogServiceBean {
     }
 
     public ExchangeLogWithValidationResults getExchangeLogRawMessageAndValidationByGuid(UUID guid) {
-        ExchangeLog log = exchangeLogDao.getExchangeLogByGuid(guid);
-        ExchangeLogWithValidationResults validationFromRules = new ExchangeLogWithValidationResults();
-        if (log.getTypeRefType() != null){
-            if (TypeRefType.FA_RESPONSE.equals(log.getTypeRefType())){
-                guid = log.getTypeRefGuid();
-            }
-            validationFromRules = exchangeToRulesSyncMsgBean.getValidationFromRules(guid.toString(), log.getTypeRefType(), log.getDf());
-            validationFromRules.setMsg(log.getTypeRefMessage() != null ? log.getTypeRefMessage() : StringUtils.EMPTY);
-        }
-        return validationFromRules;
+        throw new NotImplementedException("Rules has been removed since it is not in use and is not being maintained");
     }
 
     public void resend(List<String> messageIdList, String username) {

@@ -142,17 +142,6 @@
                 <version>${movement.model.version}</version>
             </dependency>
             <dependency>
-                <groupId>eu.europa.ec.fisheries.uvms.rules</groupId>
-                <artifactId>rules-model</artifactId>
-                <version>${rules.model.version}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>*</groupId>
-                        <artifactId>*</artifactId>
-                    </exclusion>
-                </exclusions>
-            </dependency>
-            <dependency>
                 <groupId>eu.europa.ec.fisheries.uvms.movement-rules</groupId>
                 <artifactId>movement-rules-model</artifactId>
                 <version>${movement.rules.model.version}</version>

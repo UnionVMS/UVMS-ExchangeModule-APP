@@ -1,9 +1,5 @@
 package eu.europa.ec.fisheries.uvms.exchange.rest;
 
-import eu.europa.ec.fisheries.schema.rules.rule.v1.ErrorType;
-import eu.europa.ec.fisheries.schema.rules.rule.v1.ValidationMessageType;
-import eu.europa.ec.fisheries.schema.rules.rule.v1.ValidationMessageTypeResponse;
-import eu.europa.ec.fisheries.uvms.config.model.mapper.JAXBMarshaller;
 import eu.europa.ec.fisheries.uvms.exchange.service.message.producer.bean.ExchangeEventProducer;
 
 import javax.ejb.ActivationConfigProperty;
@@ -26,7 +22,7 @@ public class RulesModuleMock implements MessageListener {
     @Override
     public void onMessage(Message message) {
         try {
-            ValidationMessageTypeResponse response = new ValidationMessageTypeResponse();
+            /*ValidationMessageTypeResponse response = new ValidationMessageTypeResponse();
             ValidationMessageType validationMessageType = new ValidationMessageType();
             validationMessageType.setEntity("Rules Mock Entity");
             validationMessageType.setExpression("Rules Mock Expression");
@@ -35,9 +31,9 @@ public class RulesModuleMock implements MessageListener {
             validationMessageType.setNote("Rules Mock Note");
             validationMessageType.setBrId("Rules Mock BRId");
             validationMessageType.setErrorType(ErrorType.WARNING);
-            response.getValidationsListResponse().add(validationMessageType);
+            response.getValidationsListResponse().add(validationMessageType);*/
 
-            String stringResponse = JAXBMarshaller.marshallJaxBObjectToString(response);
+            String stringResponse = "";//JAXBMarshaller.marshallJaxBObjectToString(response);
             messageProducer.sendResponseMessageToSender((TextMessage) message, stringResponse);
 
 
