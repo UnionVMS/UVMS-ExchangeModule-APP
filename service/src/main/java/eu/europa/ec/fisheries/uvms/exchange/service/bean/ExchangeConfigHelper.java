@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.ejb.Stateless;
+import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 
@@ -24,6 +25,11 @@ import eu.europa.ec.fisheries.uvms.exchange.service.config.ParameterKey;
 
 @Stateless
 public class ExchangeConfigHelper implements ConfigHelper {
+
+    public static final String MODULE_VERSION_PROPERTIES_KEY = "uvms.module.version";
+
+    @Inject
+    private PropertiesBean propertiesBean;
 
     @PersistenceContext(unitName = "configPU")
     protected EntityManager em;
@@ -43,7 +49,12 @@ public class ExchangeConfigHelper implements ConfigHelper {
         return ExchangeModelConstants.MODULE_NAME;
     }
 
-	@Override
+    @Override
+    public String getModuleVersion() {
+        return propertiesBean.getProperty(MODULE_VERSION_PROPERTIES_KEY);
+    }
+
+    @Override
 	public EntityManager getEntityManager() {
 		return em;
 	}
