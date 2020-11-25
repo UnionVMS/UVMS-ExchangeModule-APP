@@ -225,14 +225,14 @@ public class ExchangeMessageConsumerBean implements MessageListener {
     private ExchangeBaseRequest tryConsumeExchangeBaseRequest(TextMessage textMessage) {
         try {
             if (textMessage.getText().startsWith("<ns2:AcknowledgeResponse xmlns:ns2=\"urn:plugin.exchange.schema.fisheries.ec.europa.eu:v1\">")) {
-                LOG.info("Received deprecated plugin Ack response with message " + textMessage.getText());
+                LOG.debug("Received deprecated plugin Ack response with message " + textMessage.getText());
                 ExchangeBaseRequest plugin = new SetCommandRequest();
                 // They all go to the same place so this does not matter, also this is really ugly ;(
                 plugin.setMethod(ExchangeModuleMethod.PLUGIN_SET_COMMAND_ACK);
                 return plugin;
             }
             ExchangeBaseRequest retVal = JAXBMarshaller.unmarshallTextMessage(textMessage, ExchangeBaseRequest.class);
-            LOG.info("Using deprecated way to get incoming method call in message from: " + retVal.getUsername());
+            LOG.debug("Using deprecated way to get incoming method call in message from: " + retVal.getUsername());
             return retVal;
         } catch (Exception e) {
             LOG.error("Error when consuming ExchangeBaseRequest", e);

@@ -193,7 +193,7 @@ public class ExchangeEventIncomingServiceBean {
                 if (!baseMovement.getSource().equals(MovementSourceType.AIS)) {
                     LOG.debug("Logging received movement.");
                     ExchangeLog createdLog = exchangeLogService.log(request, LogType.RECEIVE_MOVEMENT, ExchangeLogStatusTypeType.ISSUED, TypeRefType.MOVEMENT,
-                            message.getText(), true);
+                            setRepMovType.getOriginalIncomingMessage(), true);
                     if (setRepMovType.getPollRef() != null) {
                         createdLog.setRelatedRefGuid(UUID.fromString(setRepMovType.getPollRef()));
                         createdLog.setRelatedRefType(TypeRefType.POLL);
