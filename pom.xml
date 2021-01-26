@@ -51,6 +51,13 @@
 
     <dependencyManagement>
         <dependencies>
+            <dependency>
+                <groupId>fish.focus.uvms.maven</groupId>
+                <artifactId>uvms-pom-logging-deps</artifactId>
+                <version>1.21</version>
+                <type>pom</type>
+            </dependency>
+
             <!-- Project modules-->
              <dependency>
                 <groupId>${project.groupId}</groupId>
