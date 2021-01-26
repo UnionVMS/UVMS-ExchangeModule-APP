@@ -10,7 +10,20 @@
     <artifactId>exchange-commons</artifactId>
     <packaging>jar</packaging>
 	<description>Primary for handling ear global logback config and common code between modules</description>
-    
+
+    <properties>
+        <application.logfile.message.pattern>%replace(%rEx){'[\r\n]+', '~~'}%nopex %n</application.logfile.message.pattern>
+    </properties>
+
+    <profiles>
+        <profile>
+            <id>multilineLog</id>
+            <properties>
+                <application.logfile.message.pattern>%n</application.logfile.message.pattern>
+            </properties>
+        </profile>
+    </profiles>
+
      <build>
          <resources>
             <resource>
