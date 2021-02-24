@@ -266,7 +266,7 @@ public class ExchangeLogServiceBean implements ExchangeLogService {
         LogWithRawMsgAndType rawMsg = exchangeLogModel.getExchangeLogRawXmlByGuid(guid);
         ExchangeLogWithValidationResults validationFromRules = new ExchangeLogWithValidationResults();
         if (rawMsg.getType() != null){
-            if (TypeRefType.FA_RESPONSE == rawMsg.getType() || TypeRefType.MOVEMENT == rawMsg.getType()){
+            if ( TypeRefType.MOVEMENT == rawMsg.getType()){
                 guid = rawMsg.getRefGuid();
             }
             validationFromRules = exchangeToRulesSyncMsgBean.getValidationFromRules(guid, rawMsg.getType(), rawMsg.getDataFlow());
