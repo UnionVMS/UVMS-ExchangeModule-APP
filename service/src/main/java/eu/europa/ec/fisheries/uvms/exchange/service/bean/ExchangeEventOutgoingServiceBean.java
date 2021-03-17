@@ -313,7 +313,7 @@ public class ExchangeEventOutgoingServiceBean implements ExchangeEventOutgoingSe
             SetFAQueryMessageRequest request = (SetFAQueryMessageRequest) message.getExchangeBaseRequest();
             log.debug("Got SetFAQueryMessageRequest in exchange : " + request.getRequest());
             String text = ExchangePluginRequestMapper.createSendFLUXFAQueryRequest(
-                    request.getRequest(), request.getDestination(), request.getFluxDataFlow(), request.getSenderOrReceiver(),request.getResponseMessageGuid());
+                    request.getRequest(), request.getDestination(), request.getFluxDataFlow(), request.getSenderOrReceiver(),request.getMessageGuid());
             log.debug("Message to plugin {}", text);
             String pluginMessageId = sendEventBusMessage(text, ((request.getPluginType() == BELGIAN_ACTIVITY)
                     ? ExchangeServiceConstants.BELGIAN_ACTIVITY_PLUGIN_SERVICE_NAME : ExchangeServiceConstants.FLUX_ACTIVITY_PLUGIN_SERVICE_NAME));
@@ -331,7 +331,7 @@ public class ExchangeEventOutgoingServiceBean implements ExchangeEventOutgoingSe
             SetFLUXFAReportMessageRequest request = (SetFLUXFAReportMessageRequest) message.getExchangeBaseRequest();
             log.debug("Got SetFAQueryMessageRequest in exchange : " + request.getRequest());
             String text = ExchangePluginRequestMapper.createSendFLUXFAReportRequest(
-                    request.getRequest(), request.getDestination(), request.getFluxDataFlow(), request.getSenderOrReceiver(),request.getResponseMessageGuid());
+                    request.getRequest(), request.getDestination(), request.getFluxDataFlow(), request.getSenderOrReceiver(),request.getMessageGuid());
             log.debug("Message to plugin {}", text);
             String pluginMessageId = sendEventBusMessage(text, ((request.getPluginType() == BELGIAN_ACTIVITY)
                     ? ExchangeServiceConstants.BELGIAN_ACTIVITY_PLUGIN_SERVICE_NAME : ExchangeServiceConstants.FLUX_ACTIVITY_PLUGIN_SERVICE_NAME));
