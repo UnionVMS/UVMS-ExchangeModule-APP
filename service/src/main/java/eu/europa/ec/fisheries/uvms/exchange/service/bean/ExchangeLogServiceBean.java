@@ -120,6 +120,36 @@ public class ExchangeLogServiceBean implements ExchangeLogService {
     }
 
     @Override
+    public ExchangeLogType newLog(ExchangeBaseRequest request, LogType logType, ExchangeLogStatusTypeType status, TypeRefType messageType, String messageText, boolean incoming) throws ExchangeLogException {
+        LogRefType ref = new LogRefType();
+        ref.setMessage(messageText);
+        ref.setRefGuid(request.getMessageGuid());
+        ref.setType(messageType);
+
+        ExchangeLogType log = new ExchangeLogType();
+        log.setSenderReceiver(request.getSenderOrReceiver());
+        log.setDateRecieved(request.getDate());
+        log.setType(logType);
+        log.setStatus(status);
+        log.setIncoming(incoming);
+        log.setTypeRef(ref);
+        log.setDestination(request.getDestination());
+        log.setSource(request.getPluginType().toString());
+        log.setOn(request.getOnValue());
+        log.setTo(request.getTo());
+        log.setTodt(request.getTodt());
+        log.setDf(request.getFluxDataFlow());
+        log.setGuid(request.getResponseMessageGuid());
+        log.setAd(request.getAd());
+
+        if((TypeRefType.FA_QUERY.equals(messageType) || TypeRefType.FA_REPORT.equals(messageType)) && request.getResponseMessageGuid() == null){
+            log.setGuid(request.getMessageGuid());
+        }
+
+        return log(log, request.getUsername());
+    }
+
+    @Override
     public ExchangeLogType updateStatus(String pluginMessageId, ExchangeLogStatusTypeType logStatus, String username) throws ExchangeLogException {
         try {
             String logGuid = logCache.acknowledged(pluginMessageId);
