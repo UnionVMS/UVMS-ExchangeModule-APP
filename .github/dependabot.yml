@@ -1,0 +1,25 @@
+version: 2
+registries:
+  maven-repository-nexus-focus-fish-nexus-content-repositories-rel:
+    type: maven-repository
+    url: http://nexus.focus.fish/nexus/content/repositories/releases/
+    username: greg
+    password: "${{secrets.MAVEN_REPOSITORY_NEXUS_FOCUS_FISH_NEXUS_CONTENT_REPOSITORIES_REL_PASSWORD}}"
+
+updates:
+- package-ecosystem: maven
+  directory: "/"
+  schedule:
+    interval: daily
+    time: "20:00"
+  open-pull-requests-limit: 99
+  target-branch: swe-dev
+  reviewers:
+  - peerik
+  - Johanhav
+  ignore:
+  - dependency-name: org.liquibase:liquibase-maven-plugin
+    versions:
+    - 4.3.3
+  registries:
+  - maven-repository-nexus-focus-fish-nexus-content-repositories-rel
