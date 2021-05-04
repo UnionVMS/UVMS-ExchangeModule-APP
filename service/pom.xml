@@ -20,6 +20,12 @@
             <scope>provided</scope>
         </dependency>
 
+        <dependency>
+            <groupId>eu.europa.ec.fisheries.uvms</groupId>
+            <artifactId>config-library</artifactId>
+            <scope>provided</scope>
+        </dependency>
+
         <!-- Third party libs -->
         <dependency>
             <groupId>net.sf.dozer</groupId>
@@ -64,8 +70,10 @@
         <dependency>
             <groupId>org.hibernate</groupId>
             <artifactId>hibernate-core</artifactId>
-            <version>4.3.11.Final</version>
+            <version>5.3.20.Final</version>
+            <scope>provided</scope>
         </dependency>
+
 
     </dependencies>
 
