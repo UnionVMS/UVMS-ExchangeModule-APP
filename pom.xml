@@ -32,7 +32,7 @@
         <uvms.commons.version>4.1.8</uvms.commons.version>
         <usm4uvms.version>4.1.5</usm4uvms.version>
         <uvms.config.version>4.1.3</uvms.config.version>
-        <uvms-pom-deps.version>3.4</uvms-pom-deps.version>
+        <uvms-pom-deps.version>3.5</uvms-pom-deps.version>
         <asset.version>6.8.9</asset.version>
 
         <!-- Uvms models -->
