@@ -11,9 +11,14 @@ copy of the GNU General Public License along with the IFDM Suite. If not, see <h
  */
 package eu.europa.ec.fisheries.uvms.exchange.service.mapper;
 
+import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.List;
 
+import eu.europa.ec.fisheries.uvms.exchange.message.event.carrier.ExchangeMessageEvent;
+import org.dom4j.DocumentHelper;
+import org.dom4j.io.OutputFormat;
+import org.dom4j.io.XMLWriter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,11 +46,13 @@ import eu.europa.ec.fisheries.schema.exchange.v1.UnsentMessageTypePropertyKey;
 import eu.europa.ec.fisheries.schema.rules.mobileterminal.v1.IdType;
 import eu.europa.ec.fisheries.uvms.exchange.service.exception.ExchangeLogException;
 
+import javax.jms.JMSException;
+
 public class ExchangeLogMapper {
 
     private final static Logger LOG = LoggerFactory.getLogger(ExchangeLogMapper.class);
 
-    public static ExchangeLogType getReceivedMovementExchangeLog(SetReportMovementType request, String typeRefGuid, String typeRefType,String username) throws ExchangeLogException {
+    public static ExchangeLogType getReceivedMovementExchangeLog(SetReportMovementType request, String typeRefGuid, String typeRefType,String username, ExchangeMessageEvent message) throws ExchangeLogException {
         if (request == null) {
             throw new ExchangeLogException("No request");
         }
@@ -54,6 +61,18 @@ public class ExchangeLogMapper {
         log.setType(LogType.PROCESSED_MOVEMENT);
         LogRefType logRefType = new LogRefType();
         logRefType.setRefGuid(typeRefGuid);
+        try {
+            logRefType.setMessage(message.getJmsMessage().getText());
+            final OutputFormat format = OutputFormat.createPrettyPrint();
+            final org.dom4j.Document document = DocumentHelper.parseText(message.getJmsMessage().getText());
+            StringWriter  sw = new StringWriter();
+            final XMLWriter writer = new XMLWriter(sw, format);
+            writer.write(document);
+            logRefType.setMessage(sw.toString());
+        } catch (Exception e) {
+            LOG.warn(e.getMessage(),e);
+            e.printStackTrace();
+        }
 /*        TypeRefType refType = TypeRefType.UNKNOWN;
         try {
             refType = TypeRefType.fromValue(typeRefType);
