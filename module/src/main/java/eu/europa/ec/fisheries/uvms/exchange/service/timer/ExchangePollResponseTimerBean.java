@@ -33,7 +33,7 @@ public class ExchangePollResponseTimerBean {
 
     private static final Logger LOG = LoggerFactory.getLogger(ExchangePollResponseTimerBean.class);
 
-    private static final int POLL_TIMEOUT_TIME_IN_MINUTES = 90;
+    private static final int POLL_TIMEOUT_TIME_IN_MINUTES = 8;
 
     private ExchangeListQuery query;
 
@@ -92,16 +92,16 @@ public class ExchangePollResponseTimerBean {
                 if(exchangeLog.getDateRecieved().toInstant().isBefore(Instant.now().minus(POLL_TIMEOUT_TIME_IN_MINUTES, ChronoUnit.MINUTES))) {
 
                     PollStatus pollStatus = new PollStatus();
-                    pollStatus.setStatus(ExchangeLogStatusTypeType.TIMED_OUT);
+                    pollStatus.setStatus(ExchangeLogStatusTypeType.FAILED);
                     pollStatus.setExchangeLogGuid(exchangeLog.getGuid());
                     pollStatus.setPollGuid(exchangeLog.getTypeRef().getRefGuid());
 
                     ExchangeLog exchangeLogByGuid = logDao.getExchangeLogByGuid(UUID.fromString(exchangeLog.getGuid()));
-                    exchangeLogByGuid.setStatus(ExchangeLogStatusTypeType.TIMED_OUT);
+                    exchangeLogByGuid.setStatus(ExchangeLogStatusTypeType.FAILED);
                     logDao.updateLog(exchangeLogByGuid);
 
-                    LOG.info("No response for poll {} for 90 minutes. Setting status timed out", exchangeLog.getTypeRef().getRefGuid());
-                    exchangeLogModelBean.setPollStatus(pollStatus, "Poll Response Timer", "No response to poll in 90 minutes, setting as timed out");
+                    LOG.info("No response for poll {} for 8 minutes. Setting status timed out", exchangeLog.getTypeRef().getRefGuid());
+                    exchangeLogModelBean.setPollStatus(pollStatus, "Poll Response Timer", "No response within 8 minutes");
                 }
             }
 
