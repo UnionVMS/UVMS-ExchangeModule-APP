@@ -53,7 +53,7 @@ public class ExchangePollResponseTimerBeanTest extends TransactionalTests {
 
         assertEquals(ExchangeLogStatusTypeType.FAILED, updatedExchangeLog.getStatus());
         assertTrue(updatedExchangeLog.getStatusHistory().size() == 2);
-        assertTrue(updatedExchangeLog.getStatusHistory().stream().anyMatch(log -> log.getStatus().equals(ExchangeLogStatusTypeType.TIMED_OUT)));
+        assertTrue(updatedExchangeLog.getStatusHistory().stream().anyMatch(log -> log.getStatus().equals(ExchangeLogStatusTypeType.FAILED)));
         
     }
 
