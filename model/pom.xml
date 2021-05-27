@@ -30,14 +30,16 @@
             <artifactId>uvms-commons-date</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.jvnet.jaxb2_commons</groupId>
-            <artifactId>jaxb2-basics</artifactId>
-            <version>1.11.1</version>
-        </dependency>
-        <dependency>
             <groupId>fish.focus.uvms.maven</groupId>
             <artifactId>uvms-pom-java11-deps</artifactId>
             <type>pom</type>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.sun.xml.ws</groupId>
+            <artifactId>jaxws-rt</artifactId>
+            <version>2.3.3</version>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 
