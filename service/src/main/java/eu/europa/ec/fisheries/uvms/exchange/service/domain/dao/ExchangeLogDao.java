@@ -23,16 +23,24 @@ import javax.persistence.EntityManager;
 import java.util.List;
 
 /**
+ *
  **/
 @Local
 public interface ExchangeLogDao {
 
-	EntityManager getEm();
-	ExchangeLog createLog(ExchangeLog log) throws ExchangeDaoException;
+    EntityManager getEm();
+
+    ExchangeLog createLog(ExchangeLog log) throws ExchangeDaoException;
+
     ExchangeLog getExchangeLogByGuid(String logGuid) throws ExchangeDaoException;
+
     ExchangeLog getExchangeLogByGuid(String logGuid, TypeRefType type) throws ExchangeDaoException;
-	List<ExchangeLog> getExchangeLogByTypesRefAndGuid(String typeRefGuid, List<TypeRefType> types) throws ExchangeDaoException;
-	ExchangeLog updateLog(ExchangeLog exchangeLog) throws ExchangeDaoException;
-	List<ExchangeLogStatus> getExchangeLogStatusHistory(String sql, ExchangeHistoryListQuery query) throws ExchangeDaoException;
-	List<ExchangeLog> getExchangeLogByRangeOfRefGuids(List<String> guids);
+
+    List<ExchangeLog> getExchangeLogByTypesRefAndGuid(String typeRefGuid, List<TypeRefType> types) throws ExchangeDaoException;
+
+    ExchangeLog updateLog(ExchangeLog exchangeLog) throws ExchangeDaoException;
+
+    List<ExchangeLogStatus> getExchangeLogStatusHistory(String sql, ExchangeHistoryListQuery query) throws ExchangeDaoException;
+
+    List<ExchangeLog> getExchangeLogByRangeOfRefGuids(List<String> guids);
 }
