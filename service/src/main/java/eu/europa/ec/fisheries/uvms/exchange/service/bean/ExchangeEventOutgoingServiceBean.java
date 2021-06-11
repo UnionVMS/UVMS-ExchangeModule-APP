@@ -325,7 +325,7 @@ public class ExchangeEventOutgoingServiceBean implements ExchangeEventOutgoingSe
                     ? ExchangeServiceConstants.BELGIAN_ACTIVITY_PLUGIN_SERVICE_NAME : ExchangeServiceConstants.FLUX_ACTIVITY_PLUGIN_SERVICE_NAME));
             log.info("Message sent to Flux ERS Plugin :" + pluginMessageId);
             request.setOnValue(null); //a value should be assigned later from bridge for response messages
-            exchangeLogService.newLog(request, LogType.SEND_FA_QUERY_MSG, ExchangeLogStatusTypeType.SENT, TypeRefType.FA_QUERY, request.getRequest(), false);
+            exchangeLogService.newLog(request, LogType.SEND_FA_QUERY_MSG, request.getValidation(), TypeRefType.FA_QUERY, request.getRequest(), false);
         } catch (ExchangeModelMarshallException | ExchangeMessageException | ExchangeLogException e) {
             log.error("Unable to send FLUXFAQuery to plugin.", e);
         }
@@ -349,7 +349,7 @@ public class ExchangeEventOutgoingServiceBean implements ExchangeEventOutgoingSe
                     ? ExchangeServiceConstants.BELGIAN_ACTIVITY_PLUGIN_SERVICE_NAME : ExchangeServiceConstants.FLUX_ACTIVITY_PLUGIN_SERVICE_NAME));
             log.info("Message sent to Flux ERS Plugin :" + pluginMessageId);
             request.setOnValue(null); //a value should be assigned later from bridge for response messages
-            exchangeLogService.newLog(request, LogType.SEND_FLUX_FA_REPORT_MSG, ExchangeLogStatusTypeType.SENT, TypeRefType.FA_REPORT, request.getRequest(), false);
+            exchangeLogService.newLog(request, LogType.SEND_FLUX_FA_REPORT_MSG, request.getValidation(), TypeRefType.FA_REPORT, request.getRequest(), false);
         } catch (ExchangeModelMarshallException | ExchangeMessageException | ExchangeLogException e) {
             log.error("Unable to send FLUX FA Report to plugin.", e);
         }
@@ -475,7 +475,7 @@ public class ExchangeEventOutgoingServiceBean implements ExchangeEventOutgoingSe
             } else {
                 username = orgRequest.getPluginName();
             }
-            ExchangeLogType log = ExchangeLogMapper.getReceivedMovementExchangeLog(orgRequest, movementRefType.getMovementRefGuid(), movementRefType.getType().value(), username);
+            ExchangeLogType log = ExchangeLogMapper.getReceivedMovementExchangeLog(orgRequest, movementRefType.getMovementRefGuid(), movementRefType.getType().value(), username,message);
             ExchangeLogType createdLog = exchangeLogService.log(log, username);
             LogRefType logTypeRef = createdLog.getTypeRef();
             if (logTypeRef != null && logTypeRef.getType() == TypeRefType.POLL) {
@@ -502,7 +502,7 @@ public class ExchangeEventOutgoingServiceBean implements ExchangeEventOutgoingSe
                 setReportMovementType = new SetReportMovementType();
             }
             username = request.getUsername();
-            ExchangeLogType log = ExchangeLogMapper.getReceivedMovementExchangeLog(setReportMovementType, movementRefType.getMovementRefGuid(), movementRefType.getType().value(), username);
+            ExchangeLogType log = ExchangeLogMapper.getReceivedMovementExchangeLog(setReportMovementType, movementRefType.getMovementRefGuid(), movementRefType.getType().value(), username,message);
             exchangeLogService.log(log, username);
         } catch (ExchangeLogException e) {
             log.error(e.getMessage(),e);
