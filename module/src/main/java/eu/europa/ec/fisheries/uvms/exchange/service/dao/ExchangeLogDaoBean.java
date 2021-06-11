@@ -22,13 +22,11 @@ import eu.europa.ec.fisheries.uvms.exchange.service.search.ExchangeSearchField;
 import eu.europa.ec.fisheries.uvms.exchange.service.search.SearchFieldMapper;
 import eu.europa.ec.fisheries.uvms.exchange.service.search.SearchValue;
 import eu.europa.ec.fisheries.uvms.exchange.service.search.SortFieldMapperEnum;
-import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.ejb.Stateless;
 import javax.persistence.NoResultException;
-import javax.persistence.Query;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
@@ -41,10 +39,10 @@ import java.util.stream.Collectors;
 @Stateless
 public class ExchangeLogDaoBean extends AbstractDao {
 
-    private final static Logger LOG = LoggerFactory.getLogger(ExchangeLogDaoBean.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ExchangeLogDaoBean.class);
 
     public List<ExchangeLogStatus> getExchangeLogStatusHistory(String sql, ExchangeHistoryListQuery searchQuery) {
-        LOG.debug("SQL query for status history " + sql);
+        LOG.debug("SQL query for status history {}", sql);
         TypedQuery<ExchangeLogStatus> query = em.createQuery(sql, ExchangeLogStatus.class);
         if (searchQuery.getStatus() != null && !searchQuery.getStatus().isEmpty()) {
             query.setParameter("status", searchQuery.getStatus());
@@ -188,7 +186,7 @@ public class ExchangeLogDaoBean extends AbstractDao {
     }
 
     public List<ExchangeLog> getExchangeLogByRangeOfRefGuids(List<UUID> logGuids) {
-        if (CollectionUtils.isEmpty(logGuids)) {
+        if (logGuids == null || logGuids.isEmpty()) {
             return new ArrayList<>();
         }
         TypedQuery<ExchangeLog> query = em.createNamedQuery(ExchangeLog.LOG_BY_TYPE_RANGE_OF_REF_GUIDS, ExchangeLog.class);

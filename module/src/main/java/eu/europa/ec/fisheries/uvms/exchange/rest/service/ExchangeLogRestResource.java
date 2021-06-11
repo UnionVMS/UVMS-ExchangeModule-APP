@@ -27,7 +27,6 @@ import eu.europa.ec.fisheries.uvms.exchange.service.dao.ExchangeLogDaoBean;
 import eu.europa.ec.fisheries.uvms.exchange.service.entity.exchangelog.ExchangeLog;
 import eu.europa.ec.fisheries.uvms.rest.security.RequiresFeature;
 import eu.europa.ec.fisheries.uvms.rest.security.UnionVMSFeature;
-import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -50,7 +49,7 @@ import java.util.UUID;
 @Produces(value = {MediaType.APPLICATION_JSON})
 public class ExchangeLogRestResource {
 
-    private final static Logger LOG = LoggerFactory.getLogger(ExchangeLogRestResource.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ExchangeLogRestResource.class);
 
     @EJB
     private ExchangeLogServiceBean serviceLayer;
@@ -132,7 +131,7 @@ public class ExchangeLogRestResource {
     public Response getExchangeLogRawXMLAndValidationByGuid(@PathParam("guid") String guid) {
         try {
             ExchangeLogWithValidationResults results = serviceLayer.getExchangeLogRawMessageAndValidationByGuid(UUID.fromString(guid));
-            if (results != null && CollectionUtils.isNotEmpty(results.getValidationList())) {
+            if (results != null && results.getValidationList() != null && !results.getValidationList().isEmpty()) {
                 results.getValidationList().sort(new BusinessRuleComparator());
             }
             return Response.ok(results).build();

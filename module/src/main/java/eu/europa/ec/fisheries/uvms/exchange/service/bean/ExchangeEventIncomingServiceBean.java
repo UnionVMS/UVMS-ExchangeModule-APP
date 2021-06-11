@@ -39,7 +39,6 @@ import eu.europa.ec.fisheries.uvms.exchange.service.message.event.carrier.Plugin
 import eu.europa.ec.fisheries.uvms.exchange.service.message.producer.bean.*;
 import eu.europa.ec.fisheries.uvms.exchange.service.model.IncomingMovement;
 import eu.europa.ec.fisheries.uvms.longpolling.notifications.NotificationMessage;
-import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.NotImplementedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -302,7 +301,7 @@ public class ExchangeEventIncomingServiceBean {
             List<ExchangeLogStatusType> exchangeStatusHistoryList = exchangeLogModel.getExchangeLogsStatusHistories(refGuid, refTypes);
 
             LogRefIdByTypeExistsResponse response = new LogRefIdByTypeExistsResponse();
-            if (CollectionUtils.isNotEmpty(exchangeStatusHistoryList)) {
+            if (exchangeStatusHistoryList != null && !exchangeStatusHistoryList.isEmpty()) {
                 response.setRefGuid(exchangeStatusHistoryList.get(0).getTypeRef().getRefGuid());
             }
 

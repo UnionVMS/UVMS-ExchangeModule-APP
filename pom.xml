@@ -31,7 +31,7 @@
         <longpolling.version>2.0.13</longpolling.version>
         <uvms.commons.version>4.1.9</uvms.commons.version>
         <usm4uvms.version>4.1.9</usm4uvms.version>
-        <uvms.config.version>4.1.4</uvms.config.version>
+        <uvms.config.version>4.1.5</uvms.config.version>
         <uvms-pom-deps.version>3.6</uvms-pom-deps.version>
         <asset.version>6.8.10</asset.version>
 
@@ -61,18 +61,6 @@
                     <exclusion>
                         <groupId>eu.europa.ec.fisheries.uvms.commons</groupId>
                         <artifactId>uvms-commons</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>org.jboss.resteasy</groupId>
-                        <artifactId>resteasy-jaxrs</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>com.fasterxml.jackson.core</groupId>
-                        <artifactId>jackson-databind</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>net.sf.ehcache</groupId>
-                        <artifactId>ehcache</artifactId>
                     </exclusion>
                 </exclusions>
             </dependency>
