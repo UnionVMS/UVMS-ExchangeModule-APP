@@ -19,7 +19,6 @@ import eu.europa.ec.fisheries.uvms.exchange.service.mapper.LogMapper;
 import eu.europa.ec.fisheries.uvms.exchange.model.dto.ListResponseDto;
 import eu.europa.ec.fisheries.uvms.exchange.service.search.SearchFieldMapper;
 import eu.europa.ec.fisheries.uvms.exchange.service.search.SearchValue;
-import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -64,7 +63,7 @@ public class ExchangeLogModelBean {
         Set<ExchangeLogType> exchangeLogTypeSet = new HashSet<>();
         try {
             List<ExchangeLog> exchangeLogByTypesRefAndGuid = logDao.getExchangeLogByTypesRefAndGuid(refUUID, Collections.singletonList(typeRefType));
-            if (CollectionUtils.isNotEmpty(exchangeLogByTypesRefAndGuid)) {
+            if (exchangeLogByTypesRefAndGuid != null && !exchangeLogByTypesRefAndGuid.isEmpty()) {
                 for (ExchangeLog exchangeLog : exchangeLogByTypesRefAndGuid) {
                     exchangeLogTypeSet.add(LogMapper.toModel(exchangeLog));
                 }
@@ -122,7 +121,7 @@ public class ExchangeLogModelBean {
             guids.add(UUID.fromString(log.getGuid()));
         }
         List<ExchangeLog> relatedLogs = logDao.getExchangeLogByRangeOfRefGuids(guids);
-        if (CollectionUtils.isNotEmpty(relatedLogs)) {
+        if (relatedLogs != null && !relatedLogs.isEmpty()) {
             for (ExchangeLog logEntity : relatedLogs) {
                 RelatedLogInfo refLogInfo = new RelatedLogInfo();
                 refLogInfo.setGuid(logEntity.getId().toString());
@@ -178,7 +177,7 @@ public class ExchangeLogModelBean {
             returnLog = logDao.getExchangeLogByGuid(guid);
         } else {
             List<ExchangeLog> exchangeLogByTypesRefAndGuid = logDao.getExchangeLogByTypesRefAndGuid(guid, Collections.singletonList(typeRefType));
-            if (CollectionUtils.isNotEmpty(exchangeLogByTypesRefAndGuid)) {
+            if (exchangeLogByTypesRefAndGuid != null && !exchangeLogByTypesRefAndGuid.isEmpty()) {
                 returnLog = exchangeLogByTypesRefAndGuid.get(0);
             }
         }
@@ -189,7 +188,7 @@ public class ExchangeLogModelBean {
         List<ExchangeLogStatusType> logStatusTypeList = new ArrayList<>();
         try {
             List<ExchangeLog> exchangeLogByTypesRefAndGuid = logDao.getExchangeLogByTypesRefAndGuid(guid, typeRefType);
-            if (CollectionUtils.isNotEmpty(exchangeLogByTypesRefAndGuid)) {
+            if (exchangeLogByTypesRefAndGuid != null && !exchangeLogByTypesRefAndGuid.isEmpty()) {
                 for (ExchangeLog log : exchangeLogByTypesRefAndGuid) {
                     logStatusTypeList.add(LogMapper.toStatusModel(log));
                 }

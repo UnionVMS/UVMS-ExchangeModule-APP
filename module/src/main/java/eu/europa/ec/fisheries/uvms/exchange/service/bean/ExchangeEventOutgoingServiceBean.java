@@ -33,7 +33,6 @@ import eu.europa.ec.fisheries.schema.exchange.plugin.v1.ExchangePluginMethod;
 import eu.europa.ec.fisheries.schema.exchange.plugin.v1.PluginBaseRequest;
 import eu.europa.ec.fisheries.schema.exchange.plugin.v1.SendSalesReportRequest;
 import eu.europa.ec.fisheries.schema.exchange.plugin.v1.SendSalesResponseRequest;
-import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogStatusType;
 import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogStatusTypeType;
 import eu.europa.ec.fisheries.schema.exchange.v1.LogType;
 import eu.europa.ec.fisheries.schema.exchange.v1.TypeRefType;
@@ -55,7 +54,6 @@ import eu.europa.ec.fisheries.uvms.exchange.service.message.producer.bean.Exchan
 import eu.europa.ec.fisheries.uvms.longpolling.notifications.NotificationMessage;
 import eu.europa.ec.fisheries.wsdl.asset.types.Asset;
 import eu.europa.ec.fisheries.wsdl.user.types.Organisation;
-import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -462,7 +460,7 @@ public class ExchangeEventOutgoingServiceBean {
             MovementRefType movementRefType = request.getMovementRefType();
             List<SetReportMovementType> reportTypeList = request.getOrgRequest();
             SetReportMovementType setReportMovementType;
-            if (CollectionUtils.isNotEmpty(reportTypeList)) {
+            if (reportTypeList != null && !reportTypeList.isEmpty()) {
                 setReportMovementType = reportTypeList.get(0);
             } else {
                 setReportMovementType = new SetReportMovementType();

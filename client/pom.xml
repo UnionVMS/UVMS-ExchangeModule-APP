@@ -34,14 +34,6 @@
             <artifactId>usm4uvms</artifactId>
             <exclusions>
                 <exclusion>
-                    <groupId>org.jboss.resteasy</groupId>
-                    <artifactId>resteasy-jaxrs</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>net.sf.ehcache</groupId>
-                    <artifactId>ehcache</artifactId>
-                </exclusion>
-                <exclusion>
                     <groupId>eu.europa.ec.fisheries.uvms.commons</groupId>
                     <artifactId>uvms-commons-message</artifactId>
                 </exclusion>

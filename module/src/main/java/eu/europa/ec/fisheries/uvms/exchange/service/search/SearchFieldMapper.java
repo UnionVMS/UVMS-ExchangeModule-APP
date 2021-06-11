@@ -12,16 +12,14 @@ copy of the GNU General Public License along with the IFDM Suite. If not, see <h
 package eu.europa.ec.fisheries.uvms.exchange.service.search;
 
 import eu.europa.ec.fisheries.schema.exchange.v1.*;
-import eu.europa.ec.fisheries.uvms.commons.date.DateUtils;
-import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.text.ParseException;
-import java.time.Instant;
 import java.util.*;
 
 public class SearchFieldMapper {
+
+    private SearchFieldMapper() {};
 
     private static final Logger LOG = LoggerFactory.getLogger(SearchFieldMapper.class);
 
@@ -55,7 +53,7 @@ public class SearchFieldMapper {
      */
     public static List<SearchValue> mapSearchField(List<ExchangeListCriteriaPair> listCriterias) {
 
-        if (CollectionUtils.isEmpty(listCriterias)) {
+        if (listCriterias == null || listCriterias.isEmpty()) {
             LOG.debug(" Non valid search criteria when mapping ListCriterias to SearchValue, List is null or empty");
             return new ArrayList<>();
         }
