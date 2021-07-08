@@ -145,7 +145,7 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
             ExchangeLogType exchangeLogType = exchangeLog.log(request, LogType.RCV_FLUX_FA_REPORT_MSG, ExchangeLogStatusTypeType.ISSUED
                     , extractFaType(request.getMethod()), request.getRequest(), true);
             String msg = RulesModuleRequestMapper.createSetFLUXFAReportMessageRequest(extractPluginType(request), request.getRequest()
-                    , username, extractLogId(message, exchangeLogType), fluxDataFlow, senderOrReceiver, onValue);
+                    , username, extractLogId(message, exchangeLogType), fluxDataFlow, senderOrReceiver, onValue, request.getDate());
             forwardToRules(msg, message, null);
         } catch (RulesModelMapperException e) {
             log.error("Couldn't map to SetFLUXFAReportMessageRequest when processing FLUXFAReportMessage coming from fa-plugin!", e);
@@ -162,7 +162,7 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
             ExchangeLogType exchangeLogType = exchangeLog.log(request, LogType.RECEIVE_FA_QUERY_MSG, ExchangeLogStatusTypeType.ISSUED
                     , TypeRefType.FA_QUERY, request.getRequest(), true);
             String msg = RulesModuleRequestMapper.createSetFaQueryMessageRequest(extractPluginType(request), request.getRequest(),
-                    request.getUsername(), extractLogId(message, exchangeLogType), request.getFluxDataFlow(), request.getSenderOrReceiver(), request.getOnValue());
+                    request.getUsername(), extractLogId(message, exchangeLogType), request.getFluxDataFlow(), request.getSenderOrReceiver(), request.getOnValue(), request.getDate());
             forwardToRules(msg, message, null);
         } catch (RulesModelMapperException e) {
             log.error("Couldn't map to SetFAQueryMessageRequest when processing FAQueryMessage coming from fa-plugin!", e);
@@ -243,7 +243,7 @@ public class ExchangeEventIncomingServiceBean implements ExchangeEventIncomingSe
             String todt = request.getTodt();
             String msg = RulesModuleRequestMapper.createSetFLUXMovementReportRequest(extractPluginType(request), request.getRequest(),
                     username, extractLogId(message, exchangeLogType), fluxDataFlow, senderOrReceiver, onValue,
-                    registeredClassName, ad, to, todt);
+                    registeredClassName, ad, to, todt, request.getDate());
             forwardToRules(msg, message, null);
         } catch (RulesModelMapperException  e) {
             log.error("Couldn't map to SetFLUXMovementReportRequest when processing FLUXMovementReport coming from movement-plugin!", e);
