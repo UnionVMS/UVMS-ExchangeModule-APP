@@ -17,15 +17,22 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeListQuery;
 import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogStatusTypeType;
 import eu.europa.ec.fisheries.schema.exchange.v1.TypeRefType;
+import static eu.europa.ec.fisheries.schema.exchange.v1.TypeRefType.*;
 import eu.europa.ec.fisheries.uvms.exchange.rest.dto.exchange.*;
 
 /**
  **/
 public class ExchangeMock {
+
+	private static final List<TypeRefType> ALLOWED_REF_TYPES_FOR_FILTERING =
+			Stream.of(ASSETS,FA,FA_QUERY,FA_REPORT,FA_RESPONSE,MOVEMENT,MOVEMENT_REPORT,MOVEMENT_RESPONSE)
+			.collect(Collectors.toList());
 
 	public static ListQueryResponse mockLogList(ExchangeListQuery query) {
 		ListQueryResponse response = new ListQueryResponse();
@@ -114,7 +121,7 @@ public class ExchangeMock {
 		configuration.put("RECIPIENT", recipientList);
 
 		List<TypeRefType> refTypes = new ArrayList<>();
-		refTypes.addAll(Arrays.asList(TypeRefType.values()));
+		refTypes.addAll(ALLOWED_REF_TYPES_FOR_FILTERING);
 		configuration.put("TYPE", refTypes);
 
 		List<SourceType> sources = new ArrayList<>();
@@ -123,4 +130,5 @@ public class ExchangeMock {
 
 		return configuration;
 	}
+
 }
