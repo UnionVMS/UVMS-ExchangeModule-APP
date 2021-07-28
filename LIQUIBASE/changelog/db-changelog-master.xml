@@ -15,5 +15,6 @@
     <include file="changelog\v0.3\db-changelog-modify_log_table_0.3.xml" />
     <include file="changelog\v4.0.31\db-changelog_1.xml" />
     <include file="changelog\v4.0.33\add_ad_value.xml" />
+    <include file="changelog\v4.0.33\add_response_status_to_exchangelog.xml" />
 
 </databaseChangeLog>
