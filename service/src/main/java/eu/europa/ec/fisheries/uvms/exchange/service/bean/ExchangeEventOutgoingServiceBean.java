@@ -294,7 +294,7 @@ public class ExchangeEventOutgoingServiceBean implements ExchangeEventOutgoingSe
                     request.getRequest(), request.getDestination(), request.getFluxDataFlow(), request.getSenderOrReceiver(), request.getOnValue(),request.getResponseMessageGuid());
             request.setOnValue(null); //a value should be assigned later from bridge for response messages
             final ExchangeLogType logType = exchangeLogService.log(request, LogType.SEND_FLUX_RESPONSE_MSG, request.getStatus(), TypeRefType.FA_RESPONSE, request.getRequest(), false);
-            if(!logType.getStatus().equals(ExchangeLogStatusTypeType.FAILED)){ // Send response only if it is NOT FAILED
+            if(!logType.getStatus().equals(ExchangeLogStatusTypeType.FAILED) && !logType.getStatus().equals(ExchangeLogStatusTypeType.BLOCKED)){ // Send response only if it is NOT FAILED
                 log.debug("[START] Sending FLUXFAResponse to Flux Activity Plugin..");
                 String pluginMessageId = sendEventBusMessage(text, ((request.getPluginType() == BELGIAN_ACTIVITY)
                         ? ExchangeServiceConstants.BELGIAN_ACTIVITY_PLUGIN_SERVICE_NAME : ExchangeServiceConstants.FLUX_ACTIVITY_PLUGIN_SERVICE_NAME));
