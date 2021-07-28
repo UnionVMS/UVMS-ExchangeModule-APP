@@ -12,7 +12,6 @@ copy of the GNU General Public License along with the IFDM Suite. If not, see <h
 package eu.europa.ec.fisheries.uvms.exchange.rest.mapper;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -131,6 +130,7 @@ public class ExchangeLogMapper {
     	}
     	dto.setSenderRecipient(log.getSenderReceiver());
     	dto.setStatus(log.getStatus().name());
+    	dto.setResponseStatus(log.getResponseStatus() !=null ? log.getResponseStatus().name() : null);
         dto.setRelatedLogData(log.getRelatedLogData());
         dto.setDf(log.getDf());
         dto.setTo(log.getTo());

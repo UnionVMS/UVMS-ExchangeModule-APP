@@ -16,15 +16,7 @@ import java.util.Date;
 import java.util.List;
 
 import eu.europa.ec.fisheries.schema.exchange.module.v1.ExchangeBaseRequest;
-import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogStatusType;
-import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogStatusTypeType;
-import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogType;
-import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogWithValidationResults;
-import eu.europa.ec.fisheries.schema.exchange.v1.LogType;
-import eu.europa.ec.fisheries.schema.exchange.v1.PollStatus;
-import eu.europa.ec.fisheries.schema.exchange.v1.TypeRefType;
-import eu.europa.ec.fisheries.schema.exchange.v1.UnsentMessageType;
-import eu.europa.ec.fisheries.schema.exchange.v1.UnsentMessageTypeProperty;
+import eu.europa.ec.fisheries.schema.exchange.v1.*;
 import eu.europa.ec.fisheries.uvms.exchange.model.exception.ExchangeModelException;
 import eu.europa.ec.fisheries.uvms.exchange.service.domain.entity.exchangelog.ExchangeLog;
 import eu.europa.ec.fisheries.uvms.exchange.service.exception.ExchangeLogException;
@@ -47,6 +39,8 @@ public interface ExchangeLogService {
      * @return the created log entry
      */
     ExchangeLogType log(ExchangeBaseRequest request, LogType logType, ExchangeLogStatusTypeType status, TypeRefType messageType, String messageText, boolean incoming) throws ExchangeLogException;
+
+    ExchangeLogType log(ExchangeBaseRequest request, LogType logType, ExchangeLogStatusTypeType status, TypeRefType messageType, String messageText, boolean incoming, ExchangeLogResponseStatusEnum responseStatus) throws ExchangeLogException;
 
     ExchangeLogType newLog(ExchangeBaseRequest request, LogType logType, ExchangeLogStatusTypeType status, TypeRefType messageType, String messageText, boolean incoming) throws ExchangeLogException;
 

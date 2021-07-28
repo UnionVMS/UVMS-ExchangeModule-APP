@@ -83,7 +83,6 @@ public class LogMapper {
         if (log.getStatus() != null) {
             status = log.getStatus();
         }
-
         List<ExchangeLogStatus> statusHistory = new ArrayList<>();
         ExchangeLogStatus statusLog = new ExchangeLogStatus();
         statusLog.setLog(entity);
@@ -94,6 +93,7 @@ public class LogMapper {
         statusHistory.add(statusLog);
 
         entity.setStatus(status);
+        entity.setResponseStatus(log.getResponseStatus() != null ? log.getResponseStatus() : null);
 
         if (entity.getTransferIncoming() == null) {
             entity.setTransferIncoming(log.isIncoming());
@@ -181,6 +181,7 @@ public class LogMapper {
         model.setSenderReceiver(entity.getSenderReceiver());
         model.setIncoming(entity.getTransferIncoming());
         model.setStatus(entity.getStatus());
+        model.setResponseStatus(entity.getResponseStatus());
         model.setDestination(entity.getDestination());
         model.setType(logType);
         model.setSource(entity.getSource());

@@ -293,14 +293,15 @@ public class ExchangeEventOutgoingServiceBean implements ExchangeEventOutgoingSe
             String text = ExchangePluginRequestMapper.createSetFLUXFAResponseRequestWithOn(
                     request.getRequest(), request.getDestination(), request.getFluxDataFlow(), request.getSenderOrReceiver(), request.getOnValue(),request.getResponseMessageGuid());
             request.setOnValue(null); //a value should be assigned later from bridge for response messages
-            final ExchangeLogType logType = exchangeLogService.log(request, LogType.SEND_FLUX_RESPONSE_MSG, request.getStatus(), TypeRefType.FA_RESPONSE, request.getRequest(), false);
-            if(!logType.getStatus().equals(ExchangeLogStatusTypeType.FAILED)){ // Send response only if it is NOT FAILED
+            final ExchangeLogType logType = exchangeLogService.log(request, LogType.SEND_FLUX_RESPONSE_MSG, request.getStatus(), TypeRefType.FA_RESPONSE, request.getRequest(), false,request.getResponseStatus());
+            // Send response only if it is NOT FAILED or BLOCKED
+            if (ExchangeLogStatusTypeType.FAILED != logType.getStatus() && ExchangeLogResponseStatusEnum.BLOCKED != logType.getResponseStatus()){
                 log.debug("[START] Sending FLUXFAResponse to Flux Activity Plugin..");
                 String pluginMessageId = sendEventBusMessage(text, ((request.getPluginType() == BELGIAN_ACTIVITY)
                         ? ExchangeServiceConstants.BELGIAN_ACTIVITY_PLUGIN_SERVICE_NAME : ExchangeServiceConstants.FLUX_ACTIVITY_PLUGIN_SERVICE_NAME));
                 log.debug("[END] FLUXFAResponse sent to Flux Activity Plugin {}" + pluginMessageId);
             } else {
-                log.info("[WARN] FLUXFAResponse is FAILED so won't be sent to Flux Activity Plugin..");
+                log.info("[WARN] FLUXFAResponse is {} so won't be sent to Flux Activity Plugin..", logType.getStatus());
             }
         } catch (ExchangeModelMarshallException | ExchangeMessageException | ExchangeLogException e) {
             log.error("Unable to send FLUXFAResponse to plugin.", e);
@@ -503,8 +504,21 @@ public class ExchangeEventOutgoingServiceBean implements ExchangeEventOutgoingSe
             }
             username = request.getUsername();
             ExchangeLogType log = ExchangeLogMapper.getReceivedMovementExchangeLog(setReportMovementType, movementRefType.getMovementRefGuid(), movementRefType.getType().value(), username,message);
+            log.setResponseStatus(request.getResponseStatus());
+            log.setStatus(request.getStatus());
             exchangeLogService.log(log, username);
-        } catch (ExchangeLogException e) {
+            // Send response only if it is NOT FAILED or BLOCKED
+            if (ExchangeLogStatusTypeType.FAILED != log.getStatus() && ExchangeLogResponseStatusEnum.BLOCKED != log.getResponseStatus()) {
+                String pluginRequest = ExchangePluginRequestMapper.createSendFLUXMovementRequest(
+                        JAXBMarshaller.marshallJaxBObjectToString(request),
+                        request.getDestination(),
+                        request.getSenderOrReceiver(),
+                        request.getFluxDataFlow(),
+                        log.getGuid(),
+                        request.getAd());
+                sendMovementReportToFLUX(pluginRequest, ExchangeServiceConstants.MOVEMENT_PLUGIN_SERVICE_NAME);
+            }
+        } catch (ExchangeLogException | ExchangeMessageException | ExchangeModelMarshallException e) {
             log.error(e.getMessage(),e);
         }
     }

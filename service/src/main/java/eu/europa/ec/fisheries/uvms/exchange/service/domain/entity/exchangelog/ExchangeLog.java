@@ -12,6 +12,7 @@ copy of the GNU General Public License along with the IFDM Suite. If not, see <h
 
 package eu.europa.ec.fisheries.uvms.exchange.service.domain.entity.exchangelog;
 
+import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogResponseStatusEnum;
 import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogStatusTypeType;
 import eu.europa.ec.fisheries.schema.exchange.v1.LogType;
 import eu.europa.ec.fisheries.schema.exchange.v1.TypeRefType;
@@ -172,6 +173,10 @@ public class ExchangeLog implements Serializable {
 
 	@Column(name = "log_business_error")
 	private String businessError;
+
+	@Enumerated(EnumType.STRING)
+	@Column(name = "response_status")
+	private ExchangeLogResponseStatusEnum responseStatus;
 
 	@PrePersist
 	public void prepersist() {

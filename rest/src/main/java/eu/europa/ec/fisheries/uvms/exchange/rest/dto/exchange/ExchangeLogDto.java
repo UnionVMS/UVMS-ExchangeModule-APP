@@ -51,6 +51,7 @@ public class ExchangeLogDto {
 	private ExchangeLogData logData;
 	@XmlElement(required = true)
 	private List<RelatedLogInfo> relatedLogData;
+	private String responseStatus;
 	
 	public String getId() {
 		return id;
@@ -161,5 +162,13 @@ public class ExchangeLogDto {
 
 	public void setDf(String df) {
 		this.df = df;
+	}
+
+	public String getResponseStatus() {
+		return responseStatus;
+	}
+
+	public void setResponseStatus(String responseStatus) {
+		this.responseStatus = responseStatus;
 	}
 }
