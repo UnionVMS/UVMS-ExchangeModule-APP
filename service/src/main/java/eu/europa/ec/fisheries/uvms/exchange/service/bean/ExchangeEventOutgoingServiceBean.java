@@ -504,7 +504,16 @@ public class ExchangeEventOutgoingServiceBean implements ExchangeEventOutgoingSe
             username = request.getUsername();
             ExchangeLogType log = ExchangeLogMapper.getReceivedMovementExchangeLog(setReportMovementType, movementRefType.getMovementRefGuid(), movementRefType.getType().value(), username,message);
             exchangeLogService.log(log, username);
-        } catch (ExchangeLogException e) {
+
+            String pluginRequest = ExchangePluginRequestMapper.createSendFLUXMovementRequest(
+                    JAXBMarshaller.marshallJaxBObjectToString(request),
+                    request.getDestination(),
+                    request.getSenderOrReceiver(),
+                    request.getFluxDataFlow(),
+                    log.getGuid(),
+                    request.getAd());
+            sendMovementReportToFLUX(pluginRequest, ExchangeServiceConstants.MOVEMENT_PLUGIN_SERVICE_NAME);
+        } catch (ExchangeLogException | ExchangeMessageException | ExchangeModelMarshallException e) {
             log.error(e.getMessage(),e);
         }
     }
