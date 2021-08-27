@@ -40,10 +40,11 @@ import javax.jms.TextMessage;
         @ActivationConfigProperty(propertyName = MessageConstants.DESTINATION_LOOKUP_STR, propertyValue = MessageConstants.EVENT_BUS_TOPIC),
         @ActivationConfigProperty(propertyName = MessageConstants.SUBSCRIPTION_NAME_STR, propertyValue = ExchangeModelConstants.EXCHANGE_REGISTER_SERVICE),
         @ActivationConfigProperty(propertyName = MessageConstants.CLIENT_ID_STR, propertyValue = ExchangeModelConstants.EXCHANGE_REGISTER_SERVICE),
+        @ActivationConfigProperty(propertyName = "maxSession", propertyValue = "1"),
 })
 public class RegistryBusEventListener implements MessageListener {
 
-    final static Logger LOG = LoggerFactory.getLogger(RegistryBusEventListener.class);
+    private static final Logger LOG = LoggerFactory.getLogger(RegistryBusEventListener.class);
 
     @Inject
     private PluginServiceBean pluginServiceBean;
