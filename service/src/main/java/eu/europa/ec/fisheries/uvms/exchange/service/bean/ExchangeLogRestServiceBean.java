@@ -36,6 +36,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 
@@ -183,7 +185,9 @@ public class ExchangeLogRestServiceBean {
                     paramsMap.put("SENDER_RECEIVER", criterion.getValue());
                 }
                 else if ("TYPE".equals(criterion.getKey().value())){
-                    paramsMap.put("TYPEREFTYPE", criterion.getValue());
+                    LogTypeGroupEnum logType =  LogTypeGroupEnum.valueOf(criterion.getValue());
+                    List<String> subTypes = logType.getSubTypesAsList();
+                    paramsMap.put("TYPEREFTYPE", subTypes);
                 }
             }
         }
@@ -239,6 +243,32 @@ public class ExchangeLogRestServiceBean {
             }
         } else {
             exchangeLogDao.getEntityManager().remove(exchangeLogByGuid);
+        }
+    }
+
+    /**
+     * Group relative types for search purposes
+     */
+    enum LogTypeGroupEnum {
+        FA(TypeRefType.FA, TypeRefType.FA_QUERY, TypeRefType.FA_REPORT, TypeRefType.FA_RESPONSE) ,
+        FA_QUERY(TypeRefType.FA_QUERY) ,
+        FA_REPORT(TypeRefType.FA_REPORT) ,
+        FA_RESPONSE(TypeRefType.FA_RESPONSE) ,
+        MOVEMENT(TypeRefType.MOVEMENT, TypeRefType.MOVEMENT_REPORT, TypeRefType.MOVEMENT_RESPONSE),
+        MOVEMENT_REPORT(TypeRefType.MOVEMENT, TypeRefType.MOVEMENT_REPORT),
+        MOVEMENT_RESPONSE(TypeRefType.MOVEMENT_RESPONSE),
+        ASSET(TypeRefType.ASSETS);
+
+        private TypeRefType[] subTypes;
+
+        LogTypeGroupEnum(TypeRefType... subTypes) {
+            this.subTypes = subTypes;
+        }
+
+        List<String> getSubTypesAsList() {
+            return Stream.of(this.subTypes)
+                    .map(TypeRefType::value)
+                    .collect(Collectors.toList());
         }
     }
 }

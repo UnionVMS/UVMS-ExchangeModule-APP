@@ -44,7 +44,7 @@ import static eu.europa.ec.fisheries.uvms.exchange.service.domain.entity.exchang
                         "((:TYPEREFGUID is NULL) OR (UPPER(cast(e.typeRefGuid as string)) LIKE CONCAT('%', UPPER(cast(:TYPEREFGUID as string)), '%'))) OR " +
 						"((:ON is NULL) OR (UPPER(cast(e.onValue as string)) LIKE CONCAT('%', UPPER(cast(:ON as string)), '%'))) OR " +
 						"((:SENDER_RECEIVER is NULL) OR (UPPER(cast(e.senderReceiver as string)) LIKE CONCAT('%', UPPER(cast(:SENDER_RECEIVER as string)), '%')))) AND " +
-                        "((:TYPEREFTYPE is NULL) OR (UPPER(cast(e.typeRefType as string)) LIKE CONCAT('%', UPPER(cast(:TYPEREFTYPE as string)), '%'))) AND " +
+						"(((:TYPEREFTYPE) is NULL) OR (UPPER(cast(e.typeRefType as string)) IN (:TYPEREFTYPE) ) )  AND " +
                         "((:STATUS is NULL) OR (UPPER(cast(e.status as string)) LIKE CONCAT('%', UPPER(cast(:STATUS as string)), '%'))) AND " +
                         "((:SOURCE is NULL) OR (UPPER(cast(e.source as string)) LIKE CONCAT('%', UPPER(cast(:SOURCE as string)), '%'))) AND " +
                         "((:RECIPIENT is NULL) OR (UPPER(cast(e.recipient as string)) LIKE CONCAT('%', UPPER(cast(:RECIPIENT as string)), '%'))) AND " +
@@ -58,7 +58,7 @@ import static eu.europa.ec.fisheries.uvms.exchange.service.domain.entity.exchang
 				"((:TYPEREFGUID is NULL) OR (UPPER(cast(e.typeRefGuid as string)) LIKE CONCAT('%', UPPER(cast(:TYPEREFGUID as string)), '%'))) OR " +
 				"((:ON is NULL) OR (UPPER(cast(e.onValue as string)) LIKE CONCAT('%', UPPER(cast(:ON as string)), '%'))) OR " +
 				"((:SENDER_RECEIVER is NULL) OR (UPPER(cast(e.senderReceiver as string)) LIKE CONCAT('%', UPPER(cast(:SENDER_RECEIVER as string)), '%')))) AND " +
-				"((:TYPEREFTYPE is NULL) OR (UPPER(cast(e.typeRefType as string)) LIKE CONCAT('%', UPPER(cast(:TYPEREFTYPE as string)), '%'))) AND " +
+				"(((:TYPEREFTYPE) is NULL) OR (UPPER(cast(e.typeRefType as string)) IN (:TYPEREFTYPE) ) )  AND " +
 				"((:STATUS is NULL) OR (UPPER(cast(e.status as string)) LIKE CONCAT('%', UPPER(cast(:STATUS as string)), '%'))) AND " +
 				"((:SOURCE is NULL) OR (UPPER(cast(e.source as string)) LIKE CONCAT('%', UPPER(cast(:SOURCE as string)), '%'))) AND " +
 				"((:RECIPIENT is NULL) OR (UPPER(cast(e.recipient as string)) LIKE CONCAT('%', UPPER(cast(:RECIPIENT as string)), '%'))) AND " +
