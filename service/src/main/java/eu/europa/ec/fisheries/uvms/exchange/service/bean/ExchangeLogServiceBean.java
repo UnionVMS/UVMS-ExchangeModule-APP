@@ -95,6 +95,18 @@ public class ExchangeLogServiceBean implements ExchangeLogService {
 
     @Override
     public ExchangeLogType log(ExchangeBaseRequest request, LogType logType, ExchangeLogStatusTypeType status, TypeRefType messageType, String messageText, boolean incoming) throws ExchangeLogException {
+        ExchangeLogType log = createExchangeLogType(request,logType,status,messageType, messageText,incoming);
+        return log(log, request.getUsername());
+    }
+
+    @Override
+    public ExchangeLogType log(ExchangeBaseRequest request, LogType logType, ExchangeLogStatusTypeType status, TypeRefType messageType, String messageText, boolean incoming,ExchangeLogResponseStatusEnum responseStatus) throws ExchangeLogException {
+        ExchangeLogType log = createExchangeLogType(request,logType,status,messageType, messageText,incoming);
+        log.setResponseStatus(responseStatus);
+        return log(log, request.getUsername());
+    }
+
+    private ExchangeLogType createExchangeLogType(ExchangeBaseRequest request, LogType logType, ExchangeLogStatusTypeType status, TypeRefType messageType, String messageText, boolean incoming) throws ExchangeLogException {
         LogRefType ref = new LogRefType();
         ref.setMessage(messageText);
         ref.setRefGuid(request.getMessageGuid());
@@ -115,11 +127,10 @@ public class ExchangeLogServiceBean implements ExchangeLogService {
         log.setDf(request.getFluxDataFlow());
         log.setGuid(request.getResponseMessageGuid());
         log.setAd(request.getAd());
-
-        return log(log, request.getUsername());
+        return log;
     }
 
-    @Override
+        @Override
     public ExchangeLogType newLog(ExchangeBaseRequest request, LogType logType, ExchangeLogStatusTypeType status, TypeRefType messageType, String messageText, boolean incoming) throws ExchangeLogException {
         LogRefType ref = new LogRefType();
         ref.setMessage(messageText);
