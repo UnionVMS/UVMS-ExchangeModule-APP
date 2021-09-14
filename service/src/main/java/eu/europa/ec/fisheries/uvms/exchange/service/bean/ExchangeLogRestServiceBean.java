@@ -85,9 +85,10 @@ public class ExchangeLogRestServiceBean {
         int page = pagination.getPage();
         int listSize = pagination.getListSize();
         Long count = exchangeLogDao.count(paramsMap);
+        PageInfo pageInfo = calculatePagingInfo(count.intValue(),page,listSize);
         String sortingField = mapSortField(query);
         boolean isReversed = mapReversedField(query);
-        List<ExchangeLog> list = exchangeLogDao.list(paramsMap, sortingField, isReversed,(page * listSize) - listSize, listSize);
+        List<ExchangeLog> list = exchangeLogDao.list(paramsMap, sortingField, isReversed,pageInfo.getQueryStartIndex(), listSize);
         List<ExchangeLogType> exchangeLogEntityList = new ArrayList<>();
         if (isNotEmpty(list)){
             for (ExchangeLog entity : list) {
@@ -95,14 +96,21 @@ public class ExchangeLogRestServiceBean {
             }
         }
         enrichDtosWithRelatedLogsInfo(exchangeLogEntityList);
-        response.setCurrentPage(page);
-        int totalNumberOfPages = (count.intValue() / listSize);
-        if (totalNumberOfPages == 0 && CollectionUtils.isNotEmpty(exchangeLogEntityList)){
-            totalNumberOfPages = 1;
-        }
-        response.setTotalNumberOfPages(totalNumberOfPages);
+        response.setCurrentPage(pageInfo.getCurrentPage());
+        response.setTotalNumberOfPages(pageInfo.getTotalPages());
         response.getExchangeLog().addAll(exchangeLogEntityList);
         return response;
+    }
+
+    private PageInfo calculatePagingInfo(int total, int pageNr, int pageSize) {
+        int startIdx = (pageNr * pageSize) - pageSize;
+
+        int totalPages = ((total % pageSize) > 0) ? (total/pageSize +1) : total/pageSize;
+        if (pageNr > totalPages) {
+            startIdx=0;
+            pageNr=1;
+        }
+        return new PageInfo(totalPages,startIdx,pageNr);
     }
 
     private void enrichDtosWithRelatedLogsInfo(List<ExchangeLogType> exchangeLogList) {
@@ -269,6 +277,30 @@ public class ExchangeLogRestServiceBean {
             return Stream.of(this.subTypes)
                     .map(TypeRefType::value)
                     .collect(Collectors.toList());
+        }
+    }
+
+    static class PageInfo {
+        private int totalPages;
+        private int queryStartIndex;
+        private int currentPage;
+
+        public PageInfo(int totalPages, int queryStartIndex, int currentPage) {
+            this.totalPages = totalPages;
+            this.queryStartIndex = queryStartIndex;
+            this.currentPage = currentPage;
+        }
+
+        public int getTotalPages() {
+            return totalPages;
+        }
+
+        public int getQueryStartIndex() {
+            return queryStartIndex;
+        }
+
+        public int getCurrentPage() {
+            return currentPage;
         }
     }
 }
