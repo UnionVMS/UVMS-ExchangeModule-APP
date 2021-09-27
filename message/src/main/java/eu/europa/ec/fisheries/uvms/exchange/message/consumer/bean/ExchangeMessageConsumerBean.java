@@ -14,7 +14,6 @@ package eu.europa.ec.fisheries.uvms.exchange.message.consumer.bean;
 import eu.europa.ec.fisheries.schema.exchange.module.v1.ExchangeBaseRequest;
 import eu.europa.ec.fisheries.schema.exchange.module.v1.ExchangeModuleMethod;
 import eu.europa.ec.fisheries.schema.exchange.plugin.v1.AcknowledgeResponse;
-import eu.europa.ec.fisheries.schema.exchange.plugin.v1.PingResponse;
 import eu.europa.ec.fisheries.uvms.commons.message.api.MessageConstants;
 import eu.europa.ec.fisheries.uvms.commons.message.context.FluxEnvelopePropagatedData;
 import eu.europa.ec.fisheries.uvms.commons.message.context.FluxEnvelopeStack;
@@ -30,6 +29,7 @@ import org.slf4j.LoggerFactory;
 
 import javax.ejb.ActivationConfigProperty;
 import javax.ejb.MessageDriven;
+import javax.ejb.MessageDrivenContext;
 import javax.enterprise.event.Event;
 import javax.inject.Inject;
 import javax.jms.Message;
@@ -186,38 +186,34 @@ public class ExchangeMessageConsumerBean implements MessageListener {
     @Inject
     private FluxEnvelopeStack fluxEnvelopeStack;
 
+    private MessageDrivenContext context;
 
     @Override
     public void onMessage(Message message) {
         TextMessage textMessage = (TextMessage) message;
         MappedDiagnosticContext.addMessagePropertiesToThreadMappedDiagnosticContext(textMessage);
         ExchangeBaseRequest request = tryConsumeExchangeBaseRequest(textMessage);
-        LOG.debug("Message received in Exchange Message MDB. Times redelivered: {}", getTimesRedelivered(message));
-        LOG.debug("Request body : {}", request);
+        LOG.info("EXCH FLOW: Message received in Exchange MDB. Times redelivered: {}. Request body : {}",
+                getTimesRedelivered(message), request);
         final ExchangeMessageEvent messageEventWrapper = new ExchangeMessageEvent(textMessage,request);
         if (request == null) {
-            LOG.warn("[ERROR] ExchangeBaseRequest is null!! Check the message sent...");
-            try {
-                //Handle PingResponse from plugin
-                JAXBMarshaller.unmarshallTextMessage(textMessage, PingResponse.class);
-                updatePingStateEvent.fire(messageEventWrapper);
-            } catch (ExchangeModelMarshallException e) {
-                AcknowledgeResponse type = tryConsumeAcknowledgeResponse(textMessage);
-                if (type == null) {
-                    LOG.error("[ Error when receiving message in exchange: {}]", message);
-                    errorEvent.fire(new ExchangeMessageEvent(textMessage, ExchangeModuleResponseMapper.createFaultMessage(FaultCode.EXCHANGE_MESSAGE, "Error when receiving message in exchange")));
-                } else {
-                    updateStateEvent.fire(messageEventWrapper);
-                }
+            LOG.warn("EXCH FLOW: ExchangeBaseRequest is null! Check the message sent.");
+            //TODO Here needs to be handled the PingResponse from plugin, see @PluginPingEvent handler
+            AcknowledgeResponse type = tryConsumeAcknowledgeResponse(textMessage);
+            if (type == null) {
+                LOG.error("EXCH FLOW: Error when receiving message in exchange: {}", message);
+                context.setRollbackOnly();
+            } else {
+                updateStateEvent.fire(messageEventWrapper);
             }
         } else {
             fluxEnvelopeStack.withContext(extractFluxEnvelopePropagatedData(request), fluxEnvelopePropagatedData -> {
                 if (!checkUsernameShouldBeProvided(request)) {
-                    LOG.error("[ Error when receiving message in exchange, username must be set in the request: ]");
+                    LOG.error("EXCH FLOW: Error when receiving message in exchange, username must be set in the request: ");
                     errorEvent.fire(new ExchangeMessageEvent(textMessage, ExchangeModuleResponseMapper.createFaultMessage(FaultCode.EXCHANGE_MESSAGE, "Username in the request must be set")));
                 } else {
                     ExchangeModuleMethod exchangeMethod = request.getMethod();
-                    LOG.info("[INFO] Going to process following message type [ {} ] : ", exchangeMethod);
+                    LOG.info("EXCH FLOW: Going to process following message type [ {} ] : ", exchangeMethod);
                     switch (exchangeMethod) {
                         case LIST_SERVICES:
                             pluginConfigEvent.fire(messageEventWrapper);
@@ -308,12 +304,16 @@ public class ExchangeMessageConsumerBean implements MessageListener {
                             logIdByTyeExists.fire(messageEventWrapper);
                             break;
                         default:
-                            LOG.error("[ Not implemented method consumed: {} ] ", exchangeMethod);
+                            LOG.error("EXCH FLOW: Not implemented method consumed: {}", exchangeMethod);
                             errorEvent.fire(new ExchangeMessageEvent(textMessage, ExchangeModuleResponseMapper.createFaultMessage(FaultCode.EXCHANGE_MESSAGE, "Method not implemented")));
                     }
                 }
             });
         }
+    }
+
+    public void setContext(MessageDrivenContext context) {
+        this.context = context;
     }
 
     private boolean checkUsernameShouldBeProvided(ExchangeBaseRequest request) {
