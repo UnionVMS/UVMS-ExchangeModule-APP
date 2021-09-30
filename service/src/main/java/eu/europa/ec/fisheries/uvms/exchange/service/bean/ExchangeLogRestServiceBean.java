@@ -232,6 +232,9 @@ public class ExchangeLogRestServiceBean {
                 case DATE_FORWARDED:
                     sortFields = "status";
                     break;
+                case RESPONSE_STATUS:
+                    sortFields = "responseStatus";
+                    break;
                 default:
                     sortFields = "dateReceived";
             }
