@@ -14,7 +14,7 @@ import java.util.Map;
 import static eu.europa.ec.fisheries.uvms.exchange.model.constant.ExchangeModelConstants.ACTIVITY_EVENT_QUEUE;
 
 @Stateless
-public class ExchangeActivityEfrProducer extends AbstractProducer {
+public class ExchangeActivityProducer extends AbstractProducer {
 
     @Resource(mappedName = "java:/" + ACTIVITY_EVENT_QUEUE)
     private Queue destination;
@@ -22,6 +22,10 @@ public class ExchangeActivityEfrProducer extends AbstractProducer {
     @Override
     public Destination getDestination() {
         return destination;
+    }
+
+    public void sendActivityMessage(String message) throws JMSException {
+        sendModuleMessage(message, null);
     }
 
     public void sendEfrSaveActivity(String text) throws JMSException {
