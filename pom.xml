@@ -33,14 +33,14 @@
         <usm4uvms.version>4.1.9</usm4uvms.version>
         <uvms.config.version>4.1.5</uvms.config.version>
         <uvms-pom-deps.version>3.6</uvms-pom-deps.version>
-        <asset.version>6.8.13</asset.version>
 
         <!-- Uvms models -->
+        <asset.version>6.8.13</asset.version>
         <user.model.version>2.2.2</user.model.version>
         <audit.model.version>4.3.9</audit.model.version>
         <movement.model.version>5.6.3-UVMS</movement.model.version>
-        <rules.model.version>3.3-MARE</rules.model.version>
         <movement.rules.model.version>2.4.13</movement.rules.model.version>
+        <activity.model.version>1.0.11-SWE</activity.model.version>
     </properties>
 
     <dependencyManagement>
@@ -138,6 +138,11 @@
                 <groupId>eu.europa.ec.fisheries.uvms.asset</groupId>
                 <artifactId>asset-model</artifactId>
                 <version>${asset.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>eu.europa.ec.fisheries.uvms.activity</groupId>
+                <artifactId>activity-model</artifactId>
+                <version>${activity.model.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

@@ -35,7 +35,6 @@ import eu.europa.ec.fisheries.uvms.exchange.service.event.ExchangeSendingQueueEv
 import eu.europa.ec.fisheries.uvms.exchange.service.message.producer.bean.ExchangeEventProducer;
 import eu.europa.ec.fisheries.uvms.longpolling.notifications.NotificationMessage;
 import org.apache.commons.lang3.NotImplementedException;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -43,9 +42,6 @@ import org.slf4j.LoggerFactory;
 public class ExchangeLogServiceBean {
 
     private static final Logger LOG = LoggerFactory.getLogger(ExchangeLogServiceBean.class);
-
-    @EJB
-    private ExchangeToRulesSyncMsgBean exchangeToRulesSyncMsgBean;
 
     @Inject
     @ExchangeLogEvent

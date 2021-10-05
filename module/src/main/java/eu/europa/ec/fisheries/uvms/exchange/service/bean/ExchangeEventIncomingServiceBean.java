@@ -22,6 +22,9 @@ import eu.europa.ec.fisheries.schema.exchange.plugin.v1.ExchangePluginMethod;
 import eu.europa.ec.fisheries.schema.exchange.service.v1.ServiceResponseType;
 import eu.europa.ec.fisheries.schema.exchange.service.v1.StatusType;
 import eu.europa.ec.fisheries.schema.exchange.v1.*;
+import eu.europa.ec.fisheries.uvms.activity.model.mapper.ActivityModuleRequestMapper;
+import eu.europa.ec.fisheries.uvms.activity.model.schemas.MessageType;
+import eu.europa.ec.fisheries.uvms.activity.model.schemas.SyncAsyncRequestType;
 import eu.europa.ec.fisheries.uvms.commons.date.JsonBConfigurator;
 import eu.europa.ec.fisheries.uvms.commons.message.impl.JAXBUtils;
 import eu.europa.ec.fisheries.uvms.exchange.model.mapper.ExchangeModuleResponseMapper;
@@ -95,13 +98,10 @@ public class ExchangeEventIncomingServiceBean {
     private ExchangeAssetProducer exchangeAssetProducer;
 
     @Inject
-    private ExchangeRulesProducer rulesProducer;
-
-    @Inject
     private ExchangeMovementProducer movementProducer;
 
     @Inject
-    private ExchangeActivityEfrProducer exchangeActivityEfrProducer;
+    private ExchangeActivityProducer exchangeActivityProducer;
 
     @Inject
     private ExchangeSalesProducer salesProducer;
@@ -109,12 +109,22 @@ public class ExchangeEventIncomingServiceBean {
     private Jsonb jsonb = new JsonBConfigurator().getContext(null);
 
     /**
-     * Process FLUXFAReportMessage coming from Flux Activity plugin
+     * Process FLUXFAReportMessage
      *
      * @param message
      */
     public void processFLUXFAReportMessage(TextMessage message) {
-        throw new NotImplementedException("Rules has been removed since it is not in use and is not being maintained");
+        try {
+            SetFLUXFAReportMessageRequest request = JAXBMarshaller.unmarshallTextMessage(message, SetFLUXFAReportMessageRequest.class);
+            LOG.debug("Got FLUXFAReportMessage in exchange : {}", request.getRequest());
+
+            ExchangeLog exchangeLog = exchangeLogService.log(request, LogType.RCV_FLUX_FA_REPORT_MSG, ExchangeLogStatusTypeType.SUCCESSFUL, extractFaType(request.getMethod()), request.getRequest(), true);
+
+            String activityRequest = ActivityModuleRequestMapper.mapToSetFLUXFAReportOrQueryMessageRequest(request.getRequest(), PluginType.valueOf(request.getPluginType().name()).name(), MessageType.FLUX_FA_REPORT_MESSAGE, SyncAsyncRequestType.ASYNC, exchangeLog.getId().toString());
+            exchangeActivityProducer.sendActivityMessage(activityRequest);
+        } catch (Exception e) {
+            throw new IllegalArgumentException("Could not process FA message", e);
+        }
     }
 
     public void processFAQueryMessage(TextMessage message) {
@@ -221,7 +231,7 @@ public class ExchangeEventIncomingServiceBean {
     public void processEfrSaveActivity(TextMessage textMessage) {
         try {
             LOG.debug("Received EFR Save Activity-message");
-            exchangeActivityEfrProducer.sendEfrSaveActivity(textMessage.getText());
+            exchangeActivityProducer.sendEfrSaveActivity(textMessage.getText());
         } catch (JMSException e) {
             final String ERROR_MESSAGE = "Could not process EfrSaveActivity";
             LOG.error(ERROR_MESSAGE, e);
@@ -434,26 +444,6 @@ public class ExchangeEventIncomingServiceBean {
         } catch (Exception e) {
             LOG.error("Process acknowledge couldn't be marshalled {} {}", message, e);
             throw new IllegalStateException("Could not process acknowledge", e);
-        }
-    }
-
-    private void forwardToRules(String messageToForward) {
-        forwardToRules(messageToForward, null);
-    }
-
-
-    /**
-     * forwards serialized message to Rules module
-     *
-     * @param messageToForward
-     */
-    private void forwardToRules(String messageToForward, String messageSelector) {
-        try {
-            LOG.trace("[INFO] Forwarding the msg to rules Module.");
-            rulesProducer.sendRulesMessage(messageToForward, messageSelector);
-
-        } catch (Exception e) {
-            LOG.error("[ERROR] Failed to forward message to Rules: {} {}", messageToForward, e);
         }
     }
 
