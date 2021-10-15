@@ -27,6 +27,7 @@ import eu.europa.ec.fisheries.uvms.exchange.model.mapper.JAXBMarshaller;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.Resource;
 import javax.ejb.ActivationConfigProperty;
 import javax.ejb.MessageDriven;
 import javax.ejb.MessageDrivenContext;
@@ -186,7 +187,8 @@ public class ExchangeMessageConsumerBean implements MessageListener {
     @Inject
     private FluxEnvelopeStack fluxEnvelopeStack;
 
-    private MessageDrivenContext context;
+    @Resource
+    MessageDrivenContext mdc;
 
     @Override
     public void onMessage(Message message) {
@@ -195,14 +197,14 @@ public class ExchangeMessageConsumerBean implements MessageListener {
         ExchangeBaseRequest request = tryConsumeExchangeBaseRequest(textMessage);
         LOG.info("EXCH FLOW: Message received in Exchange MDB. Times redelivered: {}. Request body : {}",
                 getTimesRedelivered(message), request);
-        final ExchangeMessageEvent messageEventWrapper = new ExchangeMessageEvent(textMessage,request);
+        final ExchangeMessageEvent messageEventWrapper = new ExchangeMessageEvent(textMessage, request);
         if (request == null) {
             LOG.warn("EXCH FLOW: ExchangeBaseRequest is null! Check the message sent.");
             //TODO Here needs to be handled the PingResponse from plugin, see @PluginPingEvent handler
             AcknowledgeResponse type = tryConsumeAcknowledgeResponse(textMessage);
             if (type == null) {
                 LOG.error("EXCH FLOW: Error when receiving message in exchange: {}", message);
-                context.setRollbackOnly();
+                mdc.setRollbackOnly();
             } else {
                 updateStateEvent.fire(messageEventWrapper);
             }
@@ -270,7 +272,7 @@ public class ExchangeMessageConsumerBean implements MessageListener {
                             mdrSyncResponseMessageEvent.fire(messageEventWrapper);
                             break;
                         case SET_FLUX_FA_REPORT_MESSAGE:
-                        case UNKNOWN :
+                        case UNKNOWN:
                             processFLUXFAReportMessageEvent.fire(messageEventWrapper);
                             break;
                         case SEND_FLUX_FA_REPORT_MESSAGE:
@@ -310,10 +312,6 @@ public class ExchangeMessageConsumerBean implements MessageListener {
                 }
             });
         }
-    }
-
-    public void setContext(MessageDrivenContext context) {
-        this.context = context;
     }
 
     private boolean checkUsernameShouldBeProvided(ExchangeBaseRequest request) {
