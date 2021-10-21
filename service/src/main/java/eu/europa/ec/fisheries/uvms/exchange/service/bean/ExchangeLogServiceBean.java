@@ -120,7 +120,7 @@ public class ExchangeLogServiceBean implements ExchangeLogService {
         log.setIncoming(incoming);
         log.setTypeRef(ref);
         log.setDestination(request.getDestination());
-        log.setSource(request.getPluginType().toString());
+        log.setSource((request.getPluginType() != null) ? request.getPluginType().toString() : null);
         log.setOn(request.getOnValue());
         log.setTo(request.getTo());
         log.setTodt(request.getTodt());
