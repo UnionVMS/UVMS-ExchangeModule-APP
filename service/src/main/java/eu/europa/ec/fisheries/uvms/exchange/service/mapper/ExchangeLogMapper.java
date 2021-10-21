@@ -92,6 +92,33 @@ public class ExchangeLogMapper {
         return log;
     }
 
+
+/*    public static ExchangeLogType getReceivedMovementExchangeLog(String refGuid, String sender, String destination, ExchangeMessageEvent message) throws ExchangeLogException {
+        ReceiveMovementType log = new ReceiveMovementType();
+        log.setDateRecieved(message.getExchangeBaseRequest().getDate());
+        log.setType(LogType.PROCESSED_MOVEMENT);
+        LogRefType logRefType = new LogRefType();
+        logRefType.setRefGuid(refGuid);
+        try {
+            logRefType.setMessage(message.getJmsMessage().getText());
+            final OutputFormat format = OutputFormat.createPrettyPrint();
+            final org.dom4j.Document document = DocumentHelper.parseText(message.getJmsMessage().getText());
+            StringWriter  sw = new StringWriter();
+            final XMLWriter writer = new XMLWriter(sw, format);
+            writer.write(document);
+            logRefType.setMessage(sw.toString());
+        } catch (Exception e) {
+            LOG.warn(e.getMessage(),e);
+            e.printStackTrace();
+        }
+        logRefType.setType(TypeRefType.MOVEMENT_RESPONSE);
+        log.setTypeRef(logRefType);
+        log.setStatus(ExchangeLogStatusTypeType.SUCCESSFUL);
+        log.setSenderReceiver(sender);
+        log.setRecipient(destination);
+        return log;
+    }*/
+
     private static String getSenderReceiver(MovementBaseType movement, PluginType pluginType, String pluginName, String username) throws ExchangeLogException {
         if (movement == null) {
             throw new ExchangeLogException("No movement");

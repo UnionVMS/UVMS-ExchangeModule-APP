@@ -44,6 +44,7 @@
         <audit.model.version>${uvms.audit.module.version}</audit.model.version>
     <movement.model.version>${uvms.movement.module.version}</movement.model.version>
         <rules.model.version>${uvms.rules.module.version}</rules.model.version>
+        <activity.model.version>${uvms.activity.model.version}</activity.model.version>
         <javaee.version>8.0</javaee.version>
 
         <hibernate.version>5.3.17.Final</hibernate.version>
@@ -195,6 +196,11 @@
                 <groupId>eu.europa.ec.fisheries.uvms.asset</groupId>
                 <artifactId>asset-model</artifactId>
                 <version>${asset.model.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>eu.europa.ec.fisheries.uvms.activity</groupId>
+                <artifactId>activity-model</artifactId>
+                <version>${activity.model.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
