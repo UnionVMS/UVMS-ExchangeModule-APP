@@ -58,6 +58,8 @@ import eu.europa.ec.fisheries.uvms.longpolling.notifications.NotificationMessage
 import eu.europa.ec.fisheries.wsdl.asset.types.Asset;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
+import un.unece.uncefact.data.standard.fluxresponsemessage._6.FLUXResponseMessage;
+import un.unece.uncefact.data.standard.unqualifieddatatype._20.IDType;
 
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
@@ -488,33 +490,22 @@ public class ExchangeEventOutgoingServiceBean implements ExchangeEventOutgoingSe
         }
     }
 
+
     @Override
     public void handleProcessedMovementBatch(@Observes @ProcessedMovementBatch ExchangeMessageEvent message) {
         try {
-            ProcessedMovementResponseBatch request = (ProcessedMovementResponseBatch) message.getExchangeBaseRequest();
+            SetFLUXFAResponseMessageRequest request = (SetFLUXFAResponseMessageRequest) message.getExchangeBaseRequest();
             log.debug("Received processed movement from Rules:{}", request);
-            String username;
-            MovementRefType movementRefType = request.getMovementRefType();
-            List<SetReportMovementType> reportTypeList = request.getOrgRequest();
-            SetReportMovementType setReportMovementType;
-            if(CollectionUtils.isNotEmpty(reportTypeList)){
-                setReportMovementType = reportTypeList.get(0);
-            } else {
-                setReportMovementType = new SetReportMovementType();
-            }
-            username = request.getUsername();
-            ExchangeLogType log = ExchangeLogMapper.getReceivedMovementExchangeLog(setReportMovementType, movementRefType.getMovementRefGuid(), movementRefType.getType().value(), username,message,request.getSenderOrReceiver());
-            log.setResponseStatus(request.getResponseStatus());
-            log.setStatus(request.getStatus());
-            exchangeLogService.log(log, username);
+            final ExchangeLogType logType = exchangeLogService.log(request, LogType.PROCESSED_MOVEMENT, request.getStatus(), TypeRefType.MOVEMENT_RESPONSE, request.getRequest(), false,request.getResponseStatus());
+
             // Send response only if it is NOT FAILED or BLOCKED
-            if (ExchangeLogStatusTypeType.FAILED != log.getStatus() && ExchangeLogResponseStatusEnum.BLOCKED != log.getResponseStatus()) {
+            if (ExchangeLogStatusTypeType.FAILED != logType.getStatus() && ExchangeLogResponseStatusEnum.BLOCKED != logType.getResponseStatus()) {
                 String pluginRequest = ExchangePluginRequestMapper.createSendFLUXMovementRequest(
                         JAXBMarshaller.marshallJaxBObjectToString(request),
                         request.getDestination(),
                         request.getSenderOrReceiver(),
                         request.getFluxDataFlow(),
-                        log.getGuid(),
+                        logType.getGuid(),
                         request.getAd());
                 sendMovementReportToFLUX(pluginRequest, ExchangeServiceConstants.MOVEMENT_PLUGIN_SERVICE_NAME);
             }
