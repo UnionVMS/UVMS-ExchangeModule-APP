@@ -476,7 +476,7 @@ public class ExchangeEventOutgoingServiceBean implements ExchangeEventOutgoingSe
             } else {
                 username = orgRequest.getPluginName();
             }
-            ExchangeLogType log = ExchangeLogMapper.getReceivedMovementExchangeLog(orgRequest, movementRefType.getMovementRefGuid(), movementRefType.getType().value(), username,message);
+            ExchangeLogType log = ExchangeLogMapper.getReceivedMovementExchangeLog(orgRequest, movementRefType.getMovementRefGuid(), movementRefType.getType().value(), username,message,null);
             ExchangeLogType createdLog = exchangeLogService.log(log, username);
             LogRefType logTypeRef = createdLog.getTypeRef();
             if (logTypeRef != null && logTypeRef.getType() == TypeRefType.POLL) {
@@ -503,7 +503,7 @@ public class ExchangeEventOutgoingServiceBean implements ExchangeEventOutgoingSe
                 setReportMovementType = new SetReportMovementType();
             }
             username = request.getUsername();
-            ExchangeLogType log = ExchangeLogMapper.getReceivedMovementExchangeLog(setReportMovementType, movementRefType.getMovementRefGuid(), movementRefType.getType().value(), username,message);
+            ExchangeLogType log = ExchangeLogMapper.getReceivedMovementExchangeLog(setReportMovementType, movementRefType.getMovementRefGuid(), movementRefType.getType().value(), username,message,request.getSenderOrReceiver());
             log.setResponseStatus(request.getResponseStatus());
             log.setStatus(request.getStatus());
             exchangeLogService.log(log, username);

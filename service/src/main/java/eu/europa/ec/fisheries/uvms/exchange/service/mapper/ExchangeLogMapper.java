@@ -52,7 +52,7 @@ public class ExchangeLogMapper {
 
     private final static Logger LOG = LoggerFactory.getLogger(ExchangeLogMapper.class);
 
-    public static ExchangeLogType getReceivedMovementExchangeLog(SetReportMovementType request, String typeRefGuid, String typeRefType,String username, ExchangeMessageEvent message) throws ExchangeLogException {
+    public static ExchangeLogType getReceivedMovementExchangeLog(SetReportMovementType request, String typeRefGuid, String typeRefType,String username, ExchangeMessageEvent message,String senderReceiver) throws ExchangeLogException {
         if (request == null) {
             throw new ExchangeLogException("No request");
         }
@@ -82,7 +82,7 @@ public class ExchangeLogMapper {
         logRefType.setType(TypeRefType.MOVEMENT_RESPONSE);
         log.setTypeRef(logRefType);
         log.setStatus(ExchangeLogStatusTypeType.SUCCESSFUL);
-        log.setSenderReceiver(getSenderReceiver(request.getMovement(), request.getPluginType(), request.getPluginName(), username));
+        log.setSenderReceiver(senderReceiver ==null ? getSenderReceiver(request.getMovement(), request.getPluginType(), request.getPluginName(), username):senderReceiver);
         if (request.getMovement().getSource() != null) {
             log.setSource(request.getMovement().getSource().name());
         } else {
