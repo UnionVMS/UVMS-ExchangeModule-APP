@@ -20,6 +20,11 @@
                 <artifactId>maven-ear-plugin</artifactId>
                 <extensions>true</extensions>
                 <configuration>
+                    <archive>
+                        <manifestEntries>
+                            <Logging-Profile>exchange-logging-profile</Logging-Profile>
+                        </manifestEntries>
+                    </archive>
                     <modules>
                         <ejbModule>
                             <groupId>${project.groupId}</groupId>   
