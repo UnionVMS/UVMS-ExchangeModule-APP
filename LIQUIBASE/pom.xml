@@ -8,6 +8,7 @@
     </parent>
 
     <artifactId>exchange-liquibase</artifactId>
+	<packaging>pom</packaging>
 
     <profiles>
         <profile>
