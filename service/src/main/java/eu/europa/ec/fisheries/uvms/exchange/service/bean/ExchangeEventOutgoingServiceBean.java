@@ -478,6 +478,7 @@ public class ExchangeEventOutgoingServiceBean implements ExchangeEventOutgoingSe
             } else {
                 username = orgRequest.getPluginName();
             }
+            orgRequest.setPluginType(PluginType.FLUX);
             ExchangeLogType log = ExchangeLogMapper.getReceivedMovementExchangeLog(orgRequest, movementRefType.getMovementRefGuid(), movementRefType.getType().value(), username,message,null);
             ExchangeLogType createdLog = exchangeLogService.log(log, username);
             LogRefType logTypeRef = createdLog.getTypeRef();
@@ -496,6 +497,7 @@ public class ExchangeEventOutgoingServiceBean implements ExchangeEventOutgoingSe
         try {
             SetFLUXFAResponseMessageRequest request = (SetFLUXFAResponseMessageRequest) message.getExchangeBaseRequest();
             log.debug("Received processed movement from Rules:{}", request);
+            request.setPluginType(PluginType.FLUX);
             final ExchangeLogType logType = exchangeLogService.log(request, LogType.PROCESSED_MOVEMENT, request.getStatus(), TypeRefType.MOVEMENT_RESPONSE, request.getRequest(), false,request.getResponseStatus());
 
             // Send response only if it is NOT FAILED or BLOCKED
