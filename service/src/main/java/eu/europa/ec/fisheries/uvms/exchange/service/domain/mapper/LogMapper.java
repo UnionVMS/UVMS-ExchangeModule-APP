@@ -54,6 +54,7 @@ public class LogMapper {
             case SEND_FLUX_FA_REPORT_MSG:
             case SEND_FLUX_RESPONSE_MSG:
             case SEND_MOVEMENT_REPORT:
+            case PROCESSED_MOVEMENT:
                 entity.setSource(log.getSource());
                 break;
             default:
