@@ -11,6 +11,7 @@ copy of the GNU General Public License along with the IFDM Suite. If not, see <h
  */
 package eu.europa.ec.fisheries.uvms.exchange.rest.unsecured;
 
+import eu.europa.ec.fisheries.uvms.commons.date.JsonBConfigurator;
 import eu.europa.ec.fisheries.uvms.exchange.rest.constants.RestConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,13 +24,14 @@ import java.util.Set;
 @ApplicationPath(RestConstants.MODULE_UNSECURED_REST)
 public class RestActivator extends Application {
 
-    final static Logger LOG = LoggerFactory.getLogger(RestActivator.class);
+    private static final Logger LOG = LoggerFactory.getLogger(RestActivator.class);
 
     private final Set<Object> singletons = new HashSet<>();
     private final Set<Class<?>> set = new HashSet<>();
 
     public RestActivator() {
         set.add(ExchangeAPIRestResource.class);
+        set.add(JsonBConfigurator.class);
         LOG.info(RestConstants.MODULE_NAME + " unsecured rest API starting up");
     }
 
