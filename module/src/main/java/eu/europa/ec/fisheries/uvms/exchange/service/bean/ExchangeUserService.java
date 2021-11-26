@@ -21,6 +21,7 @@ import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MediaType;
 import eu.europa.ec.fisheries.schema.exchange.movement.v1.RecipientInfoType;
+import eu.europa.ec.fisheries.uvms.commons.date.JsonBConfigurator;
 import eu.europa.ec.fisheries.wsdl.user.types.Channel;
 import eu.europa.ec.fisheries.wsdl.user.types.EndPoint;
 import eu.europa.ec.fisheries.wsdl.user.types.Organisation;
@@ -58,6 +59,7 @@ public class ExchangeUserService {
             .connectTimeout(30, TimeUnit.SECONDS)
             .readTimeout(30, TimeUnit.SECONDS)
             .build();
+        client.register(JsonBConfigurator.class);
         return client.target(userEndpoint + "/user");
     }
 }
