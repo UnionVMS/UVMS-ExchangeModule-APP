@@ -15,6 +15,7 @@ import eu.europa.ec.fisheries.schema.exchange.module.v1.UpdatePluginSettingReque
 import eu.europa.ec.fisheries.schema.exchange.plugin.types.v1.PluginType;
 import eu.europa.ec.fisheries.schema.exchange.registry.v1.RegisterServiceRequest;
 import eu.europa.ec.fisheries.schema.exchange.registry.v1.UnregisterServiceRequest;
+import eu.europa.ec.fisheries.schema.exchange.service.v1.ServiceResponseType;
 import eu.europa.ec.fisheries.uvms.config.event.ConfigSettingEvent;
 import eu.europa.ec.fisheries.uvms.config.event.ConfigSettingUpdatedEvent;
 import eu.europa.ec.fisheries.uvms.config.exception.ConfigServiceException;
@@ -33,6 +34,7 @@ import eu.europa.ec.fisheries.uvms.exchange.service.message.event.ErrorEvent;
 import eu.europa.ec.fisheries.uvms.exchange.service.message.event.PluginErrorEvent;
 import eu.europa.ec.fisheries.uvms.exchange.service.message.event.carrier.ExchangeErrorEvent;
 import eu.europa.ec.fisheries.uvms.exchange.service.message.event.carrier.PluginErrorEventCarrier;
+import eu.europa.ec.fisheries.uvms.exchange.service.message.producer.bean.EventProducer;
 import eu.europa.ec.fisheries.uvms.exchange.service.message.producer.bean.ExchangeEventBusTopicProducer;
 import eu.europa.ec.fisheries.uvms.exchange.service.message.producer.bean.ExchangeEventProducer;
 import org.slf4j.Logger;
@@ -42,7 +44,6 @@ import javax.ejb.EJB;
 import javax.ejb.Stateless;
 import javax.enterprise.event.Event;
 import javax.enterprise.event.Observes;
-import javax.enterprise.event.TransactionPhase;
 import javax.inject.Inject;
 import javax.jms.TextMessage;
 import java.util.ArrayList;
@@ -82,6 +83,9 @@ public class PluginServiceBean {
 
     @EJB
     private UVMSConfigService configService;
+
+    @Inject
+    private EventProducer eventProducer;
 
     private boolean checkPluginType(PluginType pluginType, String responseTopicMessageSelector, String serviceClassName, String messageId) {
         LOG.debug("[INFO] CheckPluginType " + pluginType.name());
@@ -125,10 +129,12 @@ public class PluginServiceBean {
             }
             //TODO log to exchange log
 
-            String response = ExchangePluginResponseMapper.mapToRegisterServiceResponseOK(messageId, ServiceMapper.toServiceModel(service));
+            ServiceResponseType serviceModel = ServiceMapper.toServiceModel(service);
+            String response = ExchangePluginResponseMapper.mapToRegisterServiceResponseOK(messageId, serviceModel);
             eventBusTopicProducer.sendEventBusMessage(response, register.getService().getServiceResponseMessageName());
             setServiceStatusOnRegister(service);
 
+            eventProducer.sendServiceRegisteredEvent(serviceModel);
         } catch (Exception e) {
             String response = ExchangePluginResponseMapper.mapToRegisterServiceResponseNOK(messageId, "Exchange service exception when registering plugin [ " + e.getMessage() + " ]");
             eventBusTopicProducer.sendEventBusMessage(response, register.getService().getServiceResponseMessageName());
@@ -212,6 +218,7 @@ public class PluginServiceBean {
             service = serviceRegistryModel.unregisterService(unregister.getService().getServiceClassName(), unregister.getService().getName());
             //NO ack back to plugin
             //TODO log to exchange log
+            eventProducer.sendServiceUnregisteredEvent(ServiceMapper.toServiceModel(service));
         } catch (Exception e) {
             LOG.error("Unregister service exception " + e.getMessage());
             pluginErrorEvent.fire(new PluginErrorEventCarrier(message, service.getServiceResponse(), "Exception when unregister service"));

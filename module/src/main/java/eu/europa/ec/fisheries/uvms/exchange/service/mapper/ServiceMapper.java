@@ -32,8 +32,10 @@ import eu.europa.ec.fisheries.uvms.exchange.service.entity.serviceregistry.Servi
 import eu.europa.ec.fisheries.uvms.exchange.service.entity.serviceregistry.ServiceSetting;
 
 public class ServiceMapper {
-    
-    final static Logger LOG = LoggerFactory.getLogger(ServiceMapper.class);
+
+    private ServiceMapper() {}
+
+    private static final Logger LOG = LoggerFactory.getLogger(ServiceMapper.class);
     
     public static Service toServiceEntity(ServiceType model, CapabilityListType capabilityList, SettingListType settingList, String username) {
         Service entity = new Service();

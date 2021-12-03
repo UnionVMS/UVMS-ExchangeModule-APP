@@ -43,6 +43,14 @@ public class JMSHelper {
         subscriber = session.createConsumer(eventBus, selector, true);
     }
 
+    public void registerEventSubscriber(String selector) throws Exception {
+        Connection connection = connectionFactory.createConnection();
+        connection.start();
+        session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
+        eventBus = session.createTopic("EventStream");
+        subscriber = session.createConsumer(eventBus, selector, true);
+    }
+
     public String sendMessageOnEventQueue(String text) throws Exception {
         Connection connection = connectionFactory.createConnection();
         try {
@@ -146,6 +154,16 @@ public class JMSHelper {
             Queue responseQueue = session.createQueue(queue);
             consumer = session.createConsumer(responseQueue);
             while (consumer.receive(10L) != null) ;
+        } finally {
+            connection.close();
+        }
+    }
+
+    public TextMessage createTextMessage() throws JMSException {
+        Connection connection = connectionFactory.createConnection();
+        try {
+            Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
+            return session.createTextMessage();
         } finally {
             connection.close();
         }
