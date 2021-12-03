@@ -103,9 +103,9 @@ public class ExchangeMessageConsumerBeanTest extends BuildExchangeServiceTestDep
         assertFalse(response.getService().isEmpty());
         assertEquals("ManualMovement", response.getService().get(0).getServiceClassName());
 
-        inputList.add(PluginType.SATELLITE_RECEIVER);
+        inputList.add(PluginType.BELGIAN_SALES);
 
-        request = ExchangeModuleRequestMapper.createGetServiceListRequest(inputList); // Have no SR in the db
+        request = ExchangeModuleRequestMapper.createGetServiceListRequest(inputList); // Have no BELGIAN_SALES in the db
 
         corrID = jmsHelper.sendExchangeMessage(request, null, "LIST_SERVICES");
 
