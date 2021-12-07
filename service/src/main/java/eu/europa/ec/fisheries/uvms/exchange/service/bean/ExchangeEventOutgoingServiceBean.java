@@ -328,7 +328,8 @@ public class ExchangeEventOutgoingServiceBean implements ExchangeEventOutgoingSe
                     ? ExchangeServiceConstants.BELGIAN_ACTIVITY_PLUGIN_SERVICE_NAME : ExchangeServiceConstants.FLUX_ACTIVITY_PLUGIN_SERVICE_NAME));
             log.info("Message sent to Flux ERS Plugin :" + pluginMessageId);
             request.setOnValue(null); //a value should be assigned later from bridge for response messages
-            exchangeLogService.newLog(request, LogType.SEND_FA_QUERY_MSG, request.getValidation(), TypeRefType.FA_QUERY, request.getRequest(), false);
+            exchangeLogService.newLog(request, LogType.SEND_FA_QUERY_MSG, request.getValidation(), TypeRefType.FA_QUERY, request.getRequest().replace("\n" +
+                    "        <manual>true</manual>",""), false);
         } catch (ExchangeModelMarshallException | ExchangeMessageException | ExchangeLogException e) {
             log.error("Unable to send FLUXFAQuery to plugin.", e);
         }
