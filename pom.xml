@@ -38,7 +38,7 @@
         <asset.version>6.8.18</asset.version>
         <user.model.version>2.2.2</user.model.version>
         <audit.model.version>4.3.10</audit.model.version>
-        <movement.model.version>5.6.7-UVMS</movement.model.version>
+        <movement.model.version>5.6.8-UVMS</movement.model.version>
         <movement.rules.model.version>2.4.14</movement.rules.model.version>
         <activity.model.version>1.0.11-SWE</activity.model.version>
     </properties>
