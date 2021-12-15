@@ -15,6 +15,7 @@
         <docker.dev.start.phase>test-compile</docker.dev.start.phase>
         <docker.liquibase.phase>test-compile</docker.liquibase.phase>
         <docker.dev.prestop.phase>validate</docker.dev.prestop.phase>
+        <docker.liquibase.changeLogFile>../LIQUIBASE/changelog/db-changelog-master.xml</docker.liquibase.changeLogFile>
     </properties>
 
     <dependencies>
