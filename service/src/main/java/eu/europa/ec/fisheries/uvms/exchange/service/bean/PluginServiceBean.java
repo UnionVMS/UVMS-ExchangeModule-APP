@@ -192,7 +192,7 @@ public class PluginServiceBean implements PluginService {
                     SettingType configSettingType = configServiceSettingsMap.get(type.getKey());
                     if(configSettingType!=null && !configSettingType.getValue().equalsIgnoreCase(type.getValue())){
                         // FIXME : Why Why Why??? This is overriding the settingsRequest from the plugin and setting it to the Settings values from config!!
-                        //type.setValue(configSettingType.getValue());
+                        type.setValue(configSettingType.getValue());
                     }
                 }
             }
