@@ -31,14 +31,12 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
-import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 
 import eu.europa.ec.fisheries.schema.exchange.plugin.types.v1.PluginType;
 
 @Entity
 @Table(name = "service")
-@XmlRootElement
 //@formatter:off
 @NamedQueries({
     @NamedQuery(name = Service.SERVICE_FIND_ALL, query = "SELECT s FROM Service s WHERE s.active = true ORDER BY s.updated ASC"),
@@ -164,7 +162,6 @@ public class Service implements Serializable {
         this.updatedBy = updatedBy;
     }
 
-    @XmlTransient
     public List<ServiceCapability> getServiceCapabilityList() {
         return serviceCapabilityList;
     }

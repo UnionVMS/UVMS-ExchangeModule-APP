@@ -29,11 +29,9 @@ import javax.persistence.NamedQuery;
 import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
-import javax.xml.bind.annotation.XmlRootElement;
 
 @Entity
 @Table(name = "serviceparametermapping")
-@XmlRootElement
 @NamedQueries({
     @NamedQuery(name = "Servicemapping.findAll", query = "SELECT s FROM ServiceParameterMapping s") })
 public class ServiceParameterMapping implements Serializable {

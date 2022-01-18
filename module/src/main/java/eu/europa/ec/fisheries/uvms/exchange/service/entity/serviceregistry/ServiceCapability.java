@@ -14,7 +14,7 @@ package eu.europa.ec.fisheries.uvms.exchange.service.entity.serviceregistry;
 import java.io.Serializable;
 import java.time.Instant;
 import java.util.UUID;
-
+import javax.json.bind.annotation.JsonbTransient;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -30,13 +30,11 @@ import javax.persistence.NamedQuery;
 import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
-import javax.xml.bind.annotation.XmlRootElement;
 
 import eu.europa.ec.fisheries.schema.exchange.service.v1.CapabilityTypeType;
 
 @Entity
 @Table(name = "service_capability")
-@XmlRootElement
 @NamedQueries({
         @NamedQuery(name = ServiceCapability.CAPABILITY_FIND_BY_SERVICE, query = "SELECT s FROM ServiceCapability s where s.service.serviceClassName =:serviceClassName") })
 public class ServiceCapability implements Serializable {
@@ -66,7 +64,8 @@ public class ServiceCapability implements Serializable {
     @Enumerated(EnumType.STRING)
     @Column(name = "servcap_capability")
     private CapabilityTypeType capability;
-    
+
+    @JsonbTransient
     @JoinColumn(name = "servcap_serv_id", referencedColumnName = "serv_id", nullable = false)
     @ManyToOne(optional = false, fetch = FetchType.LAZY)
     private Service service;

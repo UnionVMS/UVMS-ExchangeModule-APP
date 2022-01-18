@@ -15,6 +15,7 @@ import eu.europa.ec.fisheries.schema.exchange.service.v1.ServiceResponseType;
 import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogStatusType;
 import eu.europa.ec.fisheries.schema.exchange.v1.ExchangeLogStatusTypeType;
 import eu.europa.ec.fisheries.schema.exchange.v1.TypeRefType;
+import eu.europa.ec.fisheries.uvms.commons.date.JsonBConfigurator;
 import eu.europa.ec.fisheries.uvms.exchange.model.mapper.JAXBMarshaller;
 import eu.europa.ec.fisheries.uvms.exchange.rest.BuildExchangeRestTestDeployment;
 import eu.europa.ec.fisheries.uvms.exchange.rest.JMSHelper;
@@ -68,6 +69,7 @@ public class ExchangeAPIRestResourceTest extends BuildExchangeRestTestDeployment
         GetServiceListRequest request = new GetServiceListRequest();
         request.getType().add(PluginType.OTHER);
         Client client = ClientBuilder.newClient();
+        client.register(JsonBConfigurator.class);
 
         GetServiceListResponse response = client.target("http://localhost:8080/exchangeservice/rest/unsecured")
                 .path("api")
@@ -92,6 +94,7 @@ public class ExchangeAPIRestResourceTest extends BuildExchangeRestTestDeployment
         request.getType().add(PluginType.BELGIAN_ACTIVITY);
 
         Client client = ClientBuilder.newClient();
+        client.register(JsonBConfigurator.class);
         GetServiceListResponse response = client.target("http://localhost:8080/exchangeservice/rest/unsecured")
                 .path("api")
                 .path("serviceList")
@@ -145,6 +148,7 @@ public class ExchangeAPIRestResourceTest extends BuildExchangeRestTestDeployment
         request.setUsername("sendCommandToEmailPluginTest Username");
 
         Client client = ClientBuilder.newClient();
+        client.register(JsonBConfigurator.class);
         jmsHelper.registerSubscriber("ServiceName = '" + serviceClassName + "'");
         Response response = client.target("http://localhost:8080/exchangeservice/rest/unsecured")
                 .path("api")
@@ -241,6 +245,7 @@ public class ExchangeAPIRestResourceTest extends BuildExchangeRestTestDeployment
         request.setUsername("sendCommandToPollPluginTest Username");
 
         Client client = ClientBuilder.newClient();
+        client.register(JsonBConfigurator.class);
         jmsHelper.registerSubscriber("ServiceName = '" + serviceClassName + "'");
         Response response = client.target("http://localhost:8080/exchangeservice/rest/unsecured")
                 .path("api")

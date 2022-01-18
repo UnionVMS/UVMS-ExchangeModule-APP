@@ -14,15 +14,13 @@ package eu.europa.ec.fisheries.uvms.exchange.service.entity.serviceregistry;
 import java.io.Serializable;
 import java.time.Instant;
 import java.util.UUID;
-
+import javax.json.bind.annotation.JsonbTransient;
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
-import javax.xml.bind.annotation.XmlRootElement;
 
 @Entity
 @Table(name = "service_setting")
-@XmlRootElement
 @NamedQueries({
         @NamedQuery(name = ServiceSetting.SETTING_FIND_BY_SERVICE, query = "SELECT s FROM ServiceSetting s where s.service.serviceClassName =:serviceClassName ") })
 
@@ -49,6 +47,7 @@ public class ServiceSetting implements Serializable {
     @Column(name = "servset_setting")
     private String setting;
 
+    @JsonbTransient
     @JoinColumn(name = "servset_serv_id", referencedColumnName = "serv_id")
     @ManyToOne
     private Service service;
